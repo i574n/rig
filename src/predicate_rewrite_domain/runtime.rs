@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_Rejected(Rc<str>),
@@ -53,7 +63,7 @@ fn codec_runtime_char_6(mut v0: Rc<str>) -> u8 {
     v1
 }
 fn argument_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (i32, i32, i32, Rc<str>, bool) {
-    let mut v3: i32 = predicate_lex_domain::kit_predicate_skip(&*v0,v1);
+    let mut v3: i32 = predicate_lex_domain::rig_predicate_skip(&*v0,v1);
     let v4: bool = v3 < 0i32;
     let v7: bool = if v4 {
         true
@@ -77,7 +87,7 @@ fn argument_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (i32, i32, i32, Rc<s
         let v13: u8 = codec_runtime_char_6(v12);
         let v14: bool = v11 == v13 ;
         if v14 {
-            let (mut v15, mut v16, mut v17): (Rc<str>, i32, bool) = predicate_literal_domain::kit_predicate_literal(&*v0,v3);
+            let (mut v15, mut v16, mut v17): (Rc<str>, i32, bool) = predicate_literal_domain::rig_predicate_literal(&*v0,v3);
             (v16, v3, v16, v15, v17)
         } else {
             let v18: i32 = (v0.clone().len() as i32);
@@ -93,7 +103,7 @@ fn argument_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (i32, i32, i32, Rc<s
             };
             if v25 {
                 let v26: i32 = v3 + 1i32 ;
-                let v27: i32 = predicate_lex_domain::kit_predicate_skip(&*v0,v26);
+                let v27: i32 = predicate_lex_domain::rig_predicate_skip(&*v0,v26);
                 let v28: bool = v27 < 0i32;
                 let v45: i32 = if v28 {
                     0i32
@@ -134,8 +144,8 @@ fn argument_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (i32, i32, i32, Rc<s
                     (v3, v3, v3, v47, false)
                 } else {
                     let v48: i32 = v27 + v45 ;
-                    let v49: i32 = predicate_lex_domain::kit_predicate_skip(&*v0,v48);
-                    let (mut v50, mut v51, mut v52): (Rc<str>, i32, bool) = predicate_literal_domain::kit_predicate_literal(&*v0,v49);
+                    let v49: i32 = predicate_lex_domain::rig_predicate_skip(&*v0,v48);
+                    let (mut v50, mut v51, mut v52): (Rc<str>, i32, bool) = predicate_literal_domain::rig_predicate_literal(&*v0,v49);
                     let v53: bool = v52 == false ;
                     if v53 {
                         let v54: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -143,7 +153,7 @@ fn argument_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (i32, i32, i32, Rc<s
                     } else {
                         let v55: i32 = v2 + 1i32 ;
                         let (mut v56, mut v57, mut v58, mut v59, mut v60): (i32, i32, i32, Rc<str>, bool) = argument_5(v0.clone(), v51, v55);
-                        let v61: i32 = predicate_lex_domain::kit_predicate_skip(&*v0,v56);
+                        let v61: i32 = predicate_lex_domain::rig_predicate_skip(&*v0,v56);
                         let v62: bool = v61 < 0i32;
                         let v64: bool = if v62 {
                             true
@@ -184,7 +194,7 @@ fn argument_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (i32, i32, i32, Rc<s
 }
 fn function_end_8(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: bool) -> i32 {
     loop {
-        let (mut v4, mut v5, mut v6, mut v7): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v4, mut v5, mut v6, mut v7): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v8: bool = v7 == false ;
         let v11: bool = if v8 {
             true
@@ -242,7 +252,7 @@ fn function_end_8(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: bool) -> i3
 }
 fn closure_name_9(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
     loop {
-        let (mut v2, mut v3, mut v4, mut v5): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v2, mut v3, mut v4, mut v5): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v6: bool = v5 == false ;
         let v9: bool = if v6 {
             true
@@ -258,7 +268,7 @@ fn closure_name_9(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
             let v12: bool = v4 == v11 ;
             if v12 {
-                let (mut v13, mut v14, mut v15, mut v16): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v3);
+                let (mut v13, mut v14, mut v15, mut v16): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v3);
                 return v15;
             } else {
                 v1 = v3;
@@ -281,27 +291,11 @@ fn expected_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str
     };
     let v32: Rc<str> = match v10 {
         US1::US1_ReceiptText => {
-            let v19: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{!"); } LIT.with(|lit| lit.clone()) }, v2.clone()));
-            let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".is_empty()&&"); } LIT.with(|lit| lit.clone()) }));
-            let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v20, v2.clone()));
-            let v22: Rc<str> = Rc::<str>::from(format!("{}{}", v21, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".bytes().all(|"); } LIT.with(|lit| lit.clone()) }));
-            let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v3.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
-            let v24: Rc<str> = Rc::<str>::from(format!("{}{}", v23, v3.clone()));
-            let v25: Rc<str> = Rc::<str>::from(format!("{}{}", v24, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".is_ascii_alphanumeric()||matches!("); } LIT.with(|lit| lit.clone()) }));
-            let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v25, v3));
-            let v27: Rc<str> = Rc::<str>::from(format!("{}{}", v26, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(",b'.'|b'_'|b'-'|b'/'))}"); } LIT.with(|lit| lit.clone()) }));
-            let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v22, v27));
+            let v28: Rc<str> = string_concat(&["{!", &*v2, ".is_empty()&&", &*v2, ".bytes().all(|", &*v3, "|", &*v3, ".is_ascii_alphanumeric()||matches!(", &*v3, ",b'.'|b'_'|b'-'|b'/'))}"]);
             v28
         }
         US1::US1_Sha256 => {
-            let v11: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{"); } LIT.with(|lit| lit.clone()) }, v2.clone()));
-            let v12: Rc<str> = Rc::<str>::from(format!("{}{}", v11, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".len()==64&&"); } LIT.with(|lit| lit.clone()) }));
-            let v13: Rc<str> = Rc::<str>::from(format!("{}{}", v12, v2.clone()));
-            let v14: Rc<str> = Rc::<str>::from(format!("{}{}", v13, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".bytes().all(|"); } LIT.with(|lit| lit.clone()) }));
-            let v15: Rc<str> = Rc::<str>::from(format!("{}{}", v3.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
-            let v16: Rc<str> = Rc::<str>::from(format!("{}{}", v15, v3));
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v16, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".is_ascii_hexdigit())}"); } LIT.with(|lit| lit.clone()) }));
-            let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v14, v17));
+            let v18: Rc<str> = string_concat(&["{", &*v2, ".len()==64&&", &*v2, ".bytes().all(|", &*v3, "|", &*v3, ".is_ascii_hexdigit())}"]);
             v18
         }
         US1::US1_Unsupported => {
@@ -314,17 +308,13 @@ fn expected_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str
         let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v34
     } else {
-        let v35: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fn "); } LIT.with(|lit| lit.clone()) }, v1));
-        let v36: Rc<str> = Rc::<str>::from(format!("{}{}", v35, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("("); } LIT.with(|lit| lit.clone()) }));
-        let v37: Rc<str> = Rc::<str>::from(format!("{}{}", v36, v2));
-        let v38: Rc<str> = Rc::<str>::from(format!("{}{}", v37, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":&str)->bool"); } LIT.with(|lit| lit.clone()) }));
-        let v39: Rc<str> = Rc::<str>::from(format!("{}{}", v38, v32));
+        let v39: Rc<str> = string_concat(&["fn ", &*v1, "(", &*v2, ":&str)->bool", &*v32]);
         v39
     }
 }
 fn rust_loop_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, mut v4: i32, mut v5: bool, mut v6: i32, mut v7: Rc<str>, mut v8: i32) -> (Rc<str>, i32, bool) {
     loop {
-        let (mut v9, mut v10, mut v11, mut v12): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v3);
+        let (mut v9, mut v10, mut v11, mut v12): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v3);
         let v13: bool = v12 == false ;
         if v13 {
             let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -342,7 +332,7 @@ fn rust_loop_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, m
                     let v21: Rc<str> = string_slice(&v0, v6 as i64, v20 as i64);
                     v21
                 };
-                let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v22));
+                let v23: Rc<str> = string_concat(&[&*v7, &*v22]);
                 let v24: bool = v4 == 0i32 ;
                 return (v23, v8, v24);
             } else {
@@ -355,7 +345,7 @@ fn rust_loop_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, m
                     false
                 };
                 if v28 {
-                    let (mut v29, mut v30, mut v31, mut v32): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v10);
+                    let (mut v29, mut v30, mut v31, mut v32): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v10);
                     let v33: bool = v31 == v1 ;
                     if v33 {
                         let v34: i32 = 0i32;
@@ -379,14 +369,14 @@ fn rust_loop_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, m
                                 let v43: Rc<str> = string_slice(&v0.clone(), v9 as i64, v42 as i64);
                                 v43
                             };
-                            let (mut v45, mut v46, mut v47, mut v48): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v44,0i32);
-                            let (mut v49, mut v50, mut v51, mut v52): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v44,v46);
-                            let (mut v53, mut v54, mut v55, mut v56): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v44,v50);
-                            let (mut v57, mut v58, mut v59, mut v60): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v44,v54);
+                            let (mut v45, mut v46, mut v47, mut v48): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v44,0i32);
+                            let (mut v49, mut v50, mut v51, mut v52): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v44,v46);
+                            let (mut v53, mut v54, mut v55, mut v56): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v44,v50);
+                            let (mut v57, mut v58, mut v59, mut v60): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v44,v54);
                             let v61: Rc<str> = closure_name_9(v44.clone(), v58);
                             let v62: Rc<str> = expected_10(v2.clone(), v1.clone(), v59, v61);
-                            let (mut v63, mut v64): (Rc<str>, bool) = predicate_lex_domain::kit_predicate_canonical(&*v62);
-                            let (mut v65, mut v66): (Rc<str>, bool) = predicate_lex_domain::kit_predicate_canonical(&*v44);
+                            let (mut v63, mut v64): (Rc<str>, bool) = predicate_lex_domain::rig_predicate_canonical(&*v62);
+                            let (mut v65, mut v66): (Rc<str>, bool) = predicate_lex_domain::rig_predicate_canonical(&*v44);
                             let v67: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("("); } LIT.with(|lit| lit.clone()) };
                             let v68: bool = v55 == v67 ;
                             let v69: bool = v68 && v64;
@@ -415,7 +405,7 @@ fn rust_loop_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, m
                                     let v81: Rc<str> = string_slice(&v0.clone(), v6 as i64, v80 as i64);
                                     v81
                                 };
-                                let v83: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v82));
+                                let v83: Rc<str> = string_concat(&[&*v7, &*v82]);
                                 let v84: i32 = v8 + 1i32 ;
                                 (v3, v4, v5, v6, v7, v8) = (v36, v76, v77, v36, v83, v84);
                                 continue;
@@ -524,17 +514,12 @@ fn wrapper_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<str> {
             v12
         }
     };
-    let v16: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("(typed_predicate.model."); } LIT.with(|lit| lit.clone()) }, v15));
-    let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v16, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" \""); } LIT.with(|lit| lit.clone()) }));
-    let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, v1));
-    let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\" "); } LIT.with(|lit| lit.clone()) }));
-    let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v2, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) }));
-    let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v19, v20));
+    let v21: Rc<str> = string_concat(&["(typed_predicate.model.", &*v15, " \"", &*v1, "\" ", &*v2, ")"]);
     v21
 }
 fn source_loop_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, mut v4: i32, mut v5: Rc<str>, mut v6: i32) -> US0 {
     loop {
-        let (mut v7, mut v8, mut v9, mut v10): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v3);
+        let (mut v7, mut v8, mut v9, mut v10): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v3);
         let v11: bool = v10 == false ;
         if v11 {
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Unsupported or malformed source syntax; input unchanged"); } LIT.with(|lit| lit.clone()) };
@@ -559,7 +544,7 @@ fn source_loop_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32,
                             let v24: Rc<str> = string_slice(&v0, v4 as i64, v23 as i64);
                             v24
                         };
-                        let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v25));
+                        let v26: Rc<str> = string_concat(&[&*v5, &*v25]);
                         return US0::US0_Candidate(v26);
                     } else {
                         let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("No supported top-level predicate definition; input unchanged"); } LIT.with(|lit| lit.clone()) };
@@ -569,7 +554,7 @@ fn source_loop_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32,
                     let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rust_global"); } LIT.with(|lit| lit.clone()) };
                     let v32: bool = v9 == v31 ;
                     if v32 {
-                        let v33: i32 = predicate_lex_domain::kit_predicate_skip(&*v0,v8);
+                        let v33: i32 = predicate_lex_domain::rig_predicate_skip(&*v0,v8);
                         let v34: bool = v33 < 0i32;
                         if v34 {
                             let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Malformed comment after RustGlobal; input unchanged"); } LIT.with(|lit| lit.clone()) };
@@ -613,7 +598,7 @@ fn source_loop_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32,
                                             v3 = v47;
                                             continue;
                                         } else {
-                                            let v68: Rc<str> = predicate_literal_domain::kit_predicate_encode(&*v60);
+                                            let v68: Rc<str> = predicate_literal_domain::rig_predicate_encode(&*v60);
                                             let v69: Rc<str> = wrapper_11(v2.clone(), v1.clone(), v68);
                                             let v70: bool = v4 == v48 ;
                                             let v74: Rc<str> = if v70 {
@@ -623,8 +608,7 @@ fn source_loop_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32,
                                                 let v73: Rc<str> = string_slice(&v0.clone(), v4 as i64, v72 as i64);
                                                 v73
                                             };
-                                            let v75: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v74));
-                                            let v76: Rc<str> = Rc::<str>::from(format!("{}{}", v75, v69));
+                                            let v76: Rc<str> = string_concat(&[&*v5, &*v74, &*v69]);
                                             let v77: i32 = v6 + v61 ;
                                             (v3, v4, v5, v6) = (v47, v49, v76, v77);
                                             continue;
@@ -649,7 +633,7 @@ fn rewrite_result_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (bool,
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Empty function name"); } LIT.with(|lit| lit.clone()) };
         US0::US0_Rejected(v5)
     } else {
-        let v7: i32 = predicate_lex_domain::kit_predicate_word_end(&*v1,0i32);
+        let v7: i32 = predicate_lex_domain::rig_predicate_word_end(&*v1,0i32);
         let v8: bool = v7 == v3 ;
         let v19: bool = if v8 {
             let v9: u8 = v1.clone().as_bytes()[0i32 as usize];
@@ -726,6 +710,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>) -> (bool, Rc<str>)> {
         rewrite_result_0(v0, v1, v2)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_predicate_rewrite(v0: &str, v1: &str, v2: &str) -> (bool, Rc<str>) {
+pub fn rig_predicate_rewrite(v0: &str, v1: &str, v2: &str) -> (bool, Rc<str>) {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }

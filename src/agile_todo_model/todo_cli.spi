@@ -1,4 +1,4 @@
-///- --package ../kit_cli_check --timeout 900000
+///- --package ../rig_cli_check --timeout 900000
 :< cli
 
 := marker () : string = cat "TO" "DO"
@@ -6,7 +6,7 @@
 
 := todos (root : fixture_root) (args : cli_args) : cli_run =
     := slashed = fixture_slashed root
-    kit_run (temp_directory ()) NoArgs NoArgs (Arg ("agile", Arg ("todos", Arg (slashed, Arg (slashed, args)))))
+    rig_run (temp_directory ()) NoArgs NoArgs (Arg ("agile", Arg ("todos", Arg (slashed, Arg (slashed, args)))))
 
 := mixed_tree (~label : string) : fixture_root =
     := root = fixture_root_create label

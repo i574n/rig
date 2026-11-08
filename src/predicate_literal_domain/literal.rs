@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn method2() -> Rc<str> {
     let v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     v0
@@ -36,7 +46,7 @@ fn literal_loop_0(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>) ->
                     let v12: Rc<str> = string_slice(&v0, v2 as i64, v11 as i64);
                     v12
                 };
-                let v14: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v13));
+                let v14: Rc<str> = string_concat(&[&*v3, &*v13]);
                 let v15: i32 = v1 + 1i32 ;
                 return (v14, v15, true);
             } else {
@@ -95,8 +105,7 @@ fn literal_loop_0(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>) ->
                                 let v43: Rc<str> = string_slice(&v0.clone(), v2 as i64, v42 as i64);
                                 v43
                             };
-                            let v45: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v44));
-                            let v46: Rc<str> = Rc::<str>::from(format!("{}{}", v45, v36));
+                            let v46: Rc<str> = string_concat(&[&*v3, &*v44, &*v36]);
                             (v1, v2, v3) = (v39, v39, v46);
                             continue;
                         }
@@ -151,8 +160,7 @@ fn encode_loop_3(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>) -> 
                 let v9: Rc<str> = string_slice(&v0, v2 as i64, v8 as i64);
                 v9
             };
-            let v11: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v10));
-            let v12: Rc<str> = Rc::<str>::from(format!("{}{}", v11, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+            let v12: Rc<str> = string_concat(&[&*v3, &*v10, "\""]);
             return v12;
         } else {
             let v13: u8 = v0.clone().as_bytes()[v1 as usize];
@@ -203,8 +211,7 @@ fn encode_loop_3(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>) -> 
                     let v37: Rc<str> = string_slice(&v0.clone(), v2 as i64, v36 as i64);
                     v37
                 };
-                let v39: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v38));
-                let v40: Rc<str> = Rc::<str>::from(format!("{}{}", v39, v29));
+                let v40: Rc<str> = string_concat(&[&*v3, &*v38, &*v29]);
                 (v1, v2, v3) = (v30, v30, v40);
                 continue;
             }
@@ -219,9 +226,9 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         encode_loop_3(v0, v1, v2, v3)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_predicate_literal(v0: &str, v1: i32) -> (Rc<str>, i32, bool) {
+pub fn rig_predicate_literal(v0: &str, v1: i32) -> (Rc<str>, i32, bool) {
     closure0()(Rc::<str>::from(v0), v1)
 }
-pub fn kit_predicate_encode(v0: &str) -> Rc<str> {
+pub fn rig_predicate_encode(v0: &str) -> Rc<str> {
     closure1()(Rc::<str>::from(v0))
 }

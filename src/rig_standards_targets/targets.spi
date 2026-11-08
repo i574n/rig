@@ -1,0 +1,55 @@
+///- --package .
+:# targets static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:~ drift_named (~package : string) : bool =
+    := words = [ "receipt"; "ledger"; "gauge"; "rating"; "authority"; "settlement"; "burnin" ]
+    := lower = sm'.to_lower package
+    words |> listm.fold (\ (any : bool) (w : string) => any || sm'.contains w lower) !-
+
+:~ ^ has_test_block (~text : string) : bool =
+    := line = sm'.first_line text
+    := head = sm'.starts_with ":# " line || sm'.starts_with "test " line
+    := runs = head && sm'.contains " static =" line |> not
+    ? text = "" ?> !- |? runs ?> !+ |: has_test_block (sm'.after_first_line text)
+
+:~ ^ manifest_crates (~text : string) : bool =
+    := lead = sm'.trim (sm'.first_line text)
+    := crates = sm'.starts_with "crates:" lead || sm'.starts_with "crates =" lead || sm'.starts_with "crates=" lead
+    ? text = "" ?> !- |? crates ?> !+ |: manifest_crates (sm'.after_first_line text)
+
+:~ ^ any_tested (~directory : string) (~names : string) : bool =
+    := text = file_system.read_text_or_empty (directory ++# "/" ++# sm'.first_line names)
+    ? names = "" ?> !- |? has_test_block text ?> !+ |: any_tested directory (sm'.after_first_line names)
+
+:~ package_target_findings ((directory, names) : string * string) : string =
+    := slashed = sm'.replace "\\" "/" directory
+    := crated = \ (name : string) (seen : string) =>
+        := path = slashed ++# "/" ++# name
+        ? manifest_crates (file_system.read_text_or_empty path)
+        ?> seen ++# path ++# ":1  test-targets  crates in a manifest; put -d on each test's own ///> line\n"
+        |: seen
+    := at = sm'.last_index_of "/" slashed
+    := name = ? at < 0i32 ?> slashed |: sm'.substring (at + 1i32) (sm'.length slashed - at - 1i32) slashed
+    := rule = "/package.spiproj:1  test-targets  "
+    := untested = rule ++# "a receipt-like package with no test that checks it against a fact\n"
+    := guarded =
+        ? drift_named name && any_tested slashed names |> not
+        ?> slashed ++# untested
+        |: ""
+    crated "spiral.toml" (crated "package.spiproj" guarded)
+
+///> rust
+:# crates_in_a_manifest_and_untested_receipt_packages_are_found =
+    testing.expect (manifest_crates "packages:\n    spiral-\ncrates:\n    borsh=1.5\n") "a spiproj crates section"
+    testing.expect (manifest_crates "name = 'x'\ncrates = ['serde_json']\n") "a spiral.toml crates key"
+    testing.expect (manifest_crates "packages:\n    spiral-\nmodules:\n    m\n" |> not) "no crates"
+    testing.expect (drift_named "state_receipt_codec_core" && drift_named "rating_guard_runtime") "drift words"
+    testing.expect (drift_named "rig_style_census" |> not) "an ordinary name"
+    testing.expect (has_test_block "///> rust\n:# works =\n    ()\n") "a runnable test"
+    testing.expect (has_test_block ":# m static =\n    :< x\n" |> not) "a static block is no test"
+:= main () : i32 =
+    export "rig_standards_package_target_findings" package_target_findings
+    0i32

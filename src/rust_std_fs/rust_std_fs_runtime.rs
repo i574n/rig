@@ -4,8 +4,8 @@ use std::rc::Rc;
 #[rustfmt::skip]
 mod dense {
 use std::path::{Path, PathBuf};
-pub use kit_rust_std_fs_mutation::{discard_stage, mutation_boundary_capability, promote_stage, promote_stage_receipted, restore_text, stage_new_text, stage_text, stage_text_receipted, stage_text_receipted_bound, PromotionReceipt, StagedWriteReceipt};
-pub use kit_rust_std_fs_mutation::atomic_write;
+pub use rig_rust_std_fs_mutation::{discard_stage, mutation_boundary_capability, promote_stage, promote_stage_receipted, restore_text, stage_new_text, stage_text, stage_text_receipted, stage_text_receipted_bound, PromotionReceipt, StagedWriteReceipt};
+pub use rig_rust_std_fs_mutation::atomic_write;
 use std::io::Read;
 include!(concat!(env!("CARGO_MANIFEST_DIR"), "/portable.rs"));
 #[cfg(windows)] include!(concat!(env!("CARGO_MANIFEST_DIR"), "/windows.rs"));
@@ -216,15 +216,15 @@ pub fn rooted_copy_atomic(source: &Path, target: &Path) -> Result<usize, String>
 }
 
 pub fn rooted_remove_regular(path: &Path) -> Result<(), String> {
-    kit_rust_std_fs_mutation::rooted_remove_regular(path)
+    rig_rust_std_fs_mutation::rooted_remove_regular(path)
 }
 
 pub fn rooted_unlink_nondirectory(path: &Path) -> Result<(), String> {
-    kit_rust_std_fs_mutation::rooted_unlink_nondirectory(path)
+    rig_rust_std_fs_mutation::rooted_unlink_nondirectory(path)
 }
 
 pub fn rooted_remove_tree_within(root: &Path, path: &Path) -> Result<u64, String> {
-    kit_rust_std_fs_mutation::rooted_remove_tree_within(root, path)
+    rig_rust_std_fs_mutation::rooted_remove_tree_within(root, path)
 }
 
 #[cfg(all(test, target_os = "linux"))]
@@ -358,7 +358,7 @@ pub fn rooted_path(root: &Path, relative: &str) -> Result<PathBuf, String> {
 }
 
 pub fn copy_regular_atomic_preserve(source: &Path, target: &Path) -> Result<u64, String> {
-    kit_rust_std_fs_mutation::copy_regular_atomic_preserve(source, target)
+    rig_rust_std_fs_mutation::copy_regular_atomic_preserve(source, target)
 }
 
 }

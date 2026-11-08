@@ -1,4 +1,4 @@
-param([string]$Kit = 'C:\home\git\eoie\src\target\debug\kit.exe')
+param([string]$Kit = 'C:\home\git\kit\src\target\debug\kit.exe')
 $ErrorActionPreference = 'Stop'
 $root = Join-Path $env:TEMP "kit-read-e2e-$PID"
 Remove-Item -Recurse -Force $root -ErrorAction SilentlyContinue

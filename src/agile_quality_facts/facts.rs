@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -408,8 +418,7 @@ fn folded_15(mut v0: std::rc::Rc<std::collections::BTreeMap<Rc<str>, (Rc<str>, R
                     (v92, v93, v94, v95, v96, v97)
                 }
             };
-            let v104: Rc<str> = Rc::<str>::from(format!("{}{}", v103, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
-            let v105: Rc<str> = Rc::<str>::from(format!("{}{}", v104, v76));
+            let v105: Rc<str> = string_concat(&[&*v103, "\n", &*v76]);
             let mut v106: std::collections::BTreeMap<Rc<str>, (Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)> = std::rc::Rc::unwrap_or_clone(v0);
             let v108: bool = true; // 1;
             let mut v106 = v106;
@@ -649,7 +658,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>
         fact_rows_of_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_fact_rows(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> {
+pub fn rig_agile_fact_rows(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> {
     closure0()(Rc::<str>::from(v0))
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

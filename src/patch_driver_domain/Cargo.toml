@@ -3,18 +3,18 @@ entry = "main.spi"
 output = "driver.rs"
 
 [package]
-name = "kit-patch-driver-domain"
+name = "rig-patch-driver-domain"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [lib]
-name = "kit_patch_driver_domain"
+name = "rig_patch_driver_domain"
 path = "driver.rs"
 
 [dependencies]
-kit-patch-control-domain = { path = "../patch_control_domain" }
-kit-rust-std-fs = { path = "../rust_std_fs" }
-kit-proxy-search = { path = "../kit_proxy_search" }
-kit-process = { path = "../kit_process" }
+rig-patch-control-domain = { path = "../patch_control_domain" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-process = { path = "../rig_process" }

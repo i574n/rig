@@ -1,0 +1,25 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_style_probes
+    rig_style_measure
+    rig_style_baseline
+    rig_flag_words
+    rig_style_scoreboard
+    rig_granular_rounds
+    rig_standards_toml
+    rig_standards_layers
+    rig_wrapper_score
+link:
+    rig_style_probes
+    rig_style_measure
+    rig_style_baseline
+    rig_flag_words
+    rig_style_scoreboard
+    rig_granular_rounds
+    rig_standards_toml
+    rig_standards_layers
+    rig_wrapper_score
+modules:
+    census

@@ -74,7 +74,7 @@ $profiles = Join-Path $work 'profiles'
 $binary = Join-Path $TargetDirectory "release/kit$suffix"
 $settings = @{
     CARGO_BUILD_JOBS = [string]$Jobs; KIT_COVERAGE_JOBS = [string]$Jobs; RUST_TEST_THREADS = '1'
-    CARGO_INCREMENTAL = '1'; RUSTFLAGS = '-C instrument-coverage --cfg kit_coverage'; CARGO_ENCODED_RUSTFLAGS = $null
+    CARGO_INCREMENTAL = '1'; RUSTFLAGS = '-C instrument-coverage --cfg rig_coverage'; CARGO_ENCODED_RUSTFLAGS = $null
     CARGO_TARGET_DIR = $TargetDirectory; CARGO_PROFILE_RELEASE_STRIP = 'none'
     LLVM_PROFILE_FILE = (Join-Path $profiles '%p-%m.profraw'); KIT_SPIRAL_COMPILE = $SpiralCompiler
     KIT_BIN_UNDER_TEST = $binary; KIT_COVERAGE_SMOKE_CHILD = $null; RAYON_NUM_THREADS = [string]$Jobs
@@ -91,7 +91,7 @@ try {
     [void][IO.Directory]::CreateDirectory($buildProfiles)
     $env:LLVM_PROFILE_FILE = Join-Path $buildProfiles '%p-%m.profraw'
     $manifest = Join-Path $source 'src/Cargo.toml'
-    $buildArgs = @('build', '--manifest-path', $manifest, '--release', '--offline', '--locked', '--package', 'kit-cli', '--bin', 'kit', '--jobs', [string]$Jobs)
+    $buildArgs = @('build', '--manifest-path', $manifest, '--release', '--offline', '--locked', '--package', 'rig-cli', '--bin', 'kit', '--jobs', [string]$Jobs)
     [void](Invoke-Captured 'coverage-build' $cargo $buildArgs)
     $testArgs = @('test', '--manifest-path', $manifest, '--release', '--offline', '--locked', '--workspace', '--lib', '--bins', '--tests', '--jobs', [string]$Jobs)
     [void](Invoke-Captured 'coverage-test-build' $cargo ($testArgs + @('--no-run')))

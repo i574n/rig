@@ -50,16 +50,16 @@
 
 := main () : i32 =
     export
-        "kit_agile_planning_filters_valid"
+        "rig_agile_planning_filters_valid"
         ((\ (load, assignee) => planning_filters_valid load assignee) : string * string -> bool)
     export
-        "kit_agile_planning_selected"
+        "rig_agile_planning_selected"
         (
             \ (text, id, load, assignee) => planning_selected text id load assignee
             : string * string * string * string -> bool
         )
     export
-        "kit_agile_planning_selected_near"
+        "rig_agile_planning_selected_near"
         (
             \ (text, id, start, load, assignee) => planning_selected_near text id start load assignee
             : string * string * i32 * string * string -> bool

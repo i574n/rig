@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "query.spi"
+output = "query.rs"
+
+[package]
+name = "rig-memory-query"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_memory_query"
+path = "query.rs"

@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "fleet_file.spi"
+output = "fleet_file.rs"
+
+[package]
+name = "rig-net-fleet-file"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_net_fleet_file"
+path = "fleet_file.rs"

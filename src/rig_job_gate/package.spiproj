@@ -1,0 +1,14 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    union_reflection
+    rig_jobs
+    rig_machine_windows
+    rig_process_alive
+    rig_job_slot
+link:
+    rig_process_alive
+    rig_job_slot
+modules:
+    gate

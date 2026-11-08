@@ -1,8 +1,0 @@
-packages:
-    |core-
-    spiral-
-    union_reflection
-    kit_jobs
-    kit_machine_windows
-modules:
-    admission

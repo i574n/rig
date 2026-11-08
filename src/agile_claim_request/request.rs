@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -274,8 +284,7 @@ fn method13(mut v0: Rc<UH0>, mut v1: bool) -> bool {
     }
 }
 fn paths_refusal_14(mut v0: Rc<str>) -> Rc<str> {
-    let v1: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--paths expects comma-separated globs without spaces, quotes or parentheses, got '"); } LIT.with(|lit| lit.clone()) }, v0));
-    let v2: Rc<str> = Rc::<str>::from(format!("{}{}", v1, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) }));
+    let v2: Rc<str> = string_concat(&["--paths expects comma-separated globs without spaces, quotes or parentheses, got '", &*v0, "'"]);
     v2
 }
 fn method16(mut v0: Option<i32>) -> Option<i32> {
@@ -332,7 +341,7 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                 let v23: US3 = flag_of_11(v12.clone());
                 match v23 {
                     US3::US3_None => {
-                        let v24: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("unexpected argument "); } LIT.with(|lit| lit.clone()) }, v12));
+                        let v24: Rc<str> = string_concat(&["unexpected argument ", &*v12]);
                         return US2::US2_RequestRefused(v24);
                     }
                     US3::US3_Some(v26) => {
@@ -348,8 +357,7 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                     (v0, v3) = (v21, v20);
                                     continue;
                                 } else {
-                                    let v36: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--as expects a lane name, got '"); } LIT.with(|lit| lit.clone()) }, v20));
-                                    let v37: Rc<str> = Rc::<str>::from(format!("{}{}", v36, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) }));
+                                    let v37: Rc<str> = string_concat(&["--as expects a lane name, got '", &*v20, "'"]);
                                     return US2::US2_RequestRefused(v37);
                                 }
                             }
@@ -409,8 +417,7 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                 let v40: US5 = ttl_read_15(v20.clone());
                                 match v40 {
                                     US5::US5_None => {
-                                        let v43: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--ttl expects positive minutes, got '"); } LIT.with(|lit| lit.clone()) }, v20));
-                                        let v44: Rc<str> = Rc::<str>::from(format!("{}{}", v43, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) }));
+                                        let v44: Rc<str> = string_concat(&["--ttl expects positive minutes, got '", &*v20, "'"]);
                                         return US2::US2_RequestRefused(v44);
                                     }
                                     US5::US5_Some(v41) => {
@@ -513,8 +520,7 @@ fn request_of_4(mut v0: US1, mut v1: Rc<UH0>) -> US2 {
                     let v26: bool = false;
                     flags_read_5(v17, v0, v16, v23, v24, v25, v26)
                 } else {
-                    let v28: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("expected an item ID, got '"); } LIT.with(|lit| lit.clone()) }, v16));
-                    let v29: Rc<str> = Rc::<str>::from(format!("{}{}", v28, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) }));
+                    let v29: Rc<str> = string_concat(&["expected an item ID, got '", &*v16, "'"]);
                     US2::US2_RequestRefused(v29)
                 }
             }

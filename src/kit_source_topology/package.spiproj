@@ -1,8 +1,0 @@
-packages:
-    |core-
-    spiral-
-    kit_source_topology_core-
-modules:
-    policy
-    negative
-    main

@@ -3,18 +3,18 @@ entry = "main.spi"
 output = "source_adapter.rs"
 
 [package]
-name = "kit-patch-source-adapter"
+name = "rig-patch-source-adapter"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [lib]
-name = "kit_patch_source_adapter"
+name = "rig_patch_source_adapter"
 path = "source_adapter.rs"
 
 [dependencies]
 canonical-plan-ir-domain = { path = "../canonical_plan_ir_domain" }
-kit-process = { path = "../kit_process" }
-kit-proxy-search = { path = "../kit_proxy_search" }
-kit-rust-std-fs = { path = "../rust_std_fs" }
+rig-process = { path = "../rig_process" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-rust-std-fs = { path = "../rust_std_fs" }

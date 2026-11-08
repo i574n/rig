@@ -39,23 +39,23 @@ fn chmod_changes_files_and_directories_and_restores_zero_mode() {
     let fixture = Fixture::new();
     for relative in ["state/input.txt", "state/nested"] {
         chmod(&fixture.root(), relative, "0000").unwrap();
-        assert!(kit_rust_std_fs::portable_mode_matches(kit_rust_std_fs::portable_mode(&fs::metadata(fixture.root().join(relative)).unwrap().permissions()), 0));
+        assert!(rig_rust_std_fs::portable_mode_matches(rig_rust_std_fs::portable_mode(&fs::metadata(fixture.root().join(relative)).unwrap().permissions()), 0));
         chmod(&fixture.root(), relative, "0755").unwrap();
         assert!(chmod(&fixture.root(), relative, "10000").is_err());
-        assert!(kit_rust_std_fs::portable_mode_matches(kit_rust_std_fs::portable_mode(&fs::metadata(fixture.root().join(relative)).unwrap().permissions()), 0o755));
+        assert!(rig_rust_std_fs::portable_mode_matches(rig_rust_std_fs::portable_mode(&fs::metadata(fixture.root().join(relative)).unwrap().permissions()), 0o755));
     }
 }
 #[test]
 fn chmod_rejects_linked_roots_ancestors_and_leaves() {
     let fixture = Fixture::new();
     let outside = fixture.0.join("outside");
-    let before = kit_rust_std_fs::portable_mode(&fs::metadata(outside.join("keep.txt")).unwrap().permissions());
+    let before = rig_rust_std_fs::portable_mode(&fs::metadata(outside.join("keep.txt")).unwrap().permissions());
     let linked = fixture.root().join("linked");
     directory_link(&outside, &linked);
     assert!(chmod(&fixture.root(), "linked/keep.txt", "0000").is_err());
     assert!(chmod(&fixture.root(), "linked", "0000").is_err());
     assert!(chmod(&linked, "keep.txt", "0000").is_err());
-    assert_eq!(kit_rust_std_fs::portable_mode(&fs::metadata(outside.join("keep.txt")).unwrap().permissions()), before);
+    assert_eq!(rig_rust_std_fs::portable_mode(&fs::metadata(outside.join("keep.txt")).unwrap().permissions()), before);
     remove_directory_link(&linked);
 }
 #[test]

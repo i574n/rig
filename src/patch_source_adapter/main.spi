@@ -8,9 +8,9 @@
 := emit_source_adapter () : () =
     global """
         use canonical_plan_ir_domain::parse_plan_ir_manifest as patch_parse_plan_ir_manifest;
-        use kit_process::{compile_spiral_plan_ir as patch_compile_plan_ir, resolve_spiral_compiler as patch_resolve_spiral_compiler};
-        use kit_proxy_search::inspection_sha256;
-        use kit_rust_std_fs::{atomic_write, read_regular_limited, read_regular_text_limited, rooted_canonical_directory, rooted_entry_exists, rooted_regular_size, rooted_remove_regular};
+        use rig_process::{compile_spiral_plan_ir as patch_compile_plan_ir, resolve_spiral_compiler as patch_resolve_spiral_compiler};
+        use rig_proxy_search::inspection_sha256;
+        use rig_rust_std_fs::{atomic_write, read_regular_limited, read_regular_text_limited, rooted_canonical_directory, rooted_entry_exists, rooted_regular_size, rooted_remove_regular};
         use std::path::{Path, PathBuf};
 
         const PATCH_RESUME_RELATIVE: &str = "state/patch_resume.spi";
@@ -76,12 +76,12 @@
             let observed = read_regular_text_limited(&receipt, 64 * 1024)?;
             let compiled_fingerprint = inspection_sha256(source.as_bytes().to_vec());
             let identity = i32::from(observed.contains(&compiled_fingerprint));
-            if kit_patch_source_adapter_source_resume_pair_binding(1, identity) != 1 {
+            if rig_patch_source_adapter_source_resume_pair_binding(1, identity) != 1 {
                 return Err("typed patch resume completion identity mismatch".to_owned());
             }
             rooted_remove_regular(&receipt)?;
             let removed = i32::from(!rooted_entry_exists(&receipt)?);
-            if kit_patch_source_adapter_source_resume_completion_binding(1, removed) != 1 {
+            if rig_patch_source_adapter_source_resume_completion_binding(1, removed) != 1 {
                 return Err("typed patch resume receipt close rejected".to_owned());
             }
             println!("kit patch resume closed receipt={}", receipt.display());
@@ -103,7 +103,7 @@
             let receipt = patch_resume_path(root);
             let present = i32::from(rooted_entry_exists(&receipt)?);
             let matches = i32::from(patch_resume_matches(root, &expected)?);
-            let decision = kit_patch_source_adapter_source_resume_decision_binding(present, matches);
+            let decision = rig_patch_source_adapter_source_resume_decision_binding(present, matches);
             if decision == 1 {
                 println!("kit patch resume phase=identified resumed=true compiler={} receipt={}", compiler_status, receipt.display());
                 return Ok(source);
@@ -117,7 +117,7 @@
             }
             let rendered = patch_resume_render(plan, &before, &source)?;
             patch_resume_atomic_write(&receipt, rendered.as_bytes())?;
-            if kit_patch_source_adapter_source_resume_pair_binding(1, i32::from(patch_resume_matches(root, &rendered)?)) != 1 {
+            if rig_patch_source_adapter_source_resume_pair_binding(1, i32::from(patch_resume_matches(root, &rendered)?)) != 1 {
                 let _ = remove_regular_if_present(&receipt);
                 return Err("typed patch resume receipt verification rejected".to_owned());
             }
@@ -132,12 +132,12 @@
     := _ = source_resume_decision_binding 1i32 1i32
     := _ = source_resume_completion_binding 1i32 1i32
     export
-        "kit_patch_source_adapter_source_resume_pair_binding"
+        "rig_patch_source_adapter_source_resume_pair_binding"
         ((\ (first, second) => source_resume_pair_binding first second) : i32 * i32 -> i32)
     export
-        "kit_patch_source_adapter_source_resume_decision_binding"
+        "rig_patch_source_adapter_source_resume_decision_binding"
         ((\ (first, second) => source_resume_decision_binding first second) : i32 * i32 -> i32)
     export
-        "kit_patch_source_adapter_source_resume_completion_binding"
+        "rig_patch_source_adapter_source_resume_completion_binding"
         ((\ (first, second) => source_resume_completion_binding first second) : i32 * i32 -> i32)
     0i32

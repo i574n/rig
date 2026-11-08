@@ -1,0 +1,16 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "topology.rs"
+
+[package]
+name = "rig-source-topology"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "topology.rs"
+
+[dependencies]
+rig-proxy-search = { path = "../rig_proxy_search" }
+toml = { version = "0.8.23", default-features = false, features = ["parse"] }

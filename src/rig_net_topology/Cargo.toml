@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "topology.spi"
+output = "topology.rs"
+
+[package]
+name = "rig-net-topology"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_net_topology"
+path = "topology.rs"
+
+[dependencies]
+rig-net-fleet-file = { path = "../rig_net_fleet_file" }
+rig-net-fleet-rules = { path = "../rig_net_fleet_rules" }

@@ -13,8 +13,8 @@
     := safe_actual = evaluate (safe_receipt_text ()) text
     require (hash_actual = hash_expected)
     require (safe_actual = safe_expected)
-    require ($'kit_handoff::binary_install_hash_text(&*!text) == !hash_expected ' : bool)
-    require ($'kit_handoff::binary_install_safe_text(&*!text) == !safe_expected ' : bool)
+    require ($'rig_handoff::binary_install_hash_text(&*!text) == !hash_expected ' : bool)
+    require ($'rig_handoff::binary_install_safe_text(&*!text) == !safe_expected ' : bool)
 
 :~ differential () : i32 =
     :~ ^ loop (byte : u64) : u64 =
@@ -35,9 +35,9 @@
     0i32
 
 := main () : i32 =
-    export "kit_test_typed_predicates" ((\ () => differential ()) : () -> i32)
+    export "rig_test_typed_predicates" ((\ () => differential ()) : () -> i32)
     !!!!Global("""
-        #[cfg(test)] mod typed_predicate_tests { #[test] fn ascii_and_unicode_match_original_rust_predicates() { assert_eq!(super::kit_test_typed_predicates(),0); } }
+        #[cfg(test)] mod typed_predicate_tests { #[test] fn ascii_and_unicode_match_original_rust_predicates() { assert_eq!(super::rig_test_typed_predicates(),0); } }
 
         """)
     0i32

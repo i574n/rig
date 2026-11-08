@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "process_table.rs"
+
+[package]
+name = "rig-process-table"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_process_table"
+path = "process_table.rs"
+
+[dependencies]
+rig-process-kill = { path = "../rig_process_kill" }
+regex = "1.13.1"
+rig-machine-sample = { path = "../rig_machine_sample" }

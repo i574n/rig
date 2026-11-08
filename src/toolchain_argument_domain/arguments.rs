@@ -360,12 +360,12 @@ fn closure2() -> Rc<dyn Fn(i32, i32) -> i32> {
         toolchain_argument_token_chunk_binding_2(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_toolchain_argument_count(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_argument_count(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_toolchain_argument_token_low(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_argument_token_low(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_toolchain_argument_token_chunk(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_argument_token_chunk(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }

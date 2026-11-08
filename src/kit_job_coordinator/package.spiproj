@@ -1,8 +1,0 @@
-packages:
-    |core-
-    spiral-
-    kit_job_coordinator_args
-link:
-    kit_job_coordinator_args
-modules:
-    coordinator

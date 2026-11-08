@@ -1,0 +1,23 @@
+[package.metadata.spiral]
+entry = "host_run.spi"
+output = "host_run.rs"
+
+[package]
+name = "rig-job-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_host"
+path = "host_run.rs"
+
+[dependencies]
+rig-job-state = { path = "../rig_job_state" }
+rig-job-summary = { path = "../rig_job_summary" }
+rig-os-launch = { path = "../rig_os_launch" }
+rig-job-queue = { path = "../rig_job_queue" }
+rig-process-alive = { path = "../rig_process_alive" }
+rig-job-peers = { path = "../rig_job_peers" }
+rig-job-names = { path = "../rig_job_names" }

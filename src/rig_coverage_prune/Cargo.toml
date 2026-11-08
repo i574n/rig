@@ -1,0 +1,29 @@
+[package.metadata.kit]
+test-requires-cli = true
+
+[package.metadata.spiral]
+entry = "coverage.spi"
+output = "coverage.rs"
+
+[package]
+name = "rig-coverage-prune"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_coverage_prune"
+path = "coverage.rs"
+
+[dependencies]
+rig-lcov = { path = "../rig_lcov" }
+rig-process = { path = "../rig_process" }
+rig-process-observation = { path = "../rig_process_observation" }
+rig-coverage-smoke = { path = "../rig_coverage_smoke" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
+rig-rust-std-fs-mutation = { path = "../rust_std_fs_mutation" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(rig_coverage)'] }

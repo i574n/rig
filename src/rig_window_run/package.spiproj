@@ -1,0 +1,11 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_jobs
+    rig_machine_windows
+    rig_process_alive
+link:
+    rig_process_alive
+modules:
+    run

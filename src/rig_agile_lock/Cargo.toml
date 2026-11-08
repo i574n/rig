@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "lock.spi"
+output = "lock.rs"
+
+[package]
+name = "rig-agile-lock"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_lock"
+path = "lock.rs"
+
+[dependencies]
+rig-process-alive = { path = "../rig_process_alive" }

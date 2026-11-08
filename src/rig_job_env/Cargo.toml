@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "env_adopt.spi"
+output = "env_adopt.rs"
+
+[package]
+name = "rig-job-env"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_env"
+path = "env_adopt.rs"
+
+[dependencies]
+rig-path-first = { path = "../rig_path_first" }

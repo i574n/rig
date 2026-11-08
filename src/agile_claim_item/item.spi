@@ -58,7 +58,6 @@
     testing.expect (last_note_line notes "A-1" = "last-note 2026-11-02T02:00Z x second line") (last_note_line notes "A-1")
     testing.expect (last_note_line notes "B-2" = "last-note none") "no notes"
 
-///> _
 := main () : i32 =
-    export "kit_claim_item_lines" ((\ (root, id) => claim_item_lines root id) : string * string -> string)
+    export "rig_claim_item_lines" ((\ (root, id) => claim_item_lines root id) : string * string -> string)
     0i32

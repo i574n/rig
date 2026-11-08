@@ -127,9 +127,9 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         proxy_corrected_command_1(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_proxy_child_exit_code(v0: &str) -> i32 {
+pub fn rig_proxy_child_exit_code(v0: &str) -> i32 {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_proxy_corrected_command(v0: &str) -> Rc<str> {
+pub fn rig_proxy_corrected_command(v0: &str) -> Rc<str> {
     closure1()(Rc::<str>::from(v0))
 }

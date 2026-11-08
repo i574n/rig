@@ -1,0 +1,62 @@
+///- --package .
+:# asks static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== user_ask = { item : string; asked_on : string; quote : string }
+
+:= row_marker () : string = " = Asked (\""
+
+:~ quoted_triple (~text : string) : option user_ask =
+    ?= sm'.split_list "\", \"" text ?|
+    | item :: asked_on :: rest :: [] ?& sm'.ends_with "\")" rest =>
+        := quote = sm'.trim_end_suffix "\")" rest
+        ? item = "" || asked_on = "" ?> None |: Some { item = item; asked_on = asked_on; quote = quote }
+    | _ => None
+
+:~ ask_of_line (~line : string) : option user_ask =
+    := row = sm'.trim line
+    := at = sm'.index_of (row_marker ()) row
+    ? at < 0i32 ?> None
+    |:
+        := start = at + sm'.length (row_marker ())
+        quoted_triple (sm'.slice start (sm'.length row - 1i32) row)
+
+:~ asks_of_text (~text : string) : list user_ask =
+    := gathered = \ (found : list user_ask) (line : string) =>
+        ?= ask_of_line line ?|
+        | Some ask => ask :: found
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold gathered [] |> listm.rev
+
+:~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_" |> sm'.replace "." "_"
+
+:~ quote_text (~quote : string) : string = quote |> sm'.replace "\"" "'" |> sm'.replace "\\" "/" |> sm'.replace "\n" " "
+
+:~ row_of_ask (ask : user_ask) : string =
+    "inl asked_of_" ++# slug_of ask.item ++# " () = Asked (\"" ++# ask.item ++# "\", \"" ++# ask.asked_on ++# "\", \""
+    ++# quote_text ask.quote ++# "\")"
+
+:~ ^ digits_from (~text : string) (at : i32) : bool =
+    ? at >= (sm'.length text : i32) ?> !+
+    |: sm'.index_of (sm'.substring at 1i32 text) "0123456789" >= 0i32 && digits_from text (at + 1i32)
+
+:~ day_shaped (~day : string) : bool =
+    := digits = sm'.replace "-" "" day
+    (sm'.length day : i32) = 10i32 && sm'.substring 4i32 1i32 day = "-" && sm'.substring 7i32 1i32 day = "-"
+    && (sm'.length digits : i32) = 8i32 && digits_from digits 0i32
+
+:~ asks_of (text : string) : array_base user_ask = asks_of_text text |> listm'.box |> listm'.to_array'
+
+///> rust
+:# an_ask_row_round_trips_and_keeps_its_quote_on_one_safe_line =
+    := ask = { item = "CELLS-PLOT-EXPORT"; asked_on = "2026-11-01"; quote = "plot the physics, \"now\"" }
+    := row = row_of_ask ask
+    := head = "inl asked_of_cells_plot_export () = Asked (\"CELLS-PLOT-EXPORT\", \"2026-11-01\", "
+    := expected = head ++# "\"plot the physics, 'now'\")"
+    testing.expect (row = expected) row
+    testing.expect (asks_of_text (row ++# "\n") = [ { ask ?| quote = "plot the physics, 'now'" } ]) "the row reads back"
+    testing.expect (ask_of_line "inl task_a () = Task (\"A\")" = None) "other rows are not asks"
+    testing.expect (day_shaped "2026-11-01" && day_shaped "2026-1-01" = !-) "days are ISO dates"
+    testing.expect (day_shaped "20261101xx" = !-) "separators are dashes"

@@ -72,9 +72,8 @@
     testing.expect (mine = "BIG-P0" && wip = 1i32) "the decliner gets the next active item and the decline is not WIP"
     := _, theirs, _, _, _, _, _, _ = claim_next "z" 90i32 (wsjf ()) "GATE BIG-P0" "" declined 1000u64
     testing.expect (theirs = "GATE") "another lane is still offered the declined item"
-///> _
 := main () : i32 =
-    export "kit_claim_next" (
+    export "rig_claim_next" (
         (\ (lane, ttl, wsjf, active, live, rows, now) => claim_next lane ttl wsjf active live rows now)
         : string * i32 * string * string * string * string * u64 -> string * string * string * u64 * i32 * i32 * string * string
     )

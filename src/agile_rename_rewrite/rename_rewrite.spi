@@ -118,10 +118,9 @@
     := unchanged, _, _, _, _, _ = renamed_text "x\ny" "A" "Z"
     testing.expect (unchanged = "x\ny") "no trailing newline is added"
 
-///> _
 := main () : i32 =
     export
-        "kit_agile_renamed_text"
+        "rig_agile_renamed_text"
         (
             \ (text, old, new) => renamed_text text old new
             : string * string * string -> string * i32 * i32 * string * i32 * string

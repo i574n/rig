@@ -1,0 +1,11 @@
+:< rig_jobs.model
+:< rig_jobs.host
+:< rig_jobs.jobs
+
+:~ summary_settled ((verb, id) : string * string) : string =
+    := _ = rig_job_orphans.orphans.orphan_settled id
+    job_summary verb id
+
+:= main () : i32 =
+    export "rig_job_summary" summary_settled
+    0i32

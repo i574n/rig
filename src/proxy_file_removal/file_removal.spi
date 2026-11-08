@@ -24,7 +24,7 @@
         } else { 0 }).unwrap_or(2)' : i32
 := entry_bytes (~path : string) : u64 = $'std::fs::symlink_metadata(&*!path).map(|meta| meta.len()).unwrap_or(0)' : u64
 := unlink_error (~path : string) : string =
-    $'std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_unlink_nondirectory(std::path::Path::new(&*!path)).err().unwrap\
+    $'std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_unlink_nondirectory(std::path::Path::new(&*!path)).err().unwrap\
         _or_default().as_str())' : string
 
 := removed_entry_of (code : i32) : removed_entry =
@@ -69,6 +69,6 @@
     | RemovalRejected text => 2i32, text
 
 := main () : i32 =
-    export "kit_file_removal_outcome" ((\ () => file_removal_report ()) : () -> i32 * string)
+    export "rig_file_removal_outcome" ((\ () => file_removal_report ()) : () -> i32 * string)
     := _ = file_removal_outcome ()
     0i32

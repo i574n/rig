@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "entry.spi"
+output = "ci_probe.rs"
+
+[package]
+name = "rig-ci-probe"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_ci_probe"
+path = "ci_probe.rs"

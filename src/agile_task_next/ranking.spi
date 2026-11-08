@@ -1,4 +1,4 @@
-///- --package .
+///- --package . --timeout 900000
 :# ranking static =
     :< rust_std_string.model
     :< workspace_primitives.bytes
@@ -21,6 +21,9 @@
         tags : string
         estimate : i32
         progress : i32
+        idle_days : i32
+        asked : bool
+        parent : string
     }
 
 :| ^ task_list =
@@ -37,6 +40,7 @@
         estimated : bool
         unblocks : i32
         key : i32
+        parent : string
     }
 
 :| ^ ranked_list =
@@ -85,7 +89,7 @@
 := query_passes (~query : string) (~id : string) (~title : string) (~tags : string) (~status : string) : bool =
     ? query = ""
     ?> !+
-    |: $'agile_task_query::kit_query_passes(&*!query, &*!id, &*!title, &*!tags, &*!status, true)' : bool
+    |: $'agile_task_query::rig_query_passes(&*!query, &*!id, &*!title, &*!tags, &*!status, true)' : bool
 
 := task_passes (query : string) (task : backlog_task) : bool =
     query_passes query task.id task.title task.tags task.status
@@ -127,6 +131,49 @@
     | MainAgent => $'((!weight as i64) * 6000 / (!minutes).max(1) as i64).min(i32::MAX as i64) as i32' : i32
     | Subagent => minutes * 8i32 + 5i32 - priority
 
+:| rank_formula =
+    | WeightOverMinutes
+    | AgedAskWeighted
+
+:= aged_key (base : i32) (idle_days : i32) (asked : bool) : i32 =
+    := idle = ? idle_days < 14i32 ?> idle_days |: 14i32
+    := factor = (7i32 + idle) * (? asked ?> 2i32 |: 1i32)
+    ? base > 2147483647i32 / factor ?> 2147483647i32 |: base * factor / 7i32
+
+:== replay_row =
+    {
+        priority : i32
+        minutes : i32
+        unblocks : i32
+        idle_days : i32
+        asked : bool
+        closed : bool
+    }
+
+:= replay_at
+    (priority : i32) (minutes : i32) (unblocks : i32) (idle_days : i32) (asked : bool) (closed : bool)
+    : replay_row
+    =
+    {
+        priority = priority
+        minutes = minutes
+        unblocks = unblocks
+        idle_days = idle_days
+        asked = asked
+        closed = closed
+    }
+
+:= replay_key (formula : rank_formula) (row : replay_row) : i32 =
+    := base = rank_key MainAgent (priority_weight row.priority + row.unblocks) row.minutes row.priority
+    ?= formula ?|
+    | WeightOverMinutes => base
+    | AgedAskWeighted => aged_key base row.idle_days row.asked
+
+:= role_key (role : rank_role) (base : i32) (task : backlog_task) : i32 =
+    ?= role ?|
+    | MainAgent => aged_key base task.idle_days task.asked
+    | Subagent => base
+
 :~ ranked_of (role : rank_role) (tasks : task_list) (task : backlog_task) : ranked_task =
     := minutes = task_minutes task
     := unblocks = unblocked_weight tasks task.id 0i32
@@ -138,7 +185,8 @@
         minutes = minutes
         estimated = 0i32 < task.estimate
         unblocks = unblocks
-        key = rank_key role (priority_weight task.priority + unblocks) minutes task.priority
+        key = role_key role (rank_key role (priority_weight task.priority + unblocks) minutes task.priority) task
+        parent = task.parent
     }
 
 := role_takes (role : rank_role) (task : backlog_task) : bool =
@@ -163,7 +211,8 @@
     ?= remaining ?|
     | NoTasks => list
     | TaskThen (task, rest) =>
-        ? candidate role passes tasks task ?> ranked_from role passes tasks rest (inserted (ranked_of role tasks task) list)
+        ? candidate role passes tasks task
+        ?> ranked_from role passes tasks rest (inserted (ranked_of role tasks task) list)
         |: ranked_from role passes tasks rest list
 
 := ranking_where (role : rank_role) (passes : backlog_task -> bool) (tasks : task_list) : ranked_list =
@@ -197,6 +246,9 @@
         tags = tags
         estimate = estimate
         progress = 0i32
+        idle_days = 0i32
+        asked = !-
+        parent = ""
     }
 
 := sample_backlog () : task_list =
@@ -207,6 +259,413 @@
                     TaskThen (task_at "KIT-SIDE" 1i32 4i32 "Planned" "" "kit,agile" 0i32,
                         TaskThen (task_at "SHIPPED" 0i32 1i32 "Done" "" "" 0i32,
                             TaskThen (task_at "PARKED" 0i32 1i32 "Paused" "" "" 0i32, NoTasks)))))))
+
+:~ keys_of (formula : rank_formula) (rows : list replay_row) : list i32 = listm.map (replay_key formula) rows
+
+:~ ahead_of (keys : list i32) (key : i32) : i32 =
+    listm.fold (\ count (other : i32) => ? other > key ?> count + 1i32 |: count) 0i32 keys
+
+:~ row_count (rows : list replay_row) : i32 = listm.fold (\ count (_ : replay_row) => count + 1i32) 0i32 rows
+
+:~ closed_in_top_fifth (formula : rank_formula) (rows : list replay_row) : i32 =
+    := keys = keys_of formula rows
+    := fifth = row_count rows / 5i32
+    listm.fold
+        (\ count (row : replay_row) =>
+            ? row.closed && ahead_of keys (replay_key formula row) < fifth ?> count + 1i32 |: count)
+        0i32
+        rows
+
+:= neglected_ask (row : replay_row) : bool =
+    row.asked && not row.closed && row.priority <= 1i32 && row.idle_days >= 3i32
+
+:~ neglected_shares (formula : rank_formula) (rows : list replay_row) : list i32 =
+    := keys = keys_of formula rows
+    := total = row_count rows
+    listm.fold
+        (\ (shares : list i32) (row : replay_row) =>
+            ? neglected_ask row ?> (ahead_of keys (replay_key formula row) * 100i32 / total) :: shares |: shares)
+        []
+        rows
+
+:~ at_or_below (shares : list i32) (share : i32) : i32 =
+    listm.fold (\ count (other : i32) => ? other <= share ?> count + 1i32 |: count) 0i32 shares
+
+:~ neglected_median (formula : rank_formula) (rows : list replay_row) : i32 =
+    := shares = neglected_shares formula rows
+    := needed = (listm.fold (\ count (_ : i32) => count + 1i32) 0i32 shares + 1i32) / 2i32
+    listm.fold
+        (\ best (share : i32) => ? at_or_below shares share >= needed && share < best ?> share |: best)
+        100i32
+        shares
+
+
+:= week_rows_1 () : list replay_row =
+    [
+        replay_at 1i32 240i32 0i32 3i32 !- !-; replay_at 1i32 120i32 0i32 3i32 !- !-;
+        replay_at 1i32 300i32 0i32 3i32 !+ !-; replay_at 1i32 120i32 256i32 4i32 !- !+;
+        replay_at 1i32 240i32 256i32 5i32 !- !-; replay_at 0i32 60i32 0i32 5i32 !- !+;
+        replay_at 0i32 3000i32 16i32 1i32 !- !-; replay_at 0i32 300i32 0i32 2i32 !+ !+;
+        replay_at 0i32 900i32 272i32 0i32 !- !-; replay_at 1i32 45i32 0i32 2i32 !- !+;
+        replay_at 2i32 240i32 0i32 0i32 !- !+; replay_at 1i32 720i32 0i32 5i32 !+ !-;
+        replay_at 1i32 120i32 0i32 5i32 !+ !-; replay_at 0i32 120i32 0i32 6i32 !- !+;
+        replay_at 2i32 60i32 0i32 0i32 !- !-; replay_at 1i32 45i32 0i32 0i32 !+ !-;
+        replay_at 1i32 90i32 64i32 0i32 !- !-; replay_at 0i32 2400i32 16i32 5i32 !- !-;
+        replay_at 2i32 300i32 0i32 1i32 !- !+; replay_at 2i32 360i32 0i32 4i32 !- !-;
+        replay_at 1i32 60i32 0i32 1i32 !+ !-; replay_at 1i32 90i32 0i32 0i32 !- !-;
+        replay_at 1i32 60i32 0i32 0i32 !+ !+; replay_at 0i32 1500i32 357i32 5i32 !- !-;
+        replay_at 0i32 120i32 0i32 4i32 !- !+; replay_at 0i32 120i32 0i32 3i32 !+ !+;
+        replay_at 1i32 75i32 0i32 5i32 !- !-; replay_at 1i32 60i32 0i32 3i32 !- !+;
+        replay_at 2i32 60i32 0i32 4i32 !- !+; replay_at 1i32 120i32 0i32 6i32 !- !+;
+        replay_at 1i32 45i32 0i32 5i32 !- !+; replay_at 1i32 180i32 200i32 3i32 !- !+;
+        replay_at 1i32 60i32 0i32 6i32 !- !+; replay_at 1i32 4800i32 0i32 2i32 !+ !-;
+        replay_at 1i32 60i32 0i32 2i32 !- !+; replay_at 1i32 60i32 0i32 1i32 !- !+;
+        replay_at 1i32 180i32 0i32 1i32 !- !+; replay_at 2i32 240i32 0i32 4i32 !+ !-;
+        replay_at 1i32 240i32 0i32 2i32 !- !+; replay_at 1i32 180i32 21i32 2i32 !- !+;
+        replay_at 0i32 480i32 64i32 0i32 !- !-; replay_at 1i32 300i32 88i32 3i32 !- !-;
+        replay_at 1i32 60i32 0i32 5i32 !- !+; replay_at 1i32 180i32 0i32 5i32 !- !-;
+        replay_at 2i32 240i32 0i32 3i32 !- !-; replay_at 1i32 360i32 0i32 3i32 !- !-;
+        replay_at 3i32 30i32 0i32 0i32 !- !+; replay_at 1i32 90i32 256i32 4i32 !- !+;
+        replay_at 2i32 120i32 0i32 3i32 !- !-; replay_at 2i32 90i32 0i32 1i32 !- !+;
+        replay_at 2i32 60i32 0i32 0i32 !- !-; replay_at 1i32 120i32 0i32 4i32 !- !+;
+        replay_at 1i32 30i32 0i32 1i32 !- !+; replay_at 1i32 240i32 21i32 3i32 !- !-;
+        replay_at 0i32 600i32 1040i32 3i32 !- !+; replay_at 0i32 90i32 0i32 4i32 !- !+;
+        replay_at 1i32 300i32 0i32 3i32 !+ !-; replay_at 0i32 45i32 0i32 0i32 !- !+;
+        replay_at 1i32 240i32 256i32 0i32 !- !-; replay_at 1i32 15i32 256i32 4i32 !+ !+;
+        replay_at 1i32 120i32 0i32 2i32 !- !+; replay_at 2i32 240i32 0i32 3i32 !- !-;
+        replay_at 4i32 180i32 0i32 1i32 !- !-; replay_at 2i32 1200i32 4i32 1i32 !- !+;
+        replay_at 1i32 480i32 64i32 1i32 !- !+; replay_at 1i32 300i32 0i32 1i32 !- !+;
+        replay_at 1i32 90i32 0i32 3i32 !- !-; replay_at 2i32 180i32 0i32 1i32 !- !+;
+        replay_at 1i32 240i32 0i32 2i32 !- !+; replay_at 1i32 360i32 0i32 1i32 !- !+;
+        replay_at 2i32 120i32 0i32 1i32 !- !+; replay_at 1i32 300i32 0i32 2i32 !- !+;
+        replay_at 1i32 240i32 0i32 2i32 !- !+; replay_at 2i32 60i32 0i32 3i32 !- !-;
+        replay_at 3i32 45i32 0i32 2i32 !+ !+; replay_at 1i32 1440i32 0i32 6i32 !+ !-;
+        replay_at 0i32 240i32 0i32 0i32 !+ !-; replay_at 1i32 60i32 0i32 2i32 !- !+;
+        replay_at 1i32 180i32 0i32 0i32 !- !-; replay_at 1i32 600i32 51i32 0i32 !- !-
+    ]
+
+:= week_rows_2 () : list replay_row =
+    [
+        replay_at 2i32 120i32 0i32 0i32 !- !-; replay_at 2i32 480i32 0i32 3i32 !- !-;
+        replay_at 1i32 1200i32 51i32 0i32 !- !-; replay_at 2i32 60i32 0i32 2i32 !- !+;
+        replay_at 1i32 120i32 0i32 2i32 !- !+; replay_at 1i32 180i32 0i32 5i32 !- !+;
+        replay_at 0i32 360i32 0i32 4i32 !+ !-; replay_at 2i32 180i32 0i32 1i32 !- !+;
+        replay_at 1i32 2400i32 0i32 3i32 !- !-; replay_at 1i32 120i32 0i32 2i32 !- !+;
+        replay_at 0i32 240i32 4672i32 2i32 !- !+; replay_at 0i32 240i32 0i32 2i32 !- !+;
+        replay_at 2i32 20i32 0i32 3i32 !- !+; replay_at 2i32 90i32 0i32 0i32 !- !-;
+        replay_at 1i32 60i32 0i32 1i32 !- !+; replay_at 1i32 4800i32 0i32 3i32 !- !-;
+        replay_at 1i32 30i32 0i32 1i32 !- !+; replay_at 1i32 900i32 51i32 3i32 !- !-;
+        replay_at 2i32 120i32 0i32 0i32 !- !+; replay_at 1i32 1800i32 51i32 3i32 !- !-;
+        replay_at 1i32 2400i32 0i32 0i32 !+ !-; replay_at 1i32 600i32 256i32 3i32 !- !-;
+        replay_at 1i32 180i32 0i32 4i32 !- !+; replay_at 1i32 90i32 0i32 3i32 !- !+;
+        replay_at 0i32 90i32 0i32 1i32 !- !+; replay_at 1i32 180i32 0i32 1i32 !- !+;
+        replay_at 2i32 60i32 0i32 0i32 !- !+; replay_at 2i32 120i32 0i32 3i32 !+ !-;
+        replay_at 0i32 60i32 1024i32 4i32 !- !+; replay_at 1i32 450i32 0i32 5i32 !+ !-;
+        replay_at 0i32 1800i32 0i32 5i32 !+ !+; replay_at 1i32 600i32 0i32 5i32 !- !-;
+        replay_at 1i32 240i32 0i32 0i32 !- !+; replay_at 1i32 45i32 0i32 5i32 !- !+;
+        replay_at 0i32 240i32 0i32 2i32 !+ !+; replay_at 1i32 300i32 0i32 0i32 !- !-;
+        replay_at 2i32 180i32 51i32 0i32 !- !-; replay_at 2i32 120i32 128i32 0i32 !- !-;
+        replay_at 1i32 180i32 0i32 0i32 !- !-; replay_at 1i32 120i32 0i32 6i32 !- !+;
+        replay_at 0i32 480i32 16i32 0i32 !- !-; replay_at 1i32 120i32 0i32 3i32 !- !+;
+        replay_at 2i32 120i32 0i32 6i32 !- !+; replay_at 1i32 180i32 0i32 1i32 !- !+;
+        replay_at 1i32 120i32 0i32 5i32 !- !+; replay_at 1i32 120i32 256i32 0i32 !+ !-;
+        replay_at 1i32 60i32 384i32 3i32 !- !+; replay_at 1i32 60i32 128i32 2i32 !- !+;
+        replay_at 1i32 105i32 0i32 3i32 !+ !-; replay_at 1i32 360i32 256i32 5i32 !- !-;
+        replay_at 1i32 60i32 0i32 0i32 !+ !-; replay_at 1i32 60i32 0i32 0i32 !- !-;
+        replay_at 1i32 480i32 256i32 5i32 !+ !+; replay_at 0i32 180i32 0i32 4i32 !- !+;
+        replay_at 0i32 240i32 0i32 6i32 !+ !+; replay_at 3i32 30i32 0i32 5i32 !- !-;
+        replay_at 2i32 45i32 0i32 1i32 !- !+; replay_at 2i32 30i32 64i32 5i32 !- !-;
+        replay_at 1i32 180i32 0i32 12i32 !- !-; replay_at 1i32 60i32 0i32 5i32 !- !+;
+        replay_at 1i32 180i32 0i32 5i32 !- !-; replay_at 2i32 60i32 0i32 5i32 !- !-;
+        replay_at 2i32 30i32 0i32 6i32 !- !+; replay_at 1i32 240i32 256i32 11i32 !- !-;
+        replay_at 1i32 240i32 0i32 12i32 !- !-; replay_at 2i32 20i32 0i32 1i32 !- !+;
+        replay_at 2i32 120i32 0i32 0i32 !- !-; replay_at 3i32 240i32 0i32 12i32 !- !-;
+        replay_at 1i32 120i32 0i32 4i32 !+ !-; replay_at 0i32 240i32 256i32 0i32 !- !-;
+        replay_at 2i32 120i32 0i32 0i32 !- !-; replay_at 2i32 180i32 0i32 12i32 !- !-;
+        replay_at 1i32 90i32 0i32 3i32 !+ !-; replay_at 1i32 75i32 0i32 1i32 !- !+;
+        replay_at 1i32 90i32 0i32 1i32 !- !+; replay_at 1i32 20i32 0i32 6i32 !- !+;
+        replay_at 2i32 240i32 0i32 13i32 !- !-; replay_at 2i32 90i32 64i32 5i32 !- !-;
+        replay_at 1i32 300i32 115i32 2i32 !- !+; replay_at 0i32 480i32 256i32 11i32 !- !-
+    ]
+
+:= week_rows_3 () : list replay_row =
+    [
+        replay_at 1i32 240i32 256i32 2i32 !- !-; replay_at 1i32 120i32 0i32 5i32 !+ !-;
+        replay_at 2i32 120i32 0i32 6i32 !- !-; replay_at 3i32 20i32 0i32 5i32 !- !-;
+        replay_at 0i32 720i32 768i32 2i32 !- !+; replay_at 1i32 180i32 384i32 3i32 !- !-;
+        replay_at 1i32 30i32 128i32 4i32 !- !+; replay_at 1i32 60i32 192i32 2i32 !- !+;
+        replay_at 0i32 1800i32 51i32 3i32 !- !-; replay_at 3i32 30i32 0i32 5i32 !- !-;
+        replay_at 2i32 20i32 0i32 1i32 !- !+; replay_at 2i32 90i32 0i32 6i32 !- !-;
+        replay_at 2i32 90i32 0i32 5i32 !- !-; replay_at 2i32 120i32 256i32 5i32 !- !+;
+        replay_at 1i32 90i32 0i32 13i32 !- !-; replay_at 2i32 60i32 0i32 13i32 !- !-;
+        replay_at 0i32 120i32 323i32 1i32 !- !-; replay_at 1i32 120i32 0i32 5i32 !- !-;
+        replay_at 2i32 180i32 0i32 0i32 !- !-; replay_at 3i32 240i32 0i32 12i32 !- !-;
+        replay_at 2i32 90i32 0i32 5i32 !- !-; replay_at 2i32 195i32 0i32 5i32 !- !-;
+        replay_at 1i32 180i32 512i32 6i32 !- !+; replay_at 0i32 45i32 256i32 6i32 !- !+;
+        replay_at 2i32 720i32 64i32 4i32 !- !-; replay_at 1i32 720i32 320i32 5i32 !+ !-;
+        replay_at 1i32 510i32 64i32 3i32 !- !-; replay_at 0i32 105i32 64i32 5i32 !- !+;
+        replay_at 1i32 180i32 0i32 13i32 !+ !-; replay_at 1i32 60i32 0i32 5i32 !- !+;
+        replay_at 2i32 15i32 0i32 5i32 !- !+; replay_at 1i32 195i32 51i32 5i32 !+ !-;
+        replay_at 2i32 90i32 0i32 3i32 !- !-; replay_at 3i32 30i32 0i32 3i32 !- !-;
+        replay_at 1i32 180i32 115i32 5i32 !- !-; replay_at 1i32 90i32 0i32 6i32 !+ !+;
+        replay_at 1i32 240i32 2416i32 0i32 !- !-; replay_at 2i32 300i32 0i32 5i32 !- !-;
+        replay_at 0i32 390i32 341i32 4i32 !+ !-; replay_at 2i32 40i32 0i32 1i32 !- !-;
+        replay_at 2i32 240i32 0i32 5i32 !+ !-; replay_at 2i32 60i32 0i32 6i32 !- !+;
+        replay_at 3i32 195i32 768i32 1i32 !+ !-; replay_at 2i32 180i32 0i32 13i32 !- !-;
+        replay_at 2i32 180i32 64i32 6i32 !- !-; replay_at 1i32 435i32 0i32 6i32 !- !-;
+        replay_at 2i32 30i32 0i32 5i32 !- !-; replay_at 2i32 30i32 0i32 1i32 !- !+;
+        replay_at 3i32 60i32 0i32 5i32 !- !-; replay_at 1i32 360i32 0i32 2i32 !- !-;
+        replay_at 1i32 2400i32 0i32 5i32 !+ !-; replay_at 1i32 1200i32 0i32 5i32 !- !-;
+        replay_at 0i32 90i32 0i32 1i32 !+ !-; replay_at 1i32 4800i32 0i32 3i32 !+ !+;
+        replay_at 0i32 210i32 0i32 0i32 !+ !-; replay_at 0i32 210i32 1024i32 3i32 !- !+;
+        replay_at 1i32 60i32 64i32 0i32 !- !-; replay_at 1i32 180i32 0i32 3i32 !- !+;
+        replay_at 0i32 240i32 0i32 4i32 !- !+; replay_at 1i32 150i32 0i32 5i32 !+ !+;
+        replay_at 2i32 360i32 0i32 5i32 !- !+; replay_at 2i32 60i32 0i32 3i32 !- !+;
+        replay_at 1i32 150i32 0i32 4i32 !- !+; replay_at 0i32 90i32 3648i32 4i32 !- !+;
+        replay_at 1i32 120i32 0i32 3i32 !- !+; replay_at 1i32 480i32 512i32 0i32 !- !-;
+        replay_at 1i32 360i32 0i32 3i32 !- !+; replay_at 1i32 480i32 576i32 0i32 !+ !-;
+        replay_at 0i32 2400i32 0i32 1i32 !- !-; replay_at 1i32 150i32 0i32 6i32 !- !+;
+        replay_at 2i32 600i32 0i32 0i32 !- !-; replay_at 2i32 90i32 64i32 0i32 !- !-;
+        replay_at 0i32 90i32 0i32 3i32 !- !+; replay_at 1i32 180i32 256i32 5i32 !+ !+;
+        replay_at 1i32 240i32 128i32 0i32 !- !-; replay_at 1i32 150i32 0i32 2i32 !- !+;
+        replay_at 1i32 240i32 0i32 2i32 !- !-; replay_at 2i32 180i32 0i32 5i32 !+ !+;
+        replay_at 2i32 180i32 0i32 5i32 !+ !+; replay_at 0i32 1440i32 512i32 5i32 !+ !+
+    ]
+
+:= week_rows_4 () : list replay_row =
+    [
+        replay_at 1i32 480i32 0i32 0i32 !- !-; replay_at 1i32 120i32 0i32 4i32 !- !+;
+        replay_at 1i32 390i32 405i32 2i32 !- !-; replay_at 2i32 60i32 0i32 4i32 !- !+;
+        replay_at 1i32 45i32 0i32 3i32 !- !+; replay_at 1i32 210i32 0i32 3i32 !- !-;
+        replay_at 1i32 120i32 0i32 0i32 !- !-; replay_at 2i32 90i32 0i32 2i32 !- !+;
+        replay_at 1i32 120i32 0i32 6i32 !- !+; replay_at 5i32 60i32 0i32 15i32 !- !-;
+        replay_at 1i32 90i32 0i32 5i32 !+ !-; replay_at 1i32 960i32 0i32 0i32 !+ !-;
+        replay_at 1i32 120i32 0i32 1i32 !+ !+; replay_at 1i32 240i32 0i32 3i32 !- !+;
+        replay_at 1i32 240i32 0i32 3i32 !- !-; replay_at 0i32 90i32 0i32 3i32 !- !+;
+        replay_at 0i32 480i32 272i32 3i32 !- !+; replay_at 0i32 60i32 0i32 0i32 !+ !-;
+        replay_at 0i32 600i32 16i32 5i32 !- !-; replay_at 2i32 180i32 0i32 3i32 !- !+;
+        replay_at 1i32 45i32 0i32 3i32 !- !+; replay_at 1i32 240i32 256i32 1i32 !- !+;
+        replay_at 0i32 180i32 16i32 4i32 !- !+; replay_at 2i32 240i32 85i32 2i32 !- !-;
+        replay_at 0i32 480i32 16i32 3i32 !+ !-; replay_at 3i32 90i32 0i32 3i32 !- !+;
+        replay_at 1i32 960i32 0i32 5i32 !+ !+; replay_at 1i32 1410i32 0i32 5i32 !- !-;
+        replay_at 0i32 120i32 0i32 0i32 !- !+; replay_at 0i32 480i32 2560i32 3i32 !- !+;
+        replay_at 1i32 60i32 0i32 2i32 !- !+; replay_at 2i32 90i32 0i32 2i32 !- !-;
+        replay_at 3i32 120i32 0i32 1i32 !- !+; replay_at 1i32 120i32 0i32 1i32 !- !+;
+        replay_at 1i32 180i32 0i32 1i32 !- !+; replay_at 0i32 120i32 256i32 0i32 !+ !-;
+        replay_at 1i32 390i32 0i32 5i32 !- !-; replay_at 2i32 60i32 0i32 0i32 !- !-;
+        replay_at 2i32 60i32 0i32 2i32 !+ !+; replay_at 0i32 2400i32 0i32 3i32 !+ !-;
+        replay_at 0i32 480i32 0i32 3i32 !+ !-; replay_at 0i32 420i32 1088i32 3i32 !- !-;
+        replay_at 0i32 60i32 213i32 5i32 !- !-; replay_at 1i32 120i32 0i32 1i32 !- !+;
+        replay_at 0i32 240i32 0i32 3i32 !- !+; replay_at 2i32 120i32 0i32 2i32 !- !+;
+        replay_at 1i32 45i32 0i32 0i32 !- !-; replay_at 0i32 1200i32 0i32 1i32 !+ !-;
+        replay_at 0i32 240i32 0i32 2i32 !- !+; replay_at 0i32 30i32 0i32 2i32 !+ !+;
+        replay_at 0i32 900i32 1109i32 3i32 !- !-; replay_at 1i32 240i32 0i32 2i32 !+ !+;
+        replay_at 1i32 120i32 0i32 3i32 !- !+; replay_at 1i32 180i32 85i32 5i32 !- !-;
+        replay_at 1i32 15i32 0i32 6i32 !+ !+; replay_at 0i32 90i32 1024i32 0i32 !- !-;
+        replay_at 0i32 240i32 128i32 0i32 !- !-; replay_at 1i32 60i32 0i32 0i32 !- !-;
+        replay_at 0i32 720i32 0i32 0i32 !- !-; replay_at 1i32 180i32 0i32 1i32 !- !-;
+        replay_at 2i32 60i32 0i32 1i32 !- !+; replay_at 0i32 60i32 0i32 2i32 !- !+;
+        replay_at 2i32 45i32 0i32 0i32 !- !+; replay_at 0i32 180i32 0i32 0i32 !- !-;
+        replay_at 1i32 120i32 0i32 0i32 !- !-; replay_at 1i32 30i32 0i32 0i32 !- !-;
+        replay_at 1i32 120i32 0i32 4i32 !- !-; replay_at 2i32 60i32 0i32 0i32 !- !-;
+        replay_at 0i32 180i32 85i32 0i32 !- !-; replay_at 0i32 4800i32 0i32 0i32 !- !-;
+        replay_at 0i32 60i32 0i32 1i32 !- !+; replay_at 1i32 180i32 0i32 0i32 !+ !-;
+        replay_at 1i32 30i32 0i32 5i32 !- !+; replay_at 1i32 240i32 0i32 4i32 !+ !-;
+        replay_at 1i32 240i32 0i32 3i32 !- !-; replay_at 0i32 240i32 0i32 0i32 !- !-;
+        replay_at 0i32 240i32 0i32 1i32 !- !-; replay_at 0i32 240i32 0i32 1i32 !- !-;
+        replay_at 0i32 240i32 0i32 0i32 !- !-; replay_at 0i32 240i32 256i32 1i32 !- !-
+    ]
+
+:= week_rows_5 () : list replay_row =
+    [
+        replay_at 0i32 240i32 0i32 1i32 !- !-; replay_at 0i32 2400i32 0i32 0i32 !- !-;
+        replay_at 2i32 120i32 0i32 6i32 !- !+; replay_at 0i32 360i32 533i32 0i32 !- !-;
+        replay_at 0i32 180i32 0i32 0i32 !- !-; replay_at 1i32 180i32 0i32 2i32 !- !-;
+        replay_at 2i32 30i32 0i32 0i32 !- !-; replay_at 1i32 45i32 0i32 3i32 !- !+;
+        replay_at 1i32 360i32 0i32 2i32 !- !+; replay_at 1i32 180i32 0i32 0i32 !- !-;
+        replay_at 0i32 60i32 0i32 0i32 !- !-; replay_at 3i32 30i32 0i32 0i32 !- !-;
+        replay_at 1i32 180i32 0i32 1i32 !- !-; replay_at 1i32 60i32 0i32 1i32 !- !-;
+        replay_at 1i32 480i32 0i32 4i32 !- !-; replay_at 2i32 30i32 0i32 1i32 !- !+;
+        replay_at 1i32 150i32 341i32 0i32 !- !-; replay_at 1i32 90i32 85i32 0i32 !- !-;
+        replay_at 0i32 180i32 1578i32 0i32 !- !-; replay_at 1i32 15i32 0i32 6i32 !- !+;
+        replay_at 1i32 120i32 0i32 0i32 !+ !-; replay_at 1i32 180i32 0i32 0i32 !+ !-;
+        replay_at 1i32 60i32 51i32 0i32 !- !-; replay_at 0i32 480i32 0i32 0i32 !+ !-;
+        replay_at 0i32 120i32 0i32 3i32 !- !+; replay_at 1i32 180i32 0i32 5i32 !- !-;
+        replay_at 0i32 60i32 128i32 0i32 !- !-; replay_at 3i32 30i32 0i32 2i32 !- !-;
+        replay_at 0i32 300i32 1568i32 0i32 !- !-; replay_at 0i32 300i32 1088i32 1i32 !- !-;
+        replay_at 0i32 300i32 0i32 0i32 !- !-; replay_at 2i32 360i32 0i32 5i32 !- !-;
+        replay_at 2i32 90i32 64i32 0i32 !- !-; replay_at 1i32 360i32 0i32 4i32 !+ !-;
+        replay_at 3i32 60i32 0i32 3i32 !- !-; replay_at 0i32 180i32 0i32 4i32 !- !+;
+        replay_at 1i32 120i32 0i32 1i32 !- !-; replay_at 1i32 120i32 0i32 3i32 !- !-;
+        replay_at 1i32 60i32 0i32 0i32 !- !-; replay_at 1i32 60i32 0i32 4i32 !- !+;
+        replay_at 0i32 60i32 0i32 0i32 !- !-; replay_at 0i32 4800i32 0i32 3i32 !+ !-;
+        replay_at 1i32 90i32 0i32 0i32 !- !-; replay_at 2i32 60i32 0i32 2i32 !- !-;
+        replay_at 1i32 480i32 256i32 0i32 !- !-; replay_at 1i32 180i32 0i32 0i32 !- !-;
+        replay_at 1i32 60i32 0i32 5i32 !+ !+; replay_at 1i32 30i32 0i32 5i32 !- !+;
+        replay_at 1i32 120i32 0i32 5i32 !- !+; replay_at 2i32 180i32 64i32 4i32 !+ !-;
+        replay_at 0i32 180i32 0i32 0i32 !- !+; replay_at 2i32 45i32 0i32 6i32 !- !+;
+        replay_at 0i32 1500i32 16i32 0i32 !- !-; replay_at 1i32 2280i32 256i32 2i32 !+ !-;
+        replay_at 1i32 120i32 0i32 1i32 !- !+; replay_at 1i32 120i32 0i32 3i32 !- !+;
+        replay_at 2i32 2280i32 0i32 3i32 !- !-; replay_at 1i32 180i32 0i32 5i32 !- !-;
+        replay_at 2i32 90i32 0i32 2i32 !- !+; replay_at 0i32 720i32 256i32 3i32 !- !-;
+        replay_at 1i32 180i32 0i32 1i32 !- !+; replay_at 1i32 60i32 0i32 0i32 !- !-;
+        replay_at 3i32 120i32 0i32 4i32 !- !+; replay_at 1i32 120i32 0i32 5i32 !+ !-;
+        replay_at 1i32 30i32 256i32 4i32 !- !+; replay_at 2i32 240i32 0i32 5i32 !- !-;
+        replay_at 2i32 120i32 384i32 3i32 !- !+; replay_at 1i32 60i32 0i32 2i32 !- !+;
+        replay_at 2i32 120i32 0i32 4i32 !- !+; replay_at 2i32 90i32 0i32 1i32 !- !+;
+        replay_at 3i32 120i32 0i32 1i32 !- !+; replay_at 0i32 2400i32 256i32 6i32 !+ !+;
+        replay_at 3i32 90i32 0i32 5i32 !- !-; replay_at 3i32 120i32 0i32 6i32 !- !-;
+        replay_at 2i32 240i32 0i32 1i32 !- !+; replay_at 1i32 360i32 0i32 1i32 !- !-;
+        replay_at 2i32 150i32 0i32 4i32 !- !-; replay_at 2i32 180i32 0i32 1i32 !- !-;
+        replay_at 1i32 180i32 0i32 1i32 !- !+; replay_at 2i32 150i32 0i32 2i32 !- !+
+    ]
+
+:= week_rows_6 () : list replay_row =
+    [
+        replay_at 1i32 480i32 0i32 5i32 !+ !+; replay_at 1i32 360i32 384i32 5i32 !- !-;
+        replay_at 3i32 240i32 0i32 13i32 !- !-; replay_at 2i32 180i32 0i32 13i32 !- !-;
+        replay_at 2i32 150i32 0i32 6i32 !- !+; replay_at 2i32 150i32 0i32 6i32 !- !+;
+        replay_at 3i32 360i32 0i32 13i32 !- !-; replay_at 1i32 240i32 16i32 6i32 !- !+;
+        replay_at 1i32 240i32 128i32 6i32 !- !+; replay_at 2i32 90i32 0i32 0i32 !- !+;
+        replay_at 2i32 600i32 256i32 2i32 !- !+; replay_at 3i32 120i32 0i32 1i32 !- !+;
+        replay_at 2i32 45i32 0i32 6i32 !- !+; replay_at 1i32 600i32 0i32 5i32 !+ !-;
+        replay_at 2i32 60i32 0i32 1i32 !- !+; replay_at 3i32 180i32 0i32 0i32 !- !-;
+        replay_at 1i32 360i32 512i32 0i32 !- !-; replay_at 2i32 60i32 0i32 5i32 !- !-;
+        replay_at 1i32 180i32 0i32 3i32 !- !+; replay_at 2i32 360i32 0i32 4i32 !- !-;
+        replay_at 1i32 60i32 0i32 1i32 !- !+; replay_at 1i32 600i32 256i32 2i32 !- !+;
+        replay_at 1i32 45i32 64i32 5i32 !- !+; replay_at 2i32 150i32 0i32 4i32 !- !+;
+        replay_at 1i32 480i32 256i32 4i32 !- !-; replay_at 1i32 120i32 0i32 1i32 !- !+;
+        replay_at 3i32 90i32 0i32 4i32 !- !+; replay_at 2i32 240i32 0i32 1i32 !- !+;
+        replay_at 1i32 20i32 0i32 3i32 !- !+; replay_at 0i32 360i32 546i32 0i32 !- !-;
+        replay_at 0i32 720i32 546i32 3i32 !- !-; replay_at 0i32 240i32 546i32 0i32 !- !-;
+        replay_at 2i32 90i32 0i32 0i32 !- !-; replay_at 2i32 360i32 0i32 0i32 !- !+;
+        replay_at 2i32 240i32 512i32 0i32 !- !-; replay_at 1i32 180i32 0i32 0i32 !- !+;
+        replay_at 1i32 240i32 0i32 3i32 !- !+; replay_at 1i32 90i32 0i32 4i32 !- !+;
+        replay_at 2i32 180i32 0i32 5i32 !+ !-; replay_at 1i32 90i32 0i32 1i32 !- !-;
+        replay_at 1i32 15i32 0i32 1i32 !+ !-; replay_at 0i32 120i32 51i32 0i32 !- !-;
+        replay_at 1i32 30i32 0i32 0i32 !+ !+; replay_at 1i32 120i32 0i32 4i32 !+ !+;
+        replay_at 2i32 30i32 0i32 14i32 !- !-; replay_at 2i32 120i32 0i32 1i32 !- !+;
+        replay_at 1i32 240i32 0i32 0i32 !- !-; replay_at 1i32 480i32 0i32 4i32 !+ !-;
+        replay_at 1i32 1200i32 597i32 3i32 !+ !-; replay_at 2i32 90i32 0i32 3i32 !- !+;
+        replay_at 1i32 30i32 0i32 4i32 !- !+; replay_at 1i32 240i32 0i32 2i32 !- !+;
+        replay_at 2i32 60i32 0i32 0i32 !- !+; replay_at 1i32 90i32 0i32 1i32 !- !+;
+        replay_at 0i32 30i32 0i32 2i32 !- !+; replay_at 2i32 90i32 0i32 0i32 !- !-;
+        replay_at 1i32 3600i32 0i32 3i32 !- !-; replay_at 1i32 360i32 0i32 3i32 !- !+;
+        replay_at 0i32 360i32 16i32 4i32 !- !+; replay_at 1i32 240i32 288i32 0i32 !- !-;
+        replay_at 1i32 660i32 0i32 3i32 !- !-; replay_at 1i32 75i32 0i32 3i32 !- !-;
+        replay_at 1i32 90i32 0i32 3i32 !+ !-; replay_at 2i32 180i32 0i32 5i32 !+ !-;
+        replay_at 0i32 180i32 0i32 0i32 !- !-; replay_at 1i32 90i32 0i32 0i32 !- !+;
+        replay_at 1i32 45i32 0i32 3i32 !- !+; replay_at 1i32 60i32 0i32 0i32 !- !+;
+        replay_at 2i32 180i32 0i32 0i32 !- !-; replay_at 1i32 15i32 0i32 0i32 !- !+;
+        replay_at 1i32 150i32 256i32 5i32 !+ !-; replay_at 0i32 900i32 421i32 4i32 !- !-;
+        replay_at 1i32 480i32 0i32 1i32 !- !-; replay_at 1i32 240i32 1024i32 5i32 !- !+;
+        replay_at 1i32 180i32 0i32 4i32 !- !+; replay_at 0i32 60i32 0i32 4i32 !- !+;
+        replay_at 1i32 300i32 0i32 6i32 !- !+; replay_at 1i32 600i32 256i32 3i32 !+ !-;
+        replay_at 1i32 180i32 0i32 3i32 !+ !+; replay_at 1i32 180i32 0i32 0i32 !+ !-
+    ]
+
+:= week_rows_7 () : list replay_row =
+    [
+        replay_at 1i32 480i32 0i32 4i32 !- !-; replay_at 1i32 240i32 0i32 3i32 !- !+;
+        replay_at 1i32 1230i32 0i32 0i32 !- !-; replay_at 0i32 480i32 1040i32 2i32 !- !+;
+        replay_at 1i32 240i32 0i32 0i32 !- !-; replay_at 1i32 180i32 0i32 1i32 !- !+;
+        replay_at 1i32 90i32 0i32 5i32 !- !+; replay_at 2i32 90i32 16i32 4i32 !- !+;
+        replay_at 3i32 120i32 0i32 0i32 !- !-; replay_at 0i32 480i32 0i32 0i32 !- !+;
+        replay_at 1i32 6000i32 1024i32 5i32 !+ !-; replay_at 1i32 240i32 0i32 0i32 !- !-;
+        replay_at 0i32 120i32 0i32 3i32 !- !+; replay_at 0i32 150i32 0i32 3i32 !- !+;
+        replay_at 0i32 360i32 0i32 4i32 !- !-; replay_at 0i32 480i32 512i32 4i32 !- !-;
+        replay_at 0i32 150i32 0i32 2i32 !- !+; replay_at 0i32 600i32 128i32 1i32 !- !-;
+        replay_at 1i32 480i32 0i32 4i32 !- !-; replay_at 0i32 120i32 0i32 3i32 !- !+;
+        replay_at 0i32 6000i32 0i32 3i32 !- !-; replay_at 2i32 150i32 0i32 2i32 !- !-;
+        replay_at 1i32 480i32 320i32 1i32 !- !-; replay_at 0i32 60i32 1024i32 4i32 !- !+;
+        replay_at 0i32 60i32 1024i32 0i32 !- !-; replay_at 0i32 60i32 0i32 3i32 !- !+;
+        replay_at 0i32 60i32 1024i32 3i32 !- !+; replay_at 0i32 45i32 0i32 0i32 !- !-;
+        replay_at 0i32 60i32 0i32 3i32 !- !+; replay_at 0i32 60i32 0i32 3i32 !- !+;
+        replay_at 0i32 60i32 0i32 1i32 !- !+; replay_at 1i32 600i32 1536i32 4i32 !- !+;
+        replay_at 2i32 30i32 0i32 4i32 !- !+; replay_at 1i32 120i32 0i32 2i32 !+ !+;
+        replay_at 1i32 240i32 0i32 3i32 !+ !-; replay_at 2i32 120i32 0i32 3i32 !- !+;
+        replay_at 0i32 120i32 16i32 4i32 !- !+; replay_at 1i32 2400i32 0i32 5i32 !+ !-;
+        replay_at 2i32 180i32 0i32 2i32 !- !+; replay_at 1i32 90i32 256i32 1i32 !- !-;
+        replay_at 0i32 480i32 16i32 1i32 !- !-; replay_at 0i32 360i32 16i32 2i32 !- !+;
+        replay_at 1i32 120i32 0i32 3i32 !- !+; replay_at 3i32 120i32 0i32 2i32 !- !-;
+        replay_at 1i32 1800i32 1536i32 5i32 !- !-; replay_at 2i32 60i32 0i32 2i32 !- !+;
+        replay_at 1i32 180i32 0i32 2i32 !- !+; replay_at 0i32 60i32 2048i32 5i32 !- !+;
+        replay_at 0i32 60i32 0i32 0i32 !- !-; replay_at 2i32 360i32 0i32 3i32 !- !-;
+        replay_at 1i32 120i32 0i32 0i32 !- !+; replay_at 1i32 1800i32 0i32 5i32 !- !+;
+        replay_at 1i32 750i32 0i32 4i32 !- !+; replay_at 1i32 120i32 0i32 5i32 !- !+;
+        replay_at 1i32 120i32 1024i32 3i32 !- !+; replay_at 2i32 90i32 0i32 3i32 !- !+;
+        replay_at 2i32 30i32 0i32 3i32 !- !+; replay_at 1i32 1200i32 0i32 0i32 !- !-;
+        replay_at 1i32 480i32 0i32 2i32 !- !+; replay_at 1i32 420i32 85i32 5i32 !- !-;
+        replay_at 1i32 60i32 128i32 1i32 !- !-; replay_at 0i32 240i32 256i32 2i32 !+ !-;
+        replay_at 1i32 900i32 0i32 3i32 !+ !+; replay_at 0i32 240i32 0i32 2i32 !- !+;
+        replay_at 0i32 180i32 0i32 1i32 !- !+; replay_at 0i32 120i32 0i32 4i32 !- !+;
+        replay_at 2i32 240i32 0i32 0i32 !- !+; replay_at 1i32 960i32 0i32 5i32 !+ !-;
+        replay_at 1i32 2160i32 0i32 4i32 !- !-; replay_at 1i32 300i32 0i32 5i32 !- !-;
+        replay_at 2i32 120i32 0i32 3i32 !- !-; replay_at 1i32 480i32 0i32 3i32 !+ !-;
+        replay_at 1i32 60i32 0i32 0i32 !+ !-; replay_at 1i32 1680i32 0i32 5i32 !+ !-;
+        replay_at 0i32 180i32 0i32 5i32 !- !-; replay_at 0i32 1800i32 528i32 5i32 !+ !-;
+        replay_at 0i32 180i32 0i32 2i32 !- !+; replay_at 2i32 480i32 128i32 3i32 !- !-;
+        replay_at 2i32 1200i32 0i32 3i32 !- !-; replay_at 0i32 360i32 16i32 9i32 !- !-
+    ]
+
+:= week_rows_8 () : list replay_row =
+    [
+        replay_at 1i32 2040i32 0i32 0i32 !+ !-; replay_at 1i32 120i32 0i32 1i32 !- !+;
+        replay_at 2i32 30i32 0i32 0i32 !- !+; replay_at 3i32 120i32 0i32 6i32 !- !+;
+        replay_at 1i32 9600i32 0i32 0i32 !+ !-; replay_at 1i32 2400i32 0i32 3i32 !- !-;
+        replay_at 1i32 900i32 256i32 0i32 !- !+; replay_at 0i32 180i32 256i32 6i32 !- !+;
+        replay_at 0i32 180i32 0i32 4i32 !- !+; replay_at 1i32 900i32 0i32 0i32 !- !-;
+        replay_at 1i32 120i32 0i32 4i32 !- !+; replay_at 2i32 180i32 21i32 0i32 !- !-;
+        replay_at 2i32 180i32 0i32 2i32 !- !+; replay_at 2i32 90i32 0i32 4i32 !- !+;
+        replay_at 2i32 45i32 0i32 1i32 !- !+; replay_at 1i32 60i32 0i32 6i32 !+ !+;
+        replay_at 2i32 45i32 0i32 0i32 !- !+; replay_at 2i32 30i32 0i32 0i32 !- !-;
+        replay_at 2i32 120i32 0i32 2i32 !- !+; replay_at 2i32 120i32 0i32 2i32 !- !+;
+        replay_at 3i32 360i32 0i32 0i32 !- !-; replay_at 2i32 15i32 0i32 0i32 !- !+;
+        replay_at 2i32 90i32 0i32 5i32 !- !+; replay_at 2i32 120i32 0i32 1i32 !- !+;
+        replay_at 1i32 240i32 0i32 3i32 !- !+; replay_at 1i32 90i32 0i32 5i32 !- !+;
+        replay_at 1i32 1200i32 0i32 3i32 !+ !-; replay_at 1i32 420i32 128i32 5i32 !+ !-;
+        replay_at 0i32 300i32 0i32 2i32 !- !-; replay_at 2i32 240i32 0i32 2i32 !- !+;
+        replay_at 1i32 900i32 307i32 2i32 !- !+; replay_at 1i32 180i32 256i32 3i32 !- !+;
+        replay_at 1i32 180i32 0i32 2i32 !- !+; replay_at 2i32 90i32 0i32 0i32 !- !-;
+        replay_at 2i32 600i32 0i32 1i32 !- !+; replay_at 2i32 240i32 0i32 2i32 !- !+;
+        replay_at 2i32 180i32 0i32 1i32 !- !+; replay_at 1i32 180i32 21i32 3i32 !+ !-;
+        replay_at 0i32 900i32 0i32 0i32 !+ !-; replay_at 0i32 360i32 0i32 0i32 !- !+;
+        replay_at 1i32 4800i32 0i32 0i32 !- !-; replay_at 1i32 2400i32 0i32 5i32 !+ !-;
+        replay_at 2i32 180i32 0i32 0i32 !- !+; replay_at 1i32 180i32 0i32 0i32 !- !-;
+        replay_at 0i32 1200i32 357i32 5i32 !- !-; replay_at 1i32 180i32 0i32 3i32 !- !+;
+        replay_at 1i32 90i32 0i32 4i32 !- !+; replay_at 2i32 180i32 0i32 5i32 !- !+;
+        replay_at 1i32 2400i32 0i32 4i32 !- !-; replay_at 2i32 240i32 0i32 0i32 !- !-;
+        replay_at 1i32 90i32 85i32 6i32 !- !+; replay_at 1i32 60i32 0i32 5i32 !- !+;
+        replay_at 1i32 2400i32 144i32 0i32 !- !-; replay_at 2i32 90i32 0i32 3i32 !- !+;
+        replay_at 0i32 120i32 256i32 6i32 !- !+; replay_at 1i32 3000i32 85i32 0i32 !- !-;
+        replay_at 3i32 60i32 0i32 2i32 !- !+; replay_at 2i32 180i32 0i32 2i32 !- !-;
+        replay_at 1i32 90i32 0i32 4i32 !- !+; replay_at 2i32 120i32 0i32 0i32 !- !+;
+        replay_at 1i32 480i32 0i32 0i32 !- !-; replay_at 2i32 90i32 0i32 2i32 !- !+;
+        replay_at 1i32 60i32 0i32 5i32 !- !+; replay_at 1i32 90i32 0i32 0i32 !- !+;
+        replay_at 1i32 240i32 0i32 1i32 !- !+; replay_at 1i32 180i32 0i32 1i32 !- !+;
+        replay_at 3i32 180i32 0i32 0i32 !- !-; replay_at 2i32 60i32 0i32 0i32 !- !-;
+        replay_at 2i32 240i32 0i32 2i32 !- !+; replay_at 2i32 15i32 0i32 0i32 !- !+;
+        replay_at 1i32 300i32 0i32 0i32 !- !+; replay_at 1i32 120i32 0i32 6i32 !- !+;
+        replay_at 1i32 180i32 0i32 6i32 !- !+; replay_at 1i32 360i32 512i32 2i32 !- !+;
+        replay_at 0i32 240i32 0i32 3i32 !- !+; replay_at 0i32 480i32 0i32 0i32 !- !+;
+        replay_at 0i32 480i32 128i32 0i32 !- !-; replay_at 1i32 720i32 128i32 4i32 !- !-;
+        replay_at 1i32 300i32 64i32 6i32 !- !+; replay_at 1i32 240i32 0i32 2i32 !- !+
+    ]
+
+:= week_rows_9 () : list replay_row =
+    [
+        replay_at 1i32 180i32 0i32 6i32 !- !+; replay_at 1i32 300i32 0i32 5i32 !- !+;
+        replay_at 2i32 240i32 64i32 1i32 !- !-; replay_at 1i32 1200i32 704i32 3i32 !- !-;
+        replay_at 2i32 480i32 0i32 3i32 !+ !-; replay_at 1i32 900i32 128i32 3i32 !- !-;
+        replay_at 0i32 120i32 0i32 4i32 !- !+; replay_at 1i32 180i32 0i32 0i32 !- !-;
+        replay_at 1i32 600i32 0i32 4i32 !- !-
+    ]
+
+:= week_rows () : list replay_row =
+    listm.concat [
+        week_rows_1 (); week_rows_2 (); week_rows_3 (); week_rows_4 (); week_rows_5 ();
+        week_rows_6 (); week_rows_7 (); week_rows_8 (); week_rows_9 ()
+    ]
 
 ///> rust
 :# priorities_weigh_four_times_per_step_and_estimates_fall_back_to_difficulty =
@@ -240,8 +699,8 @@
 ///> rust
 :# subagents_take_the_longest_items_first =
     := elsewhere = \ (task : backlog_task) => sm'.starts_with "KIT-" task.id = !-
-    testing.expect (ranked_ids (ranking_where Subagent elsewhere (sample_backlog ())) = "BIG-P0 GATE SMALL-P2") (ranked_ids (
-        ranking_where Subagent elsewhere (sample_backlog ())))
+    := subagent_ids = ranked_ids (ranking_where Subagent elsewhere (sample_backlog ()))
+    testing.expect (subagent_ids = "BIG-P0 GATE SMALL-P2") subagent_ids
 
 ///> rust
 :# subagents_take_leaf_work_and_never_an_epic =
@@ -275,4 +734,29 @@
     := set = task_at "SET" 1i32 6i32 "Active" "" "" 45i32
     testing.expect (task_minutes { half ?| progress = 50i32 } = 600i32) "half done halves the difficulty fallback"
     testing.expect (task_minutes { nearly ?| progress = 99i32 } = 15i32) "never below 15 minutes"
-    testing.expect (task_minutes { set ?| progress = 90i32 } = 45i32) "an explicit estimate is already the remaining time"
+    testing.expect (task_minutes { set ?| progress = 90i32 } = 45i32) "an explicit estimate is the remaining time"
+
+///> rust
+:# a_ranking_change_keeps_last_weeks_closes_near_the_top_and_lifts_neglected_user_asks =
+    := rows = week_rows ()
+    testing.expect (row_count rows = 649i32) "the 11-06 replay holds 649 scored items"
+    testing.expect
+        (closed_in_top_fifth WeightOverMinutes rows = 107i32)
+        "weight over minutes puts 107 of last week's closes in the top fifth"
+    testing.expect (neglected_median WeightOverMinutes rows = 64i32) "and buries neglected user asks at percentile 64"
+    testing.expect
+        (closed_in_top_fifth AgedAskWeighted rows * 100i32 >= closed_in_top_fifth WeightOverMinutes rows * 80i32)
+        "aging and the user-ask weight keep at least 80 pct of those closes in the top fifth"
+    testing.expect
+        (neglected_median AgedAskWeighted rows < neglected_median WeightOverMinutes rows)
+        "and lift neglected user asks"
+
+///> rust
+:# aging_lifts_idle_items_up_to_three_times_and_a_user_ask_doubles =
+    testing.expect (aged_key 7000i32 0i32 !- = 7000i32) "a fresh item keeps its weight"
+    testing.expect (aged_key 7000i32 7i32 !- = 14000i32) "a week idle doubles it"
+    testing.expect (aged_key 7000i32 30i32 !- = 21000i32) "idleness counts at most 14 days"
+    testing.expect (aged_key 7000i32 0i32 !+ = 14000i32) "a user ask doubles it"
+    testing.expect (aged_key 2000000000i32 14i32 !+ = 2147483647i32) "the key saturates instead of wrapping"
+    := idle = task_at "A" 1i32 2i32 "Planned" "" "" 0i32
+    testing.expect (role_key Subagent 55i32 { idle ?| idle_days = 9i32 } = 55i32) "subagents rank by duration, unaged"

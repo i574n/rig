@@ -1,0 +1,168 @@
+///- --package .
+:# walk static =
+    :< sm'_operators
+    :< file_system_operators
+
+:< sm'_operators
+:< file_system_operators
+
+:= expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail
+
+:== spiral_manifest =
+    {
+        entry : string
+        output : string
+    }
+
+:| manifest_read =
+    | SpiralCrate :: spiral_manifest -> manifest_read
+    | NotSpiralCrate :: manifest_read
+
+:== crate_measure =
+    {
+        crate : string
+        output : string
+        lines : i32
+        largest : string
+    }
+
+:~ quoted_value (line : string) : string =
+    := pieces = sm'.split "\"" line |> array
+    ? am'.length pieces >= 3i32 ?> am'.index 1i32 pieces |: ""
+
+:~ ^ section_fields (lines : array string) (at : i32) (entry : string) (output : string) : manifest_read =
+    ? am'.length lines <= at
+    ?> ? entry <> "" && output <> "" ?> SpiralCrate { entry = entry; output = output } |: NotSpiralCrate
+    |:
+        := line = sm'.trim (am'.index at lines)
+        ? sm'.starts_with "[" line ?> section_fields lines (am'.length lines) entry output
+        |? sm'.starts_with "entry" line ?> section_fields lines (at + 1i32) (quoted_value line) output
+        |? sm'.starts_with "output" line ?> section_fields lines (at + 1i32) entry (quoted_value line)
+        |: section_fields lines (at + 1i32) entry output
+
+:~ ^ manifest_from (lines : array string) (at : i32) : manifest_read =
+    ? am'.length lines <= at ?> NotSpiralCrate
+    |? sm'.trim (am'.index at lines) = "[package.metadata.spiral]" ?> section_fields lines (at + 1i32) "" ""
+    |: manifest_from lines (at + 1i32)
+
+:~ manifest_of (text : string) : manifest_read =
+    manifest_from (sm'.split "\n" (sm'.replace "\r" "" text) |> array) 0i32
+
+:~ line_count (text : string) : i32 =
+    ? text = "" ?> 0i32
+    |:
+        := pieces = am'.length (sm'.split "\n" text |> array)
+        ? sm'.ends_with "\n" text ?> pieces - 1i32 |: pieces
+
+:= skipped_directory (name : string) : bool =
+    sm'.starts_with "." name
+    || name = "target"
+    || name = "node_modules"
+    || name = "_build"
+    || name = "build"
+    || name = "zig-out"
+    || name = "deps"
+    || name = "lab"
+
+:~ leaf_name (path : string) : string =
+    := slashed = sm'.replace "\\" "/" path
+    := at = sm'.last_index_of "/" slashed
+    ? at < 0i32 ?> slashed |: sm'.substring (at + 1i32) ((sm'.length slashed : i32) - at - 1i32) slashed
+
+:~ directory_names (path : string) : list string =
+    file_system.read_directory_names path
+    |> resultm.unwrap'
+    |> am'.vec_fold' (\ names name => (sm'.from_std_string name :: names)) []
+    |> listm.rev
+
+:~ largest_of (~text : string) : string = $'rig_crate_largest::rig_crate_largest(&*!text)' : string
+
+:~ measured (dir : string) : option crate_measure =
+    := manifest = dir </> "Cargo.toml"
+    ? file_system.file_exists manifest |> not ?> None
+    |:
+        ?= manifest_of (file_system.read_all_text manifest) ?|
+        | NotSpiralCrate => None
+        | SpiralCrate found =>
+            := output = dir </> found.output
+            := present = file_system.file_exists output
+            := text = ? present ?> file_system.read_all_text output |: ""
+            := lines = ? present ?> line_count text |: -1i32
+            := largest = ? lines > 0i32 ?> largest_of text |: ""
+            Some { crate = leaf_name dir; output = found.output; lines = lines; largest = largest }
+
+:~ ^ walked (todo : list string) (found : list crate_measure) : list crate_measure =
+    ?= todo ?|
+    | [] => listm.rev found
+    | (dir :: rest) =>
+        := found = ?= measured dir ?| | Some m => (m :: found) | None => found
+        := deeper =
+            directory_names dir
+            |> listm.fold \ acc (name : string) =>
+                    ? not (skipped_directory name) && file_system.directory_exists (dir </> name)
+                    ?> ((dir </> name) :: acc)
+                    |: acc
+                rest
+        walked deeper found
+
+:~ crate_measures (~root : string) : array_base crate_measure =
+    := gathered = \ (kept : array crate_measure) (m : crate_measure) => kept ++ ;[ m ]
+    walked [ root ] [] |> listm.fold gathered ;[] |> am'.base
+
+:~ file_measure (~dir : string) (~name : string) : crate_measure =
+    := lines = line_count (file_system.read_all_text (dir </> name))
+    { crate = leaf_name dir; output = name; lines = lines; largest = "" }
+
+:~ ^ files_walked (~extension : string) (todo : list string) (found : list crate_measure) : list crate_measure =
+    ?= todo ?|
+    | [] => listm.rev found
+    | (dir :: rest) =>
+        := names = directory_names dir
+        := own = \ (acc : list crate_measure) (name : string) =>
+            := wanted = sm'.ends_with extension name && file_system.file_exists (dir </> name)
+            ? wanted ?> file_measure dir name :: acc |: acc
+        := deeper = \ (acc : list string) (name : string) =>
+            := walkable = not (skipped_directory name) && file_system.directory_exists (dir </> name)
+            ? walkable ?> (dir </> name) :: acc |: acc
+        files_walked extension (names |> listm.fold deeper rest) (names |> listm.fold own found)
+
+:~ output_measures ((root, extension) : string * string) : array_base crate_measure =
+    := gathered = \ (kept : array crate_measure) (m : crate_measure) => kept ++ ;[ m ]
+    files_walked extension [ root ] [] |> listm.fold gathered ;[] |> am'.base
+
+///> rust
+:# a_spiral_manifest_yields_entry_and_output =
+    := text = "[package.metadata.spiral]\r\nentry = \"run.spi\"\noutput = \"watch.rs\"\n\n[package]\nname = \"x\"\n"
+    expect
+        (
+            ?= manifest_of text ?|
+            | SpiralCrate m => m.entry = "run.spi" && m.output = "watch.rs"
+            | NotSpiralCrate => !-
+        )
+        "entry and output"
+    expect
+        ?= manifest_of "[package]\nname = \"plain\"\n" ?|
+        | SpiralCrate _ => !-
+        | NotSpiralCrate => !+
+        "a plain crate is skipped"
+    expect
+        (
+            ?= manifest_of "[package.metadata.spiral]\nentry = \"a.spi\"\n[package]\noutput = \"b.rs\"\n" ?|
+            | SpiralCrate _ => !-
+            | NotSpiralCrate => !+
+        )
+        "fields stop at the next section"
+
+///> rust
+:# line_counts_follow_str_lines =
+    expect (line_count "a\nb\nc\n" = 3i32 && line_count "a\nb" = 2i32 && line_count "" = 0i32) "line counts"
+
+///> rust
+:# vendored_build_outputs_are_skipped =
+    expect (skipped_directory "build" && skipped_directory "zig-out") "gleam build/packages and zig-out are vendored"
+    expect (skipped_directory "src" |> not) "a source dir is walked"
+
+:= main () : i32 =
+    export "rig_crate_measures" crate_measures
+    export "rig_output_measures" output_measures
+    0i32

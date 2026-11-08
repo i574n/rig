@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US1 {
     US1_LightLoad,
@@ -39,7 +49,7 @@ enum US4 {
 }
 fn method5(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
     let v2: Rc<str> = v0.borrow().l0.clone();
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v1));
+    let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
@@ -55,20 +65,18 @@ fn field_json_3(mut v0: US0) -> Rc<str> {
     match v0 {
         US0::US0_AssigneeField(v16) => {
             let v16: Rc<str> = v16;
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"who\":\""); } LIT.with(|lit| lit.clone()) }, v16));
-            let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+            let v18: Rc<str> = string_concat(&["\"who\":\"", &*v16, "\""]);
             v18
         }
         US0::US0_EstimateMinutes(v13) => {
             let mut v13: i32 = v13;
             let v14: Rc<str> = format_real_4(v13);
-            let v15: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"est\":"); } LIT.with(|lit| lit.clone()) }, v14));
+            let v15: Rc<str> = string_concat(&["\"est\":", &*v14]);
             v15
         }
         US0::US0_KindField(v1) => {
             let v1: Rc<str> = v1;
-            let v2: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"kind\":\""); } LIT.with(|lit| lit.clone()) }, v1));
-            let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+            let v3: Rc<str> = string_concat(&["\"kind\":\"", &*v1, "\""]);
             v3
         }
         US0::US0_LoadField(v4) => {
@@ -87,14 +95,12 @@ fn field_json_3(mut v0: US0) -> Rc<str> {
                     v6
                 }
             };
-            let v11: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"load\":\""); } LIT.with(|lit| lit.clone()) }, v10));
-            let mut v12: Rc<str> = Rc::<str>::from(format!("{}{}", v11, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+            let mut v12: Rc<str> = string_concat(&["\"load\":\"", &*v10, "\""]);
             v12
         }
         US0::US0_PriorityField(v19) => {
             let v19: Rc<str> = v19;
-            let v20: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"prio\":\""); } LIT.with(|lit| lit.clone()) }, v19));
-            let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v20, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+            let v21: Rc<str> = string_concat(&["\"prio\":\"", &*v19, "\""]);
             v21
         }
         US0::US0_UnknownField(v22) => {
@@ -105,8 +111,7 @@ fn field_json_3(mut v0: US0) -> Rc<str> {
             let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) };
             let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\\""); } LIT.with(|lit| lit.clone()) };
             let v28: Rc<str> = Rc::<str>::from(v25.replace(&*v26, &*v27));
-            let v29: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"unknown\":\""); } LIT.with(|lit| lit.clone()) }, v28));
-            let v30: Rc<str> = Rc::<str>::from(format!("{}{}", v29, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+            let v30: Rc<str> = string_concat(&["\"unknown\":\"", &*v28, "\""]);
             v30
         }
     }
@@ -122,8 +127,7 @@ fn joined_2(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
                     field_json_3(v2)
                 } else {
                     let mut v6: Rc<str> = field_json_3(v2);
-                    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
-                    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v1));
+                    let v8: Rc<str> = string_concat(&[&*v6, ",", &*v1]);
                     v8
                 };
                 (v0, v1) = (v3, v9);
@@ -138,8 +142,7 @@ fn joined_2(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
 fn fields_json_1(mut v0: Rc<UH0>) -> Rc<str> {
     let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = joined_2(v0, v1);
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{"); } LIT.with(|lit| lit.clone()) }, v2));
-    let mut v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("}"); } LIT.with(|lit| lit.clone()) }));
+    let mut v4: Rc<str> = string_concat(&["{", &*v2, "}"]);
     v4
 }
 fn method7(mut v0: Option<usize>) -> Option<usize> {
@@ -153,7 +156,7 @@ fn closure1() -> Rc<dyn Fn((usize)) -> i32> {
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn tail_after_6(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
-    let v2: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) }));
+    let v2: Rc<str> = string_concat(&[&*v0, " "]);
     let v3: Option<usize> = v1.find(&*v2);
     let mut v4: Option<usize> = method7(v3);
     let mut v5: Rc<dyn Fn((usize)) -> i32> = closure1();
@@ -237,10 +240,8 @@ fn typed_field_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US0 {
     let v3: bool = &*v0 == "kind";
     let v10: bool = if v3 {
         let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Epic|Feature|Story|TaskKind"); } LIT.with(|lit| lit.clone()) };
-        let mut v5: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }, v1.clone()));
-        let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
-        let v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }, v4));
-        let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
+        let mut v6: Rc<str> = string_concat(&["|", &*v1, "|"]);
+        let v8: Rc<str> = string_concat(&["|", &*v4, "|"]);
         let v9: bool = v8.contains(&*v6);
         v9
     } else {
@@ -252,10 +253,8 @@ fn typed_field_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US0 {
         let mut v12: bool = &*v0 == "who";
         let v19: bool = if v12 {
             let mut v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agent|pair|user"); } LIT.with(|lit| lit.clone()) };
-            let v14: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }, v1.clone()));
-            let v15: Rc<str> = Rc::<str>::from(format!("{}{}", v14, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
-            let v16: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }, v13));
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v16, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
+            let v15: Rc<str> = string_concat(&["|", &*v1, "|"]);
+            let v17: Rc<str> = string_concat(&["|", &*v13, "|"]);
             let v18: bool = v17.contains(&*v15);
             v18
         } else {
@@ -267,10 +266,8 @@ fn typed_field_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US0 {
             let v21: bool = &*v0 == "prio";
             let v28: bool = if v21 {
                 let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("P0|P1|P2|P3|P4|P5"); } LIT.with(|lit| lit.clone()) };
-                let v23: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }, v1.clone()));
-                let v24: Rc<str> = Rc::<str>::from(format!("{}{}", v23, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
-                let v25: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }, v22));
-                let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v25, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) }));
+                let v24: Rc<str> = string_concat(&["|", &*v1, "|"]);
+                let v26: Rc<str> = string_concat(&["|", &*v22, "|"]);
                 let v27: bool = v26.contains(&*v24);
                 v27
             } else {
@@ -379,7 +376,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, Rc<str>) -> Rc<str>> {
         fields_of_marker_0(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_todo_fields(v0: &str, v1: &str) -> Rc<str> {
+pub fn rig_agile_todo_fields(v0: &str, v1: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
 pub type SpiralShape_97df63ebabc3 = Mut0;

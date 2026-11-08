@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "sync.spi"
+output = "sync.rs"
+
+[package]
+name = "rig-mirror-sync"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_mirror_sync"
+path = "sync.rs"
+
+[dependencies]
+rig-mirror-local = { path = "../rig_mirror_local" }
+rig-mirror-plan = { path = "../rig_mirror_plan" }

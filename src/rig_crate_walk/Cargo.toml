@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "walk.spi"
+output = "walk.rs"
+
+[package]
+name = "rig-crate-walk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_crate_walk"
+path = "walk.rs"
+
+[dependencies]
+rig-crate-largest = { path = "../rig_crate_largest" }

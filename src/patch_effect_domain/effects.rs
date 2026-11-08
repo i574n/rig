@@ -236,33 +236,33 @@ fn closure9() -> Rc<dyn Fn(i32, i32) -> i32> {
         patch_remove_receipt_binding_9(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_patch_read_limit_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_read_limit_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_patch_read_receipt_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_read_receipt_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_patch_stage_identity(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_stage_identity(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_patch_write_bytes_authorized(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_write_bytes_authorized(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_patch_write_slot_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_write_slot_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_patch_rename_stage_authorized(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_rename_stage_authorized(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_patch_rename_slot_authorized(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_rename_slot_authorized(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_patch_authority_pair(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_authority_pair(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }
-pub fn kit_patch_rename_slot_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_rename_slot_binding(v0: i32, v1: i32) -> i32 {
     closure8()(v0, v1)
 }
-pub fn kit_patch_remove_receipt_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_remove_receipt_binding(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }

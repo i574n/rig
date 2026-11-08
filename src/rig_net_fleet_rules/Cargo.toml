@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "rules.spi"
+output = "rules.rs"
+
+[package]
+name = "rig-net-fleet-rules"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_net_fleet_rules"
+path = "rules.rs"

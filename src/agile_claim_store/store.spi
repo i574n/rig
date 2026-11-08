@@ -74,6 +74,6 @@
     claims_applied a.root a.existed a.original a.change a.item a.owner a.expires_ms a.paths a.known
 
 := main () : i32 =
-    export "kit_claims_loaded" ((\ root => claims_loaded root) : string -> bool * string)
-    export "kit_claims_applied" applied_claims
+    export "rig_claims_loaded" ((\ root => claims_loaded root) : string -> bool * string)
+    export "rig_claims_applied" applied_claims
     0i32

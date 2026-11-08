@@ -1,4 +1,4 @@
-///- --package ../kit_cli_check --timeout 900000
+///- --package ../rig_cli_check --timeout 900000
 :< cli
 
 :| agile_call =
@@ -43,7 +43,7 @@
         ?= call ?|
         | RootThen (verb, rest) => Arg ("agile", Arg (verb, Arg (path_then path rest, NoArgs)))
         | ModeThenRoot (verb, mode) => Arg ("agile", Arg (verb, Arg (mode, Arg (path, NoArgs))))
-    kit_run (temp_directory ()) NoArgs NoArgs args
+    rig_run (temp_directory ()) NoArgs NoArgs args
 
 := epic_deps_line_counts_two (~text : string) : bool = $'!text.lines().any(|line| line.starts_with("epic+deps") && \
     line.contains("ID-A") && line.split_whitespace().nth(2) == Some("2"))' : bool

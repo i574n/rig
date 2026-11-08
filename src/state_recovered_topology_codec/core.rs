@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn bundle_rehydrate_structure_binding_0(mut v0: i32, mut v1: i32) -> i32 {
     let mut v2: bool = v0 == 2i32;
     if v2 {
@@ -630,8 +640,8 @@ fn state_receipt_recovered_fixture_scan_loop_20(mut v0: Rc<str>, mut v1: i32, mu
                         let v82: Rc<str> = codec_empty_8();
                         return (18446744073709551615u64, v82);
                     } else {
-                        let v83: Rc<str> = Rc::<str>::from(format!("{}{}", v57, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
-                        let v84: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v83.clone()));
+                        let v83: Rc<str> = string_concat(&[&*v57, "\n"]);
+                        let v84: Rc<str> = string_concat(&["\n", &*v83]);
                         let v85: i32 = (v2.clone().len() as i32);
                         let v86: i32 = 0i32;
                         let v87: i32 = (v84.clone().len() as i32);
@@ -641,17 +651,13 @@ fn state_receipt_recovered_fixture_scan_loop_20(mut v0: Rc<str>, mut v1: i32, mu
                             let v90: Rc<str> = codec_empty_8();
                             return (18446744073709551615u64, v90);
                         } else {
-                            let v91: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v83));
-                            let v92: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v75));
-                            let v93: Rc<str> = Rc::<str>::from(format!("{}{}", v69, v92));
-                            let v94: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v93));
-                            let v95: Rc<str> = Rc::<str>::from(format!("{}{}", v63, v94));
+                            let v91: Rc<str> = string_concat(&[&*v2, &*v83]);
+                            let v95: Rc<str> = string_concat(&[&*v63, "\n", &*v69, "\n", &*v75]);
                             let v96: bool = v3 == v76 ;
                             let v99: Rc<str> = if v96 {
                                 v95
                             } else {
-                                let v97: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v95));
-                                let v98: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v97));
+                                let v98: Rc<str> = string_concat(&[&*v3, "\n", &*v95]);
                                 v98
                             };
                             let v100: u64 = v4 + 1u64 ;
@@ -712,18 +718,18 @@ fn closure4() -> Rc<dyn Fn(i32, i32) -> i32> {
         bundle_profile_signature_binding_1(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_state_receipt_recovered_topology_count_or_max(v0: &str) -> u64 {
+pub fn rig_state_receipt_recovered_topology_count_or_max(v0: &str) -> u64 {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_recovered_fixture_record_count_or_max(v0: &str) -> u64 {
+pub fn rig_state_receipt_recovered_fixture_record_count_or_max(v0: &str) -> u64 {
     closure1()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_recovered_fixture_paths(v0: &str) -> Rc<str> {
+pub fn rig_state_receipt_recovered_fixture_paths(v0: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0))
 }
-pub fn kit_bundle_rehydrate_structure_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_rehydrate_structure_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_bundle_profile_signature_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_profile_signature_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }

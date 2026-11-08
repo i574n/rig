@@ -1,8 +1,8 @@
 
 := emit_runtime () : () =
     global """
-        use kit_patch_compat_driver::patch_apply_gated_context_owned;
-        use kit_process::run_bounded_program_in_dir;
+        use rig_patch_compat_driver::patch_apply_gated_context_owned;
+        use rig_process::run_bounded_program_in_dir;
 
         #[must_use]
         fn patch_gated_error(message: &str) -> i32 {

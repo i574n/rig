@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_source_topology_core-
+modules:
+    main

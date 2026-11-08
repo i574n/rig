@@ -76,9 +76,9 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> u64> {
         agile_state_path_candidate_code_1(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_state_transient_schema_code(v0: &str) -> u64 {
+pub fn rig_agile_state_transient_schema_code(v0: &str) -> u64 {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_state_path_candidate_code(v0: &str) -> u64 {
+pub fn rig_agile_state_path_candidate_code(v0: &str) -> u64 {
     closure1()(Rc::<str>::from(v0))
 }

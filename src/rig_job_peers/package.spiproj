@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_os_files
+    rig_process_alive
+link:
+    rig_process_alive
+modules:
+    peers

@@ -109,9 +109,13 @@ $staged = Join-Path $work 'kit'
 $snapshot = [Collections.Generic.List[object]]::new()
 function Get-WorkspaceEntries([string]$Directory) {
     foreach ($entry in Get-ChildItem -LiteralPath $Directory -Force) {
-        if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Unexpected workspace link: $($entry.FullName)" }
+        if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            $atRoot = [IO.Path]::GetFullPath($Directory).TrimEnd('\', '/') -ieq [IO.Path]::GetFullPath($KitRoot).TrimEnd('\', '/')
+            if ($entry.PSIsContainer -and $entry.Name -eq 'deps' -and $atRoot) { continue }
+            throw "Unexpected workspace link: $($entry.FullName)"
+        }
         if ($entry.PSIsContainer) {
-            if ($entry.Name -notin @('target', 'vendor', '.git', '.cache')) { $entry }
+            if ($entry.Name -notin @('target', 'vendor', '.git', '.cache', 'deps')) { $entry }
         } elseif ($entry.Name -notin @('kit', 'kit.exe')) { $entry }
     }
 }

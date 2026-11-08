@@ -32,11 +32,11 @@ inl emit_runtime () : () = global """
 
     fn dogfood_shim_install(args: &[String]) -> Result<(), String> {
         if args.len() != 5 { return Err("shim install expects root relative-dir block|warn|pass".to_owned()); }
-        let root = std::path::Path::new(kit_arg(args, 2, "root")?);
-        let dir = kit_rooted(root, kit_arg(args, 3, "relative-dir")?)?;
-        let mode = dogfood_shim_mode_code(kit_arg(args, 4, "mode")?)?;
+        let root = std::path::Path::new(rig_arg(args, 2, "root")?);
+        let dir = rig_rooted(root, rig_arg(args, 3, "relative-dir")?)?;
+        let mode = dogfood_shim_mode_code(rig_arg(args, 4, "mode")?)?;
         let target = std::env::current_exe().map_err(|error| format!("locate kit executable: {error}"))?;
-        if kit_legacy_operations_proxy_dogfood_shim_install_packed_binding(i32::from(target.is_absolute()) + (KIT_SHIM_NAMES.len() as i32 * 2), mode) != 1 { return Err("typed shim install preflight rejected".to_owned()); }
+        if rig_legacy_operations_proxy_dogfood_shim_install_packed_binding(i32::from(target.is_absolute()) + (KIT_SHIM_NAMES.len() as i32 * 2), mode) != 1 { return Err("typed shim install preflight rejected".to_owned()); }
         std::fs::create_dir_all(&dir).map_err(|error| format!("create shim dir {}: {error}", dir.display()))?;
         let mut committed = Vec::<(std::path::PathBuf, Option<std::path::PathBuf>)>::new();
         for name in KIT_SHIM_NAMES {
@@ -52,7 +52,7 @@ inl emit_runtime () : () = global """
                     saved = Some(backup.clone());
                 }
             }
-            if let Err(error) = kit_rust_std_fs::portable_symlink(&target, &wrapper) {
+            if let Err(error) = rig_rust_std_fs::portable_symlink(&target, &wrapper) {
                 for (path, prior) in committed.into_iter().rev() { let _ = std::fs::remove_file(&path); if let Some(backup) = prior { let _ = std::fs::rename(backup, path); } }
                 if let Some(backup) = saved { let _ = std::fs::rename(backup, &wrapper); }
                 return Err(format!("install shim {}: {error}", wrapper.display()));
@@ -60,7 +60,7 @@ inl emit_runtime () : () = global """
             committed.push((wrapper, saved));
         }
         let receipt = dir.join(".kit-shim-receipt.spi");
-        if let Err(error) = kit_atomic_write(&receipt, dogfood_shim_receipt(mode, &target).as_bytes()) {
+        if let Err(error) = rig_atomic_write(&receipt, dogfood_shim_receipt(mode, &target).as_bytes()) {
             for (path, prior) in committed.into_iter().rev() { let _ = std::fs::remove_file(&path); if let Some(backup) = prior { let _ = std::fs::rename(backup, path); } }
             return Err(format!("write shim receipt: {error}"));
         }
@@ -70,10 +70,10 @@ inl emit_runtime () : () = global """
 
     fn dogfood_shim_uninstall(args: &[String]) -> Result<(), String> {
         if args.len() != 4 { return Err("shim uninstall expects root relative-dir".to_owned()); }
-        let root = std::path::Path::new(kit_arg(args, 2, "root")?);
-        let dir = kit_rooted(root, kit_arg(args, 3, "relative-dir")?)?;
+        let root = std::path::Path::new(rig_arg(args, 2, "root")?);
+        let dir = rig_rooted(root, rig_arg(args, 3, "relative-dir")?)?;
         let receipt = dir.join(".kit-shim-receipt.spi");
-        if kit_legacy_operations_proxy_dogfood_shim_uninstall_binding(i32::from(receipt.is_file()), KIT_SHIM_NAMES.len() as i32) != 1 { return Err("typed shim uninstall preflight rejected".to_owned()); }
+        if rig_legacy_operations_proxy_dogfood_shim_uninstall_binding(i32::from(receipt.is_file()), KIT_SHIM_NAMES.len() as i32) != 1 { return Err("typed shim uninstall preflight rejected".to_owned()); }
         for name in KIT_SHIM_NAMES {
             let wrapper = dir.join(name);
             let backup = dir.join(format!(".kit-real-{name}"));
@@ -90,8 +90,8 @@ inl emit_runtime () : () = global """
 
     fn dogfood_shim_status(args: &[String]) -> Result<(), String> {
         if args.len() != 4 { return Err("shim status expects root relative-dir".to_owned()); }
-        let root = std::path::Path::new(kit_arg(args, 2, "root")?);
-        let dir = kit_rooted(root, kit_arg(args, 3, "relative-dir")?)?;
+        let root = std::path::Path::new(rig_arg(args, 2, "root")?);
+        let dir = rig_rooted(root, rig_arg(args, 3, "relative-dir")?)?;
         let installed = KIT_SHIM_NAMES.iter().filter(|name| std::fs::symlink_metadata(dir.join(name)).is_ok_and(|metadata| metadata.file_type().is_symlink())).count();
         println!("kit proxy shim status dir={} installed={}/4 receipt={}", dir.display(), installed, dir.join(".kit-shim-receipt.spi").is_file());
         Ok(())
@@ -127,7 +127,7 @@ inl emit_runtime () : () = global """
         let gap_present = i32::from(env_gap.is_some() || arg_gap.is_some());
         let allow_real = i32::from(std::env::var("KIT_ALLOW_REAL_ROUTE").as_deref() == Ok("1") || arg_gap.is_some());
         let flags = native_equivalent + allow_real * 2 + gap_present * 4;
-        let decision = kit_legacy_operations_proxy_dogfood_shim_decision_packed_binding(mode, flags);
+        let decision = rig_legacy_operations_proxy_dogfood_shim_decision_packed_binding(mode, flags);
         if decision <= 0 {
             eprintln!("KIT blocked direct {invoked} invocation: a native proxy route is expected.");
             eprintln!("Use `kit proxy ...`; for a real capability gap use --kit-fallback <reason> or KIT_ALLOW_REAL_ROUTE=1 with KIT_FALLBACK_GAP.");
@@ -145,7 +145,7 @@ inl emit_runtime () : () = global """
         #[cfg(not(unix))]
         {
             let timeout_ms = std::env::var("KIT_SHIM_TIMEOUT_MS").ok().and_then(|value| value.parse::<u64>().ok()).filter(|value| *value > 0).unwrap_or(3_600_000);
-            match kit_process_observation::run_bounded_streaming_receipted_observed(&mut command, timeout_ms, "shim-forward", None) {
+            match rig_process_observation::run_bounded_streaming_receipted_observed(&mut command, timeout_ms, "shim-forward", None) {
                 Ok(observation) => observation.status.code().unwrap_or(127),
                 Err(error) => { eprintln!("KIT shim spawn failed: {error}"); 127 }
             }

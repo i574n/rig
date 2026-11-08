@@ -1,7 +1,7 @@
 
 := emit_imports () : () =
     global """
-        use kit_rust_std_fs::{copy_regular_atomic_preserve, read_regular_limited, read_regular_text_limited, rooted_path};
+        use rig_rust_std_fs::{copy_regular_atomic_preserve, read_regular_limited, read_regular_text_limited, rooted_path};
         use rayon::prelude::*;
         use std::fs;
         use std::path::{Path, PathBuf};
@@ -36,12 +36,12 @@
             let path = rooted_path(root, inspection_arg(args, 2, "relative")?)?;
             let start = inspection_arg(args, 3, "start")?.parse::<usize>().map_err(|_| "invalid start".to_owned())?;
             let count = inspection_arg(args, 4, "count")?.parse::<usize>().map_err(|_| "invalid count".to_owned())?;
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            let started = proxy_search_receipt::rig_search_clock_ms();
             let source = read_regular_text_limited(&path, inspection_text_limit())?;
             let lines = inspection_slice_lines(&source, start, count);
             let shown = lines.len() as u64;
             for line in lines { println!("{line}"); }
-            proxy_search_receipt::kit_fs_slice_receipt(start as u64, shown, count as u64, started);
+            proxy_search_receipt::rig_fs_slice_receipt(start as u64, shown, count as u64, started);
             Ok(())
         }
 
@@ -56,13 +56,13 @@
             let needle = inspection_arg(args, 3, "needle")?.as_bytes();
             if needle.is_empty() { return Err("needle must not be empty".to_owned()); }
             let radius = inspection_arg(args, 4, "radius-bytes")?.parse::<usize>().map_err(|_| "invalid radius-bytes".to_owned())?;
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            let started = proxy_search_receipt::rig_search_clock_ms();
             let source = read_regular_limited(&path, inspection_text_limit())?;
             let position = source.windows(needle.len()).position(|window| window == needle).ok_or_else(|| "needle not found".to_owned())?;
             let from = position.saturating_sub(radius);
             let to = source.len().min(position + needle.len() + radius);
             println!("{}", String::from_utf8_lossy(&source[from..to]));
-            proxy_search_receipt::kit_fs_context_receipt(position as u64, (to - from) as u64, source.len() as u64, started);
+            proxy_search_receipt::rig_fs_context_receipt(position as u64, (to - from) as u64, source.len() as u64, started);
             Ok(())
         }
 
@@ -76,7 +76,7 @@
             if metadata.is_dir() {
                 let mut children = fs::read_dir(path).map_err(|error| format!("read {}: {error}", path.display()))?.map(|entry| entry.map(|entry| entry.path()).map_err(|error| error.to_string())).collect::<Result<Vec<_>, _>>()?;
                 children.sort();
-                children.retain(|child| kit_proxy_search_descends_into(&child.to_string_lossy()));
+                children.retain(|child| rig_proxy_search_descends_into(&child.to_string_lossy()));
                 let nested = if parallel { children.par_iter().map(|child| inspection_collect(root, child, needle, limit, true, tagged)).collect::<Vec<_>>() } else { children.iter().map(|child| inspection_collect(root, child, needle, limit, false, tagged)).collect::<Vec<_>>() };
                 let mut hits = Vec::new();
                 for result in nested { hits.extend(result?); if hits.len() > limit { hits.truncate(limit + 1); break; } }
@@ -97,13 +97,13 @@
             if args.len() != 4 { return Err("fs-search expects root, relative, needle".to_owned()); }
             let root = Path::new(inspection_arg(args, 1, "root")?);
             let relative = inspection_arg(args, 2, "relative")?;
-            let path = if kit_proxy_search_scope_binding(relative) == 0 { root.to_path_buf() } else { rooted_path(root, relative)? };
+            let path = if rig_proxy_search_scope_binding(relative) == 0 { root.to_path_buf() } else { rooted_path(root, relative)? };
             let limit = std::env::var("KIT_SEARCH_MAX_HITS").ok().and_then(|value| value.parse().ok()).unwrap_or(20_000usize);
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            let started = proxy_search_receipt::rig_search_clock_ms();
             let hits = inspection_collect(root, &path, inspection_arg(args, 3, "needle")?, limit, true, false)?;
             let found = hits.len() as i32;
             for hit in hits.iter().take(limit) { println!("{hit}"); }
-            proxy_search_receipt::kit_fs_search_receipt(found, limit as i32, started);
+            proxy_search_receipt::rig_fs_search_receipt(found, limit as i32, started);
             Ok(())
         }
 
@@ -115,21 +115,21 @@
             if args.len() != 5 { return Err("parallel-search expects root, relative, needle, max-hits".to_owned()); }
             let root = Path::new(inspection_arg(args, 1, "root")?);
             let relative = inspection_arg(args, 2, "relative")?;
-            let path = if kit_proxy_search_scope_binding(relative) == 0 { root.to_path_buf() } else { rooted_path(root, relative)? };
+            let path = if rig_proxy_search_scope_binding(relative) == 0 { root.to_path_buf() } else { rooted_path(root, relative)? };
             let needle = inspection_arg(args, 3, "needle")?;
             if needle.is_empty() { return Err("needle must not be empty".to_owned()); }
             let limit = inspection_arg(args, 4, "max-hits")?.parse::<usize>().map_err(|_| "invalid max-hits".to_owned())?;
             let workers = std::env::var("KIT_PARALLEL_WORKERS").ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(56);
-            if kit_proxy_search_proxy_parallel_search_request_binding(0, limit as i32) != 1 || kit_proxy_search_proxy_parallel_search_worker_binding(workers as i32, 56) != 1 { return Err("typed parallel-search request rejected".to_owned()); }
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            if rig_proxy_search_proxy_parallel_search_request_binding(0, limit as i32) != 1 || rig_proxy_search_proxy_parallel_search_worker_binding(workers as i32, 56) != 1 { return Err("typed parallel-search request rejected".to_owned()); }
+            let started = proxy_search_receipt::rig_search_clock_ms();
             let serial = inspection_collect(root, &path, needle, limit, false, true)?;
-            let serial_done = proxy_search_receipt::kit_search_clock_ms();
+            let serial_done = proxy_search_receipt::rig_search_clock_ms();
             let pool = rayon::ThreadPoolBuilder::new().num_threads(workers).build().map_err(|error| format!("build Rayon pool: {error}"))?;
             let parallel = pool.install(|| inspection_collect(root, &path, needle, limit, true, true))?;
-            let parallel_done = proxy_search_receipt::kit_search_clock_ms();
-            if kit_proxy_search_proxy_parallel_search_parity_binding(serial.len() as i32, parallel.len() as i32) != 1 || serial != parallel { return Err("serial and parallel search results diverged".to_owned()); }
+            let parallel_done = proxy_search_receipt::rig_search_clock_ms();
+            if rig_proxy_search_proxy_parallel_search_parity_binding(serial.len() as i32, parallel.len() as i32) != 1 || serial != parallel { return Err("serial and parallel search results diverged".to_owned()); }
             for hit in parallel.iter().take(limit) { println!("{hit}"); }
-            proxy_search_receipt::kit_parallel_search_receipt(workers as i32, parallel.len() as i32, limit as i32, started, serial_done, parallel_done);
+            proxy_search_receipt::rig_parallel_search_receipt(workers as i32, parallel.len() as i32, limit as i32, started, serial_done, parallel_done);
             Ok(())
         }
 
@@ -163,28 +163,28 @@
             let root = Path::new(inspection_arg(args, 1, "root")?);
             let path = rooted_path(root, inspection_arg(args, 2, "relative")?)?;
             let limit = inspection_arg(args, 3, "max-entries")?.parse::<usize>().map_err(|_| "invalid max-entries".to_owned())?;
-            let consumer = if args.len()==6 { let mode=match inspection_arg(args,4,"mode")?{"preview"=>0,"apply"=>1,_=>return Err("parallel-manifest consumer mode must be preview or apply".to_owned())}; let output=inspection_arg(args,5,"output-relative")?; let segments=std::path::Path::new(output).components().count() as i32; if kit_proxy_search_proxy_parallel_consumer_mode_binding(mode,segments)!=1{return Err("typed parallel consumer request rejected".to_owned())} Some((mode,rooted_path(root,output)?)) } else { None };
+            let consumer = if args.len()==6 { let mode=match inspection_arg(args,4,"mode")?{"preview"=>0,"apply"=>1,_=>return Err("parallel-manifest consumer mode must be preview or apply".to_owned())}; let output=inspection_arg(args,5,"output-relative")?; let segments=std::path::Path::new(output).components().count() as i32; if rig_proxy_search_proxy_parallel_consumer_mode_binding(mode,segments)!=1{return Err("typed parallel consumer request rejected".to_owned())} Some((mode,rooted_path(root,output)?)) } else { None };
             let workers = std::env::var("KIT_PARALLEL_WORKERS").ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(56);
-            if kit_proxy_search_proxy_parallel_search_request_binding(0, limit as i32) != 1 || kit_proxy_search_proxy_parallel_search_worker_binding(workers as i32, 56) != 1 { return Err("typed parallel-manifest request rejected".to_owned()); }
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            if rig_proxy_search_proxy_parallel_search_request_binding(0, limit as i32) != 1 || rig_proxy_search_proxy_parallel_search_worker_binding(workers as i32, 56) != 1 { return Err("typed parallel-manifest request rejected".to_owned()); }
+            let started = proxy_search_receipt::rig_search_clock_ms();
             let serial = manifest_collect(root, &path, limit, false)?;
-            let serial_done = proxy_search_receipt::kit_search_clock_ms();
+            let serial_done = proxy_search_receipt::rig_search_clock_ms();
             let pool = rayon::ThreadPoolBuilder::new().num_threads(workers).build().map_err(|error| format!("build Rayon pool: {error}"))?;
             let parallel = pool.install(|| manifest_collect(root, &path, limit, true))?;
-            let parallel_done = proxy_search_receipt::kit_search_clock_ms();
+            let parallel_done = proxy_search_receipt::rig_search_clock_ms();
             let sorted = i32::from(parallel.windows(2).all(|window| window[0] <= window[1]));
             let unique = i32::from(parallel.windows(2).all(|window| window[0] != window[1]));
             let serial_hash = inspection_sha256(serial.join("\n").into_bytes());
             let parallel_hash = inspection_sha256(parallel.join("\n").into_bytes());
             let serial_prefix = i32::from_str_radix(&serial_hash[..7], 16).map_err(|error| format!("manifest fingerprint: {error}"))?;
             let parallel_prefix = i32::from_str_radix(&parallel_hash[..7], 16).map_err(|error| format!("manifest fingerprint: {error}"))?;
-            if kit_proxy_search_proxy_parallel_manifest_order_binding(sorted, unique) != 1 || kit_proxy_search_proxy_parallel_manifest_parity_binding(serial_prefix, parallel_prefix) != 1 || serial != parallel { return Err("serial and parallel manifests diverged".to_owned()); }
+            if rig_proxy_search_proxy_parallel_manifest_order_binding(sorted, unique) != 1 || rig_proxy_search_proxy_parallel_manifest_parity_binding(serial_prefix, parallel_prefix) != 1 || serial != parallel { return Err("serial and parallel manifests diverged".to_owned()); }
             let consumer_payload=|entries:usize,manifest_hash:&str|format!("open core\n// parallel-readiness|entries={entries}|manifest_sha256={manifest_hash}|workers_required=56\ninl parallel_readiness_entry_count () : u32 = {entries}u32\ninl parallel_readiness_worker_floor () : u32 = 56u32\ninl parallel_readiness_manifest_sha256 () : string = \"{manifest_hash}\"\ninl main () : i32 = 0i32\n").into_bytes();
             let serial_payload=consumer_payload(serial.len(),&serial_hash);
             let payload=consumer_payload(parallel.len(),&parallel_hash);
-            if let Some((mode,target))=consumer { let serial_output_hash=inspection_sha256(serial_payload.clone()); let output_hash=inspection_sha256(payload.clone()); let serial_output_prefix=i32::from_str_radix(&serial_output_hash[..7],16).map_err(|error|format!("consumer fingerprint: {error}"))?; let output_prefix=i32::from_str_radix(&output_hash[..7],16).map_err(|error|format!("consumer fingerprint: {error}"))?; if serial_payload!=payload || kit_proxy_search_proxy_parallel_consumer_output_binding(serial_output_prefix,output_prefix)!=1{return Err("serial and parallel consumer outputs diverged".to_owned())} if mode==1 { inspection_consumer_write(&target,&payload)?; let observed=fs::read(&target).map_err(|error|format!("read {}: {error}",target.display()))?; if observed!=payload{return Err("parallel consumer bytes diverged".to_owned())} } println!("kit proxy parallel-manifest consumer={} output={} bytes={} sha256={} manifest_sha256={}",if mode==0{"preview"}else{"apply"},target.display(),payload.len(),output_hash,parallel_hash); }
+            if let Some((mode,target))=consumer { let serial_output_hash=inspection_sha256(serial_payload.clone()); let output_hash=inspection_sha256(payload.clone()); let serial_output_prefix=i32::from_str_radix(&serial_output_hash[..7],16).map_err(|error|format!("consumer fingerprint: {error}"))?; let output_prefix=i32::from_str_radix(&output_hash[..7],16).map_err(|error|format!("consumer fingerprint: {error}"))?; if serial_payload!=payload || rig_proxy_search_proxy_parallel_consumer_output_binding(serial_output_prefix,output_prefix)!=1{return Err("serial and parallel consumer outputs diverged".to_owned())} if mode==1 { inspection_consumer_write(&target,&payload)?; let observed=fs::read(&target).map_err(|error|format!("read {}: {error}",target.display()))?; if observed!=payload{return Err("parallel consumer bytes diverged".to_owned())} } println!("kit proxy parallel-manifest consumer={} output={} bytes={} sha256={} manifest_sha256={}",if mode==0{"preview"}else{"apply"},target.display(),payload.len(),output_hash,parallel_hash); }
             for entry in &parallel { println!("{entry}"); }
-            proxy_search_receipt::kit_parallel_manifest_receipt(workers as i32, parallel.len() as i32, &parallel_hash, started, serial_done, parallel_done);
+            proxy_search_receipt::rig_parallel_manifest_receipt(workers as i32, parallel.len() as i32, &parallel_hash, started, serial_done, parallel_done);
             Ok(())
         }
 
@@ -220,9 +220,9 @@
     global """
         fn inspection_hash(args: &[String]) -> Result<(), String> {
             let path = match args.len() { 2 => PathBuf::from(inspection_arg(args, 1, "path")?), 3 => rooted_path(Path::new(inspection_arg(args, 1, "root")?), inspection_arg(args, 2, "relative")?)?, _ => return Err("hash expects path or root, relative".to_owned()) };
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            let started = proxy_search_receipt::rig_search_clock_ms();
             println!("{}", inspection_file_sha256(&path)?);
-            proxy_search_receipt::kit_hash_receipt(&path.to_string_lossy(), started);
+            proxy_search_receipt::rig_hash_receipt(&path.to_string_lossy(), started);
             Ok(())
         }
 
@@ -273,10 +273,10 @@
             let root = Path::new(inspection_arg(args, 1, "root")?);
             let relative = inspection_arg(args, 2, "relative")?;
             let segments = Path::new(relative).components().count() as i32;
-            if kit_proxy_search_proxy_hash_tree_request_binding(i32::from(root.is_dir()), segments) != 1 { return Err("typed hash-tree request rejected".to_owned()); }
-            let started = proxy_search_receipt::kit_search_clock_ms();
+            if rig_proxy_search_proxy_hash_tree_request_binding(i32::from(root.is_dir()), segments) != 1 { return Err("typed hash-tree request rejected".to_owned()); }
+            let started = proxy_search_receipt::rig_search_clock_ms();
             println!("{}", inspection_tree_sha256(root, relative)?);
-            proxy_search_receipt::kit_hash_tree_receipt(relative, started);
+            proxy_search_receipt::rig_hash_tree_receipt(relative, started);
             Ok(())
         }
 
@@ -286,7 +286,7 @@
     global """
         fn inspection_copy(args: &[String]) -> Result<(), String> {
             let operand = |index: usize| args.get(index).map(String::as_str).unwrap_or("");
-            let (code, message) = proxy_file_copy::kit_file_copy_outcome(args.len() as i32, operand(1), operand(2), operand(3));
+            let (code, message) = proxy_file_copy::rig_file_copy_outcome(args.len() as i32, operand(1), operand(2), operand(3));
             if code == 0 { println!("{message}"); Ok(()) } else { Err(message.to_string()) }
         }
 

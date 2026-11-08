@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let bytes = value.as_bytes();
     let length = bytes.len() as i64;
@@ -219,13 +229,13 @@ fn raw_end_5(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
             let v6: bool = v5 == b'#' ;
             if v6 {
                 let v7: i32 = v1 + 1i32 ;
-                let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v2, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("#"); } LIT.with(|lit| lit.clone()) }));
+                let v8: Rc<str> = string_concat(&[&*v2, "#"]);
                 (v1, v2) = (v7, v8);
                 continue;
             } else {
                 let v10: bool = v5 == b'"' ;
                 if v10 {
-                    let v11: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }, v2));
+                    let v11: Rc<str> = string_concat(&["\"", &*v2]);
                     let v12: i32 = v1 + 1i32 ;
                     let v13: i32 = (v11.clone().len() as i32);
                     let v14: i32 = find_text_loop_6(v0, v11, v12, v3, v13);
@@ -588,8 +598,7 @@ fn canonical_loop_11(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> (Rc<str>,
             if v10 {
                 return (v2, true);
             } else {
-                let v11: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v5));
-                let v12: Rc<str> = Rc::<str>::from(format!("{}{}", v11, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
+                let v12: Rc<str> = string_concat(&[&*v2, &*v5, "\n"]);
                 (v1, v2) = (v4, v12);
                 continue;
             }
@@ -603,15 +612,15 @@ fn closure3() -> Rc<dyn Fn(Rc<str>) -> (Rc<str>, bool)> {
         canonical_loop_11(v0, v1, v2)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_predicate_token(v0: &str, v1: i32) -> (i32, i32, Rc<str>, bool) {
+pub fn rig_predicate_token(v0: &str, v1: i32) -> (i32, i32, Rc<str>, bool) {
     closure0()(Rc::<str>::from(v0), v1)
 }
-pub fn kit_predicate_skip(v0: &str, v1: i32) -> i32 {
+pub fn rig_predicate_skip(v0: &str, v1: i32) -> i32 {
     closure1()(Rc::<str>::from(v0), v1)
 }
-pub fn kit_predicate_word_end(v0: &str, v1: i32) -> i32 {
+pub fn rig_predicate_word_end(v0: &str, v1: i32) -> i32 {
     closure2()(Rc::<str>::from(v0), v1)
 }
-pub fn kit_predicate_canonical(v0: &str) -> (Rc<str>, bool) {
+pub fn rig_predicate_canonical(v0: &str) -> (Rc<str>, bool) {
     closure3()(Rc::<str>::from(v0))
 }

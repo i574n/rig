@@ -1,0 +1,28 @@
+///- --package ../rig_cli_check --timeout 900000
+:< cli
+:< sm'_operators
+
+:= agile_call (root : fixture_root) (args : cli_args) : cli_run =
+    rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
+
+:= backlog () : string =
+    := opening = "inl task_kit_a () = Task (\"KIT-A\", \"big item\", Story, P1, D4, 0u32, Planned, \"\", "
+    := task = opening ++# "\"kit,team:kit\", "
+    := planning = "inl planning_of_kit_a () = Planning (\"KIT-A\", Minutes 360u32, Load Light, Assigned Agent)\n"
+    := head = "inl note_of_kit_a_1 () = Note (\"KIT-A\", 1u32, \"2026-11-06T10:00Z\", \"kit\", "
+    := note = head ++# "\"MILESTONES: model 90 m; verb 60 m\")\n"
+    task ++# "\"current\", \"current\")\n" ++# planning ++# note ++# "inl main () : i32 = 0i32\n"
+
+///> rust
+:# a_big_item_splits_into_chained_children_under_it =
+    := root = fixture_root_create "agile split"
+    fixture_write root "state/agile.spi" (backlog ())
+    fixture_write root "state/package.spiproj" "modules:\n    agile\n"
+    := here = fixture_text_of root
+    := split_args = Arg ("edit", Arg (here, Arg ("KIT-A", Arg ("--split", Arg ("milestones", NoArgs)))))
+    := split = succeeded (agile_call root split_args)
+    shows split "kit agile split ok id=KIT-A children=2"
+    := second = succeeded (agile_call root (Arg ("show", Arg (here, Arg ("KIT-A-M2", NoArgs)))))
+    shows second "deps: KIT-A-M1"
+    shows (fixture_read root "state/parents.spi") "Parent (\"KIT-A-M2\", \"KIT-A\")"
+    fixture_root_remove root

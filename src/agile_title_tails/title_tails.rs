@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn digits_in_3(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> bool {
     loop {
         let v3: bool = v2 <= v1;
@@ -340,8 +350,7 @@ fn stamped_9(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>)
                 let v35: Rc<str> = if v32 {
                     v31
                 } else {
-                    let v33: Rc<str> = Rc::<str>::from(format!("{}{}", v1.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) }));
-                    let v34: Rc<str> = Rc::<str>::from(format!("{}{}", v33, v31));
+                    let v34: Rc<str> = string_concat(&[&*v1, " ", &*v31]);
                     v34
                 };
                 let v36: i32 = (v0.clone().len() as i32);
@@ -371,10 +380,7 @@ fn stamped_9(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>)
     (v54, v55, v56)
 }
 fn concat5_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn note_row_10(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
@@ -431,64 +437,63 @@ fn note_row_10(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>, mut v3: Rc<str>, m
     concat5_11(v32, v47, v31, v53, v54)
 }
 fn moved_from_6(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4: i32, mut v5: Rc<str>, mut v6: Rc<str>, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: i32) -> (Rc<str>, i32) {
-    let v10: bool = v2 <= v1;
-    let (mut v47, mut v48): (Rc<str>, i32) = if v10 {
-        (v8, v9)
-    } else {
-        let v11: i32 = stamped_separator_from_1(v0.clone(), v1);
-        let v12: bool = v11 < 0i32;
-        let v13: i32 = if v12 {
-            v2
+    loop {
+        let v10: bool = v2 <= v1;
+        if v10 {
+            return (v8, v9);
         } else {
-            v11
-        };
-        let v15: i32 = if v12 {
-            v2
-        } else {
-            let v14: i32 = v11.wrapping_add(2i32);
-            v14
-        };
-        let v16: Rc<str> = std::rc::Rc::<str>::from(v0.get(v1 as usize..v13 as usize).unwrap_or(""));
-        let v17: i32 = (v16.clone().len() as i32);
-        let v18: i32 = 0i32;
-        let v19: i32 = method7(v16.clone(), v17, v18);
-        let v20: i32 = v17.wrapping_sub(1i32);
-        let v21: Rc<str> = string_slice(&v16, v19 as i64, v20 as i64);
-        let v22: i32 = (v21.clone().len() as i32);
-        let v23: i32 = method8(v21.clone(), v22);
-        let v24: Rc<str> = string_slice(&v21, 0i32 as i64, v23 as i64);
-        let v25: bool = &*v24 == "";
-        let (mut v45, mut v46): (Rc<str>, i32) = if v25 {
-            let (mut v26, mut v27): (Rc<str>, i32) = moved_from_6(v0, v15, v2, v3, v4, v5, v6, v7, v8, v9);
-            (v26, v27)
-        } else {
-            let (mut v28, mut v29, mut v30): (Rc<str>, Rc<str>, Rc<str>) = stamped_9(v24.clone(), v5, v6, v7.clone());
-            let v31: bool = &*v30 == "";
-            let v32: Rc<str> = if v31 {
-                v24
+            let v11: i32 = stamped_separator_from_1(v0.clone(), v1);
+            let v12: bool = v11 < 0i32;
+            let v13: i32 = if v12 {
+                v2
             } else {
-                v30
+                v11
             };
-            let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("migrated"); } LIT.with(|lit| lit.clone()) };
-            let v34: Rc<str> = note_row_10(v3.clone(), v4, v28.clone(), v33, v32);
-            let v35: bool = &*v8 == "";
-            let v38: Rc<str> = if v35 {
-                let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                v36
+            let v15: i32 = if v12 {
+                v2
             } else {
-                let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
-                v37
+                let v14: i32 = v11.wrapping_add(2i32);
+                v14
             };
-            let v39: i32 = v4.wrapping_add(1i32);
-            let v40: Rc<str> = Rc::<str>::from(format!("{}{}", v8, v38));
-            let v41: Rc<str> = Rc::<str>::from(format!("{}{}", v40, v34));
-            let v42: i32 = v9.wrapping_add(1i32);
-            let (mut v43, mut v44): (Rc<str>, i32) = moved_from_6(v0, v15, v2, v3, v39, v29, v28, v7, v41, v42);
-            (v43, v44)
-        };
-        (v45, v46)
-    };
-    (v47, v48)
+            let v16: Rc<str> = std::rc::Rc::<str>::from(v0.get(v1 as usize..v13 as usize).unwrap_or(""));
+            let v17: i32 = (v16.clone().len() as i32);
+            let v18: i32 = 0i32;
+            let v19: i32 = method7(v16.clone(), v17, v18);
+            let v20: i32 = v17.wrapping_sub(1i32);
+            let v21: Rc<str> = string_slice(&v16, v19 as i64, v20 as i64);
+            let v22: i32 = (v21.clone().len() as i32);
+            let v23: i32 = method8(v21.clone(), v22);
+            let v24: Rc<str> = string_slice(&v21, 0i32 as i64, v23 as i64);
+            let v25: bool = &*v24 == "";
+            if v25 {
+                v1 = v15;
+                continue;
+            } else {
+                let (mut v28, mut v29, mut v30): (Rc<str>, Rc<str>, Rc<str>) = stamped_9(v24.clone(), v5, v6, v7.clone());
+                let v31: bool = &*v30 == "";
+                let v32: Rc<str> = if v31 {
+                    v24
+                } else {
+                    v30
+                };
+                let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("migrated"); } LIT.with(|lit| lit.clone()) };
+                let v34: Rc<str> = note_row_10(v3.clone(), v4, v28.clone(), v33, v32);
+                let v35: bool = &*v8 == "";
+                let v38: Rc<str> = if v35 {
+                    let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                    v36
+                } else {
+                    let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+                    v37
+                };
+                let v39: i32 = v4.wrapping_add(1i32);
+                let v41: Rc<str> = string_concat(&[&*v8, &*v38, &*v34]);
+                let v42: i32 = v9.wrapping_add(1i32);
+                (v1, v4, v5, v6, v8, v9) = (v15, v39, v29, v28, v41, v42);
+                continue;
+            }
+        }
+    }
 }
 fn tail_rows_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>) -> (i32, Rc<str>) {
     let v4: i32 = 0i32;
@@ -517,9 +522,9 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> i32> {
         stamped_separator_from_1(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_title_tail_rows(v0: &str, v1: &str, v2: i32, v3: &str) -> (i32, Rc<str>) {
+pub fn rig_agile_title_tail_rows(v0: &str, v1: &str, v2: i32, v3: &str) -> (i32, Rc<str>) {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), v2, Rc::<str>::from(v3))
 }
-pub fn kit_agile_title_kept_end(v0: &str) -> i32 {
+pub fn rig_agile_title_kept_end(v0: &str) -> i32 {
     closure1()(Rc::<str>::from(v0))
 }

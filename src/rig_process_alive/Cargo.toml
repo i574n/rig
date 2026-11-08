@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "alive.spi"
+output = "alive.rs"
+
+[package]
+name = "rig-process-alive"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_process_alive"
+path = "alive.rs"
+
+[dependencies]
+sysinfo = "0.38.4"

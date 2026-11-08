@@ -1,7 +1,7 @@
 :< rust_std_env.model
 
 := byte_valid (~byte : i32) : i32 =
-    $'state_receipt_fingerprint_domain::kit_state_receipt_byte_valid(!byte, 0)' : i32
+    $'state_receipt_fingerprint_domain::rig_state_receipt_byte_valid(!byte, 0)' : i32
 
 := rejected_exit (~below : i32) (~above : i32) : i32 =
     $'if !below == 0 && !above == 0 { 0 } else { 1 }' : i32

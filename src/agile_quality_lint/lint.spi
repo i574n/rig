@@ -12,6 +12,7 @@
     | DoneEvidence
     | BlockerNamed
     | PauseResume
+    | ProseWait
 
 :== item_facts =
     {
@@ -43,18 +44,24 @@
     | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven" ]
     | BlockerNamed => [ "blocked on"; "blocker:"; "waits on" ]
     | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from" ]
+    | ProseWait => [ "waits on"; "resume when"; "blocked on" ]
     | PlanningFields => []
 
 :~ checks_for (~status : string) (~tags : string) : list lint_check =
     ? status = "Done" ?> [ DoneEvidence ]
     |? status = "Blocked" ?> [ BlockerNamed ]
     |? status = "Paused" ?> [ PauseResume ]
-    |? code_tagged tags ?> [ PlanningFields; DoneDefinition; NextStep; TypeFeatures ]
-    |: [ PlanningFields; DoneDefinition; NextStep ]
+    |? code_tagged tags ?> [ PlanningFields; DoneDefinition; NextStep; TypeFeatures; ProseWait ]
+    |: [ PlanningFields; DoneDefinition; NextStep; ProseWait ]
+
+:~ last_note (~notes : string) : string =
+    := at = sm'.last_index_of "\n" notes
+    ? at < 0i32 ?> notes |: sm'.substring (at + 1i32) (sm'.length notes - at - 1i32) notes
 
 :~ passes (f : item_facts) (check : lint_check) : bool =
     ?= check ?|
     | PlanningFields => f.estimate_minutes > 0i32 && f.load <> "" && f.assignee <> "" && team_tagged f.tags
+    | ProseWait => says (markers_of check) (last_note f.notes) |> not
     | _ => says (markers_of check) f.notes
 
 :~ failing (f : item_facts) : list lint_check =
@@ -100,7 +107,7 @@
 :# a_planned_code_item_needs_fields_dod_next_and_a_type_plan =
     := bare = { status = "Planned"; tags = "kit,agile"; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "" }
     testing.expect (failing bare = [ PlanningFields; DoneDefinition; NextStep; TypeFeatures ]) (failing_words bare)
-    := notes = "DoD: 3 CLI tests pass. NEXT: kit_agile_mutation route. TYPEFEATURES: lint_check union."
+    := notes = "DoD: 3 CLI tests pass. NEXT: rig_agile_mutation route. TYPEFEATURES: lint_check union."
     := full =
         { bare ?| tags = "kit,team:kit"; estimate_minutes = 60i32; load = "light"; assignee = "agent"; notes = notes }
     testing.expect (failing full = []) (failing_words full)
@@ -131,7 +138,24 @@
     := paused = { f ?| status = "Paused"; notes = "resume when TRAIN22 installs" }
     testing.expect (failing paused = []) "paused with a resume"
     testing.expect (check_word PauseResume = "PauseResume") "check words come from the union"
-///> _
+
+///> rust
+:# a_ready_item_whose_last_note_waits_is_flagged_and_an_old_wait_is_not =
+    := ready = "DoD: x. NEXT: y."
+    := f =
+        {
+            status = "Planned"
+            tags = "docs,team:x"
+            estimate_minutes = 30i32
+            load = "light"
+            assignee = "agent"
+            notes = ready
+        }
+    testing.expect (failing f = []) (failing_words f)
+    := held = { f ?| notes = ready ++# "\n11-07 kit: built; waits on install: TRAIN40" }
+    testing.expect (failing held = [ ProseWait ]) (failing_words held)
+    := released = { f ?| notes = held.notes ++# "\n11-08 kit: installed and checked" }
+    testing.expect (failing released = []) "an older note's wait does not count"
 := main () : i32 =
-    export "kit_agile_lint_failing_rows" failing_rows
+    export "rig_agile_lint_failing_rows" failing_rows
     0i32

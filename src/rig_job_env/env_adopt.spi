@@ -1,0 +1,21 @@
+:< sm'_operators
+:< rig_jobs.model
+:< rig_jobs.host
+:< rig_jobs.jobs
+
+:~ path_first_noted (~id : string) : string =
+    := config = rig_path_first.path_first.config_dir ()
+    := applied = rig_path_first.path_first.path_first_value (config, env.get_environment_variable "PATH")
+    ? applied = "" ?> ""
+    |:
+        env.set_environment_variable "PATH" applied
+        text_written (job_file id "path-first") ("path-first PATH=" ++# applied)
+
+:~ environment_refusal (id : string) : string =
+    := refusal = snapshot_refusal (job_environment_adopted id)
+    := _ = ? refusal = "" ?> path_first_noted id |: ""
+    refusal
+
+:= main () : i32 =
+    export "rig_job_environment_adopted" environment_refusal
+    0i32

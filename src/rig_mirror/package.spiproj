@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_mirror_remote
+link:
+    rig_mirror_remote
+modules:
+    mirror
+    check

@@ -5,13 +5,13 @@
 := write (path : string) (text : string) : () = $'std::fs::write(&*!path,&*!text).unwrap()' : ()
 := read (path : string) : string = $'std::rc::Rc::<str>::from(std::fs::read_to_string(&*!path).unwrap())' : string
 := remove (path : string) : () = $'std::fs::remove_file(&*!path).unwrap()' : ()
-:= hash (path : string) : string = $'std::rc::Rc::<str>::from(kit_proxy_search::inspection_file_sha256(std::path::Path\
+:= hash (path : string) : string = $'std::rc::Rc::<str>::from(rig_proxy_search::inspection_file_sha256(std::path::Path\
     ::new(&*!path)).unwrap())' : string
 := selected (root : string) : string = $'std::rc::Rc::<str>::from(cold_public_binary(std::path::Path::new(&*!root)).un\
     wrap_or(""))' : string
 := proof_error (root : string) : string = $'std::rc::Rc::<str>::from(verify_cold_proof(std::path::Path::new(&*!root)).\
     unwrap_err())' : string
-:= count_at (root : string) (index : u64) : u64 = $'kit_source_topology::source_topology_counts(std::path::Path::new(&\
+:= count_at (root : string) (index : u64) : u64 = $'rig_source_topology::source_topology_counts(std::path::Path::new(&\
     *!root)).unwrap()[!index as usize] as u64' : u64
 := decimal (value : u64) : string = $'std::rc::Rc::<str>::from(!value.to_string())' : string
 := require (value : bool) : () = $'if !value { () } else { std::panic::panic_any("Spiral test assertion failed") }' : ()
@@ -180,12 +180,12 @@
     0i32
 
 := emit_tests () : () =
-    := _ = export "kit_test_family_renewal" ((\ root => family_renewal root) : string -> i32)
-    := _ = export "kit_test_differential_renewal" ((\ root => differential_renewal root) : string -> i32)
-    := _ = export "kit_test_cold_selection" ((\ root => selection root) : string -> i32)
-    := _ = export "kit_test_cold_binary_gate" ((\ root => binary_gate root) : string -> i32)
-    := _ = export "kit_test_cold_census_bounds" ((\ root => census_bounds root) : string -> i32)
-    := _ = export "kit_test_cold_renewal" ((\ root => renewal root) : string -> i32)
+    := _ = export "rig_test_family_renewal" ((\ root => family_renewal root) : string -> i32)
+    := _ = export "rig_test_differential_renewal" ((\ root => differential_renewal root) : string -> i32)
+    := _ = export "rig_test_cold_selection" ((\ root => selection root) : string -> i32)
+    := _ = export "rig_test_cold_binary_gate" ((\ root => binary_gate root) : string -> i32)
+    := _ = export "rig_test_cold_census_bounds" ((\ root => census_bounds root) : string -> i32)
+    := _ = export "rig_test_cold_renewal" ((\ root => renewal root) : string -> i32)
     !!!!Global("""
         #[cfg(test)] mod native_binary_tests {
         struct Fixture(std::path::PathBuf);
@@ -195,12 +195,12 @@
         std::fs::create_dir_all(root.join("state")).unwrap();
         std::fs::create_dir_all(root.join("src")).unwrap(); Self(root) } }
         impl Drop for Fixture { fn drop(&mut self) { let _=std::fs::remove_dir_all(&self.0); } }
-        #[test] fn cold_binary_selection_accepts_either_name_and_rejects_ambiguity() { let f=Fixture::new(); assert_eq!(super::kit_test_cold_selection(f.0.to_str().unwrap()),0); }
-        #[test] fn windows_cold_proof_binds_the_selected_name_and_preserves_hash_checks() { let f=Fixture::new(); assert_eq!(super::kit_test_cold_binary_gate(f.0.to_str().unwrap()),0); }
-        #[test] fn cold_census_rejects_counts_that_wrap_the_signed_binding() { let f=Fixture::new(); assert_eq!(super::kit_test_cold_census_bounds(f.0.to_str().unwrap()),0); }
-        #[test] fn cold_proof_renewal_binds_the_platform_binary_and_current_lock_and_rolls_back_without_formal_authority() { let f=Fixture::new(); assert_eq!(super::kit_test_cold_renewal(f.0.to_str().unwrap()),0); }
-        #[test] fn family_contract_renewal_rechecks_the_catalog_settlement_and_rolls_back_on_drift() { let f=Fixture::new(); assert_eq!(super::kit_test_family_renewal(f.0.to_str().unwrap()),0); }
-        #[test] fn differential_catalog_renewal_requires_the_public_route_and_rolls_back() { let f=Fixture::new(); assert_eq!(super::kit_test_differential_renewal(f.0.to_str().unwrap()),0); }
+        #[test] fn cold_binary_selection_accepts_either_name_and_rejects_ambiguity() { let f=Fixture::new(); assert_eq!(super::rig_test_cold_selection(f.0.to_str().unwrap()),0); }
+        #[test] fn windows_cold_proof_binds_the_selected_name_and_preserves_hash_checks() { let f=Fixture::new(); assert_eq!(super::rig_test_cold_binary_gate(f.0.to_str().unwrap()),0); }
+        #[test] fn cold_census_rejects_counts_that_wrap_the_signed_binding() { let f=Fixture::new(); assert_eq!(super::rig_test_cold_census_bounds(f.0.to_str().unwrap()),0); }
+        #[test] fn cold_proof_renewal_binds_the_platform_binary_and_current_lock_and_rolls_back_without_formal_authority() { let f=Fixture::new(); assert_eq!(super::rig_test_cold_renewal(f.0.to_str().unwrap()),0); }
+        #[test] fn family_contract_renewal_rechecks_the_catalog_settlement_and_rolls_back_on_drift() { let f=Fixture::new(); assert_eq!(super::rig_test_family_renewal(f.0.to_str().unwrap()),0); }
+        #[test] fn differential_catalog_renewal_requires_the_public_route_and_rolls_back() { let f=Fixture::new(); assert_eq!(super::rig_test_differential_renewal(f.0.to_str().unwrap()),0); }
         }
 
         """)

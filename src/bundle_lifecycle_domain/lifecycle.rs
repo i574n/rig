@@ -340,63 +340,63 @@ fn closure19() -> Rc<dyn Fn(i32, i32) -> i32> {
         bundle_verify_complete_binding_19(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_bundle_root_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_root_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_bundle_coverage_checkpoint_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_coverage_checkpoint_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_bundle_entry_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_entry_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_bundle_size_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_size_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_bundle_extract_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_extract_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_bundle_payload_count_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_payload_count_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_bundle_rehydration_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_rehydration_binding(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_bundle_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_complete_binding(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }
-pub fn kit_bundle_rehydrate_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_rehydrate_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure8()(v0, v1)
 }
-pub fn kit_bundle_rehydrate_extract_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_rehydrate_extract_binding(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }
-pub fn kit_bundle_rehydrate_validate_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_rehydrate_validate_binding(v0: i32, v1: i32) -> i32 {
     closure10()(v0, v1)
 }
-pub fn kit_bundle_rehydrate_receipt_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_rehydrate_receipt_binding(v0: i32, v1: i32) -> i32 {
     closure11()(v0, v1)
 }
-pub fn kit_archive_extract_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_extract_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure12()(v0, v1)
 }
-pub fn kit_archive_extract_process_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_extract_process_binding(v0: i32, v1: i32) -> i32 {
     closure13()(v0, v1)
 }
-pub fn kit_archive_extract_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_extract_complete_binding(v0: i32, v1: i32) -> i32 {
     closure14()(v0, v1)
 }
-pub fn kit_archive_extract_receipt_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_extract_receipt_binding(v0: i32, v1: i32) -> i32 {
     closure15()(v0, v1)
 }
-pub fn kit_bundle_output_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_output_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure16()(v0, v1)
 }
-pub fn kit_bundle_output_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_output_complete_binding(v0: i32, v1: i32) -> i32 {
     closure17()(v0, v1)
 }
-pub fn kit_bundle_verify_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_verify_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure18()(v0, v1)
 }
-pub fn kit_bundle_verify_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_verify_complete_binding(v0: i32, v1: i32) -> i32 {
     closure19()(v0, v1)
 }

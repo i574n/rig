@@ -32,33 +32,33 @@
     legacy_terminal.emit_runtime ()
     legacy_terminal.emit_self_install_runtime ()
     export
-        "kit_self_install_preflight_binding"
+        "rig_self_install_preflight_binding"
         ((\ (first, second) => self_install_preflight_binding first second) : i32 * i32 -> i32)
     export
-        "kit_self_install_target_binding"
+        "rig_self_install_target_binding"
         ((\ (first, second) => self_install_target_binding first second) : i32 * i32 -> i32)
     export
-        "kit_self_install_fault_binding"
+        "rig_self_install_fault_binding"
         ((\ (first, second) => self_install_fault_binding first second) : i32 * i32 -> i32)
     export
-        "kit_self_install_complete_binding"
+        "rig_self_install_complete_binding"
         ((\ (first, second) => self_install_complete_binding first second) : i32 * i32 -> i32)
     export
-        "kit_restart_baton_preflight_binding"
+        "rig_restart_baton_preflight_binding"
         ((\ (first, second) => restart_baton_preflight_binding first second) : i32 * i32 -> i32)
     export
-        "kit_restart_baton_migration_binding"
+        "rig_restart_baton_migration_binding"
         ((\ (first, second) => restart_baton_migration_binding first second) : i32 * i32 -> i32)
     export
-        "kit_restart_baton_fault_binding"
+        "rig_restart_baton_fault_binding"
         ((\ (first, second) => restart_baton_fault_binding first second) : i32 * i32 -> i32)
     export
-        "kit_restart_baton_complete_binding"
+        "rig_restart_baton_complete_binding"
         ((\ (first, second) => restart_baton_complete_binding first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_surface_status_binding"
+        "rig_legacy_surface_status_binding"
         ((\ (first, second) => legacy_surface_status_export first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_surface_summary_binding"
+        "rig_legacy_surface_summary_binding"
         ((\ (first, second) => legacy_surface_summary_export first second) : i32 * i32 -> i32)
     0i32

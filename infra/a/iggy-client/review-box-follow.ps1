@@ -1,13 +1,17 @@
-param([string] $Label = '', [int] $Minutes = 1, [int] $LocalPort = 18090, [string] $Distro = 'Ubuntu', [string] $Tool = 'follow', [string[]] $ToolArguments = @())
+param([string] $Machine = 'node', [string] $Config = (Join-Path $HOME '.config/remote-machines.json'), [string] $Label = '', [int] $Minutes = 1, [int] $LocalPort = 18090, [string] $Distro = 'Ubuntu', [string] $Tool = 'follow', [string[]] $ToolArguments = @())
 $ErrorActionPreference = 'Stop'
 $toolPath = Join-Path $env:LOCALAPPDATA "kit\iggy-bin\$Tool.exe"
 if ($Tool -eq 'follow') { if (-not $Label) { 'STOP: follow needs -Label'; exit 1 }; $ToolArguments = @($Label, "$Minutes") }
-$address = (Get-Content (Join-Path $HOME '.ssh\laptop-last-ip.txt') -TotalCount 1).Trim()
-$encoded = (ssh -o "HostName=$address" laptop "wsl.exe -d $Distro -u root -- sh -c `"k3s kubectl -n iggy get secret iggy-root -o jsonpath='{.data.password}'`"" | Out-String).Trim()
+$entry = (Get-Content $Config -Raw | ConvertFrom-Json -AsHashtable)[$Machine]
+if (-not $entry) { "STOP: no machine '$Machine' in $Config"; exit 1 }
+$alias = $entry.sshAlias ? $entry.sshAlias : $entry.alias
+$address = try { ([Net.Dns]::GetHostAddresses($entry.hostName) | Where-Object AddressFamily -eq 'InterNetwork' | Select-Object -First 1).IPAddressToString } catch { $null }
+if (-not $address) { $address = (Get-Content (Join-Path $HOME ".ssh\$alias-last-ip.txt") -TotalCount 1).Trim() }
+$encoded = (ssh -o "HostName=$address" $alias "wsl.exe -d $Distro -u root -- sh -c `"k3s kubectl -n iggy get secret iggy-root -o jsonpath='{.data.password}'`"" | Out-String).Trim()
 if (-not $encoded) { 'STOP: could not read secret iggy/iggy-root over ssh'; exit 1 }
 $env:IGGY_PASSWORD = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($encoded))
 $env:IGGY_ADDRESS = "127.0.0.1:$LocalPort"
-$tunnel = Start-Process -FilePath ssh -ArgumentList '-N', '-o', "HostName=$address", '-o', 'ExitOnForwardFailure=yes', '-L', "${LocalPort}:127.0.0.1:8090", 'laptop' -PassThru -NoNewWindow
+$tunnel = Start-Process -FilePath ssh -ArgumentList '-N', '-o', "HostName=$address", '-o', 'ExitOnForwardFailure=yes', '-L', "${LocalPort}:127.0.0.1:8090", $alias -PassThru -NoNewWindow
 try {
     $open = $false
     foreach ($attempt in 1..20) {

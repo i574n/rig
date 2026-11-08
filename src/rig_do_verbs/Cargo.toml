@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "verbs.spi"
+output = "verbs.rs"
+
+[package]
+name = "rig-do-verbs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do_verbs"
+path = "verbs.rs"
+
+[dependencies]
+rig-do-model = { path = "../rig_do_model" }

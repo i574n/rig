@@ -1,7 +1,7 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-#[cfg(test)] mod typed_predicate_tests { #[test] fn ascii_and_unicode_match_original_rust_predicates() { assert_eq!(super::kit_test_typed_predicates(),0); } }
+#[cfg(test)] mod typed_predicate_tests { #[test] fn ascii_and_unicode_match_original_rust_predicates() { assert_eq!(super::rig_test_typed_predicates(),0); } }
 
 fn ascii_text_2(mut v0: u64, mut v1: u64) -> Rc<str> {
     let mut v2: Rc<str> = std::rc::Rc::<str>::from(std::string::String::from_utf8(std::iter::repeat_n(v0 as u8,v1 as usize).collect::<Vec<_>>()).unwrap());
@@ -153,9 +153,9 @@ fn check_3(mut v0: Rc<str>) -> () {
     require_4(v14);
     let v15: bool = v13 == v2;
     require_4(v15);
-    let v16: bool = kit_handoff::binary_install_hash_text(&*v0) == v1 ;
+    let v16: bool = rig_handoff::binary_install_hash_text(&*v0) == v1 ;
     require_4(v16);
-    let v17: bool = kit_handoff::binary_install_safe_text(&*v0) == v2 ;
+    let v17: bool = rig_handoff::binary_install_safe_text(&*v0) == v2 ;
     require_4(v17)
 }
 fn loop_1(mut v0: u64) -> u64 {
@@ -204,6 +204,6 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
         differential_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_test_typed_predicates() -> i32 {
+pub fn rig_test_typed_predicates() -> i32 {
     closure0()()
 }

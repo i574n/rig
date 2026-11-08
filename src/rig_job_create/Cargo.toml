@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "create.spi"
+output = "create.rs"
+
+[package]
+name = "rig-job-create"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_create"
+path = "create.rs"
+
+[dependencies]
+rig-machine-windows = { path = "../rig_machine_windows" }
+rig-job-host = { path = "../rig_job_host" }
+rig-job-host-request = { path = "../rig_job_host_request" }

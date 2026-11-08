@@ -20,7 +20,7 @@ needs a native C linker. From `src`, bootstrap the Spiral-authored driver
 into a separate target directory so Windows can rebuild the workspace safely:
 
 ```text
-cargo build --locked --package kit-dev --target-dir target/workflow-driver
+cargo build --locked --package rig-dev --target-dir target/workflow-driver
 ./target/workflow-driver/debug/kit-dev --root .. --test --skip-release
 ```
 
@@ -74,9 +74,9 @@ select the compiler and bound each owner compilation; no compiler is needed for
 Packages whose tests launch the CLI declare `test-requires-cli = true` under
 `[package.metadata.kit]`. Selected runs build that executable first, including
 when the target directory is empty; pure library tests remain isolated. Run
-`cargo test --locked -p kit-dev --test selected_workflow` from `src` to check
+`cargo test --locked -p rig-dev --test selected_workflow` from `src` to check
 this behavior independently of the Spiral compiler. Scenarios are authored in
-`src/kit_dev/selected_tests.spi`.
+`src/rig_dev/selected_tests.spi`.
 
 Each Cargo owner declares its Spiral `entry` and Rust `output` under
 `[package.metadata.spiral]` in its existing `Cargo.toml`. Add this metadata when
@@ -100,9 +100,9 @@ It accepts only the supported SHA-256-text and receipt-text helper forms and
 rejects ambiguity, attributes, public functions and near matches. From `src`:
 
 ```text
-cargo build --locked -p kit-predicate-lift
+cargo build --locked -p rig-predicate-lift
 ./target/debug/kit-lift-predicate sha256 helper input.spi candidate.spi
-cargo test --locked -p kit-predicate-lift --test native_codemod
+cargo test --locked -p rig-predicate-lift --test native_codemod
 ```
 
 Use `.exe` on Windows. The output must be a new file; the input is preserved.
@@ -111,7 +111,7 @@ regenerate and test the affected owner before adopting it. The codemod uses an
 exact token grammar, not a general Rust AST or semantic equivalence proof.
 Its lexer and rewrite models live in `predicate_lex_core` and
 `predicate_rewrite_model`; their generated libraries are separate Cargo owners.
-The native developer workflow uses `kit_dev_model` and
+The native developer workflow uses `rig_dev_model` and
 `developer_metadata_domain` for argument, ordering and package-selection policy.
 
 Process matrix `args` cells can use `json:["argument with spaces", "", "next"]`
@@ -150,8 +150,8 @@ $compiler = '../spiral/apps/compiler/tmp'
 pwsh "$compiler/scripts/install-dotnet.ps1" # only if .NET 11 is absent
 pwsh "$compiler/scripts/build.ps1" -Mode single-flight
 pwsh spiral.ps1 -CompilerBundle $compiler `
-  -InputPath src/kit_fs_actions/main.spi `
-  -OutputPath src/kit_fs_actions/fs_actions.rs
+  -InputPath src/rig_fs_actions/main.spi `
+  -OutputPath src/rig_fs_actions/fs_actions.rs
 ```
 
 `spiral.ps1` supports `-Backend Rust|C|Fsharp|Delphi`, `-TimeoutSec`, and

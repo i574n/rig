@@ -15,9 +15,9 @@
     ? user > 0i32 ?> user - 1i32 |: 0i32
 
 := tail_rows (~title : string) (~id : string) (seq : i32) (~fallback : string) : i32 * string =
-    $'agile_title_tails::kit_agile_title_tail_rows(&*!title, &*!id, !seq, &*!fallback)' : i32 * string
+    $'agile_title_tails::rig_agile_title_tail_rows(&*!title, &*!id, !seq, &*!fallback)' : i32 * string
 
-:= kept_end (~title : string) : i32 = $'agile_title_tails::kit_agile_title_kept_end(&*!title)' : i32
+:= kept_end (~title : string) : i32 = $'agile_title_tails::rig_agile_title_kept_end(&*!title)' : i32
 
 := from_title_failure (~reason : string) (~id : string) : i32 =
     stderr_failure ("agile notes from-title " ++# id ++# " rejected: " ++# reason)
@@ -75,6 +75,6 @@
     |: from_title_failure "usage: agile notes from-title <root> <id>" id
 
 := main () : i32 =
-    export "kit_agile_notes_from_title_run" ((\ () => from_title_entry ()) : () -> i32)
+    export "rig_agile_notes_from_title_run" ((\ () => from_title_entry ()) : () -> i32)
     := _ = from_title_entry ()
     0i32

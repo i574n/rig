@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "hook.spi"
+output = "hook.rs"
+
+[package]
+name = "rig-hook"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_hook"
+path = "hook.rs"
+
+[dependencies]
+serde_json = "1.0.151"
+rig-hook-verbs = { path = "../rig_hook_verbs" }

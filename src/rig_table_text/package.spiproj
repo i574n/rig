@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_table_rows
+modules:
+    text
+    entry

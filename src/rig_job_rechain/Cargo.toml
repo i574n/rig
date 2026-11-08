@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "entry.spi"
+output = "rechain.rs"
+
+[package]
+name = "rig-job-rechain"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_rechain"
+path = "rechain.rs"
+
+[dependencies]
+rig-process-alive = { path = "../rig_process_alive" }

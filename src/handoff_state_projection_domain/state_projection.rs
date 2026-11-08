@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn method2() -> Rc<str> {
     let v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     v0
@@ -698,20 +708,7 @@ fn handoff_ratings_projection_0(mut v0: Rc<str>) -> Rc<str> {
                             if v309 {
                                 codec_empty_1()
                             } else {
-                                let v311: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("active_readiness="); } LIT.with(|lit| lit.clone()) }, v43));
-                                let v312: Rc<str> = Rc::<str>::from(format!("{}{}", v311, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000 subjective_ceiling="); } LIT.with(|lit| lit.clone()) }));
-                                let v313: Rc<str> = Rc::<str>::from(format!("{}{}", v312, v85));
-                                let v314: Rc<str> = Rc::<str>::from(format!("{}{}", v313, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000 coverage="); } LIT.with(|lit| lit.clone()) }));
-                                let v315: Rc<str> = Rc::<str>::from(format!("{}{}", v314, v127));
-                                let v316: Rc<str> = Rc::<str>::from(format!("{}{}", v315, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000 runtime_drift="); } LIT.with(|lit| lit.clone()) }));
-                                let v317: Rc<str> = Rc::<str>::from(format!("{}{}", v316, v169));
-                                let v318: Rc<str> = Rc::<str>::from(format!("{}{}", v317, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000 parallel_readiness="); } LIT.with(|lit| lit.clone()) }));
-                                let v319: Rc<str> = Rc::<str>::from(format!("{}{}", v318, v211));
-                                let v320: Rc<str> = Rc::<str>::from(format!("{}{}", v319, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000 canonical_plan_ir="); } LIT.with(|lit| lit.clone()) }));
-                                let v321: Rc<str> = Rc::<str>::from(format!("{}{}", v320, v253));
-                                let v322: Rc<str> = Rc::<str>::from(format!("{}{}", v321, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000 migration_historical="); } LIT.with(|lit| lit.clone()) }));
-                                let v323: Rc<str> = Rc::<str>::from(format!("{}{}", v322, v295));
-                                let v324: Rc<str> = Rc::<str>::from(format!("{}{}", v323, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/1000"); } LIT.with(|lit| lit.clone()) }));
+                                let v324: Rc<str> = string_concat(&["active_readiness=", &*v43, "/1000 subjective_ceiling=", &*v85, "/1000 coverage=", &*v127, "/1000 runtime_drift=", &*v169, "/1000 parallel_readiness=", &*v211, "/1000 canonical_plan_ir=", &*v253, "/1000 migration_historical=", &*v295, "/1000"]);
                                 v324
                             }
                         }
@@ -815,10 +812,9 @@ fn projection_census_loop_11(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: 
                                 }
                             }
                         };
-                        let v55: Rc<str> = Rc::<str>::from(format!("{}{}", v54, v23));
                         let v56: i32 = v15 + 3i32 ;
                         let v57: i32 = v3 + 1i32 ;
-                        let v58: Rc<str> = Rc::<str>::from(format!("{}{}", v4, v55));
+                        let v58: Rc<str> = string_concat(&[&*v4, &*v54, &*v23]);
                         (v1, v3, v4) = (v56, v57, v58);
                         continue;
                     }
@@ -870,9 +866,9 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         handoff_census_projection_10(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_handoff_ratings_projection(v0: &str) -> Rc<str> {
+pub fn rig_handoff_ratings_projection(v0: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_handoff_census_projection(v0: &str) -> Rc<str> {
+pub fn rig_handoff_census_projection(v0: &str) -> Rc<str> {
     closure1()(Rc::<str>::from(v0))
 }

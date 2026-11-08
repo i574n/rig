@@ -1,4 +1,4 @@
-:< kit_process_observation.streaming_observation
+:< rig_process_observation.streaming_observation
 
 := main () : i32 =
     := launched : observation_plan observation_idle observation_running =

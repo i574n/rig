@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_job_coordinator_args
+link:
+    rig_job_coordinator_args
+modules:
+    coordinator

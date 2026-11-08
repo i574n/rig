@@ -132,18 +132,18 @@ fn closure4() -> Rc<dyn Fn(Rc<str>) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<s
         authority_blocker_labels_4(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_authority_state(v0: i32, v1: i32) -> i32 {
+pub fn rig_authority_state(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_authority_declared_mask(v0: i32, v1: i32) -> i32 {
+pub fn rig_authority_declared_mask(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_authority_live_mask(v0: i32, v1: i32) -> i32 {
+pub fn rig_authority_live_mask(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_authority_blocker_bit(v0: i32, v1: i32) -> i32 {
+pub fn rig_authority_blocker_bit(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_authority_blocker_labels(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
+pub fn rig_authority_blocker_labels(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
     closure4()(Rc::<str>::from(v0))
 }

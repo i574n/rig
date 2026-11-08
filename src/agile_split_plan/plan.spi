@@ -1,0 +1,114 @@
+///- --package .
+:# plan static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== milestone = { name : string; minutes : i32 }
+
+:== shown_fields = { priority : string; difficulty : string; tags : string; estimate : i32 }
+
+:| line_role =
+    | HeadLine :: line_role
+    | TagsLine :: line_role
+    | PlanningLine :: line_role
+    | MilestonesLine :: line_role
+
+:~ number_of (~word : string) : option i32 = convert.try_convert word
+
+:~ ^ minutes_in (words : list string) (before : list string) : option (list string * i32) =
+    ?= words ?|
+    | n :: unit :: _ ?& unit = "m" && number_of n <> None => Some (before, optionm'.default_value 0i32 (number_of n))
+    | w :: rest ?& sm'.ends_with "m" w && number_of (sm'.slice 0i32 (sm'.length w - 2i32) w) <> None =>
+        Some (before, optionm'.default_value 0i32 (number_of (sm'.slice 0i32 (sm'.length w - 2i32) w)))
+    | w :: rest => minutes_in rest (w :: before)
+    | [] => None
+
+:~ milestone_of (~segment : string) : option milestone =
+    := spaced = segment |> sm'.replace "(" " " |> sm'.replace ")" " "
+    := words = sm'.split_list " " spaced |> listm'.filter (\ (w : string) => w <> "")
+    ?= minutes_in words [] ?|
+    | Some (before, minutes) ?& minutes > 0i32 && before <> [] =>
+        Some { name = sm'.concat_list " " (listm.rev before); minutes = minutes }
+    | _ => None
+
+:~ milestones_text (~note : string) : string =
+    := at = sm'.index_of "MILESTONES:" note
+    ? at < 0i32 ?> ""
+    |:
+        := rest = sm'.slice (at + 11i32) (sm'.length note - 1i32) note
+        := found = [ "NEXT STEP"; " = "; ". " ] |> listm.map (\ (stop : string) => sm'.index_of stop rest)
+        := stops = found |> listm'.filter (\ (i : i32) => i >= 0i32)
+        := stop = stops |> listm.fold (\ (best : i32) (i : i32) => ? i < best ?> i |: best) (sm'.length rest)
+        sm'.slice 0i32 (stop - 1i32) rest
+
+:~ milestones_of (~note : string) : list milestone =
+    sm'.split_list ";" (milestones_text note)
+    |> listm.fold (\ (found : list milestone) (segment : string) =>
+        ?= milestone_of segment ?|
+        | Some m ?& sm'.contains "(done)" segment = !- => m :: found
+        | _ => found) []
+    |> listm.rev
+
+:~ ^ nth_word (words : list string) (index : i32) : string =
+    ?= words ?|
+    | w :: rest => ? index = 0i32 ?> w |: nth_word rest (index - 1i32)
+    | [] => ""
+
+:~ word_at (~line : string) (index : i32) : string =
+    nth_word (sm'.split_list " " line |> listm'.filter (\ (w : string) => w <> "")) index
+
+:~ estimate_in (~line : string) : i32 =
+    := at = sm'.index_of "estimate=" line
+    ? at < 0i32 ?> 0i32
+    |:
+        := rest = sm'.slice (at + 9i32) (sm'.length line - 1i32) line
+        := first_piece = \ (first : string) (p : string) => ? first = "" ?> p |: first
+        := digits = sm'.split_list "m" rest |> listm.fold first_piece ""
+        optionm'.default_value 0i32 (number_of digits)
+
+:~ marked (role : line_role) (~line : string) : bool =
+    ?= role ?|
+    | HeadLine => !-
+    | TagsLine => sm'.starts_with "tags:" line
+    | PlanningLine => sm'.contains "planning:" line
+    | MilestonesLine => sm'.contains "MILESTONES:" line
+
+:~ line_of (~text : string) (role : line_role) : string =
+    := lines = sm'.split_list "\n" (sm'.replace "\r" "" text)
+    ?= role ?|
+    | HeadLine => lines |> listm.fold (\ (first : string) (line : string) => ? first = "" ?> line |: first) ""
+    | _ => lines |> listm.fold (\ (found : string) (line : string) => ? marked role line ?> line |: found) ""
+
+:~ shown_fields_of (text : string) : shown_fields =
+    := head = line_of text HeadLine
+    := tags = sm'.trim (sm'.replace "tags:" "" (line_of text TagsLine))
+    := estimate = estimate_in (line_of text PlanningLine)
+    { priority = word_at head 2i32; difficulty = word_at head 3i32; tags = tags; estimate = estimate }
+
+:~ shown_steps (text : string) : array_base milestone =
+    milestones_of (line_of text MilestonesLine) |> listm'.box |> listm'.to_array'
+
+///> rust
+:# milestones_and_fields_are_read_from_an_agile_show =
+    := head = "DoD: x. MILESTONES: replay guard 60 m (done); aging in live next 45 m (in the tree); "
+    := note = head ++# "typed user-ask field 90 m; groom check 30 m = 360 m. NEXT STEP: y"
+    := aging = { name = "aging in live next"; minutes = 45i32 }
+    := typed = { name = "typed user-ask field"; minutes = 90i32 }
+    := groom = { name = "groom check"; minutes = 30i32 }
+    testing.expect (milestones_of note = [ aging; typed; groom ]) "done steps are skipped and the sum is not a step"
+    := numbered = { name = "M1 predicates + fact rows"; minutes = 90i32 }
+    testing.expect (milestone_of "M1 predicates + fact rows 90 m" = Some numbered) "numbered"
+    := boxed = { name = "codes plus a box test"; minutes = 30i32 }
+    testing.expect (milestone_of "codes plus a box test (30 m)" = Some boxed) "parens"
+    testing.expect (milestone_of "no minutes here" = None) "a step without minutes is not a milestone"
+    := shown_head = "KIT-A  Story  P1  D4  10%  Planned\ndeps: -\ntags: kit,team:kit\n"
+    := planning = "planning: estimate=360m load=light assignee=agent\nnotes (2)\n"
+    := text = shown_head ++# planning ++# "2026-11-06T10:00Z  kit  MILESTONES: one 60 m; two 90 m\n"
+    := fields = shown_fields_of text
+    testing.expect (fields = { priority = "P1"; difficulty = "D4"; tags = "kit,team:kit"; estimate = 360i32 }) "fields"
+    testing.expect (am'.length_base (shown_steps text) = 2i32) "steps"
+:= main () : i32 =
+    export "rig_agile_split_fields" shown_fields_of
+    export "rig_agile_split_steps" shown_steps
+    0i32

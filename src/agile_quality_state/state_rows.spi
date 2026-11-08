@@ -90,12 +90,11 @@
     testing.expect (stamp_hour "2026-11-04T10:00Z" = 20761i64 * 24i64 + 10i64) "note stamps read as hours"
     := note = "inl note_of_t_a_1 () = Note (\"T-A\", 1u32, \"2026-11-04T10:00Z\", \"kit\", \"x\")"
     testing.expect (last_note_hour note = 20761i64 * 24i64 + 10i64) "the latest note hour"
-///> _
 := main () : i32 =
-    export "kit_agile_lint_failures" failures_of
-    export "kit_agile_lint_census" census_text_of
-    export "kit_agile_lint_item_failures" item_failures
-    export "kit_agile_cadence_rows" cadence_of
-    export "kit_agile_stamp_hour" stamp_hour
-    export "kit_agile_lint_team_failures" team_failures_of
+    export "rig_agile_lint_failures" failures_of
+    export "rig_agile_lint_census" census_text_of
+    export "rig_agile_lint_item_failures" item_failures
+    export "rig_agile_cadence_rows" cadence_of
+    export "rig_agile_stamp_hour" stamp_hour
+    export "rig_agile_lint_team_failures" team_failures_of
     0i32

@@ -1,6 +1,6 @@
 
 inl emit_runtime () : () = global """
-    use kit_patch_compat_driver::{patch_apply_context_owned, patch_check_context_owned, patch_plan_error, patch_prepare_source_owned};
+    use rig_patch_compat_driver::{patch_apply_context_owned, patch_check_context_owned, patch_plan_error, patch_prepare_source_owned};
 
     #[must_use]
     fn patch_mutation_error(message: &str) -> i32 {

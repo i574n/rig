@@ -19,7 +19,7 @@
 
 := main () : i32 =
     export
-        "kit_agile_record_catalog_text"
+        "rig_agile_record_catalog_text"
         (
             \ (version, present, required, missing) => agile_record_catalog_text version present required missing
             : string * i32 * i32 * string -> string

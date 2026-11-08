@@ -50,6 +50,11 @@ Say "train $Name on $KitRoot; installed kit.exe $((Get-FileHash $installed).Hash
 if (-not $env:SPIRAL_COMPILER_DLL) {
     $liveDll = Join-Path $env:LOCALAPPDATA 'spiral-bin\bin\single-flight\SpiralCompiler\Release\net11.0\SpiralCompiler.dll'
     $pinnedDir = Join-Path $out 'compiler'
+    $liveCore = Join-Path (Split-Path $liveDll) 'SpiralCompilerCore.dll'
+    $pinnedCore = Join-Path $pinnedDir 'SpiralCompilerCore.dll'
+    $stale = (Test-Path -LiteralPath $pinnedCore) -and (Test-Path -LiteralPath $liveCore) -and ((Get-FileHash -LiteralPath $pinnedCore).Hash -ne (Get-FileHash -LiteralPath $liveCore).Hash)
+    if ($stale -and -not $Resume) { Say "pinned compiler at $pinnedDir differs from the live core; re-pinning (an earlier launch of $Name left it)"; Remove-Item -LiteralPath $pinnedDir -Recurse -Force }
+    if ($stale -and $Resume) { Stop-Train "-Resume would mix compilers: the pinned core differs from the live one" }
     if (-not (Test-Path -LiteralPath (Join-Path $pinnedDir 'SpiralCompiler.dll'))) { [void](Copy-KitCompilerSnapshot -Compiler $liveDll -Destination $pinnedDir) }
     $env:SPIRAL_COMPILER_DLL = Join-Path $pinnedDir 'SpiralCompiler.dll'
 }
@@ -87,7 +92,7 @@ Say "phase crate gate: ok ($((Get-Content (Join-Path $out 'crate-gate.log') -Tai
 Say 'phase candidate: debug build of kit-cli and kit-dev'
 $started = Get-Date
 Push-Location $src
-try { cargo build --locked -p kit-cli -p kit-dev *> (Join-Path $out 'candidate.log') }
+try { cargo build --locked -p rig-cli -p rig-dev *> (Join-Path $out 'candidate.log') }
 finally { Pop-Location }
 if ($LASTEXITCODE -ne 0) { Get-Content (Join-Path $out 'candidate.log') -Tail 15 | ForEach-Object { Say "  build: $_" }; Stop-Train 'candidate build failed' }
 $candidate = Join-Path $src 'target/debug/kit.exe'
@@ -100,7 +105,7 @@ Say "phase candidate: ok, kit.exe $((Get-FileHash $candidate).Hash.Substring(0, 
 
 $testBlock = '^(///> |:# (?!.* static =)|test (?!.* static =))'
 $binaryUsers = Get-ChildItem $src -Recurse -File -Filter *.spi | Where-Object { $_.FullName -notmatch '[\\/]target[\\/]' } |
-    Where-Object { Select-String -LiteralPath $_.FullName -Pattern 'KIT_BIN_UNDER_TEST|kit_run|job_call' -Quiet } |
+    Where-Object { Select-String -LiteralPath $_.FullName -Pattern 'KIT_BIN_UNDER_TEST|rig_run|job_call' -Quiet } |
     Where-Object { Select-String -LiteralPath $_.FullName -Pattern $testBlock -Quiet }
 function Get-SourceFiles([string]$dir) {
     foreach ($entry in [IO.Directory]::EnumerateFileSystemEntries($dir)) {
@@ -146,7 +151,8 @@ if ($Verdicts) {
     Say "phase notebooks: accepted $($notebooks.Count)/$($notebooks.Count) pass verdicts from $Verdicts (the same tree, run on another machine)"
 } else {
 $spiral = (Resolve-Path -LiteralPath (Join-Path $liveRoot '../spiral')).Path
-$runner = Join-Path $spiral 'apps/cells/spi/run_notebook.ps1'
+$cells = $env:SPIRAL_CELLS_ROOT ? $env:SPIRAL_CELLS_ROOT : (Join-Path $spiral 'apps/cells')
+$runner = Join-Path $cells 'spi/run_notebook.ps1'
 $spiralLib = if ($Lib) { (Resolve-Path -LiteralPath $Lib).Path } else { Join-Path $spiral 'lib/spiral' }
 if ($Lib -and $KitRoot -ne $liveRoot) {
     $nearest = Join-Path $KitRoot 'deps/spiral/lib/spiral'
@@ -160,7 +166,7 @@ $env:SPIRAL_CELLS_LIB = $spiralLib
 $env:KIT_BIN_UNDER_TEST = $candidate
 $env:SPIRAL_CELLS_WARM = '0'; $env:SPIRAL_CELLS_MEMO = '0'; $env:SPIRAL_CELLS_COMPILER = 'process'
 $env:MIX_BUILD_PATH = Join-Path $out 'mix-control'
-$control = 'src/kit_lcov/lcov.spi'
+$control = 'src/rig_lcov/lcov.spi'
 Say 'phase notebooks: start'
 Push-Location $KitRoot
 & pwsh -NoProfile -File $runner --path (Join-Path $KitRoot $control) --output-path (Join-Path $out 'positive-control.ipynb') --no-html *> (Join-Path $out 'positive-control.log')
@@ -298,5 +304,11 @@ if ($env:LOCALAPPDATA) {
 }
 Get-SourceManifest $KitRoot | Set-Content -LiteralPath (Join-Path $out 'shipped-manifest.txt')
 Set-Content -LiteralPath $lastInstalled $Name
+if ($env:LOCALAPPDATA -and (Test-Path -LiteralPath $laneBin)) { Set-Content -LiteralPath (Join-Path $laneBin 'installed-train.txt') $Name }
 Say "shipped manifest written; the next train tests every package changed since $Name, committed or not"
+$treeRoot = Join-Path $liveRoot '.cache/release-tree'
+foreach ($older in @(Get-ChildItem -LiteralPath $treeRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne $Name -and $_.Name -notlike '*-lib' })) {
+    $olderTarget = Join-Path $older.FullName 'src/target'
+    if (Test-Path -LiteralPath $olderTarget) { Remove-Item -LiteralPath $olderTarget -Recurse -Force -ErrorAction SilentlyContinue; Say "removed the regenerable build output of the older snapshot $($older.Name)" }
+}
 Say 'DONE'

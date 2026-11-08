@@ -6,13 +6,13 @@
 :~ segments_of (~state_dir : string) : string = state_segments_text state_dir
 
 := main () : i32 =
-    export "kit_agile_last_note" last_note_of
-    export "kit_agile_segments_of" segments_of
-    export "kit_agile_notes_text" ((\ (text, id) => notes_text text id) : string * string -> string)
-    export "kit_agile_notes_json" ((\ (text, id) => notes_json text id) : string * string -> string)
-    export "kit_agile_state_segments" ((\ state_dir => state_segments_text state_dir) : string -> string)
+    export "rig_agile_last_note" last_note_of
+    export "rig_agile_segments_of" segments_of
+    export "rig_agile_notes_text" ((\ (text, id) => notes_text text id) : string * string -> string)
+    export "rig_agile_notes_json" ((\ (text, id) => notes_json text id) : string * string -> string)
+    export "rig_agile_state_segments" ((\ state_dir => state_segments_text state_dir) : string -> string)
     export
-        "kit_agile_notes_filtered_text"
+        "rig_agile_notes_filtered_text"
         (
             \ (text, id, mode, value) => notes_filtered_text text id (note_filter_of mode value)
             : string * string * string * string -> string

@@ -1,0 +1,13 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_jobs
+    rig_machine_windows
+    rig_process_alive
+    rig_job_ticket
+link:
+    rig_process_alive
+    rig_job_ticket
+modules:
+    slot

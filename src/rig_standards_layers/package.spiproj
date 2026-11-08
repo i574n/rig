@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_standards_layers_model
+link:
+    rig_standards_layers_model
+modules:
+    layers

@@ -14,4 +14,4 @@ name = "proxy_file_copy"
 path = "file_copy.rs"
 
 [dependencies]
-kit-rust-std-fs = { path = "../rust_std_fs" }
+rig-rust-std-fs = { path = "../rust_std_fs" }

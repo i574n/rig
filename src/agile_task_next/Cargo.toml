@@ -14,9 +14,12 @@ name = "agile_task_next"
 path = "task_next.rs"
 
 [dependencies]
-kit-agile-records = { path = "../kit_agile_records" }
+rig-agile-records = { path = "../rig_agile_records" }
 agile-task-query = { path = "../agile_task_query" }
 agile-planning-fields = { path = "../agile_planning_fields" }
 agile-planning-filters = { path = "../agile_planning_filters" }
-kit-window-query = { path = "../kit_window_query" }
-kit-agile-next-args = { path = "../kit_agile_next_args" }
+rig-window-query = { path = "../rig_window_query" }
+rig-agile-next-args = { path = "../rig_agile_next_args" }
+agile-task-annotation = { path = "../agile_task_annotation" }
+agile-next-print = { path = "../agile_next_print" }
+agile-waits-hold = { path = "../agile_waits_hold" }

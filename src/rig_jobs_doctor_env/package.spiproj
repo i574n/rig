@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_jobs_doctor_model
+modules:
+    environment
+    entry

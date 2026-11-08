@@ -177,7 +177,6 @@
     testing.expect (unknown.refusal = "not a claim verb") "unknown verb"
     := release = am'.index_base 0i32 (request_parsed ("release", (;[ "KIT-A"; "--as"; "kit" ] : array string) |> am'.base))
     testing.expect (release.release && (release.next |> not) && release.refusal = "") release.refusal
-///> _
 := main () : i32 =
     export "agile_claim_request_parsed" request_parsed
     0i32

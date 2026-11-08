@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "toml.spi"
+output = "toml.rs"
+
+[package]
+name = "rig-proof-scope-toml"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_proof_scope_toml"
+path = "toml.rs"

@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "review.spi"
+output = "review.rs"
+
+[package]
+name = "rig-agile-sprint-review"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_sprint_review"
+path = "review.rs"
+
+[dependencies]
+rig-agile-sprint-read = { path = "../rig_agile_sprint_read" }

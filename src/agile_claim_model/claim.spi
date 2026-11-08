@@ -266,7 +266,7 @@
 ///> rust
 :# path_globs_overlap_by_their_literal_stem =
     testing.expect (globs_overlap "src/agile/**" "src/agile/claim.spi") "stem contains the file"
-    testing.expect (globs_overlap "src/agile/**" "src/kit_jobs/**" = !-) "disjoint stems"
+    testing.expect (globs_overlap "src/agile/**" "src/rig_jobs/**" = !-) "disjoint stems"
     := refused = refusal_of (fixture_claims ()) Idle "C-3" "y" [ "src/agile/x.spi" ] 1000u64
     testing.expect (refused = Some (PathOverlap ("A-1", "src/agile/x.spi"))) "a live lease's paths refuse a claim"
     := job = refusal_of (fixture_claims ()) (LiveJob "job-7") "C-3" "y" [] 1000u64

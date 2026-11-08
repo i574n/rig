@@ -41,7 +41,7 @@ inl emit_test_support () : () = global """
             let error = authorize_staged_write(0, 4, receipt.bytes_written())
                 .expect_err("mismatched receipt");
             discard_stage(receipt.temporary())?;
-            if kit_patch_remove_receipt_binding(receipt.stage_index(), 1) != receipt.stage_index() { return Err("typed remove receipt mismatch".to_owned()); }
+            if rig_patch_remove_receipt_binding(receipt.stage_index(), 1) != receipt.stage_index() { return Err("typed remove receipt mismatch".to_owned()); }
             Ok(error)
         }
 

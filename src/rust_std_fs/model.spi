@@ -70,14 +70,14 @@
 := target (path : string) : target_path = target_path path
 
 := stage (target_path target) (patch_text text) : staged_path =
-    staged ($'kit_rust_std_fs::stage_text(std::path::Path::new(&*!target), \
+    staged ($'rig_rust_std_fs::stage_text(std::path::Path::new(&*!target), \
         &!text).unwrap().display().to_string().into()' : string)
 
 := promote (target_path target) (staged_path temporary) : bool =
     rename target temporary
 
 := restore (target_path target) (original_text text) : bool =
-    $'kit_rust_std_fs::restore_text(std::path::Path::new(&*!target), &!text).is_ok()' : bool
+    $'rig_rust_std_fs::restore_text(std::path::Path::new(&*!target), &!text).is_ok()' : bool
 
 :| restoration_authority =
     | RestorationAuthority
@@ -100,7 +100,7 @@
         |: RestorationFailed
 
 := discard (staged_path temporary) : bool =
-    $'kit_rust_std_fs::discard_stage(std::path::Path::new(&*!temporary)).is_ok()' : bool
+    $'rig_rust_std_fs::discard_stage(std::path::Path::new(&*!temporary)).is_ok()' : bool
 
 := staged_missing (staged_path temporary) : bool = file_missing temporary
 

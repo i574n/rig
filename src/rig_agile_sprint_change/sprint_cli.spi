@@ -1,0 +1,39 @@
+///- --package ../rig_cli_check --timeout 900000
+:< cli
+:< sm'_operators
+
+:= agile_call (root : fixture_root) (args : cli_args) : cli_run =
+    rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
+
+:= task_row (~id : string) (~title : string) (~progress : string) (~status : string) : string =
+    := slug = sm'.replace "-" "_" (sm'.to_lower id)
+    "inl task_" ++# slug ++# " () = Task (\"" ++# id ++# "\", \"" ++# title ++# "\", Story, P1, D2, "
+    ++# progress ++# ", " ++# status ++# ", \"\", \"kit\", \"current\", \"current\")\n"
+
+:= planning_row (~id : string) (~minutes : string) : string =
+    := slug = sm'.replace "-" "_" (sm'.to_lower id)
+    "inl planning_of_" ++# slug ++# " () = Planning (\"" ++# id ++# "\", Minutes " ++# minutes
+    ++# ", Load Light, Assigned Agent)\n"
+
+:= backlog () : string =
+    task_row "KIT-A" "done item" "100u32" "Done" ++# task_row "KIT-B" "carried item" "0u32" "Planned"
+    ++# task_row "KIT-C" "dropped item" "0u32" "Planned"
+    ++# planning_row "KIT-A" "30u32" ++# planning_row "KIT-B" "45u32"
+    ++# planning_row "KIT-C" "60u32" ++# "inl main () : i32 = 0i32\n"
+
+///> rust
+:# closing_a_sprint_reviews_it_and_notes_each_carried_item =
+    := root = fixture_root_create "agile sprint close"
+    fixture_write root "state/agile.spi" (backlog ())
+    fixture_write root "state/package.spiproj" "modules:\n    agile\n"
+    := here = fixture_text_of root
+    := sprint = \ (rest : cli_args) => agile_call root (Arg ("sprint", rest))
+    := items = Arg ("--items", Arg ("KIT-B,KIT-C", NoArgs))
+    := started = sprint (Arg ("start", Arg (here, Arg ("S-1", Arg ("7", Arg ("goal", items))))))
+    shows (succeeded started) "sprint start ok id=S-1"
+    shows (succeeded (sprint (Arg ("drop", Arg (here, Arg ("S-1", Arg ("KIT-C", NoArgs))))))) "sprint drop ok"
+    := closed = succeeded (sprint (Arg ("close", Arg (here, Arg ("S-1", NoArgs)))))
+    shows closed "carried=45m dropped=60m goal_met=no carried_notes=1"
+    := shown = succeeded (agile_call root (Arg ("show", Arg (here, Arg ("KIT-B", NoArgs)))))
+    shows shown "sprint S-1 closed with this item"
+    fixture_root_remove root

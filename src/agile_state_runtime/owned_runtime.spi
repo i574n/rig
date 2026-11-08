@@ -28,7 +28,7 @@
         pub fn agile_lease_status_owned(root: &str) -> i32 {
             let root = std::path::Path::new(root);
             let result = agile_prompt_lease_clock(root).map(|(started, deadline, wrap_at, remaining, should_wrap, should_yield)| {
-                println!("{}", agile_lease_terms::kit_lease_status_text(&root.display().to_string(), started, wrap_at, deadline, remaining, should_wrap, should_yield));
+                println!("{}", agile_lease_terms::rig_lease_status_text(&root.display().to_string(), started, wrap_at, deadline, remaining, should_wrap, should_yield));
             });
             agile_finish(result)
         }

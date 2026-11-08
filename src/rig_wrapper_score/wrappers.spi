@@ -1,0 +1,73 @@
+:< sm'_operators
+
+:~ listed_files (~root : string) : option (list string) =
+    := listing = [ "-C"; root; "ls-files"; "--cached"; "--others"; "--exclude-standard"; "--"; "*.spi"; "*.spir" ]
+    := run = process.captured_by "git" listing !-
+    ? run.ran && run.code = 0i32
+    ?>
+        := lines = sm'.split_list "\n" (sm'.replace "\r" "" run.stdout) |> listm.map sm'.trim
+        Some (lines |> listm'.filter (\ (l : string) => l <> ""))
+    |: None
+
+:== scored_row = { score : i32; line : string }
+
+:~ scored_of (~path : string) (~corpus : string) (row : rig_wrapper_score_model.scan.wrapper_row) : scored_row =
+    := callers = rig_wrapper_score_model.model.uses_in corpus row.name - 1i32
+    := lone = ? callers <= 1i32 ?> 2i32 |? callers >= 3i32 ?> -1i32 |: 0i32
+    := score = row.base + lone
+    := place = path ++# ":" ++# sm'.show row.line
+    := text = sm'.show score ++# " " ++# place ++# " " ++# row.name ++# " " ++# row.shape
+    { score = score; line = text ++# " callers=" ++# sm'.show callers ++# " -> " ++# row.callee }
+
+:~ ^ inserted (item : scored_row) (sorted : list scored_row) : list scored_row =
+    ?= sorted ?|
+    | [] => [ item ]
+    | head :: rest => ? item.score > head.score ?> item :: sorted |: head :: inserted item rest
+
+:~ wrappers_listed (~root : string) (files : list string) (top : i32) : i32 =
+    := base = sm'.replace "\\" "/" root
+    := texts = files |> listm.map (\ (p : string) => p, file_system.read_text_or_empty (base ++# "/" ++# p))
+    := corpus = texts |> listm.map (\ ((_, text) : string * string) => text) |> sm'.concat_list "\n"
+    := ranked_in = \ (kept : list scored_row) ((path, text) : string * string) =>
+        rig_wrapper_score_model.scan.wrapper_rows text
+        |> am'.to_list_base'
+        |> listm'.unbox
+        |> listm.fold (\ more row => inserted (scored_of path corpus row) more) kept
+    := ranked = texts |> listm.fold ranked_in []
+    := high = ranked |> listm'.filter (\ (s : scored_row) => s.score >= 5i32)
+    := shown = \ (s : scored_row) => console.write_line s.line
+    ranked |> listm'.take_ top |> listm.iter shown
+    := summary =
+        "kit standards wrappers files="
+        ++# sm'.show (listm.length files : i32)
+        ++# " wrappers="
+        ++# sm'.show (listm.length ranked : i32)
+        ++# " high="
+        ++# sm'.show (listm.length high : i32)
+    console.write_line summary
+    0i32
+
+:~ ^ top_flag (words : list string) (found : i32) : i32 =
+    ?= words ?|
+    | word :: value :: rest ?& word = "--top" =>
+        ?= convert.try_convert value ?|
+        | Some n ?& n > 0i32 => top_flag rest n
+        | _ => top_flag rest found
+    | _ :: rest => top_flag rest found
+    | [] => found
+
+:~ wrappers_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: rest =>
+        ?= listed_files root ?|
+        | Some files => wrappers_listed root files (top_flag rest 20i32)
+        | None =>
+            console.write_error_line ("kit error: standards --wrappers: git could not list " ++# root)
+            2i32
+    | _ =>
+        console.write_error_line "kit error: usage: standards --wrappers <repo> [--top n]"
+        2i32
+
+:= main () : i32 =
+    export "rig_standards_wrappers_run" wrappers_run
+    0i32

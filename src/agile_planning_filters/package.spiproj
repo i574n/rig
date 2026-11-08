@@ -10,4 +10,4 @@ packages:
 modules:
     planning_filters
 rust-extern:
-    rc_str = kit_agile_planning_selected, kit_agile_planning_selected_near
+    rc_str = rig_agile_planning_selected, rig_agile_planning_selected_near

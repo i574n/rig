@@ -1,5 +1,5 @@
 #![cfg(windows)]
-use kit_rust_std_fs::*;
+use rig_rust_std_fs::*;
 use std::fs;
 use std::path::PathBuf;
 static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);

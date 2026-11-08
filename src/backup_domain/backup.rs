@@ -322,45 +322,45 @@ fn closure13() -> Rc<dyn Fn(i32, i32) -> i32> {
         restoration_accumulator_outcome_14(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_patch_backup_slot(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_backup_slot(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_patch_backup_next_count(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_backup_next_count(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_patch_backup_should_capture(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_backup_should_capture(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_patch_backup_binding_slot(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_backup_binding_slot(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_patch_capture_authorized(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_capture_authorized(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_patch_capture_binding_slot(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_capture_binding_slot(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_patch_promotion_slot_authorized(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_promotion_slot_authorized(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_patch_restoration_select(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_select(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }
-pub fn kit_patch_restoration_bind(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_bind(v0: i32, v1: i32) -> i32 {
     closure8()(v0, v1)
 }
-pub fn kit_patch_restoration_complete(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_complete(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }
-pub fn kit_patch_restoration_attempt_count(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_attempt_count(v0: i32, v1: i32) -> i32 {
     closure10()(v0, v1)
 }
-pub fn kit_patch_restoration_attempt_authorized(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_attempt_authorized(v0: i32, v1: i32) -> i32 {
     closure11()(v0, v1)
 }
-pub fn kit_patch_restoration_counter_next(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_counter_next(v0: i32, v1: i32) -> i32 {
     closure12()(v0, v1)
 }
-pub fn kit_patch_restoration_accumulator_outcome(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_accumulator_outcome(v0: i32, v1: i32) -> i32 {
     closure13()(v0, v1)
 }

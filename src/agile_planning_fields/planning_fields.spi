@@ -41,22 +41,22 @@
 :~ minutes_pair ((text, id) : string * string) : i32 = planning_minutes_of text id
 
 := main () : i32 =
-    export "kit_agile_planning_minutes_of" minutes_pair
-    export "kit_agile_planning_header" ((\ () => planning_header ()) : () -> string)
-    export "kit_agile_planning_columns" ((\ (text, id) => planning_columns text id) : string * string -> string)
-    export "kit_agile_planning_json" ((\ (text, id) => planning_json text id) : string * string -> string)
+    export "rig_agile_planning_minutes_of" minutes_pair
+    export "rig_agile_planning_header" ((\ () => planning_header ()) : () -> string)
+    export "rig_agile_planning_columns" ((\ (text, id) => planning_columns text id) : string * string -> string)
+    export "rig_agile_planning_json" ((\ (text, id) => planning_json text id) : string * string -> string)
     export
-        "kit_agile_planning_summary"
+        "rig_agile_planning_summary"
         ((\ (text, id) => planning_summary_of text id) : string * string -> string)
-    export "kit_agile_planning_minutes" ((\ (text, id) => planning_minutes_of text id) : string * string -> i32)
+    export "rig_agile_planning_minutes" ((\ (text, id) => planning_minutes_of text id) : string * string -> i32)
     export
-        "kit_agile_planning_columns_near"
+        "rig_agile_planning_columns_near"
         ((\ (text, id, start) => planning_columns_near text id start) : string * string * i32 -> string)
     export
-        "kit_agile_planning_json_near"
+        "rig_agile_planning_json_near"
         ((\ (text, id, start) => planning_json_near text id start) : string * string * i32 -> string)
     export
-        "kit_agile_planning_minutes_near"
+        "rig_agile_planning_minutes_near"
         ((\ (text, id, start) => planning_minutes_near text id start) : string * string * i32 -> i32)
     := _ = planning_header ()
     := _ = planning_columns "" "ID"

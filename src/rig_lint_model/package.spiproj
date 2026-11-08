@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_lint_flow
+    rig_lint_flow_constructs
+    rig_lint_flow_idioms
+modules:
+    model

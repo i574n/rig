@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn codec_runtime_char_2(mut v0: Rc<str>) -> u8 {
     let mut v1: u8 = v0.as_bytes()[0i32 as usize];
     v1
@@ -218,7 +228,7 @@ fn escape_path_loop_12(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                 }
             };
             let v32: i32 = v1 + 1i32 ;
-            let v33: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v31));
+            let v33: Rc<str> = string_concat(&[&*v3, &*v31]);
             (v1, v3) = (v32, v33);
             continue;
         }
@@ -243,10 +253,10 @@ fn serialize_rows_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32,
             };
             let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("1"); } LIT.with(|lit| lit.clone()) };
             let v15: Rc<str> = receipt_row_kind_text_6(v14.clone());
-            let v16: Rc<str> = Rc::<str>::from(format!("{}{}", v15, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }));
+            let v16: Rc<str> = string_concat(&[&*v15, "\t"]);
             let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("2"); } LIT.with(|lit| lit.clone()) };
             let v18: Rc<str> = receipt_row_kind_text_6(v17.clone());
-            let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }));
+            let v19: Rc<str> = string_concat(&[&*v18, "\t"]);
             let v20: i32 = (v13.clone().len() as i32);
             let v21: i32 = (v16.clone().len() as i32);
             let v22: i32 = 0i32 + v21 ;
@@ -270,7 +280,7 @@ fn serialize_rows_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32,
             };
             let v139: Rc<str> = if v27 {
                 let v35: Rc<str> = receipt_row_kind_text_6(v14);
-                let v36: Rc<str> = Rc::<str>::from(format!("{}{}", v35, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }));
+                let v36: Rc<str> = string_concat(&[&*v35, "\t"]);
                 let v37: i32 = (v36.len() as i32);
                 let v38: bool = v37 == v20 ;
                 let v42: Rc<str> = if v38 {
@@ -280,13 +290,12 @@ fn serialize_rows_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32,
                     let v41: Rc<str> = string_slice(&v13, v37 as i64, v40 as i64);
                     v41
                 };
-                let v43: Rc<str> = Rc::<str>::from(format!("{}{}", v42, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u64\n"); } LIT.with(|lit| lit.clone()) }));
-                let v44: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl snapshot () : state_check_snapshot = StateCheckSnapshot "); } LIT.with(|lit| lit.clone()) }, v43));
+                let v44: Rc<str> = string_concat(&["inl snapshot () : state_check_snapshot = StateCheckSnapshot ", &*v42, "u64\n"]);
                 v44
             } else {
                 if v34 {
                     let v45: Rc<str> = receipt_row_kind_text_6(v17);
-                    let v46: Rc<str> = Rc::<str>::from(format!("{}{}", v45, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }));
+                    let v46: Rc<str> = string_concat(&[&*v45, "\t"]);
                     let v47: i32 = (v46.len() as i32);
                     let v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) };
                     let v49: u8 = codec_runtime_char_2(v48.clone());
@@ -361,8 +370,7 @@ fn serialize_rows_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32,
                                             let v94: i32 = 0i32;
                                             let v95: bool = digits_valid_loop_10(v90.clone(), v94, v91);
                                             if v95 {
-                                                let v96: Rc<str> = Rc::<str>::from(format!("{}{}", v90, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u64"); } LIT.with(|lit| lit.clone()) }));
-                                                let v97: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("BuildAttestation "); } LIT.with(|lit| lit.clone()) }, v96));
+                                                let v97: Rc<str> = string_concat(&["BuildAttestation ", &*v90, "u64"]);
                                                 v97
                                             } else {
                                                 codec_empty_4()
@@ -387,22 +395,10 @@ fn serialize_rows_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32,
                                     let v114: Rc<str> = string_slice(&{ thread_local!{ static LIT: Rc<str> = Rc::<str>::from("0123456789"); } LIT.with(|lit| lit.clone()) }, v109 as i64, v109 as i64);
                                     let v115: Rc<str> = string_slice(&{ thread_local!{ static LIT: Rc<str> = Rc::<str>::from("0123456789"); } LIT.with(|lit| lit.clone()) }, v111 as i64, v111 as i64);
                                     let v116: Rc<str> = string_slice(&{ thread_local!{ static LIT: Rc<str> = Rc::<str>::from("0123456789"); } LIT.with(|lit| lit.clone()) }, v112 as i64, v112 as i64);
-                                    let v117: Rc<str> = Rc::<str>::from(format!("{}{}", v115, v116));
-                                    let v118: Rc<str> = Rc::<str>::from(format!("{}{}", v114, v117));
-                                    let v119: Rc<str> = Rc::<str>::from(format!("{}{}", v113, v118));
-                                    let v120: Rc<str> = Rc::<str>::from(format!("{}{}", v119, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () : module_typecheck_receipt = ModuleTypecheckReceipt (\""); } LIT.with(|lit| lit.clone()) }));
-                                    let v121: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl receipt_"); } LIT.with(|lit| lit.clone()) }, v120));
                                     let v122: i32 = 0i32;
                                     let v123: i32 = (v67.clone().len() as i32);
                                     let v124: Rc<str> = escape_path_loop_12(v67, v122, v123, v104);
-                                    let v125: Rc<str> = Rc::<str>::from(format!("{}{}", v73, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u64, "); } LIT.with(|lit| lit.clone()) }));
-                                    let v126: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\", "); } LIT.with(|lit| lit.clone()) }, v125));
-                                    let v127: Rc<str> = Rc::<str>::from(format!("{}{}", v124, v126));
-                                    let v128: Rc<str> = Rc::<str>::from(format!("{}{}", v103, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")\n"); } LIT.with(|lit| lit.clone()) }));
-                                    let v129: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u64, "); } LIT.with(|lit| lit.clone()) }, v128));
-                                    let v130: Rc<str> = Rc::<str>::from(format!("{}{}", v79, v129));
-                                    let v131: Rc<str> = Rc::<str>::from(format!("{}{}", v127, v130));
-                                    let v132: Rc<str> = Rc::<str>::from(format!("{}{}", v121, v131));
+                                    let v132: Rc<str> = string_concat(&["inl receipt_", &*v113, &*v114, &*v115, &*v116, " () : module_typecheck_receipt = ModuleTypecheckReceipt (\"", &*v124, "\", ", &*v73, "u64, ", &*v79, "u64, ", &*v103, ")\n"]);
                                     v132
                                 }
                             }
@@ -425,7 +421,7 @@ fn serialize_rows_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32,
                 let v143: i32 = v8 + 1i32 ;
                 v143
             };
-            let v145: Rc<str> = Rc::<str>::from(format!("{}{}", v4, v139));
+            let v145: Rc<str> = string_concat(&[&*v4, &*v139]);
             (v1, v3, v4) = (v144, v141, v145);
             continue;
         }
@@ -437,8 +433,7 @@ fn receipt_serialize_0(mut v0: Rc<str>) -> Rc<str> {
     let v3: i32 = 0i32;
     let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = serialize_rows_loop_1(v0, v1, v2, v3, v4);
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl main () : i32 = 0i32\n"); } LIT.with(|lit| lit.clone()) }));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("///- --no-respell\nunion state_check_snapshot = | StateCheckSnapshot :: u64 -> state_check_snapshot\nunion module_attestation = | RuntimeAttestation | BuildAttestation :: u64 -> module_attestation\nunion module_typecheck_receipt = | ModuleTypecheckReceipt :: string * u64 * u64 * module_attestation -> module_typecheck_receipt\n\n"); } LIT.with(|lit| lit.clone()) }, v6));
+    let v7: Rc<str> = string_concat(&["///- --no-respell\nunion state_check_snapshot = | StateCheckSnapshot :: u64 -> state_check_snapshot\nunion module_attestation = | RuntimeAttestation | BuildAttestation :: u64 -> module_attestation\nunion module_typecheck_receipt = | ModuleTypecheckReceipt :: string * u64 * u64 * module_attestation -> module_typecheck_receipt\n\n", &*v5, "inl main () : i32 = 0i32\n"]);
     v7
 }
 fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
@@ -446,6 +441,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         receipt_serialize_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_state_receipt_serialize(v0: &str) -> Rc<str> {
+pub fn rig_state_receipt_serialize(v0: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0))
 }

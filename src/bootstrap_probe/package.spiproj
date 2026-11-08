@@ -1,5 +1,0 @@
-packages:
-    |core-
-    domain
-modules:
-    main

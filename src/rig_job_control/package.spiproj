@@ -1,0 +1,11 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_process_alive
+    rig_job_names
+link:
+    rig_job_names
+    rig_process_alive
+modules:
+    control

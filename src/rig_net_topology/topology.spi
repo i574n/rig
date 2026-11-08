@@ -1,0 +1,195 @@
+///- --package .
+:# topology static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| link =
+    | Direct :: string -> link
+    | Jump :: list string * string -> link
+    | Reverse :: string * i32 -> link
+
+:| machine_os =
+    | WindowsHost :: machine_os
+    | LinuxHost :: machine_os
+
+:== day_window = { from_minute : i32; until_minute : i32 }
+
+:== network = { id : string; harvest : day_window }
+
+:== machine = { id : string; network : string; hub : bool; link : link; os : machine_os }
+
+:| push_plan =
+    | PushDirect :: string -> push_plan
+    | PushThroughJump :: list string * string -> push_plan
+    | PullOnly :: string * i32 -> push_plan
+
+:= push_plan_of (m : machine) : push_plan =
+    ?= m.link ?|
+    | Direct address => PushDirect address
+    | Jump (hops, address) => PushThroughJump (hops, address)
+    | Reverse (relay, port) => PullOnly (relay, port)
+
+:= in_window (w : day_window) (minute : i32) : bool =
+    ? w.from_minute <= w.until_minute ?> minute >= w.from_minute && minute < w.until_minute
+    |: minute >= w.from_minute || minute < w.until_minute
+
+:= clock_minute (hour : i32) (minute : i32) : i32 = hour * 60i32 + minute
+
+:| fleet_row =
+    | NetworkRow :: network -> fleet_row
+    | MachineRow :: machine -> fleet_row
+    | UnreadRow :: string -> fleet_row
+
+:~ minute_of (~clock : string) : option i32 =
+    := found = rig_net_fleet_file.fleet_file.clock_minutes clock
+    ? am'.length_base found = 1i32 ?> Some (am'.index_base 0i32 found) |: None
+
+:~ link_of (~kind : string) (~address : string) (~extra : string) : option link =
+    ? kind = "direct" ?> Some (Direct address)
+    |? kind = "jump" ?> Some (Jump (sm'.split_list "," extra |> listm'.filter (\ (hop : string) => hop <> ""), address))
+    |? kind = "reverse" ?>
+        := port = optionm'.default_value -1i32 (convert.try_convert extra)
+        ? port > 0i32 ?> Some (Reverse (address, port)) |: None
+    |: None
+
+:~ network_row (~line : string) (fields : array_base string) : fleet_row =
+    ?= minute_of (am'.index_base 1i32 fields), minute_of (am'.index_base 2i32 fields) ?|
+    | Some from, Some until =>
+        NetworkRow { id = am'.index_base 0i32 fields; harvest = { from_minute = from; until_minute = until } }
+    | _ => UnreadRow line
+
+:~ machine_row (~line : string) (fields : array_base string) : fleet_row =
+    := field = \ (k : i32) => am'.index_base k fields
+    := role, os = field 2i32, field 6i32
+    ?= link_of (field 3i32) (field 4i32) (field 5i32) ?|
+    | Some l ?& (role = "hub" || role = "member") && (os = "windows" || os = "linux") =>
+        := host = ? os = "windows" ?> WindowsHost |: LinuxHost
+        MachineRow { id = field 0i32; network = field 1i32; hub = role = "hub"; link = l; os = host }
+    | _ => UnreadRow line
+
+:~ row_of_fleet_line (line : rig_net_fleet_file.fleet_file.fleet_line) : fleet_row =
+    ? line.kind = "network" ?> network_row line.text line.fields
+    |? line.kind = "machine" ?> machine_row line.text line.fields
+    |: UnreadRow line.text
+
+:~ ^ rows_from
+    (lines : array_base rig_net_fleet_file.fleet_file.fleet_line) (at : i32) (kept : list fleet_row)
+    : list fleet_row
+    =
+    ? at >= am'.length_base lines ?> listm.rev kept
+    |: rows_from lines (at + 1i32) (row_of_fleet_line (am'.index_base at lines) :: kept)
+
+:~ fleet_rows (~text : string) : list fleet_row = rows_from (rig_net_fleet_file.fleet_file.fleet_lines_of text) 0i32 []
+
+:~ hhmm (minute : i32) : string = rig_net_fleet_file.fleet_file.clock_text minute
+
+:~ link_text (l : link) : string =
+    ?= l ?|
+    | Direct address => "direct " ++# address
+    | Jump (hops, address) => "jump " ++# sm'.concat_list "," hops ++# " " ++# address
+    | Reverse (relay, port) => "reverse " ++# relay ++# ":" ++# sm'.show port
+
+:~ machine_line (m : machine) : string =
+    := role = ? m.hub ?> "hub" |: "member"
+    := os = ?= m.os ?| WindowsHost => "windows" | LinuxHost => "linux"
+    "  " ++# m.id ++# "  " ++# m.network ++# "  " ++# role ++# "  " ++# link_text m.link ++# "  " ++# os
+
+:~ config_dir () : string =
+    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := app_data = env.get_environment_variable "APPDATA"
+    ? home <> "" ?> home
+    |? app_data <> "" ?> app_data ++# "/kit"
+    |: env.get_environment_variable "HOME" ++# "/.config/kit"
+
+:~ ^ partitioned (rows : list fleet_row) (nets : list network) (ms : list machine) (bad : list string)
+    : list network * list machine * list string
+    =
+    ?= rows ?|
+    | [] => listm.rev nets, listm.rev ms, listm.rev bad
+    | NetworkRow n :: rest => partitioned rest (n :: nets) ms bad
+    | MachineRow m :: rest => partitioned rest nets (m :: ms) bad
+    | UnreadRow line :: rest => partitioned rest nets ms (line :: bad)
+
+:~ fleet_lines (networks : list network) (machines : list machine) : list string =
+    := members = \ (net : network) =>
+        machines |> listm'.filter (\ (m : machine) => m.network = net.id) |> listm.map machine_line
+    := window = \ (net : network) => hhmm net.harvest.from_minute ++# "-" ++# hhmm net.harvest.until_minute
+    := block = \ (net : network) => ("network " ++# net.id ++# "  harvest " ++# window net) :: members net
+    networks |> listm.map block |> listm.concat
+
+:~ reach_word (l : link) : string =
+    ?= l ?|
+    | Direct _ => "direct"
+    | Jump _ => "jump"
+    | Reverse _ => "reverse"
+
+:~ problems_of (networks : list network) (machines : list machine) : list string =
+    := ids = networks |> listm.map (\ (n : network) => n.id) |> listm'.box |> listm'.to_array'
+    := flat = \ (m : machine) => { id = m.id; network = m.network; hub = m.hub; reach = reach_word m.link }
+    := members = machines |> listm.map flat |> listm'.box |> listm'.to_array'
+    := lines = rig_net_fleet_rules.rules.problem_lines (ids, members)
+    am'.to_list_base' lines |> listm'.unbox
+
+:== report_line = { error : bool; text : string }
+
+:~ report_of (error : bool) (lines : list string) : list report_line =
+    lines |> listm.map (\ (text : string) => { error = error; text = text })
+
+:~ fleet_report () : array_base report_line =
+    := path = config_dir () ++# "/fleet.spi"
+    := lines =
+        ? file_system.file_exists path |> not
+        ?> [ { error = !+; text = "kit error: machine fleet: no fleet file at " ++# path } ]
+        |:
+            := rows = fleet_rows (file_system.read_all_text path)
+            := networks, machines, unread = partitioned rows [] [] []
+            := problems = problems_of networks machines |> listm.map (\ (p : string) => "problem: " ++# p)
+            := unread_lines = unread |> listm.map (\ (line : string) => "unread row: " ++# line)
+            := counts = " networks=" ++# sm'.show (listm.length networks : i32)
+            := more = " machines=" ++# sm'.show (listm.length machines : i32)
+            := issues = " problems=" ++# sm'.show (listm.length problems : i32)
+            := unread_count = " unread=" ++# sm'.show (listm.length unread : i32)
+            := receipt = "kit machine fleet ok" ++# counts ++# more ++# issues ++# unread_count ++# " file=" ++# path
+            := listing = report_of !- (fleet_lines networks machines)
+            := closing = [ { error = !-; text = receipt } ]
+            listm.concat [ listing; report_of !+ problems; report_of !+ unread_lines; closing ]
+    lines |> listm'.box |> listm'.to_array'
+
+///> rust
+:# an_outbound_only_machine_is_pulled_from_and_a_night_window_crosses_midnight =
+    := hub_b = { id = "b-hub"; network = "beta"; hub = !+; link = Reverse ("relay.example", 2222i32); os = WindowsHost }
+    testing.expect (push_plan_of hub_b = PullOnly ("relay.example", 2222i32)) "a reverse link is pull only"
+    := direct = { hub_b ?| link = Direct "10.0.0.9" }
+    testing.expect (push_plan_of direct = PushDirect "10.0.0.9") "a direct link takes pushes"
+    := night = { from_minute = clock_minute 21i32 0i32; until_minute = clock_minute 6i32 0i32 }
+    testing.expect (in_window night (clock_minute 23i32 30i32)) "late evening is inside"
+    testing.expect (in_window night (clock_minute 5i32 59i32)) "just before dawn is inside"
+    testing.expect (in_window night (clock_minute 6i32 0i32) = !-) "the end minute is outside"
+    testing.expect (in_window night (clock_minute 12i32 0i32) = !-) "noon is outside"
+    := day = { from_minute = clock_minute 9i32 0i32; until_minute = clock_minute 17i32 0i32 }
+    testing.expect (in_window day (clock_minute 9i32 0i32)) "a day window includes its start"
+    testing.expect (in_window day (clock_minute 17i32 0i32) = !-) "and excludes its end"
+
+///> rust
+:# a_fleet_file_reads_networks_and_machines_and_reports_the_rows_it_cannot_read =
+    := text =
+        "inl network_of_alpha () = Network (\"alpha\", \"21:00\", \"06:00\")\n"
+        ++# "inl machine_of_a_hub () = Machine (\"a-hub\", \"alpha\", \"hub\", \"direct\", \"10.0.0.1\", \"\", "
+        ++# "\"windows\")\n"
+        ++# "inl machine_of_b () = Machine (\"b\", \"alpha\", \"member\", \"reverse\", \"relay.example\", \"2222\", "
+        ++# "\"linux\")\n"
+        ++# "inl machine_of_c () = Machine (\"c\", \"alpha\", \"boss\", \"direct\", \"10.0.0.3\", \"\", \"linux\")\n"
+        ++# "inl main () : i32 = 0i32\n"
+    := rows = fleet_rows text
+    testing.expect (listm.length rows = 4i32) "three readable rows and one unread"
+    := night = { from_minute = clock_minute 21i32 0i32; until_minute = clock_minute 6i32 0i32 }
+    testing.expect (listm'.contains (NetworkRow { id = "alpha"; harvest = night }) rows) "the network and its window"
+    := b = { id = "b"; network = "alpha"; hub = !-; link = Reverse ("relay.example", 2222i32); os = LinuxHost }
+    testing.expect (listm'.contains (MachineRow b) rows) "a reverse member"
+    := bad = "inl machine_of_c () = Machine (\"c\", \"alpha\", \"boss\", \"direct\", \"10.0.0.3\", \"\", \"linux\")"
+    testing.expect (listm'.contains (UnreadRow bad) rows) "an unknown role is reported, never guessed"
+    testing.expect (minute_of "24:00" = None && minute_of "6:5" = Some 365i32) "clock text"
+:= main () : i32 =
+    export "rig_net_fleet_report" fleet_report
+    0i32

@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_coordinator_model
+    rig_coordinator_table
+modules:
+    actor

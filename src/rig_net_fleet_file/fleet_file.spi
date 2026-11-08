@@ -1,0 +1,87 @@
+///- --package .
+:# fleet_file static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== fleet_line = { kind : string; fields : array_base string; text : string }
+
+:| row_kind =
+    | NetworkLine :: row_kind
+    | MachineLine :: row_kind
+
+:= row_marker = \|
+    | NetworkLine => " = Network (\""
+    | MachineLine => " = Machine (\""
+
+:= row_word = \|
+    | NetworkLine => "network"
+    | MachineLine => "machine"
+
+:= row_arity = \|
+    | NetworkLine => 3i32
+    | MachineLine => 7i32
+
+:~ fields_of (~line : string) (kind : row_kind) : array_base string =
+    := row = sm'.trim line
+    := marker = row_marker kind
+    := at = sm'.index_of marker row
+    ? at < 0i32 || sm'.ends_with "\")" row = !- ?> (;[] : array string) |> am'.base
+    |:
+        := start = at + sm'.length marker
+        sm'.split "\", \"" (sm'.trim_end_suffix "\")" (sm'.slice start (sm'.length row - 1i32) row))
+
+:~ line_of (~line : string) : option fleet_line =
+    := network = fields_of line NetworkLine
+    := machine = fields_of line MachineLine
+    := sized = \ (kind : row_kind) (fields : array_base string) => am'.length_base fields = row_arity kind
+    ? sized NetworkLine network ?> Some { kind = row_word NetworkLine; fields = network; text = line }
+    |? sized MachineLine machine ?> Some { kind = row_word MachineLine; fields = machine; text = line }
+    |? am'.length_base network > 0i32 || am'.length_base machine > 0i32 ?>
+        Some { kind = "unread"; fields = network; text = line }
+    |: None
+
+:~ ^ lines_from (lines : array string) (at : i32) (kept : array fleet_line) : array fleet_line =
+    ? at >= am'.length lines ?> kept
+    |:
+        ?= line_of (am'.index at lines) ?|
+        | Some found => lines_from lines (at + 1i32) (kept ++ ;[ found ])
+        | None => lines_from lines (at + 1i32) kept
+
+:~ fleet_lines_of (text : string) : array_base fleet_line =
+    lines_from (sm'.split "\n" (sm'.replace "\r" "" text) |> array) 0i32 ;[] |> am'.base
+
+:~ clock_minutes (clock : string) : array_base i32 =
+    ?= sm'.split_list ":" clock ?|
+    | h :: m :: [] =>
+        ?= convert.try_convert h, convert.try_convert m ?|
+        | Some hour, Some minute ?& hour >= 0i32 && hour < 24i32 && minute >= 0i32 && minute < 60i32 =>
+            ;[ hour * 60i32 + minute ] |> am'.base
+        | _ => (;[] : array i32) |> am'.base
+    | _ => (;[] : array i32) |> am'.base
+
+:~ clock_text (minute : i32) : string =
+    := two = \ (n : i32) => ? n < 10i32 ?> "0" ++# sm'.show n |: sm'.show n
+    two (minute / 60i32) ++# ":" ++# two (minute % 60i32)
+
+///> rust
+:# clock_text_reads_and_writes_minutes_of_the_day =
+    testing.expect (am'.index_base 0i32 (clock_minutes "6:5") = 365i32) "short clock text"
+    testing.expect (am'.length_base (clock_minutes "24:00") = 0i32) "no hour 24"
+    testing.expect (clock_text 365i32 = "06:05" && clock_text 1260i32 = "21:00") "two digits each"
+
+///> rust
+:# a_fleet_file_splits_into_network_machine_and_unread_lines =
+    := hub = "inl machine_of_a () = Machine (\"a\", \"alpha\", \"hub\", \"direct\", \"10.0.0.1\", \"\", \"windows\")"
+    := text = "inl network_of_alpha () = Network (\"alpha\", \"21:00\", \"06:00\")\n" ++# hub ++# "\n"
+    := lines = fleet_lines_of (text ++# "inl machine_of_x () = Machine (\"x\", \"short\")\ninl main () : i32 = 0i32\n")
+    testing.expect (am'.length_base lines = 3i32) "two rows and one unread, the main line skipped"
+    testing.expect ((am'.index_base 0i32 lines).kind = "network") "the network line"
+    testing.expect ((am'.index_base 1i32 lines).kind = "machine") "the machine line"
+    testing.expect (am'.index_base 2i32 (am'.index_base 1i32 lines).fields = "hub") "machine fields by index"
+    testing.expect ((am'.index_base 2i32 lines).kind = "unread") "a row with the wrong field count is unread"
+:= main () : i32 =
+    export "rig_net_fleet_lines" fleet_lines_of
+    export "rig_net_clock_minutes" clock_minutes
+    export "rig_net_clock_text" clock_text
+    0i32

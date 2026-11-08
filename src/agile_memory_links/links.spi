@@ -44,7 +44,7 @@
         rest.split_once("]]").map(|(target, _)| target.trim().to_owned())).filter(|target| \
         \!target.is_empty()).collect::<Vec<_>>(); links.sort(); links.dedup(); links.join("\n") }.as_str())' : string
 
-:= task_status (~state : string) (~id : string) : string = $'agile_task_census::kit_agile_task_status(&*!state, \
+:= task_status (~state : string) (~id : string) : string = $'agile_task_census::rig_agile_task_status(&*!state, \
     &*!id)' : string
 
 :== links_tally =
@@ -185,9 +185,9 @@
         2i32
     |:
         := state_dir = joined root "state"
-        := segments = $'agile_note_listing::kit_agile_state_segments(&*!state_dir)' : string
+        := segments = $'agile_note_listing::rig_agile_state_segments(&*!state_dir)' : string
         := state_raw = sm'.concat_list "\n" [ text_of (joined state_dir "agile.spi"); segments ]
-        := state = $'kit_agile_records::kit_agile_records_as_lines(&*!state_raw)' : string
+        := state = $'rig_agile_records::rig_agile_records_as_lines(&*!state_raw)' : string
         := files = memory_files directory
         := names = names_from directory files ""
         := tally =
@@ -234,5 +234,5 @@
     | _ => links_checked "" start
 
 := main () : i32 =
-    export "kit_agile_links_run" ((\ () => links_run ()) : () -> i32)
+    export "rig_agile_links_run" ((\ () => links_run ()) : () -> i32)
     0i32

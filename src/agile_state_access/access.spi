@@ -16,7 +16,6 @@
     testing.expect (writes_named "set" && writes_named "note" && writes_named "view-add") "writers"
     testing.expect (writes_named "list" = !- && writes_named "show" = !- && writes_named "views" = !-) "readers"
     testing.expect (writes_named "nope" = !-) "an unknown name writes nothing"
-///> _
 := main () : i32 =
-    export "kit_agile_writes_named" writes_named
+    export "rig_agile_writes_named" writes_named
     0i32

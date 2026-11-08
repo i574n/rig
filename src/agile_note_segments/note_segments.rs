@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let bytes = value.as_bytes();
     let length = bytes.len() as i64;
@@ -66,7 +76,7 @@ fn written_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<str> {
     if v3 {
         let v4: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
         let v21: US0 = if v4 {
-            let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+            let v5: Rc<str> = string_concat(&[&*v0, ".pending"]);
             let mut v6: bool = std::fs::write(&*v5, &*v2).is_ok();
             if v6 {
                 let mut v7: i32 = 40i32;
@@ -549,10 +559,7 @@ fn get_environment_variable_20(mut v0: Rc<str>) -> Rc<str> {
     v1
 }
 fn concat5_22(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let mut v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn declared_from_24(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
@@ -645,7 +652,7 @@ fn state_written_26(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US1 {
     std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
     let mut v6: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
     if v6 {
-        let mut v7: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+        let mut v7: Rc<str> = string_concat(&[&*v0, ".pending"]);
         let v8: bool = std::fs::write(&*v7, &*v2).is_ok();
         let v21: US0 = if v8 {
             let mut v9: i32 = 40i32;
@@ -744,10 +751,10 @@ fn closure1() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>,
         note_persisted_19(v0, v1, v2, v3, v4, v5, v6)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_note_appended(v0: &str, v1: &str, v2: &str) -> Rc<str> {
+pub fn rig_agile_note_appended(v0: &str, v1: &str, v2: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }
-pub fn kit_agile_note_persisted(v0: &str, v1: &str, v2: &str, v3: &str, v4: &str, v5: &str, v6: &str) -> (Rc<str>, u64) {
+pub fn rig_agile_note_persisted(v0: &str, v1: &str, v2: &str, v3: &str, v4: &str, v5: &str, v6: &str) -> (Rc<str>, u64) {
     closure1()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2), Rc::<str>::from(v3), Rc::<str>::from(v4), Rc::<str>::from(v5), Rc::<str>::from(v6))
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

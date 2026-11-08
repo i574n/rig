@@ -335,6 +335,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, bool) -> i32> {
         todo_path_verdict_0(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_todo_path_verdict(v0: &str, v1: bool) -> i32 {
+pub fn rig_agile_todo_path_verdict(v0: &str, v1: bool) -> i32 {
     closure0()(Rc::<str>::from(v0), v1)
 }

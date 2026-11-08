@@ -498,18 +498,18 @@ fn closure4() -> Rc<dyn Fn() -> i32> {
         complete_binding_24(v2, v4, v8, v11, v14)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_bootstrap_settled_migration_status() -> i32 {
+pub fn rig_bootstrap_settled_migration_status() -> i32 {
     closure0()()
 }
-pub fn kit_bootstrap_workspace_state_status() -> i32 {
+pub fn rig_bootstrap_workspace_state_status() -> i32 {
     closure1()()
 }
-pub fn kit_bootstrap_compiler_session_status() -> i32 {
+pub fn rig_bootstrap_compiler_session_status() -> i32 {
     closure2()()
 }
-pub fn kit_bootstrap_legacy_bundle_writer_status() -> i32 {
+pub fn rig_bootstrap_legacy_bundle_writer_status() -> i32 {
     closure3()()
 }
-pub fn kit_bootstrap_ingest_frontier_status() -> i32 {
+pub fn rig_bootstrap_ingest_frontier_status() -> i32 {
     closure4()()
 }

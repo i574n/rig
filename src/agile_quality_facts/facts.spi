@@ -99,7 +99,6 @@
         testing.expect (failing f = [ TypeFeatures ]) (failing_words f)
     | None => testing.expect !- "T-A read back"
     testing.expect (am'.length_base (fact_rows_of text) = 2i32) "both tasks become fact rows"
-///> _
 := main () : i32 =
-    export "kit_agile_fact_rows" fact_rows_of
+    export "rig_agile_fact_rows" fact_rows_of
     0i32

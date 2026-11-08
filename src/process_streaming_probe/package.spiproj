@@ -1,5 +1,5 @@
 packages:
     |core-
-    kit_process_observation
+    rig_process_observation
 modules:
     main

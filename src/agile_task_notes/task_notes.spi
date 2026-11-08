@@ -83,13 +83,13 @@
         ? task_declared original id ?>
             := schema_ready = note_schema_ensured original
             := state_dir = root ++# "/state"
-            := segments = $'agile_note_listing::kit_agile_state_segments(&*!state_dir)' : string
+            := segments = $'agile_note_listing::rig_agile_state_segments(&*!state_dir)' : string
             := seq = note_count (schema_ready ++# "\n" ++# segments) id + 1i32
             := note = { at = utc_stamp started; author = author; text = body }
             := row = note_row id seq note
             := stamp = note.at
             := problem, after =
-                $'agile_note_segments::kit_agile_note_persisted(&*!state_dir, &*!state, &*!raw, &*!schema_ready, \
+                $'agile_note_segments::rig_agile_note_persisted(&*!state_dir, &*!state, &*!raw, &*!schema_ready, \
                     &*!id, &*!row, &*!stamp)' : string * u64
             ? problem = "" ?> note_success id seq note (text_bytes original) after (ms_since started)
             |: note_failure problem id
@@ -129,13 +129,13 @@
         |:
             ?=
                 groomed_from (
-                    $'agile_planning_values::kit_agile_planning_value_token(&*!field_name, &*!value)' : i32 * string
+                    $'agile_planning_values::rig_agile_planning_value_token(&*!field_name, &*!value)' : i32 * string
                 )
             ?|
             | GroomedRefused reason => GroomedRefused reason
             | GroomedText token =>
                 groomed_from (
-                    $'agile_planning_rewrite::kit_agile_planning_rewrite(&*!text, &*!id, &*!field_name, &*!token)'
+                    $'agile_planning_rewrite::rig_agile_planning_rewrite(&*!text, &*!id, &*!field_name, &*!token)'
                     : i32 * string
                 )
 
@@ -166,16 +166,15 @@
     testing.expect (blank.author = AuthorMalformed) "a blank author is malformed"
     := extra = note_request_from [ "agile"; "note"; "root"; "ID"; "text"; "--by"; "kit" ]
     testing.expect (extra.author = AuthorMalformed && extra.body = "text") "an unknown flag is malformed"
-///> _
 := main () : i32 =
-    export "kit_agile_note_run" ((\ () => note_entry ()) : () -> i32)
+    export "rig_agile_note_run" ((\ () => note_entry ()) : () -> i32)
     export
-        "kit_agile_groomed"
+        "rig_agile_groomed"
         (
             \ (text, id, estimate, load, assignee, body, author) =>
                 groomed_text text id estimate load assignee body author
             : string * string * string * string * string * string * string -> i32 * string
         )
-    export "kit_utc_stamp" ((\ stamped => utc_stamp stamped) : u64 -> string)
+    export "rig_utc_stamp" ((\ stamped => utc_stamp stamped) : u64 -> string)
     := _ = note_entry ()
     0i32

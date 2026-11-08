@@ -1,0 +1,88 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "kit.rs"
+
+[package]
+name = "rig-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "kit"
+path = "kit.rs"
+
+[dependencies]
+rig-heal-nameof = { path = "../rig_heal_nameof" }
+rig-hook = { path = "../rig_hook" }
+rig-run-cli = { path = "../rig_run_cli" }
+rig-exec-export = { path = "../rig_exec_export" }
+rig-cli-routes = { path = "../rig_cli_routes" }
+rig-status-facts = { path = "../rig_status_facts" }
+rig-job-entry = { path = "../rig_job_entry" }
+rig-repo-state = { path = "../rig_repo_state" }
+rig-repo-affected = { path = "../rig_repo_affected" }
+rig-repo-accept-review = { path = "../rig_repo_accept_review" }
+rig-table-query = { path = "../rig_table_query" }
+rig-standards = { path = "../rig_standards" }
+rig-machine-windows = { path = "../rig_machine_windows" }
+rig-experiments = { path = "../rig_experiments" }
+rig-table-logs = { path = "../rig_table_logs" }
+rig-env-pins = { path = "../rig_env_pins" }
+rig-mirror = { path = "../rig_mirror" }
+rig-ceremonies = { path = "../rig_ceremonies" }
+rig-evidence = { path = "../rig_evidence" }
+rig-lint-macros = { path = "../rig_lint_macros" }
+rig-lint-cli = { path = "../rig_lint_cli" }
+rig-table-sequences = { path = "../rig_table_sequences" }
+rig-guide = { path = "../rig_guide" }
+rig-machine-watch = { path = "../rig_machine_watch" }
+rig-adoption = { path = "../rig_adoption" }
+rig-schedule = { path = "../rig_schedule" }
+rig-memory = { path = "../rig_memory" }
+rig-resume = { path = "../rig_resume" }
+rig-ci-parity = { path = "../rig_ci_parity" }
+rig-os-launch = { path = "../rig_os_launch" }
+rig-crate-gate = { path = "../rig_crate_gate" }
+rig-table-test = { path = "../rig_table_test" }
+rig-grep-query = { path = "../rig_grep_query" }
+rig-read-query = { path = "../rig_read_query" }
+rig-do = { path = "../rig_do" }
+rig-process-table = { path = "../rig_process_table" }
+bootstrap-authority-status = { path = "../bootstrap_authority_status" }
+rig-patch-mutation = { path = "../rig_patch_mutation" }
+rig-patch-rehearsal = { path = "../rig_patch_rehearsal" }
+rig-patch-driver-domain = { path = "../patch_driver_domain" }
+rig-batch-write = { path = "../rig_batch_write" }
+rig-fs-actions = { path = "../rig_fs_actions" }
+rig-agile-mutation = { path = "../rig_agile_mutation" }
+rig-agile-state = { path = "../rig_agile_state" }
+rig-agile-lease = { path = "../rig_agile_lease" }
+rig-process-observation = { path = "../rig_process_observation" }
+rig-legacy-operations = { path = "../rig_legacy_operations" }
+rig-toolchain-proxy = { path = "../rig_toolchain_proxy" }
+rig-release-hygiene = { path = "../rig_release_hygiene" }
+rig-coverage-prune = { path = "../rig_coverage_prune" }
+rig-bundle-retention = { path = "../rig_bundle_retention" }
+bundle-retention-domain = { path = "../bundle_retention_domain" }
+rig-handoff = { path = "../rig_handoff" }
+legacy-capability-domain = { path = "../legacy_capability_domain" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-product-diff = { path = "../rig_product_diff" }
+archive-deflate-domain = { path = "../archive_deflate_domain" }
+rig-bundle-manifest = { path = "../rig_bundle_manifest" }
+process-batch-plan-domain = { path = "../process_batch_plan_domain" }
+evidence-currentness-domain = { path = "../evidence_currentness_domain" }
+rig-compiler-discovery = { path = "../rig_compiler_discovery" }
+authority-state-domain = { path = "../authority_state_domain" }
+semantic-evidence-domain = { path = "../semantic_evidence_domain" }
+cold-proof-domain = { path = "../cold_proof_domain" }
+command-spec-domain = { path = "../command_spec_domain" }
+rig-command-help = { path = "../rig_command_help" }
+rig-command-usages = { path = "../rig_command_usages" }
+canonical-plan-ir-domain = { path = "../canonical_plan_ir_domain" }
+
+[lints.clippy]
+needless_return = "allow"
+needless_late_init = "allow"

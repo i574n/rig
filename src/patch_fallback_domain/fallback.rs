@@ -139,21 +139,21 @@ fn closure5() -> Rc<dyn Fn(i32, i32) -> i32> {
         patch_route_agreement_binding_5(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_patch_route_role_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_route_role_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_patch_route_forward_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_route_forward_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_patch_route_restore_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_route_restore_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_patch_route_hash_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_route_hash_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_patch_route_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_route_complete_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_patch_route_agreement_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_route_agreement_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }

@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "sprint.spi"
+output = "sprint.rs"
+
+[package]
+name = "rig-agile-sprint"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_sprint"
+path = "sprint.rs"
+
+[dependencies]
+rig-agile-sprint-change = { path = "../rig_agile_sprint_change" }
+rig-agile-sprint-show = { path = "../rig_agile_sprint_show" }
+rig-agile-sprint-start = { path = "../rig_agile_sprint_start" }

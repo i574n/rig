@@ -12,7 +12,7 @@ $outName = 'm4c'
 if (Test-Path (Join-Path $stage $outName)) { Rename-Item (Join-Path $stage $outName) "$outName-old-$(Get-Date -Format HHmmss)" }
 $follower = Start-Process -FilePath (Join-Path $Project 'target\release\follow.exe') -ArgumentList $label, '60' -RedirectStandardOutput (Join-Path $Project 'm4c-follow.txt') -RedirectStandardError (Join-Path $Project 'm4c-follow.err') -PassThru -NoNewWindow
 Say "follower started for $label"
-& (Join-Path $Project 'target\release\publish.exe') $label (Join-Path $stage 'scripts\node-candidate.ps1') -Mirror C:\home\remote\arity\eoie -Fixes none -RegenCrates 'kit_adoption,kit_agile_mutation' -OutName $outName -Only 'agile|notes' *> (Join-Path $Project 'm4c-publish.txt')
+& (Join-Path $Project 'target\release\publish.exe') $label (Join-Path $stage 'scripts\node-candidate.ps1') -Mirror C:\home\remote\arity\kit -Fixes none -RegenCrates 'rig_adoption,rig_agile_mutation' -OutName $outName -Only 'agile|notes' *> (Join-Path $Project 'm4c-publish.txt')
 $jobEnded = Get-Date
 Say "job ended, publish exit $LASTEXITCODE"
 $finished = $follower.WaitForExit(30000)

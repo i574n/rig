@@ -54,7 +54,7 @@
 
 := renamed_text (~text : string) (~old : string) (~new : string) : string * rename_tally =
     := updated, items, deps_count, deps_tasks, title_count, title_tasks =
-        $'agile_rename_rewrite::kit_agile_renamed_text(&*!text, &*!old, &*!new)'
+        $'agile_rename_rewrite::rig_agile_renamed_text(&*!text, &*!old, &*!new)'
         : string * i32 * i32 * string * i32 * string
     updated,
     {
@@ -123,6 +123,6 @@
     |: renamed (argument_owned 1i32) old new
 
 := main () : i32 =
-    export "kit_agile_rename_run" ((\ () => rename_entry ()) : () -> i32)
+    export "rig_agile_rename_run" ((\ () => rename_entry ()) : () -> i32)
     := _ = rename_entry ()
     0i32

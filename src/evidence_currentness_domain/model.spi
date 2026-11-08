@@ -1,3 +1,7 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
 :! evidence_declared = ()
 :! evidence_observed = ()
 :! evidence_verified = ()
@@ -68,3 +72,14 @@
     ? unix = 1i32 && windows = 0i32 ?> public_binary_name UnixPublicBinary
     |? unix = 0i32 && windows = 1i32 ?> public_binary_name WindowsPublicBinary
     |: ""
+
+///> rust
+:# evidence_stages_tool_variables_and_binary_names_hold =
+    testing.expect (evidence_row_stage 1i32 1i32 = 2i32) "a regular identical file is verified"
+    testing.expect (evidence_row_stage 1i32 0i32 = 1i32) "a regular changed file is only observed"
+    testing.expect (evidence_row_stage 0i32 1i32 = 0i32) "an irregular file never advances"
+    testing.expect (rust_tool_environment_binding "cargo" = "CARGO") "cargo's own variable name"
+    testing.expect (rust_tool_environment_binding "rustc" = "RUSTC" && rust_tool_environment_binding "go" = "") "tools"
+    testing.expect (evidence_public_binary_binding 1i32 0i32 = "kit") "unix binary"
+    testing.expect (evidence_public_binary_binding 0i32 1i32 = "kit.exe") "windows binary"
+    testing.expect (evidence_public_binary_binding 1i32 1i32 = "") "both flags is no answer"

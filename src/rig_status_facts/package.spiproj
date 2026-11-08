@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    agile_task_census
+modules:
+    model
+    facts

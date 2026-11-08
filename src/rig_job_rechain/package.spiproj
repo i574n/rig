@@ -1,0 +1,11 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_job_after_model
+    rig_process_alive
+link:
+    rig_process_alive
+modules:
+    rechain
+    entry

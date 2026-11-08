@@ -137,7 +137,6 @@
     testing.expect (anchored "/home/x" "./lib/a.spi" = "/home/x/lib/a.spi") (anchored "/home/x" "./lib/a.spi")
     testing.expect (anchored "/home/x" "/etc/y" = "/etc/y" && anchored "/home/x" "D:/z/**" = "D:/z/**") "absolute"
 
-///> _
 := main () : i32 =
-    export "kit_agile_claim_run" ((\ () => claim_run ()) : () -> i32)
+    export "rig_agile_claim_run" ((\ () => claim_run ()) : () -> i32)
     0i32

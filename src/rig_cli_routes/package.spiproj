@@ -1,0 +1,23 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_repo_state
+    rig_repo_affected
+    rig_repo_accept_review
+    rig_table_query
+    rig_table_logs
+    rig_table_sequences
+    rig_table_test
+    rig_proof_scope
+link:
+    rig_repo_state
+    rig_repo_affected
+    rig_repo_accept_review
+    rig_table_query
+    rig_table_logs
+    rig_table_sequences
+    rig_table_test
+    rig_proof_scope
+modules:
+    routes

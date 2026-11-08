@@ -8,6 +8,14 @@ packages:
     agile_mutation_policy
     agile_task_text
     union_reflection
+    agile_task_annotation
+    agile_next_print
+    agile_task_waits
+    agile_waits_hold
+link:
+    agile_task_annotation
+    agile_next_print
+    agile_waits_hold
 modules:
     ranking
     task_next

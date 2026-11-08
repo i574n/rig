@@ -219,88 +219,87 @@ fn valued_applied_7(mut v0: US4, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
     (v69, v70, v71, v72, v73, v74, v75, v76, v77)
 }
 fn flags_read_6(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: bool, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: bool) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) {
-    let (mut v117, mut v118, mut v119, mut v120, mut v121, mut v122, mut v123, mut v124, mut v125): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &*v0 {
-        UH0::UH0_Nil => {
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9)
-        }
-        _ => {
-            let (mut v108, mut v109, mut v110, mut v111, mut v112, mut v113, mut v114, mut v115, mut v116): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match Rc::unwrap_or_clone(v0) {
-                UH0::UH0_Cons(v10, v11) => {
-                    let v10: Rc<str> = v10;
-                    let v11: Rc<UH0> = v11;
-                    let v12: bool = &*v10 == "--append";
-                    let v16: US1 = if v12 {
-                        let v13: US2 = US2::US2_SwitchAppend;
-                        US1::US1_Some(v13)
-                    } else {
-                        US1::US1_None
-                    };
-                    let v17: bool = &*v10 == "--as";
-                    let v29: US3 = if v17 {
-                        let v18: US4 = US4::US4_ValuedAs;
-                        US3::US3_Some(v18)
-                    } else {
-                        let v20: bool = &*v10 == "--expect-at";
-                        if v20 {
-                            let v21: US4 = US4::US4_ValuedExpectAt;
-                            US3::US3_Some(v21)
+    loop {
+        match &*v0 {
+            UH0::UH0_Nil => {
+                return (v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            }
+            _ => {
+                match Rc::unwrap_or_clone(v0) {
+                    UH0::UH0_Cons(v10, v11) => {
+                        let v10: Rc<str> = v10;
+                        let v11: Rc<UH0> = v11;
+                        let v12: bool = &*v10 == "--append";
+                        let v16: US1 = if v12 {
+                            let v13: US2 = US2::US2_SwitchAppend;
+                            US1::US1_Some(v13)
                         } else {
-                            let v23: bool = &*v10 == "--expect-prefix";
-                            if v23 {
-                                let v24: US4 = US4::US4_ValuedExpectPrefix;
-                                US3::US3_Some(v24)
+                            US1::US1_None
+                        };
+                        let v17: bool = &*v10 == "--as";
+                        let v29: US3 = if v17 {
+                            let v18: US4 = US4::US4_ValuedAs;
+                            US3::US3_Some(v18)
+                        } else {
+                            let v20: bool = &*v10 == "--expect-at";
+                            if v20 {
+                                let v21: US4 = US4::US4_ValuedExpectAt;
+                                US3::US3_Some(v21)
                             } else {
-                                US3::US3_None
-                            }
-                        }
-                    };
-                    let v30: bool = &*v10 == "";
-                    if v30 {
-                        (v1, v2, v3, v4, v5, v6, v7, v8, v9)
-                    } else {
-                        let (mut v90, mut v91, mut v92, mut v93, mut v94, mut v95, mut v96, mut v97, mut v98): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match v16 {
-                            US1::US1_Some(v31) => {
-                                let v31: US2 = v31;
-                                let v32: bool = true;
-                                flags_read_6(v11, v1, v2, v3, v4, v5, v32, v7, v8, v9)
-                            }
-                            _ => {
-                                let (mut v81, mut v82, mut v83, mut v84, mut v85, mut v86, mut v87, mut v88, mut v89): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match v29 {
-                                    US3::US3_Some(v42) => {
-                                        let v42: US4 = v42;
-                                        match Rc::unwrap_or_clone(v11) {
-                                            UH0::UH0_Cons(v43, v44) => {
-                                                let v43: Rc<str> = v43;
-                                                let v44: Rc<UH0> = v44;
-                                                let (mut v45, mut v46, mut v47, mut v48, mut v49, mut v50, mut v51, mut v52, mut v53): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = valued_applied_7(v42, v43, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-                                                if v53 {
-                                                    let (mut v54, mut v55, mut v56, mut v57, mut v58, mut v59, mut v60, mut v61, mut v62): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = flags_read_6(v44, v45, v46, v47, v48, v49, v50, v51, v52, v53);
-                                                    (v54, v55, v56, v57, v58, v59, v60, v61, v62)
-                                                } else {
-                                                    (v45, v46, v47, v48, v49, v50, v51, v52, v53)
-                                                }
-                                            }
-                                            _ => {
-                                                (v1, v2, v3, v4, v5, v6, v7, v8, false)
-                                            }
-                                        }
-                                    }
-                                    _ => {
-                                        (v1, v2, v3, v4, v5, v6, v7, v8, false)
-                                    }
-                                };
-                                (v81, v82, v83, v84, v85, v86, v87, v88, v89)
+                                let v23: bool = &*v10 == "--expect-prefix";
+                                if v23 {
+                                    let v24: US4 = US4::US4_ValuedExpectPrefix;
+                                    US3::US3_Some(v24)
+                                } else {
+                                    US3::US3_None
+                                }
                             }
                         };
-                        (v90, v91, v92, v93, v94, v95, v96, v97, v98)
+                        let v30: bool = &*v10 == "";
+                        if v30 {
+                            return (v1, v2, v3, v4, v5, v6, v7, v8, v9);
+                        } else {
+                            match v16 {
+                                US1::US1_Some(v31) => {
+                                    let v31: US2 = v31;
+                                    let v32: bool = true;
+                                    (v0, v6) = (v11, v32);
+                                    continue;
+                                }
+                                _ => {
+                                    match v29 {
+                                        US3::US3_Some(v42) => {
+                                            let v42: US4 = v42;
+                                            match Rc::unwrap_or_clone(v11) {
+                                                UH0::UH0_Cons(v43, v44) => {
+                                                    let v43: Rc<str> = v43;
+                                                    let v44: Rc<UH0> = v44;
+                                                    let (mut v45, mut v46, mut v47, mut v48, mut v49, mut v50, mut v51, mut v52, mut v53): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = valued_applied_7(v42, v43, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+                                                    if v53 {
+                                                        (v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) = (v44, v45, v46, v47, v48, v49, v50, v51, v52, v53);
+                                                        continue;
+                                                    } else {
+                                                        return (v45, v46, v47, v48, v49, v50, v51, v52, v53);
+                                                    }
+                                                }
+                                                _ => {
+                                                    return (v1, v2, v3, v4, v5, v6, v7, v8, false);
+                                                }
+                                            }
+                                        }
+                                        _ => {
+                                            return (v1, v2, v3, v4, v5, v6, v7, v8, false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+                    _ => unreachable!(),
                 }
-                _ => unreachable!(),
-            };
-            (v108, v109, v110, v111, v112, v113, v114, v115, v116)
+            }
         }
-    };
-    (v117, v118, v119, v120, v121, v122, v123, v124, v125)
+    }
 }
 fn args_of_5(mut v0: &Rc<UH0>) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) {
     let (mut v70, mut v71, mut v72, mut v73, mut v74, mut v75, mut v76, mut v77, mut v78): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &**v0 {

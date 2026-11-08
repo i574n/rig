@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -121,7 +131,7 @@ fn open_failures_in_2(mut v0: Rc<UH1>) -> Rc<UH0> {
     let mut v5: i32 = method5(v3.clone(), v2, v4);
     let v6: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new(v3.borrow().clone());
     let mut v7: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = Rc::new(RefCell::new((v6).as_ref().clone()));
-    let mut v8: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_lint::kit_agile_lint_failing_rows(v7);
+    let mut v8: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_lint::rig_agile_lint_failing_rows(v7);
     let mut v9: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v8).borrow().clone());
     let v10: usize = (v9).len();
     let v11: i32 = ((v10) as i32);
@@ -145,7 +155,7 @@ fn method7(mut v0: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<
     }
 }
 fn facts_list_6(mut v0: Rc<str>) -> Rc<UH1> {
-    let mut v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::kit_agile_fact_rows(&v0);
+    let mut v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::rig_agile_fact_rows(&v0);
     let mut v2: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v1).borrow().clone());
     let v3: usize = (v2).len();
     let mut v4: i32 = ((v3) as i32);
@@ -397,7 +407,7 @@ fn item_failures_17(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<Ref
             let v10: Rc<str> = v10;
             let v11: Rc<str> = v11;
             let v12: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = Rc::new(RefCell::new(vec![(v5, v0, v7, v8, v9, v10, v11)]));
-            let v13: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_lint::kit_agile_lint_failing_rows(v12);
+            let v13: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_lint::rig_agile_lint_failing_rows(v12);
             v13
         }
     }
@@ -826,7 +836,7 @@ fn of_team_30(mut v0: Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: Rc<st
         let v10: Rc<UH3> = split_list_23(v9, v3);
         let v11: Rc<UH3> = { thread_local!{ static CASE: Rc<UH3> = Rc::new(UH3::UH3_Nil); } CASE.with(|case| case.clone()) };
         let v12: Rc<UH3> = method31(v10, v11);
-        let v13: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("team:"); } LIT.with(|lit| lit.clone()) }, v0));
+        let v13: Rc<str> = string_concat(&["team:", &*v0]);
         let v14: i32 = 0i32;
         let mut v15: Rc<dyn Fn(Rc<UH3>) -> US0> = method34(v13, v14);
         let v16: US0 = v15(v12);
@@ -883,22 +893,22 @@ fn closure7() -> Rc<dyn Fn(Rc<str>, Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>
         team_failures_of_28(v1, v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_lint_failures(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
+pub fn rig_agile_lint_failures(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_lint_census(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, i32)>>> {
+pub fn rig_agile_lint_census(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, i32)>>> {
     closure1()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_lint_item_failures(v0: &str, v1: &str, v2: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
+pub fn rig_agile_lint_item_failures(v0: &str, v1: &str, v2: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
     closure3()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }
-pub fn kit_agile_cadence_rows(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i64)>>> {
+pub fn rig_agile_cadence_rows(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i64)>>> {
     closure4()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_stamp_hour(v0: &str) -> i64 {
+pub fn rig_agile_stamp_hour(v0: &str) -> i64 {
     closure6()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_lint_team_failures(v0: &str, v1: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
+pub fn rig_agile_lint_team_failures(v0: &str, v1: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
     closure7()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
 pub type SpiralShape_4fa472513c6d = Mut0;

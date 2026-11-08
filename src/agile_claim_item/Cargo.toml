@@ -14,5 +14,5 @@ name = "agile_claim_item"
 path = "item.rs"
 
 [dependencies]
-kit-agile-records = { path = "../kit_agile_records" }
+rig-agile-records = { path = "../rig_agile_records" }
 agile-planning-fields = { path = "../agile_planning_fields" }

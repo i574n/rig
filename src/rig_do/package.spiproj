@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rig_receipt
+    rig_do_model
+    rig_do_records
+link:
+    rig_do_model
+modules:
+    host
+    decode
+    run

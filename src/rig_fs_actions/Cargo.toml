@@ -1,0 +1,27 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "fs_actions.rs"
+
+[package]
+name = "rig-fs-actions"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_fs_actions"
+path = "fs_actions.rs"
+
+[dependencies]
+canonical-plan-ir-domain = { path = "../canonical_plan_ir_domain" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
+rig-rust-std-fs-mutation = { path = "../rust_std_fs_mutation" }
+rig-patch-control-domain = { path = "../patch_control_domain" }
+rig-patch-driver-domain = { path = "../patch_driver_domain" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-process = { path = "../rig_process" }
+
+[lints.clippy]
+needless_return = "allow"
+needless_late_init = "allow"

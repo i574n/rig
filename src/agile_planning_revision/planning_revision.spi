@@ -15,15 +15,15 @@
 := step_from (code, detail) : planning_step = ? code = 0i32 ?> StepText detail |: StepRejected detail
 
 :~ value_token (~field_name : string) (~value : string) : planning_step =
-    step_from ($'agile_planning_values::kit_agile_planning_value_token(&*!field_name, &*!value)' : i32 * string)
+    step_from ($'agile_planning_values::rig_agile_planning_value_token(&*!field_name, &*!value)' : i32 * string)
 
 :~ rewritten (~text : string) (~id : string) (~field_name : string) (~token : string) : planning_step =
     step_from (
-        $'agile_planning_rewrite::kit_agile_planning_rewrite(&*!text, &*!id, &*!field_name, &*!token)' : i32 * string
+        $'agile_planning_rewrite::rig_agile_planning_rewrite(&*!text, &*!id, &*!field_name, &*!token)' : i32 * string
     )
 
 := planning_summary (~text : string) (~id : string) : string =
-    $'agile_planning_fields::kit_agile_planning_summary(&*!text, &*!id)' : string
+    $'agile_planning_fields::rig_agile_planning_summary(&*!text, &*!id)' : string
 
 :~ planning_edit_failure (~reason : string) (~id : string) : i32 =
     stderr_failure ("agile edit " ++# id ++# " rejected: " ++# reason)
@@ -76,6 +76,6 @@
     planning_edit (argument_owned 1i32) (argument_owned 2i32) (argument_owned 3i32) (argument_owned 4i32)
 
 := main () : i32 =
-    export "kit_agile_planning_edit_run" ((\ () => planning_edit_entry ()) : () -> i32)
+    export "rig_agile_planning_edit_run" ((\ () => planning_edit_entry ()) : () -> i32)
     := _ = planning_edit_entry ()
     0i32

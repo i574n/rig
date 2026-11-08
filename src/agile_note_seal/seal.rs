@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_SealApply,
@@ -37,7 +47,7 @@ enum US4 {
     US4_None,
 }
 fn seal_failure_2(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile seal rejected: "); } LIT.with(|lit| lit.clone()) }, v0));
+    let v1: Rc<str> = string_concat(&["agile seal rejected: ", &*v0]);
     let mut v2: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v1 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
     v2
@@ -54,43 +64,29 @@ fn seal_receipt_3(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<RefCell<Vec<Rc<str>>>
         }
     };
     let v14: Rc<str> = std::rc::Rc::<str>::from((v4).to_string());
-    let v15: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" sealed="); } LIT.with(|lit| lit.clone()) }, v14));
-    let v16: Rc<str> = Rc::<str>::from(format!("{}{}", v15, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" new_in_archive="); } LIT.with(|lit| lit.clone()) }));
     let v17: Rc<str> = std::rc::Rc::<str>::from((v6).to_string());
-    let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v16, v17));
-    let v19: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile seal "); } LIT.with(|lit| lit.clone()) }, v13));
-    let mut v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, v18));
     let v21: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v9);
     let v22: Rc<str> = std::rc::Rc::<str>::from((v7).to_string());
-    let v23: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_before="); } LIT.with(|lit| lit.clone()) }, v22));
-    let v24: Rc<str> = Rc::<str>::from(format!("{}{}", v23, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_after="); } LIT.with(|lit| lit.clone()) }));
     let v25: Rc<str> = std::rc::Rc::<str>::from((v8).to_string());
-    let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v24, v25));
-    let v27: Rc<str> = Rc::<str>::from(format!("{}{}", v26, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
     let v28: Rc<str> = std::rc::Rc::<str>::from((v21).to_string());
-    let v29: Rc<str> = Rc::<str>::from(format!("{}{}", v27, v28));
-    let v30: Rc<str> = Rc::<str>::from(format!("{}{}", v20, v29));
+    let v30: Rc<str> = string_concat(&["kit agile seal ", &*v13, " sealed=", &*v14, " new_in_archive=", &*v17, " bytes_before=", &*v22, " bytes_after=", &*v25, " elapsed_ms=", &*v28]);
     let v31: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v30.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
     v31
 }
 fn concat5_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let mut v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let mut v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn done_ids_5(mut v0: Rc<str>) -> Rc<str> {
-    let v1: Rc<str> = agile_task_census::kit_agile_done_ids(&*v0);
-    let mut v2: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v1));
+    let v1: Rc<str> = agile_task_census::rig_agile_done_ids(&*v0);
+    let mut v2: Rc<str> = string_concat(&["\n", &*v1]);
     v2
 }
 fn member_8(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let mut v2: bool = &*v1 != "";
     if v2 {
-        let v3: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v1));
-        let mut v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
+        let mut v4: Rc<str> = string_concat(&["\n", &*v1, "\n"]);
         let mut v5: bool = v0.contains(&*v4);
         v5
     } else {
@@ -230,13 +226,26 @@ fn sealing_of_6(mut v0: Rc<str>, mut v1: Rc<str>) -> (Rc<str>, Rc<RefCell<Vec<Rc
     (v7, v6, v8, v9, v10)
 }
 fn archive_path_16(mut v0: Rc<str>) -> Rc<str> {
-    let v1: Rc<str> = Rc::<str>::from(format!("{}{}", v0, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive/done-notes.spi"); } LIT.with(|lit| lit.clone()) }));
+    let v1: Rc<str> = string_concat(&[&*v0, "/archive/done-notes.spi"]);
     v1
 }
 fn method17(mut v0: Vec<u8>) -> Vec<u8> {
     v0
 }
-fn binding_of_19(mut v0: Rc<str>) -> Rc<str> {
+fn archived_line_19(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
+    let v3: Rc<str> = string_concat(&["\n", &*v1, "\n"]);
+    let mut v4: Rc<str> = string_concat(&[&*v0, "\n"]);
+    let mut v5: bool = v4.contains(&*v3);
+    v5
+}
+fn closure4(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> bool> {
+    Rc::new(move |mut v1: Rc<str>| -> bool {
+        let mut v2: bool = archived_line_19(v0.clone(), v1);
+        let v3: bool = v2 == false;
+        v3
+    })
+}
+fn binding_of_22(mut v0: Rc<str>) -> Rc<str> {
     let v1: i32 = (v0.clone().len() as i32);
     let mut v2: Rc<str> = std::rc::Rc::<str>::from(v0.get(4i32 as usize..v1 as usize).unwrap_or(""));
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
@@ -262,21 +271,77 @@ fn binding_of_19(mut v0: Rc<str>) -> Rc<str> {
         v16
     }
 }
-fn archived_binding_18(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
-    let mut v2: Rc<str> = binding_of_19(v1);
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\ninl "); } LIT.with(|lit| lit.clone()) }, v2));
-    let mut v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () ="); } LIT.with(|lit| lit.clone()) }));
+fn archived_binding_23(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
+    let mut v2: Rc<str> = binding_of_22(v1);
+    let mut v4: Rc<str> = string_concat(&["\ninl ", &*v2, " () ="]);
     let mut v5: bool = v0.contains(&*v4);
     v5
 }
-fn closure4(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> bool> {
-    Rc::new(move |mut v1: Rc<str>| -> bool {
-        let mut v2: bool = archived_binding_18(v0.clone(), v1);
-        let v3: bool = v2 == false;
-        v3
-    })
+fn free_binding_24(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> Rc<str> {
+    loop {
+        let mut v4: Rc<str> = std::rc::Rc::<str>::from((v2).to_string());
+        let mut v5: Rc<str> = string_concat(&[&*v1, "_seal", &*v4]);
+        let mut v7: Rc<str> = string_concat(&["\ninl ", &*v5, " () ="]);
+        let v8: bool = v0.contains(&*v7);
+        if v8 {
+            let v9: i32 = v2.wrapping_add(1i32);
+            v2 = v9;
+            continue;
+        } else {
+            return v5;
+        }
+    }
 }
-fn renamed_within_20(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
+fn archive_row_21(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+    let mut v2: Rc<str> = binding_of_22(v1.clone());
+    let v3: bool = archived_binding_23(v0.clone(), v1.clone());
+    let mut v4: bool = v3 == false;
+    if v4 {
+        v1
+    } else {
+        let mut v5: i32 = 2i32;
+        let mut v6: Rc<str> = free_binding_24(v0, v2.clone(), v5);
+        let v8: i32 = (v2.len() as i32);
+        let v9: i32 = 4i32.wrapping_add(v8);
+        let v10: i32 = (v1.clone().len() as i32);
+        let v11: Rc<str> = std::rc::Rc::<str>::from(v1.get(v9 as usize..v10 as usize).unwrap_or(""));
+        let v12: Rc<str> = string_concat(&["inl ", &*v6, &*v11]);
+        v12
+    }
+}
+fn method20(mut v0: Rc<str>, mut v1: Rc<Vec<Rc<str>>>, mut v2: i32, mut v3: Rc<UH0>) -> Rc<UH0> {
+    loop {
+        let mut v4: bool = v2 < 0i32;
+        if v4 {
+            return v3;
+        } else {
+            let mut v5: usize = ((v2) as usize);
+            let mut v6: Rc<str> = (v1)[v5].clone();
+            let mut v7: i32 = v2.wrapping_sub(1i32);
+            let v8: Rc<str> = archive_row_21(v0.clone(), v6);
+            let v9: Rc<UH0> = Rc::new(UH0::UH0_Cons(v8, v3));
+            (v2, v3) = (v7, v9);
+            continue;
+        }
+    }
+}
+fn fresh_rows_18(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>) -> Rc<RefCell<Vec<Rc<str>>>> {
+    let mut v2: Rc<dyn Fn(Rc<str>) -> bool> = closure4(v0.clone());
+    let v3: Rc<RefCell<Vec<Rc<str>>>> = filtered_11(v2, v1);
+    let mut v4: Rc<Vec<Rc<str>>> = Rc::new((v3).borrow().clone());
+    let mut v5: usize = (v4).len();
+    let mut v6: i32 = ((v5) as i32);
+    let mut v7: i32 = v6.wrapping_sub(1i32);
+    let v8: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+    let v9: Rc<UH0> = method20(v0, v4, v7, v8);
+    let v10: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
+    let v11: i32 = 0i32;
+    let v12: i32 = method13(v10.clone(), v9, v11);
+    let v13: Rc<Vec<Rc<str>>> = Rc::new(v10.borrow().clone());
+    let v14: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v13).as_ref().clone()));
+    v14
+}
+fn renamed_within_25(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
     loop {
         let v3: bool = std::fs::rename(&*v1, &*v0).is_ok();
         if v3 {
@@ -294,18 +359,18 @@ fn renamed_within_20(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
         }
     }
 }
-fn state_written_21(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US3 {
+fn state_written_26(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US3 {
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".paused"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v5: Rc<str> = concat5_4(v0.clone(), v3, v4.clone(), v4.clone(), v4.clone());
     std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
     let mut v6: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
     if v6 {
-        let mut v7: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+        let mut v7: Rc<str> = string_concat(&[&*v0, ".pending"]);
         let v8: bool = std::fs::write(&*v7, &*v2).is_ok();
         let v21: US2 = if v8 {
             let v9: i32 = 40i32;
-            let v10: bool = renamed_within_20(v0.clone(), v7.clone(), v9);
+            let v10: bool = renamed_within_25(v0.clone(), v7.clone(), v9);
             if v10 {
                 let v11: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v2);
                 if v11 {
@@ -374,50 +439,48 @@ fn sealed_written_15(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
         let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v22
     };
-    let v24: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }, v23.clone()));
-    let v25: Rc<dyn Fn(Rc<str>) -> bool> = closure4(v24);
-    let v26: Rc<RefCell<Vec<Rc<str>>>> = filtered_11(v25, v4);
-    let v27: Rc<str> = Rc::<str>::from(format!("{}{}", v0, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) }));
-    let v29: Result<(), std::io::Error> = std::fs::create_dir_all(&*v27);
-    let v30: bool = &*v23 == "";
-    let v33: bool = if v30 {
+    let v24: Rc<str> = string_concat(&["\n", &*v23]);
+    let v25: Rc<RefCell<Vec<Rc<str>>>> = fresh_rows_18(v24, v4);
+    let v26: Rc<str> = string_concat(&[&*v0, "/archive"]);
+    let v28: Result<(), std::io::Error> = std::fs::create_dir_all(&*v26);
+    let v29: bool = &*v23 == "";
+    let v32: bool = if v29 {
         true
     } else {
-        let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
-        let v32: bool = v23.ends_with(&*v31);
-        v32
+        let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+        let v31: bool = v23.ends_with(&*v30);
+        v31
     };
-    let v35: Rc<str> = if v33 {
+    let v34: Rc<str> = if v32 {
         v23.clone()
     } else {
-        let v34: Rc<str> = Rc::<str>::from(format!("{}{}", v23.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
-        v34
+        let v33: Rc<str> = string_concat(&[&*v23, "\n"]);
+        v33
     };
-    let v36: i32 = (v26.clone().borrow().len() as i32);
-    let v37: bool = v36 == 0i32;
-    let v41: Rc<str> = if v37 {
+    let v35: i32 = (v25.clone().borrow().len() as i32);
+    let v36: bool = v35 == 0i32;
+    let v40: Rc<str> = if v36 {
         v23
     } else {
-        let v38: Rc<str> = joined_lines_14(v26);
-        let v39: Rc<str> = Rc::<str>::from(format!("{}{}", v35, v38));
-        let v40: Rc<str> = Rc::<str>::from(format!("{}{}", v39, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
-        v40
+        let v37: Rc<str> = joined_lines_14(v25);
+        let v39: Rc<str> = string_concat(&[&*v34, &*v37, "\n"]);
+        v39
     };
-    let v42: Rc<str> = Rc::<str>::from(format!("{}{}", v9.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
-    let v43: bool = std::fs::write(&*v42, &*v41).is_ok();
-    let v56: US2 = if v43 {
-        let v44: i32 = 40i32;
-        let v45: bool = renamed_within_20(v9.clone(), v42.clone(), v44);
-        if v45 {
-            let mut v46: bool = std::fs::read_to_string(&*v9).is_ok_and(|value| value == *v41);
-            if v46 {
+    let v41: Rc<str> = string_concat(&[&*v9, ".pending"]);
+    let v42: bool = std::fs::write(&*v41, &*v40).is_ok();
+    let v55: US2 = if v42 {
+        let v43: i32 = 40i32;
+        let v44: bool = renamed_within_25(v9.clone(), v41.clone(), v43);
+        if v44 {
+            let v45: bool = std::fs::read_to_string(&*v9).is_ok_and(|value| value == *v40);
+            if v45 {
                 US2::US2_Replaced
             } else {
                 US2::US2_ReadbackMismatch
             }
         } else {
-            let v50: bool = std::fs::remove_file(&*v42).is_ok() || !std::path::Path::new(&*v42).exists();
-            if v50 {
+            let v49: bool = std::fs::remove_file(&*v41).is_ok() || !std::path::Path::new(&*v41).exists();
+            if v49 {
                 US2::US2_RenameFailed
             } else {
                 US2::US2_RenameFailedTemporaryKept
@@ -426,62 +489,62 @@ fn sealed_written_15(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
     } else {
         US2::US2_TemporaryWriteFailed
     };
-    match &v56 {
+    match &v55 {
         US2::US2_Replaced => {
-            let v57: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v8));
-            let v58: US3 = state_written_21(v1, v2, v57);
-            match &v58 {
+            let v56: Rc<str> = string_concat(&[&*v3, &*v8]);
+            let v57: US3 = state_written_26(v1, v2, v56);
+            match &v57 {
                 US3::US3_StateWritten => {
-                    let v59: Rc<str> = std::rc::Rc::<str>::from((v36).to_string());
-                    v59
+                    let v58: Rc<str> = std::rc::Rc::<str>::from((v35).to_string());
+                    v58
                 }
                 _ => {
-                    let v63: Rc<str> = match v58 {
+                    let v62: Rc<str> = match v57 {
                         US3::US3_StateChangedSinceRead => {
-                            let v60: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
-                            v60
+                            let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
+                            v59
                         }
-                        US3::US3_StateWriteFailed(v61) => {
-                            let v61: Rc<str> = v61;
-                            v61
+                        US3::US3_StateWriteFailed(v60) => {
+                            let v60: Rc<str> = v60;
+                            v60
                         }
                         _ => unreachable!(),
                     };
-                    let v64: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("!"); } LIT.with(|lit| lit.clone()) }, v63));
-                    v64
+                    let v63: Rc<str> = string_concat(&["!", &*v62]);
+                    v63
                 }
             }
         }
         _ => {
-            let v75: Rc<str> = match v56 {
+            let v74: Rc<str> = match v55 {
                 US2::US2_ChangedSinceRead => {
-                    let v70: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the file changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
-                    v70
-                }
-                US2::US2_ReadbackMismatch => {
-                    let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("readback did not match the written file"); } LIT.with(|lit| lit.clone()) };
+                    let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the file changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
                     v69
                 }
-                US2::US2_RenameFailed => {
-                    let v67: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place"); } LIT.with(|lit| lit.clone()) };
-                    v67
-                }
-                US2::US2_RenameFailedTemporaryKept => {
-                    let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place or remove its .pending copy"); } LIT.with(|lit| lit.clone()) };
+                US2::US2_ReadbackMismatch => {
+                    let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("readback did not match the written file"); } LIT.with(|lit| lit.clone()) };
                     v68
                 }
-                US2::US2_TemporaryWriteFailed => {
-                    let v66: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write the replacement file"); } LIT.with(|lit| lit.clone()) };
+                US2::US2_RenameFailed => {
+                    let v66: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place"); } LIT.with(|lit| lit.clone()) };
                     v66
+                }
+                US2::US2_RenameFailedTemporaryKept => {
+                    let v67: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place or remove its .pending copy"); } LIT.with(|lit| lit.clone()) };
+                    v67
+                }
+                US2::US2_TemporaryWriteFailed => {
+                    let v65: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write the replacement file"); } LIT.with(|lit| lit.clone()) };
+                    v65
                 }
                 _ => unreachable!(),
             };
-            let v76: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("!archive "); } LIT.with(|lit| lit.clone()) }, v75));
-            v76
+            let v75: Rc<str> = string_concat(&["!archive ", &*v74]);
+            v75
         }
     }
 }
-fn method22(mut v0: Option<i32>) -> Option<i32> {
+fn method27(mut v0: Option<i32>) -> Option<i32> {
     v0
 }
 fn closure5() -> Rc<dyn Fn((i32)) -> US4> {
@@ -510,7 +573,7 @@ fn seal_run_1(mut v0: Rc<str>, mut v1: US0) -> i32 {
         US1::US1_FileReadable(v13) => {
             let v13: Rc<str> = v13;
             let v14: Rc<str> = std::fs::read_to_string(&*v13).unwrap_or_default().into();
-            let v15: Rc<str> = kit_agile_records::kit_agile_records_as_lines(&*v14);
+            let v15: Rc<str> = rig_agile_records::rig_agile_records_as_lines(&*v14);
             let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\r"); } LIT.with(|lit| lit.clone()) };
             let v17: bool = v15.contains(&*v16);
             if v17 {
@@ -543,7 +606,7 @@ fn seal_run_1(mut v0: Rc<str>, mut v1: US0) -> i32 {
                                 seal_failure_2(v42)
                             } else {
                                 let v44: Option<i32> = (v38).trim().parse::<i32>().ok();
-                                let v45: Option<i32> = method22(v44);
+                                let v45: Option<i32> = method27(v44);
                                 let mut v46: Rc<dyn Fn((i32)) -> US4> = closure5();
                                 let mut v47: Option<US4> = v45.map(|x| v46(x));
                                 let v49: US4 = US4::US4_None;
@@ -559,7 +622,7 @@ fn seal_run_1(mut v0: Rc<str>, mut v1: US0) -> i32 {
                                     }
                                 };
                                 let v55: u64 = v15.len() as u64;
-                                let v56: Rc<str> = Rc::<str>::from(format!("{}{}", v21.clone(), v28));
+                                let v56: Rc<str> = string_concat(&[&*v21, &*v28]);
                                 let v57: u64 = v56.len() as u64;
                                 seal_receipt_3(v1, v21, v22, v23, v24, v25, v54, v55, v57, v2)
                             }
@@ -567,7 +630,7 @@ fn seal_run_1(mut v0: Rc<str>, mut v1: US0) -> i32 {
                         US0::US0_SealDryRun => {
                             let v33: i32 = 0i32;
                             let v34: u64 = v15.len() as u64;
-                            let v35: Rc<str> = Rc::<str>::from(format!("{}{}", v21.clone(), v28));
+                            let v35: Rc<str> = string_concat(&[&*v21, &*v28]);
                             let v36: u64 = v35.len() as u64;
                             seal_receipt_3(v1, v21, v22, v23, v24, v25, v33, v34, v36, v2)
                         }
@@ -602,6 +665,6 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
         seal_entry_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_seal_run() -> i32 {
+pub fn rig_agile_seal_run() -> i32 {
     closure0()()
 }

@@ -14,7 +14,7 @@
 
 := main () : i32 =
     export
-        "kit_agile_planning_rewrite"
+        "rig_agile_planning_rewrite"
         (
             \ (text, id, field_name, token) => planning_rewrite text id field_name token
             : string * string * string * string -> i32 * string

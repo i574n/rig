@@ -1,9 +1,0 @@
-packages:
-    |core-
-    spiral-
-    union_reflection
-    kit_receipt
-modules:
-    model
-    slice
-    read

@@ -1,4 +1,4 @@
-:< kit_process_observation.process_observation
+:< rig_process_observation.process_observation
 
 := main () : i32 =
     := plan = smoke_plan ()

@@ -785,36 +785,36 @@ fn closure10() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         state_receipt_coverage_checkpoint_sha_32(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_state_receipt_u64_decimal_valid(v0: &str) -> u64 {
+pub fn rig_state_receipt_u64_decimal_valid(v0: &str) -> u64 {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_u64_decimal_value(v0: &str) -> u64 {
+pub fn rig_state_receipt_u64_decimal_value(v0: &str) -> u64 {
     closure1()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_u32_decimal_valid(v0: &str) -> u64 {
+pub fn rig_state_receipt_u32_decimal_valid(v0: &str) -> u64 {
     closure2()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_u32_spi_literal_valid(v0: &str) -> u64 {
+pub fn rig_state_receipt_u32_spi_literal_valid(v0: &str) -> u64 {
     closure3()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_u32_spi_literal_value(v0: &str) -> u64 {
+pub fn rig_state_receipt_u32_spi_literal_value(v0: &str) -> u64 {
     closure4()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_dash_shape(v0: &str) -> u64 {
+pub fn rig_state_receipt_dash_shape(v0: &str) -> u64 {
     closure5()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_migration_denominator_payload(v0: &str) -> Rc<str> {
+pub fn rig_state_receipt_migration_denominator_payload(v0: &str) -> Rc<str> {
     closure6()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_series_records_valid(v0: &str) -> u64 {
+pub fn rig_state_receipt_series_records_valid(v0: &str) -> u64 {
     closure7()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_last_series_record_payload(v0: &str) -> Rc<str> {
+pub fn rig_state_receipt_last_series_record_payload(v0: &str) -> Rc<str> {
     closure8()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_coverage_checkpoint_kind(v0: &str) -> u64 {
+pub fn rig_state_receipt_coverage_checkpoint_kind(v0: &str) -> u64 {
     closure9()(Rc::<str>::from(v0))
 }
-pub fn kit_state_receipt_coverage_checkpoint_sha(v0: &str) -> Rc<str> {
+pub fn rig_state_receipt_coverage_checkpoint_sha(v0: &str) -> Rc<str> {
     closure10()(Rc::<str>::from(v0))
 }

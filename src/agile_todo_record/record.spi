@@ -18,7 +18,7 @@
     ?> lines_sorted found
     |:
         := line = line_head sites
-        := id = $'agile_todo_lines::kit_agile_todo_id(&*!backlog, &*!line)' : string
+        := id = $'agile_todo_lines::rig_agile_todo_id(&*!backlog, &*!line)' : string
         := gap = byte_find line "  "
         := entry =
             ? id = "" || gap < 0i32 || byte_find line (todo_marker ()) < 0i32
@@ -75,7 +75,7 @@
     | FileReadable file =>
         := raw = loaded_string (read_text file)
         := original = records_text raw
-        := sites = $'agile_todo_scan::kit_agile_todo_sites(&*!root, "*")' : string
+        := sites = $'agile_todo_scan::rig_agile_todo_sites(&*!root, "*")' : string
         := after = harvested_ledger original sites ""
         := before = ledger_from_rows original 0i32 ""
         := start = record_start original
@@ -108,6 +108,6 @@
             | problem => record_failure (state_write_problem problem)
 
 := main () : i32 =
-    export "kit_agile_todos_record_run" ((\ () => record_entry ()) : () -> i32)
+    export "rig_agile_todos_record_run" ((\ () => record_entry ()) : () -> i32)
     := _ = record_entry ()
     0i32

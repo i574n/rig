@@ -1,0 +1,35 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rust_std_string
+    rust_std_env
+    rig_job_placement
+    rig_jobs
+    rig_process_alive
+    rig_job_dispatch
+    rig_job_chain
+    rig_job_serial
+    rig_job_control
+    rig_job_rechain
+    rig_jobs_doctor
+    rig_job_supervise
+    rig_job_launch
+    rig_job_host
+    rig_job_query
+    rig_job_coordinator
+link:
+    rig_process_alive
+    rig_job_dispatch
+    rig_job_chain
+    rig_job_serial
+    rig_job_control
+    rig_job_rechain
+    rig_jobs_doctor
+    rig_job_supervise
+    rig_job_launch
+    rig_job_host
+    rig_job_query
+    rig_job_coordinator
+modules:
+    entry

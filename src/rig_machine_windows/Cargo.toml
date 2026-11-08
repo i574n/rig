@@ -1,0 +1,25 @@
+[package.metadata.spiral]
+entry = "windows.spi"
+output = "windows.rs"
+
+[package]
+name = "rig-machine-windows"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_machine_windows"
+path = "windows.rs"
+
+[dependencies]
+rig-window-run = { path = "../rig_window_run" }
+rig-window-query = { path = "../rig_window_query" }
+rig-window-claim = { path = "../rig_window_claim" }
+rig-window-request = { path = "../rig_window_request" }
+rig-window-wait = { path = "../rig_window_wait" }
+rig-window-admission = { path = "../rig_window_admission" }
+rig-remote-status = { path = "../rig_remote_status" }
+rig-window-announce-verb = { path = "../rig_window_announce_verb" }
+rig-window-announce-check = { path = "../rig_window_announce_check" }

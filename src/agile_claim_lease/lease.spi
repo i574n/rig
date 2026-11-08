@@ -71,9 +71,8 @@
     := held = claims_text []
     := kind, _, _, _, _, _, reason, _ = lease_claimed "KIT-SIDE" "b" 90i32 "" (known ()) (known ()) "KIT-SIDE" held 1000u64
     testing.expect (kind = "refused" && reason = "job-running:KIT-SIDE") reason
-///> _
 := main () : i32 =
-    export "kit_claim_lease" (
+    export "rig_claim_lease" (
         (\ (item, lane, ttl, paths, wsjf, known, live, rows, now) => lease_claimed item lane ttl paths wsjf known live rows now)
         : string * string * i32 * string * string * string * string * string * u64
             -> string * string * string * u64 * i32 * i32 * string * string

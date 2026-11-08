@@ -3,12 +3,12 @@ entry = "main.spi"
 output = "policy_probe.rs"
 
 [package]
-name = "kit-policy-probe"
+name = "rig-policy-probe"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [[example]]
-name = "kit-policy-probe"
+name = "rig-policy-probe"
 path = "policy_probe.rs"

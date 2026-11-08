@@ -6,7 +6,7 @@
 
 := main () : i32 =
     export
-        "kit_agile_todo_path_verdict"
+        "rig_agile_todo_path_verdict"
         ((\ (relative, spiral_sibling) => todo_path_verdict relative spiral_sibling) : string * bool -> i32)
     := _ = todo_path_verdict "" !-
     0i32

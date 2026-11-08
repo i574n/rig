@@ -47,9 +47,8 @@
     := declined = claims_text [ release_lease_of "GATE" "~a" 9000u64 ]
     := _, _, _, _, _, _, again, _ = lease_released "GATE" "a" 90i32 declined 1000u64
     testing.expect (again = "none") "a second release by the decliner is a no-op"
-///> _
 := main () : i32 =
-    export "kit_claim_release" (
+    export "rig_claim_release" (
         (\ (item, lane, ttl, rows, now) => lease_released item lane ttl rows now)
         : string * string * i32 * string * u64 -> string * string * string * u64 * i32 * i32 * string * string
     )

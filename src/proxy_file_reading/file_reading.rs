@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_ReadShown(i32),
@@ -48,12 +58,10 @@ fn proxy_argument_count_2() -> i32 {
     }
 }
 fn read_receipt_text_4(mut v0: Rc<str>, mut v1: u64, mut v2: i32, mut v3: u64) -> Rc<str> {
-    let v4: u64 = kit_rust_std_fs::rooted_regular_size(std::path::Path::new(&*v0)).unwrap_or(0);
+    let v4: u64 = rig_rust_std_fs::rooted_regular_size(std::path::Path::new(&*v0)).unwrap_or(0);
     let v5: Rc<str> = std::rc::Rc::<str>::from((v4).to_string());
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy fs-read ok bytes="); } LIT.with(|lit| lit.clone()) }, v5));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" shown="); } LIT.with(|lit| lit.clone()) }));
     let v8: Rc<str> = std::rc::Rc::<str>::from((v1).to_string());
-    let v9: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v8));
+    let v9: Rc<str> = string_concat(&["kit proxy fs-read ok bytes=", &*v5, " shown=", &*v8]);
     let v10: bool = v1 < v4;
     let v13: US2 = if v10 {
         US2::US2_LeadingBytesShown
@@ -89,11 +97,9 @@ fn read_receipt_text_4(mut v0: Rc<str>, mut v1: u64, mut v2: i32, mut v3: u64) -
             }
         }
     };
-    let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v9, v27));
-    let v29: Rc<str> = Rc::<str>::from(format!("{}{}", v28, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
     let v30: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v3);
     let v31: Rc<str> = std::rc::Rc::<str>::from((v30).to_string());
-    let v32: Rc<str> = Rc::<str>::from(format!("{}{}", v29, v31));
+    let v32: Rc<str> = string_concat(&[&*v9, &*v27, " elapsed_ms=", &*v31]);
     v32
 }
 fn file_reading_outcome_1() -> US0 {
@@ -103,18 +109,18 @@ fn file_reading_outcome_1() -> US0 {
     if v2 {
         let v3: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 1i32 as usize).unwrap_or_default());
         let v4: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 2i32 as usize).unwrap_or_default());
-        let v5: Rc<str> = kit_rust_std_fs::rooted_path(std::path::Path::new(&*v3), &*v4).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
+        let v5: Rc<str> = rig_rust_std_fs::rooted_path(std::path::Path::new(&*v3), &*v4).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
         let v6: bool = &*v5 == "";
         if v6 {
-            let v7: Rc<str> = std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_path(std::path::Path::new(&*v3), &*v4).err().unwrap_or_default().as_str());
-            let v8: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read path rejected: "); } LIT.with(|lit| lit.clone()) }, v7));
+            let v7: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_path(std::path::Path::new(&*v3), &*v4).err().unwrap_or_default().as_str());
+            let v8: Rc<str> = string_concat(&["fs-read path rejected: ", &*v7]);
             US0::US0_ReadRejected(v8)
         } else {
-            let v10: Rc<str> = std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v5)).err().unwrap_or_default().as_str());
+            let v10: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v5)).err().unwrap_or_default().as_str());
             let v11: bool = &*v10 == "";
             if v11 {
                 let v12: u64 = u64::MAX;
-                let v13: u64 = kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v5)).ok().and_then(|file| std::io::copy(&mut std::io::Read::take(file, v12), &mut std::io::stdout().lock()).ok()).unwrap_or(u64::MAX);
+                let v13: u64 = rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v5)).ok().and_then(|file| std::io::copy(&mut std::io::Read::take(file, v12), &mut std::io::stdout().lock()).ok()).unwrap_or(u64::MAX);
                 let v14: u64 = u64::MAX;
                 let v15: bool = v13 == v14;
                 let v18: US1 = if v15 {
@@ -124,7 +130,7 @@ fn file_reading_outcome_1() -> US0 {
                 };
                 match v18 {
                     US1::US1_StreamFailed => {
-                        let v19: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read failed while streaming: "); } LIT.with(|lit| lit.clone()) }, v5));
+                        let v19: Rc<str> = string_concat(&["fs-read failed while streaming: ", &*v5]);
                         US0::US0_ReadRejected(v19)
                     }
                     US1::US1_Streamed(v21) => {
@@ -132,19 +138,19 @@ fn file_reading_outcome_1() -> US0 {
                         let v22: i32 = std::io::Write::flush(&mut std::io::stdout()).map(|_| 0i32).unwrap_or(2i32);
                         let v23: bool = v22 == 0i32;
                         if v23 {
-                            let v24: i32 = kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v5)).ok().and_then(|mut file| { let offset = (v21).checked_sub(1)?; std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(offset)).ok()?; let mut byte = [0u8; 1]; std::io::Read::read_exact(&mut file, &mut byte).ok()?; Some(i32::from(byte[0])) }).unwrap_or(-1);
+                            let v24: i32 = rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v5)).ok().and_then(|mut file| { let offset = (v21).checked_sub(1)?; std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(offset)).ok()?; let mut byte = [0u8; 1]; std::io::Read::read_exact(&mut file, &mut byte).ok()?; Some(i32::from(byte[0])) }).unwrap_or(-1);
                             let v25: Rc<str> = read_receipt_text_4(v5, v21, v24, v0);
                             let v26: i32 = std::io::Write::write_all(&mut std::io::stderr(), (v25.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                             US0::US0_ReadShown(v26)
                         } else {
-                            let v28: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read could not flush stdout: "); } LIT.with(|lit| lit.clone()) }, v5));
+                            let v28: Rc<str> = string_concat(&["fs-read could not flush stdout: ", &*v5]);
                             US0::US0_ReadRejected(v28)
                         }
                     }
                 }
             } else {
-                let v33: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read failed: "); } LIT.with(|lit| lit.clone()) }, v10));
+                let v33: Rc<str> = string_concat(&["fs-read failed: ", &*v10]);
                 US0::US0_ReadRejected(v33)
             }
         }
@@ -169,14 +175,14 @@ fn file_reading_outcome_1() -> US0 {
                 }
                 US4::US4_Valid(v47) => {
                     let v47: US5 = v47;
-                    let v48: Rc<str> = kit_rust_std_fs::rooted_path(std::path::Path::new(&*v38), &*v39).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
+                    let v48: Rc<str> = rig_rust_std_fs::rooted_path(std::path::Path::new(&*v38), &*v39).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
                     let v49: bool = &*v48 == "";
                     if v49 {
-                        let v50: Rc<str> = std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_path(std::path::Path::new(&*v38), &*v39).err().unwrap_or_default().as_str());
-                        let v51: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read path rejected: "); } LIT.with(|lit| lit.clone()) }, v50));
+                        let v50: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_path(std::path::Path::new(&*v38), &*v39).err().unwrap_or_default().as_str());
+                        let v51: Rc<str> = string_concat(&["fs-read path rejected: ", &*v50]);
                         US0::US0_ReadRejected(v51)
                     } else {
-                        let v53: Rc<str> = std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v48)).err().unwrap_or_default().as_str());
+                        let v53: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v48)).err().unwrap_or_default().as_str());
                         let v54: bool = &*v53 == "";
                         if v54 {
                             let v58: u64 = match v47 {
@@ -189,7 +195,7 @@ fn file_reading_outcome_1() -> US0 {
                                     v55
                                 }
                             };
-                            let v59: u64 = kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v48)).ok().and_then(|file| std::io::copy(&mut std::io::Read::take(file, v58), &mut std::io::stdout().lock()).ok()).unwrap_or(u64::MAX);
+                            let v59: u64 = rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v48)).ok().and_then(|file| std::io::copy(&mut std::io::Read::take(file, v58), &mut std::io::stdout().lock()).ok()).unwrap_or(u64::MAX);
                             let v60: u64 = u64::MAX;
                             let v61: bool = v59 == v60;
                             let v64: US1 = if v61 {
@@ -199,7 +205,7 @@ fn file_reading_outcome_1() -> US0 {
                             };
                             match v64 {
                                 US1::US1_StreamFailed => {
-                                    let v65: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read failed while streaming: "); } LIT.with(|lit| lit.clone()) }, v48));
+                                    let v65: Rc<str> = string_concat(&["fs-read failed while streaming: ", &*v48]);
                                     US0::US0_ReadRejected(v65)
                                 }
                                 US1::US1_Streamed(v67) => {
@@ -207,19 +213,19 @@ fn file_reading_outcome_1() -> US0 {
                                     let v68: i32 = std::io::Write::flush(&mut std::io::stdout()).map(|_| 0i32).unwrap_or(2i32);
                                     let v69: bool = v68 == 0i32;
                                     if v69 {
-                                        let v70: i32 = kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v48)).ok().and_then(|mut file| { let offset = (v67).checked_sub(1)?; std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(offset)).ok()?; let mut byte = [0u8; 1]; std::io::Read::read_exact(&mut file, &mut byte).ok()?; Some(i32::from(byte[0])) }).unwrap_or(-1);
+                                        let v70: i32 = rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*v48)).ok().and_then(|mut file| { let offset = (v67).checked_sub(1)?; std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(offset)).ok()?; let mut byte = [0u8; 1]; std::io::Read::read_exact(&mut file, &mut byte).ok()?; Some(i32::from(byte[0])) }).unwrap_or(-1);
                                         let v71: Rc<str> = read_receipt_text_4(v48, v67, v70, v0);
                                         let v72: i32 = std::io::Write::write_all(&mut std::io::stderr(), (v71.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                                         US0::US0_ReadShown(v72)
                                     } else {
-                                        let v74: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read could not flush stdout: "); } LIT.with(|lit| lit.clone()) }, v48));
+                                        let v74: Rc<str> = string_concat(&["fs-read could not flush stdout: ", &*v48]);
                                         US0::US0_ReadRejected(v74)
                                     }
                                 }
                             }
                         } else {
-                            let v79: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-read failed: "); } LIT.with(|lit| lit.clone()) }, v53));
+                            let v79: Rc<str> = string_concat(&["fs-read failed: ", &*v53]);
                             US0::US0_ReadRejected(v79)
                         }
                     }
@@ -250,6 +256,6 @@ fn closure0() -> Rc<dyn Fn() -> (i32, Rc<str>)> {
         file_reading_report_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_file_reading_outcome() -> (i32, Rc<str>) {
+pub fn rig_file_reading_outcome() -> (i32, Rc<str>) {
     closure0()()
 }

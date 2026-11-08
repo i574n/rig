@@ -1,0 +1,15 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    agile_task_census
+    rig_agile_sprint_state
+    agile_note_listing
+    agile_status_changes
+link:
+    agile_task_census
+    rig_agile_sprint_state
+    agile_note_listing
+    agile_status_changes
+modules:
+    show

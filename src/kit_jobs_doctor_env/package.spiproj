@@ -1,8 +1,0 @@
-packages:
-    |core-
-    spiral-
-    kit_jobs
-    kit_jobs_doctor_model
-modules:
-    environment
-    entry

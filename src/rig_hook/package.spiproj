@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rig_os_json
+    rig_hook_rules
+    rig_hook_verbs
+link:
+    rig_hook_verbs
+modules:
+    hook

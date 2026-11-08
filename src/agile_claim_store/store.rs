@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_FileReadable(Rc<str>),
@@ -55,7 +65,7 @@ enum US6 {
 }
 pub struct Mut1 { pub l0: Rc<str> }
 fn claims_loaded_0(mut v0: Rc<str>) -> (bool, Rc<str>) {
-    let mut v1: Rc<str> = Rc::<str>::from(format!("{}{}", v0, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/claims.spi"); } LIT.with(|lit| lit.clone()) }));
+    let mut v1: Rc<str> = string_concat(&[&*v0, "/state/claims.spi"]);
     let mut v2: bool = std::path::Path::new(&*v1).is_file();
     let v5: US0 = if v2 {
         US0::US0_FileReadable(v1)
@@ -110,7 +120,7 @@ fn listed_6(mut v0: Rc<str>) -> bool {
     }
 }
 fn module_registered_5(mut v0: Rc<str>) -> US1 {
-    let mut v1: Rc<str> = Rc::<str>::from(format!("{}{}", v0, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/package.spiproj"); } LIT.with(|lit| lit.clone()) }));
+    let mut v1: Rc<str> = string_concat(&[&*v0, "/state/package.spiproj"]);
     let mut v2: bool = std::path::Path::new(&*v1).is_file();
     let v5: US0 = if v2 {
         US0::US0_FileReadable(v1.clone())
@@ -138,7 +148,7 @@ fn module_registered_5(mut v0: Rc<str>) -> US1 {
                 } else {
                     let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("modules:\n    claims\n"); } LIT.with(|lit| lit.clone()) };
                     let v18: Rc<str> = Rc::<str>::from(v9.replace(&*v12, &*v17));
-                    let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v1.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+                    let v19: Rc<str> = string_concat(&[&*v1, ".pending"]);
                     let v20: bool = std::fs::write(&*v19, &*v18).is_ok();
                     let v33: US2 = if v20 {
                         let v21: i32 = 40i32;
@@ -198,7 +208,7 @@ fn module_registered_5(mut v0: Rc<str>) -> US1 {
     }
 }
 fn claims_saved_3(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<str>) -> Rc<str> {
-    let v4: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/claims.spi"); } LIT.with(|lit| lit.clone()) }));
+    let v4: Rc<str> = string_concat(&[&*v0, "/state/claims.spi"]);
     let v8: bool = if v1 {
         let v5: bool = std::fs::read_to_string(&*v4).is_ok_and(|value| value == *v2);
         v5
@@ -211,7 +221,7 @@ fn claims_saved_3(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<str
     let v39: US1 = if v9 {
         US1::US1_StateChangedSinceRead
     } else {
-        let v11: Rc<str> = Rc::<str>::from(format!("{}{}", v4.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+        let v11: Rc<str> = string_concat(&[&*v4, ".pending"]);
         let v12: bool = std::fs::write(&*v11, &*v3).is_ok();
         let v25: US2 = if v12 {
             let v13: i32 = 40i32;
@@ -697,13 +707,12 @@ fn quoted_31(mut v0: Rc<str>) -> Rc<str> {
     let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\\""); } LIT.with(|lit| lit.clone()) };
     let v6: Rc<str> = Rc::<str>::from(v3.replace(&*v4, &*v5));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }, v6));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+    let v8: Rc<str> = string_concat(&["\"", &*v6, "\""]);
     v8
 }
 fn method33(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
     let mut v2: Rc<str> = v0.borrow().l0.clone();
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v1));
+    let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
@@ -721,11 +730,8 @@ fn paths_term_34(mut v0: Rc<UH1>) -> Rc<str> {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH1> = v3;
             let v4: Rc<str> = quoted_31(v2);
-            let v5: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("PathThen ("); } LIT.with(|lit| lit.clone()) }, v4));
-            let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) }));
             let v7: Rc<str> = paths_term_34(v3);
-            let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v7));
-            let mut v9: Rc<str> = Rc::<str>::from(format!("{}{}", v8, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) }));
+            let mut v9: Rc<str> = string_concat(&["PathThen (", &*v4, ", ", &*v7, ")"]);
             v9
         }
         UH1::UH1_Nil => {
@@ -746,28 +752,18 @@ fn claim_row_30(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: u64, mut v3: Rc<UH1>) 
         let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) };
         let mut v10: Rc<str> = Rc::<str>::from(v7.replace(&*v8, &*v9));
         let v11: Rc<str> = Rc::<str>::from(v10.to_lowercase());
-        let v12: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("__declined_"); } LIT.with(|lit| lit.clone()) }, v11));
+        let v12: Rc<str> = string_concat(&["__declined_", &*v11]);
         v12
     };
     let mut v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
     let mut v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) };
     let v16: Rc<str> = Rc::<str>::from(v0.replace(&*v14, &*v15));
     let v17: Rc<str> = Rc::<str>::from(v16.to_lowercase());
-    let v18: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl claim_"); } LIT.with(|lit| lit.clone()) }, v17));
-    let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, v13));
-    let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = Claim ("); } LIT.with(|lit| lit.clone()) }));
     let v21: Rc<str> = quoted_31(v0);
-    let v22: Rc<str> = Rc::<str>::from(format!("{}{}", v20, v21));
-    let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v22, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) }));
     let v24: Rc<str> = quoted_31(v1);
-    let v25: Rc<str> = Rc::<str>::from(format!("{}{}", v23, v24));
-    let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v25, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) }));
     let v27: Rc<str> = format_real_32(v2);
-    let mut v28: Rc<str> = Rc::<str>::from(format!("{}{}", v26, v27));
-    let mut v29: Rc<str> = Rc::<str>::from(format!("{}{}", v28, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u64, "); } LIT.with(|lit| lit.clone()) }));
     let v30: Rc<str> = paths_term_34(v3);
-    let v31: Rc<str> = Rc::<str>::from(format!("{}{}", v29, v30));
-    let v32: Rc<str> = Rc::<str>::from(format!("{}{}", v31, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) }));
+    let v32: Rc<str> = string_concat(&["inl claim_", &*v17, &*v13, " () = Claim (", &*v21, ", ", &*v24, ", ", &*v27, "u64, ", &*v30, ")"]);
     v32
 }
 fn method29(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
@@ -780,8 +776,7 @@ fn method29(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
                 let v5: Rc<UH1> = v5;
                 let v6: Rc<UH0> = v6;
                 let v7: Rc<str> = claim_row_30(v2, v3, v4, v5);
-                let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v1, v7));
-                let mut v9: Rc<str> = Rc::<str>::from(format!("{}{}", v8, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
+                let mut v9: Rc<str> = string_concat(&[&*v1, &*v7, "\n"]);
                 (v0, v1) = (v6, v9);
                 continue;
             }
@@ -809,7 +804,7 @@ fn claims_text_28(mut v0: Rc<UH0>) -> Rc<str> {
     let mut v9: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v8).as_ref().clone()));
     let mut v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
     let v11: Rc<str> = Rc::<str>::from((*v9.borrow()).join(&*v10));
-    let v12: Rc<str> = Rc::<str>::from(format!("{}{}", v11, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
+    let v12: Rc<str> = string_concat(&[&*v11, "\n"]);
     method29(v0, v12)
 }
 fn claims_applied_2(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: u64, mut v7: Rc<str>, mut v8: Rc<str>) -> Rc<str> {
@@ -866,10 +861,10 @@ fn closure1() -> Rc<dyn Fn(Rc<RefCell<Vec<(Rc<str>, bool, Rc<str>, Rc<str>, Rc<s
         applied_claims_1(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_claims_loaded(v0: &str) -> (bool, Rc<str>) {
+pub fn rig_claims_loaded(v0: &str) -> (bool, Rc<str>) {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_claims_applied(v0: Rc<RefCell<Vec<(Rc<str>, bool, Rc<str>, Rc<str>, Rc<str>, Rc<str>, u64, Rc<str>, Rc<str>)>>>) -> Rc<str> {
+pub fn rig_claims_applied(v0: Rc<RefCell<Vec<(Rc<str>, bool, Rc<str>, Rc<str>, Rc<str>, Rc<str>, u64, Rc<str>, Rc<str>)>>>) -> Rc<str> {
     closure1()(v0)
 }
 pub type SpiralShape_accbf6de6842 = Mut0;

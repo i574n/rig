@@ -18,39 +18,39 @@
     := _ = archive_fault_binding 1i32 1i32
     archive_terminal.emit_runtime ()
     export
-        "kit_archive_preflight_binding"
+        "rig_archive_preflight_binding"
         ((\ (first, second) => archive_preflight_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_entry_binding"
+        "rig_archive_entry_binding"
         ((\ (first, second) => archive_entry_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_tar_symlink_binding"
+        "rig_archive_tar_symlink_binding"
         ((\ (first, second) => archive_tar_symlink_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_tar_hardlink_binding"
+        "rig_archive_tar_hardlink_binding"
         ((\ (first, second) => archive_tar_hardlink_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_tar_long_link_binding"
+        "rig_archive_tar_long_link_binding"
         ((\ (first, second) => archive_tar_long_link_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_tar_pax_path_binding"
+        "rig_archive_tar_pax_path_binding"
         ((\ (first, second) => archive_tar_pax_path_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_compression_binding"
+        "rig_archive_compression_binding"
         ((\ (first, second) => archive_compression_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_budget_binding"
+        "rig_archive_budget_binding"
         ((\ (first, second) => archive_budget_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_complete_binding"
+        "rig_archive_complete_binding"
         ((\ (first, second) => archive_complete_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_tree_binding"
+        "rig_archive_tree_binding"
         ((\ (first, second) => archive_tree_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_format_binding"
+        "rig_archive_format_binding"
         ((\ (first, second) => archive_format_binding first second) : i32 * i32 -> i32)
     export
-        "kit_archive_fault_binding"
+        "rig_archive_fault_binding"
         ((\ (first, second) => archive_fault_binding first second) : i32 * i32 -> i32)
     0i32

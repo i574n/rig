@@ -146,7 +146,7 @@
     }
 
 :~ local_stamp (~at : string) : string =
-    := offset = kit_receipt.receipt.local_offset_minutes ()
+    := offset = rig_receipt.receipt.local_offset_minutes ()
     $'{ let at = &*!at; let offset = !offset; let parsed = (|| -> Option<i64> { let hours: i64 = \
         at.get(11..13)?.parse().ok()?; let minutes: i64 = at.get(14..16)?.parse().ok()?; Some(hours * 60 + minutes) \
         })(); std::rc::Rc::<str>::from(match parsed { Some(total) => { let local = (total + offset).rem_euclid(1440); \

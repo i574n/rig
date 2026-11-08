@@ -28,10 +28,10 @@
 
 := main () : i32 =
     export
-        "kit_agile_state_transient_schema_code"
+        "rig_agile_state_transient_schema_code"
         ((\ value => agile_transient_schema_code value) : string -> u64)
     export
-        "kit_agile_state_path_candidate_code"
+        "rig_agile_state_path_candidate_code"
         ((\ value => agile_state_path_candidate_code value) : string -> u64)
     inl _ = agile_transient_schema_code """
         patch_resume.spi

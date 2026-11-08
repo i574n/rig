@@ -31,19 +31,19 @@
 := u64_parsed (~text : string) : u64 = $'!text.parse::<u64>().unwrap_or(0)' : u64
 
 := open_problem (~path : string) : string =
-    $'std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*!path)).err().unwrap_o\
+    $'std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*!path)).err().unwrap_o\
         r_default().as_str())' : string
-:= regular_file_bytes (~path : string) : u64 = $'kit_rust_std_fs::rooted_regular_size(std::path::Path::new(&*!path)).u\
+:= regular_file_bytes (~path : string) : u64 = $'rig_rust_std_fs::rooted_regular_size(std::path::Path::new(&*!path)).u\
     nwrap_or(0)' : u64
 := streamed_prefix (~path : string) (limit : u64) : u64 =
-    $'kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*!path)).ok().and_then(|file| \
+    $'rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*!path)).ok().and_then(|file| \
         std::io::copy(&mut std::io::Read::take(file, !limit), &mut \
         std::io::stdout().lock()).ok()).unwrap_or(u64::MAX)' : u64
 := stream_result_of (count : u64) : stream_result =
     ? (count = (stream_failure_marker ())) ?> StreamFailed |: Streamed count
 := flushed_stdout () : i32 = $'std::io::Write::flush(&mut std::io::stdout()).map(|_| 0i32).unwrap_or(2i32)' : i32
 := byte_before (~path : string) (shown : u64) : i32 =
-    $'kit_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*!path)).ok().and_then(|mut file| { let offset \
+    $'rig_rust_std_fs::rooted_open_regular_read(std::path::Path::new(&*!path)).ok().and_then(|mut file| { let offset \
         = (!shown).checked_sub(1)?; std::io::Seek::seek(&mut file, std::io::SeekFrom::Start(offset)).ok()?; \
         let mut byte = [0u8; 1]; std::io::Read::read_exact(&mut file, &mut byte).ok()?; \
         Some(i32::from(byte[0])) }).unwrap_or(-1)' : i32
@@ -120,7 +120,7 @@
     | ReadRejected text => 2i32, text
 
 := main () : i32 =
-    export "kit_file_reading_outcome" ((\ () => file_reading_report ()) : () -> i32 * string)
+    export "rig_file_reading_outcome" ((\ () => file_reading_report ()) : () -> i32 * string)
     := _ = read_receipt_text "file_reading.spi" 5u64 10i32 (unix_ms ())
     := _ = file_reading_outcome ()
     0i32

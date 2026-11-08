@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    union_reflection
+    rig_jobs
+    rust_std_env
+modules:
+    window_model
+    windows

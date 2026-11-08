@@ -1,0 +1,18 @@
+:< sm'_operators
+:< model
+
+:~ config_dir () : string =
+    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := app_data = env.get_environment_variable "APPDATA"
+    := base = ? app_data <> "" ?> app_data |: env.get_environment_variable "HOME" ++# "/.config"
+    := rig_exists = file_system.directory_exists (base ++# "/rig")
+    ? home <> "" ?> home |: config_choice base rig_exists (file_system.directory_exists (base ++# "/kit"))
+
+:~ path_first_value ((config, current) : string * string) : string =
+    := rows = path_first_rows (file_system.read_text_or_empty (config ++# "/path_first.spi"))
+    := dirs = rows |> listm.map row_dir |> listm'.filter (\ (d : string) => file_system.directory_exists d)
+    ? dirs = [] ?> "" |: path_with_first current dirs (? platform::is_windows () ?> ";" |: ":")
+
+:= main () : i32 =
+    export "rig_path_first_value" path_first_value
+    0i32

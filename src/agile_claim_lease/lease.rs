@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -818,7 +828,7 @@ fn change_word_37(mut v0: US10) -> Rc<str> {
 }
 fn method40(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
     let v2: Rc<str> = v0.borrow().l0.clone();
-    let mut v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v1));
+    let mut v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
@@ -838,12 +848,12 @@ fn refusal_reason_38(mut v0: US5) -> Rc<str> {
             let v20: u64 = v20;
             let v21: Rc<UH0> = v21;
             let v22: Rc<str> = format_real_39(v20);
-            let v23: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("declined-by-you-until:"); } LIT.with(|lit| lit.clone()) }, v22));
+            let v23: Rc<str> = string_concat(&["declined-by-you-until:", &*v22]);
             v23
         }
         US5::US5_JobRunning(v9) => {
             let mut v9: Rc<str> = v9;
-            let v10: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job-running:"); } LIT.with(|lit| lit.clone()) }, v9));
+            let v10: Rc<str> = string_concat(&["job-running:", &*v9]);
             v10
         }
         US5::US5_LeasedBy(v1, v2, v3, v4) => {
@@ -851,23 +861,19 @@ fn refusal_reason_38(mut v0: US5) -> Rc<str> {
             let v2: Rc<str> = v2;
             let mut v3: u64 = v3;
             let mut v4: Rc<UH0> = v4;
-            let mut v5: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("leased-by:"); } LIT.with(|lit| lit.clone()) }, v2));
-            let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":"); } LIT.with(|lit| lit.clone()) }));
             let v7: Rc<str> = format_real_39(v3);
-            let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v7));
+            let v8: Rc<str> = string_concat(&["leased-by:", &*v2, ":", &*v7]);
             v8
         }
         US5::US5_PathOverlap(v13, v14) => {
             let v13: Rc<str> = v13;
             let mut v14: Rc<str> = v14;
-            let mut v15: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("path-overlap:"); } LIT.with(|lit| lit.clone()) }, v13));
-            let v16: Rc<str> = Rc::<str>::from(format!("{}{}", v15, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":"); } LIT.with(|lit| lit.clone()) }));
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v16, v14));
+            let v17: Rc<str> = string_concat(&["path-overlap:", &*v13, ":", &*v14]);
             v17
         }
         US5::US5_RecentEditOn(v11) => {
             let v11: Rc<str> = v11;
-            let mut v12: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("recent-edit:"); } LIT.with(|lit| lit.clone()) }, v11));
+            let mut v12: Rc<str> = string_concat(&["recent-edit:", &*v11]);
             v12
         }
     }
@@ -970,7 +976,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<
         lease_claimed_0(v0, v1, v2, v3, v4, v5, v6, v7, v8)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_claim_lease(v0: &str, v1: &str, v2: i32, v3: &str, v4: &str, v5: &str, v6: &str, v7: &str, v8: u64) -> (Rc<str>, Rc<str>, Rc<str>, u64, i32, i32, Rc<str>, Rc<str>) {
+pub fn rig_claim_lease(v0: &str, v1: &str, v2: i32, v3: &str, v4: &str, v5: &str, v6: &str, v7: &str, v8: u64) -> (Rc<str>, Rc<str>, Rc<str>, u64, i32, i32, Rc<str>, Rc<str>) {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), v2, Rc::<str>::from(v3), Rc::<str>::from(v4), Rc::<str>::from(v5), Rc::<str>::from(v6), Rc::<str>::from(v7), v8)
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

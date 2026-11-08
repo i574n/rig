@@ -36,7 +36,7 @@
         }
 
         pub fn copy_regular_atomic_preserve(source: &Path, target: &Path) -> Result<u64, String> {
-            kit_rust_std_fs_mutation::copy_regular_atomic_preserve(source, target)
+            rig_rust_std_fs_mutation::copy_regular_atomic_preserve(source, target)
         }
 
         """

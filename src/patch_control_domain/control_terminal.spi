@@ -3,9 +3,9 @@ inl emit_runtime () : () = global """
     use std::env;
     use std::path::{Path, PathBuf};
 
-    pub fn patch_safe_relative(value: &str) -> Result<PathBuf, String> { kit_rust_std_fs::safe_relative_path(value) }
+    pub fn patch_safe_relative(value: &str) -> Result<PathBuf, String> { rig_rust_std_fs::safe_relative_path(value) }
 
-    pub fn patch_rooted(root: &Path, relative: &str) -> Result<PathBuf, String> { kit_rust_std_fs::rooted_path(root, relative) }
+    pub fn patch_rooted(root: &Path, relative: &str) -> Result<PathBuf, String> { rig_rust_std_fs::rooted_path(root, relative) }
 
     pub fn patch_target_max_bytes() -> Result<usize, String> {
         let value = env::var("KIT_PATCH_TARGET_MAX_BYTES")
@@ -57,7 +57,7 @@ inl emit_runtime () : () = global """
             let rows = canonical_plan_ir_domain::parse_plan_ir_manifest(source)?;
             let mut patches = Vec::with_capacity(rows.len());
             for row in rows {
-                if canonical_plan_ir_domain::kit_plan_ir_decode_code(&row.op, &row.target, &row.expected, &row.payload, &row.effect) != 2 {
+                if canonical_plan_ir_domain::rig_plan_ir_decode_code(&row.op, &row.target, &row.expected, &row.payload, &row.effect) != 2 {
                     return Err("compiled Plan IR contains a non-patch operation".to_owned());
                 }
                 patches.push(PatchExactValue { relative: row.target, before: row.expected, after: row.payload });
@@ -76,7 +76,7 @@ inl emit_runtime () : () = global """
     }
     #[must_use]
     pub fn patch_plan_error(code: i32) -> i32 {
-        eprintln!("kit error: {}", kit_patch_plan_failure_message(code));
+        eprintln!("kit error: {}", rig_patch_plan_failure_message(code));
         2
     }
 

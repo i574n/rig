@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "experiments.spi"
+output = "experiments.rs"
+
+[package]
+name = "rig-experiments"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_experiments"
+path = "experiments.rs"
+
+[dependencies]
+rig-experiment-amend = { path = "../rig_experiment_amend" }
+rig-experiment-import = { path = "../rig_experiment_import" }
+rig-experiment-analysis = { path = "../rig_experiment_analysis" }
+rig-experiment-args = { path = "../rig_experiment_args" }

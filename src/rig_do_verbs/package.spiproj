@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_do_model
+    rig_do_records
+link:
+    rig_do_model
+modules:
+    verbs

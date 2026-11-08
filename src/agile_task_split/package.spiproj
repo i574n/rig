@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    rust_std_env
+    agile_split_plan
+link:
+    agile_split_plan
+modules:
+    verb

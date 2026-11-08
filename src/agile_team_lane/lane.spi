@@ -55,9 +55,23 @@
 
 :== paused_row = { id : string }
 
+:~ resume_noted (~records : string) (ids : list string) : list string =
+    := markers = [ "resume when"; "resume:"; "resumes on"; "resume from" ]
+    := resumed = \ (found : list string) (line : string) =>
+        ? sm'.contains " = Note (\"" line |> not ?> found
+        |:
+            := low = sm'.to_lower line
+            := named = \ (id : string) => sm'.contains ("note (\"" ++# sm'.to_lower id ++# "\",") low
+            := marked = markers |> listm.fold (\ (any : bool) (m : string) => any || sm'.contains m low) !-
+            ? marked ?> listm.append found (ids |> listm'.filter named) |: found
+    sm'.split_list "\n" records |> listm.fold resumed []
+
 :~ paused_of ((root, team) : string * string) : array_base paused_row =
-    := _, tasks = tasks_of root
-    := ids = team_paused tasks team |> listm'.take_ 5i32
+    := records, tasks = tasks_of root
+    := paused = team_paused tasks team
+    := resumed = resume_noted records paused
+    := unresumed = \ (id : string) => listm'.contains id resumed |> not
+    := ids = paused |> listm'.filter unresumed |> listm'.take_ 5i32
     ids |> listm.map (\ (id : string) => { id = id }) |> listm'.box |> listm'.to_array'
 
 ///> rust
@@ -66,9 +80,11 @@
     testing.expect (lane_team "kit-fc1568a6" teams = "kit" && lane_team "x-dumps-ec368ac8" teams = "x-dumps") "prefix"
     testing.expect (lane_team "x" teams = "x" && lane_team "tibia-1" teams = "") "exact name, or no team"
     testing.expect (team_words "kit, team:kit,agile,team:x" = [ "kit"; "x" ]) "team tags"
-
-///> _
+    := noted = "inl note_of_a_1 () = Note (\"KIT-A\", 1u32, \"t\", \"kit\", \"merged; resume when B is Done\")\n"
+    := plain = "inl note_of_b_1 () = Note (\"KIT-B\", 1u32, \"t\", \"kit\", \"parked for now\")\n"
+    := cleared = resume_noted (noted ++# plain) [ "KIT-A"; "KIT-B" ]
+    testing.expect (cleared = [ "KIT-A" ]) "only a resume condition clears it"
 := main () : i32 =
-    export "kit_claim_lane_items" lane_items
-    export "kit_agile_team_paused" paused_of
+    export "rig_claim_lane_items" lane_items
+    export "rig_agile_team_paused" paused_of
     0i32

@@ -1,0 +1,92 @@
+///- --package .
+:# toml static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| toml_verdict =
+    | Formatted :: i32 -> toml_verdict
+    | Unformatted :: list string -> toml_verdict
+    | NoConfig :: string -> toml_verdict
+    | NoTaplo :: toml_verdict
+
+:~ unformatted_paths (~output : string) : list string =
+    := marker = "not properly formatted path=\""
+    := picked = \ (found : list string) (line : string) =>
+        := at = sm'.index_of marker line
+        ? at < 0i32 ?> found
+        |:
+            := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
+            := first_piece = \ (first : string) (p : string) => ? first = "" ?> p |: first
+            := path = sm'.split_list "\"" rest |> listm.fold first_piece ""
+            ? path = "" || listm'.contains path found ?> found |: listm.append found [ path ]
+    sm'.split_list "\n" (sm'.replace "\r" "" output) |> listm.fold picked []
+
+:~ toml_files (~listing : string) : list string =
+    := kept = \ (found : list string) (line : string) =>
+        := file = sm'.trim line
+        ? file = "" || sm'.ends_with "manifest.toml" file ?> found |: listm.append found [ file ]
+    sm'.split_list "\n" (sm'.replace "\r" "" listing) |> listm.fold kept []
+
+:~ verdict_lines (verdict : toml_verdict) : list string =
+    ?= verdict ?|
+    | Formatted count => [ "kit standards toml ok files=" ++# sm'.show count ++# " unformatted=0" ]
+    | Unformatted paths =>
+        := rows = paths |> listm.map (\ (p : string) => p ++# ":1  toml-format  not formatted by the taplo config")
+        listm.append rows [ "kit standards toml refused unformatted=" ++# sm'.show (listm.length paths : i32) ]
+    | NoConfig repo => [ "kit standards toml: no .taplo.toml at " ++# repo ++# " and TAPLO_CONFIG names no file" ]
+    | NoTaplo => [ "kit standards toml: taplo is not on PATH" ]
+
+:~ verdict_code (verdict : toml_verdict) : i32 =
+    ?= verdict ?|
+    | Formatted _ => 0i32
+    | Unformatted _ => 1i32
+    | _ => 2i32
+
+:~ taplo_config (~own : string) (own_exists : bool) (~shared : string) : string = ? own_exists ?> own |: shared
+
+:~ toml_verdict_of (~repo : string) : toml_verdict =
+    := own = sm'.replace "\\" "/" repo ++# "/.taplo.toml"
+    := shared = sm'.replace "\\" "/" (env.get_environment_variable "TAPLO_CONFIG")
+    := config = taplo_config own (file_system.file_exists own) shared
+    ? config = "" || (file_system.file_exists config |> not) ?> NoConfig repo
+    |:
+        := listed = process.captured_by "git" [ "-C"; repo; "ls-files"; "*.toml" ] !-
+        := files = toml_files listed.stdout
+        := checked = process.captured_by "taplo" (listm.append [ "fmt"; "--check"; "--config"; config ] files) !+
+        ? checked.ran |> not ?> NoTaplo
+        |:
+            ?= unformatted_paths checked.stdout ?|
+            | [] => Formatted (listm.length files)
+            | paths => Unformatted paths
+
+:~ toml_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: repo :: _ =>
+        := verdict = toml_verdict_of repo
+        verdict_lines verdict |> listm.iter console.write_line
+        verdict_code verdict
+    | _ =>
+        console.write_error_line "kit error: usage: standards --toml <repo>"
+        2i32
+
+///> rust
+:# unformatted_files_become_findings_and_manifests_are_skipped =
+    := head = " ERROR taplo:format_files: the file is not properly formatted path=\"C:/r/a/Cargo.toml\"\n"
+    := out = head ++# " INFO taplo: other line\n ERROR x: not properly formatted path=\"C:/r/b.toml\"\n"
+    testing.expect (unformatted_paths out = [ "C:/r/a/Cargo.toml"; "C:/r/b.toml" ]) "both paths"
+    testing.expect (unformatted_paths "all good\n" = []) "a clean check"
+    := listing = "Cargo.toml\nsrc/x/Cargo.toml\ngleam/manifest.toml\n\n"
+    testing.expect (toml_files listing = [ "Cargo.toml"; "src/x/Cargo.toml" ]) "files"
+    testing.expect (verdict_code (Unformatted [ "a" ]) = 1i32 && verdict_code NoTaplo = 2i32) "exit codes"
+    testing.expect (verdict_lines (Formatted 3i32) = [ "kit standards toml ok files=3 unformatted=0" ]) "a clean line"
+
+///> rust
+:# a_repo_config_wins_and_the_shared_one_is_the_fallback =
+    testing.expect (taplo_config "C:/r/.taplo.toml" !+ "C:/org/.taplo.toml" = "C:/r/.taplo.toml") "the repo copy"
+    testing.expect (taplo_config "C:/r/.taplo.toml" !- "C:/org/.taplo.toml" = "C:/org/.taplo.toml") "the shared one"
+    testing.expect (taplo_config "C:/r/.taplo.toml" !- "" = "") "neither, so the caller refuses"
+
+:= main () : i32 =
+    export "rig_standards_toml_run" toml_run
+    0i32

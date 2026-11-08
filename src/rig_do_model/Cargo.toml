@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "model.spi"
+output = "model.rs"
+
+[package]
+name = "rig-do-model"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do_model"
+path = "model.rs"

@@ -66,12 +66,12 @@
 
 := state_text (~root : string) : string =
     := _, text = read_content (rust_std_string.model.concat5 root "/state/agile.spi" "" "" "")
-    $'kit_agile_records::kit_agile_records_as_lines(&*!text)' : string
+    $'rig_agile_records::rig_agile_records_as_lines(&*!text)' : string
 
 := standings_from (state : scan_state) (~rendered : string) : scan_state =
     := backlog = state.backlog
     := silent = state.json || state.quiet
-    := stale, unknown = $'agile_todo_standing::kit_agile_todo_standings(&*!backlog, &*!rendered, !silent)' : i32 * i32
+    := stale, unknown = $'agile_todo_standing::rig_agile_todo_standings(&*!backlog, &*!rendered, !silent)' : i32 * i32
     { state ?| stale = state.stale + stale; unknown = state.unknown + unknown }
 
 := standing_receipt (state : scan_state) : string =
@@ -83,14 +83,14 @@
         (rust_std_string.model.concat5 " wide=" (i32_text state.wide) "" "" "")
 
 := crate_path_verdict (~relative : string) (spiral_sibling : bool) : path_verdict =
-    path_verdict_of_code ($'agile_todo_paths::kit_agile_todo_path_verdict(&*!relative, !spiral_sibling)' : i32)
+    path_verdict_of_code ($'agile_todo_paths::rig_agile_todo_path_verdict(&*!relative, !spiral_sibling)' : i32)
 
 := crate_findings
     (syntax : comment_syntax) (~only : string) (~backlog : string) (~text : string) (~display : string) (json : bool)
     : string * i32 * string
     =
     := code = case_index syntax
-    $'agile_todo_lines::kit_agile_todo_findings(!code, &*!only, &*!backlog, &*!text, &*!display, !json)'
+    $'agile_todo_lines::rig_agile_todo_findings(!code, &*!only, &*!backlog, &*!text, &*!display, !json)'
     : string * i32 * string
 := emitted_findings (state : scan_state) (~rendered : string) : scan_state =
     ? state.quiet
@@ -180,7 +180,7 @@
     ?= entry_kind_of path ?|
     | RegularFile => scanned_file state display path (forward_slashes path)
     | Directory =>
-        := listed, listing = $'agile_todo_sources::kit_agile_todo_sources(&*!path)' : bool * string
+        := listed, listing = $'agile_todo_sources::rig_agile_todo_sources(&*!path)' : bool * string
         ? listed ?> listed_files state path display listing 0i32 |: state
     | _ => state
 
@@ -268,7 +268,7 @@
         | _ => todos_failure (rust_std_string.model.concat5 "the backlog root " root " is not a directory" "" "")
 
 := main () : i32 =
-    export "kit_agile_todos_run" ((\ () => todos_entry ()) : () -> i32)
-    export "kit_agile_todo_sites" ((\ (root, id) => todo_sites root id) : string * string -> string)
+    export "rig_agile_todos_run" ((\ () => todos_entry ()) : () -> i32)
+    export "rig_agile_todo_sites" ((\ (root, id) => todo_sites root id) : string * string -> string)
     := _ = todos_entry ()
     0i32

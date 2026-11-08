@@ -111,14 +111,14 @@
     | Invalid => unknown_field_rule ()
 
 := main () : i32 =
-    export "kit_agile_edit_field_position" ((\ field_name => edit_field_position field_name) : string -> i32)
+    export "rig_agile_edit_field_position" ((\ field_name => edit_field_position field_name) : string -> i32)
     export
-        "kit_agile_edit_field_token"
+        "rig_agile_edit_field_token"
         (
             \ (field_name, current, value) => edit_field_token field_name current value
             : string * string * string -> string
         )
-    export "kit_agile_edit_field_rule" ((\ field_name => edit_field_rule field_name) : string -> string)
+    export "rig_agile_edit_field_rule" ((\ field_name => edit_field_rule field_name) : string -> string)
     := _ = edit_field_position "title-append"
     := _ = edit_field_token "title-append" "\"first\"" "second"
     := _ = edit_field_rule "kind"

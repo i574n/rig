@@ -1,16 +1,16 @@
 :< rust_std_env.model
 
 := preflight (~a : i32) (~b : i32) : i32 =
-    $'legacy_capability_domain::kit_self_install_preflight_binding(!a, !b)' : i32
+    $'legacy_capability_domain::rig_self_install_preflight_binding(!a, !b)' : i32
 
 := target (~a : i32) (~b : i32) : i32 =
-    $'legacy_capability_domain::kit_self_install_target_binding(!a, !b)' : i32
+    $'legacy_capability_domain::rig_self_install_target_binding(!a, !b)' : i32
 
 := fault (~a : i32) (~b : i32) : i32 =
-    $'legacy_capability_domain::kit_self_install_fault_binding(!a, !b)' : i32
+    $'legacy_capability_domain::rig_self_install_fault_binding(!a, !b)' : i32
 
 := complete (~a : i32) (~b : i32) : i32 =
-    $'legacy_capability_domain::kit_self_install_complete_binding(!a, !b)' : i32
+    $'legacy_capability_domain::rig_self_install_complete_binding(!a, !b)' : i32
 
 := main () : i32 =
     := invalid_source = preflight 0i32 1i32

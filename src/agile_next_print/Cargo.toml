@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "next_print.spi"
+output = "next_print.rs"
+
+[package]
+name = "agile-next-print"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "agile_next_print"
+path = "next_print.rs"

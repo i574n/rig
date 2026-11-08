@@ -16,7 +16,7 @@ $driver = $env:KIT_DEV_BINARY
 if (-not $driver) {
     $driverTarget = Join-Path $targetRoot 'workflow-driver'
     $driver = Join-Path $driverTarget "debug/kit-dev$suffix"
-    $bootstrap = @('build', '--locked', '--package', 'kit-dev', '--target-dir', $driverTarget)
+    $bootstrap = @('build', '--locked', '--package', 'rig-dev', '--target-dir', $driverTarget)
     if ($Offline) { $bootstrap += '--offline' }
     Push-Location (Join-Path $PSScriptRoot 'src')
     try { & cargo @bootstrap; if ($LASTEXITCODE -ne 0) { throw 'Native Spiral developer workflow build failed.' } }

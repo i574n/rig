@@ -1,0 +1,25 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "matrix.rs"
+
+[package]
+name = "rig-cold-rebuild-matrix"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "matrix.rs"
+
+[dependencies]
+rig-source-map = { path = "../rig_source_map" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
+process-batch-plan-domain = { path = "../process_batch_plan_domain" }
+rig-process-observation = { path = "../rig_process_observation" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+serde_json = "1.0"
+
+[[test]]
+name = "native_matrix"
+path = "native_matrix.rs"

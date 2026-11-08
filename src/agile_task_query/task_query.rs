@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US1 {
     US1_OnTeam(Rc<str>),
@@ -50,8 +60,8 @@ fn flag_read_of_1(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
         };
         let v15: bool = if v6 {
             let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
-            let v8: Option<usize> = v1.find(&*v7);
-            let v9: Option<usize> = method2(v8);
+            let mut v8: Option<usize> = v1.find(&*v7);
+            let mut v9: Option<usize> = method2(v8);
             let mut v10: Rc<dyn Fn((usize)) -> i32> = closure1();
             let mut v11: Option<i32> = v9.map(|x| v10(x));
             let v13: i32 = v11.unwrap_or(-1i32);
@@ -75,7 +85,7 @@ fn flag_read_of_1(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
         let v28: US2 = if v24 {
             US2::US2_ValueRead(v1.clone())
         } else {
-            let v26: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--team expects a lower-case team word, got "); } LIT.with(|lit| lit.clone()) }, v1.clone()));
+            let v26: Rc<str> = string_concat(&["--team expects a lower-case team word, got ", &*v1]);
             US2::US2_ValueRefused(v26)
         };
         match v28 {
@@ -266,14 +276,12 @@ fn closure2() -> Rc<dyn Fn(Rc<str>, Rc<str>) -> Rc<str>> {
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn tag_listed_8(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
-    let v2: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }, v1));
-    let mut v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
+    let mut v3: Rc<str> = string_concat(&[",", &*v1, ","]);
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v6: Rc<str> = Rc::<str>::from(v0.replace(&*v4, &*v5));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }, v6));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
-    let v9: Option<usize> = v8.find(&*v3);
+    let mut v8: Rc<str> = string_concat(&[",", &*v6, ","]);
+    let mut v9: Option<usize> = v8.find(&*v3);
     let mut v10: Option<usize> = method2(v9);
     let mut v11: Rc<dyn Fn((usize)) -> i32> = closure1();
     let mut v12: Option<i32> = v10.map(|x| v11(x));
@@ -281,30 +289,44 @@ fn tag_listed_8(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let v15: bool = v14 >= 0i32;
     v15
 }
+fn team_tagged_9(mut v0: Rc<str>) -> bool {
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
+    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+    let mut v3: Rc<str> = Rc::<str>::from(v0.replace(&*v1, &*v2));
+    let mut v4: Rc<str> = string_concat(&[",", &*v3]);
+    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(",team:"); } LIT.with(|lit| lit.clone()) };
+    let v6: Option<usize> = v4.find(&*v5);
+    let v7: Option<usize> = method2(v6);
+    let mut v8: Rc<dyn Fn((usize)) -> i32> = closure1();
+    let mut v9: Option<i32> = v7.map(|x| v8(x));
+    let mut v11: i32 = v9.unwrap_or(-1i32);
+    let mut v12: bool = v11 >= 0i32;
+    v12
+}
 fn on_team_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> bool {
-    let mut v3: bool = tag_listed_8(v2.clone(), v0.clone());
-    let v6: bool = if v3 {
-        true
+    let mut v3: bool = team_tagged_9(v2.clone());
+    if v3 {
+        let mut v4: Rc<str> = string_concat(&["team:", &*v0]);
+        tag_listed_8(v2, v4)
     } else {
-        let mut v4: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("team:"); } LIT.with(|lit| lit.clone()) }, v0.clone()));
-        tag_listed_8(v2.clone(), v4)
-    };
-    let v9: bool = if v6 {
-        true
-    } else {
-        let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-team"); } LIT.with(|lit| lit.clone()) }));
-        tag_listed_8(v2, v7)
-    };
-    if v9 {
-        true
-    } else {
-        let mut v10: Rc<str> = Rc::<str>::from(v0.to_uppercase());
-        let mut v11: Rc<str> = Rc::<str>::from(format!("{}{}", v10, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) }));
-        let mut v12: bool = v1.starts_with(&*v11);
-        v12
+        let v6: bool = tag_listed_8(v2.clone(), v0.clone());
+        let mut v9: bool = if v6 {
+            true
+        } else {
+            let v7: Rc<str> = string_concat(&[&*v0, "-team"]);
+            tag_listed_8(v2, v7)
+        };
+        if v9 {
+            true
+        } else {
+            let mut v10: Rc<str> = Rc::<str>::from(v0.to_uppercase());
+            let mut v11: Rc<str> = string_concat(&[&*v10, "-"]);
+            let mut v12: bool = v1.starts_with(&*v11);
+            v12
+        }
     }
 }
-fn loop_12(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut v3: i32) -> bool {
+fn loop_13(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut v3: i32) -> bool {
     loop {
         let mut v4: bool = v3 >= v2;
         if v4 {
@@ -322,15 +344,15 @@ fn loop_12(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut 
         }
     }
 }
-fn has_word_11(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
+fn has_word_12(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let v2: Rc<str> = Rc::<str>::from(v0.to_lowercase());
     let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = Rc::<str>::from(v2.replace(&*v3, &*v4));
     let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("."); } LIT.with(|lit| lit.clone()) };
     let v7: Rc<str> = Rc::<str>::from(v5.replace(&*v6, &*v4));
-    let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":"); } LIT.with(|lit| lit.clone()) };
-    let v9: Rc<str> = Rc::<str>::from(v7.replace(&*v8, &*v4));
+    let mut v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":"); } LIT.with(|lit| lit.clone()) };
+    let mut v9: Rc<str> = Rc::<str>::from(v7.replace(&*v8, &*v4));
     let mut v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(";"); } LIT.with(|lit| lit.clone()) };
     let mut v11: Rc<str> = Rc::<str>::from(v9.replace(&*v10, &*v4));
     let mut v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("("); } LIT.with(|lit| lit.clone()) };
@@ -342,9 +364,9 @@ fn has_word_11(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let v18: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v17.split(&*v4).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
     let mut v19: i32 = (v18.clone().borrow().len() as i32);
     let mut v20: i32 = 0i32;
-    loop_12(v1, v18, v19, v20)
+    loop_13(v1, v18, v19, v20)
 }
-fn loop_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: &Rc<RefCell<Vec<Rc<str>>>>, mut v3: i32, mut v4: i32) -> bool {
+fn loop_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: &Rc<RefCell<Vec<Rc<str>>>>, mut v3: i32, mut v4: i32) -> bool {
     loop {
         let v5: bool = v4 >= v3;
         if v5 {
@@ -353,14 +375,14 @@ fn loop_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: &Rc<RefCell<Vec<Rc<str>>>>,
             let v6: Rc<str> = v2.borrow()[v4 as usize].clone();
             let v7: bool = &*v6 != "";
             let mut v10: bool = if v7 {
-                let v8: bool = has_word_11(v0.clone(), v6.clone());
-                let v9: bool = v8 == false;
+                let mut v8: bool = has_word_12(v0.clone(), v6.clone());
+                let mut v9: bool = v8 == false;
                 v9
             } else {
                 false
             };
             let v13: bool = if v10 {
-                let mut v11: bool = has_word_11(v1.clone(), v6);
+                let mut v11: bool = has_word_12(v1.clone(), v6);
                 let mut v12: bool = v11 == false;
                 v12
             } else {
@@ -376,14 +398,14 @@ fn loop_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: &Rc<RefCell<Vec<Rc<str>>>>,
         }
     }
 }
-fn words_hit_9(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> bool {
+fn words_hit_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> bool {
     let mut v3: Rc<str> = Rc::<str>::from(v0.to_lowercase());
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v3.split(&*v4).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
     let v6: i32 = (v5.clone().borrow().len() as i32);
     let v7: i32 = 0i32;
-    let v8: bool = loop_10(v1, v2, &v5, v6, v7);
-    let v9: bool = v8 == false;
+    let mut v8: bool = loop_11(v1, v2, &v5, v6, v7);
+    let mut v9: bool = v8 == false;
     v9
 }
 fn filter_passes_6(mut v0: US1, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: bool) -> bool {
@@ -438,12 +460,12 @@ fn filter_passes_6(mut v0: US1, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str
             v11
         }
         US1::US1_WithTag(v8) => {
-            let v8: Rc<str> = v8;
+            let mut v8: Rc<str> = v8;
             tag_listed_8(v3, v8)
         }
         US1::US1_WithWords(v12) => {
             let mut v12: Rc<str> = v12;
-            words_hit_9(v12, v2, v3)
+            words_hit_10(v12, v2, v3)
         }
     }
 }
@@ -453,7 +475,7 @@ fn filters_pass_5(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<
             UH0::UH0_FilterThen(v6, v7) => {
                 let v6: US1 = v6;
                 let v7: Rc<UH0> = v7;
-                let v8: bool = filter_passes_6(v6, v1.clone(), v2.clone(), v3.clone(), v4.clone(), v5);
+                let mut v8: bool = filter_passes_6(v6, v1.clone(), v2.clone(), v3.clone(), v4.clone(), v5);
                 if v8 {
                     v0 = v7;
                     continue;
@@ -467,24 +489,24 @@ fn filters_pass_5(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<
         }
     }
 }
-fn query_token_14(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
+fn query_token_15(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
     let v2: Rc<str> = std::rc::Rc::<str>::from((v0).split_whitespace().nth(v1 as usize).unwrap_or(""));
     v2
 }
-fn filters_of_query_13(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn filters_of_query_14(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<UH0>) -> Rc<UH0> {
     loop {
-        let mut v3: Rc<str> = query_token_14(v0.clone(), v1);
+        let mut v3: Rc<str> = query_token_15(v0.clone(), v1);
         let mut v4: bool = &*v3 == "";
         if v4 {
             return v2;
         } else {
             let v5: i32 = v1.wrapping_add(1i32);
-            let v6: Rc<str> = query_token_14(v0.clone(), v5);
+            let v6: Rc<str> = query_token_15(v0.clone(), v5);
             let v7: US0 = flag_read_of_1(v3, v6);
             match v7 {
                 US0::US0_FilterRead(v8, v9) => {
-                    let v8: US1 = v8;
-                    let v9: i32 = v9;
+                    let mut v8: US1 = v8;
+                    let mut v9: i32 = v9;
                     let mut v10: i32 = v1.wrapping_add(v9);
                     let mut v11: Rc<UH0> = Rc::new(UH0::UH0_FilterThen(v8, v2));
                     (v1, v2) = (v10, v11);
@@ -501,7 +523,7 @@ fn filters_of_query_13(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<UH0>) -> Rc<UH0>
 fn query_passes_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: bool) -> bool {
     let v6: i32 = 0i32;
     let v7: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_NoFilters); } CASE.with(|case| case.clone()) };
-    let v8: Rc<UH0> = filters_of_query_13(v0, v6, v7);
+    let mut v8: Rc<UH0> = filters_of_query_14(v0, v6, v7);
     filters_pass_5(v8, v1, v2, v3, v4, v5)
 }
 fn closure3() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool) -> bool> {
@@ -509,7 +531,7 @@ fn closure3() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool) ->
         query_passes_4(v0, v1, v2, v3, v4, v5)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn filters_read_deps_16(mut v0: Rc<UH0>) -> bool {
+fn filters_read_deps_17(mut v0: Rc<UH0>) -> bool {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_FilterThen(v1, v2) => {
@@ -539,18 +561,18 @@ fn filters_read_deps_16(mut v0: Rc<UH0>) -> bool {
         }
     }
 }
-fn query_reads_deps_15(mut v0: Rc<str>) -> bool {
+fn query_reads_deps_16(mut v0: Rc<str>) -> bool {
     let mut v1: i32 = 0i32;
     let v2: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_NoFilters); } CASE.with(|case| case.clone()) };
-    let mut v3: Rc<UH0> = filters_of_query_13(v0, v1, v2);
-    filters_read_deps_16(v3)
+    let mut v3: Rc<UH0> = filters_of_query_14(v0, v1, v2);
+    filters_read_deps_17(v3)
 }
 fn closure4() -> Rc<dyn Fn(Rc<str>) -> bool> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> bool> = Rc::new(move |mut v0: Rc<str>| -> bool {
-        query_reads_deps_15(v0)
+        query_reads_deps_16(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn filters_text_18(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
+fn filters_text_19(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_FilterThen(v2, v3) => {
@@ -559,7 +581,7 @@ fn filters_text_18(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
                 let v21: Rc<str> = match v2 {
                     US1::US1_OnTeam(v4) => {
                         let mut v4: Rc<str> = v4;
-                        let v5: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("team="); } LIT.with(|lit| lit.clone()) }, v4));
+                        let v5: Rc<str> = string_concat(&["team=", &*v4]);
                         v5
                     }
                     US1::US1_OnlyBlocked => {
@@ -575,23 +597,22 @@ fn filters_text_18(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
                         v13
                     }
                     US1::US1_WithPrefix(v8) => {
-                        let v8: Rc<str> = v8;
-                        let v9: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("prefix="); } LIT.with(|lit| lit.clone()) }, v8));
+                        let mut v8: Rc<str> = v8;
+                        let mut v9: Rc<str> = string_concat(&["prefix=", &*v8]);
                         v9
                     }
                     US1::US1_WithTag(v6) => {
                         let v6: Rc<str> = v6;
-                        let v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("tag="); } LIT.with(|lit| lit.clone()) }, v6));
+                        let v7: Rc<str> = string_concat(&["tag=", &*v6]);
                         v7
                     }
                     US1::US1_WithWords(v10) => {
                         let mut v10: Rc<str> = v10;
-                        let mut v11: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("words="); } LIT.with(|lit| lit.clone()) }, v10));
+                        let mut v11: Rc<str> = string_concat(&["words=", &*v10]);
                         v11
                     }
                 };
-                let v22: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) }, v21));
-                let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v22, v1));
+                let v23: Rc<str> = string_concat(&[" ", &*v21, &*v1]);
                 (v0, v1) = (v3, v23);
                 continue;
             }
@@ -601,16 +622,16 @@ fn filters_text_18(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn query_shown_of_17(mut v0: Rc<str>) -> Rc<str> {
+fn query_shown_of_18(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: i32 = 0i32;
     let v2: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_NoFilters); } CASE.with(|case| case.clone()) };
-    let mut v3: Rc<UH0> = filters_of_query_13(v0, v1, v2);
+    let mut v3: Rc<UH0> = filters_of_query_14(v0, v1, v2);
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    filters_text_18(v3, v4)
+    filters_text_19(v3, v4)
 }
 fn closure5() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> Rc<str>> = Rc::new(move |mut v0: Rc<str>| -> Rc<str> {
-        query_shown_of_17(v0)
+        query_shown_of_18(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn closure6() -> Rc<dyn Fn() -> Rc<str>> {
@@ -619,21 +640,21 @@ fn closure6() -> Rc<dyn Fn() -> Rc<str>> {
         v0
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_query_flag_width(v0: &str, v1: &str) -> i32 {
+pub fn rig_query_flag_width(v0: &str, v1: &str) -> i32 {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
-pub fn kit_query_flag_refusal(v0: &str, v1: &str) -> Rc<str> {
+pub fn rig_query_flag_refusal(v0: &str, v1: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
-pub fn kit_query_passes(v0: &str, v1: &str, v2: &str, v3: &str, v4: &str, v5: bool) -> bool {
+pub fn rig_query_passes(v0: &str, v1: &str, v2: &str, v3: &str, v4: &str, v5: bool) -> bool {
     closure3()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2), Rc::<str>::from(v3), Rc::<str>::from(v4), v5)
 }
-pub fn kit_query_reads_deps(v0: &str) -> bool {
+pub fn rig_query_reads_deps(v0: &str) -> bool {
     closure4()(Rc::<str>::from(v0))
 }
-pub fn kit_query_shown(v0: &str) -> Rc<str> {
+pub fn rig_query_shown(v0: &str) -> Rc<str> {
     closure5()(Rc::<str>::from(v0))
 }
-pub fn kit_query_usage() -> Rc<str> {
+pub fn rig_query_usage() -> Rc<str> {
     closure6()()
 }

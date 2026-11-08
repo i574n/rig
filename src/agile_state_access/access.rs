@@ -416,6 +416,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> bool> {
         writes_named_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_writes_named(v0: &str) -> bool {
+pub fn rig_agile_writes_named(v0: &str) -> bool {
     closure0()(Rc::<str>::from(v0))
 }

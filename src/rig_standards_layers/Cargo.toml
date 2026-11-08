@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "layers.spi"
+output = "layers.rs"
+
+[package]
+name = "rig-standards-layers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_standards_layers"
+path = "layers.rs"
+
+[dependencies]
+rig-standards-layers-model = { path = "../rig_standards_layers_model" }

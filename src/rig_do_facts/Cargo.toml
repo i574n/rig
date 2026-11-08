@@ -1,0 +1,24 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "do_facts.rs"
+
+[package]
+name = "rig-do-facts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do_facts"
+path = "do_facts.rs"
+
+[dependencies]
+rig-do-read = { path = "../rig_do_read" }
+rig-do-tables = { path = "../rig_do_tables" }
+regex = "1.13.1"
+serde_json = "1.0.151"
+sha2 = "0.11.1"
+rig-do-verbs = { path = "../rig_do_verbs" }
+rig-do-facts-receipt = { path = "../rig_do_facts_receipt" }
+rig-do-model = { path = "../rig_do_model" }

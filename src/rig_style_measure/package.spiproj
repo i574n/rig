@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rig_os_files
+    rig_os_search
+    rig_style_probes
+link:
+    rig_style_probes
+modules:
+    measure

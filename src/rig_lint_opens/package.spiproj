@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_lint_shadows_core
+modules:
+    opens
+    entry

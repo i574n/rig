@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "dispatch.spi"
+output = "dispatch.rs"
+
+[package]
+name = "rig-job-dispatch"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_dispatch"
+path = "dispatch.rs"
+
+[dependencies]
+rig-job-bin = { path = "../rig_job_bin" }
+rig-job-remote-gate = { path = "../rig_job_remote_gate" }

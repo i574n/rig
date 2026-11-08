@@ -3,12 +3,12 @@ entry = "main.spi"
 output = "orchestration.rs"
 
 [package]
-name = "kit-patch-orchestration-domain"
+name = "rig-patch-orchestration-domain"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [lib]
-name = "kit_patch_orchestration_domain"
+name = "rig_patch_orchestration_domain"
 path = "orchestration.rs"

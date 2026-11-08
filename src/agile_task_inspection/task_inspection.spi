@@ -116,19 +116,19 @@
     head ++# middle ++# tail ++# lists ++# "}"
 
 := planning_summary (~text : string) (~id : string) : string =
-    $'agile_planning_fields::kit_agile_planning_summary(&*!text, &*!id)' : string
-:= planning_json (~text : string) (~id : string) : string = $'agile_planning_fields::kit_agile_planning_json(&*!text, \
+    $'agile_planning_fields::rig_agile_planning_summary(&*!text, &*!id)' : string
+:= planning_json (~text : string) (~id : string) : string = $'agile_planning_fields::rig_agile_planning_json(&*!text, \
     &*!id)' : string
 := notes_text (~text : string) (~id : string) : string =
-    $'agile_note_listing::kit_agile_notes_text(&*!text, &*!id)' : string
+    $'agile_note_listing::rig_agile_notes_text(&*!text, &*!id)' : string
 := notes_filtered (~text : string) (~id : string) (~mode : string) (~value : string) : string =
-    $'agile_note_listing::kit_agile_notes_filtered_text(&*!text, &*!id, &*!mode, &*!value)' : string
+    $'agile_note_listing::rig_agile_notes_filtered_text(&*!text, &*!id, &*!mode, &*!value)' : string
 :~ state_segments (~root : string) : string =
     := state_dir = root ++# "/state"
-    $'agile_note_listing::kit_agile_state_segments(&*!state_dir)' : string
+    $'agile_note_listing::rig_agile_state_segments(&*!state_dir)' : string
 
 := notes_json (~text : string) (~id : string) : string =
-    $'agile_note_listing::kit_agile_notes_json(&*!text, &*!id)' : string
+    $'agile_note_listing::rig_agile_notes_json(&*!text, &*!id)' : string
 
 := task_anchor (~id : string) : string = "Task (\"" ++# id ++# "\","
 
@@ -219,6 +219,6 @@
         | Invalid => agile_show_failure "options are --json, --last <n> or --grep <word>" (argument_owned 2i32)
 
 := main () : i32 =
-    export "kit_agile_show_run" ((\ () => agile_show_entry ()) : () -> i32)
+    export "rig_agile_show_run" ((\ () => agile_show_entry ()) : () -> i32)
     := _ = agile_show_entry ()
     0i32

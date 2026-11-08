@@ -17,5 +17,5 @@ name = "agile_planning_rollup"
 path = "planning_rollup.rs"
 
 [dependencies]
-kit-agile-records = { path = "../kit_agile_records" }
+rig-agile-records = { path = "../rig_agile_records" }
 agile-planning-tally = { path = "../agile_planning_tally" }

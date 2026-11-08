@@ -116,8 +116,8 @@
     | RenewingLeasePolicy => 1u64
 
 :~ agile_lease_policy_from_text (~value : string) : u64 =
-    ? ((sm'.trim value) = "renewing") ?> agile_lease_policy_code RenewingLeasePolicy
-    |: agile_lease_policy_code BoundedLeasePolicy
+    ? ((sm'.trim value) = "bounded") ?> agile_lease_policy_code BoundedLeasePolicy
+    |: agile_lease_policy_code RenewingLeasePolicy
 
 :~ agile_lease_effective_phase_binding (renewing : i32) (phase : i32) : i32 =
     ? renewing = 1i32 ?> agile_lease_clock_phase_code LeaseClockWork
@@ -172,52 +172,52 @@
 
 := main () : i32 =
     export
-        "kit_agile_state_mutation_target_decision_binding"
+        "rig_agile_state_mutation_target_decision_binding"
         ((\ (first, second) => agile_state_mutation_target_decision_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_lease_budget_decision_binding"
+        "rig_agile_lease_budget_decision_binding"
         ((\ (first, second) => agile_lease_budget_decision_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_lease_readback_decision_binding"
+        "rig_agile_lease_readback_decision_binding"
         ((\ (first, second) => agile_lease_readback_decision_binding first second) : i32 * i32 -> i32)
-    export "kit_agile_prompt_title_code" ((\ value => agile_prompt_title_code value) : string -> u64)
-    export "kit_agile_status_name_code" ((\ value => agile_status_name_code value) : string -> u64)
+    export "rig_agile_prompt_title_code" ((\ value => agile_prompt_title_code value) : string -> u64)
+    export "rig_agile_status_name_code" ((\ value => agile_status_name_code value) : string -> u64)
     export
-        "kit_agile_task_line_candidate_code"
+        "rig_agile_task_line_candidate_code"
         ((\ value => agile_task_line_candidate_code value) : string -> u64)
-    export "kit_agile_receipt_row_kind_code" ((\ value => agile_receipt_row_kind_code value) : string -> u64)
+    export "rig_agile_receipt_row_kind_code" ((\ value => agile_receipt_row_kind_code value) : string -> u64)
     export
-        "kit_agile_receipt_row_kind_text"
+        "rig_agile_receipt_row_kind_text"
         ((\ value => agile_receipt_row_kind_text value) : string -> string)
     export
-        "kit_agile_receipt_attestation_kind_code"
+        "rig_agile_receipt_attestation_kind_code"
         ((\ value => agile_receipt_attestation_kind_code value) : string -> u64)
     export
-        "kit_agile_receipt_attestation_text"
+        "rig_agile_receipt_attestation_text"
         ((\ value => agile_receipt_attestation_text value) : string -> string)
     export
-        "kit_agile_prompt_lease_status_code"
+        "rig_agile_prompt_lease_status_code"
         ((\ value => agile_prompt_lease_status_code value) : string -> u64)
     export
-        "kit_agile_prompt_lease_marker_text"
+        "rig_agile_prompt_lease_marker_text"
         ((\ value => agile_prompt_lease_marker_text value) : string -> string)
     export
-        "kit_agile_prompt_lease_shape_binding"
+        "rig_agile_prompt_lease_shape_binding"
         ((\ (first, second) => agile_prompt_lease_shape_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_lease_clock_phase_binding"
+        "rig_agile_lease_clock_phase_binding"
         ((\ (first, second) => agile_lease_clock_phase_binding first second) : i32 * i32 -> i32)
-    export "kit_agile_lease_policy_from_text" ((\ value => agile_lease_policy_from_text value) : string -> u64)
+    export "rig_agile_lease_policy_from_text" ((\ value => agile_lease_policy_from_text value) : string -> u64)
     export
-        "kit_agile_lease_effective_phase_binding"
+        "rig_agile_lease_effective_phase_binding"
         ((\ (first, second) => agile_lease_effective_phase_binding first second) : i32 * i32 -> i32)
-    export "kit_agile_status_text" ((\ value => agile_status_text value) : string -> string)
-    export "kit_agile_spi_escape_text" ((\ value => agile_spi_escape_text value) : string -> string)
+    export "rig_agile_status_text" ((\ value => agile_status_text value) : string -> string)
+    export "rig_agile_spi_escape_text" ((\ value => agile_spi_escape_text value) : string -> string)
     export
-        "kit_agile_state_package_line_code"
+        "rig_agile_state_package_line_code"
         ((\ value => agile_state_package_line_code value) : string -> u64)
     export
-        "kit_agile_state_package_module_name"
+        "rig_agile_state_package_module_name"
         ((\ value => agile_state_package_module_name value) : string -> string)
     := _ = agile_state_mutation_target_decision_binding 1i32 1i32
     := _ = agile_lease_budget_decision_binding 1i32 1i32

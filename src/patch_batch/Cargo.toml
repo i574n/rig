@@ -3,14 +3,14 @@ entry = "main.spi"
 output = "patch_batch.rs"
 
 [package]
-name = "kit-patch-batch"
+name = "rig-patch-batch"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [[example]]
-name = "kit-patch-batch"
+name = "rig-patch-batch"
 path = "patch_batch.rs"
 test = false
 doc = false

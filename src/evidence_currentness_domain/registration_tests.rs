@@ -2,7 +2,7 @@ use super::*;
 use std::path::PathBuf;
 
 const ZERO: &str = "0000000000000000000000000000000000000000000000000000000000000000";
-const LCOV: &str = "SF:src/kit_cli/kit.rs\nDA:1,1\nDA:2,0\nend_of_record\n";
+const LCOV: &str = "SF:src/rig_cli/kit.rs\nDA:1,1\nDA:2,0\nend_of_record\n";
 
 struct Fixture(PathBuf);
 impl Fixture {
@@ -120,10 +120,10 @@ fn closeout_evidence_refresh_attests_the_release_state() {
 
 #[test]
 fn evidence_rows_follow_the_spiral_currentness_plan() {
-    for (regular, identical, stage) in [(0, 0, 0), (0, 1, 0), (1, 0, 1), (1, 1, 2)] { assert_eq!(kit_evidence_row_stage(regular, identical), stage); }
+    for (regular, identical, stage) in [(0, 0, 0), (0, 1, 0), (1, 0, 1), (1, 1, 2)] { assert_eq!(rig_evidence_row_stage(regular, identical), stage); }
     for (tool, name) in [("rustc", "RUSTC"), ("cargo", "CARGO"), ("rustdoc", "RUSTDOC"), ("rustfmt", "RUSTFMT"), ("rustup", ""), ("", "")] { assert_eq!(toolchain_env_name(tool).unwrap_or_default(), name); }
-    for (unix, windows, name) in [(1, 0, "kit"), (0, 1, "kit.exe"), (1, 1, ""), (0, 0, "")] { assert_eq!(&*kit_evidence_public_binary(unix, windows), name); }
+    for (unix, windows, name) in [(1, 0, "kit"), (0, 1, "kit.exe"), (1, 1, ""), (0, 0, "")] { assert_eq!(&*rig_evidence_public_binary(unix, windows), name); }
     assert!(evidence_sha256_text(ZERO) && evidence_sha256_text(&"Ab".repeat(32)));
     assert!(!evidence_sha256_text(&ZERO[1..]) && !evidence_sha256_text(&"g".repeat(64)) && !evidence_sha256_text(&format!("{ZERO}0")));
-    for (code, tail) in [(0, "contains no PatchExact values"), (-1, "is malformed"), (-2, "exceeds 256 KiB"), (-3, "source is unavailable"), (9, "returned an invalid witness")] { assert_eq!(&*kit_patch_control_domain::kit_patch_plan_failure_message(code), format!("typed patch plan {tail}")); }
+    for (code, tail) in [(0, "contains no PatchExact values"), (-1, "is malformed"), (-2, "exceeds 256 KiB"), (-3, "source is unavailable"), (9, "returned an invalid witness")] { assert_eq!(&*rig_patch_control_domain::rig_patch_plan_failure_message(code), format!("typed patch plan {tail}")); }
 }

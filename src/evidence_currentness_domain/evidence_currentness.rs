@@ -1,9 +1,9 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-use kit_patch_control_domain::{patch_quoted_fields, patch_safe_relative};
-use kit_proxy_search::{inspection_file_sha256, inspection_sha256, inspection_tree_sha256};
-use kit_rust_std_fs::atomic_write;
+use rig_patch_control_domain::{patch_quoted_fields, patch_safe_relative};
+use rig_proxy_search::{inspection_file_sha256, inspection_sha256, inspection_tree_sha256};
+use rig_rust_std_fs::atomic_write;
 use std::collections::BTreeSet;
 use std::env;
 use std::fs;
@@ -92,12 +92,12 @@ pub fn refresh_release_closeout_evidence(root: &Path, closeout_sha256: &str, clo
     if !cargo_lock_metadata.is_file() || cargo_lock_metadata.file_type().is_symlink() { return Err("Cargo.lock evidence target must be a regular file".to_owned()); }
     let cargo_lock_sha256 = inspection_file_sha256(&cargo_lock_path)?;
     let cargo_lock_bytes = cargo_lock_metadata.len();
-    let kit_name = evidence_public_binary(root)?;
-    let kit_path = root.join(&kit_name);
-    let kit_metadata = fs::symlink_metadata(&kit_path).map_err(|error| format!("metadata {}: {error}", kit_path.display()))?;
-    if !kit_metadata.is_file() || kit_metadata.file_type().is_symlink() { return Err("KIT binary evidence target must be a regular file".to_owned()); }
-    let kit_sha256 = inspection_file_sha256(&kit_path)?;
-    let kit_bytes = kit_metadata.len();
+    let rig_name = evidence_public_binary(root)?;
+    let rig_path = root.join(&rig_name);
+    let rig_metadata = fs::symlink_metadata(&rig_path).map_err(|error| format!("metadata {}: {error}", rig_path.display()))?;
+    if !rig_metadata.is_file() || rig_metadata.file_type().is_symlink() { return Err("KIT binary evidence target must be a regular file".to_owned()); }
+    let rig_sha256 = inspection_file_sha256(&rig_path)?;
+    let rig_bytes = rig_metadata.len();
     let source_sha256 = inspection_tree_sha256(root, "src")?;
     let mut release_hits = 0usize;
     let mut cold_hits = 0usize;
@@ -140,10 +140,10 @@ pub fn refresh_release_closeout_evidence(root: &Path, closeout_sha256: &str, clo
             }
             if fields.len() == 2 && (fields[0] == "kit" || fields[0] == "kit.exe") {
                 binary_hits += 1;
-                updated = updated.replacen(&format!("({:?}", fields[0]), &format!("({kit_name:?}"), 1);
-                updated = updated.replacen(&fields[1], &kit_sha256, 1);
+                updated = updated.replacen(&format!("({:?}", fields[0]), &format!("({rig_name:?}"), 1);
+                updated = updated.replacen(&fields[1], &rig_sha256, 1);
                 let old_bytes = evidence_parse_u64(line)?;
-                updated = updated.replacen(&format!("{old_bytes}u64"), &format!("{kit_bytes}u64"), 1);
+                updated = updated.replacen(&format!("{old_bytes}u64"), &format!("{rig_bytes}u64"), 1);
             }
         }
         if line.contains("EvidenceTreeRef (") && line.contains("ExactTree") {
@@ -237,7 +237,7 @@ pub fn check_evidence_tree(root: &Path) -> Result<EvidenceCurrentnessSummary, St
         let bytes_match = regular && metadata.len() == spec.bytes;
         let observed_sha = if regular { inspection_file_sha256(&path)? } else { String::new() };
         let sha_match = observed_sha == spec.sha256;
-        let stage = kit_evidence_row_stage(i32::from(regular), i32::from(bytes_match && sha_match));
+        let stage = rig_evidence_row_stage(i32::from(regular), i32::from(bytes_match && sha_match));
         if stage > 0 { observed_specs += 1; }
         let in_scope = path.starts_with(root) && spec.relative != "state/evidence.spi";
         let mask = i32::from(in_scope) + 2 * i32::from(regular) + 4 * i32::from(bytes_match) + 8 * i32::from(sha_match);
@@ -263,7 +263,7 @@ pub fn check_evidence_tree(root: &Path) -> Result<EvidenceCurrentnessSummary, St
 fn evidence_public_binary(root: &Path) -> Result<String, String> {
     let unix = fs::symlink_metadata(root.join("kit")).is_ok();
     let windows = fs::symlink_metadata(root.join("kit.exe")).is_ok();
-    let name = kit_evidence_public_binary(i32::from(unix), i32::from(windows));
+    let name = rig_evidence_public_binary(i32::from(unix), i32::from(windows));
     if name.is_empty() { return Err("closeout evidence requires exactly one root binary: kit or kit.exe".to_owned()); }
     Ok(name.to_string())
 }
@@ -274,8 +274,8 @@ fn coverage_receipt_field<'a>(receipt: &'a str, name: &str) -> Result<&'a str, S
 
 fn coverage_registration_input(lcov: &Path) -> Result<(Vec<u8>, Vec<u8>, String, u32, u64), String> {
     let receipt_path = std::path::PathBuf::from(format!("{}.receipt", lcov.display()));
-    let payload = kit_rust_std_fs::read_regular_limited(lcov, 256 * 1024 * 1024)?;
-    let receipt = kit_rust_std_fs::read_regular_limited(&receipt_path, 64 * 1024)?;
+    let payload = rig_rust_std_fs::read_regular_limited(lcov, 256 * 1024 * 1024)?;
+    let receipt = rig_rust_std_fs::read_regular_limited(&receipt_path, 64 * 1024)?;
     let receipt_text = std::str::from_utf8(&receipt).map_err(|_| format!("coverage receipt must be UTF-8: {}", receipt_path.display()))?;
     let text = std::str::from_utf8(&payload).map_err(|_| format!("coverage LCOV must be UTF-8: {}", lcov.display()))?;
     let route = coverage_receipt_field(receipt_text, "route")?;
@@ -298,8 +298,8 @@ pub fn register_coverage_evidence(root: &Path, current: &Path, seed: &Path) -> R
     let (seed_lcov, seed_receipt, seed_sha256, seed_permille, seed_lines) = coverage_registration_input(seed)?;
     let evidence_path = root.join("state/evidence.spi");
     let coverage_path = root.join("state/coverage.spi");
-    let evidence_original = kit_rust_std_fs::read_regular_text_limited(&evidence_path, 1024 * 1024)?;
-    let coverage_original = kit_rust_std_fs::read_regular_text_limited(&coverage_path, 1024 * 1024)?;
+    let evidence_original = rig_rust_std_fs::read_regular_text_limited(&evidence_path, 1024 * 1024)?;
+    let coverage_original = rig_rust_std_fs::read_regular_text_limited(&coverage_path, 1024 * 1024)?;
     let payloads = [("evidence/coverage/current.lcov", current_lcov), ("evidence/coverage/current.lcov.receipt", current_receipt), ("evidence/coverage/replay-seed.lcov", seed_lcov), ("evidence/coverage/replay-seed.receipt", seed_receipt)];
     let mut hits = 0usize;
     let mut evidence_lines = Vec::new();
@@ -362,7 +362,7 @@ mod registration_tests;
 #[derive(Clone, Debug)]
 pub struct ToolchainCurrentnessSummary { pub declared: usize, pub observed: usize, pub verified: usize }
 
-fn toolchain_env_name(relative: &str) -> Option<String> { Some(kit_rust_tool_environment(relative).to_string()).filter(|name| !name.is_empty()) }
+fn toolchain_env_name(relative: &str) -> Option<String> { Some(rig_rust_tool_environment(relative).to_string()).filter(|name| !name.is_empty()) }
 
 pub fn toolchain_status(root: &Path) -> Result<Option<ToolchainCurrentnessSummary>, String> {
     let state = root.join("state/toolchain_identity.spi");
@@ -382,7 +382,7 @@ pub fn toolchain_status(root: &Path) -> Result<Option<ToolchainCurrentnessSummar
         let regular = metadata.is_file() && !metadata.file_type().is_symlink();
         let bytes_match = regular && metadata.len() == spec.bytes;
         let sha256 = if regular { inspection_file_sha256(path)? } else { String::new() };
-        let stage = kit_evidence_row_stage(i32::from(regular), i32::from(bytes_match && sha256 == spec.sha256));
+        let stage = rig_evidence_row_stage(i32::from(regular), i32::from(bytes_match && sha256 == spec.sha256));
         if stage > 0 { observed += 1; }
         if stage != 2 { return Err(format!("Rust tool identity mismatch tool={} expected_bytes={} observed_bytes={} expected_sha256={} observed_sha256={}", spec.relative, spec.bytes, metadata.len(), spec.sha256, sha256)); }
         verified += 1;
@@ -557,12 +557,12 @@ fn closure3() -> Rc<dyn Fn(i32, i32) -> Rc<str>> {
 pub fn evidence_sha256_text(v0: &str) -> bool {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_evidence_row_stage(v0: i32, v1: i32) -> i32 {
+pub fn rig_evidence_row_stage(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_rust_tool_environment(v0: &str) -> Rc<str> {
+pub fn rig_rust_tool_environment(v0: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0))
 }
-pub fn kit_evidence_public_binary(v0: i32, v1: i32) -> Rc<str> {
+pub fn rig_evidence_public_binary(v0: i32, v1: i32) -> Rc<str> {
     closure3()(v0, v1)
 }

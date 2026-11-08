@@ -1,4 +1,4 @@
-///- --package ../kit_cli_check --timeout 900000
+///- --package ../rig_cli_check --timeout 900000
 :< cli
 
 := quoted (~text : string) : string = $'std::rc::Rc::<str>::from(format\!("{}{}{}", char::from(34u8), &*!text, \
@@ -32,7 +32,7 @@
     root
 
 := next_run (root : fixture_root) (args : cli_args) : cli_run =
-    kit_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", Arg ("next", Arg (fixture_text_of root, args))))
+    rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", Arg ("next", Arg (fixture_text_of root, args))))
 
 := ranked_word (~stdout : string) (~rank : string) : string =
     word_after (line_starting stdout (cat (padded "" (3i32 - byte_count rank)) rank)) (cat rank "  ")
@@ -63,6 +63,33 @@
     same (ranked_word out "1") "MINE"
     hides out "THEIRS"
     shows out "ready=1 shown=1"
+    fixture_root_remove root
+
+///> rust
+:# an_item_with_a_wait_row_is_not_offered =
+    := root = fixture_root_create "agile next waits"
+    := rows = cat (task_row "FREE" "P2" "D2" "Planned" "" "kit") (task_row "HELD" "P0" "D1" "Planned" "" "kit")
+    fixture_write root "state/agile.spi" rows
+    := wait_row = cat (cat "inl wait_of_held () = Waits (" (quoted "HELD")) ", \"train\", \"TRAIN40\")\n"
+    fixture_write root "state/waits.spi" wait_row
+    := out = succeeded (next_run root NoArgs)
+    same (ranked_word out "1") "FREE"
+    hides out "HELD"
+    shows out "ready=1 shown=1"
+    fixture_root_remove root
+
+///> rust
+:# an_item_wait_clears_when_its_item_is_done_and_a_lane_wait_reaches_that_team =
+    := root = fixture_root_create "agile next wait resolve"
+    := done = task_row "SHIPPED" "P2" "D2" "Done" "" "kit,team:ops"
+    := rows = cat done (task_row "HELD" "P0" "D1" "Planned" "" "kit,team:ops")
+    fixture_write root "state/agile.spi" rows
+    := item_wait = cat (cat "inl wait_of_held () = Waits (" (quoted "HELD")) ", \"item\", \"SHIPPED\")\n"
+    := lane_wait = cat (cat "inl wait_of_other () = Waits (" (quoted "OTHER")) ", \"lane\", \"team:ops\")\n"
+    fixture_write root "state/waits.spi" (cat item_wait lane_wait)
+    := out = succeeded (next_run root (Arg ("--team", Arg ("ops", NoArgs))))
+    same (ranked_word out "1") "HELD"
+    shows out "unblock  OTHER  waits on team ops: answer or pull it"
     fixture_root_remove root
 
 ///> rust
@@ -104,7 +131,7 @@
 :# a_flag_in_the_root_slot_is_refused_with_the_verbs_usage =
     := root = backlog_root ()
     := run =
-        kit_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", Arg ("next", Arg ("--team", Arg ("ops", NoArgs)))))
+        rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", Arg ("next", Arg ("--team", Arg ("ops", NoArgs)))))
     rejected_with run 2i32 "agile next takes <root> before any flag, got --team; usage: agile next <root>"
     fixture_root_remove root
 

@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_job_host
+    rig_job_slot
+    rig_job_gate
+link:
+    rig_job_slot
+    rig_job_gate
+modules:
+    decide

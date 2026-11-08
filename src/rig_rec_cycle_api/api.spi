@@ -1,0 +1,2 @@
+:= rig_rec_cycle_findings (~path : string) (~text : string) : string =
+    $'rig_rec_cycle::rig_rec_cycle_findings(&*!path, &*!text)' : string

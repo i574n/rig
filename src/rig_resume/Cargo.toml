@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "resume.spi"
+output = "resume.rs"
+
+[package]
+name = "rig-resume"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_resume"
+path = "resume.rs"
+
+[dependencies]
+rig-agile-records = { path = "../rig_agile_records" }

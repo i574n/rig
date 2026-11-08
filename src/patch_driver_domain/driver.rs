@@ -1,9 +1,9 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-use kit_patch_control_domain::patch_rooted as source_authoring_rooted;
-use kit_rust_std_fs::atomic_write as source_authoring_atomic_write;
-use kit_process::{compile_spiral as source_authoring_compile_spiral, resolve_spiral_compiler as source_authoring_resolve_spiral_compiler};
+use rig_patch_control_domain::patch_rooted as source_authoring_rooted;
+use rig_rust_std_fs::atomic_write as source_authoring_atomic_write;
+use rig_process::{compile_spiral as source_authoring_compile_spiral, resolve_spiral_compiler as source_authoring_resolve_spiral_compiler};
 
 fn source_authoring_arg<'a>(args: &'a [String], index: usize, name: &str) -> Result<&'a str, String> { args.get(index).map(String::as_str).ok_or_else(|| format!("missing argument: {name}")) }
 
@@ -56,7 +56,7 @@ fn source_authoring_render(template: &str, bindings: &std::collections::BTreeMap
     if tokens == 0 {
         return Err("template must contain at least one token".to_owned());
     }
-    if kit_patch_driver_source_authoring_render_binding(bindings.len() as i32, 0) != 1 {
+    if rig_patch_driver_source_authoring_render_binding(bindings.len() as i32, 0) != 1 {
         return Err("typed template rendering rejected".to_owned());
     }
     Ok(output)
@@ -67,7 +67,7 @@ fn source_authoring_freshness(target: &std::path::Path, expected: &str) -> Resul
         if target.exists() {
             return Err(format!("stale target: expected missing but found {}", target.display()));
         }
-        if kit_patch_driver_source_authoring_freshness_binding(0, 0) != 1 {
+        if rig_patch_driver_source_authoring_freshness_binding(0, 0) != 1 {
             return Err("typed missing-target witness rejected".to_owned());
         }
         return Ok((0, None));
@@ -76,11 +76,11 @@ fn source_authoring_freshness(target: &std::path::Path, expected: &str) -> Resul
     if !metadata.is_file() || metadata.file_type().is_symlink() {
         return Err(format!("target must be a regular file: {}", target.display()));
     }
-    let observed = kit_proxy_search::inspection_file_sha256(target)?;
+    let observed = rig_proxy_search::inspection_file_sha256(target)?;
     if observed != expected {
         return Err(format!("stale target fingerprint expected={expected} observed={observed}"));
     }
-    if kit_patch_driver_source_authoring_freshness_binding(1, 1) != 1 {
+    if rig_patch_driver_source_authoring_freshness_binding(1, 1) != 1 {
         return Err("typed present-target witness rejected".to_owned());
     }
     let original = std::fs::read(target).map_err(|error| format!("read {}: {error}", target.display()))?;
@@ -108,30 +108,30 @@ pub fn source_authoring_run(args: &[String]) -> Result<(), String> {
     let template_relative = source_authoring_arg(args, 4, "template-relative")?;
     let target = source_authoring_rooted(root, target_relative)?;
     let template = source_authoring_rooted(root, template_relative)?;
-    if kit_patch_driver_source_authoring_shape_binding(1, 1) != 1 {
+    if rig_patch_driver_source_authoring_shape_binding(1, 1) != 1 {
         return Err("typed authoring path shape rejected".to_owned());
     }
     let expected_target = source_authoring_arg(args, 5, "expected-target|missing")?;
     let expected_template = source_authoring_arg(args, 6, "expected-template-sha256")?;
-    let template_hash = kit_proxy_search::inspection_file_sha256(&template)?;
+    let template_hash = rig_proxy_search::inspection_file_sha256(&template)?;
     let template_text = std::fs::read_to_string(&template).map_err(|error| format!("read template {}: {error}", template.display()))?;
     let template_matches = i32::from(template_hash == expected_template);
-    if kit_patch_driver_source_authoring_template_binding(template_matches, i32::from(!template_text.is_empty())) != 1 {
+    if rig_patch_driver_source_authoring_template_binding(template_matches, i32::from(!template_text.is_empty())) != 1 {
         return Err(format!("stale or empty template expected={expected_template} observed={template_hash}"));
     }
     let bindings = source_authoring_bindings(&args[7..])?;
     let rendered = source_authoring_render(&template_text, &bindings)?;
-    let rendered_hash = kit_proxy_search::inspection_sha256(rendered.as_bytes().to_vec());
+    let rendered_hash = rig_proxy_search::inspection_sha256(rendered.as_bytes().to_vec());
     let (_, original) = source_authoring_freshness(&target, expected_target)?;
-    let tag = kit_proxy_search::mnemonic_path_tag(target_relative)?;
+    let tag = rig_proxy_search::mnemonic_path_tag(target_relative)?;
     if mode_code == 0 {
-        if kit_patch_driver_source_authoring_mode_binding(0, 0) != 1 {
+        if rig_patch_driver_source_authoring_mode_binding(0, 0) != 1 {
             return Err("typed preview mode rejected".to_owned());
         }
         println!("kit proxy source-author preview ok target={} tag={} bytes={} sha256={} mutation=false", target.display(), tag, rendered.len(), rendered_hash);
         return Ok(());
     }
-    if kit_patch_driver_source_authoring_mode_binding(1, 1) != 1 {
+    if rig_patch_driver_source_authoring_mode_binding(1, 1) != 1 {
         return Err("typed materialization mode rejected".to_owned());
     }
     if let Some(parent) = target.parent() {
@@ -154,7 +154,7 @@ pub fn source_authoring_run(args: &[String]) -> Result<(), String> {
         let _ = source_authoring_restore(&target, original.as_deref());
         return Err(format!("source typecheck failed and materialization was rolled back: {error}"));
     }
-    if kit_patch_driver_source_authoring_commit_binding(1, 1) != 1 {
+    if rig_patch_driver_source_authoring_commit_binding(1, 1) != 1 {
         let _ = source_authoring_restore(&target, original.as_deref());
         return Err("typed authoring commit rejected and was rolled back".to_owned());
     }
@@ -320,21 +320,21 @@ fn closure5() -> Rc<dyn Fn(i32, i32) -> i32> {
         source_authoring_commit_binding_5(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_patch_driver_source_authoring_shape_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_driver_source_authoring_shape_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_patch_driver_source_authoring_template_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_driver_source_authoring_template_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_patch_driver_source_authoring_render_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_driver_source_authoring_render_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_patch_driver_source_authoring_freshness_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_driver_source_authoring_freshness_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_patch_driver_source_authoring_mode_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_driver_source_authoring_mode_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_patch_driver_source_authoring_commit_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_driver_source_authoring_commit_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }

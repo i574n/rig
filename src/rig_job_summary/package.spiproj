@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    rig_jobs
+    rig_process_alive
+    rig_job_orphans
+link:
+    rig_process_alive
+    rig_job_orphans
+modules:
+    summary

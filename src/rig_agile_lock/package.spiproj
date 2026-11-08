@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    rig_os_process
+    rig_process_alive
+link:
+    rig_process_alive
+modules:
+    lock

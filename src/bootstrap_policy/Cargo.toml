@@ -3,12 +3,12 @@ entry = "main.spi"
 output = "bootstrap_policy.rs"
 
 [package]
-name = "kit-bootstrap-policy"
+name = "rig-bootstrap-policy"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
 [lib]
-name = "kit_bootstrap_policy"
+name = "rig_bootstrap_policy"
 path = "bootstrap_policy.rs"

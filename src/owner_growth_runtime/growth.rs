@@ -2,7 +2,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 #[cfg(test)] #[path = "publication_tests.rs"] mod publication_tests;
-fn owner_growth_current(root: &std::path::Path) -> Result<std::collections::BTreeMap<String,u32>, String> { kit_source_map::source_owner_rust_lines(root) }
+fn owner_growth_current(root: &std::path::Path) -> Result<std::collections::BTreeMap<String,u32>, String> { rig_source_map::source_owner_rust_lines(root) }
 
 type OwnerGrowthParsed = (String, std::collections::BTreeMap<String,u32>, std::collections::BTreeSet<String>);
 
@@ -61,18 +61,18 @@ fn owner_growth_render(predecessor_sha256: &str, baseline: &std::collections::BT
 
 fn owner_growth_write(root: &std::path::Path, text: &str) -> Result<(), String> {
     let path = root.join("state/owner_growth.spi");
-    kit_rust_std_fs::atomic_write(&path, text.as_bytes())
+    rig_rust_std_fs::atomic_write(&path, text.as_bytes())
 }
 
 fn owner_growth_predecessor_proof(predecessor_archive: &std::path::Path, previous: &std::path::Path) -> Result<String, String> {
-    let _ = kit_bundle_manifest::verify_generic_flat_zip(predecessor_archive, 30_000_000)?;
-    let manifest = kit_bundle_manifest::collect_bundle_manifest(previous)?;
+    let _ = rig_bundle_manifest::verify_generic_flat_zip(predecessor_archive, 30_000_000)?;
+    let manifest = rig_bundle_manifest::collect_bundle_manifest(previous)?;
     let stage = std::env::temp_dir().join(format!("kit-owner-growth-predecessor-{}.zip", std::process::id()));
     let _ = std::fs::remove_file(&stage);
     let result = (|| -> Result<String, String> {
-        kit_bundle_manifest::write_deterministic_deflate_zip(previous, &stage, &manifest)?;
-        let expected = kit_proxy_search::inspection_file_sha256(predecessor_archive)?;
-        let observed = kit_proxy_search::inspection_file_sha256(&stage)?;
+        rig_bundle_manifest::write_deterministic_deflate_zip(previous, &stage, &manifest)?;
+        let expected = rig_proxy_search::inspection_file_sha256(predecessor_archive)?;
+        let observed = rig_proxy_search::inspection_file_sha256(&stage)?;
         owner_growth_sha256_token(&expected, "predecessor sha256")?;
         if expected != observed { return Err(format!("owner growth predecessor archive/root mismatch expected={expected} observed={observed}")); }
         Ok(expected)
@@ -112,7 +112,7 @@ pub fn owner_growth_all_owner_check(root: &std::path::Path) -> Result<(), String
         let before = baseline.get(&owner).copied().unwrap_or(0); let after = current.get(&owner).copied().unwrap_or(0);
         if after > before { growth = growth.saturating_add(after - before); } else { shrink = shrink.saturating_add(before - after); }
     }
-    let compensated = kit_bundle_owner_growth_compensation_binding(i32::try_from(growth).unwrap_or(i32::MAX), i32::try_from(shrink).unwrap_or(i32::MAX));
+    let compensated = rig_bundle_owner_growth_compensation_binding(i32::try_from(growth).unwrap_or(i32::MAX), i32::try_from(shrink).unwrap_or(i32::MAX));
     println!("owner_growth_owners={} owner_growth_changed={} owner_growth_rust_growth={} owner_growth_rust_shrink={} owner_growth_compensated={} owner_growth_predecessor_sha256={} owner_growth_net_policy=report-only", current.len(), changed.len(), growth, shrink, compensated, predecessor_sha256);
     Ok(())
 }
@@ -138,6 +138,6 @@ fn closure0() -> Rc<dyn Fn(i32, i32) -> i32> {
         owner_growth_runtime_compensation_binding_0(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_bundle_owner_growth_compensation_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_bundle_owner_growth_compensation_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }

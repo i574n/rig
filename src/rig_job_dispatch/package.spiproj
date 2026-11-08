@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rust_std_env
+    workspace_primitives
+    rig_job_bin
+    rig_job_remote_gate
+link:
+    rig_job_bin
+    rig_job_remote_gate
+modules:
+    dispatch

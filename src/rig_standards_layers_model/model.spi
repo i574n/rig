@@ -1,0 +1,187 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| lib_layer =
+    | Meta
+    | Core
+    | Std
+    | Os
+    | Host : string
+    | Ecosystem
+
+:~ layer_rank (layer : lib_layer) : i32 =
+    ?= layer ?|
+    | Meta => 0i32
+    | Core => 1i32
+    | Std => 2i32
+    | Os => 3i32
+    | Host _ => 4i32
+    | Ecosystem => 5i32
+
+:~ layer_word (layer : lib_layer) : string =
+    ?= layer ?|
+    | Meta => "Meta"
+    | Core => "Core"
+    | Std => "Std"
+    | Os => "Os"
+    | Host backend => "Host " ++# backend
+    | Ecosystem => "Ecosystem"
+
+:~ layer_named (~word : string) (~backend : string) : option lib_layer =
+    ? word = "Meta" ?> Some Meta
+    |? word = "Core" ?> Some Core
+    |? word = "Std" ?> Some Std
+    |? word = "Os" ?> Some Os
+    |? word = "Host" && backend <> "" ?> Some (Host backend)
+    |? word = "Ecosystem" ?> Some Ecosystem
+    |: None
+
+:== layer_row = { module : string; layer : option lib_layer; word : string }
+
+:~ ^ closed_piece (pieces : list string) (n : i32) : string =
+    ?= pieces ?|
+    | _ :: quoted :: after :: rest => ? n = 0i32 ?> quoted |: closed_piece (after :: rest) (n - 1i32)
+    | _ => ""
+
+:~ nth_quoted (~text : string) (n : i32) : string = closed_piece (sm'.split_list "\"" text) n
+
+:~ table_rows (~text : string) : list layer_row =
+    := marker = " = LayerRow ("
+    := picked = \ (found : list layer_row) (line : string) =>
+        := at = sm'.index_of marker line
+        ? at < 0i32 ?> found
+        |:
+            := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
+            := m = nth_quoted rest 0i32
+            := w = nth_quoted rest 1i32
+            := row = { module = m; layer = layer_named w (nth_quoted rest 2i32); word = w }
+            ? m = "" || w = "" ?> found |: listm.append found [ row ]
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold picked []
+
+:| layer_verdict =
+    | Allowed
+    | UpwardImport
+    | CrossBackend
+
+:~ ranked_verdict (from : lib_layer) (opened : lib_layer) : layer_verdict =
+    ? layer_rank opened > layer_rank from ?> UpwardImport |: Allowed
+
+:~ opening_verdict (from : lib_layer) (opened : lib_layer) : layer_verdict =
+    ?= from, opened ?|
+    | _, Meta => Allowed
+    | Host mine, Host theirs ?& mine <> theirs => CrossBackend
+    | _ => ranked_verdict from opened
+
+:~ macros_allowed (layer : lib_layer) : bool = layer_rank layer > layer_rank Std
+
+:~ code_of (~text : string) : string =
+    := kept = \ ((code, inside) : string * bool) (line : string) =>
+        := trimmed = sm'.trim_start [] line
+        := test_body = inside && (trimmed = "" || sm'.starts_with " " line)
+        ? sm'.starts_with ":#" line ?> code, !+
+        |? test_body || sm'.starts_with "//" trimmed ?> code, inside
+        |: code ++# line ++# "\n", !-
+    := code, _ = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold kept ("", !-)
+    code
+
+:~ occurrences (~token : string) (~text : string) : i32 = (listm.length (sm'.split_list token text) : i32) - 1i32
+
+:~ own_macros (~code : string) : i32 =
+    := dollar = "$"
+    occurrences (dollar ++# "'") code + occurrences (dollar ++# "\"") code + occurrences "!!!!" code
+
+:~ word_char (~c : string) : bool =
+    c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'"
+
+:~ last_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring (sm'.length text - 1i32) 1i32 text
+
+:~ first_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring 0i32 1i32 text
+
+:~ member_start (~c : string) : bool = c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyz_"
+
+:~ referenced_by (~code : string) (~name : string) (~separator : string) : bool =
+    := needle = name ++# separator
+    ? sm'.contains needle code |> not ?> !-
+    |:
+        := found = \ ((any, before) : bool * string) (piece : string) =>
+            any || (word_char (last_char before) |> not && member_start (first_char piece)), piece
+        ?= sm'.split_list needle code ?|
+        | head :: rest =>
+            := any, _ = rest |> listm.fold found (!-, head)
+            any
+        | [] => !-
+
+:~ opens_module (~code : string) (~name : string) : bool =
+    := opened = sm'.contains ("\n:< " ++# name ++# "\n") ("\n" ++# code)
+    opened || referenced_by code name "." || referenced_by code name "::"
+
+:== module_report = { module : string; word : string; macros : i32; violations : list string }
+
+:~ ^ layer_of_module (rows : list layer_row) (~name : string) : option lib_layer =
+    ?= rows ?|
+    | [] => None
+    | row :: rest => ? row.module = name ?> row.layer |: layer_of_module rest name
+
+:~ opened_text (~module : string) (layer : lib_layer) : string =
+    "opens " ++# module ++# " (" ++# layer_word layer ++# ")"
+
+:~ module_checked (rows : list layer_row) (~name : string) (~text : string) : module_report =
+    := code = code_of text
+    := macros = own_macros code
+    ?= layer_of_module rows name ?|
+    | None => { module = name; word = "unassigned"; macros = macros; violations = [] }
+    | Some layer =>
+        := opened = \ (found : list string) (row : layer_row) =>
+            ?= row.layer ?|
+            | Some theirs ?& row.module <> name && opens_module code row.module =>
+                ?= opening_verdict layer theirs ?|
+                | Allowed => found
+                | UpwardImport => listm.append found [ opened_text row.module theirs ++# " above its rank" ]
+                | CrossBackend => listm.append found [ opened_text row.module theirs ++# " of another backend" ]
+            | _ => found
+        := imports = rows |> listm.fold opened []
+        := macro_text = sm'.show macros ++# " own host macro(s) in " ++# layer_word layer
+        := macro_rows = ? macros > 0i32 && macros_allowed layer |> not ?> [ macro_text ] |: []
+        { module = name; word = layer_word layer; macros = macros; violations = listm.append imports macro_rows }
+
+:~ violation_count (report : module_report) : i32 =
+    := imports = report.violations |> listm'.filter (\ (v : string) => sm'.starts_with "opens " v)
+    := macros = ? (listm.length imports : i32) < listm.length report.violations ?> report.macros |: 0i32
+    (listm.length imports : i32) + macros
+
+:~ total_violations (reports : list module_report) : i32 =
+    reports |> listm.fold (\ (total : i32) (r : module_report) => total + violation_count r) 0i32
+
+///> rust
+:# rows_parse_and_rank_rules_hold =
+    := std_row = "inl layer_of_am' () = LayerRow (\"am'\", \"Std\", \"\")\n"
+    := table = std_row ++# "inl layer_of_x () = LayerRow (\"otp_x\", \"Host\", \"erlang\")\n"
+    := rows = listm.append (table_rows table) (table_rows "inl l () = LayerRow (\"odd\", \"Kernel\", \"\")\n")
+    testing.expect (rows |> listm.map (\ (r : layer_row) => r.module) = [ "am'"; "otp_x"; "odd" ]) "three rows"
+    testing.expect (layer_of_module rows "otp_x" = Some (Host "erlang") && layer_of_module rows "odd" = None) "layers"
+    testing.expect (nth_quoted "(\"a\", \"b\")" 1i32 = "b") "the second quoted field"
+    testing.expect (nth_quoted "(\"a\", \"b" 1i32 = "") "an unclosed quote is empty"
+    testing.expect (opening_verdict Core Std = UpwardImport && opening_verdict Std Core = Allowed) "rank"
+    testing.expect (opening_verdict Core Meta = Allowed) "Meta is importable by everyone"
+    testing.expect (opening_verdict (Host "erlang") (Host "rust") = CrossBackend) "no cross-backend host"
+    testing.expect (opening_verdict (Host "erlang") Os = Allowed) "a host opens os"
+    testing.expect (opening_verdict Os (Host "rust") = UpwardImport) "os never opens a host"
+
+///> rust
+:# code_scan_skips_tests_and_comments_and_finds_bounded_references =
+    := text = ":< am'\n// $'skip'\n:= f () = $'x' + sm'.length s + xsm'.y\n:# t =\n    $'in test'\n\n:= g () = 1\n"
+    := code = code_of text
+    testing.expect (own_macros code = 1i32) "one macro outside tests and comments"
+    testing.expect (opens_module code "am'" && opens_module code "sm'") "an open line and a qualified ref"
+    testing.expect (opens_module code "listm" |> not) "an unrelated module"
+    testing.expect (referenced_by "xsm'.y" "sm'" "." |> not) "a longer name is not a ref"
+    := core_row = "inl a () = LayerRow (\"core_a\", \"Core\", \"\")\n"
+    := rows = table_rows (core_row ++# "inl b () = LayerRow (\"sm'\", \"Std\", \"\")\n")
+    := report = module_checked rows "core_a" text
+    := expected = [ "opens sm' (Std) above its rank"; "1 own host macro(s) in Core" ]
+    testing.expect (report.violations = expected) "violations"
+    testing.expect (violation_count report = 2i32) "one import and one macro"
+    testing.expect ((module_checked rows "loose" text).word = "unassigned") "a module without a row"

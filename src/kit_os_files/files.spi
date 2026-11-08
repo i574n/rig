@@ -1,4 +1,0 @@
-:= entry_names (~dir : string) : list string =
-    ?= resultm.unbox' (file_system.read_dir_names dir) ?|
-    | Ok names => names |> am'.vec_fold' (\ found name => sm'.from_std_string name :: found) [] |> listm.rev
-    | Error _ => []

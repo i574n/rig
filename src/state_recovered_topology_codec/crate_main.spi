@@ -18,18 +18,18 @@
     := _ = state_receipt_recovered_fixture_record_count_or_max "// recovered-fixture|cap|a|b|c"
     := _ = state_receipt_recovered_fixture_paths "// recovered-fixture|cap|a|b|c"
     export
-        "kit_state_receipt_recovered_topology_count_or_max"
+        "rig_state_receipt_recovered_topology_count_or_max"
         ((\ value => state_receipt_recovered_topology_count_or_max value) : string -> u64)
     export
-        "kit_state_receipt_recovered_fixture_record_count_or_max"
+        "rig_state_receipt_recovered_fixture_record_count_or_max"
         ((\ value => state_receipt_recovered_fixture_record_count_or_max value) : string -> u64)
     export
-        "kit_state_receipt_recovered_fixture_paths"
+        "rig_state_receipt_recovered_fixture_paths"
         ((\ value => state_receipt_recovered_fixture_paths value) : string -> string)
     export
-        "kit_bundle_rehydrate_structure_binding"
+        "rig_bundle_rehydrate_structure_binding"
         ((\ (first, second) => bundle_rehydrate_structure_binding first second) : i32 * i32 -> i32)
     export
-        "kit_bundle_profile_signature_binding"
+        "rig_bundle_profile_signature_binding"
         ((\ (first, second) => bundle_profile_signature_binding first second) : i32 * i32 -> i32)
     0i32

@@ -1,0 +1,15 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    union_reflection
+    rig_memory_model
+    rig_memory_query
+    rig_memory_import
+    rig_memory_save
+link:
+    rig_memory_query
+    rig_memory_import
+    rig_memory_save
+modules:
+    memory

@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let bytes = value.as_bytes();
     let length = bytes.len() as i64;
@@ -156,10 +166,7 @@ fn field_start_7(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32) -> i32 
     }
 }
 fn concat5_12(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn unescaped_from_11(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32, mut v4: Rc<str>) -> Rc<str> {
@@ -326,8 +333,7 @@ fn deps_renamed_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, m
             let v28: Rc<str> = if v25 {
                 v24
             } else {
-                let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
-                let mut v27: Rc<str> = Rc::<str>::from(format!("{}{}", v26, v24));
+                let mut v27: Rc<str> = string_concat(&[&*v5, ",", &*v24]);
                 v27
             };
             let v29: bool = v23 || v6;
@@ -358,8 +364,7 @@ fn dependent_line_6(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>, mut v3: Rc<st
         let v28: Rc<str> = if v25 {
             v16.clone()
         } else {
-            let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
-            let mut v27: Rc<str> = Rc::<str>::from(format!("{}{}", v26, v16.clone()));
+            let mut v27: Rc<str> = string_concat(&[&*v7, ",", &*v16]);
             v27
         };
         let v29: i32 = v8.wrapping_add(1i32);
@@ -402,8 +407,7 @@ fn dependent_line_6(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>, mut v3: Rc<st
         let v69: Rc<str> = if v66 {
             v16
         } else {
-            let v67: Rc<str> = Rc::<str>::from(format!("{}{}", v31, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
-            let v68: Rc<str> = Rc::<str>::from(format!("{}{}", v67, v16));
+            let v68: Rc<str> = string_concat(&[&*v31, ",", &*v16]);
             v68
         };
         let v70: i32 = v32.wrapping_add(1i32);
@@ -441,11 +445,8 @@ fn renamed_line_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32
             let v31: i32 = v15.wrapping_add(v30);
             let v32: i32 = (v0.clone().len() as i32);
             let v33: Rc<str> = std::rc::Rc::<str>::from(v0.get(v31 as usize..v32 as usize).unwrap_or(""));
-            let v34: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) }, v28));
-            let v35: Rc<str> = Rc::<str>::from(format!("{}{}", v34, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = "); } LIT.with(|lit| lit.clone()) }));
             let v36: Rc<str> = concat5_12(v10, v11, v2, v12, v13);
-            let v37: Rc<str> = Rc::<str>::from(format!("{}{}", v35, v36));
-            let v38: Rc<str> = Rc::<str>::from(format!("{}{}", v37, v33));
+            let v38: Rc<str> = string_concat(&["inl ", &*v28, " () = ", &*v36, &*v33]);
             (v38, v22, v4, v5, v6, v7)
         } else {
             let v39: bool = v18 < 0i32;
@@ -462,11 +463,8 @@ fn renamed_line_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32
                 let v49: i32 = v18.wrapping_add(v48);
                 let v50: i32 = (v0.clone().len() as i32);
                 let v51: Rc<str> = std::rc::Rc::<str>::from(v0.get(v49 as usize..v50 as usize).unwrap_or(""));
-                let v52: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) }, v46));
-                let v53: Rc<str> = Rc::<str>::from(format!("{}{}", v52, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = "); } LIT.with(|lit| lit.clone()) }));
                 let v54: Rc<str> = concat5_12(v16, v11, v2, v12, v13);
-                let v55: Rc<str> = Rc::<str>::from(format!("{}{}", v53, v54));
-                let v56: Rc<str> = Rc::<str>::from(format!("{}{}", v55, v51));
+                let v56: Rc<str> = string_concat(&["inl ", &*v46, " () = ", &*v54, &*v51]);
                 (v56, v22, v4, v5, v6, v7)
             } else {
                 let v57: bool = v21 < 0i32;
@@ -476,8 +474,6 @@ fn renamed_line_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32
                     let v60: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) };
                     let mut v61: Rc<str> = Rc::<str>::from(v2.replace(&*v59, &*v60));
                     let v62: Rc<str> = std::rc::Rc::<str>::from(v61.to_ascii_lowercase());
-                    let v63: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("note_of_"); } LIT.with(|lit| lit.clone()) }, v62));
-                    let v64: Rc<str> = Rc::<str>::from(format!("{}{}", v63, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) }));
                     let v65: i32 = v21.wrapping_add(6i32);
                     let v66: i32 = (v0.clone().len() as i32);
                     let v67: i32 = 1i32;
@@ -487,16 +483,12 @@ fn renamed_line_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32
                     let v71: Rc<str> = std::rc::Rc::<str>::from(v0.get(v68 as usize..v70 as usize).unwrap_or(""));
                     let v72: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u32"); } LIT.with(|lit| lit.clone()) };
                     let v73: Rc<str> = Rc::<str>::from(v71.replace(&*v72, &*v13));
-                    let v74: Rc<str> = Rc::<str>::from(format!("{}{}", v64, v73));
                     let v75: Rc<str> = concat5_12(v19.clone(), v11.clone(), v1, v12.clone(), v13.clone());
                     let v76: i32 = (v75.len() as i32);
                     let v77: i32 = v21.wrapping_add(v76);
                     let v78: Rc<str> = std::rc::Rc::<str>::from(v0.get(v77 as usize..v66 as usize).unwrap_or(""));
-                    let v79: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) }, v74));
-                    let v80: Rc<str> = Rc::<str>::from(format!("{}{}", v79, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = "); } LIT.with(|lit| lit.clone()) }));
                     let v81: Rc<str> = concat5_12(v19, v11, v2, v12, v13);
-                    let v82: Rc<str> = Rc::<str>::from(format!("{}{}", v80, v81));
-                    let v83: Rc<str> = Rc::<str>::from(format!("{}{}", v82, v78));
+                    let v83: Rc<str> = string_concat(&["inl note_of_", &*v62, "_", &*v73, " () = ", &*v81, &*v78]);
                     (v83, v22, v4, v5, v6, v7)
                 } else {
                     let v84: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Task (\""); } LIT.with(|lit| lit.clone()) };
@@ -572,7 +564,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>) -> (Rc<str>, i32, i32, Rc<
         renamed_text_0(v0, v1, v2)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_renamed_text(v0: &str, v1: &str, v2: &str) -> (Rc<str>, i32, i32, Rc<str>, i32, Rc<str>) {
+pub fn rig_agile_renamed_text(v0: &str, v1: &str, v2: &str) -> (Rc<str>, i32, i32, Rc<str>, i32, Rc<str>) {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

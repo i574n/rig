@@ -23,9 +23,92 @@ if ($Node -and -not $NodeStage) {
     Set-Location $kitRoot
     $touched = @(git -C $kitRoot status --porcelain --untracked-files=all -- src | ForEach-Object { $_.Substring(3).Trim() } | Where-Object { $_ -match '\.spi$|(^|/)Cargo\.toml$' -and (Test-Path -LiteralPath (Join-Path $kitRoot $_)) })
     if ($touched) {
-        $pre = (& $kit lint precheck @touched 2>&1 | Out-String).Trim()
-        if ($pre -match 'kit lint precheck refused') { throw "precheck refused the snapshot; fix before a node train:`n$pre" }
-        $verdict = if ($pre -match 'kit lint precheck ok') { ($pre -split "`n")[-1] } else { 'precheck unavailable in the installed kit; skipped' }
+        $refusedRows = @(); $chunks = 0
+        for ($at = 0; $at -lt $touched.Count; $at += 150) {
+            $chunk = $touched[$at..([Math]::Min($at + 149, $touched.Count - 1))]
+            $part = (& $kit lint precheck @chunk 2>&1 | Out-String).Trim()
+            $chunks++
+            if ($part -match 'kit lint precheck refused') { $refusedRows += @($part -split "`n" | Where-Object { $_ -match '^\S+\.spi:\d+: ' }) }
+            elseif ($part -notmatch 'kit lint precheck ok') { throw "precheck gave no verdict for files $at to $($at + $chunk.Count - 1), refusing the launch:`n$(($part -split "`n" | Select-Object -Last 3) -join "`n")" }
+        }
+        $pre = if ($refusedRows.Count) { "kit lint precheck refused`n$($refusedRows -join "`n")" } else { "kit lint precheck ok ($chunks chunks)" }
+        if ($pre -match 'kit lint precheck refused') {
+            $rows = @($pre -split "`n" | Where-Object { $_ -match '^\S+\.spi:\d+: ' })
+            $rawText = { param($row) if ($row -notmatch '^(\S+\.spi):(\d+): ') { return $false }; $line = [int]$Matches[2]; $inside = $false; $n = 0; foreach ($l in (Get-Content -LiteralPath (Join-Path $kitRoot $Matches[1]))) { $n++; $marks = ([regex]::Matches($l, '"""')).Count; if ($n -eq $line) { return ($inside -or $marks -gt 0) }; if ($marks % 2 -eq 1) { $inside = -not $inside } }; $false }
+            $inRaw = @($rows | Where-Object { & $rawText $_ })
+            $changed = @{}
+            $headLines = @{}
+            $inHead = {
+                param($file, $line)
+                $source = if (git -C $kitRoot ls-files -- $file) { $file } else { $file -replace '^src/rig_', 'src/kit_' }
+                if ($source -eq $file -and -not (git -C $kitRoot ls-files -- $file)) { return $false }
+                if (-not (git -C $kitRoot ls-files -- $source)) { return $false }
+                if (-not $headLines.ContainsKey($source)) { $headLines[$source] = [Collections.Generic.HashSet[string]]::new([string[]]@(git -C $kitRoot show "HEAD:$source")) }
+                $text = @(Get-Content -LiteralPath (Join-Path $kitRoot $file))[$line - 1]
+                $back = [regex]::Replace([regex]::Replace($text, '(?<![A-Za-z0-9_])rig_(?=[a-z0-9])', 'kit_'), '(?<![A-Za-z0-9_-])rig-(?=[a-z0-9])', 'kit-')
+                $headLines[$source].Contains($text) -or $headLines[$source].Contains($back)
+            }
+            $unchanged = {
+                param($row)
+                if ($row -notmatch '^(\S+\.spi):(\d+): ') { return $false }
+                $file = $Matches[1]; $line = [int]$Matches[2]
+                if (& $inHead $file $line) { return $true }
+                if (-not (git -C $kitRoot ls-files -- $file)) { return $false }
+                if (-not $changed.ContainsKey($file)) {
+                    $set = [Collections.Generic.HashSet[int]]::new()
+                    foreach ($h in (git -C $kitRoot diff -U0 HEAD -- $file | Select-String '^@@ -\S+ \+(\d+)(?:,(\d+))? @@')) {
+                        $start = [int]$h.Matches[0].Groups[1].Value
+                        $count = if ($h.Matches[0].Groups[2].Success) { [int]$h.Matches[0].Groups[2].Value } else { 1 }
+                        for ($n = $start; $n -lt $start + $count; $n++) { [void]$set.Add($n) }
+                    }
+                    $changed[$file] = $set
+                }
+                -not $changed[$file].Contains($line)
+            }
+            $old = @($rows | Where-Object { -not (& $rawText $_) -and (& $unchanged $_) })
+            $real = @($rows | Where-Object { -not (& $rawText $_) -and -not (& $unchanged $_) })
+            if ($real.Count) { throw "precheck refused the snapshot; fix before a node train:`n$($real -join "`n")" }
+            $pre = "kit lint precheck ok after excusing $($inRaw.Count) rows inside triple-quoted raw blocks and $($old.Count) rows on lines unchanged since HEAD"
+        }
+        $notebookFindings = foreach ($rel in ($touched | Where-Object { $_ -like '*.spi' })) {
+            $lines = @(Get-Content -LiteralPath (Join-Path $kitRoot $rel))
+            $cliCheck = @($lines | Select-String -SimpleMatch 'rig_cli_check' -List).Count -gt 0
+            $packageDir = Split-Path (Join-Path $kitRoot $rel)
+            $projPath = Join-Path $packageDir 'package.spiproj'
+            if (Test-Path -LiteralPath $projPath) {
+                $listed = @([regex]::Matches((Get-Content -LiteralPath $projPath -Raw), '(?m)^\s+\|?([a-z][a-z0-9_]*)-?\s*$') | ForEach-Object { $_.Groups[1].Value })
+                $own = Split-Path $packageDir -Leaf
+                for ($k = 0; $k -lt $lines.Count; $k++) {
+                    if ($lines[$k] -match '^\s*//') { continue }
+                    $code = $lines[$k] -replace '"(?:[^"\\]|\\.)*"', '' -replace "\$'[^']*'", ''
+                    foreach ($ref in [regex]::Matches($code, '(?<![\w''.])([a-z][a-z0-9_]*)\.([a-z][a-z0-9_]*)\.[a-z_]')) {
+                        $used = $ref.Groups[1].Value
+                        if ($used -ne $own -and $listed -notcontains $used -and (Test-Path -LiteralPath (Join-Path (Split-Path $packageDir) "$used\package.spiproj"))) { "${rel}:$($k + 1): uses package $used, which this package.spiproj does not list" }
+                    }
+                }
+            }
+            for ($k = 1; $k -lt $lines.Count; $k++) {
+                if ($lines[$k] -match '^\s+\+\+# ' -and $lines[$k - 1] -match '^\s*:= [\w'']+ = \S' -and $lines[$k - 1] -notmatch '=\s*$') { "${rel}:$($k + 1): a := value continued on the next line with ++# (the parser drops the binding); bind each piece first" }
+            }
+            $keywordLocal = [regex]'^\s*:= (open|and|inl|let|type|union|nominal|prototype|instance|join|real)\s*(=|:)|\\ \((open|and|inl|let|type|union|nominal|prototype|instance|join|real)\s*:|\(\(?~?(open|and|inl|let|type|union|nominal|prototype|instance|join|real)\s*:'
+            for ($k = 0; $k -lt $lines.Count; $k++) {
+                if ($lines[$k] -notmatch '^\s*//' -and $keywordLocal.IsMatch(($lines[$k] -replace '"(?:[^"\\]|\\.)*"', ''))) { "${rel}:$($k + 1): a keyword used as a local or parameter name (the parser drops the block with only a warning)" }
+            }
+            $concats = @($lines | Where-Object { $_ -notmatch '^\s*//' } | Where-Object { ($_ -replace '"(?:[^"\\]|\\.)*"', '') -match '\+\+#' }).Count
+            if ($concats -and -not @($lines | Select-String -SimpleMatch "sm'_operators" -List).Count) { "${rel}: uses ++# without opening sm'_operators$(if ($cliCheck) { ' (in a rig_cli_check test)' })" }
+            for ($n = 0; $n -lt $lines.Count; $n++) {
+                if ($lines[$n] -notmatch '^(:# |test )' -or $lines[$n] -match ' static =') { continue }
+                $j = $n - 1; while ($j -ge 0 -and $lines[$j].Trim() -eq '') { $j-- }
+                if ($j -lt 0 -or $lines[$j] -notmatch '^///> ') { "${rel}:$($n + 1): a test block without its own ///> target line" }
+            }
+        }
+        if (@($notebookFindings).Count) { throw "notebook precheck refused the snapshot (each costs a whole train):`n$($notebookFindings -join "`n")" }
+        $lockLog = Join-Path ([IO.Path]::GetTempPath()) "kit-train-lock-$PID.txt"
+        Push-Location (Join-Path $kitRoot 'src')
+        try { $null = & cargo metadata --offline --locked --format-version 1 2>$lockLog; $lockExit = $LASTEXITCODE } finally { Pop-Location }
+        if ($lockExit -ne 0) { throw "lock precheck refused the snapshot: src/Cargo.lock does not match the manifests (the node regen runs --locked); run cargo update --workspace --offline in src:`n$((Get-Content -LiteralPath $lockLog -ErrorAction SilentlyContinue | Select-Object -First 3) -join "`n")" }
+        if ($pre -notmatch 'kit lint precheck ok') { throw "precheck gave no verdict, refusing the launch: $(($pre -split "`n")[-1])" }
+        $verdict = ($pre -split "`n")[-1]
         [Console]::WriteLine("$(Get-Date -Format HH:mm:ss) launch-train $Name $verdict ($($touched.Count) touched files)")
     }
     & $kit job start "kit-$Name-node" 43200000 pwsh -NoProfile -File $PSCommandPath -Name $Name -Node $Node -NodeMirror $NodeMirror -SshHost $SshHost -NodeStage -CellsPort $CellsPort
@@ -127,21 +210,24 @@ if ($NodeStage) {
             Say "node notebook selection uses the box's last installed train $lastName"
         }
         $before = Invoke-NodePwsh "Get-ChildItem '$mirror\kit\src' -Recurse -File -Filter *.rs | Where-Object { `$_.FullName -notmatch '\\target\\' } | ForEach-Object { `"`$(`$_.FullName.Substring('$mirror\kit\'.Length)) `$((Get-FileHash `$_.FullName).Hash)`" }"
-        $start = & $remote $Node job start "kit-$Name" 36000000 pwsh -NoProfile -File "$mirror\kit\scripts\release-train.ps1" -Name $Name -KitRoot "$mirror\kit" -Lib "$mirror\spiral\lib\spiral" -NotebooksOnly 2>&1 | Out-String
+        $nodeKit = (Get-Content ~/.config/remote-machines.json -Raw | ConvertFrom-Json -AsHashtable)[$Node].kit
+        if (-not $nodeKit) { throw "remote-machines.json has no kit path for $Node" }
+        $start = & $kit job start --on $SshHost --bin $nodeKit "kit-$Name" 36000000 pwsh -NoProfile -File "$mirror\kit\scripts\release-train.ps1" -Name $Name -KitRoot "$mirror\kit" -Lib "$mirror\spiral\lib\spiral" -NotebooksOnly 2>&1 | Out-String
         $jobId = [regex]::Match($start, 'id=(\S+)').Groups[1].Value
         if (-not $jobId) { throw "node job did not start: $start" }
         Say "node half started: $jobId"
     }
     $misses = 0
+    $giveUp = (Get-Date).AddHours(11)
     while ($true) {
-        $wait = try { & $remote $Node job wait $jobId 2>&1 | Out-String } catch { "$_" }
+        $wait = try { & $kit job wait $jobId 43200000 2>&1 | Out-String } catch { "$_" }
         if ($wait -match 'kit job wait ok') { break }
         $misses++
-        Say "node wait lost its route ($misses of 10): $(($wait.Trim() -split "`n" | Select-Object -Last 1))"
-        if ($misses -ge 10) { throw "node half UNKNOWN: route lost $misses times; the job may still be running on $Node. Resume with -NodeStage -ResumeNodeJob $jobId once it answers" }
-        Start-Sleep -Seconds 60
+        Say "node wait lost its route (miss $misses, exit $LASTEXITCODE, retrying until $($giveUp.ToString('HH:mm'))): $(($wait.Trim() -split "`n" | Select-Object -Last 1))"
+        if ((Get-Date) -ge $giveUp) { throw "node half UNKNOWN: no route for the whole node job timeout ($misses misses); the job may still be on $Node. Resume with -NodeStage -ResumeNodeJob $jobId once it answers" }
+        Start-Sleep -Seconds ([Math]::Min(300, 60 * $misses))
     }
-    & $remote $Node job tail $jobId 40 2>&1 | Where-Object { $_ -match '^\d\d:\d\d:\d\d ' } | ForEach-Object { Say "node: $_" }
+    & $kit job tail $jobId 40 2>&1 | Where-Object { $_ -match '^\d\d:\d\d:\d\d ' } | ForEach-Object { Say "node: $_" }
     if ($wait -notmatch 'exit=0\b') { throw "node half failed: $(($wait -split "`n" | Select-Object -Last 1))" }
     $after = Invoke-NodePwsh "Get-ChildItem '$mirror\kit\src' -Recurse -File -Filter *.rs | Where-Object { `$_.FullName -notmatch '\\target\\' } | ForEach-Object { `"`$(`$_.FullName.Substring('$mirror\kit\'.Length)) `$((Get-FileHash `$_.FullName).Hash)`" }"
     $changed = @(Compare-Object $before $after -PassThru | Where-Object SideIndicator -eq '=>')

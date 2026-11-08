@@ -210,15 +210,15 @@ inl emit_rooted () : () = global """
     }
 
     pub fn rooted_remove_regular(path: &Path) -> Result<(), String> {
-        kit_rust_std_fs_mutation::rooted_remove_regular(path)
+        rig_rust_std_fs_mutation::rooted_remove_regular(path)
     }
 
     pub fn rooted_unlink_nondirectory(path: &Path) -> Result<(), String> {
-        kit_rust_std_fs_mutation::rooted_unlink_nondirectory(path)
+        rig_rust_std_fs_mutation::rooted_unlink_nondirectory(path)
     }
 
     pub fn rooted_remove_tree_within(root: &Path, path: &Path) -> Result<u64, String> {
-        kit_rust_std_fs_mutation::rooted_remove_tree_within(root, path)
+        rig_rust_std_fs_mutation::rooted_remove_tree_within(root, path)
     }
 
     #[cfg(all(test, target_os = "linux"))]

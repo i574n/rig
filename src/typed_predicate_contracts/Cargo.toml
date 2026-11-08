@@ -15,4 +15,4 @@ name = "typed_predicates"
 path = "predicate_tests.rs"
 
 [dependencies]
-kit-handoff = { path = "../kit_handoff" }
+rig-handoff = { path = "../rig_handoff" }

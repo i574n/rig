@@ -37,7 +37,7 @@ fn codec_empty_3() -> Rc<str> {
 }
 fn composite_end_6(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
     loop {
-        let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v7: bool = v6 == false ;
         let v10: bool = if v7 {
             true
@@ -91,7 +91,7 @@ fn composite_end_6(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
 }
 fn scalar_end_7(mut v0: Rc<str>, mut v1: i32) -> i32 {
     loop {
-        let (mut v2, mut v3, mut v4, mut v5): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v2, mut v3, mut v4, mut v5): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v6: bool = v5 == false ;
         if v6 {
             return -2i32;
@@ -130,7 +130,7 @@ fn scalar_end_7(mut v0: Rc<str>, mut v1: i32) -> i32 {
 }
 fn fields_8(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
     loop {
-        let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v7: bool = v6 == false ;
         if v7 {
             return -2i32;
@@ -140,8 +140,8 @@ fn fields_8(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
             if v9 {
                 return -1i32;
             } else {
-                let (mut v10, mut v11, mut v12): (Rc<str>, i32, bool) = predicate_literal_domain::kit_predicate_literal(&*v0,v3);
-                let (mut v13, mut v14, mut v15, mut v16): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v4);
+                let (mut v10, mut v11, mut v12): (Rc<str>, i32, bool) = predicate_literal_domain::rig_predicate_literal(&*v0,v3);
+                let (mut v13, mut v14, mut v15, mut v16): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v4);
                 let v17: bool = v12 == false ;
                 let v19: bool = if v17 {
                     true
@@ -162,10 +162,10 @@ fn fields_8(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
                 } else {
                     let v24: bool = v10 == v2 ;
                     if v24 {
-                        let v25: i32 = predicate_lex_domain::kit_predicate_skip(&*v0,v14);
+                        let v25: i32 = predicate_lex_domain::rig_predicate_skip(&*v0,v14);
                         return v25;
                     } else {
-                        let (mut v26, mut v27, mut v28, mut v29): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v14);
+                        let (mut v26, mut v27, mut v28, mut v29): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v14);
                         let v30: bool = v29 == false ;
                         let v33: bool = if v30 {
                             true
@@ -197,7 +197,7 @@ fn fields_8(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
                         if v44 {
                             return -2i32;
                         } else {
-                            let (mut v45, mut v46, mut v47, mut v48): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v43);
+                            let (mut v45, mut v46, mut v47, mut v48): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v43);
                             let v49: bool = v48 == false ;
                             if v49 {
                                 return -2i32;
@@ -225,7 +225,7 @@ fn fields_8(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
 }
 fn members_9(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
     loop {
-        let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v7: bool = v6 == false ;
         if v7 {
             return -1i32;
@@ -241,7 +241,7 @@ fn members_9(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
                     v1 = v4;
                     continue;
                 } else {
-                    let (mut v13, mut v14, mut v15): (Rc<str>, i32, bool) = predicate_literal_domain::kit_predicate_literal(&*v0,v3);
+                    let (mut v13, mut v14, mut v15): (Rc<str>, i32, bool) = predicate_literal_domain::rig_predicate_literal(&*v0,v3);
                     let v16: bool = v15 == false ;
                     if v16 {
                         return -1i32;
@@ -261,7 +261,7 @@ fn members_9(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>) -> i32 {
 }
 fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4: bool, mut v5: i32) -> i32 {
     loop {
-        let (mut v6, mut v7, mut v8, mut v9): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v1);
+        let (mut v6, mut v7, mut v8, mut v9): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v1);
         let v10: bool = v9 == false ;
         if v10 {
             return -5i32;
@@ -287,7 +287,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                     if v19 {
                         return -5i32;
                     } else {
-                        let (mut v20, mut v21, mut v22, mut v23): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v6);
+                        let (mut v20, mut v21, mut v22, mut v23): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v6);
                         let v24: bool = v23 == false ;
                         let v27: bool = if v24 {
                             true
@@ -318,7 +318,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                         let v47: i32 = if v37 {
                             -2i32
                         } else {
-                            let (mut v38, mut v39, mut v40, mut v41): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v6);
+                            let (mut v38, mut v39, mut v40, mut v41): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v6);
                             let v43: bool = if v41 {
                                 let v42: bool = v40 == v17 ;
                                 v42
@@ -335,7 +335,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                         let v57: i32 = if v37 {
                             -2i32
                         } else {
-                            let (mut v48, mut v49, mut v50, mut v51): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v6);
+                            let (mut v48, mut v49, mut v50, mut v51): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v6);
                             let v53: bool = if v51 {
                                 let v52: bool = v50 == v17 ;
                                 v52
@@ -349,8 +349,8 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                                 -2i32
                             }
                         };
-                        let (mut v58, mut v59, mut v60): (Rc<str>, i32, bool) = predicate_literal_domain::kit_predicate_literal(&*v0,v47);
-                        let (mut v61, mut v62, mut v63): (Rc<str>, i32, bool) = predicate_literal_domain::kit_predicate_literal(&*v0,v57);
+                        let (mut v58, mut v59, mut v60): (Rc<str>, i32, bool) = predicate_literal_domain::rig_predicate_literal(&*v0,v47);
+                        let (mut v61, mut v62, mut v63): (Rc<str>, i32, bool) = predicate_literal_domain::rig_predicate_literal(&*v0,v57);
                         let v64: bool = v36 < 0i32;
                         let v66: bool = if v64 {
                             true
@@ -382,7 +382,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                                             let v82: i32 = if v37 {
                                                 -2i32
                                             } else {
-                                                let (mut v73, mut v74, mut v75, mut v76): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v6);
+                                                let (mut v73, mut v74, mut v75, mut v76): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v6);
                                                 let v78: bool = if v76 {
                                                     let v77: bool = v75 == v17 ;
                                                     v77
@@ -400,7 +400,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                                             let v93: i32 = if v83 {
                                                 -2i32
                                             } else {
-                                                let (mut v84, mut v85, mut v86, mut v87): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v82);
+                                                let (mut v84, mut v85, mut v86, mut v87): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v82);
                                                 let v89: bool = if v87 {
                                                     let v88: bool = v86 == v17 ;
                                                     v88
@@ -418,7 +418,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                                             let v133: i32 = if v94 {
                                                 0i32
                                             } else {
-                                                let (mut v95, mut v96, mut v97, mut v98): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v93);
+                                                let (mut v95, mut v96, mut v97, mut v98): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v93);
                                                 let v101: bool = if v98 {
                                                     let v99: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("null"); } LIT.with(|lit| lit.clone()) };
                                                     let v100: bool = v97 == v99 ;
@@ -440,7 +440,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                                                     if v105 {
                                                         -3i32
                                                     } else {
-                                                        let (mut v106, mut v107, mut v108, mut v109): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v93);
+                                                        let (mut v106, mut v107, mut v108, mut v109): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v93);
                                                         let v111: bool = if v109 {
                                                             let v110: bool = v108 == v17 ;
                                                             v110
@@ -461,7 +461,7 @@ fn packages_5(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4
                                                             if v116 {
                                                                 -3i32
                                                             } else {
-                                                                let (mut v117, mut v118, mut v119, mut v120): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v114);
+                                                                let (mut v117, mut v118, mut v119, mut v120): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v114);
                                                                 let v123: bool = if v120 {
                                                                     let v121: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("true"); } LIT.with(|lit| lit.clone()) };
                                                                     let v122: bool = v119 == v121 ;
@@ -552,7 +552,7 @@ fn selected_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: u8, mut v4:
     }
 }
 fn inspect_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
-    let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,0i32);
+    let (mut v3, mut v4, mut v5, mut v6): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,0i32);
     let v9: bool = if v6 {
         let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{"); } LIT.with(|lit| lit.clone()) };
         let v8: bool = v5 == v7 ;
@@ -566,7 +566,7 @@ fn inspect_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
     } else {
         -2i32
     };
-    let (mut v13, mut v14, mut v15, mut v16): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,0i32);
+    let (mut v13, mut v14, mut v15, mut v16): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,0i32);
     let v19: bool = if v16 {
         let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{"); } LIT.with(|lit| lit.clone()) };
         let v18: bool = v15 == v17 ;
@@ -590,8 +590,8 @@ fn inspect_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
     if v25 {
         -5i32
     } else {
-        let (mut v26, mut v27, mut v28, mut v29): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v12);
-        let (mut v30, mut v31, mut v32, mut v33): (i32, i32, Rc<str>, bool) = predicate_lex_domain::kit_predicate_token(&*v0,v22);
+        let (mut v26, mut v27, mut v28, mut v29): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v12);
+        let (mut v30, mut v31, mut v32, mut v33): (i32, i32, Rc<str>, bool) = predicate_lex_domain::rig_predicate_token(&*v0,v22);
         let v34: bool = v29 && v33;
         let v37: bool = if v34 {
             let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("["); } LIT.with(|lit| lit.clone()) };
@@ -622,6 +622,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>) -> i32> {
         inspect_0(v0, v1, v2)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_developer_requirements(v0: &str, v1: &str, v2: &str) -> i32 {
+pub fn rig_developer_requirements(v0: &str, v1: &str, v2: &str) -> i32 {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }

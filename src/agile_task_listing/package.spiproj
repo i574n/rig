@@ -6,8 +6,8 @@ packages:
     agile_task_text
     union_reflection
     spiral-
-    kit_agile_list_args
+    rig_agile_list_args
 link:
-    kit_agile_list_args
+    rig_agile_list_args
 modules:
     task_listing

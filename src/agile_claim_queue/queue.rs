@@ -935,7 +935,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<str>, u64
         claim_next_0(v0, v1, v2, v3, v4, v5, v6)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_claim_next(v0: &str, v1: i32, v2: &str, v3: &str, v4: &str, v5: &str, v6: u64) -> (Rc<str>, Rc<str>, Rc<str>, u64, i32, i32, Rc<str>, Rc<str>) {
+pub fn rig_claim_next(v0: &str, v1: i32, v2: &str, v3: &str, v4: &str, v5: &str, v6: u64) -> (Rc<str>, Rc<str>, Rc<str>, u64, i32, i32, Rc<str>, Rc<str>) {
     closure0()(Rc::<str>::from(v0), v1, Rc::<str>::from(v2), Rc::<str>::from(v3), Rc::<str>::from(v4), Rc::<str>::from(v5), v6)
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

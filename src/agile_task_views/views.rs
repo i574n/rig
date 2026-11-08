@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_FileReadable(Rc<str>),
@@ -51,10 +61,7 @@ enum US6 {
 fn views_loaded_3(mut v0: Rc<str>) -> (bool, Rc<str>) {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/views.spi"); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v2.clone()));
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v4, v2.clone()));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2.clone()));
+    let v6: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v2, &*v2]);
     let v7: bool = std::path::Path::new(&*v6).is_file();
     let v10: US0 = if v7 {
         US0::US0_FileReadable(v6)
@@ -81,10 +88,7 @@ fn views_loaded_3(mut v0: Rc<str>) -> (bool, Rc<str>) {
     (v16, v17)
 }
 fn concat5_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn declared_from_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
@@ -136,7 +140,7 @@ fn views_written_6(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<st
         v6
     };
     if v7 {
-        let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+        let v8: Rc<str> = string_concat(&[&*v0, ".pending"]);
         let v9: bool = std::fs::write(&*v8, &*v3).is_ok();
         let v22: US2 = if v9 {
             let v10: i32 = 40i32;
@@ -197,10 +201,7 @@ fn views_written_6(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<st
 fn views_module_registered_8(mut v0: Rc<str>) -> US1 {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/package.spiproj"); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v2.clone()));
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v4, v2.clone()));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2.clone()));
+    let v6: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v2, &*v2]);
     let v7: bool = std::path::Path::new(&*v6).is_file();
     let v10: US0 = if v7 {
         US0::US0_FileReadable(v6.clone())
@@ -217,10 +218,7 @@ fn views_module_registered_8(mut v0: Rc<str>) -> US1 {
             let v14: Rc<str> = std::fs::read_to_string(&*v13).unwrap_or_default().into();
             let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
             let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("    views\n"); } LIT.with(|lit| lit.clone()) };
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v15, v16.clone()));
-            let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, v2.clone()));
-            let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, v2.clone()));
-            let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, v2.clone()));
+            let v20: Rc<str> = string_concat(&[&*v15, &*v16, &*v2, &*v2, &*v2]);
             let v21: bool = v14.contains(&*v20);
             let v24: bool = if v21 {
                 true
@@ -235,12 +233,9 @@ fn views_module_registered_8(mut v0: Rc<str>) -> US1 {
                 let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("modules:\n"); } LIT.with(|lit| lit.clone()) };
                 let v27: bool = v14.contains(&*v26);
                 if v27 {
-                    let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v26.clone(), v16));
-                    let v29: Rc<str> = Rc::<str>::from(format!("{}{}", v28, v2.clone()));
-                    let v30: Rc<str> = Rc::<str>::from(format!("{}{}", v29, v2.clone()));
-                    let v31: Rc<str> = Rc::<str>::from(format!("{}{}", v30, v2));
+                    let v31: Rc<str> = string_concat(&[&*v26, &*v16, &*v2, &*v2, &*v2]);
                     let v32: Rc<str> = Rc::<str>::from(v14.replace(&*v26, &*v31));
-                    let v33: Rc<str> = Rc::<str>::from(format!("{}{}", v6.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+                    let v33: Rc<str> = string_concat(&[&*v6, ".pending"]);
                     let v34: bool = std::fs::write(&*v33, &*v32).is_ok();
                     let v47: US2 = if v34 {
                         let v35: i32 = 40i32;
@@ -323,10 +318,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
     let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v23: Rc<str> = concat5_4(v7.clone(), v21, v7.clone(), v22.clone(), v22.clone());
     let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
-    let v25: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v23));
-    let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v25, v24));
-    let v27: Rc<str> = Rc::<str>::from(format!("{}{}", v26, v22.clone()));
-    let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v27, v22.clone()));
+    let v28: Rc<str> = string_concat(&[&*v6, &*v23, &*v24, &*v22, &*v22]);
     let v29: i32 = 0i32;
     let v30: i32 = declared_from_5(v5.clone(), v28, v29);
     let v31: bool = v30 < 0i32;
@@ -337,10 +329,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
         let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) };
         let v37: Rc<str> = Rc::<str>::from(v1.replace(&*v35, &*v36));
-        let v38: Rc<str> = Rc::<str>::from(format!("{}{}", v34, v37));
-        let v39: Rc<str> = Rc::<str>::from(format!("{}{}", v38, v22.clone()));
-        let v40: Rc<str> = Rc::<str>::from(format!("{}{}", v39, v22.clone()));
-        let v41: Rc<str> = Rc::<str>::from(format!("{}{}", v40, v22.clone()));
+        let v41: Rc<str> = string_concat(&[&*v34, &*v37, &*v22, &*v22, &*v22]);
         let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = View ("); } LIT.with(|lit| lit.clone()) };
         let v43: Rc<str> = Rc::<str>::from(v1.replace(&*v8, &*v9));
         let v44: Rc<str> = Rc::<str>::from(v43.replace(&*v7, &*v11));
@@ -349,10 +338,6 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v47: Rc<str> = Rc::<str>::from(v46.replace(&*v19, &*v20));
         let v48: Rc<str> = concat5_4(v7.clone(), v47, v7.clone(), v22.clone(), v22.clone());
         let v49: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
-        let v50: Rc<str> = Rc::<str>::from(format!("{}{}", v33, v41));
-        let v51: Rc<str> = Rc::<str>::from(format!("{}{}", v50, v42));
-        let v52: Rc<str> = Rc::<str>::from(format!("{}{}", v51, v48));
-        let v53: Rc<str> = Rc::<str>::from(format!("{}{}", v52, v49.clone()));
         let v54: Rc<str> = Rc::<str>::from(v2.replace(&*v8, &*v9));
         let v55: Rc<str> = Rc::<str>::from(v54.replace(&*v7, &*v11));
         let v56: Rc<str> = Rc::<str>::from(v55.replace(&*v13, &*v14));
@@ -366,10 +351,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v64: Rc<str> = Rc::<str>::from(v63.replace(&*v19, &*v20));
         let v65: Rc<str> = concat5_4(v7.clone(), v64, v7.clone(), v22.clone(), v22.clone());
         let v66: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) };
-        let v67: Rc<str> = Rc::<str>::from(format!("{}{}", v53, v59));
-        let v68: Rc<str> = Rc::<str>::from(format!("{}{}", v67, v49));
-        let v69: Rc<str> = Rc::<str>::from(format!("{}{}", v68, v65));
-        let v70: Rc<str> = Rc::<str>::from(format!("{}{}", v69, v66));
+        let v70: Rc<str> = string_concat(&[&*v33, &*v41, &*v42, &*v48, &*v49, &*v59, &*v49, &*v65, &*v66]);
         let v71: i32 = v5.get(..v30 as usize).and_then(|head| head.rfind(char::from(10u8))).map(|newline| newline as i32 + 1).unwrap_or(0);
         let v72: i32 = v5.get(v30 as usize..).and_then(|rest| rest.find(&*v13)).map(|found| (found + v30 as usize) as i32).unwrap_or(-1);
         let v73: bool = v72 < 0i32;
@@ -382,10 +364,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v76: Rc<str> = std::rc::Rc::<str>::from(v5.get(0i32 as usize..v71 as usize).unwrap_or(""));
         let v77: i32 = (v5.clone().len() as i32);
         let v78: Rc<str> = std::rc::Rc::<str>::from(v5.get(v75 as usize..v77 as usize).unwrap_or(""));
-        let v79: Rc<str> = Rc::<str>::from(format!("{}{}", v76, v70));
-        let v80: Rc<str> = Rc::<str>::from(format!("{}{}", v79, v78));
-        let v81: Rc<str> = Rc::<str>::from(format!("{}{}", v80, v22.clone()));
-        let v82: Rc<str> = Rc::<str>::from(format!("{}{}", v81, v22.clone()));
+        let v82: Rc<str> = string_concat(&[&*v76, &*v70, &*v78, &*v22, &*v22]);
         v82
     } else {
         let v83: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
@@ -393,10 +372,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v85: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
         let v86: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) };
         let v87: Rc<str> = Rc::<str>::from(v1.replace(&*v85, &*v86));
-        let v88: Rc<str> = Rc::<str>::from(format!("{}{}", v84, v87));
-        let v89: Rc<str> = Rc::<str>::from(format!("{}{}", v88, v22.clone()));
-        let v90: Rc<str> = Rc::<str>::from(format!("{}{}", v89, v22.clone()));
-        let v91: Rc<str> = Rc::<str>::from(format!("{}{}", v90, v22.clone()));
+        let v91: Rc<str> = string_concat(&[&*v84, &*v87, &*v22, &*v22, &*v22]);
         let v92: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = View ("); } LIT.with(|lit| lit.clone()) };
         let v93: Rc<str> = Rc::<str>::from(v1.replace(&*v8, &*v9));
         let v94: Rc<str> = Rc::<str>::from(v93.replace(&*v7, &*v11));
@@ -405,10 +381,6 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v97: Rc<str> = Rc::<str>::from(v96.replace(&*v19, &*v20));
         let v98: Rc<str> = concat5_4(v7.clone(), v97, v7.clone(), v22.clone(), v22.clone());
         let v99: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
-        let v100: Rc<str> = Rc::<str>::from(format!("{}{}", v83, v91));
-        let v101: Rc<str> = Rc::<str>::from(format!("{}{}", v100, v92));
-        let v102: Rc<str> = Rc::<str>::from(format!("{}{}", v101, v98));
-        let v103: Rc<str> = Rc::<str>::from(format!("{}{}", v102, v99.clone()));
         let v104: Rc<str> = Rc::<str>::from(v2.replace(&*v8, &*v9));
         let v105: Rc<str> = Rc::<str>::from(v104.replace(&*v7, &*v11));
         let v106: Rc<str> = Rc::<str>::from(v105.replace(&*v13, &*v14));
@@ -422,10 +394,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         let v114: Rc<str> = Rc::<str>::from(v113.replace(&*v19, &*v20));
         let v115: Rc<str> = concat5_4(v7.clone(), v114, v7.clone(), v22.clone(), v22.clone());
         let v116: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) };
-        let v117: Rc<str> = Rc::<str>::from(format!("{}{}", v103, v109));
-        let v118: Rc<str> = Rc::<str>::from(format!("{}{}", v117, v99));
-        let v119: Rc<str> = Rc::<str>::from(format!("{}{}", v118, v115));
-        let v120: Rc<str> = Rc::<str>::from(format!("{}{}", v119, v116));
+        let v120: Rc<str> = string_concat(&[&*v83, &*v91, &*v92, &*v98, &*v99, &*v109, &*v99, &*v115, &*v116]);
         let v121: bool = &*v5 == "";
         let v123: Rc<str> = if v121 {
             let v122: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("///- --no-respell\nunion agile_view =\n    | View :: string * string * string -> agile_view\n"); } LIT.with(|lit| lit.clone()) };
@@ -439,17 +408,11 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         } else {
             v13.clone()
         };
-        let v126: Rc<str> = Rc::<str>::from(format!("{}{}", v123, v125));
-        let v127: Rc<str> = Rc::<str>::from(format!("{}{}", v126, v120));
-        let v128: Rc<str> = Rc::<str>::from(format!("{}{}", v127, v13));
-        let v129: Rc<str> = Rc::<str>::from(format!("{}{}", v128, v22.clone()));
+        let v129: Rc<str> = string_concat(&[&*v123, &*v125, &*v120, &*v13, &*v22]);
         v129
     };
     let v131: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/views.spi"); } LIT.with(|lit| lit.clone()) };
-    let v132: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), v131));
-    let v133: Rc<str> = Rc::<str>::from(format!("{}{}", v132, v22.clone()));
-    let v134: Rc<str> = Rc::<str>::from(format!("{}{}", v133, v22.clone()));
-    let v135: Rc<str> = Rc::<str>::from(format!("{}{}", v134, v22.clone()));
+    let v135: Rc<str> = string_concat(&[&*v0, &*v131, &*v22, &*v22, &*v22]);
     let v136: US1 = views_written_6(v135, v4, v5, v130);
     let v138: US1 = match &v136 {
         US1::US1_StateWritten => {
@@ -464,10 +427,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
             let v139: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" verb="); } LIT.with(|lit| lit.clone()) };
             let v140: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" flags='"); } LIT.with(|lit| lit.clone()) };
             let v141: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) };
-            let v142: Rc<str> = Rc::<str>::from(format!("{}{}", v139, v2));
-            let v143: Rc<str> = Rc::<str>::from(format!("{}{}", v142, v140));
-            let v144: Rc<str> = Rc::<str>::from(format!("{}{}", v143, v3));
-            let v145: Rc<str> = Rc::<str>::from(format!("{}{}", v144, v141));
+            let v145: Rc<str> = string_concat(&[&*v139, &*v2, &*v140, &*v3, &*v141]);
             let v146: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile view-add ok name="); } LIT.with(|lit| lit.clone()) };
             let v149: Rc<str> = if v32 {
                 let v147: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" replaced=yes"); } LIT.with(|lit| lit.clone()) };
@@ -476,10 +436,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
                 let v148: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" replaced=no"); } LIT.with(|lit| lit.clone()) };
                 v148
             };
-            let v150: Rc<str> = Rc::<str>::from(format!("{}{}", v146, v1));
-            let v151: Rc<str> = Rc::<str>::from(format!("{}{}", v150, v145));
-            let v152: Rc<str> = Rc::<str>::from(format!("{}{}", v151, v149));
-            let v153: Rc<str> = Rc::<str>::from(format!("{}{}", v152, v22));
+            let v153: Rc<str> = string_concat(&[&*v146, &*v1, &*v145, &*v149, &*v22]);
             let v154: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v153.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
             v154
@@ -498,10 +455,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
                 }
                 _ => unreachable!(),
             };
-            let v161: Rc<str> = Rc::<str>::from(format!("{}{}", v155, v1));
-            let v162: Rc<str> = Rc::<str>::from(format!("{}{}", v161, v156));
-            let v163: Rc<str> = Rc::<str>::from(format!("{}{}", v162, v160));
-            let v164: Rc<str> = Rc::<str>::from(format!("{}{}", v163, v22));
+            let v164: Rc<str> = string_concat(&[&*v155, &*v1, &*v156, &*v160, &*v22]);
             let v165: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v164 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v165
@@ -558,10 +512,7 @@ fn view_add_run_1() -> i32 {
                 let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile view-add: view verbs are "); } LIT.with(|lit| lit.clone()) };
                 let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("list|next"); } LIT.with(|lit| lit.clone()) };
                 let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile view-add: view verbs are list|next"); } LIT.with(|lit| lit.clone()) };
-                let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, v18.clone()));
-                let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v20, v18.clone()));
-                let v22: Rc<str> = Rc::<str>::from(format!("{}{}", v21, v18));
+                let v22: Rc<str> = string_concat(&[&*v16, &*v17, &*v18, &*v18, &*v18]);
                 let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v22 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v23
@@ -772,10 +723,7 @@ fn view_run_9() -> i32 {
         let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let v26: Rc<str> = concat5_4(v10.clone(), v24, v10.clone(), v25.clone(), v25.clone());
         let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
-        let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v9, v26));
-        let v29: Rc<str> = Rc::<str>::from(format!("{}{}", v28, v27));
-        let v30: Rc<str> = Rc::<str>::from(format!("{}{}", v29, v25.clone()));
-        let v31: Rc<str> = Rc::<str>::from(format!("{}{}", v30, v25.clone()));
+        let v31: Rc<str> = string_concat(&[&*v9, &*v26, &*v27, &*v25, &*v25]);
         let v32: i32 = 0i32;
         let v33: i32 = declared_from_5(v8.clone(), v31, v32);
         let v34: bool = v33 < 0i32;
@@ -783,15 +731,8 @@ fn view_run_9() -> i32 {
             let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile view: no view named "); } LIT.with(|lit| lit.clone()) };
             let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" in "); } LIT.with(|lit| lit.clone()) };
             let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/views.spi"); } LIT.with(|lit| lit.clone()) };
-            let v38: Rc<str> = Rc::<str>::from(format!("{}{}", v1, v37));
-            let v39: Rc<str> = Rc::<str>::from(format!("{}{}", v38, v25.clone()));
-            let v40: Rc<str> = Rc::<str>::from(format!("{}{}", v39, v25.clone()));
-            let v41: Rc<str> = Rc::<str>::from(format!("{}{}", v40, v25));
             let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("; agile views <root> lists them"); } LIT.with(|lit| lit.clone()) };
-            let v43: Rc<str> = Rc::<str>::from(format!("{}{}", v35, v3));
-            let v44: Rc<str> = Rc::<str>::from(format!("{}{}", v43, v36));
-            let v45: Rc<str> = Rc::<str>::from(format!("{}{}", v44, v41));
-            let v46: Rc<str> = Rc::<str>::from(format!("{}{}", v45, v42));
+            let v46: Rc<str> = string_concat(&[&*v35, &*v3, &*v36, &*v1, &*v37, &*v25, &*v25, &*v25, &*v42]);
             let v47: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v46 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v47
@@ -807,10 +748,7 @@ fn views_listed_17(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
         let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("View ("); } LIT.with(|lit| lit.clone()) };
         let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) };
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-        let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("View (\""); } LIT.with(|lit| lit.clone()) };
-        let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v5.clone()));
-        let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v5.clone()));
-        let v9: Rc<str> = Rc::<str>::from(format!("{}{}", v8, v5));
+        let v9: Rc<str> = string_concat(&[&*v3, &*v4, &*v5, &*v5, &*v5]);
         let v10: i32 = declared_from_5(v0.clone(), v9, v1);
         let v11: bool = v10 < 0i32;
         if v11 {
@@ -818,10 +756,7 @@ fn views_listed_17(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
         } else {
             let (mut v12, mut v13, mut v14): (Rc<str>, Rc<str>, Rc<str>) = view_at_10(v0.clone(), v10);
             let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("  "); } LIT.with(|lit| lit.clone()) };
-            let v16: Rc<str> = Rc::<str>::from(format!("{}{}", v12, v15.clone()));
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v16, v13));
-            let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, v15));
-            let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, v14));
+            let v19: Rc<str> = string_concat(&[&*v12, &*v15, &*v13, &*v15, &*v14]);
             let v20: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v19.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
             let v21: i32 = v10.wrapping_add(1i32);
@@ -843,14 +778,7 @@ fn views_run_16() -> i32 {
     let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" path="); } LIT.with(|lit| lit.clone()) };
     let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/views.spi"); } LIT.with(|lit| lit.clone()) };
     let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let v12: Rc<str> = Rc::<str>::from(format!("{}{}", v1, v10));
-    let v13: Rc<str> = Rc::<str>::from(format!("{}{}", v12, v11.clone()));
-    let v14: Rc<str> = Rc::<str>::from(format!("{}{}", v13, v11.clone()));
-    let v15: Rc<str> = Rc::<str>::from(format!("{}{}", v14, v11.clone()));
-    let v16: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v8));
-    let v17: Rc<str> = Rc::<str>::from(format!("{}{}", v16, v9));
-    let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, v15));
-    let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, v11));
+    let v19: Rc<str> = string_concat(&[&*v7, &*v8, &*v9, &*v1, &*v10, &*v11, &*v11, &*v11, &*v11]);
     let v20: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v19.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
     v20
@@ -905,6 +833,6 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
         views_entry_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_views_run() -> i32 {
+pub fn rig_agile_views_run() -> i32 {
     closure0()()
 }

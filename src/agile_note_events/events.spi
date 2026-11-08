@@ -27,7 +27,6 @@
     testing.expect (events |> listm.map (\ (e : note_event_row) => e.author) = [ "kit"; "x" ]) "one event per note line"
     testing.expect (events |> listm.map (\ (e : note_event_row) => e.id) = [ "T-A"; "T-A" ]) "the note's item id"
     testing.expect (events |> listm.map (\ (e : note_event_row) => e.hour) = [ 498274i64; 498274i64 ]) "hours"
-///> _
 := main () : i32 =
-    export "kit_agile_note_events" note_events_of
+    export "rig_agile_note_events" note_events_of
     0i32

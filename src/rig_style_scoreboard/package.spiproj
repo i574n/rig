@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rig_style_probes
+    rig_style_measure
+link:
+    rig_style_probes
+    rig_style_measure
+modules:
+    scoreboard

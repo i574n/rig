@@ -1,4 +1,4 @@
-///- --package ../kit_cli_check --timeout 900000
+///- --package ../rig_cli_check --timeout 900000
 :< cli
 
 := marked (~text : string) : string = cat (cat "// " (cat "TO" "DO")) text
@@ -16,7 +16,7 @@
     root
 
 := agile_run (root : fixture_root) (args : cli_args) : cli_run =
-    kit_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
+    rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
 
 := forward (~path : string) : string =
     sm'.replace "\\" "/" path

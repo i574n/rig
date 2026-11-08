@@ -7,8 +7,8 @@ pub struct CanonicalPlanRow { pub op: String, pub target: String, pub expected: 
 fn plan_hex_nibble(byte: u8) -> Option<u8> { match byte { b'0'..=b'9' => Some(byte-b'0'), b'a'..=b'f' => Some(byte-b'a'+10), b'A'..=b'F' => Some(byte-b'A'+10), _ => None } }
 fn plan_hex_decode(value: &str) -> Result<String,String> { if !value.len().is_multiple_of(2) { return Err("canonical plan IR hex field has odd length".to_owned()); } let bytes=value.as_bytes(); let mut out=Vec::with_capacity(bytes.len()/2); let mut index=0usize; while index<bytes.len() { let hi=plan_hex_nibble(bytes[index]).ok_or_else(|| "canonical plan IR contains non-hex data".to_owned())?; let lo=plan_hex_nibble(bytes[index+1]).ok_or_else(|| "canonical plan IR contains non-hex data".to_owned())?; out.push((hi<<4)|lo); index+=2; } String::from_utf8(out).map_err(|error| format!("canonical plan IR field is not UTF-8: {error}")) }
 
-pub fn parse_plan_ir_manifest(text: &str) -> Result<Vec<CanonicalPlanRow>,String> { let mut lines=text.lines(); let header=lines.next().unwrap_or_default(); if kit_plan_ir_header_projection(header).as_ref()!="1" { return Err("canonical plan IR header mismatch".to_owned()); } let mut rows=Vec::new(); for (index,line) in lines.enumerate() { if line.is_empty() { continue; } let (op_hex,target_hex,expected_hex,payload_hex,effect_hex)=kit_plan_ir_row_hex_tuple(line); if op_hex.is_empty() { return Err(format!("canonical plan IR row {} has invalid shape", index+1)); } let row=CanonicalPlanRow { op:plan_hex_decode(op_hex.as_ref())?, target:plan_hex_decode(target_hex.as_ref())?, expected:plan_hex_decode(expected_hex.as_ref())?, payload:plan_hex_decode(payload_hex.as_ref())?, effect:plan_hex_decode(effect_hex.as_ref())? }; let code=kit_plan_ir_decode_code(&row.op,&row.target,&row.expected,&row.payload,&row.effect); if code>=8 { return Err(format!("canonical plan IR row {} was rejected by Spiral decoder", index+1)); } rows.push(row); } if rows.is_empty() { return Err("canonical plan IR manifest contains no operations".to_owned()); } Ok(rows) }
-pub fn plan_ir_manifest_count(value: &str) -> i32 { let header=value.lines().next().unwrap_or_default(); if kit_plan_ir_header_projection(header).as_ref()=="1" { match parse_plan_ir_manifest(value) { Ok(rows) => i32::try_from(rows.len()).unwrap_or(-1), Err(_) => -1 } } else if header.starts_with("KIT-PLAN-IR") { -1 } else { 0 } }
+pub fn parse_plan_ir_manifest(text: &str) -> Result<Vec<CanonicalPlanRow>,String> { let mut lines=text.lines(); let header=lines.next().unwrap_or_default(); if rig_plan_ir_header_projection(header).as_ref()!="1" { return Err("canonical plan IR header mismatch".to_owned()); } let mut rows=Vec::new(); for (index,line) in lines.enumerate() { if line.is_empty() { continue; } let (op_hex,target_hex,expected_hex,payload_hex,effect_hex)=rig_plan_ir_row_hex_tuple(line); if op_hex.is_empty() { return Err(format!("canonical plan IR row {} has invalid shape", index+1)); } let row=CanonicalPlanRow { op:plan_hex_decode(op_hex.as_ref())?, target:plan_hex_decode(target_hex.as_ref())?, expected:plan_hex_decode(expected_hex.as_ref())?, payload:plan_hex_decode(payload_hex.as_ref())?, effect:plan_hex_decode(effect_hex.as_ref())? }; let code=rig_plan_ir_decode_code(&row.op,&row.target,&row.expected,&row.payload,&row.effect); if code>=8 { return Err(format!("canonical plan IR row {} was rejected by Spiral decoder", index+1)); } rows.push(row); } if rows.is_empty() { return Err("canonical plan IR manifest contains no operations".to_owned()); } Ok(rows) }
+pub fn plan_ir_manifest_count(value: &str) -> i32 { let header=value.lines().next().unwrap_or_default(); if rig_plan_ir_header_projection(header).as_ref()=="1" { match parse_plan_ir_manifest(value) { Ok(rows) => i32::try_from(rows.len()).unwrap_or(-1), Err(_) => -1 } } else if header.starts_with("KIT-PLAN-IR") { -1 } else { 0 } }
 
 fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let bytes = value.as_bytes();
@@ -729,30 +729,30 @@ fn closure8() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) -> u64> 
         plan_decode_code_12(v0, v1, v2, v3, v4)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_plan_ir_schema(v0: &str) -> Rc<str> {
+pub fn rig_plan_ir_schema(v0: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_plan_ir_descriptor(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
+pub fn rig_plan_ir_descriptor(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
     closure1()(Rc::<str>::from(v0))
 }
-pub fn kit_plan_ir_header_projection(v0: &str) -> Rc<str> {
+pub fn rig_plan_ir_header_projection(v0: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0))
 }
-pub fn kit_plan_ir_row_hex_tuple(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
+pub fn rig_plan_ir_row_hex_tuple(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
     closure3()(Rc::<str>::from(v0))
 }
-pub fn kit_plan_ir_projection_witness() -> i32 {
+pub fn rig_plan_ir_projection_witness() -> i32 {
     closure4()()
 }
-pub fn kit_plan_ir_count() -> i32 {
+pub fn rig_plan_ir_count() -> i32 {
     closure5()()
 }
-pub fn kit_plan_ir_stage_witness() -> i32 {
+pub fn rig_plan_ir_stage_witness() -> i32 {
     closure6()()
 }
-pub fn kit_plan_ir_index_valid(v0: &str) -> u64 {
+pub fn rig_plan_ir_index_valid(v0: &str) -> u64 {
     closure7()(Rc::<str>::from(v0))
 }
-pub fn kit_plan_ir_decode_code(v0: &str, v1: &str, v2: &str, v3: &str, v4: &str) -> u64 {
+pub fn rig_plan_ir_decode_code(v0: &str, v1: &str, v2: &str, v3: &str, v4: &str) -> u64 {
     closure8()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2), Rc::<str>::from(v3), Rc::<str>::from(v4))
 }

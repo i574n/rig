@@ -94,7 +94,6 @@
     testing.expect ((args_of [ "r"; "T" ]).seq = "" && (args_of [ "r" ]).root = "") "short argument lists"
     := words = union_reflection.cases.union_cases_joined valued_word "|"
     testing.expect (words = "--as|--expect-at|--expect-prefix") words
-///> _
 := main () : i32 =
     export "agile_note_edit_args_read" note_args_read
     0i32

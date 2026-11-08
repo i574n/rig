@@ -1,0 +1,21 @@
+[package.metadata.spiral]
+entry = "control.spi"
+output = "control.rs"
+
+[package]
+name = "rig-job-control"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_control"
+path = "control.rs"
+[dependencies]
+rig-job-state = { path = "../rig_job_state" }
+rig-job-summary = { path = "../rig_job_summary" }
+rig-machine-windows = { path = "../rig_machine_windows" }
+rig-job-launch = { path = "../rig_job_launch" }
+rig-process-alive = { path = "../rig_process_alive" }
+rig-job-names = { path = "../rig_job_names" }

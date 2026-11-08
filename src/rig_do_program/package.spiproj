@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    rig_do_model
+link:
+    rig_do_model
+modules:
+    program
+    compiled

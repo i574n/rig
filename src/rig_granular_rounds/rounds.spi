@@ -1,0 +1,122 @@
+///- --package .
+:# rounds static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== round_count = { word : string; count : i32 }
+
+:| round_line =
+    | CountRow :: string * u64 * round_count -> round_line
+    | OtherLine :: round_line
+
+:~ added (totals : list round_count) (~word : string) (count : i32) : list round_count =
+    ? listm'.contains word (totals |> listm.map (\ (t : round_count) => t.word))
+    ?> totals |> listm.map (\ (t : round_count) => ? t.word = word ?> { t ?| count = t.count + count } |: t)
+    |: listm.append totals [ { word = word; count = count } ]
+
+:~ ^ summed
+    (rows : array_base rig_style_measure.measure.probe_row) (at : i32) (totals : list round_count)
+    : list round_count
+    =
+    ? at >= am'.length_base rows ?> totals
+    |:
+        := row = am'.index_base at rows
+        summed rows (at + 1i32) (added totals row.word row.count)
+
+:~ ^ packages_summed (packages : array_base string) (at : i32) (totals : list round_count) : list round_count =
+    ? at >= am'.length_base packages ?> totals
+    |:
+        := rows = rig_style_measure.measure.measured (am'.index_base at packages)
+        packages_summed packages (at + 1i32) (summed rows 0i32 totals)
+
+:~ totals_of (dirs : array_base string) : list round_count =
+    packages_summed (rig_style_measure.measure.packages_under dirs) 0i32 []
+
+:~ slug_of (~text : string) : string =
+    sm'.to_lower text |> sm'.replace "-" "_" |> sm'.replace "." "_" |> sm'.replace "/" "_"
+
+:~ row_text (~repo : string) (stamp : u64) (c : round_count) : string =
+    "inl round_" ++# slug_of repo ++# "_" ++# sm'.show stamp ++# "_" ++# slug_of c.word ++# " () = RoundCount (\""
+    ++# repo ++# "\", " ++# sm'.show stamp ++# "u64, \"" ++# c.word ++# "\", " ++# sm'.show c.count ++# "i32)"
+
+:~ line_of (~line : string) : round_line =
+    := marker = " = RoundCount (\""
+    := at = sm'.index_of marker line
+    ? at < 0i32 ?> OtherLine
+    |:
+        := fields = sm'.split ", " (sm'.slice (at + sm'.length marker - 1i32) (sm'.length line - 2i32) line) |> array
+        := field = \ (k : i32) => ? am'.length fields > k ?> am'.index k fields |> sm'.replace "\"" "" |: ""
+        := stamp = optionm'.default_value 0u64 (convert.try_convert (field 1i32 |> sm'.replace "u64" ""))
+        := count = optionm'.default_value 0i32 (convert.try_convert (field 3i32 |> sm'.replace "i32" ""))
+        ? am'.length fields = 4i32 ?> CountRow (field 0i32, stamp, { word = field 2i32; count = count }) |: OtherLine
+
+:~ previous_of (~text : string) (~repo : string) : list round_count =
+    := rows = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.map line_of
+    := later = \ (best : u64) (row : round_line) =>
+        ?= row ?|
+        | CountRow (r, s, _) ?& r = repo && s > best => s
+        | _ => best
+    := latest = rows |> listm.fold later 0u64
+    := kept = \ (found : list round_count) (row : round_line) =>
+        ?= row ?|
+        | CountRow (r, s, c) ?& r = repo && s = latest => c :: found
+        | _ => found
+    rows |> listm.fold kept [] |> listm.rev
+
+:~ delta_line (previous : list round_count) (c : round_count) : string =
+    := earlier = \ (found : i32) (p : round_count) => ? p.word = c.word ?> p.count |: found
+    := before = previous |> listm.fold earlier -1i32
+    := difference = c.count - before
+    := change = ? before < 0i32 ?> "new" |? difference >= 0i32 ?> "+" ++# sm'.show difference |: sm'.show difference
+    "  " ++# c.word ++# "=" ++# sm'.show c.count ++# " (" ++# change ++# ")"
+
+:~ config_path () : string =
+    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := app_data = env.get_environment_variable "APPDATA"
+    := dir =
+        ? home <> "" ?> home
+        |? app_data <> "" ?> app_data ++# "/kit"
+        |: env.get_environment_variable "HOME" ++# "/.config/kit"
+    dir ++# "/granular_rounds.spi"
+
+:~ ^ written (lines : list string) : () =
+    ?= lines ?|
+    | [] => ()
+    | line :: rest =>
+        console.write_line line
+        written rest
+
+:~ round_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: repo :: first :: more =>
+        := dirs = first :: more |> listm'.box |> listm'.to_array'
+        := totals = totals_of dirs
+        := path = config_path ()
+        := before = file_system.read_text_or_empty path
+        := previous = previous_of before repo
+        := stamp = workspace_primitives.clock.unix_ms ()
+        written (totals |> listm.map (delta_line previous))
+        := rows = totals |> listm.map (\ (c : round_count) => row_text repo stamp c ++# "\n") |> sm'.concat_list ""
+        file_system.write_all_text path (before ++# rows)
+        := counts = " words=" ++# sm'.show (listm.length totals : i32) ++# " file=" ++# path
+        console.write_line ("kit standards round ok repo=" ++# repo ++# counts)
+        0i32
+    | _ =>
+        console.write_error_line "kit error: usage: standards --round <repo-label> <dir>..."
+        2i32
+
+///> rust
+:# a_round_sums_words_reads_the_last_round_and_shows_deltas =
+    := totals = added (added [] "host-macro" 3i32) "host-macro" 2i32
+    testing.expect (totals = [ { word = "host-macro"; count = 5i32 } ]) "counts add per word"
+    := row = row_text "kit" 100u64 { word = "host-macro"; count = 5i32 }
+    testing.expect (line_of row = CountRow ("kit", 100u64, { word = "host-macro"; count = 5i32 })) "a row reads back"
+    := text = row ++# "\n" ++# row_text "kit" 200u64 { word = "host-macro"; count = 4i32 } ++# "\n"
+    testing.expect (previous_of text "kit" = [ { word = "host-macro"; count = 4i32 } ]) "only the latest round counts"
+    := grown = delta_line [ { word = "host-macro"; count = 4i32 } ] { word = "host-macro"; count = 6i32 }
+    testing.expect (grown = "  host-macro=6 (+2)") grown
+    testing.expect (delta_line [] { word = "forall"; count = 1i32 } = "  forall=1 (new)") "a word with no earlier round"
+:= main () : i32 =
+    export "rig_granular_round_run" round_run
+    0i32

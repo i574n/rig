@@ -1,8 +1,8 @@
-///- --package ../kit_cli_check --timeout 900000
+///- --package ../rig_cli_check --timeout 900000
 :< cli
 
 := agile_call (root : fixture_root) (args : cli_args) : cli_run =
-    kit_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
+    rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
 
 := backlog () : string =
     "inl task_kit_a () = Task (\"KIT-A\", \"view item\", Story, P1, D2, 0u32, Planned, \"\", \"kit\", \"current\", "

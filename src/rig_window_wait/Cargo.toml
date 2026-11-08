@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "wait.spi"
+output = "wait.rs"
+
+[package]
+name = "rig-window-wait"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_window_wait"
+path = "wait.rs"
+
+[dependencies]
+rig-window-admission = { path = "../rig_window_admission" }
+rig-process-alive = { path = "../rig_process_alive" }

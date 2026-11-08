@@ -1,0 +1,131 @@
+///- --package .
+:# model static =
+    :< rig_crate_walk.walk
+    :< sm'_operators
+
+:< rig_crate_walk.walk
+:< sm'_operators
+
+:= expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail
+
+:| target_backend =
+    | RustTarget :: target_backend
+    | GleamTarget :: target_backend
+    | ZigTarget :: target_backend
+
+:= backend_word = \|
+    | RustTarget => "rust"
+    | GleamTarget => "gleam"
+    | ZigTarget => "zig"
+
+:~ backend_named (~word : string) : option target_backend =
+    ? word = "rust" ?> Some RustTarget |? word = "gleam" ?> Some GleamTarget |? word = "zig" ?> Some ZigTarget |: None
+
+:= backend_extension = \|
+    | RustTarget => ".rs"
+    | GleamTarget => ".gleam"
+    | ZigTarget => ".zig"
+
+:= default_limit () : i32 = 1000i32
+
+:~ target_limit_of (~text : string) (backend : target_backend) : i32 =
+    := marker = " = TargetLimit (\"" ++# backend_word backend ++# "\", "
+    := found = \ (limit : i32) (line : string) =>
+        := at = sm'.index_of marker line
+        ? at < 0i32 ?> limit
+        |:
+            := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
+            := digits = sm'.replace "i32)" "" (sm'.trim rest)
+            ?= convert.try_convert digits ?|
+            | Some n ?& n > 0i32 => n
+            | _ => limit
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold found (default_limit ())
+
+:| crate_verdict =
+    | CrateWithin
+    | CrateOver
+    | CrateUnbuilt
+
+:~ verdict_of (limit : i32) (measure : crate_measure) : crate_verdict =
+    ? measure.lines < 0i32 ?> CrateUnbuilt |? measure.lines > limit ?> CrateOver |: CrateWithin
+
+:~ verdict_text (limit : i32) (measure : crate_measure) : string =
+    ?= verdict_of limit measure ?|
+    | CrateWithin => "ok"
+    | CrateOver => "OVER " ++# sm'.format limit
+    | CrateUnbuilt => "no generated output yet"
+
+:~ measure_line (limit : i32) (measure : crate_measure) : string =
+    "gate / "
+    ++# measure.crate
+    ++# " "
+    ++# measure.output
+    ++# " "
+    ++# sm'.format measure.lines
+    ++# " lines "
+    ++# verdict_text limit measure
+    ++# measure.largest
+
+:~ over_count (limit : i32) (measures : list crate_measure) : i32 =
+    := counted = \ count (m : crate_measure) => ?= verdict_of limit m ?| | CrateOver => count + 1i32 | _ => count
+    measures |> listm.fold counted 0i32
+
+:| gate_outcome =
+    | GatePassed
+    | GateFailedOver : i32
+    | GateFailedMissing : i32
+    | GateFailedVacuous
+
+:~ missing_count (limit : i32) (measures : list crate_measure) : i32 =
+    := counted = \ count (m : crate_measure) => ?= verdict_of limit m ?| | CrateUnbuilt => count + 1i32 | _ => count
+    measures |> listm.fold counted 0i32
+
+:~ gate_outcome_of (enforce : bool) (limit : i32) (measures : list crate_measure) : gate_outcome =
+    := over = over_count limit measures
+    := missing = missing_count limit measures
+    ? enforce && listm.length measures = 0i32 ?> GateFailedVacuous
+    |? enforce && over > 0i32 ?> GateFailedOver over
+    |? enforce && missing > 0i32 ?> GateFailedMissing missing
+    |: GatePassed
+
+///> rust
+:# target_limits_come_from_typed_rows_with_a_default =
+    := rust_row = "inl limit_rust () = TargetLimit (\"rust\", 900i32)\n"
+    := rows = rust_row ++# "inl limit_gleam () = TargetLimit (\"gleam\", 1500i32)\n"
+    expect (target_limit_of rows RustTarget = 900i32 && target_limit_of rows GleamTarget = 1500i32) "rows set limits"
+    expect (target_limit_of rows ZigTarget = 1000i32) "a backend without a row keeps the default"
+    expect (target_limit_of "inl x () = TargetLimit (\"rust\", 0i32)\n" RustTarget = 1000i32) "a zero limit is ignored"
+    expect (backend_named "gleam" = Some GleamTarget && backend_named "wasm" = None) "backend words"
+    expect (backend_extension ZigTarget = ".zig" && backend_word GleamTarget = "gleam") "extensions"
+
+///> rust
+:# lines_verdicts_and_the_vacuity_rule =
+    := small = { crate = "small"; output = "s.rs"; lines = 900i32; largest = "" }
+    := big = { crate = "big"; output = "b.rs"; lines = 1200i32; largest = "" }
+    := unbuilt = { crate = "new"; output = "n.rs"; lines = -1i32; largest = "" }
+    := named = { crate = "big"; output = "b.rs"; lines = 1200i32; largest = " largest run 300" }
+    expect (measure_line 1000i32 named = "gate / big b.rs 1200 lines OVER 1000 largest run 300") "largest fn named"
+    expect (measure_line 1000i32 big = "gate / big b.rs 1200 lines OVER 1000") "over line"
+    expect (measure_line 1000i32 small = "gate / small s.rs 900 lines ok") "ok line"
+    expect (verdict_of 1000i32 unbuilt = CrateUnbuilt) "missing output is not counted as over"
+    expect
+        ?= gate_outcome_of !+ 1000i32 [ small; big; unbuilt ] ?|
+        | GateFailedOver n => n = 1i32
+        | _ => !-
+        "enforce fails on one crate over"
+    expect
+        ?= gate_outcome_of !+ 1000i32 [] ?|
+        | GateFailedVacuous => !+
+        | _ => !-
+        "enforce fails when nothing was measured"
+    expect (?= gate_outcome_of !- 1000i32 [ big ] ?| | GatePassed => !+ | _ => !-) "report-only passes"
+    expect
+        ?= gate_outcome_of !+ 1000i32 [ small; unbuilt ] ?|
+        | GateFailedMissing n => n = 1i32
+        | _ => !-
+        "enforce fails on a missing output"
+    expect
+        ?= gate_outcome_of !- 1000i32 [ unbuilt ] ?|
+        | GatePassed => !+
+        | _ => !-
+        "report-only keeps a missing output as a report"

@@ -13,10 +13,10 @@ publish.workspace = true
 path = "legacy_surface.rs"
 
 [dependencies]
-kit-process-observation = { path = "../kit_process_observation" }
-kit-rust-std-fs = { path = "../rust_std_fs" }
-kit-rust-std-fs-mutation = { path = "../rust_std_fs_mutation" }
-kit-tree-copy = { path = "../kit_tree_copy" }
+rig-process-observation = { path = "../rig_process_observation" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
+rig-rust-std-fs-mutation = { path = "../rust_std_fs_mutation" }
+rig-tree-copy = { path = "../rig_tree_copy" }
 
 [lints.clippy]
 needless_return = "allow"

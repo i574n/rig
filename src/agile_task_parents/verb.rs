@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -443,8 +453,7 @@ fn text_of_19(mut v0: Rc<str>) -> Rc<str> {
     }
 }
 fn task_known_22(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
-    let mut v2: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Task (\""); } LIT.with(|lit| lit.clone()) }, v1));
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+    let v3: Rc<str> = string_concat(&["Task (\"", &*v1, "\""]);
     let v4: bool = v0.contains(&*v3);
     v4
 }
@@ -520,12 +529,7 @@ fn slug_of_29(mut v0: Rc<str>) -> Rc<str> {
 }
 fn row_of_link_28(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let mut v2: Rc<str> = slug_of_29(v0.clone());
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl parent_of_"); } LIT.with(|lit| lit.clone()) }, v2));
-    let v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" () = Parent (\""); } LIT.with(|lit| lit.clone()) }));
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v4, v0));
-    let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\", \""); } LIT.with(|lit| lit.clone()) }));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v1));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\")"); } LIT.with(|lit| lit.clone()) }));
+    let v8: Rc<str> = string_concat(&["inl parent_of_", &*v2, " () = Parent (\"", &*v0, "\", \"", &*v1, "\")"]);
     v8
 }
 fn method27(mut v0: Rc<UH0>, mut v1: Rc<UH1>) -> Rc<UH1> {
@@ -536,7 +540,7 @@ fn method27(mut v0: Rc<UH0>, mut v1: Rc<UH1>) -> Rc<UH1> {
             let v4: Rc<UH0> = v4;
             let v5: Rc<UH1> = method27(v4, v1);
             let mut v6: Rc<str> = row_of_link_28(v2, v3);
-            let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
+            let v7: Rc<str> = string_concat(&[&*v6, "\n"]);
             Rc::new(UH1::UH1_Cons(v7, v5))
         }
         UH0::UH0_Nil => {
@@ -571,7 +575,7 @@ fn parents_text_26(mut v0: Rc<UH0>) -> Rc<str> {
     let v7: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v6).as_ref().clone()));
     let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v9: Rc<str> = Rc::<str>::from((*v7.borrow()).join(&*v8));
-    let v10: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("///- --no-respell\nunion task_parent =\n    | Parent :: string * string -> task_parent\n"); } LIT.with(|lit| lit.clone()) }, v9));
+    let v10: Rc<str> = string_concat(&["///- --no-respell\nunion task_parent =\n    | Parent :: string * string -> task_parent\n", &*v9]);
     v10
 }
 fn renamed_within_32(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
@@ -593,7 +597,7 @@ fn renamed_within_32(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
     }
 }
 fn replaced_31(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
-    let mut v2: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+    let mut v2: Rc<str> = string_concat(&[&*v0, ".pending"]);
     let v3: bool = std::fs::write(&*v2, &*v1).is_ok();
     let v16: US5 = if v3 {
         let v4: i32 = 40i32;
@@ -670,10 +674,10 @@ fn parents_changed_18(mut v0: Rc<str>, mut v1: US3) -> US4 {
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = Rc::<str>::from(v0.replace(&*v2, &*v3));
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v4, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) }));
-    let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/agile.spi"); } LIT.with(|lit| lit.clone()) }));
+    let v5: Rc<str> = string_concat(&[&*v4, "/state"]);
+    let mut v6: Rc<str> = string_concat(&[&*v5, "/agile.spi"]);
     let v7: Rc<str> = text_of_19(v6);
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v5.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/parents.spi"); } LIT.with(|lit| lit.clone()) }));
+    let v8: Rc<str> = string_concat(&[&*v5, "/parents.spi"]);
     let mut v9: Rc<str> = text_of_19(v8.clone());
     let v25: Rc<str> = match &v1 {
         US3::US3_ParentCleared(v20) => {
@@ -714,13 +718,12 @@ fn parents_changed_18(mut v0: Rc<str>, mut v1: US3) -> US4 {
     let v27: Rc<UH0> = links_changed_23(v26, v1);
     let v28: bool = &*v7 == "";
     if v28 {
-        let v29: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("no backlog state at "); } LIT.with(|lit| lit.clone()) }, v5));
+        let v29: Rc<str> = string_concat(&["no backlog state at ", &*v5]);
         US4::US4_ParentsRefused(v29)
     } else {
         let v31: bool = &*v25 != "";
         if v31 {
-            let v32: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("no task "); } LIT.with(|lit| lit.clone()) }, v25));
-            let v33: Rc<str> = Rc::<str>::from(format!("{}{}", v32, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" in state/agile.spi"); } LIT.with(|lit| lit.clone()) }));
+            let v33: Rc<str> = string_concat(&["no task ", &*v25, " in state/agile.spi"]);
             US4::US4_ParentsRefused(v33)
         } else {
             let v35: Rc<str> = text_of_19(v8.clone());
@@ -736,7 +739,7 @@ fn parents_changed_18(mut v0: Rc<str>, mut v1: US3) -> US4 {
                     let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/parents.spi could not be written"); } LIT.with(|lit| lit.clone()) };
                     US4::US4_ParentsRefused(v42)
                 } else {
-                    let v44: Rc<str> = Rc::<str>::from(format!("{}{}", v5, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/package.spiproj"); } LIT.with(|lit| lit.clone()) }));
+                    let v44: Rc<str> = string_concat(&[&*v5, "/package.spiproj"]);
                     let v45: i32 = 0i32;
                     let v46: i32 = method33(v27, v45);
                     let v47: Rc<str> = text_of_19(v44.clone());
@@ -767,7 +770,7 @@ fn parents_changed_18(mut v0: Rc<str>, mut v1: US3) -> US4 {
 }
 fn method36(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
     let mut v2: Rc<str> = v0.borrow().l0.clone();
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v1));
+    let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
@@ -820,7 +823,7 @@ fn parent_edit_run_14() -> i32 {
                                                                 match v19 {
                                                                     US4::US4_ParentsRefused(v29) => {
                                                                         let v29: Rc<str> = v29;
-                                                                        let v30: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: agile edit --parent: "); } LIT.with(|lit| lit.clone()) }, v29));
+                                                                        let v30: Rc<str> = string_concat(&["kit error: agile edit --parent: ", &*v29]);
                                                                         eprintln!("{}", v30);
                                                                         2i32
                                                                     }
@@ -832,12 +835,8 @@ fn parent_edit_run_14() -> i32 {
                                                                         } else {
                                                                             v12
                                                                         };
-                                                                        let v23: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" parent="); } LIT.with(|lit| lit.clone()) }, v22));
-                                                                        let v24: Rc<str> = Rc::<str>::from(format!("{}{}", v23, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" links="); } LIT.with(|lit| lit.clone()) }));
                                                                         let v25: Rc<str> = format_real_35(v20);
-                                                                        let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v24, v25));
-                                                                        let v27: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile edit ok child="); } LIT.with(|lit| lit.clone()) }, v8));
-                                                                        let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v27, v26));
+                                                                        let v28: Rc<str> = string_concat(&["kit agile edit ok child=", &*v8, " parent=", &*v22, " links=", &*v25]);
                                                                         println!("{}", v28);
                                                                         0i32
                                                                     }
@@ -902,10 +901,10 @@ fn closure2() -> Rc<dyn Fn() -> i32> {
         parent_edit_run_14()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_parent_links(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>)>>> {
+pub fn rig_agile_parent_links(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>)>>> {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_parent_edit_run() -> i32 {
+pub fn rig_agile_parent_edit_run() -> i32 {
     closure2()()
 }
 pub type SpiralShape_accbf6de6842 = Mut0;

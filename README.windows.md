@@ -22,7 +22,7 @@ The build/test driver is now authored in Spiral. From `src`, bootstrap it in a
 separate target directory, then run it from that same directory:
 
 ```powershell
-cargo build --locked -p kit-dev --target-dir target/workflow-driver
+cargo build --locked -p rig-dev --target-dir target/workflow-driver
 ./target/workflow-driver/debug/kit-dev.exe --root .. --test --skip-release
 ```
 
@@ -129,7 +129,7 @@ to the next compiler check.
 
 Platform-specific Rust lives in `rust_std_fs_mutation/windows.rs`,
 `rust_std_fs/windows.rs`, `rust_std_fs/portable.rs`, and
-`kit_process_streaming/windows.rs`. The matching embedded Rust in the `.spi`
+`rig_process_streaming/windows.rs`. The matching embedded Rust in the `.spi`
 sources is updated too. Retain these adapter files when regenerating Rust owners.
 
 Windows regression tests cover Unicode/space paths, junction rejection, ancestor

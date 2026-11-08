@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "kill.spi"
+output = "kill.rs"
+
+[package]
+name = "rig-process-kill"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_process_kill"
+path = "kill.rs"
+
+[dependencies]
+regex = "1.13.1"
+sysinfo = "0.38.4"
+rig-machine-sample = { path = "../rig_machine_sample" }

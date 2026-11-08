@@ -1,0 +1,130 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| wrapper_shape =
+    | Forward :: wrapper_shape
+    | Rename :: wrapper_shape
+    | Reorder :: wrapper_shape
+
+:= shape_word = \|
+    | Forward => "forward"
+    | Rename => "rename"
+    | Reorder => "reorder"
+
+:== wrapper = { name : string; shape : wrapper_shape; callee : string; line : i32 }
+
+:~ head_word (~line : string) : string =
+    := words = sm'.split_list " " (sm'.trim line)
+    ?= words ?| | first :: _ => first | [] => ""
+
+:~ cut_start (~line : string) (~found : string) (~start : string) : string =
+    := size = sm'.length start
+    ? found = "" && sm'.starts_with start line ?> sm'.substring size (sm'.length line - size) line |: found
+
+:~ definition_rest (~line : string) : string =
+    := starts = [ ":~ ^ "; ":= ^ "; ":~ "; ":= "; "inl " ]
+    starts |> listm.fold (\ (found : string) (start : string) => cut_start line found start) ""
+
+:~ ^ params_from (~text : string) (found : list string) : list string * string =
+    := rest = sm'.trim text
+    ? sm'.starts_with "(" rest |> not ?> listm.rev found, rest
+    |:
+        := close = sm'.index_of ")" rest
+        := inner = ? close < 0i32 ?> "" |: sm'.substring 1i32 (close - 1i32) rest
+        := name = sm'.replace "~" "" (head_word inner)
+        ? close < 0i32 || sm'.contains "(" inner || name = "" ?> [], ""
+        |: params_from (sm'.substring (close + 1i32) (sm'.length rest - close - 1i32) rest) (name :: found)
+
+:~ identifier (~word : string) : bool =
+    word <> "" && sm'.contains "(" word |> not && sm'.contains "\"" word |> not && sm'.contains "," word |> not
+
+:~ ^ all_within (items : list string) (others : list string) : bool =
+    ?= items ?|
+    | [] => !+
+    | item :: rest => listm'.contains item others && all_within rest others
+:~ passed_shape (~callee : string) : wrapper_shape = ? sm'.contains "." callee ?> Forward |: Rename
+
+:~ called_shape (params : list string) (~callee : string) (args : list string) : option (wrapper_shape * string) =
+    := same_length = (listm.length args : i32) = listm.length params
+    ? identifier callee |> not || args = [] || listm'.contains callee params ?> None
+    |? args = params ?> Some (passed_shape callee, callee)
+    |? same_length && all_within args params && all_within params args ?> Some (Reorder, callee)
+    |: None
+
+:~ shape_of (params : list string) (body : list string) : option (wrapper_shape * string) =
+    ?= body ?|
+    | arg :: pipe :: callee :: [] ?& pipe = "|>" && params = [ arg ] && identifier callee =>
+        Some (passed_shape callee, callee)
+    | callee :: args => called_shape params callee args
+    | [] => None
+
+:~ wrapper_of (~line : string) (number : i32) : option wrapper =
+    := rest = definition_rest line
+    := name = head_word rest
+    := after = ? name = "" ?> "" |: sm'.substring (sm'.length name) (sm'.length rest - sm'.length name) rest
+    := params, tail = params_from after []
+    := spaced = " " ++# tail
+    := at = sm'.index_of " = " spaced
+    ? name = "" || params = [] || at < 0i32 ?> None
+    |:
+        := body = sm'.substring (at + 3i32) (sm'.length spaced - at - 3i32) spaced |> sm'.trim
+        := words = sm'.split_list " " body |> listm'.filter (\ (w : string) => w <> "")
+        ?= shape_of params words ?|
+        | Some (shape, callee) => Some { name = name; shape = shape; callee = callee; line = number }
+        | None => None
+
+:~ wrappers_in (~text : string) : list wrapper =
+    := found = \ ((kept, number) : list wrapper * i32) (line : string) =>
+        ?= wrapper_of line number ?|
+        | Some w => listm.append kept [ w ], number + 1i32
+        | None => kept, number + 1i32
+    := kept, _ = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold found ([], 1i32)
+    kept
+
+:~ word_char (~c : string) : bool =
+    c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'"
+
+:~ last_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring (sm'.length text - 1i32) 1i32 text
+
+:~ first_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring 0i32 1i32 text
+:~ uses_in (~text : string) (~name : string) : i32 =
+    := counted = \ ((count, before) : i32 * string) (piece : string) =>
+        (? word_char (last_char before) || word_char (first_char piece) ?> count |: count + 1i32), piece
+    ? sm'.contains name text |> not ?> 0i32
+    |:
+        ?= sm'.split_list name text ?|
+        | head :: rest =>
+            := count, _ = rest |> listm.fold counted (0i32, head)
+            count
+        | [] => 0i32
+
+:~ wrapper_score (w : wrapper) (callers : i32) : i32 =
+    := base = ?= w.shape ?| | Forward => 3i32 | Rename => 3i32 | Reorder => 2i32
+    := lone = ? callers <= 1i32 ?> 2i32 |? callers >= 3i32 ?> -1i32 |: 0i32
+    base + lone + (? sm'.contains "." w.callee ?> 1i32 |: 0i32)
+
+///> rust
+:# forwards_renames_and_reorders_are_found_and_logic_is_not =
+    := text =
+        ":~ present (path : string) : bool = file_system.file_exists path\n"
+        ++# ":~ size (~xs : list i32) : i32 = xs |> listm.length\n"
+        ++# ":~ flip (a : i32) (b : i32) : i32 = minus b a\n"
+        ++# ":~ guarded (a : string) : bool = a <> \"\" && file_system.file_exists a\n"
+        ++# ":~ twice (a : i32) : i32 = add a a\n"
+    := found = wrappers_in text
+    testing.expect (found |> listm.map (\ (w : wrapper) => w.name) = [ "present"; "size"; "flip" ]) "three wrappers"
+    := shapes = found |> listm.map (\ (w : wrapper) => shape_word w.shape)
+    testing.expect (shapes = [ "forward"; "forward"; "reorder" ]) "shapes"
+    testing.expect (found |> listm.map (\ (w : wrapper) => w.line) = [ 1i32; 2i32; 3i32 ]) "line numbers"
+
+///> rust
+:# call_sites_are_word_bounded_and_lone_forwards_score_highest =
+    := text = "present p\nnot_present q\npresent_ok r\nm.present s\n"
+    testing.expect (uses_in text "present" = 2i32) "a bare and a qualified use"
+    := w = { name = "present"; shape = Forward; callee = "file_system.file_exists"; line = 1i32 }
+    testing.expect (wrapper_score w 1i32 = 6i32 && wrapper_score w 4i32 = 3i32) "callers lower the score"
+    := local = { name = "flip"; shape = Reorder; callee = "minus"; line = 3i32 }
+    testing.expect (wrapper_score local 2i32 = 2i32) "a local reorder"

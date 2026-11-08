@@ -9,8 +9,8 @@
 := git_output (~directory : string) (~arguments : string) : bool * string =
     := timeout = git_timeout_ms ()
     $'{ let mut command = std::process::Command::new("git"); command.arg("-C").arg(&*!directory).args(!arguments.split\
-        (char::from(9u8))); match kit_process::run_bounded_capture_with_input(&mut command, !timeout, \
-        None) { Ok(capture) => (capture.termination == kit_process::ProcessTermination::Exited(0), \
+        (char::from(9u8))); match rig_process::run_bounded_capture_with_input(&mut command, !timeout, \
+        None) { Ok(capture) => (capture.termination == rig_process::ProcessTermination::Exited(0), \
         std::rc::Rc::<str>::from(String::from_utf8_lossy(&capture.stdout).as_ref())), Err(error) => (false, \
         std::rc::Rc::<str>::from(error)) } }' : bool * string
 
@@ -21,7 +21,7 @@
         metadata.is_dir() { 2 } else if metadata.is_file() { 1 } else { 0 }).unwrap_or(0)' : i32
 
 := listed_names (~path : string) : string =
-    $'std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_list_names(std::path::Path::new(&*!path)).unwrap_or_default().j\
+    $'std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_list_names(std::path::Path::new(&*!path)).unwrap_or_default().j\
         oin(&char::from(10u8).to_string()).as_str())' : string
 
 := joined_path (~base : string) (~relative : string) : string =
@@ -72,10 +72,10 @@
     ? diffed_ok && untracked_ok ?> nul_text () ++# diffed ++# untracked |: ""
 
 := main () : i32 =
-    export "kit_agile_todo_sources" ((\ path => todo_sources path) : string -> bool * string)
+    export "rig_agile_todo_sources" ((\ path => todo_sources path) : string -> bool * string)
     := _ = todo_sources ""
-    export "kit_agile_todo_git_head" ((\ root => git_head root) : string -> string)
-    export "kit_agile_todo_git_changed" ((\ (root, since) => git_changed_since root since) : string * string -> string)
+    export "rig_agile_todo_git_head" ((\ root => git_head root) : string -> string)
+    export "rig_agile_todo_git_changed" ((\ (root, since) => git_changed_since root since) : string * string -> string)
     := _ = git_head ""
     := _ = git_changed_since "" ""
     0i32

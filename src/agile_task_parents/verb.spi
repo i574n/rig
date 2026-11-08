@@ -105,8 +105,7 @@
     testing.expect (module_listed "modules:\n    parents\n    agile\n" = ModuleListed) "already listed"
     testing.expect (module_listed "packages:\n" = NoModulesSection) "no modules section"
     testing.expect (task_known "x Task (\"S7\", \"t\")" "S7" && task_known "Task (\"S70\"" "S7" = !-) "ids match whole"
-///> _
 := main () : i32 =
-    export "kit_agile_parent_links" links_of
-    export "kit_agile_parent_edit_run" parent_edit_run
+    export "rig_agile_parent_links" links_of
+    export "rig_agile_parent_edit_run" parent_edit_run
     0i32

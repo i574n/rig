@@ -293,7 +293,7 @@
             word = "metrics"
             line =
                 "metrics export --notebooks <dir> [--machine box|node] (Prometheus text: one "
-                ^^ "kit_exec_duration_ms{machine,backend,phase} line per phase of every Cells notebook cell)"
+                ^^ "rig_exec_duration_ms{machine,backend,phase} line per phase of every Cells notebook cell)"
         }
 
 := help_line_for (~target : string) : string =

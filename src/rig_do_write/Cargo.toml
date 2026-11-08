@@ -1,0 +1,21 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "do_write.rs"
+
+[package]
+name = "rig-do-write"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do_write"
+path = "do_write.rs"
+
+[dependencies]
+rig-do-file-steps = { path = "../rig_do_file_steps" }
+rig-do-read = { path = "../rig_do_read" }
+regex = "1.13.1"
+rig-do-verbs = { path = "../rig_do_verbs" }
+rig-do-model = { path = "../rig_do_model" }

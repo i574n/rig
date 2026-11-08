@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_FieldEstimate,
@@ -322,7 +332,7 @@ fn planned_value_token_2(mut v0: US0, mut v1: Rc<str>) -> US1 {
                                     v36
                                 }
                             };
-                            let v38: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Assigned "); } LIT.with(|lit| lit.clone()) }, v37));
+                            let v38: Rc<str> = string_concat(&["Assigned ", &*v37]);
                             v38
                         }
                         US3::US3_Unassigned => {
@@ -346,8 +356,7 @@ fn planned_value_token_2(mut v0: US0, mut v1: Rc<str>) -> US1 {
                         US7::US7_EstimateMinutes(v5) => {
                             let v5: i32 = v5;
                             let v6: Rc<str> = std::rc::Rc::<str>::from((v5).to_string());
-                            let mut v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Minutes "); } LIT.with(|lit| lit.clone()) }, v6));
-                            let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("u32"); } LIT.with(|lit| lit.clone()) }));
+                            let v8: Rc<str> = string_concat(&["Minutes ", &*v6, "u32"]);
                             v8
                         }
                         US7::US7_Unestimated => {
@@ -388,7 +397,7 @@ fn planned_value_token_2(mut v0: US0, mut v1: Rc<str>) -> US1 {
                                     v20
                                 }
                             };
-                            let v23: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Load "); } LIT.with(|lit| lit.clone()) }, v22));
+                            let v23: Rc<str> = string_concat(&["Load ", &*v22]);
                             v23
                         }
                     };
@@ -495,9 +504,9 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         legacy_agent_value_8(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_planning_value_token(v0: &str, v1: &str) -> (i32, Rc<str>) {
+pub fn rig_agile_planning_value_token(v0: &str, v1: &str) -> (i32, Rc<str>) {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
-pub fn kit_agile_planning_legacy_agent_value(v0: &str) -> Rc<str> {
+pub fn rig_agile_planning_legacy_agent_value(v0: &str) -> Rc<str> {
     closure1()(Rc::<str>::from(v0))
 }

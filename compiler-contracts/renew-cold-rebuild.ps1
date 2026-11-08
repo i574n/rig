@@ -51,7 +51,7 @@ function Build-ColdProduct([string]$Root) {
     $env:RUSTFLAGS = $flags; $env:CARGO_INCREMENTAL = '0'; $env:CARGO_TARGET_DIR = $target
     Push-Location (Join-Path $Root 'src')
     try {
-        & cargo build --release --locked --offline --package kit-cli 2>&1 | Select-Object -Last 3 | ForEach-Object { Write-Host "  $_" }
+        & cargo build --release --locked --offline --package rig-cli 2>&1 | Select-Object -Last 3 | ForEach-Object { Write-Host "  $_" }
         if ($LASTEXITCODE -ne 0) { throw "cold build failed in $Root" }
     } finally {
         Pop-Location
@@ -154,7 +154,7 @@ $receipt = @(
     ''
     "inl contract_gate () : string * string = `"src/cold_rebuild_contract/model.spi`", `"$(Get-GateSha 'src/cold_rebuild_contract/model.spi')`""
     "inl bindings_gate () : string * string = `"src/cold_rebuild_contract/bindings.spi`", `"$(Get-GateSha 'src/cold_rebuild_contract/bindings.spi')`""
-    "inl matrix_gate () : string * string = `"src/kit_cold_rebuild_matrix/main.spi`", `"$(Get-GateSha 'src/kit_cold_rebuild_matrix/main.spi')`""
+    "inl matrix_gate () : string * string = `"src/rig_cold_rebuild_matrix/main.spi`", `"$(Get-GateSha 'src/rig_cold_rebuild_matrix/main.spi')`""
     "inl toolchain_gate () : string * string = `"state/toolchain_identity.spi`", `"$(Get-GateSha '' $identityTemp)`""
     ''
     'inl main () : i32 = 0i32'

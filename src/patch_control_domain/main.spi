@@ -1,16 +1,16 @@
 := export_restoration_payload_identity () : () =
     export
-        "kit_patch_restoration_payload_identity"
+        "rig_patch_restoration_payload_identity"
         ((\ (first, second) => restoration_payload_identity first second) : i32 * i32 -> i32)
 
 := export_restoration_payload_slot_binding () : () =
     export
-        "kit_patch_restoration_payload_slot_binding"
+        "rig_patch_restoration_payload_slot_binding"
         ((\ (first, second) => restoration_payload_slot_binding first second) : i32 * i32 -> i32)
 
 := export_restoration_payload_outcome_binding () : () =
     export
-        "kit_patch_restoration_payload_outcome_binding"
+        "rig_patch_restoration_payload_outcome_binding"
         ((\ (first, second) => restoration_payload_outcome_binding first second) : i32 * i32 -> i32)
 
 := main () : i32 =
@@ -23,7 +23,7 @@
     export_restoration_payload_identity ()
     export_restoration_payload_slot_binding ()
     export_restoration_payload_outcome_binding ()
-    export "kit_patch_plan_failure_message" ((\ code => patch_plan_failure_binding code) : i32 -> string)
+    export "rig_patch_plan_failure_message" ((\ code => patch_plan_failure_binding code) : i32 -> string)
     emit_runtime ()
 
     0i32

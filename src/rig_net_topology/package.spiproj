@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rig_net_fleet_file
+    rig_net_fleet_rules
+link:
+    rig_net_fleet_file
+    rig_net_fleet_rules
+modules:
+    topology

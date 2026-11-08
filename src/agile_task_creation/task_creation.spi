@@ -124,7 +124,7 @@
 :~ extras_applied (~text : string) (~id : string) (extras : add_extras) : added_text =
     := estimate, load, assignee, body, author =
         extras.estimate, extras.load, extras.assignee, extras.note, extras.author
-    := code, detail = $'agile_task_notes::kit_agile_groomed(&*!text, &*!id, &*!estimate, &*!load, &*!assignee, \
+    := code, detail = $'agile_task_notes::rig_agile_groomed(&*!text, &*!id, &*!estimate, &*!load, &*!assignee, \
         &*!body, &*!author)' : i32 * string
     ? code = 0i32 ?> AddedText detail |: AddedRefused detail
 
@@ -231,6 +231,6 @@
         | _, _, _, Invalid => agile_add_failure "difficulty must be D0..D8" (argument_owned 2i32)
 
 := main () : i32 =
-    export "kit_agile_add_run" ((\ () => agile_add_entry ()) : () -> i32)
+    export "rig_agile_add_run" ((\ () => agile_add_entry ()) : () -> i32)
     := _ = agile_add_entry ()
     0i32

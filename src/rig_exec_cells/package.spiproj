@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_exec_metrics
+    rig_os_json
+modules:
+    cells

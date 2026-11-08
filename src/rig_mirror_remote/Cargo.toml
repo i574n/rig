@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "remote_run.spi"
+output = "remote_run.rs"
+
+[package]
+name = "rig-mirror-remote"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_mirror_remote"
+path = "remote_run.rs"
+
+[dependencies]
+rig-mirror-local = { path = "../rig_mirror_local" }
+rig-mirror-plan = { path = "../rig_mirror_plan" }
+rig-mirror-unpack = { path = "../rig_mirror_unpack" }
+rig-mirror-sync = { path = "../rig_mirror_sync" }

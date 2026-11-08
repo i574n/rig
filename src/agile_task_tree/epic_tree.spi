@@ -73,7 +73,6 @@
     := e1 = [ "E1  done=1/2 minutes=60/240"; "  A  Done 60m"; "  C  Planned 180m" ]
     := e2 = [ "E2  done=0/1 minutes=0/30"; "  B  Active 30m" ]
     testing.expect (tree_text_of facts links = listm.append e1 e2) "each epic, then its children"
-///> _
 := main () : i32 =
-    export "kit_agile_list_routed" list_routed
+    export "rig_agile_list_routed" list_routed
     0i32

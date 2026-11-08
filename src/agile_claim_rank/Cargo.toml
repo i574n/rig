@@ -14,8 +14,8 @@ name = "agile_claim_rank"
 path = "rank.rs"
 
 [dependencies]
-kit-agile-records = { path = "../kit_agile_records" }
+rig-agile-records = { path = "../rig_agile_records" }
 agile-planning-fields = { path = "../agile_planning_fields" }
 agile-planning-filters = { path = "../agile_planning_filters" }
-kit-process-alive = { path = "../kit_process_alive" }
-kit-job-names = { path = "../kit_job_names" }
+rig-process-alive = { path = "../rig_process_alive" }
+rig-job-names = { path = "../rig_job_names" }

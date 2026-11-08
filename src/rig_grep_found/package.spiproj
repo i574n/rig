@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_os_files
+    rig_os_search
+modules:
+    found

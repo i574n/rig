@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_ReplacementReceipt(Rc<str>),
@@ -154,7 +164,7 @@ fn text_replace_outcome_1() -> US0 {
                                     let v45: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 5i32 as usize).unwrap_or_default());
                                     let v46: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 2i32 as usize).unwrap_or_default());
                                     let v47: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 3i32 as usize).unwrap_or_default());
-                                    let v48: Rc<str> = kit_rust_std_fs::rooted_path(std::path::Path::new(&*v46), &*v47).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
+                                    let v48: Rc<str> = rig_rust_std_fs::rooted_path(std::path::Path::new(&*v46), &*v47).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
                                     let v49: bool = &*v48 == "";
                                     if v49 {
                                         let v50: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("text-replace target escapes the root"); } LIT.with(|lit| lit.clone()) };
@@ -205,11 +215,10 @@ fn text_replace_outcome_1() -> US0 {
                                                                 let v97: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v48).unwrap_or_default());
                                                                 let v98: bool = &*v97 != &*v59;
                                                                 if v98 {
-                                                                    let v99: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("text-replace: "); } LIT.with(|lit| lit.clone()) }, v48));
-                                                                    let v100: Rc<str> = Rc::<str>::from(format!("{}{}", v99, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" changed since it was read; nothing written, run it again"); } LIT.with(|lit| lit.clone()) }));
+                                                                    let v100: Rc<str> = string_concat(&["text-replace: ", &*v48, " changed since it was read; nothing written, run it again"]);
                                                                     US0::US0_ReplacementRejected(v100)
                                                                 } else {
-                                                                    let v102: Rc<str> = Rc::<str>::from(format!("{}{}", v48.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+                                                                    let v102: Rc<str> = string_concat(&[&*v48, ".pending"]);
                                                                     let v103: bool = std::fs::write(&*v102, &*v70).is_ok();
                                                                     let v116: US5 = if v103 {
                                                                         let v104: i32 = 40i32;
@@ -236,10 +245,9 @@ fn text_replace_outcome_1() -> US0 {
                                                                         US5::US5_Replaced => {
                                                                             let v117: u64 = v59.len() as u64;
                                                                             let v118: u64 = v70.len() as u64;
-                                                                            let v119: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy text-replace ok mode=apply path="); } LIT.with(|lit| lit.clone()) }, v48));
-                                                                            let v120: Rc<str> = Rc::<str>::from(format!("{}{}", v119, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" matches="); } LIT.with(|lit| lit.clone()) }));
+                                                                            let v120: Rc<str> = string_concat(&["kit proxy text-replace ok mode=apply path=", &*v48, " matches="]);
                                                                             let v121: Rc<str> = std::rc::Rc::<str>::from((v60).to_string());
-                                                                            let v122: Rc<str> = Rc::<str>::from(format!("{}{}", v121, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" expected="); } LIT.with(|lit| lit.clone()) }));
+                                                                            let v122: Rc<str> = string_concat(&[&*v121, " expected="]);
                                                                             let v129: Rc<str> = match v43 {
                                                                                 US4::US4_EveryMatch => {
                                                                                     let v126: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("all"); } LIT.with(|lit| lit.clone()) };
@@ -255,18 +263,11 @@ fn text_replace_outcome_1() -> US0 {
                                                                                     v123
                                                                                 }
                                                                             };
-                                                                            let v130: Rc<str> = Rc::<str>::from(format!("{}{}", v122, v129));
-                                                                            let v131: Rc<str> = Rc::<str>::from(format!("{}{}", v120, v130));
                                                                             let v132: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                                                                             let v133: Rc<str> = std::rc::Rc::<str>::from((v117).to_string());
-                                                                            let v134: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_before="); } LIT.with(|lit| lit.clone()) }, v133));
-                                                                            let v135: Rc<str> = Rc::<str>::from(format!("{}{}", v134, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_after="); } LIT.with(|lit| lit.clone()) }));
                                                                             let v136: Rc<str> = std::rc::Rc::<str>::from((v118).to_string());
-                                                                            let v137: Rc<str> = Rc::<str>::from(format!("{}{}", v135, v136));
-                                                                            let v138: Rc<str> = Rc::<str>::from(format!("{}{}", v137, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
                                                                             let v139: Rc<str> = std::rc::Rc::<str>::from((v132).to_string());
-                                                                            let v140: Rc<str> = Rc::<str>::from(format!("{}{}", v138, v139));
-                                                                            let v141: Rc<str> = Rc::<str>::from(format!("{}{}", v131, v140));
+                                                                            let v141: Rc<str> = string_concat(&[&*v120, &*v122, &*v129, " bytes_before=", &*v133, " bytes_after=", &*v136, " elapsed_ms=", &*v139]);
                                                                             US0::US0_ReplacementReceipt(v141)
                                                                         }
                                                                         _ => {
@@ -301,10 +302,9 @@ fn text_replace_outcome_1() -> US0 {
                                                             US2::US2_CheckReplacement => {
                                                                 let v71: u64 = v59.len() as u64;
                                                                 let v72: u64 = v70.len() as u64;
-                                                                let v73: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy text-replace ok mode=check path="); } LIT.with(|lit| lit.clone()) }, v48));
-                                                                let v74: Rc<str> = Rc::<str>::from(format!("{}{}", v73, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" matches="); } LIT.with(|lit| lit.clone()) }));
+                                                                let v74: Rc<str> = string_concat(&["kit proxy text-replace ok mode=check path=", &*v48, " matches="]);
                                                                 let v75: Rc<str> = std::rc::Rc::<str>::from((v60).to_string());
-                                                                let v76: Rc<str> = Rc::<str>::from(format!("{}{}", v75, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" expected="); } LIT.with(|lit| lit.clone()) }));
+                                                                let v76: Rc<str> = string_concat(&[&*v75, " expected="]);
                                                                 let v83: Rc<str> = match v43 {
                                                                     US4::US4_EveryMatch => {
                                                                         let v80: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("all"); } LIT.with(|lit| lit.clone()) };
@@ -320,18 +320,11 @@ fn text_replace_outcome_1() -> US0 {
                                                                         v77
                                                                     }
                                                                 };
-                                                                let v84: Rc<str> = Rc::<str>::from(format!("{}{}", v76, v83));
-                                                                let v85: Rc<str> = Rc::<str>::from(format!("{}{}", v74, v84));
                                                                 let v86: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                                                                 let v87: Rc<str> = std::rc::Rc::<str>::from((v71).to_string());
-                                                                let v88: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_before="); } LIT.with(|lit| lit.clone()) }, v87));
-                                                                let v89: Rc<str> = Rc::<str>::from(format!("{}{}", v88, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_after="); } LIT.with(|lit| lit.clone()) }));
                                                                 let v90: Rc<str> = std::rc::Rc::<str>::from((v72).to_string());
-                                                                let v91: Rc<str> = Rc::<str>::from(format!("{}{}", v89, v90));
-                                                                let v92: Rc<str> = Rc::<str>::from(format!("{}{}", v91, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
                                                                 let v93: Rc<str> = std::rc::Rc::<str>::from((v86).to_string());
-                                                                let v94: Rc<str> = Rc::<str>::from(format!("{}{}", v92, v93));
-                                                                let v95: Rc<str> = Rc::<str>::from(format!("{}{}", v85, v94));
+                                                                let v95: Rc<str> = string_concat(&[&*v74, &*v76, &*v83, " bytes_before=", &*v87, " bytes_after=", &*v90, " elapsed_ms=", &*v93]);
                                                                 US0::US0_ReplacementReceipt(v95)
                                                             }
                                                         }
@@ -351,11 +344,8 @@ fn text_replace_outcome_1() -> US0 {
                                                                 v158
                                                             }
                                                         };
-                                                        let v165: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("text-replace expected "); } LIT.with(|lit| lit.clone()) }, v164));
-                                                        let v166: Rc<str> = Rc::<str>::from(format!("{}{}", v165, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" match(es), observed matches="); } LIT.with(|lit| lit.clone()) }));
                                                         let v167: Rc<str> = std::rc::Rc::<str>::from((v60).to_string());
-                                                        let v168: Rc<str> = Rc::<str>::from(format!("{}{}", v166, v167));
-                                                        let v169: Rc<str> = Rc::<str>::from(format!("{}{}", v168, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" (use --expect N or --all for repeated text)"); } LIT.with(|lit| lit.clone()) }));
+                                                        let v169: Rc<str> = string_concat(&["text-replace expected ", &*v164, " match(es), observed matches=", &*v167, " (use --expect N or --all for repeated text)"]);
                                                         US0::US0_ReplacementRejected(v169)
                                                     }
                                                 } else {
@@ -394,6 +384,6 @@ fn closure0() -> Rc<dyn Fn() -> (i32, Rc<str>)> {
         text_replace_report_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_text_replace_outcome() -> (i32, Rc<str>) {
+pub fn rig_text_replace_outcome() -> (i32, Rc<str>) {
     closure0()()
 }

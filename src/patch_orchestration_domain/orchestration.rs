@@ -324,27 +324,27 @@ fn closure7() -> Rc<dyn Fn(i32, i32) -> i32> {
         orchestration_complete_binding_18(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_patch_orchestration_witness_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_witness_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_patch_orchestration_operation_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_operation_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_patch_orchestration_guard_identity(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_guard_identity(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_patch_orchestration_guard_needle_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_guard_needle_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_patch_orchestration_guard_match_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_guard_match_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_patch_orchestration_stage_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_stage_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_patch_orchestration_promotion_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_promotion_binding(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_patch_orchestration_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_orchestration_complete_binding(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }

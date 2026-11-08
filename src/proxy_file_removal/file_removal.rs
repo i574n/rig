@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_RemovalReceipt(Rc<str>),
@@ -36,7 +46,7 @@ fn file_removal_outcome_1() -> US0 {
     if v2 {
         let v3: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 1i32 as usize).unwrap_or_default());
         let v4: Rc<str> = std::rc::Rc::<str>::from(std::env::args().nth(2 + 2i32 as usize).unwrap_or_default());
-        let v5: Rc<str> = kit_rust_std_fs::rooted_path(std::path::Path::new(&*v3), &*v4).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
+        let v5: Rc<str> = rig_rust_std_fs::rooted_path(std::path::Path::new(&*v3), &*v4).map(|path| std::rc::Rc::<str>::from(path.to_string_lossy().as_ref())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
         let v6: bool = &*v5 == "";
         if v6 {
             let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-remove target escapes the root"); } LIT.with(|lit| lit.clone()) };
@@ -61,20 +71,19 @@ fn file_removal_outcome_1() -> US0 {
             };
             match &v19 {
                 US1::US1_DirectoryEntry => {
-                    let v22: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-remove target is a directory (use fs-remove-tree): "); } LIT.with(|lit| lit.clone()) }, v5));
+                    let v22: Rc<str> = string_concat(&["fs-remove target is a directory (use fs-remove-tree): ", &*v5]);
                     US0::US0_RemovalRejected(v22)
                 }
                 US1::US1_MissingEntry => {
-                    let v20: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-remove target is missing: "); } LIT.with(|lit| lit.clone()) }, v5));
+                    let v20: Rc<str> = string_concat(&["fs-remove target is missing: ", &*v5]);
                     US0::US0_RemovalRejected(v20)
                 }
                 _ => {
                     let v24: u64 = std::fs::symlink_metadata(&*v5).map(|meta| meta.len()).unwrap_or(0);
-                    let v25: Rc<str> = std::rc::Rc::<str>::from(kit_rust_std_fs::rooted_unlink_nondirectory(std::path::Path::new(&*v5)).err().unwrap_or_default().as_str());
+                    let v25: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_unlink_nondirectory(std::path::Path::new(&*v5)).err().unwrap_or_default().as_str());
                     let v26: bool = &*v25 == "";
                     if v26 {
-                        let v27: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy fs-remove ok path="); } LIT.with(|lit| lit.clone()) }, v5));
-                        let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v27, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" kind="); } LIT.with(|lit| lit.clone()) }));
+                        let v28: Rc<str> = string_concat(&["kit proxy fs-remove ok path=", &*v5, " kind="]);
                         let v32: Rc<str> = match v19 {
                             US1::US1_RemovedFile => {
                                 let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("file"); } LIT.with(|lit| lit.clone()) };
@@ -86,17 +95,13 @@ fn file_removal_outcome_1() -> US0 {
                             }
                             _ => unreachable!(),
                         };
-                        let v33: Rc<str> = Rc::<str>::from(format!("{}{}", v28, v32));
-                        let v34: Rc<str> = Rc::<str>::from(format!("{}{}", v33, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes="); } LIT.with(|lit| lit.clone()) }));
                         let v35: Rc<str> = std::rc::Rc::<str>::from((v24).to_string());
-                        let v36: Rc<str> = Rc::<str>::from(format!("{}{}", v34, v35));
-                        let v37: Rc<str> = Rc::<str>::from(format!("{}{}", v36, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
                         let v38: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                         let v39: Rc<str> = std::rc::Rc::<str>::from((v38).to_string());
-                        let v40: Rc<str> = Rc::<str>::from(format!("{}{}", v37, v39));
+                        let v40: Rc<str> = string_concat(&[&*v28, &*v32, " bytes=", &*v35, " elapsed_ms=", &*v39]);
                         US0::US0_RemovalReceipt(v40)
                     } else {
-                        let v42: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fs-remove failed: "); } LIT.with(|lit| lit.clone()) }, v25));
+                        let v42: Rc<str> = string_concat(&["fs-remove failed: ", &*v25]);
                         US0::US0_RemovalRejected(v42)
                     }
                 }
@@ -125,6 +130,6 @@ fn closure0() -> Rc<dyn Fn() -> (i32, Rc<str>)> {
         file_removal_report_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_file_removal_outcome() -> (i32, Rc<str>) {
+pub fn rig_file_removal_outcome() -> (i32, Rc<str>) {
     closure0()()
 }

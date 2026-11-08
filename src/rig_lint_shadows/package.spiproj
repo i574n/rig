@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rig_receipt
+    rig_lint_macros
+    rig_lint_walk
+    rig_lint_shadows_core
+    rig_lint_args
+link:
+    rig_lint_args
+modules:
+    shadows_run

@@ -21,20 +21,20 @@ if (-not $DevBinary) {
 }
 if (-not (Test-Path -LiteralPath $DevBinary)) {
     if ($DevBinary -ne $bootstrapped) {
-        throw "kit-dev was not found at '$DevBinary'. Omit -DevBinary to bootstrap '$bootstrapped', or build it with: cargo build --locked --package kit-dev --target-dir `"$driverTarget`" from src."
+        throw "kit-dev was not found at '$DevBinary'. Omit -DevBinary to bootstrap '$bootstrapped', or build it with: cargo build --locked --package rig-dev --target-dir `"$driverTarget`" from src."
     }
     if (-not (Get-Command cargo -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1)) {
-        throw "kit-dev was not found at '$bootstrapped' and cargo is not on PATH. Install Rust 1.88 and run: cargo build --locked --package kit-dev --target-dir `"$driverTarget`" from src."
+        throw "kit-dev was not found at '$bootstrapped' and cargo is not on PATH. Install Rust 1.88 and run: cargo build --locked --package rig-dev --target-dir `"$driverTarget`" from src."
     }
-    Write-Host "kit-dev is missing; bootstrapping: cargo build --locked --package kit-dev --target-dir $driverTarget"
+    Write-Host "kit-dev is missing; bootstrapping: cargo build --locked --package rig-dev --target-dir $driverTarget"
     Push-Location (Join-Path $eoiRoot 'src')
     try {
-        & cargo build --locked --package kit-dev --target-dir $driverTarget
+        & cargo build --locked --package rig-dev --target-dir $driverTarget
         if ($LASTEXITCODE -ne 0) { throw "kit-dev bootstrap failed (exit $LASTEXITCODE). Expected binary: $bootstrapped" }
     } finally { Pop-Location }
 }
 if (-not (Test-Path -LiteralPath $DevBinary)) {
-    throw "kit-dev bootstrap finished without producing '$DevBinary'. Command: cargo build --locked --package kit-dev --target-dir `"$driverTarget`" from src."
+    throw "kit-dev bootstrap finished without producing '$DevBinary'. Command: cargo build --locked --package rig-dev --target-dir `"$driverTarget`" from src."
 }
 $DevBinary = (Resolve-Path -LiteralPath $DevBinary).Path
 function Write-Fixture([string]$Path, [string]$Text) {

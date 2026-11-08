@@ -1,4 +1,4 @@
-use super::{kit_cold_rebuild_expected_shards, verify_public_cold_rebuild};
+use super::{rig_cold_rebuild_expected_shards, verify_public_cold_rebuild};
 use std::{fs, path::PathBuf, time::{SystemTime, UNIX_EPOCH}};
 
 struct Fixture(PathBuf);
@@ -29,11 +29,11 @@ fn shard_arithmetic_rounds_up_without_overflow() {
     for owners in [1, 2, 3, 4, 5, i32::MAX - 1, i32::MAX] {
         for width in [1, 2, 4] {
             let expected = (i64::from(owners) + i64::from(width) - 1) / i64::from(width);
-            assert_eq!(i64::from(kit_cold_rebuild_expected_shards(owners, width)), expected);
+            assert_eq!(i64::from(rig_cold_rebuild_expected_shards(owners, width)), expected);
         }
     }
     for (owners, width) in [(0, 1), (-1, 2), (1, 0), (1, 3), (1, i32::MAX)] {
-        assert_eq!(kit_cold_rebuild_expected_shards(owners, width), -1);
+        assert_eq!(rig_cold_rebuild_expected_shards(owners, width), -1);
     }
 }
 

@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_os_files
+    rig_nameof_findings
+link:
+    rig_nameof_findings
+modules:
+    heal

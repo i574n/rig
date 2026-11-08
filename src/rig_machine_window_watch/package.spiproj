@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_machine_watch_model
+modules:
+    windows

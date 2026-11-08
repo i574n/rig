@@ -1,6 +1,0 @@
-packages:
-    |core-
-    spiral-
-    kit_os_process
-modules:
-    alive

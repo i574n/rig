@@ -4,9 +4,9 @@ use std::rc::Rc;
 use std::env;
 use std::path::{Path, PathBuf};
 
-pub fn patch_safe_relative(value: &str) -> Result<PathBuf, String> { kit_rust_std_fs::safe_relative_path(value) }
+pub fn patch_safe_relative(value: &str) -> Result<PathBuf, String> { rig_rust_std_fs::safe_relative_path(value) }
 
-pub fn patch_rooted(root: &Path, relative: &str) -> Result<PathBuf, String> { kit_rust_std_fs::rooted_path(root, relative) }
+pub fn patch_rooted(root: &Path, relative: &str) -> Result<PathBuf, String> { rig_rust_std_fs::rooted_path(root, relative) }
 
 pub fn patch_target_max_bytes() -> Result<usize, String> {
     let value = env::var("KIT_PATCH_TARGET_MAX_BYTES")
@@ -58,7 +58,7 @@ pub fn parse_patch_exact_source(source: &str) -> Result<Vec<PatchExactValue>, St
         let rows = canonical_plan_ir_domain::parse_plan_ir_manifest(source)?;
         let mut patches = Vec::with_capacity(rows.len());
         for row in rows {
-            if canonical_plan_ir_domain::kit_plan_ir_decode_code(&row.op, &row.target, &row.expected, &row.payload, &row.effect) != 2 {
+            if canonical_plan_ir_domain::rig_plan_ir_decode_code(&row.op, &row.target, &row.expected, &row.payload, &row.effect) != 2 {
                 return Err("compiled Plan IR contains a non-patch operation".to_owned());
             }
             patches.push(PatchExactValue { relative: row.target, before: row.expected, after: row.payload });
@@ -77,7 +77,7 @@ pub fn patch_occurrence_count(text: &str, needle: &str) -> usize {
 }
 #[must_use]
 pub fn patch_plan_error(code: i32) -> i32 {
-    eprintln!("kit error: {}", kit_patch_plan_failure_message(code));
+    eprintln!("kit error: {}", rig_patch_plan_failure_message(code));
     2
 }
 
@@ -189,15 +189,15 @@ fn closure3() -> Rc<dyn Fn(i32) -> Rc<str>> {
         patch_plan_failure_binding_3(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_patch_restoration_payload_identity(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_payload_identity(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_patch_restoration_payload_slot_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_payload_slot_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_patch_restoration_payload_outcome_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_patch_restoration_payload_outcome_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_patch_plan_failure_message(v0: i32) -> Rc<str> {
+pub fn rig_patch_plan_failure_message(v0: i32) -> Rc<str> {
     closure3()(v0)
 }

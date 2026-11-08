@@ -14,7 +14,7 @@
     }
 
 := standing_of (~text : string) (~id : string) : todo_standing =
-    := status = $'agile_task_census::kit_agile_task_status(&*!text, &*!id)' : string
+    := status = $'agile_task_census::rig_agile_task_status(&*!text, &*!id)' : string
     ? (status = "") ?> UnknownTodo
     |? (status = "Done") ?> StaleTodo
     |: OpenTodo
@@ -40,7 +40,7 @@
         := newline = byte_find_from rendered "\n" offset
         := stop = ? newline < 0i32 ?> byte_len rendered |: newline
         := line = byte_slice rendered offset stop
-        := id = $'agile_todo_lines::kit_agile_todo_id(&*!backlog, &*!line)' : string
+        := id = $'agile_todo_lines::rig_agile_todo_id(&*!backlog, &*!line)' : string
         := standing = ? id = "" ?> OpenTodo |: standing_of backlog id
         := _ =
             ? silent || standing = OpenTodo
@@ -53,7 +53,7 @@
     counts.stale, counts.unknown
 
 := main () : i32 =
-    export "kit_agile_todo_standings" (
+    export "rig_agile_todo_standings" (
         (\ (backlog, rendered, silent) => standings_of backlog rendered silent) : string * string * bool -> i32 * i32
     )
     0i32

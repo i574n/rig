@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_lint_model
+modules:
+    scan

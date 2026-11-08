@@ -319,36 +319,36 @@ fn closure10() -> Rc<dyn Fn(i32, i32) -> i32> {
         agile_attestation_decision_binding_15(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_state_series_sequence_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_series_sequence_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_agile_state_series_source_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_series_source_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_agile_state_series_pair_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_series_pair_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_agile_state_series_monotonic_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_series_monotonic_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_agile_state_series_fingerprint_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_series_fingerprint_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_agile_state_entry_kind_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_entry_kind_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_agile_state_transient_name_code(v0: &str) -> u64 {
+pub fn rig_agile_state_transient_name_code(v0: &str) -> u64 {
     closure6()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_state_record_required_name_bit(v0: &str) -> u64 {
+pub fn rig_agile_state_record_required_name_bit(v0: &str) -> u64 {
     closure7()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_state_record_required_catalog(v0: &str) -> Rc<str> {
+pub fn rig_agile_state_record_required_catalog(v0: &str) -> Rc<str> {
     closure8()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_state_record_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_record_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }
-pub fn kit_agile_state_attestation_decision_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_attestation_decision_binding(v0: i32, v1: i32) -> i32 {
     closure10()(v0, v1)
 }

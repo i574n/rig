@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_os_process
+modules:
+    alive

@@ -1,8 +1,8 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-use kit_process_observation::run_bounded_receipted_observed;
-use kit_rust_std_fs::{atomic_write as legacy_atomic_write, safe_relative_path as legacy_safe_relative};
+use rig_process_observation::run_bounded_receipted_observed;
+use rig_rust_std_fs::{atomic_write as legacy_atomic_write, safe_relative_path as legacy_safe_relative};
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -14,10 +14,10 @@ fn legacy_arg<'a>(args: &'a [String], index: usize, name: &str) -> Result<&'a st
 
 pub fn legacy_surface_run(args: &[String]) -> Result<(), String> {
     if args.len() != 1 { return Err("legacy-surface takes no arguments".to_owned()); }
-    if kit_legacy_surface_summary_binding(9, 0) != 1 { return Err("typed legacy-surface summary rejected settled catalog".to_owned()); }
-    for family in 0..=8 { if kit_legacy_surface_status_binding(family, 2) != 1 { return Err(format!("typed legacy-surface rejected equivalent family {family}")); } }
-    if kit_legacy_surface_status_binding(9, 0) != 1 { return Err("typed legacy-surface rejected quarantined planning governance".to_owned()); }
-    for family in [5, 7, 8] { if kit_legacy_surface_status_binding(family, 1) != 0 { return Err(format!("typed legacy-surface accepted stale partial family {family}")); } }
+    if rig_legacy_surface_summary_binding(9, 0) != 1 { return Err("typed legacy-surface summary rejected settled catalog".to_owned()); }
+    for family in 0..=8 { if rig_legacy_surface_status_binding(family, 2) != 1 { return Err(format!("typed legacy-surface rejected equivalent family {family}")); } }
+    if rig_legacy_surface_status_binding(9, 0) != 1 { return Err("typed legacy-surface rejected quarantined planning governance".to_owned()); }
+    for family in [5, 7, 8] { if rig_legacy_surface_status_binding(family, 1) != 0 { return Err(format!("typed legacy-surface accepted stale partial family {family}")); } }
     println!("kit proxy legacy-surface ok sources=834,9252 model=spiral typed=verified");
     println!("summary cataloged=36/36 decided=36/36 absorbed=34/36 pruned=2 deferred=0 needs_evidence=0 executable_absorption=100/100 resolved=100/100");
     println!("dogfood candidate_common_path=usable fallback_required=none recovery_fallbacks=optional");
@@ -31,7 +31,7 @@ pub fn legacy_surface_run(args: &[String]) -> Result<(), String> {
 
 pub fn legacy_chmod_run(args: &[String]) -> Result<(), String> {
     if args.len() != 4 { return Err("fs-chmod expects root relative-path octal-mode".to_owned()); }
-    let root = kit_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 1, "root")?))?;
+    let root = rig_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 1, "root")?))?;
     let relative = legacy_safe_relative(legacy_arg(args, 2, "relative-path")?)?;
     let mode_text = legacy_arg(args, 3, "octal-mode")?.trim_start_matches("0o");
     let mode = u32::from_str_radix(mode_text, 8).map_err(|_| "octal-mode must be an octal integer".to_owned())?;
@@ -39,23 +39,23 @@ pub fn legacy_chmod_run(args: &[String]) -> Result<(), String> {
     let target = root.join(relative);
     let metadata = fs::symlink_metadata(&target).map_err(|error| format!("metadata {}: {error}", target.display()))?;
     if metadata.file_type().is_symlink() { return Err(format!("fs-chmod rejects symlink: {}", target.display())); }
-    kit_rust_std_fs::portable_set_mode(&target, mode).map_err(|error| format!("chmod {}: {error}", target.display()))?;
+    rig_rust_std_fs::portable_set_mode(&target, mode).map_err(|error| format!("chmod {}: {error}", target.display()))?;
     println!("kit proxy fs-chmod ok path={} mode={mode:04o}", target.display());
     Ok(())
 }
 
 pub fn legacy_symlink_run(args: &[String]) -> Result<(), String> {
     if args.len() != 4 { return Err("fs-symlink expects root target-relative link-relative".to_owned()); }
-    let root = kit_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 1, "root")?))?;
+    let root = rig_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 1, "root")?))?;
     let target = legacy_safe_relative(legacy_arg(args, 2, "target-relative")?)?;
     let link_relative = legacy_safe_relative(legacy_arg(args, 3, "link-relative")?)?;
     let link = root.join(&link_relative);
     let parent = link.parent().ok_or_else(|| format!("link has no parent: {}", link.display()))?;
-    kit_rust_std_fs_mutation::rooted_ensure_directory(parent)?;
+    rig_rust_std_fs_mutation::rooted_ensure_directory(parent)?;
     let mut payload = std::path::PathBuf::new();
     for _ in link_relative.parent().into_iter().flat_map(|parent| parent.components()) { payload.push(".."); }
     for component in target.components() { payload.push(component.as_os_str()); }
-    kit_rust_std_fs_mutation::rooted_create_symlink_within(&root, &link, &payload)?;
+    rig_rust_std_fs_mutation::rooted_create_symlink_within(&root, &link, &payload)?;
     println!("kit proxy fs-symlink ok link={} target={}", link.display(), target.display());
     Ok(())
 }
@@ -64,7 +64,7 @@ pub fn legacy_symlink_run(args: &[String]) -> Result<(), String> {
 #[path = "tests/support/path_mutation.rs"]
 mod path_mutation_tests;
 
-pub use kit_tree_copy::copy_tree_run as legacy_copy_tree_run;
+pub use rig_tree_copy::copy_tree_run as legacy_copy_tree_run;
 
 pub fn legacy_command_capture_run(args: &[String]) -> Result<(), String> {
     if args.len() < 5 { return Err("command-capture expects root receipt-relative timeout-ms program [args...]".to_owned()); }
@@ -123,12 +123,12 @@ fn self_install_restore_link(path: &Path, original: &SelfInstallLinkOriginal) ->
             legacy_atomic_write(path, bytes)?;
             fs::set_permissions(path, permissions.clone()).map_err(|error| format!("permissions {}: {error}", path.display()))
         }
-        SelfInstallLinkOriginal::Symlink(target) => kit_rust_std_fs::portable_symlink(target, path).map_err(|error| format!("restore symlink {}: {error}", path.display())),
+        SelfInstallLinkOriginal::Symlink(target) => rig_rust_std_fs::portable_symlink(target, path).map_err(|error| format!("restore symlink {}: {error}", path.display())),
     }
 }
 
 fn legacy_install_self_with_fault(source: &Path, destination: &Path, link: &Path, fault: i32) -> Result<(), String> {
-    use kit_rust_std_fs::portable_mode;
+    use rig_rust_std_fs::portable_mode;
     if !source.is_absolute() || !destination.is_absolute() || !link.is_absolute() { return Err("install-self requires absolute source, destination, and link paths".to_owned()); }
     if source == destination || destination == link || source == link { return Err("install-self paths must be distinct".to_owned()); }
     let managed_workspace = env::var_os("KIT_LEASE_ROOT").map(std::path::PathBuf::from).or_else(|| source.ancestors().find(|root| root.join("state/prompt.spi").is_file() && root.join("src/Cargo.toml").is_file()).map(Path::to_path_buf));
@@ -136,7 +136,7 @@ fn legacy_install_self_with_fault(source: &Path, destination: &Path, link: &Path
     let source_metadata = fs::symlink_metadata(source).map_err(|error| format!("metadata {}: {error}", source.display()))?;
     let source_regular = source_metadata.is_file() && !source_metadata.file_type().is_symlink();
     let source_executable = portable_mode(&source_metadata.permissions()) & 0o111 != 0;
-    if kit_self_install_preflight_binding(i32::from(source_regular), i32::from(source_executable)) != 1 { return Err(format!("install-self source must be a regular executable: {}", source.display())); }
+    if rig_self_install_preflight_binding(i32::from(source_regular), i32::from(source_executable)) != 1 { return Err(format!("install-self source must be a regular executable: {}", source.display())); }
     let destination_metadata = fs::symlink_metadata(destination).ok();
     let destination_safe = destination_metadata.as_ref().is_none_or(|metadata| metadata.is_file() && !metadata.file_type().is_symlink());
     let link_metadata = fs::symlink_metadata(link).ok();
@@ -146,7 +146,7 @@ fn legacy_install_self_with_fault(source: &Path, destination: &Path, link: &Path
         Some(metadata) if metadata.is_file() => 2,
         Some(_) => 3,
     };
-    if kit_self_install_target_binding(i32::from(destination_safe), link_state) != 1 { return Err("install-self destination must be a regular file or absent and canonical entry must be absent, symlink, or regular file; directory/other rejected".to_owned()); }
+    if rig_self_install_target_binding(i32::from(destination_safe), link_state) != 1 { return Err("install-self destination must be a regular file or absent and canonical entry must be absent, symlink, or regular file; directory/other rejected".to_owned()); }
     let link_original = match link_state {
         0 => SelfInstallLinkOriginal::Absent,
         1 => SelfInstallLinkOriginal::Symlink(fs::read_link(link).map_err(|error| format!("read link {}: {error}", link.display()))?),
@@ -172,18 +172,18 @@ fn legacy_install_self_with_fault(source: &Path, destination: &Path, link: &Path
         fs::OpenOptions::new().write(true).open(&stage).and_then(|file| file.sync_all()).map_err(|error| format!("sync {}: {error}", stage.display()))?;
         if had_destination { fs::rename(destination, &backup).map_err(|error| format!("backup {}: {error}", destination.display()))?; }
         fs::rename(&stage, destination).map_err(|error| format!("commit binary {}: {error}", destination.display()))?;
-        if kit_self_install_fault_binding(fault, 1) == 1 { self_install_restore_destination(destination, &backup, had_destination)?; return Err("injected self-install fault after-binary-commit rollback=restored".to_owned()); }
-        if kit_self_install_fault_binding(fault, 2) == 1 { self_install_restore_destination(destination, &backup, had_destination)?; return Err("injected self-install fault before-link-commit rollback=restored".to_owned()); }
-        kit_rust_std_fs::portable_symlink(destination, &link_stage).map_err(|error| format!("symlink {}: {error}", link_stage.display()))?;
+        if rig_self_install_fault_binding(fault, 1) == 1 { self_install_restore_destination(destination, &backup, had_destination)?; return Err("injected self-install fault after-binary-commit rollback=restored".to_owned()); }
+        if rig_self_install_fault_binding(fault, 2) == 1 { self_install_restore_destination(destination, &backup, had_destination)?; return Err("injected self-install fault before-link-commit rollback=restored".to_owned()); }
+        rig_rust_std_fs::portable_symlink(destination, &link_stage).map_err(|error| format!("symlink {}: {error}", link_stage.display()))?;
         fs::rename(&link_stage, link).map_err(|error| format!("commit link {}: {error}", link.display()))?;
-        if kit_self_install_fault_binding(fault, 3) == 1 {
+        if rig_self_install_fault_binding(fault, 3) == 1 {
             self_install_restore_link(link, &link_original)?;
             self_install_restore_destination(destination, &backup, had_destination)?;
             return Err("injected self-install fault after-link-commit rollback=restored".to_owned());
         }
         let binary_matches = fs::read(source).map_err(|error| error.to_string())? == fs::read(destination).map_err(|error| error.to_string())?;
         let link_matches = fs::read_link(link).map_err(|error| format!("read link {}: {error}", link.display()))? == destination;
-        if kit_self_install_complete_binding(i32::from(binary_matches), i32::from(link_matches)) != 1 { return Err("typed self-install completion rejected".to_owned()); }
+        if rig_self_install_complete_binding(i32::from(binary_matches), i32::from(link_matches)) != 1 { return Err("typed self-install completion rejected".to_owned()); }
         if had_destination { fs::remove_file(&backup).map_err(|error| format!("remove backup {}: {error}", backup.display()))?; }
         Ok(())
     })();
@@ -219,18 +219,18 @@ fn self_upgrade_binary(root: &Path) -> Result<std::path::PathBuf, String> {
     let mut found = Vec::new();
     for name in ["kit", "kit.exe"] {
         let path = root.join(name);
-        if kit_rust_std_fs::rooted_entry_exists(&path)? { found.push(path); }
+        if rig_rust_std_fs::rooted_entry_exists(&path)? { found.push(path); }
     }
     if found.len() != 1 { return Err(format!("self-upgrade root must contain exactly one of kit or kit.exe: {}", root.display())); }
     let binary = found.pop().unwrap();
-    kit_rust_std_fs::rooted_open_regular_read(&binary)?;
+    rig_rust_std_fs::rooted_open_regular_read(&binary)?;
     Ok(binary)
 }
 
 pub fn legacy_self_upgrade_check_run(args: &[String]) -> Result<(), String> {
     if args.len() != 3 { return Err("self-upgrade-check expects current-root candidate-root".to_owned()); }
-    let current_root = kit_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 1, "current-root")?))?;
-    let candidate_root = kit_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 2, "candidate-root")?))?;
+    let current_root = rig_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 1, "current-root")?))?;
+    let candidate_root = rig_rust_std_fs::rooted_canonical_directory(Path::new(legacy_arg(args, 2, "candidate-root")?))?;
     let current = self_upgrade_binary(&current_root)?;
     let candidate = self_upgrade_binary(&candidate_root)?;
     self_upgrade_gate(&current, &current_root, "current-baseline")?;
@@ -545,33 +545,33 @@ fn closure9() -> Rc<dyn Fn(i32, i32) -> i32> {
         legacy_surface_summary_export_11(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_self_install_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_self_install_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_self_install_target_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_self_install_target_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_self_install_fault_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_self_install_fault_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_self_install_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_self_install_complete_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_restart_baton_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_restart_baton_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_restart_baton_migration_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_restart_baton_migration_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_restart_baton_fault_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_restart_baton_fault_binding(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_restart_baton_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_restart_baton_complete_binding(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }
-pub fn kit_legacy_surface_status_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_legacy_surface_status_binding(v0: i32, v1: i32) -> i32 {
     closure8()(v0, v1)
 }
-pub fn kit_legacy_surface_summary_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_legacy_surface_summary_binding(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }

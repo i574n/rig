@@ -12,11 +12,11 @@
 :~ argument_owned (index : i32) : string = rust_std_env.model.argument_owned index
 
 := edit_field_position (~field_name : string) : i32 =
-    $'agile_field_rendering::kit_agile_edit_field_position(&*!field_name)' : i32
+    $'agile_field_rendering::rig_agile_edit_field_position(&*!field_name)' : i32
 := edit_field_token (~field_name : string) (~current : string) (~value : string) : string =
-    $'agile_field_rendering::kit_agile_edit_field_token(&*!field_name, &*!current, &*!value)' : string
+    $'agile_field_rendering::rig_agile_edit_field_token(&*!field_name, &*!current, &*!value)' : string
 := edit_field_rule (~field_name : string) : string =
-    $'agile_field_rendering::kit_agile_edit_field_rule(&*!field_name)' : string
+    $'agile_field_rendering::rig_agile_edit_field_rule(&*!field_name)' : string
 
 :| field_token =
     | TokenRendered : string
@@ -63,6 +63,6 @@
     |: agile_edit (argument_owned 1i32) (argument_owned 2i32) position field_name (argument_owned 4i32)
 
 := main () : i32 =
-    export "kit_agile_edit_run" ((\ () => agile_edit_entry ()) : () -> i32)
+    export "rig_agile_edit_run" ((\ () => agile_edit_entry ()) : () -> i32)
     := _ = agile_edit_entry ()
     0i32

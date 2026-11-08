@@ -129,37 +129,37 @@
 
 := main () : i32 =
     export
-        "kit_agile_state_series_sequence_binding"
+        "rig_agile_state_series_sequence_binding"
         ((\ (first, second) => agile_series_sequence_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_series_source_binding"
+        "rig_agile_state_series_source_binding"
         ((\ (first, second) => agile_series_source_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_series_pair_binding"
+        "rig_agile_state_series_pair_binding"
         ((\ (first, second) => agile_series_pair_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_series_monotonic_binding"
+        "rig_agile_state_series_monotonic_binding"
         ((\ (first, second) => agile_series_monotonic_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_series_fingerprint_binding"
+        "rig_agile_state_series_fingerprint_binding"
         ((\ (first, second) => agile_series_fingerprint_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_entry_kind_binding"
+        "rig_agile_state_entry_kind_binding"
         ((\ (first, second) => agile_state_entry_kind_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_transient_name_code"
+        "rig_agile_state_transient_name_code"
         ((\ value => agile_transient_state_name_code value) : string -> u64)
     export
-        "kit_agile_state_record_required_name_bit"
+        "rig_agile_state_record_required_name_bit"
         ((\ value => agile_record_required_name_bit value) : string -> u64)
     export
-        "kit_agile_state_record_required_catalog"
+        "rig_agile_state_record_required_catalog"
         ((\ value => agile_record_required_catalog value) : string -> string)
     export
-        "kit_agile_state_record_preflight_binding"
+        "rig_agile_state_record_preflight_binding"
         ((\ (first, second) => agile_record_preflight_binding first second) : i32 * i32 -> i32)
     export
-        "kit_agile_state_attestation_decision_binding"
+        "rig_agile_state_attestation_decision_binding"
         ((\ (first, second) => agile_attestation_decision_binding first second) : i32 * i32 -> i32)
     := _ = append_only_series_plan ()
     := _ = agile_series_sequence_binding 0i32 1i32

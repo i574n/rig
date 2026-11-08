@@ -1,5 +1,0 @@
-:< delete_guard
-
-:= main () : i32 =
-    export "kit_delete_target_refusal" ((\ value => delete_target_refusal value) : string -> string)
-    0i32

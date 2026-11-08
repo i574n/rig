@@ -1,5 +1,0 @@
-:< chain
-
-:= main () : i32 =
-    export "kit_job_chain_run" chain_run
-    0i32

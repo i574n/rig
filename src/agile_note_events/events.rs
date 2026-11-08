@@ -38,7 +38,7 @@ fn method2(mut v0: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<
     }
 }
 fn facts_list_1(mut v0: Rc<str>) -> Rc<UH0> {
-    let v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::kit_agile_fact_rows(&v0);
+    let v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::rig_agile_fact_rows(&v0);
     let v2: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v1).borrow().clone());
     let v3: usize = (v2).len();
     let v4: i32 = ((v3) as i32);
@@ -404,7 +404,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, i64, Rc<str>)>>>
         note_events_of_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_note_events(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, i64, Rc<str>)>>> {
+pub fn rig_agile_note_events(v0: &str) -> Rc<RefCell<Vec<(Rc<str>, i64, Rc<str>)>>> {
     closure0()(Rc::<str>::from(v0))
 }
 pub type SpiralShape_0408665020a9 = Mut0;

@@ -334,7 +334,7 @@
         fn bundle_profile_signature(root: &Path) -> i32 {
             let bootstrap_mask = i32::from(BUNDLE_BINARY_NAMES.iter().any(|name| rooted_open_regular_read(&root.join(name)).is_ok())) | (i32::from(rooted_open_regular_read(&root.join(BUNDLE_PROFILE_SIGNATURE[1])).is_ok()) << 1);
             let model_mask = i32::from(rooted_open_regular_read(&root.join(BUNDLE_PROFILE_SIGNATURE[2])).is_ok()) | (i32::from(rooted_open_regular_read(&root.join(BUNDLE_PROFILE_SIGNATURE[3])).is_ok()) << 1);
-            kit_bundle_profile_signature_binding(bootstrap_mask, model_mask)
+            rig_bundle_profile_signature_binding(bootstrap_mask, model_mask)
         }
 
         fn resolve_bundle_profile_code(requested: Option<&str>, signature: i32) -> Result<i32, String> {
@@ -346,7 +346,7 @@
     inl x4 = sm.concat x3 """
                 other => return Err(format!("unknown bundle profile: {other}; expected auto, generic or kit")),
             };
-            let resolved = kit_bundle_profile_resolve_binding(requested_code, signature);
+            let resolved = rig_bundle_profile_resolve_binding(requested_code, signature);
             if resolved == 1 || resolved == 2 { Ok(resolved) } else { Err("typed bundle profile resolution rejected".to_owned()) }
         }
 
@@ -359,7 +359,7 @@
 
         """
     inl profile_runtime = sm.concat x4 """
-            resolve_bundle_profile_code(requested, kit_bundle_profile_signature_binding(bootstrap_mask, model_mask))
+            resolve_bundle_profile_code(requested, rig_bundle_profile_signature_binding(bootstrap_mask, model_mask))
         }
 
 

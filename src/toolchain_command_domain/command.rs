@@ -377,33 +377,33 @@ fn closure9() -> Rc<dyn Fn(i32, i32) -> i32> {
         toolchain_environment_entry_binding_9(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_toolchain_program_profile(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_program_profile(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_toolchain_argument_profile(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_argument_profile(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_toolchain_environment_profile(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_environment_profile(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_toolchain_timeout_profile(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_timeout_profile(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_toolchain_success_profile(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_success_profile(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_toolchain_execution_plan(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_execution_plan(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_toolchain_resume_profile(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_resume_profile(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_toolchain_resume_retry(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_resume_retry(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }
-pub fn kit_toolchain_environment_entry_count(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_environment_entry_count(v0: i32, v1: i32) -> i32 {
     closure8()(v0, v1)
 }
-pub fn kit_toolchain_environment_entry(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_environment_entry(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }

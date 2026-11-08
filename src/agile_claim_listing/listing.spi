@@ -34,8 +34,7 @@
     testing.expect (active = "MINE-A") "only the lane's own Active item is resumed"
     testing.expect (wsjf = "MINE-B MINE-A THEIRS-READY") "own items first, then others' ready work, never their Active"
     testing.expect (lane_order ("A B", "A", "") = ("B", "")) "a lane with no team never takes an Active item"
-///> _
 := main () : i32 =
-    export "kit_claim_listed_ids" listed_ids
-    export "kit_claim_lane_order" lane_order
+    export "rig_claim_listed_ids" listed_ids
+    export "rig_claim_lane_order" lane_order
     0i32

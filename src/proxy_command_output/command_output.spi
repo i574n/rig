@@ -23,7 +23,7 @@
 
 := main () : i32 =
     export
-        "kit_command_output_receipt"
+        "rig_command_output_receipt"
         (
             \ (status, elapsed, stdout_bytes, stderr_bytes) =>
                 command_output_receipt_text status elapsed stdout_bytes stderr_bytes

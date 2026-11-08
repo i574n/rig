@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "start.spi"
+output = "start.rs"
+
+[package]
+name = "rig-agile-sprint-start"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_sprint_start"
+path = "start.rs"
+
+[dependencies]
+agile-task-census = { path = "../agile_task_census" }
+agile-planning-fields = { path = "../agile_planning_fields" }
+rig-agile-sprint-state = { path = "../rig_agile_sprint_state" }
+rig-agile-sprint-append = { path = "../rig_agile_sprint_append" }

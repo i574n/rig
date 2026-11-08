@@ -15,11 +15,8 @@
     | NoRanked => []
     | RankedThen (head, rest) => head.id :: ranked_words rest
 
-:~ team_words (~tags : string) : list string =
-    sm'.split_list "," tags
-    |> listm.map sm'.trim
-    |> listm'.filter (\ (w : string) => sm'.starts_with "team:" w)
-    |> listm.map (\ (w : string) => sm'.replace "team:" "" w)
+:~ on_team (~tags : string) (~team : string) : bool =
+    sm'.contains (",team:" ++# team ++# ",") ("," ++# sm'.replace " " "" tags ++# ",")
 
 :~ tasks_of (~root : string) : string * task_list =
     ?= probe (unchecked (backlog_state_path root)) ?|
@@ -37,14 +34,14 @@
 
 :~ gate_rows ((root, team) : string * string) : array_base gate_row =
     := records, tasks = tasks_of root
-    := own = \ (task : backlog_task) => listm'.contains team (team_words task.tags) && light_work records task
-    := ready = ranked_words (ranking_where MainAgent own tasks) |> listm'.take_ 3i32
+    := own = \ (task : backlog_task) => on_team task.tags team && light_work records task
+    := ready = ranked_words (ranking_where MainAgent own tasks) |> listm'.take_ 12i32
     ready |> listm.map (\ (id : string) => { id = id; parked = !- }) |> listm'.box |> listm'.to_array'
 
 ///> rust
 :# gate_work_reads_team_tags =
-    testing.expect (team_words "kit, team:kit,agile,team:x" = [ "kit"; "x" ]) "team tags"
-///> _
+    testing.expect (on_team "kit, team:kit,agile,team:x" "x" && on_team "kit, team:kit" "kit") "team tags"
+    testing.expect (on_team "x,team:x-dumps" "x" |> not) "a longer team is another team"
 := main () : i32 =
-    export "kit_agile_gate_rows" gate_rows
+    export "rig_agile_gate_rows" gate_rows
     0i32

@@ -1,0 +1,140 @@
+///- --package .
+:# show static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:~ days_of (~date : string) : i64 =
+    := part = \ (from : i32) (size : i32) =>
+        optionm'.default_value 0i64 (convert.try_convert (sm'.substring from size date))
+    ? (sm'.length date : i32) < 10i32 ?> 0i64
+    |: date_time.days_from_civil (part 0i32 4i32) (part 5i32 2i32) (part 8i32 2i32)
+
+:| show_depth =
+    | ShowItems
+    | ShowNotes
+
+:~ depth_word (depth : show_depth) : string = ? depth = ShowNotes ?> "retro" |: "show"
+
+:~ clipped (~line : string) : string =
+    ? (sm'.length line : i32) > 160i32 ?> sm'.substring 0i32 160i32 line ++# "..." |: line
+
+:~ last_note_line (~agile_text : string) (~task : string) : string =
+    := lines = sm'.split "\n" (agile_note_listing.note_listing.last_note_of (agile_text, task))
+    ? am'.length_base lines < 2i32 ?> "" |: clipped (sm'.trim (am'.index_base 1i32 lines))
+
+:~ ^ committed_from (items : array_base rig_agile_sprint_state.state.item_shown) (at : i32) (sum : i32) : i32 =
+    ? at >= am'.length_base items ?> sum
+    |:
+        := item = am'.index_base at items
+        committed_from items (at + 1i32) (? item.committed ?> sum + item.minutes |: sum)
+
+:~ ^ items_shown
+    (depth : show_depth) (~agile_text : string) (items : array_base rig_agile_sprint_state.state.item_shown)
+    (at : i32) (done : i32)
+    : i32
+    =
+    ? at >= am'.length_base items ?> done
+    |:
+        := item = am'.index_base at items
+        := status = agile_task_census.task_census.status_pair (agile_text, item.task)
+        := fate = ? item.committed ?> "committed" |: "dropped"
+        := shown = ? status = "" ?> "unknown" |: status
+        console.write_line ("  " ++# item.task ++# " " ++# sm'.show item.minutes ++# "m " ++# shown ++# " " ++# fate)
+        := note = ? depth = ShowNotes ?> last_note_line agile_text item.task |: ""
+        := _ = ? note <> "" ?> console.write_line ("    " ++# note) |: ()
+        := counted = ? status = "Done" && item.committed ?> done + item.minutes |: done
+        items_shown depth agile_text items (at + 1i32) counted
+
+:~ sprint_shown (~root : string) (~id : string) (depth : show_depth) : i32 =
+    := state = sm'.replace "\\" "/" root ++# "/state"
+    := sprints_text = file_system.read_text_or_empty (state ++# "/sprints.spi")
+    := heads = rig_agile_sprint_state.state.sprint_head_of (sprints_text, id)
+    ? am'.length_base heads = 0i32
+    ?>
+        := which = ? id = "" ?> "open sprint" |: "sprint " ++# id
+        console.write_error_line ("kit error: agile sprint " ++# depth_word depth ++# ": no " ++# which)
+        1i32
+    |:
+        := head = am'.index_base 0i32 heads
+        := items = rig_agile_sprint_state.state.sprint_items_of (sprints_text, head.id)
+        := agile_text = file_system.read_text_or_empty (state ++# "/agile.spi")
+        := committed = committed_from items 0i32 0i32
+        := today = (conv (workspace_primitives.clock.unix_ms ()) : i64) / 86400000i64
+        := left = days_of head.finish - today
+        := state_word = ? head.running ?> "open" |: "closed"
+        console.write_line (
+            "kit agile sprint " ++# depth_word depth ++# " ok id="
+            ++# head.id
+            ++# " status="
+            ++# state_word
+            ++# " start="
+            ++# head.start
+            ++# " finish="
+            ++# head.finish
+            ++# " days_left="
+            ++# sm'.show left
+            ++# " goal="
+            ++# head.goal
+        )
+        := done = items_shown depth agile_text items 0i32 0i32
+        console.write_line ("  committed=" ++# sm'.show committed ++# "m done=" ++# sm'.show done ++# "m")
+        0i32
+
+:~ shown ((root, id) : string * string) : i32 = sprint_shown root id ShowItems
+
+:~ retro ((root, id) : string * string) : i32 =
+    := sprints = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/sprints.spi")
+    sprint_shown root (? id = "" ?> rig_agile_sprint_state.state.latest_sprint_of sprints |: id) ShowNotes
+
+:~ ^ done_since
+    (rows : array_base agile_status_changes.changes.status_change) (at : i32) (since_ms : u64) (found : list string)
+    : list string
+    =
+    ? at >= am'.length_base rows ?> found
+    |:
+        := r = am'.index_base at rows
+        := fresh = r.status = "Done" && r.at_ms >= since_ms && listm'.contains r.item found |> not
+        done_since rows (at + 1i32) since_ms (? fresh ?> listm.append found [ r.item ] |: found)
+
+:~ retro_since ((root, since) : string * string) : i32 =
+    := base = sm'.replace "\\" "/" root
+    := day = days_of since
+    ? day <= 0i64
+    ?>
+        console.write_error_line ("kit error: agile sprint retro --since expects a YYYY-MM-DD date, got " ++# since)
+        2i32
+    |:
+        := changes = file_system.read_text_or_empty (base ++# "/history/status_changes.spi")
+        := agile_text = file_system.read_text_or_empty (base ++# "/state/agile.spi")
+        := since_ms : u64 = conv (day * 86400000i64)
+        := items = done_since (agile_status_changes.changes.changes_of changes) 0i32 since_ms []
+        := count : i32 = listm.length items
+        console.write_line ("kit agile sprint retro ok since=" ++# since ++# " done=" ++# sm'.show count)
+        := item_shown = \ (task : string) =>
+            := status = agile_task_census.task_census.status_pair (agile_text, task)
+            console.write_line ("  " ++# task ++# " " ++# (? status = "" ?> "unknown" |: status))
+            := note = last_note_line agile_text task
+            ? note <> "" ?> console.write_line ("    " ++# note) |: ()
+        items |> listm.iter item_shown
+        0i32
+
+///> rust
+:# a_date_reads_as_days_since_the_epoch =
+    testing.expect (days_of "2026-11-04" = 20761i64 && days_of "" = 0i64) "a date reads as days"
+    testing.expect (depth_word ShowNotes = "retro" && depth_word ShowItems = "show") "receipt words"
+    := ten = "xxxxxxxxxx"
+    := long = sm'.concat_list "" [ ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten; ten ]
+    testing.expect ((sm'.length (clipped long) : i32) = 163i32 && clipped "short" = "short") "notes clip at 160"
+    := row = \ (item : string) (status : string) (at : u64) =>
+        agile_status_changes.changes.row_of_change { item = item; status = status; at_ms = at }
+    := day = 20761u64 * 86400000u64
+    := rows = [ row "OLD" "Done" 1u64; row "A" "Done" day; row "B" "Active" day; row "A" "Done" day ]
+    := text = sm'.concat_list "\n" rows
+    := found = done_since (agile_status_changes.changes.changes_of text) 0i32 day []
+    testing.expect (found = [ "A" ]) "only Done changes inside the window, each item once"
+:= main () : i32 =
+    export "rig_agile_sprint_shown" shown
+    export "rig_agile_sprint_retro" retro
+    export "rig_agile_sprint_retro_since" retro_since
+    0i32

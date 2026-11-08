@@ -745,10 +745,10 @@ fn closure4() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>) -> (Rc<str>, Rc<str>)> {
         lane_order_26(v2, v1, v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_claim_listed_ids(v0: &str, v1: &str, v2: &str, v3: &str, v4: u64) -> Rc<RefCell<Vec<Rc<str>>>> {
+pub fn rig_claim_listed_ids(v0: &str, v1: &str, v2: &str, v3: &str, v4: u64) -> Rc<RefCell<Vec<Rc<str>>>> {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2), Rc::<str>::from(v3), v4)
 }
-pub fn kit_claim_lane_order(v0: &str, v1: &str, v2: &str) -> (Rc<str>, Rc<str>) {
+pub fn rig_claim_lane_order(v0: &str, v1: &str, v2: &str) -> (Rc<str>, Rc<str>) {
     closure4()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

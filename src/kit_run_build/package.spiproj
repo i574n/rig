@@ -1,8 +1,0 @@
-packages:
-    |core-
-    spiral-
-    kit_run_model
-    kit_os_machine
-    kit_os_run
-modules:
-    builder

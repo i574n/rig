@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "words.spi"
+output = "words.rs"
+
+[package]
+name = "rig-flag-words"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_flag_words"
+path = "words.rs"

@@ -1,5 +1,5 @@
 #![cfg(any(windows, target_os = "linux"))]
-use kit_rust_std_fs::{rooted_list_names, rooted_list_names_limited};
+use rig_rust_std_fs::{rooted_list_names, rooted_list_names_limited};
 use std::fs;
 
 fn scratch() -> std::path::PathBuf {

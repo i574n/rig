@@ -34,8 +34,6 @@ spec:
       labels:
         app: iggy
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       containers:
@@ -43,6 +41,12 @@ spec:
           image: apache/iggy:0.9.0
           imagePullPolicy: IfNotPresent
           env:
+            - name: IGGY_HTTP_TLS_ENABLED
+              value: "true"
+            - name: IGGY_HTTP_TLS_CERT_FILE
+              value: /certs/server.crt
+            - name: IGGY_HTTP_TLS_KEY_FILE
+              value: /certs/server.key
             - name: IGGY_TCP_ADDRESS
               value: 0.0.0.0:8090
             - name: IGGY_HTTP_ADDRESS
@@ -73,12 +77,22 @@ spec:
                 secretKeyRef:
                   name: iggy-root
                   key: password
+            - name: IGGY_TCP_TLS_ENABLED
+              value: "true"
+            - name: IGGY_TCP_TLS_SELF_SIGNED
+              value: "false"
+            - name: IGGY_TCP_TLS_CERT_FILE
+              value: /certs/server.crt
+            - name: IGGY_TCP_TLS_KEY_FILE
+              value: /certs/server.key
           ports:
-            - name: tcp
-              containerPort: 8090
-              protocol: TCP
             - name: http
               containerPort: 3000
+              hostPort: 3000
+              protocol: TCP
+            - name: tcp
+              containerPort: 8090
+              hostPort: 8090
               protocol: TCP
             - name: quic
               containerPort: 8080
@@ -90,30 +104,39 @@ spec:
             seccompProfile:
               type: Unconfined
             capabilities:
-              add: [SYS_NICE]
+              add: [SYS_NICE, IPC_LOCK]
           resources:
             requests:
               cpu: 250m
-              memory: 256Mi
+              memory: 512Mi
             limits:
-              memory: 3Gi
+              cpu: 250m
+              memory: 512Mi
           readinessProbe:
             httpGet:
               path: /ping
               port: 3000
+              scheme: HTTPS
             periodSeconds: 5
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /ping
               port: 3000
+              scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 15
             failureThreshold: 4
           volumeMounts:
+            - name: certs
+              mountPath: /certs
+              readOnly: true
             - name: data
               mountPath: /app/local_data
       volumes:
+        - name: certs
+          secret:
+            secretName: iggy-tls
         - name: data
           persistentVolumeClaim:
             claimName: iggy-data

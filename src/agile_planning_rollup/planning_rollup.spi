@@ -37,7 +37,7 @@
 
 :~ tally_of (~text : string) (~group : string) (~value : string) : planning_tally =
     tally_record (
-        $'agile_planning_tally::kit_agile_planning_tally(&*!text, &*!group, &*!value)' : i32 * i32 * i32 * i32 * i32
+        $'agile_planning_tally::rig_agile_planning_tally(&*!text, &*!group, &*!value)' : i32 * i32 * i32 * i32 * i32
     )
 
 := padded (~text : string) (width : i32) : string =
@@ -166,6 +166,6 @@
     |: planning_rollup_failure "plan expects <root> [--json]"
 
 := main () : i32 =
-    export "kit_agile_planning_rollup_run" ((\ () => planning_rollup_entry ()) : () -> i32)
+    export "rig_agile_planning_rollup_run" ((\ () => planning_rollup_entry ()) : () -> i32)
     := _ = planning_rollup_entry ()
     0i32

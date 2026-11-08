@@ -48,9 +48,9 @@
 
 := main () : i32 =
     export
-        "kit_agile_planning_value_token"
+        "rig_agile_planning_value_token"
         ((\ (field_name, value) => planning_value_token field_name value) : string * string -> i32 * string)
-    export "kit_agile_planning_legacy_agent_value" ((\ value => legacy_agent_value value) : string -> string)
+    export "rig_agile_planning_legacy_agent_value" ((\ value => legacy_agent_value value) : string -> string)
     := _ = planning_value_token "load" "heavy"
     := _ = legacy_agent_value "yes"
     0i32

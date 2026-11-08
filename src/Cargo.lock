@@ -32,7 +32,7 @@ name = "agile-claim-item"
 version = "0.0.0"
 dependencies = [
  "agile-planning-fields",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -53,9 +53,9 @@ version = "0.0.0"
 dependencies = [
  "agile-planning-fields",
  "agile-planning-filters",
- "kit-agile-records",
- "kit-job-names",
- "kit-process-alive",
+ "rig-agile-records",
+ "rig-job-names",
+ "rig-process-alive",
 ]
 
 [[package]]
@@ -87,15 +87,19 @@ version = "0.0.0"
 dependencies = [
  "agile-note-listing",
  "agile-task-census",
- "kit-agile-records",
+ "rig-agile-records",
 ]
+
+[[package]]
+name = "agile-next-print"
+version = "0.0.0"
 
 [[package]]
 name = "agile-note-edit"
 version = "0.0.0"
 dependencies = [
  "agile-note-edit-args",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -119,7 +123,7 @@ name = "agile-note-seal"
 version = "0.0.0"
 dependencies = [
  "agile-task-census",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -145,7 +149,7 @@ dependencies = [
  "agile-planning-fields",
  "agile-planning-rewrite",
  "agile-planning-values",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -155,7 +159,7 @@ dependencies = [
  "agile-planning-fields",
  "agile-planning-rewrite",
  "agile-planning-values",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -167,7 +171,7 @@ name = "agile-planning-rollup"
 version = "0.0.0"
 dependencies = [
  "agile-planning-tally",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -203,6 +207,10 @@ name = "agile-rename-rewrite"
 version = "0.0.0"
 
 [[package]]
+name = "agile-split-plan"
+version = "0.0.0"
+
+[[package]]
 name = "agile-state-access"
 version = "0.0.0"
 
@@ -219,6 +227,18 @@ name = "agile-state-transient-schema-domain"
 version = "0.0.0"
 
 [[package]]
+name = "agile-status-changes"
+version = "0.0.0"
+
+[[package]]
+name = "agile-task-annotation"
+version = "0.0.0"
+
+[[package]]
+name = "agile-task-asks"
+version = "0.0.0"
+
+[[package]]
 name = "agile-task-census"
 version = "0.0.0"
 
@@ -227,7 +247,7 @@ name = "agile-task-creation"
 version = "0.0.0"
 dependencies = [
  "agile-task-notes",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -236,7 +256,7 @@ version = "0.0.0"
 dependencies = [
  "agile-note-listing",
  "agile-planning-fields",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -248,20 +268,23 @@ dependencies = [
  "agile-planning-filters",
  "agile-task-census",
  "agile-task-query",
- "kit-agile-list-args",
- "kit-agile-records",
+ "rig-agile-list-args",
+ "rig-agile-records",
 ]
 
 [[package]]
 name = "agile-task-next"
 version = "0.0.0"
 dependencies = [
+ "agile-next-print",
  "agile-planning-fields",
  "agile-planning-filters",
+ "agile-task-annotation",
  "agile-task-query",
- "kit-agile-next-args",
- "kit-agile-records",
- "kit-window-query",
+ "agile-waits-hold",
+ "rig-agile-next-args",
+ "rig-agile-records",
+ "rig-window-query",
 ]
 
 [[package]]
@@ -272,7 +295,7 @@ dependencies = [
  "agile-note-segments",
  "agile-planning-rewrite",
  "agile-planning-values",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -288,7 +311,7 @@ name = "agile-task-rename"
 version = "0.0.0"
 dependencies = [
  "agile-rename-rewrite",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -296,7 +319,14 @@ name = "agile-task-revision"
 version = "0.0.0"
 dependencies = [
  "agile-field-rendering",
- "kit-agile-records",
+ "rig-agile-records",
+]
+
+[[package]]
+name = "agile-task-split"
+version = "0.0.0"
+dependencies = [
+ "agile-split-plan",
 ]
 
 [[package]]
@@ -312,12 +342,16 @@ name = "agile-task-views"
 version = "0.0.0"
 
 [[package]]
+name = "agile-task-waits"
+version = "0.0.0"
+
+[[package]]
 name = "agile-team-lane"
 version = "0.0.0"
 dependencies = [
  "agile-planning-fields",
  "agile-planning-filters",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -326,7 +360,7 @@ version = "0.0.0"
 dependencies = [
  "agile-planning-fields",
  "agile-planning-filters",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -334,7 +368,7 @@ name = "agile-title-notes"
 version = "0.0.0"
 dependencies = [
  "agile-title-tails",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -377,14 +411,14 @@ version = "0.0.0"
 dependencies = [
  "agile-todo-lines",
  "agile-todo-scan",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
 name = "agile-todo-roots"
 version = "0.0.0"
 dependencies = [
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
@@ -395,15 +429,15 @@ dependencies = [
  "agile-todo-paths",
  "agile-todo-sources",
  "agile-todo-standing",
- "kit-agile-records",
+ "rig-agile-records",
 ]
 
 [[package]]
 name = "agile-todo-sources"
 version = "0.0.0"
 dependencies = [
- "kit-process",
- "kit-rust-std-fs",
+ "rig-process",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -419,6 +453,10 @@ name = "agile-update-receipt"
 version = "0.0.0"
 
 [[package]]
+name = "agile-waits-hold"
+version = "0.0.0"
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -431,8 +469,8 @@ dependencies = [
 name = "archive-deflate-domain"
 version = "0.0.0"
 dependencies = [
- "kit-rust-std-fs",
- "kit-rust-std-fs-mutation",
+ "rig-rust-std-fs",
+ "rig-rust-std-fs-mutation",
  "zip",
 ]
 
@@ -467,8 +505,8 @@ version = "0.0.0"
 name = "bundle-retention-domain"
 version = "0.0.0"
 dependencies = [
- "kit-proxy-search",
- "kit-rust-std-fs",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -491,10 +529,10 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 name = "cold-proof-domain"
 version = "0.0.0"
 dependencies = [
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-source-map",
- "kit-source-topology",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-source-map",
+ "rig-source-topology",
 ]
 
 [[package]]
@@ -594,9 +632,9 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 name = "evidence-currentness-domain"
 version = "0.0.0"
 dependencies = [
- "kit-patch-control-domain",
- "kit-proxy-search",
- "kit-rust-std-fs",
+ "rig-patch-control-domain",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -651,1945 +689,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "inspection-negative"
-version = "0.0.0"
-dependencies = [
- "kit-proxy-search",
-]
-
-[[package]]
-name = "inspection-policy-probe"
-version = "0.0.0"
-dependencies = [
- "kit-proxy-search",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
-name = "kit-adoption"
-version = "0.0.0"
-dependencies = [
- "kit-adoption-habits",
- "regex",
-]
-
-[[package]]
-name = "kit-adoption-habits"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-activity-migration"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-cadence"
-version = "0.0.0"
-dependencies = [
- "agile-quality-state",
- "kit-cadence-activity",
- "kit-cadence-done",
-]
-
-[[package]]
-name = "kit-agile-contracts"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-gate"
-version = "0.0.0"
-dependencies = [
- "agile-team-lane",
- "agile-team-work",
-]
-
-[[package]]
-name = "kit-agile-lease"
-version = "0.0.0"
-dependencies = [
- "agile-lease-terms",
- "agile-state-runtime-policy-domain",
- "command-spec-domain",
- "kit-agile-policy",
- "kit-proxy-search",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-agile-lint"
-version = "0.0.0"
-dependencies = [
- "agile-quality-lint",
- "agile-quality-state",
-]
-
-[[package]]
-name = "kit-agile-list-args"
-version = "0.0.0"
-dependencies = [
- "agile-planning-filters",
- "agile-task-query",
-]
-
-[[package]]
-name = "kit-agile-lock"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-agile-mutation"
-version = "0.0.0"
-dependencies = [
- "agile-backlog-scaffold",
- "agile-claim-cli",
- "agile-memory-links",
- "agile-note-edit",
- "agile-note-seal",
- "agile-planning-migration",
- "agile-planning-revision",
- "agile-planning-rollup",
- "agile-state-access",
- "agile-task-creation",
- "agile-task-inspection",
- "agile-task-listing",
- "agile-task-next",
- "agile-task-notes",
- "agile-task-rename",
- "agile-task-revision",
- "agile-task-tree",
- "agile-task-views",
- "agile-title-notes",
- "agile-todo-merge",
- "agile-todo-record",
- "agile-todo-roots",
- "agile-todo-scan",
- "kit-agile-activity-migration",
- "kit-agile-cadence",
- "kit-agile-gate",
- "kit-agile-lease",
- "kit-agile-lint",
- "kit-agile-lock",
- "kit-agile-routes",
- "kit-agile-sprint",
- "kit-agile-state",
- "kit-command-help",
- "kit-handoff-render",
-]
-
-[[package]]
-name = "kit-agile-next-args"
-version = "0.0.0"
-dependencies = [
- "agile-planning-filters",
- "agile-task-query",
- "kit-window-query",
-]
-
-[[package]]
-name = "kit-agile-policy"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-records"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-routes"
-version = "0.0.0"
-dependencies = [
- "agile-planning-revision",
- "agile-quality-state",
- "agile-task-parents",
- "agile-task-revision",
- "agile-todo-scan",
- "kit-agile-lease",
- "kit-agile-state",
-]
-
-[[package]]
-name = "kit-agile-sprint"
-version = "0.0.0"
-dependencies = [
- "kit-agile-sprint-change",
- "kit-agile-sprint-show",
- "kit-agile-sprint-start",
-]
-
-[[package]]
-name = "kit-agile-sprint-append"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-sprint-change"
-version = "0.0.0"
-dependencies = [
- "agile-planning-fields",
- "agile-task-census",
- "kit-agile-sprint-append",
- "kit-agile-sprint-review",
- "kit-agile-sprint-state",
-]
-
-[[package]]
-name = "kit-agile-sprint-read"
-version = "0.0.0"
-
-[[package]]
-name = "kit-agile-sprint-review"
-version = "0.0.0"
-dependencies = [
- "kit-agile-sprint-read",
-]
-
-[[package]]
-name = "kit-agile-sprint-show"
-version = "0.0.0"
-dependencies = [
- "agile-note-listing",
- "agile-task-census",
- "kit-agile-sprint-state",
-]
-
-[[package]]
-name = "kit-agile-sprint-start"
-version = "0.0.0"
-dependencies = [
- "agile-planning-fields",
- "agile-task-census",
- "kit-agile-sprint-append",
- "kit-agile-sprint-state",
-]
-
-[[package]]
-name = "kit-agile-sprint-state"
-version = "0.0.0"
-dependencies = [
- "kit-agile-sprint-read",
-]
-
-[[package]]
-name = "kit-agile-state"
-version = "0.0.0"
-dependencies = [
- "agile-lease-terms",
- "agile-planning-gaps",
- "agile-record-catalog",
- "agile-state-decision-domain",
- "agile-state-runtime-policy-domain",
- "agile-state-transient-schema-domain",
- "agile-update-receipt",
- "kit-agile-lease",
- "kit-agile-policy",
- "kit-compiler-discovery",
- "kit-process",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "rayon",
- "state-receipt-codec-core",
- "state-receipt-fingerprint-domain",
- "state-receipt-parser-domain",
- "state-receipt-serializer-domain",
- "state-receipt-tuple-domain",
-]
-
-[[package]]
-name = "kit-archive-contracts"
-version = "0.0.0"
-dependencies = [
- "zip",
-]
-
-[[package]]
-name = "kit-archive-tar-runtime"
-version = "0.0.0"
-dependencies = [
- "archive-deflate-domain",
-]
-
-[[package]]
-name = "kit-backup-domain"
-version = "0.0.0"
-
-[[package]]
-name = "kit-batch-write"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "kit-patch-control-domain",
- "kit-patch-driver-domain",
- "kit-process",
- "kit-proxy-search",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-bootstrap-policy"
-version = "0.0.0"
-
-[[package]]
-name = "kit-bootstrap-probe"
-version = "0.0.0"
-
-[[package]]
-name = "kit-bundle-manifest"
-version = "0.0.0"
-dependencies = [
- "archive-deflate-domain",
- "kit-archive-tar-runtime",
- "kit-process-observation",
- "kit-rust-std-fs-mutation",
- "zip",
-]
-
-[[package]]
-name = "kit-bundle-retention"
-version = "0.0.0"
-dependencies = [
- "bundle-retention-domain",
- "kit-process",
- "rayon",
-]
-
-[[package]]
-name = "kit-bundle-zip"
-version = "0.0.0"
-dependencies = [
- "archive-deflate-domain",
- "bundle-lifecycle-domain",
- "cold-proof-domain",
- "evidence-currentness-domain",
- "kit-bundle-manifest",
- "kit-proxy-search",
- "kit-release-hygiene",
- "kit-rust-std-fs",
- "kit-rust-std-fs-mutation",
- "kit-source-map",
- "owner-growth-runtime",
- "rating-guard-runtime",
- "semantic-evidence-domain",
- "state-receipt-codec-core",
- "state-recovered-topology-codec",
-]
-
-[[package]]
-name = "kit-cadence-activity"
-version = "0.0.0"
-dependencies = [
- "agile-note-events",
- "agile-quality-state",
-]
-
-[[package]]
-name = "kit-cadence-done"
-version = "0.0.0"
-dependencies = [
- "agile-quality-state",
-]
-
-[[package]]
-name = "kit-ceremonies"
-version = "0.0.0"
-
-[[package]]
-name = "kit-ci-parity"
-version = "0.0.0"
-dependencies = [
- "kit-ci-verdict",
-]
-
-[[package]]
-name = "kit-ci-probe"
-version = "0.0.0"
-
-[[package]]
-name = "kit-ci-verdict"
-version = "0.0.0"
-dependencies = [
- "kit-ci-probe",
-]
-
-[[package]]
-name = "kit-cli"
-version = "0.0.0"
-dependencies = [
- "archive-deflate-domain",
- "authority-state-domain",
- "bootstrap-authority-status",
- "bundle-retention-domain",
- "canonical-plan-ir-domain",
- "cold-proof-domain",
- "command-spec-domain",
- "evidence-currentness-domain",
- "kit-adoption",
- "kit-agile-lease",
- "kit-agile-mutation",
- "kit-agile-state",
- "kit-batch-write",
- "kit-bundle-manifest",
- "kit-bundle-retention",
- "kit-ceremonies",
- "kit-ci-parity",
- "kit-cli-routes",
- "kit-command-help",
- "kit-command-usages",
- "kit-compiler-discovery",
- "kit-coverage-prune",
- "kit-crate-gate",
- "kit-do",
- "kit-env-pins",
- "kit-evidence",
- "kit-exec-export",
- "kit-experiments",
- "kit-fs-actions",
- "kit-grep-query",
- "kit-guide",
- "kit-handoff",
- "kit-heal-nameof",
- "kit-hook",
- "kit-job-entry",
- "kit-legacy-operations",
- "kit-lint-cli",
- "kit-lint-macros",
- "kit-machine-watch",
- "kit-machine-windows",
- "kit-memory",
- "kit-mirror",
- "kit-os-launch",
- "kit-patch-driver-domain",
- "kit-patch-mutation",
- "kit-patch-rehearsal",
- "kit-process-observation",
- "kit-process-table",
- "kit-product-diff",
- "kit-proxy-search",
- "kit-read-query",
- "kit-release-hygiene",
- "kit-repo-accept-review",
- "kit-repo-affected",
- "kit-repo-state",
- "kit-resume",
- "kit-run-cli",
- "kit-schedule",
- "kit-standards",
- "kit-table-logs",
- "kit-table-query",
- "kit-table-sequences",
- "kit-table-test",
- "kit-toolchain-proxy",
- "legacy-capability-domain",
- "process-batch-plan-domain",
- "semantic-evidence-domain",
-]
-
-[[package]]
-name = "kit-cli-routes"
-version = "0.0.0"
-dependencies = [
- "kit-proof-scope",
- "kit-repo-accept-review",
- "kit-repo-affected",
- "kit-repo-state",
- "kit-table-logs",
- "kit-table-query",
- "kit-table-sequences",
- "kit-table-test",
-]
-
-[[package]]
-name = "kit-cold-rebuild-matrix"
-version = "0.0.0"
-dependencies = [
- "kit-process-observation",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-source-map",
- "process-batch-plan-domain",
- "serde_json",
-]
-
-[[package]]
-name = "kit-command-help"
-version = "0.0.0"
-
-[[package]]
-name = "kit-command-line"
-version = "0.0.0"
-
-[[package]]
-name = "kit-command-usages"
-version = "0.0.0"
-
-[[package]]
-name = "kit-compiler-discovery"
-version = "0.0.0"
-dependencies = [
- "kit-proxy-search",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-contracts"
-version = "0.0.0"
-
-[[package]]
-name = "kit-coverage-prune"
-version = "0.0.0"
-dependencies = [
- "kit-coverage-smoke",
- "kit-lcov",
- "kit-process",
- "kit-process-observation",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-rust-std-fs-mutation",
-]
-
-[[package]]
-name = "kit-coverage-smoke"
-version = "0.0.0"
-dependencies = [
- "kit-process-observation",
-]
-
-[[package]]
-name = "kit-crate-gate"
-version = "0.0.0"
-dependencies = [
- "kit-crate-largest",
- "kit-crate-walk",
-]
-
-[[package]]
-name = "kit-crate-largest"
-version = "0.0.0"
-
-[[package]]
-name = "kit-crate-walk"
-version = "0.0.0"
-dependencies = [
- "kit-crate-largest",
-]
-
-[[package]]
-name = "kit-delete-guard"
-version = "0.0.0"
-
-[[package]]
-name = "kit-dev"
-version = "0.0.0"
-dependencies = [
- "developer-metadata-domain",
- "kit-dev-spiral-tests",
- "kit-process",
- "predicate-lex-domain",
- "predicate-literal-domain",
-]
-
-[[package]]
-name = "kit-dev-spiral-tests"
-version = "0.0.0"
-dependencies = [
- "kit-process",
- "kit-process-streaming",
-]
-
-[[package]]
-name = "kit-do"
-version = "0.0.0"
-dependencies = [
- "kit-do-edit",
- "kit-do-facts",
- "kit-do-file-steps",
- "kit-do-git",
- "kit-do-jobs",
- "kit-do-lab",
- "kit-do-model",
- "kit-do-process",
- "kit-do-program",
- "kit-do-read",
- "kit-do-verbs",
- "kit-do-write",
-]
-
-[[package]]
-name = "kit-do-commit"
-version = "0.0.0"
-
-[[package]]
-name = "kit-do-edit"
-version = "0.0.0"
-dependencies = [
- "kit-do-commit",
- "kit-do-model",
- "kit-do-process",
- "kit-do-verbs",
- "regex",
- "sha2",
-]
-
-[[package]]
-name = "kit-do-facts"
-version = "0.0.0"
-dependencies = [
- "kit-do-facts-receipt",
- "kit-do-model",
- "kit-do-read",
- "kit-do-tables",
- "kit-do-verbs",
- "regex",
- "serde_json",
- "sha2",
-]
-
-[[package]]
-name = "kit-do-facts-receipt"
-version = "0.0.0"
-
-[[package]]
-name = "kit-do-file-steps"
-version = "0.0.0"
-dependencies = [
- "kit-do-model",
- "kit-do-read",
- "kit-do-verbs",
- "regex",
-]
-
-[[package]]
-name = "kit-do-git"
-version = "0.0.0"
-dependencies = [
- "kit-do-git-reports",
-]
-
-[[package]]
-name = "kit-do-git-reports"
-version = "0.0.0"
-
-[[package]]
-name = "kit-do-jobs"
-version = "0.0.0"
-dependencies = [
- "kit-command-line",
- "kit-do-model",
- "kit-do-verbs",
- "kit-job-control",
- "kit-job-entry",
-]
-
-[[package]]
-name = "kit-do-lab"
-version = "0.0.0"
-dependencies = [
- "regex",
- "serde_json",
-]
-
-[[package]]
-name = "kit-do-model"
-version = "0.0.0"
-
-[[package]]
-name = "kit-do-process"
-version = "0.0.0"
-dependencies = [
- "kit-command-line",
- "regex",
- "sysinfo",
-]
-
-[[package]]
-name = "kit-do-program"
-version = "0.0.0"
-dependencies = [
- "kit-do-model",
- "kit-do-verbs",
-]
-
-[[package]]
-name = "kit-do-read"
-version = "0.0.0"
-dependencies = [
- "kit-do-model",
- "kit-do-walk",
- "rayon",
- "regex",
-]
-
-[[package]]
-name = "kit-do-tables"
-version = "0.0.0"
-
-[[package]]
-name = "kit-do-verbs"
-version = "0.0.0"
-dependencies = [
- "kit-do-model",
-]
-
-[[package]]
-name = "kit-do-walk"
-version = "0.0.0"
-
-[[package]]
-name = "kit-do-write"
-version = "0.0.0"
-dependencies = [
- "kit-do-file-steps",
- "kit-do-model",
- "kit-do-read",
- "kit-do-verbs",
- "regex",
-]
-
-[[package]]
-name = "kit-domain-probe"
-version = "0.0.0"
-
-[[package]]
-name = "kit-env-pins"
-version = "0.0.0"
-
-[[package]]
-name = "kit-evidence"
-version = "0.0.0"
-dependencies = [
- "kit-proxy-search",
-]
-
-[[package]]
-name = "kit-exec-cells"
-version = "0.0.0"
-dependencies = [
- "serde_json",
-]
-
-[[package]]
-name = "kit-exec-export"
-version = "0.0.0"
-dependencies = [
- "kit-exec-cells",
- "kit-exec-jobs",
-]
-
-[[package]]
-name = "kit-exec-jobs"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-experiment-amend"
-version = "0.0.0"
-dependencies = [
- "kit-experiment-verb-args",
-]
-
-[[package]]
-name = "kit-experiment-analysis"
-version = "0.0.0"
-dependencies = [
- "agile-task-notes",
- "kit-experiment-stats",
- "kit-experiment-verb-args",
- "kit-table-query",
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-experiment-args"
-version = "0.0.0"
-
-[[package]]
-name = "kit-experiment-import"
-version = "0.0.0"
-dependencies = [
- "kit-experiment-args",
- "kit-experiment-verb-args",
-]
-
-[[package]]
-name = "kit-experiment-stats"
-version = "0.0.0"
-
-[[package]]
-name = "kit-experiment-verb-args"
-version = "0.0.0"
-
-[[package]]
-name = "kit-experiments"
-version = "0.0.0"
-dependencies = [
- "kit-experiment-amend",
- "kit-experiment-analysis",
- "kit-experiment-args",
- "kit-experiment-import",
-]
-
-[[package]]
-name = "kit-flag-words"
-version = "0.0.0"
-
-[[package]]
-name = "kit-fs-actions"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "kit-patch-control-domain",
- "kit-patch-driver-domain",
- "kit-process",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-rust-std-fs-mutation",
-]
-
-[[package]]
-name = "kit-grep-found"
-version = "0.0.0"
-dependencies = [
- "regex",
-]
-
-[[package]]
-name = "kit-grep-query"
-version = "0.0.0"
-dependencies = [
- "kit-grep-found",
-]
-
-[[package]]
-name = "kit-guide"
-version = "0.0.0"
-
-[[package]]
-name = "kit-handoff"
-version = "0.0.0"
-dependencies = [
- "authority-state-domain",
- "cold-proof-domain",
- "evidence-currentness-domain",
- "handoff-active-work-projection-domain",
- "handoff-evidence-projection-domain",
- "handoff-sections-projection-domain",
- "handoff-state-projection-domain",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-source-topology",
- "semantic-evidence-domain",
-]
-
-[[package]]
-name = "kit-handoff-render"
-version = "0.0.0"
-dependencies = [
- "authority-state-domain",
- "handoff-active-work-projection-domain",
- "handoff-evidence-projection-domain",
- "handoff-sections-projection-domain",
- "handoff-state-projection-domain",
- "kit-agile-records",
-]
-
-[[package]]
-name = "kit-heal-nameof"
-version = "0.0.0"
-dependencies = [
- "kit-nameof-findings",
-]
-
-[[package]]
-name = "kit-hook"
-version = "0.0.0"
-dependencies = [
- "kit-hook-verbs",
- "serde_json",
-]
-
-[[package]]
-name = "kit-hook-rules"
-version = "0.0.0"
-
-[[package]]
-name = "kit-hook-verbs"
-version = "0.0.0"
-
-[[package]]
-name = "kit-ingest-frontier"
-version = "0.1.0"
-
-[[package]]
-name = "kit-job-after"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-bin"
-version = "0.0.0"
-
-[[package]]
-name = "kit-job-chain"
-version = "0.0.0"
-
-[[package]]
-name = "kit-job-control"
-version = "0.0.0"
-dependencies = [
- "kit-job-launch",
- "kit-job-names",
- "kit-job-state",
- "kit-job-summary",
- "kit-machine-windows",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-coordinator"
-version = "0.0.0"
-dependencies = [
- "kit-job-coordinator-args",
-]
-
-[[package]]
-name = "kit-job-coordinator-args"
-version = "0.0.0"
-
-[[package]]
-name = "kit-job-create"
-version = "0.0.0"
-dependencies = [
- "kit-job-host",
- "kit-job-host-request",
- "kit-machine-windows",
-]
-
-[[package]]
-name = "kit-job-dispatch"
-version = "0.0.0"
-dependencies = [
- "kit-job-bin",
-]
-
-[[package]]
-name = "kit-job-entry"
-version = "0.0.0"
-dependencies = [
- "kit-job-chain",
- "kit-job-control",
- "kit-job-coordinator",
- "kit-job-dispatch",
- "kit-job-gate",
- "kit-job-host",
- "kit-job-host-request",
- "kit-job-launch",
- "kit-job-query",
- "kit-job-rechain",
- "kit-job-serial",
- "kit-job-state",
- "kit-job-summary",
- "kit-job-supervise",
- "kit-jobs-doctor",
- "kit-machine-windows",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-env"
-version = "0.0.0"
-
-[[package]]
-name = "kit-job-gate"
-version = "0.0.0"
-dependencies = [
- "kit-job-slot",
- "kit-process-alive",
- "kit-window-admission",
-]
-
-[[package]]
-name = "kit-job-host"
-version = "0.0.0"
-dependencies = [
- "kit-job-names",
- "kit-job-peers",
- "kit-job-queue",
- "kit-job-state",
- "kit-job-summary",
- "kit-os-launch",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-host-request"
-version = "0.0.0"
-dependencies = [
- "kit-job-state",
- "kit-os-launch",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-launch"
-version = "0.0.0"
-dependencies = [
- "kit-job-create",
- "kit-job-host",
- "kit-job-start-args",
- "kit-job-state",
- "kit-job-summary",
- "kit-job-supervise",
- "kit-machine-windows",
-]
-
-[[package]]
-name = "kit-job-names"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-orphans"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-peers"
-version = "0.0.0"
-dependencies = [
- "kit-job-state",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-query"
-version = "0.0.0"
-dependencies = [
- "kit-job-control",
- "kit-job-dispatch",
- "kit-job-gate",
- "kit-job-host-request",
- "kit-job-state",
- "kit-job-summary",
- "kit-machine-windows",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-queue"
-version = "0.0.0"
-dependencies = [
- "kit-job-gate",
- "kit-job-slot",
- "kit-job-state",
-]
-
-[[package]]
-name = "kit-job-rechain"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-serial"
-version = "0.0.0"
-
-[[package]]
-name = "kit-job-slot"
-version = "0.0.0"
-dependencies = [
- "kit-job-ticket",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-start-args"
-version = "0.0.0"
-dependencies = [
- "kit-flag-words",
-]
-
-[[package]]
-name = "kit-job-state"
-version = "0.0.0"
-dependencies = [
- "kit-job-orphans",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-summary"
-version = "0.0.0"
-dependencies = [
- "kit-job-orphans",
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-job-supervise"
-version = "0.0.0"
-dependencies = [
- "kit-job-after",
- "kit-job-env",
- "kit-job-gate",
- "kit-machine-windows",
-]
-
-[[package]]
-name = "kit-job-ticket"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-jobs-doctor"
-version = "0.0.0"
-dependencies = [
- "kit-jobs-doctor-env",
- "kit-jobs-doctor-servers",
- "kit-machine-sample",
-]
-
-[[package]]
-name = "kit-jobs-doctor-env"
-version = "0.0.0"
-
-[[package]]
-name = "kit-jobs-doctor-servers"
-version = "0.0.0"
-dependencies = [
- "kit-machine-sample",
-]
-
-[[package]]
-name = "kit-lcov"
-version = "0.0.0"
-
-[[package]]
-name = "kit-legacy-operations"
-version = "0.0.0"
-dependencies = [
- "cold-proof-domain",
- "evidence-currentness-domain",
- "kit-bundle-zip",
- "kit-cold-rebuild-matrix",
- "kit-coverage-prune",
- "kit-delete-guard",
- "kit-ingest-frontier",
- "kit-patch-control-domain",
- "kit-process",
- "kit-process-observation",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-source-map",
- "kit-source-topology",
- "kit-toolchain-proxy",
- "legacy-capability-domain",
- "proxy-command-output",
- "proxy-directory-listing",
- "proxy-failure-classification",
- "proxy-file-reading",
- "proxy-file-receipt",
- "proxy-file-removal",
- "proxy-text-replacement",
-]
-
-[[package]]
-name = "kit-lint-args"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-baseline"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-classify"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-cli"
-version = "0.0.0"
-dependencies = [
- "kit-lint-growth",
- "kit-lint-macros",
- "kit-lint-precheck",
- "kit-tracked-text",
-]
-
-[[package]]
-name = "kit-lint-flow"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-flow-constructs"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-flow-idioms"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-growth"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-macros"
-version = "0.0.0"
-dependencies = [
- "kit-lint-args",
- "kit-lint-baseline",
- "kit-lint-classify",
- "kit-lint-flow",
- "kit-lint-flow-constructs",
- "kit-lint-flow-idioms",
- "kit-lint-scan",
- "kit-lint-shadows",
- "kit-lint-walk",
-]
-
-[[package]]
-name = "kit-lint-opens"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-precheck"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-scan"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-shadows"
-version = "0.0.0"
-dependencies = [
- "kit-lint-args",
- "kit-lint-opens",
- "kit-lint-shadows-core",
-]
-
-[[package]]
-name = "kit-lint-shadows-core"
-version = "0.0.0"
-
-[[package]]
-name = "kit-lint-walk"
-version = "0.0.0"
-
-[[package]]
-name = "kit-log-counts"
-version = "0.0.0"
-dependencies = [
- "regex",
-]
-
-[[package]]
-name = "kit-log-sections"
-version = "0.0.0"
-dependencies = [
- "regex",
-]
-
-[[package]]
-name = "kit-log-sequences"
-version = "0.0.0"
-dependencies = [
- "regex",
-]
-
-[[package]]
-name = "kit-machine-crowding"
-version = "0.0.0"
-
-[[package]]
-name = "kit-machine-health"
-version = "0.0.0"
-dependencies = [
- "kit-machine-sample",
- "sysinfo",
-]
-
-[[package]]
-name = "kit-machine-sample"
-version = "0.0.0"
-dependencies = [
- "kit-os-launch",
- "sysinfo",
-]
-
-[[package]]
-name = "kit-machine-watch"
-version = "0.0.0"
-dependencies = [
- "kit-job-control",
- "kit-machine-crowding",
- "kit-machine-health",
- "kit-machine-sample",
- "kit-machine-window-watch",
- "kit-notebook-progress",
- "sysinfo",
-]
-
-[[package]]
-name = "kit-machine-window-watch"
-version = "0.0.0"
-dependencies = [
- "kit-job-control",
-]
-
-[[package]]
-name = "kit-machine-windows"
-version = "0.0.0"
-dependencies = [
- "kit-remote-status",
- "kit-window-admission",
- "kit-window-announce-check",
- "kit-window-announce-verb",
- "kit-window-claim",
- "kit-window-query",
- "kit-window-request",
- "kit-window-run",
- "kit-window-wait",
-]
-
-[[package]]
-name = "kit-memory"
-version = "0.0.0"
-dependencies = [
- "kit-memory-import",
- "kit-memory-query",
- "kit-memory-save",
-]
-
-[[package]]
-name = "kit-memory-import"
-version = "0.0.0"
-
-[[package]]
-name = "kit-memory-query"
-version = "0.0.0"
-
-[[package]]
-name = "kit-memory-save"
-version = "0.0.0"
-
-[[package]]
-name = "kit-mirror"
-version = "0.0.0"
-dependencies = [
- "kit-mirror-remote",
-]
-
-[[package]]
-name = "kit-mirror-local"
-version = "0.0.0"
-dependencies = [
- "sha2",
-]
-
-[[package]]
-name = "kit-mirror-plan"
-version = "0.0.0"
-dependencies = [
- "sha2",
-]
-
-[[package]]
-name = "kit-mirror-remote"
-version = "0.0.0"
-dependencies = [
- "kit-mirror-local",
- "kit-mirror-plan",
- "kit-mirror-sync",
- "kit-mirror-unpack",
-]
-
-[[package]]
-name = "kit-mirror-sync"
-version = "0.0.0"
-dependencies = [
- "kit-mirror-local",
- "kit-mirror-plan",
-]
-
-[[package]]
-name = "kit-mirror-unpack"
-version = "0.0.0"
-
-[[package]]
-name = "kit-nameof-findings"
-version = "0.0.0"
-
-[[package]]
-name = "kit-notebook-progress"
-version = "0.0.0"
-
-[[package]]
-name = "kit-os-launch"
-version = "0.0.0"
-
-[[package]]
-name = "kit-patch-batch"
-version = "0.0.0"
-
-[[package]]
-name = "kit-patch-compat-driver"
-version = "0.0.0"
-dependencies = [
- "kit-backup-domain",
- "kit-patch-control-domain",
- "kit-patch-effect-domain",
- "kit-patch-orchestration-domain",
- "kit-patch-source-adapter",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-patch-control-domain"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-patch-driver-domain"
-version = "0.0.0"
-dependencies = [
- "kit-patch-control-domain",
- "kit-process",
- "kit-proxy-search",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-patch-effect-domain"
-version = "0.0.0"
-
-[[package]]
-name = "kit-patch-fallback-domain"
-version = "0.0.0"
-
-[[package]]
-name = "kit-patch-grammar"
-version = "0.0.0"
-
-[[package]]
-name = "kit-patch-mutation"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "kit-patch-compat-driver",
-]
-
-[[package]]
-name = "kit-patch-mutation-contracts"
-version = "0.0.0"
-dependencies = [
- "kit-patch-mutation",
-]
-
-[[package]]
-name = "kit-patch-orchestration-domain"
-version = "0.0.0"
-
-[[package]]
-name = "kit-patch-rehearsal"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "kit-patch-compat-driver",
- "kit-process",
-]
-
-[[package]]
-name = "kit-patch-scan"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
-]
-
-[[package]]
-name = "kit-patch-source-adapter"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "kit-process",
- "kit-proxy-search",
- "kit-rust-std-fs",
-]
-
-[[package]]
-name = "kit-patch-transaction-contracts"
-version = "0.0.0"
-dependencies = [
- "kit-patch-compat-driver",
-]
-
-[[package]]
-name = "kit-policy-probe"
-version = "0.0.0"
-
-[[package]]
-name = "kit-predicate-lift"
-version = "0.0.0"
-dependencies = [
- "kit-rust-std-fs",
- "predicate-lex-domain",
- "predicate-literal-domain",
- "predicate-rewrite-domain",
-]
-
-[[package]]
-name = "kit-process"
-version = "0.0.0"
-dependencies = [
- "kit-compiler-discovery",
- "kit-process-streaming",
-]
-
-[[package]]
-name = "kit-process-alive"
-version = "0.0.0"
-dependencies = [
- "sysinfo",
-]
-
-[[package]]
-name = "kit-process-kill"
-version = "0.0.0"
-dependencies = [
- "kit-machine-sample",
- "regex",
- "sysinfo",
-]
-
-[[package]]
-name = "kit-process-observation"
-version = "0.0.0"
-dependencies = [
- "kit-process",
-]
-
-[[package]]
-name = "kit-process-streaming"
-version = "0.0.0"
-
-[[package]]
-name = "kit-process-table"
-version = "0.0.0"
-dependencies = [
- "kit-machine-sample",
- "kit-process-kill",
- "regex",
-]
-
-[[package]]
-name = "kit-product-diff"
-version = "0.0.0"
-dependencies = [
- "kit-proxy-search",
- "kit-source-map",
- "rayon",
-]
-
-[[package]]
-name = "kit-proof-scope"
-version = "0.0.0"
-dependencies = [
- "kit-proof-scope-manifests",
-]
-
-[[package]]
-name = "kit-proof-scope-manifests"
-version = "0.0.0"
-
-[[package]]
-name = "kit-proxy-edit-contracts"
-version = "0.0.0"
-
-[[package]]
-name = "kit-proxy-search"
-version = "0.0.0"
-dependencies = [
- "kit-rust-std-fs",
- "proxy-file-copy",
- "proxy-search-receipt",
- "rayon",
-]
-
-[[package]]
-name = "kit-read-query"
-version = "0.0.0"
-dependencies = [
- "rayon",
-]
-
-[[package]]
-name = "kit-rec-cycle"
-version = "0.0.0"
-
-[[package]]
-name = "kit-release-contracts"
-version = "0.0.0"
-dependencies = [
- "kit-release-hygiene",
-]
-
-[[package]]
-name = "kit-release-hygiene"
-version = "0.0.0"
-dependencies = [
- "kit-proxy-search",
- "kit-rust-std-fs",
- "legacy-capability-domain",
-]
-
-[[package]]
-name = "kit-remote-activity"
-version = "0.0.0"
-
-[[package]]
-name = "kit-remote-status"
-version = "0.0.0"
-dependencies = [
- "kit-remote-activity",
-]
-
-[[package]]
-name = "kit-repo-accept-review"
-version = "0.0.0"
-
-[[package]]
-name = "kit-repo-affected"
-version = "0.0.0"
-
-[[package]]
-name = "kit-repo-state"
-version = "0.0.0"
-
-[[package]]
-name = "kit-resume"
-version = "0.0.0"
-dependencies = [
- "kit-agile-records",
-]
-
-[[package]]
-name = "kit-run-build"
-version = "0.0.0"
-
-[[package]]
-name = "kit-run-cli"
-version = "0.0.0"
-dependencies = [
- "kit-run-build",
-]
-
-[[package]]
-name = "kit-rust-std-env"
-version = "0.0.0"
-
-[[package]]
-name = "kit-rust-std-fs"
-version = "0.0.0"
-dependencies = [
- "kit-rust-std-fs-mutation",
-]
-
-[[package]]
-name = "kit-rust-std-fs-mutation"
-version = "0.0.0"
-
-[[package]]
-name = "kit-schedule"
-version = "0.0.0"
-
-[[package]]
-name = "kit-source-map"
-version = "0.1.0"
-dependencies = [
- "kit-proxy-search",
- "kit-source-topology",
-]
-
-[[package]]
-name = "kit-source-topology"
-version = "0.1.0"
-dependencies = [
- "kit-proxy-search",
- "toml",
-]
-
-[[package]]
-name = "kit-standards"
-version = "0.0.0"
-dependencies = [
- "kit-standards-scan",
- "kit-style-census",
-]
-
-[[package]]
-name = "kit-standards-scan"
-version = "0.0.0"
-dependencies = [
- "kit-rec-cycle",
-]
-
-[[package]]
-name = "kit-style-baseline"
-version = "0.0.0"
-
-[[package]]
-name = "kit-style-census"
-version = "0.0.0"
-dependencies = [
- "kit-flag-words",
- "kit-style-baseline",
- "kit-style-measure",
- "kit-style-probes",
- "kit-style-scoreboard",
-]
-
-[[package]]
-name = "kit-style-measure"
-version = "0.0.0"
-dependencies = [
- "kit-style-probes",
- "regex",
-]
-
-[[package]]
-name = "kit-style-probes"
-version = "0.0.0"
-
-[[package]]
-name = "kit-style-scoreboard"
-version = "0.0.0"
-dependencies = [
- "kit-style-measure",
- "kit-style-probes",
-]
-
-[[package]]
-name = "kit-table-append"
-version = "0.0.0"
-
-[[package]]
-name = "kit-table-counts"
-version = "0.0.0"
-dependencies = [
- "kit-log-counts",
-]
-
-[[package]]
-name = "kit-table-diff"
-version = "0.0.0"
-dependencies = [
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-table-filter"
-version = "0.0.0"
-dependencies = [
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-table-logs"
-version = "0.0.0"
-dependencies = [
- "kit-table-logs-args",
- "kit-table-text",
- "regex",
-]
-
-[[package]]
-name = "kit-table-logs-args"
-version = "0.0.0"
-
-[[package]]
-name = "kit-table-measures"
-version = "0.0.0"
-dependencies = [
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-table-plain"
-version = "0.0.0"
-dependencies = [
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-table-query"
-version = "0.0.0"
-dependencies = [
- "kit-table-append",
- "kit-table-diff",
- "kit-table-filter",
- "kit-table-measures",
- "kit-table-plain",
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-table-sections"
-version = "0.0.0"
-dependencies = [
- "kit-log-sections",
-]
-
-[[package]]
-name = "kit-table-sequence-measures"
-version = "0.0.0"
-dependencies = [
- "kit-log-sequences",
-]
-
-[[package]]
-name = "kit-table-sequences"
-version = "0.0.0"
-dependencies = [
- "kit-table-counts",
- "kit-table-sections",
- "kit-table-sequence-measures",
-]
-
-[[package]]
-name = "kit-table-test"
-version = "0.0.0"
-dependencies = [
- "kit-experiment-args",
- "kit-experiment-stats",
- "kit-table-query",
- "kit-table-text",
-]
-
-[[package]]
-name = "kit-table-text"
-version = "0.0.0"
-
-[[package]]
-name = "kit-toolchain-argument-agile-probe"
-version = "0.0.0"
-dependencies = [
- "toolchain-argument-domain",
- "toolchain-argument-tail-domain",
-]
-
-[[package]]
-name = "kit-toolchain-argument-policy-probe"
-version = "0.0.0"
-dependencies = [
- "toolchain-argument-domain",
- "toolchain-argument-tail-domain",
-]
-
-[[package]]
-name = "kit-toolchain-proxy"
-version = "0.0.0"
-dependencies = [
- "canonical-plan-ir-domain",
- "command-spec-domain",
- "kit-process",
- "kit-process-observation",
- "kit-proxy-search",
- "process-batch-plan-domain",
- "toolchain-argument-domain",
- "toolchain-argument-tail-domain",
- "toolchain-command-domain",
- "toolchain-runtime-policy-domain",
-]
-
-[[package]]
-name = "kit-tracked-text"
-version = "0.0.0"
-
-[[package]]
-name = "kit-tree-copy"
-version = "0.0.0"
-dependencies = [
- "kit-rust-std-fs",
- "kit-rust-std-fs-mutation",
- "proxy-file-receipt",
-]
-
-[[package]]
-name = "kit-window-admission"
-version = "0.0.0"
-
-[[package]]
-name = "kit-window-announce-check"
-version = "0.0.0"
-
-[[package]]
-name = "kit-window-announce-verb"
-version = "0.0.0"
-
-[[package]]
-name = "kit-window-claim"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
-]
-
-[[package]]
-name = "kit-window-query"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
- "kit-window-admission",
- "kit-window-run",
-]
-
-[[package]]
-name = "kit-window-request"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
- "kit-window-admission",
- "kit-window-announce-check",
-]
-
-[[package]]
-name = "kit-window-run"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
- "kit-window-admission",
-]
-
-[[package]]
-name = "kit-window-wait"
-version = "0.0.0"
-dependencies = [
- "kit-process-alive",
- "kit-window-admission",
-]
-
-[[package]]
 name = "legacy-capability-domain"
 version = "0.0.0"
 dependencies = [
- "kit-process-observation",
- "kit-rust-std-fs",
- "kit-rust-std-fs-mutation",
- "kit-tree-copy",
+ "rig-process-observation",
+ "rig-rust-std-fs",
+ "rig-rust-std-fs-mutation",
+ "rig-tree-copy",
 ]
 
 [[package]]
@@ -2646,10 +758,10 @@ dependencies = [
 name = "owner-growth-runtime"
 version = "0.0.0"
 dependencies = [
- "kit-bundle-manifest",
- "kit-proxy-search",
- "kit-rust-std-fs",
- "kit-source-map",
+ "rig-bundle-manifest",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-source-map",
 ]
 
 [[package]]
@@ -2693,24 +805,10 @@ dependencies = [
 name = "process-batch-plan-domain"
 version = "0.0.0"
 dependencies = [
- "kit-agile-lease",
- "kit-process-observation",
- "kit-rust-std-fs",
+ "rig-agile-lease",
+ "rig-process-observation",
+ "rig-rust-std-fs",
  "serde_json",
-]
-
-[[package]]
-name = "process-batch-plan-policy-probe"
-version = "0.0.0"
-dependencies = [
- "process-batch-plan-domain",
-]
-
-[[package]]
-name = "process-batch-plan-resume-probe"
-version = "0.0.0"
-dependencies = [
- "process-batch-plan-domain",
 ]
 
 [[package]]
@@ -2721,7 +819,7 @@ version = "0.0.0"
 name = "proxy-directory-listing"
 version = "0.0.0"
 dependencies = [
- "kit-rust-std-fs",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -2732,14 +830,14 @@ version = "0.0.0"
 name = "proxy-file-copy"
 version = "0.0.0"
 dependencies = [
- "kit-rust-std-fs",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
 name = "proxy-file-reading"
 version = "0.0.0"
 dependencies = [
- "kit-rust-std-fs",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -2750,7 +848,7 @@ version = "0.0.0"
 name = "proxy-file-removal"
 version = "0.0.0"
 dependencies = [
- "kit-rust-std-fs",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -2761,7 +859,7 @@ version = "0.0.0"
 name = "proxy-text-replacement"
 version = "0.0.0"
 dependencies = [
- "kit-rust-std-fs",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -2827,11 +925,2001 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
+name = "rig-adoption"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-adoption-habits",
+]
+
+[[package]]
+name = "rig-adoption-habits"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-activity-migration"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-cadence"
+version = "0.0.0"
+dependencies = [
+ "agile-quality-state",
+ "rig-cadence-activity",
+ "rig-cadence-asks",
+ "rig-cadence-done",
+]
+
+[[package]]
+name = "rig-agile-contracts"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-gate"
+version = "0.0.0"
+dependencies = [
+ "agile-team-lane",
+ "agile-team-work",
+]
+
+[[package]]
+name = "rig-agile-lease"
+version = "0.0.0"
+dependencies = [
+ "agile-lease-terms",
+ "agile-state-runtime-policy-domain",
+ "command-spec-domain",
+ "rig-agile-policy",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-agile-lint"
+version = "0.0.0"
+dependencies = [
+ "agile-quality-lint",
+ "agile-quality-state",
+]
+
+[[package]]
+name = "rig-agile-list-args"
+version = "0.0.0"
+dependencies = [
+ "agile-planning-filters",
+ "agile-task-query",
+]
+
+[[package]]
+name = "rig-agile-lock"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-agile-mutation"
+version = "0.0.0"
+dependencies = [
+ "agile-backlog-scaffold",
+ "agile-claim-cli",
+ "agile-memory-links",
+ "agile-note-edit",
+ "agile-note-seal",
+ "agile-planning-migration",
+ "agile-planning-revision",
+ "agile-planning-rollup",
+ "agile-state-access",
+ "agile-task-creation",
+ "agile-task-inspection",
+ "agile-task-listing",
+ "agile-task-next",
+ "agile-task-notes",
+ "agile-task-rename",
+ "agile-task-revision",
+ "agile-task-tree",
+ "agile-task-views",
+ "agile-title-notes",
+ "agile-todo-merge",
+ "agile-todo-record",
+ "agile-todo-roots",
+ "agile-todo-scan",
+ "rig-agile-activity-migration",
+ "rig-agile-cadence",
+ "rig-agile-gate",
+ "rig-agile-lease",
+ "rig-agile-lint",
+ "rig-agile-lock",
+ "rig-agile-routes",
+ "rig-agile-sprint",
+ "rig-agile-state",
+ "rig-command-help",
+ "rig-handoff-render",
+]
+
+[[package]]
+name = "rig-agile-next-args"
+version = "0.0.0"
+dependencies = [
+ "agile-planning-filters",
+ "agile-task-query",
+ "rig-window-query",
+]
+
+[[package]]
+name = "rig-agile-policy"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-records"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-routes"
+version = "0.0.0"
+dependencies = [
+ "agile-planning-revision",
+ "agile-quality-state",
+ "agile-status-changes",
+ "agile-task-asks",
+ "agile-task-parents",
+ "agile-task-revision",
+ "agile-task-split",
+ "agile-task-waits",
+ "agile-todo-scan",
+ "rig-agile-lease",
+ "rig-agile-state",
+]
+
+[[package]]
+name = "rig-agile-sprint"
+version = "0.0.0"
+dependencies = [
+ "rig-agile-sprint-change",
+ "rig-agile-sprint-show",
+ "rig-agile-sprint-start",
+]
+
+[[package]]
+name = "rig-agile-sprint-append"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-sprint-change"
+version = "0.0.0"
+dependencies = [
+ "agile-planning-fields",
+ "agile-task-census",
+ "rig-agile-sprint-append",
+ "rig-agile-sprint-review",
+ "rig-agile-sprint-state",
+]
+
+[[package]]
+name = "rig-agile-sprint-read"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-sprint-review"
+version = "0.0.0"
+dependencies = [
+ "rig-agile-sprint-read",
+]
+
+[[package]]
+name = "rig-agile-sprint-show"
+version = "0.0.0"
+dependencies = [
+ "agile-note-listing",
+ "agile-status-changes",
+ "agile-task-census",
+ "rig-agile-sprint-state",
+]
+
+[[package]]
+name = "rig-agile-sprint-start"
+version = "0.0.0"
+dependencies = [
+ "agile-planning-fields",
+ "agile-task-census",
+ "rig-agile-sprint-append",
+ "rig-agile-sprint-state",
+]
+
+[[package]]
+name = "rig-agile-sprint-state"
+version = "0.0.0"
+dependencies = [
+ "rig-agile-sprint-read",
+]
+
+[[package]]
+name = "rig-agile-state"
+version = "0.0.0"
+dependencies = [
+ "agile-lease-terms",
+ "agile-planning-gaps",
+ "agile-record-catalog",
+ "agile-state-decision-domain",
+ "agile-state-runtime-policy-domain",
+ "agile-state-transient-schema-domain",
+ "agile-update-receipt",
+ "rayon",
+ "rig-agile-lease",
+ "rig-agile-policy",
+ "rig-compiler-discovery",
+ "rig-process",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "state-receipt-codec-core",
+ "state-receipt-fingerprint-domain",
+ "state-receipt-parser-domain",
+ "state-receipt-serializer-domain",
+ "state-receipt-tuple-domain",
+]
+
+[[package]]
+name = "rig-archive-contracts"
+version = "0.0.0"
+dependencies = [
+ "zip",
+]
+
+[[package]]
+name = "rig-archive-tar-runtime"
+version = "0.0.0"
+dependencies = [
+ "archive-deflate-domain",
+]
+
+[[package]]
+name = "rig-backup-domain"
+version = "0.0.0"
+
+[[package]]
+name = "rig-batch-write"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "rig-patch-control-domain",
+ "rig-patch-driver-domain",
+ "rig-process",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-bootstrap-policy"
+version = "0.0.0"
+
+[[package]]
+name = "rig-bundle-manifest"
+version = "0.0.0"
+dependencies = [
+ "archive-deflate-domain",
+ "rig-archive-tar-runtime",
+ "rig-process-observation",
+ "rig-rust-std-fs-mutation",
+ "zip",
+]
+
+[[package]]
+name = "rig-bundle-retention"
+version = "0.0.0"
+dependencies = [
+ "bundle-retention-domain",
+ "rayon",
+ "rig-process",
+]
+
+[[package]]
+name = "rig-bundle-zip"
+version = "0.0.0"
+dependencies = [
+ "archive-deflate-domain",
+ "bundle-lifecycle-domain",
+ "cold-proof-domain",
+ "evidence-currentness-domain",
+ "owner-growth-runtime",
+ "rating-guard-runtime",
+ "rig-bundle-manifest",
+ "rig-proxy-search",
+ "rig-release-hygiene",
+ "rig-rust-std-fs",
+ "rig-rust-std-fs-mutation",
+ "rig-source-map",
+ "semantic-evidence-domain",
+ "state-receipt-codec-core",
+ "state-recovered-topology-codec",
+]
+
+[[package]]
+name = "rig-cadence-activity"
+version = "0.0.0"
+dependencies = [
+ "agile-note-events",
+ "agile-quality-state",
+]
+
+[[package]]
+name = "rig-cadence-asks"
+version = "0.0.0"
+dependencies = [
+ "agile-quality-state",
+ "agile-task-asks",
+]
+
+[[package]]
+name = "rig-cadence-done"
+version = "0.0.0"
+dependencies = [
+ "agile-quality-state",
+ "agile-status-changes",
+]
+
+[[package]]
+name = "rig-ceremonies"
+version = "0.0.0"
+
+[[package]]
+name = "rig-ci-parity"
+version = "0.0.0"
+dependencies = [
+ "rig-ci-verdict",
+]
+
+[[package]]
+name = "rig-ci-probe"
+version = "0.0.0"
+
+[[package]]
+name = "rig-ci-verdict"
+version = "0.0.0"
+dependencies = [
+ "rig-ci-probe",
+]
+
+[[package]]
+name = "rig-cli"
+version = "0.0.0"
+dependencies = [
+ "archive-deflate-domain",
+ "authority-state-domain",
+ "bootstrap-authority-status",
+ "bundle-retention-domain",
+ "canonical-plan-ir-domain",
+ "cold-proof-domain",
+ "command-spec-domain",
+ "evidence-currentness-domain",
+ "legacy-capability-domain",
+ "process-batch-plan-domain",
+ "rig-adoption",
+ "rig-agile-lease",
+ "rig-agile-mutation",
+ "rig-agile-state",
+ "rig-batch-write",
+ "rig-bundle-manifest",
+ "rig-bundle-retention",
+ "rig-ceremonies",
+ "rig-ci-parity",
+ "rig-cli-routes",
+ "rig-command-help",
+ "rig-command-usages",
+ "rig-compiler-discovery",
+ "rig-coverage-prune",
+ "rig-crate-gate",
+ "rig-do",
+ "rig-env-pins",
+ "rig-evidence",
+ "rig-exec-export",
+ "rig-experiments",
+ "rig-fs-actions",
+ "rig-grep-query",
+ "rig-guide",
+ "rig-handoff",
+ "rig-heal-nameof",
+ "rig-hook",
+ "rig-job-entry",
+ "rig-legacy-operations",
+ "rig-lint-cli",
+ "rig-lint-macros",
+ "rig-machine-watch",
+ "rig-machine-windows",
+ "rig-memory",
+ "rig-mirror",
+ "rig-os-launch",
+ "rig-patch-driver-domain",
+ "rig-patch-mutation",
+ "rig-patch-rehearsal",
+ "rig-process-observation",
+ "rig-process-table",
+ "rig-product-diff",
+ "rig-proxy-search",
+ "rig-read-query",
+ "rig-release-hygiene",
+ "rig-repo-accept-review",
+ "rig-repo-affected",
+ "rig-repo-state",
+ "rig-resume",
+ "rig-run-cli",
+ "rig-schedule",
+ "rig-standards",
+ "rig-status-facts",
+ "rig-table-logs",
+ "rig-table-query",
+ "rig-table-sequences",
+ "rig-table-test",
+ "rig-toolchain-proxy",
+ "semantic-evidence-domain",
+]
+
+[[package]]
+name = "rig-cli-routes"
+version = "0.0.0"
+dependencies = [
+ "rig-proof-scope",
+ "rig-repo-accept-review",
+ "rig-repo-affected",
+ "rig-repo-state",
+ "rig-table-logs",
+ "rig-table-query",
+ "rig-table-sequences",
+ "rig-table-test",
+]
+
+[[package]]
+name = "rig-cold-rebuild-matrix"
+version = "0.0.0"
+dependencies = [
+ "process-batch-plan-domain",
+ "rig-process-observation",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-source-map",
+ "serde_json",
+]
+
+[[package]]
+name = "rig-command-help"
+version = "0.0.0"
+
+[[package]]
+name = "rig-command-line"
+version = "0.0.0"
+
+[[package]]
+name = "rig-command-usages"
+version = "0.0.0"
+
+[[package]]
+name = "rig-compiler-discovery"
+version = "0.0.0"
+dependencies = [
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-contracts"
+version = "0.0.0"
+
+[[package]]
+name = "rig-coverage-prune"
+version = "0.0.0"
+dependencies = [
+ "rig-coverage-smoke",
+ "rig-lcov",
+ "rig-process",
+ "rig-process-observation",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-rust-std-fs-mutation",
+]
+
+[[package]]
+name = "rig-coverage-smoke"
+version = "0.0.0"
+dependencies = [
+ "rig-process-observation",
+]
+
+[[package]]
+name = "rig-crate-gate"
+version = "0.0.0"
+dependencies = [
+ "rig-crate-largest",
+ "rig-crate-walk",
+]
+
+[[package]]
+name = "rig-crate-largest"
+version = "0.0.0"
+
+[[package]]
+name = "rig-crate-walk"
+version = "0.0.0"
+dependencies = [
+ "rig-crate-largest",
+]
+
+[[package]]
+name = "rig-delete-guard"
+version = "0.0.0"
+
+[[package]]
+name = "rig-dev"
+version = "0.0.0"
+dependencies = [
+ "developer-metadata-domain",
+ "predicate-lex-domain",
+ "predicate-literal-domain",
+ "rig-dev-spiral-tests",
+ "rig-process",
+]
+
+[[package]]
+name = "rig-dev-spiral-tests"
+version = "0.0.0"
+dependencies = [
+ "rig-process",
+ "rig-process-streaming",
+]
+
+[[package]]
+name = "rig-do"
+version = "0.0.0"
+dependencies = [
+ "rig-do-edit",
+ "rig-do-facts",
+ "rig-do-file-steps",
+ "rig-do-git",
+ "rig-do-jobs",
+ "rig-do-lab",
+ "rig-do-model",
+ "rig-do-process",
+ "rig-do-program",
+ "rig-do-read",
+ "rig-do-verbs",
+ "rig-do-write",
+]
+
+[[package]]
+name = "rig-do-commit"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-edit"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-do-commit",
+ "rig-do-model",
+ "rig-do-process",
+ "rig-do-verbs",
+ "sha2",
+]
+
+[[package]]
+name = "rig-do-facts"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-do-facts-receipt",
+ "rig-do-model",
+ "rig-do-read",
+ "rig-do-tables",
+ "rig-do-verbs",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
+name = "rig-do-facts-receipt"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-file-steps"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-do-model",
+ "rig-do-read",
+ "rig-do-verbs",
+]
+
+[[package]]
+name = "rig-do-git"
+version = "0.0.0"
+dependencies = [
+ "rig-do-git-reports",
+]
+
+[[package]]
+name = "rig-do-git-reports"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-jobs"
+version = "0.0.0"
+dependencies = [
+ "rig-command-line",
+ "rig-do-model",
+ "rig-do-verbs",
+ "rig-job-control",
+ "rig-job-entry",
+]
+
+[[package]]
+name = "rig-do-lab"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "serde_json",
+]
+
+[[package]]
+name = "rig-do-model"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-process"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-command-line",
+ "sysinfo",
+]
+
+[[package]]
+name = "rig-do-program"
+version = "0.0.0"
+dependencies = [
+ "rig-do-model",
+ "rig-do-verbs",
+]
+
+[[package]]
+name = "rig-do-read"
+version = "0.0.0"
+dependencies = [
+ "rayon",
+ "regex",
+ "rig-do-model",
+ "rig-do-walk",
+]
+
+[[package]]
+name = "rig-do-tables"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-verbs"
+version = "0.0.0"
+dependencies = [
+ "rig-do-model",
+]
+
+[[package]]
+name = "rig-do-walk"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-write"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-do-file-steps",
+ "rig-do-model",
+ "rig-do-read",
+ "rig-do-verbs",
+]
+
+[[package]]
+name = "rig-domain-probe"
+version = "0.0.0"
+
+[[package]]
+name = "rig-env-pins"
+version = "0.0.0"
+
+[[package]]
+name = "rig-evidence"
+version = "0.0.0"
+dependencies = [
+ "rig-proxy-search",
+]
+
+[[package]]
+name = "rig-exec-cells"
+version = "0.0.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
+name = "rig-exec-export"
+version = "0.0.0"
+dependencies = [
+ "rig-exec-cells",
+ "rig-exec-jobs",
+]
+
+[[package]]
+name = "rig-exec-jobs"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-experiment-amend"
+version = "0.0.0"
+dependencies = [
+ "rig-experiment-verb-args",
+]
+
+[[package]]
+name = "rig-experiment-analysis"
+version = "0.0.0"
+dependencies = [
+ "agile-task-notes",
+ "rig-experiment-stats",
+ "rig-experiment-verb-args",
+ "rig-table-query",
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-experiment-args"
+version = "0.0.0"
+
+[[package]]
+name = "rig-experiment-import"
+version = "0.0.0"
+dependencies = [
+ "rig-experiment-args",
+ "rig-experiment-verb-args",
+]
+
+[[package]]
+name = "rig-experiment-stats"
+version = "0.0.0"
+
+[[package]]
+name = "rig-experiment-verb-args"
+version = "0.0.0"
+
+[[package]]
+name = "rig-experiments"
+version = "0.0.0"
+dependencies = [
+ "rig-experiment-amend",
+ "rig-experiment-analysis",
+ "rig-experiment-args",
+ "rig-experiment-import",
+]
+
+[[package]]
+name = "rig-flag-words"
+version = "0.0.0"
+
+[[package]]
+name = "rig-fs-actions"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "rig-patch-control-domain",
+ "rig-patch-driver-domain",
+ "rig-process",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-rust-std-fs-mutation",
+]
+
+[[package]]
+name = "rig-granular-rounds"
+version = "0.0.0"
+dependencies = [
+ "rig-style-measure",
+]
+
+[[package]]
+name = "rig-grep-found"
+version = "0.0.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "rig-grep-query"
+version = "0.0.0"
+dependencies = [
+ "rig-grep-found",
+]
+
+[[package]]
+name = "rig-guide"
+version = "0.0.0"
+
+[[package]]
+name = "rig-handoff"
+version = "0.0.0"
+dependencies = [
+ "authority-state-domain",
+ "cold-proof-domain",
+ "evidence-currentness-domain",
+ "handoff-active-work-projection-domain",
+ "handoff-evidence-projection-domain",
+ "handoff-sections-projection-domain",
+ "handoff-state-projection-domain",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-source-topology",
+ "semantic-evidence-domain",
+]
+
+[[package]]
+name = "rig-handoff-render"
+version = "0.0.0"
+dependencies = [
+ "authority-state-domain",
+ "handoff-active-work-projection-domain",
+ "handoff-evidence-projection-domain",
+ "handoff-sections-projection-domain",
+ "handoff-state-projection-domain",
+ "rig-agile-records",
+]
+
+[[package]]
+name = "rig-heal-nameof"
+version = "0.0.0"
+dependencies = [
+ "rig-nameof-findings",
+]
+
+[[package]]
+name = "rig-hook"
+version = "0.0.0"
+dependencies = [
+ "rig-hook-verbs",
+ "serde_json",
+]
+
+[[package]]
+name = "rig-hook-rules"
+version = "0.0.0"
+
+[[package]]
+name = "rig-hook-verbs"
+version = "0.0.0"
+
+[[package]]
+name = "rig-ingest-frontier"
+version = "0.1.0"
+
+[[package]]
+name = "rig-job-after"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-bin"
+version = "0.0.0"
+
+[[package]]
+name = "rig-job-chain"
+version = "0.0.0"
+
+[[package]]
+name = "rig-job-control"
+version = "0.0.0"
+dependencies = [
+ "rig-job-launch",
+ "rig-job-names",
+ "rig-job-state",
+ "rig-job-summary",
+ "rig-machine-windows",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-coordinator"
+version = "0.0.0"
+dependencies = [
+ "rig-job-coordinator-args",
+]
+
+[[package]]
+name = "rig-job-coordinator-args"
+version = "0.0.0"
+
+[[package]]
+name = "rig-job-create"
+version = "0.0.0"
+dependencies = [
+ "rig-job-host",
+ "rig-job-host-request",
+ "rig-machine-windows",
+]
+
+[[package]]
+name = "rig-job-dispatch"
+version = "0.0.0"
+dependencies = [
+ "rig-job-bin",
+ "rig-job-remote-gate",
+]
+
+[[package]]
+name = "rig-job-entry"
+version = "0.0.0"
+dependencies = [
+ "rig-job-chain",
+ "rig-job-control",
+ "rig-job-coordinator",
+ "rig-job-dispatch",
+ "rig-job-gate",
+ "rig-job-host",
+ "rig-job-host-request",
+ "rig-job-launch",
+ "rig-job-query",
+ "rig-job-rechain",
+ "rig-job-serial",
+ "rig-job-state",
+ "rig-job-summary",
+ "rig-job-supervise",
+ "rig-jobs-doctor",
+ "rig-machine-windows",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-env"
+version = "0.0.0"
+dependencies = [
+ "rig-path-first",
+]
+
+[[package]]
+name = "rig-job-gate"
+version = "0.0.0"
+dependencies = [
+ "rig-job-slot",
+ "rig-process-alive",
+ "rig-window-admission",
+]
+
+[[package]]
+name = "rig-job-host"
+version = "0.0.0"
+dependencies = [
+ "rig-job-names",
+ "rig-job-peers",
+ "rig-job-queue",
+ "rig-job-state",
+ "rig-job-summary",
+ "rig-os-launch",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-host-request"
+version = "0.0.0"
+dependencies = [
+ "rig-job-state",
+ "rig-os-launch",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-launch"
+version = "0.0.0"
+dependencies = [
+ "rig-job-create",
+ "rig-job-host",
+ "rig-job-start-args",
+ "rig-job-state",
+ "rig-job-summary",
+ "rig-job-supervise",
+ "rig-machine-windows",
+]
+
+[[package]]
+name = "rig-job-names"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-orphans"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-peers"
+version = "0.0.0"
+dependencies = [
+ "rig-job-state",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-query"
+version = "0.0.0"
+dependencies = [
+ "rig-job-control",
+ "rig-job-dispatch",
+ "rig-job-gate",
+ "rig-job-host-request",
+ "rig-job-state",
+ "rig-job-summary",
+ "rig-machine-windows",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-queue"
+version = "0.0.0"
+dependencies = [
+ "rig-job-gate",
+ "rig-job-slot",
+ "rig-job-state",
+]
+
+[[package]]
+name = "rig-job-rechain"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-remote-gate"
+version = "0.0.0"
+
+[[package]]
+name = "rig-job-serial"
+version = "0.0.0"
+
+[[package]]
+name = "rig-job-slot"
+version = "0.0.0"
+dependencies = [
+ "rig-job-ticket",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-start-args"
+version = "0.0.0"
+dependencies = [
+ "rig-flag-words",
+]
+
+[[package]]
+name = "rig-job-state"
+version = "0.0.0"
+dependencies = [
+ "rig-job-orphans",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-summary"
+version = "0.0.0"
+dependencies = [
+ "rig-job-orphans",
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-job-supervise"
+version = "0.0.0"
+dependencies = [
+ "rig-job-after",
+ "rig-job-env",
+ "rig-job-gate",
+ "rig-machine-windows",
+]
+
+[[package]]
+name = "rig-job-ticket"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-jobs-doctor"
+version = "0.0.0"
+dependencies = [
+ "rig-jobs-doctor-env",
+ "rig-jobs-doctor-servers",
+ "rig-machine-sample",
+]
+
+[[package]]
+name = "rig-jobs-doctor-env"
+version = "0.0.0"
+
+[[package]]
+name = "rig-jobs-doctor-servers"
+version = "0.0.0"
+dependencies = [
+ "rig-machine-sample",
+]
+
+[[package]]
+name = "rig-lcov"
+version = "0.0.0"
+
+[[package]]
+name = "rig-legacy-operations"
+version = "0.0.0"
+dependencies = [
+ "cold-proof-domain",
+ "evidence-currentness-domain",
+ "legacy-capability-domain",
+ "proxy-command-output",
+ "proxy-directory-listing",
+ "proxy-failure-classification",
+ "proxy-file-reading",
+ "proxy-file-receipt",
+ "proxy-file-removal",
+ "proxy-text-replacement",
+ "rig-bundle-zip",
+ "rig-cold-rebuild-matrix",
+ "rig-coverage-prune",
+ "rig-delete-guard",
+ "rig-ingest-frontier",
+ "rig-patch-control-domain",
+ "rig-process",
+ "rig-process-observation",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+ "rig-source-map",
+ "rig-source-topology",
+ "rig-toolchain-proxy",
+]
+
+[[package]]
+name = "rig-lint-args"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-baseline"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-classify"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-cli"
+version = "0.0.0"
+dependencies = [
+ "rig-lint-growth",
+ "rig-lint-macros",
+ "rig-lint-precheck",
+ "rig-tracked-text",
+]
+
+[[package]]
+name = "rig-lint-flow"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-flow-constructs"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-flow-idioms"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-growth"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-macros"
+version = "0.0.0"
+dependencies = [
+ "rig-lint-args",
+ "rig-lint-baseline",
+ "rig-lint-classify",
+ "rig-lint-flow",
+ "rig-lint-flow-constructs",
+ "rig-lint-flow-idioms",
+ "rig-lint-scan",
+ "rig-lint-shadows",
+ "rig-lint-walk",
+]
+
+[[package]]
+name = "rig-lint-opens"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-precheck"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-scan"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-shadows"
+version = "0.0.0"
+dependencies = [
+ "rig-lint-args",
+ "rig-lint-opens",
+ "rig-lint-shadows-core",
+]
+
+[[package]]
+name = "rig-lint-shadows-core"
+version = "0.0.0"
+
+[[package]]
+name = "rig-lint-walk"
+version = "0.0.0"
+
+[[package]]
+name = "rig-log-counts"
+version = "0.0.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "rig-log-sections"
+version = "0.0.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "rig-log-sequences"
+version = "0.0.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "rig-machine-crowding"
+version = "0.0.0"
+
+[[package]]
+name = "rig-machine-health"
+version = "0.0.0"
+dependencies = [
+ "rig-machine-sample",
+ "sysinfo",
+]
+
+[[package]]
+name = "rig-machine-sample"
+version = "0.0.0"
+dependencies = [
+ "rig-os-launch",
+ "sysinfo",
+]
+
+[[package]]
+name = "rig-machine-watch"
+version = "0.0.0"
+dependencies = [
+ "rig-job-control",
+ "rig-machine-crowding",
+ "rig-machine-health",
+ "rig-machine-sample",
+ "rig-machine-window-watch",
+ "rig-net-topology",
+ "rig-notebook-progress",
+ "sysinfo",
+]
+
+[[package]]
+name = "rig-machine-window-watch"
+version = "0.0.0"
+dependencies = [
+ "rig-job-control",
+]
+
+[[package]]
+name = "rig-machine-windows"
+version = "0.0.0"
+dependencies = [
+ "rig-remote-status",
+ "rig-window-admission",
+ "rig-window-announce-check",
+ "rig-window-announce-verb",
+ "rig-window-claim",
+ "rig-window-query",
+ "rig-window-request",
+ "rig-window-run",
+ "rig-window-wait",
+]
+
+[[package]]
+name = "rig-memory"
+version = "0.0.0"
+dependencies = [
+ "rig-memory-import",
+ "rig-memory-query",
+ "rig-memory-save",
+]
+
+[[package]]
+name = "rig-memory-import"
+version = "0.0.0"
+
+[[package]]
+name = "rig-memory-query"
+version = "0.0.0"
+
+[[package]]
+name = "rig-memory-save"
+version = "0.0.0"
+
+[[package]]
+name = "rig-mirror"
+version = "0.0.0"
+dependencies = [
+ "rig-mirror-remote",
+]
+
+[[package]]
+name = "rig-mirror-local"
+version = "0.0.0"
+dependencies = [
+ "sha2",
+]
+
+[[package]]
+name = "rig-mirror-plan"
+version = "0.0.0"
+dependencies = [
+ "sha2",
+]
+
+[[package]]
+name = "rig-mirror-remote"
+version = "0.0.0"
+dependencies = [
+ "rig-mirror-local",
+ "rig-mirror-plan",
+ "rig-mirror-sync",
+ "rig-mirror-unpack",
+]
+
+[[package]]
+name = "rig-mirror-sync"
+version = "0.0.0"
+dependencies = [
+ "rig-mirror-local",
+ "rig-mirror-plan",
+]
+
+[[package]]
+name = "rig-mirror-unpack"
+version = "0.0.0"
+
+[[package]]
+name = "rig-nameof-findings"
+version = "0.0.0"
+
+[[package]]
+name = "rig-net-fleet-file"
+version = "0.0.0"
+
+[[package]]
+name = "rig-net-fleet-rules"
+version = "0.0.0"
+
+[[package]]
+name = "rig-net-topology"
+version = "0.0.0"
+dependencies = [
+ "rig-net-fleet-file",
+ "rig-net-fleet-rules",
+]
+
+[[package]]
+name = "rig-notebook-progress"
+version = "0.0.0"
+
+[[package]]
+name = "rig-os-launch"
+version = "0.0.0"
+
+[[package]]
+name = "rig-patch-batch"
+version = "0.0.0"
+
+[[package]]
+name = "rig-patch-compat-driver"
+version = "0.0.0"
+dependencies = [
+ "rig-backup-domain",
+ "rig-patch-control-domain",
+ "rig-patch-effect-domain",
+ "rig-patch-orchestration-domain",
+ "rig-patch-source-adapter",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-patch-control-domain"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-patch-driver-domain"
+version = "0.0.0"
+dependencies = [
+ "rig-patch-control-domain",
+ "rig-process",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-patch-effect-domain"
+version = "0.0.0"
+
+[[package]]
+name = "rig-patch-fallback-domain"
+version = "0.0.0"
+
+[[package]]
+name = "rig-patch-grammar"
+version = "0.0.0"
+
+[[package]]
+name = "rig-patch-mutation"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "rig-patch-compat-driver",
+]
+
+[[package]]
+name = "rig-patch-mutation-contracts"
+version = "0.0.0"
+dependencies = [
+ "rig-patch-mutation",
+]
+
+[[package]]
+name = "rig-patch-orchestration-domain"
+version = "0.0.0"
+
+[[package]]
+name = "rig-patch-rehearsal"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "rig-patch-compat-driver",
+ "rig-process",
+]
+
+[[package]]
+name = "rig-patch-scan"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+]
+
+[[package]]
+name = "rig-patch-source-adapter"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "rig-process",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-patch-transaction-contracts"
+version = "0.0.0"
+dependencies = [
+ "rig-patch-compat-driver",
+]
+
+[[package]]
+name = "rig-path-first"
+version = "0.0.0"
+
+[[package]]
+name = "rig-policy-probe"
+version = "0.0.0"
+
+[[package]]
+name = "rig-predicate-lift"
+version = "0.0.0"
+dependencies = [
+ "predicate-lex-domain",
+ "predicate-literal-domain",
+ "predicate-rewrite-domain",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-process"
+version = "0.0.0"
+dependencies = [
+ "rig-compiler-discovery",
+ "rig-process-streaming",
+]
+
+[[package]]
+name = "rig-process-alive"
+version = "0.0.0"
+dependencies = [
+ "sysinfo",
+]
+
+[[package]]
+name = "rig-process-kill"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-machine-sample",
+ "sysinfo",
+]
+
+[[package]]
+name = "rig-process-observation"
+version = "0.0.0"
+dependencies = [
+ "rig-process",
+]
+
+[[package]]
+name = "rig-process-streaming"
+version = "0.0.0"
+
+[[package]]
+name = "rig-process-table"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-machine-sample",
+ "rig-process-kill",
+]
+
+[[package]]
+name = "rig-product-diff"
+version = "0.0.0"
+dependencies = [
+ "rayon",
+ "rig-proxy-search",
+ "rig-source-map",
+]
+
+[[package]]
+name = "rig-proof-scope"
+version = "0.0.0"
+dependencies = [
+ "rig-proof-scope-manifests",
+]
+
+[[package]]
+name = "rig-proof-scope-manifests"
+version = "0.0.0"
+dependencies = [
+ "rig-proof-scope-toml",
+]
+
+[[package]]
+name = "rig-proof-scope-toml"
+version = "0.0.0"
+
+[[package]]
+name = "rig-proxy-edit-contracts"
+version = "0.0.0"
+
+[[package]]
+name = "rig-proxy-search"
+version = "0.0.0"
+dependencies = [
+ "proxy-file-copy",
+ "proxy-search-receipt",
+ "rayon",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-read-query"
+version = "0.0.0"
+dependencies = [
+ "rayon",
+]
+
+[[package]]
+name = "rig-rec-cycle"
+version = "0.0.0"
+
+[[package]]
+name = "rig-release-contracts"
+version = "0.0.0"
+dependencies = [
+ "rig-release-hygiene",
+]
+
+[[package]]
+name = "rig-release-hygiene"
+version = "0.0.0"
+dependencies = [
+ "legacy-capability-domain",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
+]
+
+[[package]]
+name = "rig-remote-activity"
+version = "0.0.0"
+
+[[package]]
+name = "rig-remote-status"
+version = "0.0.0"
+dependencies = [
+ "rig-remote-activity",
+]
+
+[[package]]
+name = "rig-repo-accept-review"
+version = "0.0.0"
+
+[[package]]
+name = "rig-repo-affected"
+version = "0.0.0"
+
+[[package]]
+name = "rig-repo-state"
+version = "0.0.0"
+
+[[package]]
+name = "rig-resume"
+version = "0.0.0"
+dependencies = [
+ "rig-agile-records",
+]
+
+[[package]]
+name = "rig-run-build"
+version = "0.0.0"
+
+[[package]]
+name = "rig-run-cli"
+version = "0.0.0"
+dependencies = [
+ "rig-run-build",
+]
+
+[[package]]
+name = "rig-rust-std-env"
+version = "0.0.0"
+
+[[package]]
+name = "rig-rust-std-fs"
+version = "0.0.0"
+dependencies = [
+ "rig-rust-std-fs-mutation",
+]
+
+[[package]]
+name = "rig-rust-std-fs-mutation"
+version = "0.0.0"
+
+[[package]]
+name = "rig-schedule"
+version = "0.0.0"
+
+[[package]]
+name = "rig-source-map"
+version = "0.1.0"
+dependencies = [
+ "rig-proxy-search",
+ "rig-source-topology",
+]
+
+[[package]]
+name = "rig-source-topology"
+version = "0.1.0"
+dependencies = [
+ "rig-proxy-search",
+ "toml",
+]
+
+[[package]]
+name = "rig-standards"
+version = "0.0.0"
+dependencies = [
+ "rig-standards-scan",
+ "rig-standards-targets",
+ "rig-style-census",
+]
+
+[[package]]
+name = "rig-standards-layers"
+version = "0.0.0"
+dependencies = [
+ "rig-standards-layers-model",
+]
+
+[[package]]
+name = "rig-standards-layers-model"
+version = "0.0.0"
+
+[[package]]
+name = "rig-standards-scan"
+version = "0.0.0"
+dependencies = [
+ "rig-rec-cycle",
+]
+
+[[package]]
+name = "rig-standards-targets"
+version = "0.0.0"
+
+[[package]]
+name = "rig-standards-toml"
+version = "0.0.0"
+
+[[package]]
+name = "rig-status-facts"
+version = "0.0.0"
+
+[[package]]
+name = "rig-style-baseline"
+version = "0.0.0"
+
+[[package]]
+name = "rig-style-census"
+version = "0.0.0"
+dependencies = [
+ "rig-flag-words",
+ "rig-granular-rounds",
+ "rig-standards-layers",
+ "rig-standards-toml",
+ "rig-style-baseline",
+ "rig-style-measure",
+ "rig-style-probes",
+ "rig-style-scoreboard",
+ "rig-wrapper-score",
+]
+
+[[package]]
+name = "rig-style-measure"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-style-probes",
+]
+
+[[package]]
+name = "rig-style-probes"
+version = "0.0.0"
+
+[[package]]
+name = "rig-style-scoreboard"
+version = "0.0.0"
+dependencies = [
+ "rig-style-measure",
+ "rig-style-probes",
+]
+
+[[package]]
+name = "rig-table-append"
+version = "0.0.0"
+
+[[package]]
+name = "rig-table-counts"
+version = "0.0.0"
+dependencies = [
+ "rig-log-counts",
+]
+
+[[package]]
+name = "rig-table-diff"
+version = "0.0.0"
+dependencies = [
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-filter"
+version = "0.0.0"
+dependencies = [
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-logs"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "rig-table-logs-args",
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-logs-args"
+version = "0.0.0"
+
+[[package]]
+name = "rig-table-measures"
+version = "0.0.0"
+dependencies = [
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-plain"
+version = "0.0.0"
+dependencies = [
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-query"
+version = "0.0.0"
+dependencies = [
+ "rig-table-append",
+ "rig-table-diff",
+ "rig-table-filter",
+ "rig-table-measures",
+ "rig-table-plain",
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-sections"
+version = "0.0.0"
+dependencies = [
+ "rig-log-sections",
+]
+
+[[package]]
+name = "rig-table-sequence-measures"
+version = "0.0.0"
+dependencies = [
+ "rig-log-sequences",
+]
+
+[[package]]
+name = "rig-table-sequences"
+version = "0.0.0"
+dependencies = [
+ "rig-table-counts",
+ "rig-table-sections",
+ "rig-table-sequence-measures",
+]
+
+[[package]]
+name = "rig-table-test"
+version = "0.0.0"
+dependencies = [
+ "rig-experiment-args",
+ "rig-experiment-stats",
+ "rig-table-query",
+ "rig-table-text",
+]
+
+[[package]]
+name = "rig-table-text"
+version = "0.0.0"
+
+[[package]]
+name = "rig-toolchain-proxy"
+version = "0.0.0"
+dependencies = [
+ "canonical-plan-ir-domain",
+ "command-spec-domain",
+ "process-batch-plan-domain",
+ "rig-process",
+ "rig-process-observation",
+ "rig-proxy-search",
+ "toolchain-argument-domain",
+ "toolchain-argument-tail-domain",
+ "toolchain-command-domain",
+ "toolchain-runtime-policy-domain",
+]
+
+[[package]]
+name = "rig-tracked-text"
+version = "0.0.0"
+
+[[package]]
+name = "rig-tree-copy"
+version = "0.0.0"
+dependencies = [
+ "proxy-file-receipt",
+ "rig-rust-std-fs",
+ "rig-rust-std-fs-mutation",
+]
+
+[[package]]
+name = "rig-window-admission"
+version = "0.0.0"
+
+[[package]]
+name = "rig-window-announce-check"
+version = "0.0.0"
+
+[[package]]
+name = "rig-window-announce-verb"
+version = "0.0.0"
+
+[[package]]
+name = "rig-window-claim"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+]
+
+[[package]]
+name = "rig-window-query"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+ "rig-window-admission",
+ "rig-window-run",
+]
+
+[[package]]
+name = "rig-window-request"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+ "rig-window-admission",
+ "rig-window-announce-check",
+]
+
+[[package]]
+name = "rig-window-run"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+ "rig-window-admission",
+]
+
+[[package]]
+name = "rig-window-wait"
+version = "0.0.0"
+dependencies = [
+ "rig-process-alive",
+ "rig-window-admission",
+]
+
+[[package]]
+name = "rig-wrapper-score"
+version = "0.0.0"
+dependencies = [
+ "rig-wrapper-score-model",
+]
+
+[[package]]
+name = "rig-wrapper-score-model"
+version = "0.0.0"
+
+[[package]]
 name = "semantic-evidence-domain"
 version = "0.0.0"
 dependencies = [
- "kit-proxy-search",
- "kit-rust-std-fs",
+ "rig-proxy-search",
+ "rig-rust-std-fs",
 ]
 
 [[package]]
@@ -3016,7 +3104,7 @@ version = "0.0.0"
 name = "typed-predicate-contracts"
 version = "0.0.0"
 dependencies = [
- "kit-handoff",
+ "rig-handoff",
 ]
 
 [[package]]

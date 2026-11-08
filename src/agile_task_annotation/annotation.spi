@@ -1,0 +1,117 @@
+///- --package .
+:# annotation static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== task_annotation = { id : string; idle_days : i32; parent : string; asked : bool }
+
+:== note_hour_index = dict.dict string i64
+
+:== row_pairs = dict.dict string string
+
+:| state_row =
+    | NoteRow :: state_row
+    | ParentRow :: state_row
+    | AskRow :: state_row
+
+:= row_prefix = \|
+    | NoteRow => "inl note_of_"
+    | ParentRow => "inl parent_of_"
+    | AskRow => "inl asked_of_"
+
+:= row_file = \|
+    | NoteRow => "agile.spi"
+    | ParentRow => "parents.spi"
+    | AskRow => "asks.spi"
+
+:~ stamp_hour (~stamp : string) : i64 =
+    := number = \ (from : i32) (size : i32) =>
+        optionm'.default_value 0i64 (convert.try_convert (sm'.substring from size stamp))
+    ? (sm'.length stamp : i32) < 13i32 ?> 0i64
+    |: date_time.days_from_civil (number 0i32 4i32) (number 5i32 2i32) (number 8i32 2i32) * 24i64 + number 11i32 2i32
+
+:~ later_note (index : note_hour_index) (~line : string) : note_hour_index =
+    ?= sm'.split_list "\"" line ?|
+    | _ :: id :: _ :: stamp :: _ =>
+        := hour = stamp_hour stamp
+        ? hour > optionm'.default_value 0i64 (dict.find id index) ?> dict.insert id hour index |: index
+    | _ => index
+
+:~ ^ note_hours_from (lines : array string) (at : i32) (index : note_hour_index) : note_hour_index =
+    ? am'.length lines <= at ?> index
+    |:
+        := line = am'.index at lines
+        := next = ? sm'.starts_with (row_prefix NoteRow) line ?> later_note index line |: index
+        note_hours_from lines (at + 1i32) next
+
+:~ pair_of_line (index : row_pairs) (~line : string) : row_pairs =
+    ?= sm'.split_list "\"" line ?|
+    | _ :: key :: _ :: value :: _ => dict.insert key value index
+    | _ => index
+
+:~ ^ pairs_from (row : state_row) (lines : array string) (at : i32) (index : row_pairs) : row_pairs =
+    ? am'.length lines <= at ?> index
+    |:
+        := line = am'.index at lines
+        := next = ? sm'.starts_with (row_prefix row) line ?> pair_of_line index line |: index
+        pairs_from row lines (at + 1i32) next
+
+:~ state_pairs (~root : string) (row : state_row) : row_pairs =
+    := path = root ++# "/state/" ++# row_file row
+    := text = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+    pairs_from row (sm'.lines text) 0i32 (dict.empty ())
+
+:= idle_days_of (now_hour : i64) (last : i64) : i32 =
+    ? last <= 0i64 || now_hour <= last ?> 0i32 |: conv ((now_hour - last) / 24i64)
+
+:~ annotation_for (hours : note_hour_index) (parents : row_pairs) (asks : row_pairs) (now_hour : i64) (~id : string)
+    : task_annotation
+    =
+    {
+        id = id
+        idle_days = idle_days_of now_hour (optionm'.default_value 0i64 (dict.find id hours))
+        parent = optionm'.default_value "" (dict.find id parents)
+        asked = optionm'.default_value "" (dict.find id asks) <> ""
+    }
+
+:~ ^ annotate_into
+    (out : array_base task_annotation) (hours : note_hour_index) (parents : row_pairs) (asks : row_pairs)
+    (now_hour : i64) (ids : array_base string) (at : i32)
+    : ()
+    =
+    ? am'.length_base ids <= at ?> ()
+    |:
+        am'.set_base out at (annotation_for hours parents asks now_hour (am'.index_base at ids))
+        annotate_into out hours parents asks now_hour ids (at + 1i32)
+
+:~ annotations_of
+    ((root, text, ids_text, now_hour) : string * string * string * i64)
+    : array_base task_annotation
+    =
+    := hours = note_hours_from (sm'.lines text) 0i32 (dict.empty ())
+    := parents = state_pairs root ParentRow
+    := asks = state_pairs root AskRow
+    := ids = sm'.lines ids_text |> am'.base
+    := count = am'.length_base ids
+    := out = am'.create_base count
+    annotate_into out hours parents asks now_hour ids 0i32
+    out
+
+///> rust
+:# an_item_ages_from_its_last_note_and_carries_its_parent_and_ask =
+    := first = "inl note_of_a_1 () = Note (\"A\", 1u32, \"2026-11-01T10:00Z\", \"x\", \"t\")\n"
+    := text = first ++# "inl note_of_a_2 () = Note (\"A\", 2u32, \"2026-11-03T10:00Z\", \"x\", \"t\")\n"
+    := hours = note_hours_from (sm'.lines text) 0i32 (dict.empty ())
+    := now = stamp_hour "2026-11-06T10:00Z"
+    := parent_rows = sm'.lines "inl parent_of_a () = Parent (\"A\", \"EPIC\")"
+    := parents = pairs_from ParentRow parent_rows 0i32 (dict.empty ())
+    := ask_rows = sm'.lines "inl asked_of_a () = Asked (\"A\", \"2026-11-01\", \"q\")"
+    := asks = pairs_from AskRow ask_rows 0i32 (dict.empty ())
+    := seen = annotation_for hours parents asks now "A"
+    testing.expect (seen = { id = "A"; idle_days = 3i32; parent = "EPIC"; asked = !+ }) "three days since the last note"
+    := fresh = annotation_for hours parents asks now "B"
+    testing.expect (fresh = { id = "B"; idle_days = 0i32; parent = ""; asked = !- }) "an item with no rows is fresh"
+:= main () : i32 =
+    export "rig_agile_task_annotations" annotations_of
+    0i32

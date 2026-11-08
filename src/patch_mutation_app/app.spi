@@ -2,7 +2,7 @@
 
 := emit () : () =
     mutation_terminal.emit_runtime ()
-    export "kit_patch_run" ((\ () => patch_entry_public ()) : () -> i32)
+    export "rig_patch_run" ((\ () => patch_entry_public ()) : () -> i32)
     := _ = patch_mutation_contract.model.typed_patch_plan ()
     := _ = patch_entry_public ()
     ()

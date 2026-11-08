@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "lcov.rs"
+
+[package]
+name = "rig-lcov"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_lcov"
+path = "lcov.rs"

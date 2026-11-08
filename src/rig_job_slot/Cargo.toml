@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "slot.spi"
+output = "slot.rs"
+
+[package]
+name = "rig-job-slot"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_slot"
+path = "slot.rs"
+
+[dependencies]
+rig-process-alive = { path = "../rig_process_alive" }
+rig-job-ticket = { path = "../rig_job_ticket" }

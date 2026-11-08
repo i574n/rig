@@ -17,6 +17,16 @@ pub fn spiral_json_quote(s: &str) -> std::rc::Rc<str> {
     std::rc::Rc::from(out.as_str())
 }
 
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_CFamily,
@@ -44,10 +54,7 @@ enum US2 {
     US2_TodoComment(Rc<str>),
 }
 fn concat5_3(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn directive_line_4(mut v0: Rc<str>) -> bool {
@@ -648,23 +655,13 @@ fn finding_json_20(mut v0: Rc<dyn Fn(Rc<str>) -> Rc<dyn Fn(Rc<str>) -> Rc<str>>>
         v9
     } else {
         let v10: Rc<str> = json_text_21(v5);
-        let v11: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"id\":"); } LIT.with(|lit| lit.clone()) }, v10));
-        let mut v12: Rc<str> = Rc::<str>::from(format!("{}{}", v11, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(",\"fields\":"); } LIT.with(|lit| lit.clone()) }));
-        let v13: Rc<str> = Rc::<str>::from(format!("{}{}", v12, v7));
-        let v14: Rc<str> = Rc::<str>::from(format!("{}{}", v13, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
+        let v14: Rc<str> = string_concat(&["\"id\":", &*v10, ",\"fields\":", &*v7, ","]);
         v14
     };
     let v16: Rc<str> = json_text_21(v2);
-    let v17: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{\"path\":"); } LIT.with(|lit| lit.clone()) }, v16));
-    let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(",\"line\":"); } LIT.with(|lit| lit.clone()) }));
     let v19: Rc<str> = std::rc::Rc::<str>::from((v3).to_string());
-    let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v18, v19));
-    let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v20, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) }));
-    let v22: Rc<str> = Rc::<str>::from(format!("{}{}", v21, v15));
-    let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v22, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\"text\":"); } LIT.with(|lit| lit.clone()) }));
     let v24: Rc<str> = json_text_21(v4);
-    let v25: Rc<str> = Rc::<str>::from(format!("{}{}", v23, v24));
-    let v26: Rc<str> = Rc::<str>::from(format!("{}{}", v25, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("}"); } LIT.with(|lit| lit.clone()) }));
+    let v26: Rc<str> = string_concat(&["{\"path\":", &*v16, ",\"line\":", &*v19, ",", &*v15, "\"text\":", &*v24, "}"]);
     v26
 }
 fn findings_from_1(mut v0: Rc<dyn Fn(Rc<str>) -> Rc<dyn Fn(Rc<str>) -> Rc<str>>>, mut v1: US0, mut v2: US1, mut v3: bool, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: Rc<str>, mut v7: bool, mut v8: i32, mut v9: i32, mut v10: Rc<str>, mut v11: i32, mut v12: Rc<str>) -> (Rc<str>, i32, Rc<str>) {
@@ -766,7 +763,7 @@ fn findings_from_1(mut v0: Rc<dyn Fn(Rc<str>) -> Rc<dyn Fn(Rc<str>) -> Rc<str>>>
     }
 }
 fn linked_marker_fields_22(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
-    let mut v2: Rc<str> = agile_todo_fields::kit_agile_todo_fields(&*v0, &*v1);
+    let mut v2: Rc<str> = agile_todo_fields::rig_agile_todo_fields(&*v0, &*v1);
     v2
 }
 fn closure2(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
@@ -914,9 +911,9 @@ fn closure3() -> Rc<dyn Fn(Rc<str>, Rc<str>) -> Rc<str>> {
         todo_id_18(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_todo_findings(v0: i32, v1: &str, v2: &str, v3: &str, v4: &str, v5: bool) -> (Rc<str>, i32, Rc<str>) {
+pub fn rig_agile_todo_findings(v0: i32, v1: &str, v2: &str, v3: &str, v4: &str, v5: bool) -> (Rc<str>, i32, Rc<str>) {
     closure0()(v0, Rc::<str>::from(v1), Rc::<str>::from(v2), Rc::<str>::from(v3), Rc::<str>::from(v4), v5)
 }
-pub fn kit_agile_todo_id(v0: &str, v1: &str) -> Rc<str> {
+pub fn rig_agile_todo_id(v0: &str, v1: &str) -> Rc<str> {
     closure3()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }

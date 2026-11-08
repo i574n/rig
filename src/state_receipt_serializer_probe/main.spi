@@ -1,7 +1,7 @@
 :< rust_std_env.model
 
 := serialize_exit (~input : string) (~expected : string) : i32 =
-    $'if state_receipt_serializer_domain::kit_state_receipt_serialize(!input.as_ref()).as_ref() == !expected.as_ref() \
+    $'if state_receipt_serializer_domain::rig_state_receipt_serialize(!input.as_ref()).as_ref() == !expected.as_ref() \
         { 0 } else { 1 }' : i32
 
 := main () : i32 =

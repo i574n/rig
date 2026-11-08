@@ -36,7 +36,7 @@
             }
             let result = apply_patch_context(std::path::Path::new(root), source, validated_count);
             if result.is_ok()
-                && let Err(error) = kit_patch_source_adapter::patch_resume_complete(root, source)
+                && let Err(error) = rig_patch_source_adapter::patch_resume_complete(root, source)
             {
                 return patch_finish(Err(error));
             }

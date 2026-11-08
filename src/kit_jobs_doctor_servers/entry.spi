@@ -1,5 +1,0 @@
-:< servers
-
-:= main () : i32 =
-    export "kit_job_doctor_server_report" ((\ () => server_report ()) : () -> i32 * string)
-    0i32

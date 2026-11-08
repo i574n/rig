@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_bindings_model_api
+modules:
+    bindings

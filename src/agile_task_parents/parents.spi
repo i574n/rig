@@ -51,14 +51,14 @@
 :# parent_rows_round_trip_and_group_children_under_their_epic =
     := text =
         "inl planning_of_x () = Planning (\"X\", Unestimated, LoadUnset, Unassigned)\n"
-        ^^ "inl parent_of_scrum_xp_s7 () = Parent (\"SCRUM-XP-S7\", \"EOIE-SCRUM-XP\")\n"
-        ^^ "inl parent_of_scrum_xp_s8 () = Parent (\"SCRUM-XP-S8\", \"EOIE-SCRUM-XP\")\r\n"
+        ^^ "inl parent_of_scrum_xp_s7 () = Parent (\"SCRUM-XP-S7\", \"KIT-SCRUM-XP\")\n"
+        ^^ "inl parent_of_scrum_xp_s8 () = Parent (\"SCRUM-XP-S8\", \"KIT-SCRUM-XP\")\r\n"
         ^^ "inl parent_of_broken () = Parent (\"ONLY-ONE\")\n"
     := links = links_of_text text
     testing.expect ((listm.length links : i32) = 2i32) "two well-formed Parent rows, the broken one is skipped"
-    testing.expect (children_of links "EOIE-SCRUM-XP" = [ "SCRUM-XP-S7"; "SCRUM-XP-S8" ]) "children in file order"
-    := s7 = { child = "SCRUM-XP-S7"; parent = "EOIE-SCRUM-XP" }
-    := expected = "inl parent_of_scrum_xp_s7 () = Parent (\"SCRUM-XP-S7\", \"EOIE-SCRUM-XP\")"
+    testing.expect (children_of links "KIT-SCRUM-XP" = [ "SCRUM-XP-S7"; "SCRUM-XP-S8" ]) "children in file order"
+    := s7 = { child = "SCRUM-XP-S7"; parent = "KIT-SCRUM-XP" }
+    := expected = "inl parent_of_scrum_xp_s7 () = Parent (\"SCRUM-XP-S7\", \"KIT-SCRUM-XP\")"
     testing.expect (row_of_link s7 = expected) "row shape"
     testing.expect (link_of_line (row_of_link s7) = Some s7) "a written row reads back"
-    testing.expect (tree_lines links "EOIE-SCRUM-XP" = [ "EOIE-SCRUM-XP"; "  SCRUM-XP-S7"; "  SCRUM-XP-S8" ]) "tree"
+    testing.expect (tree_lines links "KIT-SCRUM-XP" = [ "KIT-SCRUM-XP"; "  SCRUM-XP-S7"; "  SCRUM-XP-S8" ]) "tree"

@@ -1,0 +1,25 @@
+[package.metadata.spiral]
+entry = "census.spi"
+output = "census.rs"
+
+[package]
+name = "rig-style-census"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_style_census"
+path = "census.rs"
+
+[dependencies]
+rig-style-measure = { path = "../rig_style_measure" }
+rig-style-probes = { path = "../rig_style_probes" }
+rig-style-baseline = { path = "../rig_style_baseline" }
+rig-flag-words = { path = "../rig_flag_words" }
+rig-style-scoreboard = { path = "../rig_style_scoreboard" }
+rig-granular-rounds = { path = "../rig_granular_rounds" }
+rig-standards-toml = { path = "../rig_standards_toml" }
+rig-standards-layers = { path = "../rig_standards_layers" }
+rig-wrapper-score = { path = "../rig_wrapper_score" }

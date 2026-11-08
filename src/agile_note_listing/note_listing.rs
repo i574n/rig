@@ -17,6 +17,16 @@ pub fn spiral_json_quote(s: &str) -> std::rc::Rc<str> {
     std::rc::Rc::from(out.as_str())
 }
 
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let bytes = value.as_bytes();
     let length = bytes.len() as i64;
@@ -50,10 +60,7 @@ enum UH0 {
 }
 pub struct Mut0 { pub l0: i32, pub l1: Rc<UH0> }
 fn concat5_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let mut v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let mut v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn declared_from_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
@@ -310,14 +317,11 @@ fn kept_lines_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: US0, mut 
                 let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 let v35: Rc<str> = Rc::<str>::from(v32.replace(&*v33, &*v34));
                 let v36: i32 = v8.wrapping_add(1i32);
-                let v37: Rc<str> = Rc::<str>::from(format!("{}{}", v6, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n#"); } LIT.with(|lit| lit.clone()) }));
-                let v38: Rc<str> = Rc::<str>::from(format!("{}{}", v37, v35));
-                let v39: Rc<str> = Rc::<str>::from(format!("{}{}", v38, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) }));
                 let v40: Rc<str> = local_stamp_12(v10.clone());
                 let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("  "); } LIT.with(|lit| lit.clone()) };
                 let v42: Rc<str> = concat5_2(v41.clone(), v12, v34.clone(), v34.clone(), v34.clone());
                 let v43: Rc<str> = concat5_2(v10, v40, v41, v11, v42);
-                let v44: Rc<str> = Rc::<str>::from(format!("{}{}", v39, v43));
+                let v44: Rc<str> = string_concat(&[&*v6, "\n#", &*v35, " ", &*v43]);
                 let v45: i32 = v7.wrapping_add(1i32);
                 (v2, v4, v6, v7) = (v36, v13, v44, v45);
                 continue;
@@ -348,12 +352,8 @@ fn notes_filtered_text_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US0) -> Rc<st
         let v15: i32 = 0i32;
         let (mut v16, mut v17): (Rc<str>, i32) = kept_lines_5(v0, v12, v13, v2, v14, v10, v6, v15);
         let v18: Rc<str> = std::rc::Rc::<str>::from((v17).to_string());
-        let v19: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("notes ("); } LIT.with(|lit| lit.clone()) }, v18));
-        let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) }));
         let v21: Rc<str> = std::rc::Rc::<str>::from((v10).to_string());
-        let v22: Rc<str> = Rc::<str>::from(format!("{}{}", v20, v21));
-        let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v22, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) }));
-        let v24: Rc<str> = Rc::<str>::from(format!("{}{}", v23, v16));
+        let v24: Rc<str> = string_concat(&["notes (", &*v18, "/", &*v21, ")", &*v16]);
         v24
     }
 }
@@ -812,22 +812,22 @@ fn closure6() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>) -> Rc<str>> {
         notes_filtered_text_1(v0, v1, v4)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_last_note(v0: &str, v1: &str) -> Rc<str> {
+pub fn rig_agile_last_note(v0: &str, v1: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
-pub fn kit_agile_segments_of(v0: &str) -> Rc<str> {
+pub fn rig_agile_segments_of(v0: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_notes_text(v0: &str, v1: &str) -> Rc<str> {
+pub fn rig_agile_notes_text(v0: &str, v1: &str) -> Rc<str> {
     closure3()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
-pub fn kit_agile_notes_json(v0: &str, v1: &str) -> Rc<str> {
+pub fn rig_agile_notes_json(v0: &str, v1: &str) -> Rc<str> {
     closure4()(Rc::<str>::from(v0), Rc::<str>::from(v1))
 }
-pub fn kit_agile_state_segments(v0: &str) -> Rc<str> {
+pub fn rig_agile_state_segments(v0: &str) -> Rc<str> {
     closure5()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_notes_filtered_text(v0: &str, v1: &str, v2: &str, v3: &str) -> Rc<str> {
+pub fn rig_agile_notes_filtered_text(v0: &str, v1: &str, v2: &str, v3: &str) -> Rc<str> {
     closure6()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2), Rc::<str>::from(v3))
 }
 pub type SpiralShape_652accfc6a8d = Mut0;

@@ -135,29 +135,29 @@
     := _ = proxy_write_action_binding 0i32 2i32
     := _ = proxy_usage_bridge "fs-read"
     export
-        "kit_legacy_operations_proxy_dogfood_shim_decision_packed_binding"
+        "rig_legacy_operations_proxy_dogfood_shim_decision_packed_binding"
         ((\ (first, second) => proxy_dogfood_shim_decision_packed_binding first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_operations_proxy_dogfood_shim_install_packed_binding"
+        "rig_legacy_operations_proxy_dogfood_shim_install_packed_binding"
         ((\ (first, second) => proxy_dogfood_shim_install_packed_binding first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_operations_proxy_dogfood_shim_uninstall_binding"
+        "rig_legacy_operations_proxy_dogfood_shim_uninstall_binding"
         ((\ (first, second) => proxy_dogfood_shim_uninstall_binding first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_operations_proxy_exact_replace_preflight_binding"
+        "rig_legacy_operations_proxy_exact_replace_preflight_binding"
         ((\ (first, second) => proxy_exact_replace_preflight_binding first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_operations_proxy_exact_replace_authorize_binding"
+        "rig_legacy_operations_proxy_exact_replace_authorize_binding"
         ((\ (first, second) => proxy_exact_replace_authorize_binding first second) : i32 * i32 -> i32)
     export
-        "kit_legacy_operations_proxy_exact_replace_verify_binding"
+        "rig_legacy_operations_proxy_exact_replace_verify_binding"
         ((\ (first, second) => proxy_exact_replace_verify_binding first second) : i32 * i32 -> i32)
-    export "kit_legacy_operations_proxy_run_token_code" ((\ value => proxy_run_token_code value) : string -> u64)
+    export "rig_legacy_operations_proxy_run_token_code" ((\ value => proxy_run_token_code value) : string -> u64)
     export
-        "kit_legacy_operations_proxy_write_token_code"
+        "rig_legacy_operations_proxy_write_token_code"
         ((\ value => proxy_write_token_code value) : string -> u64)
     export
-        "kit_legacy_operations_proxy_write_action_binding"
+        "rig_legacy_operations_proxy_write_action_binding"
         ((\ (existed, packed) => proxy_write_action_binding existed packed) : i32 * i32 -> i32)
-    export "kit_legacy_operations_proxy_usage" ((\ value => proxy_usage_bridge value) : string -> string)
+    export "rig_legacy_operations_proxy_usage" ((\ value => proxy_usage_bridge value) : string -> string)
     0i32

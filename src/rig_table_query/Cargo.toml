@@ -1,0 +1,22 @@
+[package.metadata.spiral]
+entry = "table.spi"
+output = "table_query.rs"
+
+[package]
+name = "rig-table-query"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_table_query"
+path = "table_query.rs"
+
+[dependencies]
+rig-table-text = { path = "../rig_table_text" }
+rig-table-diff = { path = "../rig_table_diff" }
+rig-table-measures = { path = "../rig_table_measures" }
+rig-table-filter = { path = "../rig_table_filter" }
+rig-table-plain = { path = "../rig_table_plain" }
+rig-table-append = { path = "../rig_table_append" }

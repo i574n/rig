@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US1 {
     US1_EditTitle,
@@ -161,10 +171,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> i32> {
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn concat5_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn quoted_field_value_3(mut v0: Rc<str>) -> US2 {
@@ -501,7 +508,6 @@ fn edit_field_token_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<s
                             v27
                         }
                     };
-                    let v33: Rc<str> = Rc::<str>::from(format!("{}{}", v11, v32));
                     let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
                     let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\\\"); } LIT.with(|lit| lit.clone()) };
                     let v36: Rc<str> = Rc::<str>::from(v2.replace(&*v34, &*v35));
@@ -517,8 +523,7 @@ fn edit_field_token_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<s
                     let v46: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) };
                     let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\t"); } LIT.with(|lit| lit.clone()) };
                     let v48: Rc<str> = Rc::<str>::from(v45.replace(&*v46, &*v47));
-                    let v49: Rc<str> = Rc::<str>::from(format!("{}{}", v33, v48));
-                    let v50: Rc<str> = Rc::<str>::from(format!("{}{}", v49, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) }));
+                    let v50: Rc<str> = string_concat(&[&*v11, &*v32, &*v48, "\""]);
                     US2::US2_Valid(v50)
                 }
             };
@@ -575,12 +580,12 @@ fn closure2() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         edit_field_rule_5(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_edit_field_position(v0: &str) -> i32 {
+pub fn rig_agile_edit_field_position(v0: &str) -> i32 {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_edit_field_token(v0: &str, v1: &str, v2: &str) -> Rc<str> {
+pub fn rig_agile_edit_field_token(v0: &str, v1: &str, v2: &str) -> Rc<str> {
     closure1()(Rc::<str>::from(v0), Rc::<str>::from(v1), Rc::<str>::from(v2))
 }
-pub fn kit_agile_edit_field_rule(v0: &str) -> Rc<str> {
+pub fn rig_agile_edit_field_rule(v0: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0))
 }

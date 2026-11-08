@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    rig_remote_activity
+link:
+    rig_remote_activity
+modules:
+    status
+    entry

@@ -1,0 +1,24 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "watch.rs"
+
+[package]
+name = "rig-machine-watch"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_machine_watch"
+path = "watch.rs"
+
+[dependencies]
+rig-machine-crowding = { path = "../rig_machine_crowding" }
+rig-job-control = { path = "../rig_job_control" }
+rig-machine-window-watch = { path = "../rig_machine_window_watch" }
+rig-notebook-progress = { path = "../rig_notebook_progress" }
+sysinfo = "0.38.4"
+rig-machine-sample = { path = "../rig_machine_sample" }
+rig-machine-health = { path = "../rig_machine_health" }
+rig-net-topology = { path = "../rig_net_topology" }

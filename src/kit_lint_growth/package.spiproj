@@ -1,7 +1,0 @@
-packages:
-    |core-
-    spiral-
-    union_reflection
-    kit_lint_model
-modules:
-    growth

@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "product_diff.rs"
+
+[package]
+name = "rig-product-diff"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_product_diff"
+path = "product_diff.rs"
+
+[dependencies]
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-source-map = { path = "../rig_source_map" }
+rayon = "1.12.0"

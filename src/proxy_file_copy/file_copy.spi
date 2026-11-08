@@ -8,7 +8,7 @@
     | CopyRejected : string
 
 := copy_problem (~source : string) (~target : string) : string =
-    $'std::rc::Rc::<str>::from(kit_rust_std_fs::copy_regular_atomic_preserve(std::path::Path::new(&*!source), \
+    $'std::rc::Rc::<str>::from(rig_rust_std_fs::copy_regular_atomic_preserve(std::path::Path::new(&*!source), \
         std::path::Path::new(&*!target)).err().unwrap_or_default().as_str())' : string
 := copied_bytes (~path : string) : u64 = $'std::fs::symlink_metadata(&*!path).map(|meta| meta.len()).unwrap_or(0)' : u64
 
@@ -41,7 +41,7 @@
 
 := main () : i32 =
     export
-        "kit_file_copy_outcome"
+        "rig_file_copy_outcome"
         (
             \ (operands, root, source, target) => file_copy_report operands root source target
             : i32 * string * string * string -> i32 * string

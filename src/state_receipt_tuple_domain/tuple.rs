@@ -190,6 +190,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<s
         receipt_row_tuple_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_state_receipt_row_tuple(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
+pub fn rig_state_receipt_row_tuple(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
     closure0()(Rc::<str>::from(v0))
 }

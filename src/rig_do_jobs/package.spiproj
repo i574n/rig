@@ -1,0 +1,15 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_receipt
+    rig_do_records
+    rig_do_model
+    rig_do_verbs
+link:
+    rig_do_model
+    rig_do_verbs
+modules:
+    host
+    grammar
+    run

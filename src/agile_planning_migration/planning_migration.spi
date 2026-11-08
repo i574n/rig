@@ -25,17 +25,17 @@
 := step_from (code, detail) : planning_step = ? code = 0i32 ?> StepText detail |: StepRejected detail
 
 :~ value_token (~field_name : string) (~value : string) : planning_step =
-    step_from ($'agile_planning_values::kit_agile_planning_value_token(&*!field_name, &*!value)' : i32 * string)
+    step_from ($'agile_planning_values::rig_agile_planning_value_token(&*!field_name, &*!value)' : i32 * string)
 
 :~ rewritten (~text : string) (~id : string) (~field_name : string) (~token : string) : planning_step =
     step_from (
-        $'agile_planning_rewrite::kit_agile_planning_rewrite(&*!text, &*!id, &*!field_name, &*!token)' : i32 * string
+        $'agile_planning_rewrite::rig_agile_planning_rewrite(&*!text, &*!id, &*!field_name, &*!token)' : i32 * string
     )
 
 := legacy_agent_value (~value : string) : string =
-    $'agile_planning_values::kit_agile_planning_legacy_agent_value(&*!value)' : string
+    $'agile_planning_values::rig_agile_planning_legacy_agent_value(&*!value)' : string
 := planning_summary (~text : string) (~id : string) : string =
-    $'agile_planning_fields::kit_agile_planning_summary(&*!text, &*!id)' : string
+    $'agile_planning_fields::rig_agile_planning_summary(&*!text, &*!id)' : string
 
 :| tag_kind =
     | PlainTag
@@ -199,6 +199,6 @@
     |: migration_failure "migrate-tags expects preview <root> or apply <root>"
 
 := main () : i32 =
-    export "kit_agile_migrate_tags_run" ((\ () => tags_migration_entry ()) : () -> i32)
+    export "rig_agile_migrate_tags_run" ((\ () => tags_migration_entry ()) : () -> i32)
     := _ = tags_migration_entry ()
     0i32

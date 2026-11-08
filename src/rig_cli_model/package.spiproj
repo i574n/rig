@@ -1,0 +1,22 @@
+packages:
+    |core-
+    spiral-
+    command_spec_domain
+    union_reflection
+    rust_std_env
+    rig_heal_nameof
+    rig_hook
+    rig_run_cli
+    rig_exec_export
+    rig_cli_routes
+    rig_status_facts
+link:
+    rig_heal_nameof
+    rig_hook
+    rig_run_cli
+    rig_exec_export
+    rig_cli_routes
+    rig_status_facts
+modules:
+    argument_file
+    model

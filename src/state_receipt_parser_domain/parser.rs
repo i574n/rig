@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn codec_runtime_char_2(mut v0: Rc<str>) -> u8 {
     let mut v1: u8 = v0.as_bytes()[0i32 as usize];
     v1
@@ -133,7 +143,7 @@ fn parse_quoted_loop_8(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                     return (v3, v1, false);
                 } else {
                     let v27: i32 = v1 + 1i32 ;
-                    let v28: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v24));
+                    let v28: Rc<str> = string_concat(&[&*v3, &*v24]);
                     let v29: bool = false;
                     (v1, v3, v4) = (v27, v28, v29);
                     continue;
@@ -157,7 +167,7 @@ fn parse_quoted_loop_8(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                     } else {
                         let v48: i32 = v1 + 1i32 ;
                         let v49: Rc<str> = string_slice(&v0.clone(), v1 as i64, v1 as i64);
-                        let v50: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v49));
+                        let v50: Rc<str> = string_concat(&[&*v3, &*v49]);
                         let v51: bool = false;
                         (v1, v3, v4) = (v48, v50, v51);
                         continue;
@@ -236,8 +246,7 @@ fn parse_source_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                         let v29: Rc<str> = string_slice(&v12.clone(), v20 as i64, v28 as i64);
                         v29
                     };
-                    let v31: Rc<str> = Rc::<str>::from(format!("{}{}", v30, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
-                    let v32: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("snapshot\t"); } LIT.with(|lit| lit.clone()) }, v31));
+                    let v32: Rc<str> = string_concat(&["snapshot\t", &*v30, "\n"]);
                     v32
                 }
             };
@@ -397,7 +406,7 @@ fn parse_source_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                                                             let v140: Rc<str> = string_slice(&v12, v132 as i64, v139 as i64);
                                                             v140
                                                         };
-                                                        let v142: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("build:"); } LIT.with(|lit| lit.clone()) }, v141));
+                                                        let v142: Rc<str> = string_concat(&["build:", &*v141]);
                                                         v142
                                                     }
                                                 } else {
@@ -427,7 +436,7 @@ fn parse_source_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                                                                 let v159: Rc<str> = string_slice(&v12, v151 as i64, v158 as i64);
                                                                 v159
                                                             };
-                                                            let v161: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("build:"); } LIT.with(|lit| lit.clone()) }, v160));
+                                                            let v161: Rc<str> = string_concat(&["build:", &*v160]);
                                                             v161
                                                         }
                                                     } else {
@@ -447,14 +456,7 @@ fn parse_source_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
                                         if v172 {
                                             codec_empty_4()
                                         } else {
-                                            let v174: Rc<str> = Rc::<str>::from(format!("{}{}", v171, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) }));
-                                            let v175: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }, v174));
-                                            let v176: Rc<str> = Rc::<str>::from(format!("{}{}", v100, v175));
-                                            let v177: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }, v176));
-                                            let v178: Rc<str> = Rc::<str>::from(format!("{}{}", v95, v177));
-                                            let v179: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) }, v178));
-                                            let v180: Rc<str> = Rc::<str>::from(format!("{}{}", v59, v179));
-                                            let v181: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("module\t"); } LIT.with(|lit| lit.clone()) }, v180));
+                                            let v181: Rc<str> = string_concat(&["module\t", &*v59, "\t", &*v95, "\t", &*v100, "\t", &*v171, "\n"]);
                                             v181
                                         }
                                     }
@@ -466,7 +468,7 @@ fn parse_source_loop_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str
             } else {
                 v34
             };
-            let v190: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v189));
+            let v190: Rc<str> = string_concat(&[&*v3, &*v189]);
             let v191: bool = v7 == v2 ;
             let v193: i32 = if v191 {
                 v2
@@ -490,6 +492,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         receipt_parse_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_state_receipt_parse(v0: &str) -> Rc<str> {
+pub fn rig_state_receipt_parse(v0: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0))
 }

@@ -1,0 +1,15 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_lint_macros
+    rig_lint_growth
+    rig_lint_precheck
+    rig_tracked_text
+link:
+    rig_lint_macros
+    rig_lint_growth
+    rig_lint_precheck
+    rig_tracked_text
+modules:
+    cli

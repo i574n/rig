@@ -11,8 +11,8 @@
 := process_operand_count () : string = $'std::rc::Rc::<str>::from(std::env::args().count().saturating_sub(3).to_string\
     ())' : string
 := known_effect (code : u64) : bool = (code <= 3u64)
-:= subcommand_effect (~key : string) : u64 = $"command_spec_domain::kit_command_subcommand_effect_code(&!key)" : u64
-:= verb_effect (~verb : string) : u64 = $"command_spec_domain::kit_command_effect_code(&!verb)" : u64
+:= subcommand_effect (~key : string) : u64 = $"command_spec_domain::rig_command_subcommand_effect_code(&!key)" : u64
+:= verb_effect (~verb : string) : u64 = $"command_spec_domain::rig_command_effect_code(&!verb)" : u64
 := effect_code_i32 (code : u64) : i32 = $"!code as i32" : i32
 
 := effect_for (lookup : effect_lookup) : u64 =
@@ -46,12 +46,12 @@
     std::rc::Rc::<str>::from(text.trim())).unwrap_or_else(|_| std::rc::Rc::<str>::from(""))' : string
 := present (~text : string) : bool = $"!text.is_empty() == false"
 
-:= kit_config_file (~name : string) : string =
-    := kit_home = environment_text "KIT_CONFIG_HOME"
+:= rig_config_file (~name : string) : string =
+    := rig_home = environment_text "KIT_CONFIG_HOME"
     := xdg_home = environment_text "XDG_CONFIG_HOME"
     := app_data = environment_text "APPDATA"
     := user_home = environment_text "USERPROFILE"
-    ? present kit_home ?> kit_home ++# "/" ++# name
+    ? present rig_home ?> rig_home ++# "/" ++# name
     |? present xdg_home ?> xdg_home ++# "/kit/" ++# name
     |? present app_data ?> app_data ++# "/kit/" ++# name
     |? present user_home ?> user_home ++# "/.config/kit/" ++# name
@@ -60,7 +60,7 @@
 := lease_policy_from (origin : lease_policy_origin) : string =
     ?= origin ?|
     | PolicyFromEnvironment => environment_text "KIT_LEASE_POLICY"
-    | PolicyFromConfigFile => trimmed_file_text (kit_config_file "lease-policy")
+    | PolicyFromConfigFile => trimmed_file_text (rig_config_file "lease-policy")
 
 :~ lease_policy_entry () : string =
     := from_environment = lease_policy_from PolicyFromEnvironment
@@ -108,7 +108,7 @@
 
 := policy_name () : string =
     := configured = lease_policy_entry ()
-    ? present configured ?> configured |: "bounded"
+    ? present configured ?> configured |: "renewing"
 
 :~ lease_status_entry
     (~root : string) (started : u64) (wrap_at : u64) (deadline : u64) (remaining : u64) (should_wrap : bool)
@@ -131,10 +131,10 @@
     (head ++# readable ++# remaining_text) ++# flags ++# raw_start ++# raw_end
 
 := main () : i32 =
-    export "kit_lease_effect_code" ((\ () => lease_effect_entry ()) : () -> i32)
-    export "kit_lease_policy_text" ((\ () => lease_policy_entry ()) : () -> string)
+    export "rig_lease_effect_code" ((\ () => lease_effect_entry ()) : () -> i32)
+    export "rig_lease_policy_text" ((\ () => lease_policy_entry ()) : () -> string)
     export
-        "kit_lease_status_text"
+        "rig_lease_status_text"
         (
             \ (root, started, wrap_at, deadline, remaining, should_wrap, should_yield) =>
                 lease_status_entry root started wrap_at deadline remaining should_wrap should_yield

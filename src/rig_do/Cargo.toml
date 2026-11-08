@@ -1,0 +1,28 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "do_run.rs"
+
+[package]
+name = "rig-do"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do"
+path = "do_run.rs"
+
+[dependencies]
+rig-do-verbs = { path = "../rig_do_verbs" }
+rig-do-program = { path = "../rig_do_program" }
+rig-do-edit = { path = "../rig_do_edit" }
+rig-do-facts = { path = "../rig_do_facts" }
+rig-do-git = { path = "../rig_do_git" }
+rig-do-jobs = { path = "../rig_do_jobs" }
+rig-do-lab = { path = "../rig_do_lab" }
+rig-do-process = { path = "../rig_do_process" }
+rig-do-read = { path = "../rig_do_read" }
+rig-do-write = { path = "../rig_do_write" }
+rig-do-file-steps = { path = "../rig_do_file_steps" }
+rig-do-model = { path = "../rig_do_model" }

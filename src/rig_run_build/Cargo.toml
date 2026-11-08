@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "builder.spi"
+output = "builder.rs"
+
+[package]
+name = "rig-run-build"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_run_build"
+path = "builder.rs"

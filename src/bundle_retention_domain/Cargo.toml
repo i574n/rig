@@ -22,8 +22,8 @@ name = "bundle_retention_domain"
 path = "retention.rs"
 
 [dependencies]
-kit-proxy-search = { path = "../kit_proxy_search" }
-kit-rust-std-fs = { path = "../rust_std_fs" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
 
 [[example]]
 name = "retention_negative"

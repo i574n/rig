@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_Replaced,
@@ -27,9 +37,7 @@ enum US3 {
     US3_FileMissing(Rc<str>),
 }
 fn planning_edit_failure_2(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
-    let mut v2: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile edit "); } LIT.with(|lit| lit.clone()) }, v1));
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) }));
-    let v4: Rc<str> = Rc::<str>::from(format!("{}{}", v3, v0));
+    let v4: Rc<str> = string_concat(&["agile edit ", &*v1, " rejected: ", &*v0]);
     let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v4 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
     v5
@@ -53,9 +61,9 @@ fn renamed_within_6(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
     }
 }
 fn replace_records_unchanged_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US0 {
-    let v3: bool = kit_agile_records::kit_agile_records_unchanged(&*v0, &*v1);
+    let v3: bool = rig_agile_records::rig_agile_records_unchanged(&*v0, &*v1);
     if v3 {
-        let v4: Rc<str> = Rc::<str>::from(format!("{}{}", v0.clone(), { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) }));
+        let v4: Rc<str> = string_concat(&[&*v0, ".pending"]);
         let v5: bool = std::fs::write(&*v4, &*v2).is_ok();
         if v5 {
             let v6: i32 = 40i32;
@@ -86,24 +94,15 @@ fn planning_written_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3:
     let v6: US0 = replace_records_unchanged_5(v0, v3.clone(), v4.clone());
     match &v6 {
         US0::US0_Replaced => {
-            let v7: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile edit ok id="); } LIT.with(|lit| lit.clone()) }, v1.clone()));
-            let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" field="); } LIT.with(|lit| lit.clone()) }));
-            let v9: Rc<str> = Rc::<str>::from(format!("{}{}", v8, v2));
-            let v10: Rc<str> = Rc::<str>::from(format!("{}{}", v9, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) }));
-            let v11: Rc<str> = agile_planning_fields::kit_agile_planning_summary(&*v4, &*v1);
-            let v12: Rc<str> = Rc::<str>::from(format!("{}{}", v10, v11));
+            let v10: Rc<str> = string_concat(&["kit agile edit ok id=", &*v1, " field=", &*v2, " "]);
+            let v11: Rc<str> = agile_planning_fields::rig_agile_planning_summary(&*v4, &*v1);
             let v13: u64 = v3.len() as u64;
             let v14: u64 = v4.len() as u64;
             let v15: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v5);
             let v16: Rc<str> = std::rc::Rc::<str>::from((v13).to_string());
-            let v17: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_before="); } LIT.with(|lit| lit.clone()) }, v16));
-            let v18: Rc<str> = Rc::<str>::from(format!("{}{}", v17, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_after="); } LIT.with(|lit| lit.clone()) }));
             let v19: Rc<str> = std::rc::Rc::<str>::from((v14).to_string());
-            let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v18, v19));
-            let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v20, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
             let v22: Rc<str> = std::rc::Rc::<str>::from((v15).to_string());
-            let v23: Rc<str> = Rc::<str>::from(format!("{}{}", v21, v22));
-            let v24: Rc<str> = Rc::<str>::from(format!("{}{}", v12, v23));
+            let v24: Rc<str> = string_concat(&[&*v10, &*v11, " bytes_before=", &*v16, " bytes_after=", &*v19, " elapsed_ms=", &*v22]);
             let v25: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v24.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
             v25
@@ -137,7 +136,7 @@ fn planning_written_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3:
     }
 }
 fn rewritten_7(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>) -> US1 {
-    let (mut v4, mut v5): (i32, Rc<str>) = agile_planning_rewrite::kit_agile_planning_rewrite(&*v0, &*v1, &*v2, &*v3);
+    let (mut v4, mut v5): (i32, Rc<str>) = agile_planning_rewrite::rig_agile_planning_rewrite(&*v0, &*v1, &*v2, &*v3);
     let v6: bool = v4 == 0i32;
     if v6 {
         US1::US1_StepText(v5)
@@ -172,24 +171,15 @@ fn planning_revised_3(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3:
             planning_written_4(v0, v1, v2, v4, v37, v5)
         }
         US2::US2_PlanningUnchanged => {
-            let v18: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile edit ok id="); } LIT.with(|lit| lit.clone()) }, v1.clone()));
-            let v19: Rc<str> = Rc::<str>::from(format!("{}{}", v18, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" field="); } LIT.with(|lit| lit.clone()) }));
-            let v20: Rc<str> = Rc::<str>::from(format!("{}{}", v19, v2));
-            let v21: Rc<str> = Rc::<str>::from(format!("{}{}", v20, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" unchanged "); } LIT.with(|lit| lit.clone()) }));
+            let v21: Rc<str> = string_concat(&["kit agile edit ok id=", &*v1, " field=", &*v2, " unchanged "]);
             let v22: u64 = v4.len() as u64;
             let v23: u64 = v4.len() as u64;
             let v24: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v5);
             let v25: Rc<str> = std::rc::Rc::<str>::from((v22).to_string());
-            let v26: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_before="); } LIT.with(|lit| lit.clone()) }, v25));
-            let v27: Rc<str> = Rc::<str>::from(format!("{}{}", v26, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" bytes_after="); } LIT.with(|lit| lit.clone()) }));
             let v28: Rc<str> = std::rc::Rc::<str>::from((v23).to_string());
-            let v29: Rc<str> = Rc::<str>::from(format!("{}{}", v27, v28));
-            let v30: Rc<str> = Rc::<str>::from(format!("{}{}", v29, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" elapsed_ms="); } LIT.with(|lit| lit.clone()) }));
             let v31: Rc<str> = std::rc::Rc::<str>::from((v24).to_string());
-            let v32: Rc<str> = Rc::<str>::from(format!("{}{}", v30, v31));
-            let v33: Rc<str> = agile_planning_fields::kit_agile_planning_summary(&*v4, &*v1);
-            let v34: Rc<str> = Rc::<str>::from(format!("{}{}", v21, v33));
-            let v35: Rc<str> = Rc::<str>::from(format!("{}{}", v34, v32));
+            let v33: Rc<str> = agile_planning_fields::rig_agile_planning_summary(&*v4, &*v1);
+            let v35: Rc<str> = string_concat(&[&*v21, &*v33, " bytes_before=", &*v25, " bytes_after=", &*v28, " elapsed_ms=", &*v31]);
             let v36: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v35.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
             v36
@@ -197,14 +187,11 @@ fn planning_revised_3(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3:
     }
 }
 fn concat5_8(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn value_token_9(mut v0: Rc<str>, mut v1: Rc<str>) -> US1 {
-    let (mut v2, mut v3): (i32, Rc<str>) = agile_planning_values::kit_agile_planning_value_token(&*v0, &*v1);
+    let (mut v2, mut v3): (i32, Rc<str>) = agile_planning_values::rig_agile_planning_value_token(&*v0, &*v1);
     let v4: bool = v2 == 0i32;
     if v4 {
         US1::US1_StepText(v3)
@@ -240,7 +227,7 @@ fn planning_edit_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc
                 US1::US1_StepText(v19) => {
                     let v19: Rc<str> = v19;
                     let v20: Rc<str> = std::fs::read_to_string(&*v15).unwrap_or_default().into();
-                    let v21: Rc<str> = kit_agile_records::kit_agile_records_as_lines(&*v20);
+                    let v21: Rc<str> = rig_agile_records::rig_agile_records_as_lines(&*v20);
                     planning_revised_3(v7, v1, v2, v19, v21, v4)
                 }
             }
@@ -263,6 +250,6 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
         planning_edit_entry_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_planning_edit_run() -> i32 {
+pub fn rig_agile_planning_edit_run() -> i32 {
     closure0()()
 }

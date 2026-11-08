@@ -1,6 +1,0 @@
-packages:
-    |core-
-    spiral-
-    kit_memory_model
-modules:
-    import

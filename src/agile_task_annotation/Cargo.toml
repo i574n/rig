@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "annotation.spi"
+output = "annotation.rs"
+
+[package]
+name = "agile-task-annotation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "agile_task_annotation"
+path = "annotation.rs"

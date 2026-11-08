@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_crate_walk
+link:
+    rig_crate_walk
+modules:
+    model
+    gate

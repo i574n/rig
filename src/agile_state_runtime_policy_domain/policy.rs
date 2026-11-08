@@ -10,6 +10,16 @@ fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
     let slice = &bytes[from as usize..(to + 1) as usize];
     match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 fn agile_state_mutation_target_decision_binding_0(mut v0: i32, mut v1: i32) -> i32 {
     let mut v2: bool = v0 == 1i32;
     if v2 {
@@ -320,7 +330,7 @@ fn receipt_attestation_text_16(mut v0: Rc<str>) -> Rc<str> {
         let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("runtime"); } LIT.with(|lit| lit.clone()) };
         v3
     } else {
-        let v4: Rc<str> = Rc::<str>::from(format!("{}{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("build:"); } LIT.with(|lit| lit.clone()) }, v0));
+        let v4: Rc<str> = string_concat(&["build:", &*v0]);
         v4
     }
 }
@@ -405,11 +415,11 @@ fn agile_lease_policy_from_text_21(mut v0: Rc<str>) -> u64 {
     let v6: i32 = (v5.clone().len() as i32);
     let v7: i32 = method7(v5.clone(), v6);
     let v8: Rc<str> = string_slice(&v5, 0i32 as i64, v7 as i64);
-    let v9: bool = &*v8 == "renewing";
+    let v9: bool = &*v8 == "bounded";
     if v9 {
-        1u64
-    } else {
         0u64
+    } else {
+        1u64
     }
 }
 fn closure14() -> Rc<dyn Fn(Rc<str>) -> u64> {
@@ -614,7 +624,7 @@ fn agile_state_package_module_name_26(mut v0: Rc<str>) -> Rc<str> {
         let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v26
     } else {
-        let v27: Rc<str> = Rc::<str>::from(format!("{}{}", v18, { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".spi"); } LIT.with(|lit| lit.clone()) }));
+        let v27: Rc<str> = string_concat(&[&*v18, ".spi"]);
         v27
     }
 }
@@ -623,63 +633,63 @@ fn closure19() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         agile_state_package_module_name_26(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_agile_state_mutation_target_decision_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_state_mutation_target_decision_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_agile_lease_budget_decision_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_lease_budget_decision_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_agile_lease_readback_decision_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_lease_readback_decision_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_agile_prompt_title_code(v0: &str) -> u64 {
+pub fn rig_agile_prompt_title_code(v0: &str) -> u64 {
     closure3()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_status_name_code(v0: &str) -> u64 {
+pub fn rig_agile_status_name_code(v0: &str) -> u64 {
     closure4()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_task_line_candidate_code(v0: &str) -> u64 {
+pub fn rig_agile_task_line_candidate_code(v0: &str) -> u64 {
     closure5()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_receipt_row_kind_code(v0: &str) -> u64 {
+pub fn rig_agile_receipt_row_kind_code(v0: &str) -> u64 {
     closure6()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_receipt_row_kind_text(v0: &str) -> Rc<str> {
+pub fn rig_agile_receipt_row_kind_text(v0: &str) -> Rc<str> {
     closure7()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_receipt_attestation_kind_code(v0: &str) -> u64 {
+pub fn rig_agile_receipt_attestation_kind_code(v0: &str) -> u64 {
     closure8()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_receipt_attestation_text(v0: &str) -> Rc<str> {
+pub fn rig_agile_receipt_attestation_text(v0: &str) -> Rc<str> {
     closure9()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_prompt_lease_status_code(v0: &str) -> u64 {
+pub fn rig_agile_prompt_lease_status_code(v0: &str) -> u64 {
     closure10()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_prompt_lease_marker_text(v0: &str) -> Rc<str> {
+pub fn rig_agile_prompt_lease_marker_text(v0: &str) -> Rc<str> {
     closure11()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_prompt_lease_shape_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_prompt_lease_shape_binding(v0: i32, v1: i32) -> i32 {
     closure12()(v0, v1)
 }
-pub fn kit_agile_lease_clock_phase_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_lease_clock_phase_binding(v0: i32, v1: i32) -> i32 {
     closure13()(v0, v1)
 }
-pub fn kit_agile_lease_policy_from_text(v0: &str) -> u64 {
+pub fn rig_agile_lease_policy_from_text(v0: &str) -> u64 {
     closure14()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_lease_effective_phase_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_agile_lease_effective_phase_binding(v0: i32, v1: i32) -> i32 {
     closure15()(v0, v1)
 }
-pub fn kit_agile_status_text(v0: &str) -> Rc<str> {
+pub fn rig_agile_status_text(v0: &str) -> Rc<str> {
     closure16()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_spi_escape_text(v0: &str) -> Rc<str> {
+pub fn rig_agile_spi_escape_text(v0: &str) -> Rc<str> {
     closure17()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_state_package_line_code(v0: &str) -> u64 {
+pub fn rig_agile_state_package_line_code(v0: &str) -> u64 {
     closure18()(Rc::<str>::from(v0))
 }
-pub fn kit_agile_state_package_module_name(v0: &str) -> Rc<str> {
+pub fn rig_agile_state_package_module_name(v0: &str) -> Rc<str> {
     closure19()(Rc::<str>::from(v0))
 }

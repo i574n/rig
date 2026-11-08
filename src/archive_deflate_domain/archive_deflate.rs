@@ -2,8 +2,8 @@
 #![allow(clippy::needless_late_init)]
 #![allow(clippy::items_after_test_module)]
 use std::collections::BTreeSet;
-use kit_rust_std_fs::{rooted_list_names, rooted_open_regular_read, rooted_read_symlink};
-use kit_rust_std_fs_mutation::{rooted_create_directory_within, rooted_create_hardlink_within, rooted_create_regular_within, rooted_create_symlink_within, rooted_ensure_directory, rooted_promote_directory_within, rooted_remove_tree_within, rooted_set_directory_mode_within};
+use rig_rust_std_fs::{rooted_list_names, rooted_open_regular_read, rooted_read_symlink};
+use rig_rust_std_fs_mutation::{rooted_create_directory_within, rooted_create_hardlink_within, rooted_create_regular_within, rooted_create_symlink_within, rooted_ensure_directory, rooted_promote_directory_within, rooted_remove_tree_within, rooted_set_directory_mode_within};
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
 use zip::CompressionMethod;
@@ -46,7 +46,7 @@ pub fn archive_link_target_confined(link_relative: &Path, target: &Path) -> bool
 
 pub fn archive_create_confined_symlink(link_relative: &Path, target: &Path, output: &Path, stage: &Path, size: u64) -> Result<(), String> {
     let confined = archive_link_target_confined(link_relative, target);
-    if kit_archive_tar_symlink_binding(i32::from(confined), i32::from(size == 0)) != 1 {
+    if rig_archive_tar_symlink_binding(i32::from(confined), i32::from(size == 0)) != 1 {
         return Err(format!("tar symlink rejected: {} -> {}", link_relative.display(), target.display()));
     }
     rooted_create_symlink_within(stage, output, target)?;
@@ -57,7 +57,7 @@ pub fn archive_create_confined_hardlink(target_relative: &Path, output: &Path, s
     let target_safe = archive_safe_relative(target_relative);
     let target = stage.join(target_relative);
     let target_regular = rooted_open_regular_read(&target).is_ok();
-    if kit_archive_tar_hardlink_binding(i32::from(target_safe && target_regular), i32::from(size == 0)) != 1 {
+    if rig_archive_tar_hardlink_binding(i32::from(target_safe && target_regular), i32::from(size == 0)) != 1 {
         return Err(format!("tar hardlink rejected: {} -> {}", output.display(), target_relative.display()));
     }
     if let Some(parent) = output.parent() { rooted_ensure_directory(parent)?; }
@@ -91,7 +91,7 @@ fn archive_validate_tree(root: &Path) -> Result<usize, String> {
 }
 
 pub fn archive_extract_with_limit(archive_path: &Path, destination: &Path, limit_bytes: u64) -> Result<(usize, usize, u64), String> {
-    if kit_archive_preflight_binding(i32::from(archive_path.is_file()), i32::from(!destination.exists())) != 1 {
+    if rig_archive_preflight_binding(i32::from(archive_path.is_file()), i32::from(!destination.exists())) != 1 {
         return Err(format!("archive preflight rejected archive={} destination={}", archive_path.display(), destination.display()));
     }
     if limit_bytes == 0 || limit_bytes > i32::MAX as u64 { return Err("archive limit must be between 1 and i32::MAX".to_owned()); }
@@ -117,12 +117,12 @@ pub fn archive_extract_with_limit(archive_path: &Path, destination: &Path, limit
             let compression_supported = matches!(entry.compression(), CompressionMethod::Stored | CompressionMethod::Deflated);
             let mode = entry.unix_mode().unwrap_or(if entry.is_dir() { 0o755 } else { 0o644 });
             let is_symlink = mode & 0o170000 == 0o120000;
-            if kit_archive_compression_binding(1, i32::from(compression_supported)) != 1 {
+            if rig_archive_compression_binding(1, i32::from(compression_supported)) != 1 {
                 return Err(format!("zip entry rejected path={} compression={:?} mode={mode:o}", relative.display(), entry.compression()));
             }
             let output = stage.join(&relative);
             if entry.is_dir() {
-                if is_symlink || kit_archive_entry_binding(1, 1) != 1 { return Err(format!("directory zip entry rejected: {}", relative.display())); }
+                if is_symlink || rig_archive_entry_binding(1, 1) != 1 { return Err(format!("directory zip entry rejected: {}", relative.display())); }
                 rooted_ensure_directory(&output)?;
                 rooted_set_directory_mode_within(&stage, &output, mode)?;
                 continue;
@@ -139,15 +139,15 @@ pub fn archive_extract_with_limit(archive_path: &Path, destination: &Path, limit
                 let target_text = String::from_utf8(bytes).map_err(|_| format!("symlink target is not UTF-8: {}", relative.display()))?;
                 let target = PathBuf::from(target_text);
                 let confined = archive_link_target_confined(&relative, &target);
-                if kit_archive_entry_binding(1, i32::from(confined)) != 1 { return Err(format!("zip symlink escapes root: {} -> {}", relative.display(), target.display())); }
+                if rig_archive_entry_binding(1, i32::from(confined)) != 1 { return Err(format!("zip symlink escapes root: {} -> {}", relative.display(), target.display())); }
                 rooted_create_symlink_within(&stage, &output, &target)?;
                 payloads += 1;
-                if kit_archive_fault_binding(fault, 1) == 1 {
+                if rig_archive_fault_binding(fault, 1) == 1 {
                     return Err("injected archive fault after-first-payload".to_owned());
                 }
                 continue;
             }
-            if kit_archive_entry_binding(1, 1) != 1 { return Err(format!("zip file entry rejected: {}", relative.display())); }
+            if rig_archive_entry_binding(1, 1) != 1 { return Err(format!("zip file entry rejected: {}", relative.display())); }
             let mut output_file = rooted_create_regular_within(&stage, &output, mode)?;
             let mut written = 0u64;
             let mut buffer = [0u8; 64 * 1024];
@@ -162,16 +162,16 @@ pub fn archive_extract_with_limit(archive_path: &Path, destination: &Path, limit
             if written != declared { return Err(format!("zip entry size mismatch path={} declared={declared} written={written}", relative.display())); }
             output_file.sync_all().map_err(|error| format!("sync {}: {error}", output.display()))?;
             payloads += 1;
-            if kit_archive_fault_binding(fault, 1) == 1 {
+            if rig_archive_fault_binding(fault, 1) == 1 {
                 return Err("injected archive fault after-first-payload".to_owned());
             }
         }
-        if kit_archive_budget_binding(limit_bytes as i32, total_bytes as i32) != 1 { return Err("typed archive budget rejected".to_owned()); }
+        if rig_archive_budget_binding(limit_bytes as i32, total_bytes as i32) != 1 { return Err("typed archive budget rejected".to_owned()); }
         let tree_files = archive_validate_tree(&stage)?;
-        if kit_archive_complete_binding(payloads as i32, tree_files as i32) != 1 || kit_archive_tree_binding(1, 1) != 1 {
+        if rig_archive_complete_binding(payloads as i32, tree_files as i32) != 1 || rig_archive_tree_binding(1, 1) != 1 {
             return Err(format!("typed archive completion rejected payloads={payloads} tree_files={tree_files}"));
         }
-        if kit_archive_fault_binding(fault, 2) == 1 {
+        if rig_archive_fault_binding(fault, 2) == 1 {
             return Err("injected archive fault before-commit".to_owned());
         }
         Ok((entries_total, payloads, total_bytes))
@@ -542,39 +542,39 @@ fn closure11() -> Rc<dyn Fn(i32, i32) -> i32> {
         archive_fault_binding_11(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_archive_preflight_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_preflight_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_archive_entry_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_entry_binding(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_archive_tar_symlink_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_tar_symlink_binding(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_archive_tar_hardlink_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_tar_hardlink_binding(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }
-pub fn kit_archive_tar_long_link_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_tar_long_link_binding(v0: i32, v1: i32) -> i32 {
     closure4()(v0, v1)
 }
-pub fn kit_archive_tar_pax_path_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_tar_pax_path_binding(v0: i32, v1: i32) -> i32 {
     closure5()(v0, v1)
 }
-pub fn kit_archive_compression_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_compression_binding(v0: i32, v1: i32) -> i32 {
     closure6()(v0, v1)
 }
-pub fn kit_archive_budget_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_budget_binding(v0: i32, v1: i32) -> i32 {
     closure7()(v0, v1)
 }
-pub fn kit_archive_complete_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_complete_binding(v0: i32, v1: i32) -> i32 {
     closure8()(v0, v1)
 }
-pub fn kit_archive_tree_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_tree_binding(v0: i32, v1: i32) -> i32 {
     closure9()(v0, v1)
 }
-pub fn kit_archive_format_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_format_binding(v0: i32, v1: i32) -> i32 {
     closure10()(v0, v1)
 }
-pub fn kit_archive_fault_binding(v0: i32, v1: i32) -> i32 {
+pub fn rig_archive_fault_binding(v0: i32, v1: i32) -> i32 {
     closure11()(v0, v1)
 }

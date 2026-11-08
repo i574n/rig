@@ -1,3 +1,10 @@
+///- --package .
+:# search_receipt static =
+    :< workspace_primitives.numbers
+    :< sm'_operators
+    :< workspace_primitives.clock
+    :< workspace_primitives.console
+
 :< workspace_primitives.numbers
 :< sm'_operators
 :< workspace_primitives.clock
@@ -125,36 +132,48 @@
     =
     emit_receipt AfterContent (parallel_manifest_receipt_text workers entries digest started serial_done parallel_done)
 
+///> rust
+:# hits_over_the_limit_say_truncated_and_short_slices_say_end_of_file =
+    testing.expect (hits_text 7i32 50i32 (hit_budget_of 7i32 50i32) = " hits=7") "all hits shown"
+    := over = hits_text 51i32 50i32 (hit_budget_of 51i32 50i32)
+    testing.expect (over = " hits=50 truncated=true found_at_least=51") "more hits than the limit"
+    testing.expect (hit_budget_of 50i32 50i32 = AllHitsShown) "exactly the limit is not truncated"
+    := started = search_clock_ms ()
+    testing.expect (sm'.contains " end_of_file=true" (fs_slice_receipt_text 1u64 3u64 5u64 started)) "a short slice"
+    testing.expect (sm'.contains "end_of_file" (fs_slice_receipt_text 1u64 5u64 5u64 started) |> not) "a full slice"
+    := receipt = fs_search_receipt_text 7i32 50i32 started
+    := expected = "kit proxy fs-search ok hits=7 excludes=.git,node_modules"
+    testing.expect (sm'.starts_with expected receipt) "fs-search fields"
 := main () : i32 =
-    export "kit_search_clock_ms" ((\ () => search_clock_ms ()) : () -> u64)
+    export "rig_search_clock_ms" ((\ () => search_clock_ms ()) : () -> u64)
     export
-        "kit_parallel_search_receipt"
+        "rig_parallel_search_receipt"
         (
             \ (workers, found, limit, started, serial_done, parallel_done) =>
                 parallel_search_receipt workers found limit started serial_done parallel_done
             : i32 * i32 * i32 * u64 * u64 * u64 -> i32
         )
     export
-        "kit_fs_search_receipt"
+        "rig_fs_search_receipt"
         ((\ (found, limit, started) => fs_search_receipt found limit started) : i32 * i32 * u64 -> i32)
     export
-        "kit_fs_slice_receipt"
+        "rig_fs_slice_receipt"
         (
             \ (start, shown, requested, started) => fs_slice_receipt start shown requested started
             : u64 * u64 * u64 * u64 -> i32
         )
     export
-        "kit_fs_context_receipt"
+        "rig_fs_context_receipt"
         (
             \ (offset, window, file_bytes, started) => fs_context_receipt offset window file_bytes started
             : u64 * u64 * u64 * u64 -> i32
         )
-    export "kit_hash_receipt" ((\ (path, started) => hash_receipt path started) : string * u64 -> i32)
+    export "rig_hash_receipt" ((\ (path, started) => hash_receipt path started) : string * u64 -> i32)
     export
-        "kit_hash_tree_receipt"
+        "rig_hash_tree_receipt"
         ((\ (relative, started) => hash_tree_receipt relative started) : string * u64 -> i32)
     export
-        "kit_parallel_manifest_receipt"
+        "rig_parallel_manifest_receipt"
         (
             \ (workers, entries, digest, started, serial_done, parallel_done) =>
                 parallel_manifest_receipt workers entries digest started serial_done parallel_done

@@ -61,10 +61,10 @@
 := id_width () = 26i32
 := title_width () = 96i32
 
-:= planning_header () : string = $'agile_planning_fields::kit_agile_planning_header()' : string
-:= planning_columns (~text : string) (~id : string) (at : i32) : string = $'agile_planning_fields::kit_agile_planning_\
+:= planning_header () : string = $'agile_planning_fields::rig_agile_planning_header()' : string
+:= planning_columns (~text : string) (~id : string) (at : i32) : string = $'agile_planning_fields::rig_agile_planning_\
     columns_near(&*!text, &*!id, !at)' : string
-:= planning_json (~text : string) (~id : string) (at : i32) : string = $'agile_planning_fields::kit_agile_planning_jso\
+:= planning_json (~text : string) (~id : string) (at : i32) : string = $'agile_planning_fields::rig_agile_planning_jso\
     n_near(&*!text, &*!id, !at)' : string
 
 := table_header () : string =
@@ -193,7 +193,7 @@
     head ++# middle ++# tail ++# "," ++# (extra ++# planning ++# "}")
 
 := waits_column (~unsettled : string) (~deps : string) : string =
-    $'agile_task_census::kit_agile_waits_column(&*!unsettled, &*!deps)' : string
+    $'agile_task_census::rig_agile_waits_column(&*!unsettled, &*!deps)' : string
 
 :~ row_line (text : string) (request : list_request) (row : task_row) (first : bool) : string =
     := planning = planning_row_in request.planning row.id
@@ -206,7 +206,7 @@
 := any_planning (~filter : string) : bool = (filter = "all")
 
 := planning_selected (~text : string) (~id : string) (at : i32) (~load : string) (~assignee : string) : bool =
-    $'agile_planning_filters::kit_agile_planning_selected_near(&!text, &!id, !at, &!load, &!assignee)' : bool
+    $'agile_planning_filters::rig_agile_planning_selected_near(&!text, &!id, !at, &!load, &!assignee)' : bool
 
 := query_passes
     (~query : string) (~id : string) (~title : string) (~tags : string) (~status : string) (settled : bool)
@@ -214,18 +214,18 @@
     =
     ? query = ""
     ?> !+
-    |: $'agile_task_query::kit_query_passes(&*!query, &*!id, &*!title, &*!tags, &*!status, !settled)' : bool
-:= query_reads_deps (~query : string) : bool = ? query = "" ?> !- |: $'agile_task_query::kit_query_reads_deps(&*!query\
+    |: $'agile_task_query::rig_query_passes(&*!query, &*!id, &*!title, &*!tags, &*!status, !settled)' : bool
+:= query_reads_deps (~query : string) : bool = ? query = "" ?> !- |: $'agile_task_query::rig_query_reads_deps(&*!query\
     )' : bool
 := deps_settled (~unsettled : string) (~deps : string) : bool = $'(!deps).split(char::from(44u8)).map(|dep| \
     dep.trim()).filter(|dep| (!unsettled).lines().any(|line| line == *dep)).next().is_none()' : bool
-:= query_shown (~query : string) : string = $'agile_task_query::kit_query_shown(&*!query)' : string
-:= query_usage () : string = $'agile_task_query::kit_query_usage()' : string
+:= query_shown (~query : string) : string = $'agile_task_query::rig_query_shown(&*!query)' : string
+:= query_usage () : string = $'agile_task_query::rig_query_usage()' : string
 := query_appended (~query : string) (~argument : string) (~value : string) : string =
     query ++# (? query = "" ?> "" |: " ") ++# argument ++# (? value = "" ?> "" |: " ") ++# value
 
 := planning_filters_valid (~load : string) (~assignee : string) : bool =
-    $'agile_planning_filters::kit_agile_planning_filters_valid(&*!load, &*!assignee)' : bool
+    $'agile_planning_filters::rig_agile_planning_filters_valid(&*!load, &*!assignee)' : bool
 
 :~ row_selected (text : string) (request : list_request) (row : task_row) : bool =
     ?
@@ -298,11 +298,11 @@
                  | SortPriority => ""
                  | sort => " sort=" ++# (sort_word sort)
     (? request.query = "" ?> "" |: query_shown request.query) ++# sorted
-:= unsettled_ids (text : string) : string = $"agile_task_census::kit_agile_unsettled_ids(&!text)" : string
+:= unsettled_ids (text : string) : string = $"agile_task_census::rig_agile_unsettled_ids(&!text)" : string
 := status_counts (text : string) (length : i32) : string =
-    $"agile_task_census::kit_agile_status_counts(&!text)" : string
+    $"agile_task_census::rig_agile_status_counts(&!text)" : string
 := status_counts_json (text : string) (length : i32) : string =
-    $"agile_task_census::kit_agile_status_counts_json(&!text)" : string
+    $"agile_task_census::rig_agile_status_counts_json(&!text)" : string
 
 := planning_filter_text (request : list_request) : string =
     ? any_planning request.load ?>
@@ -368,7 +368,7 @@
 
 :~ state_segments (~root : string) : string =
     := state_dir = root ++# "/state"
-    $'agile_note_listing::kit_agile_state_segments(&*!state_dir)' : string
+    $'agile_note_listing::rig_agile_state_segments(&*!state_dir)' : string
 
 :~ agile_list (~root : string) (request : list_request) : i32 =
     := started = unix_ms ()
@@ -377,7 +377,7 @@
     | FileReadable file =>
         := text = records_text (loaded_string (read_text file))
         := length = byte_len text
-        := malformed = $'agile_task_census::kit_agile_first_malformed_task(&*!text)' : i32
+        := malformed = $'agile_task_census::rig_agile_first_malformed_task(&*!text)' : i32
         ? malformed < 0i32 ?>
             := unsettled = ? query_reads_deps request.query ?> unsettled_ids text |: ""
             := noted_text = text ++# "\n" ++# state_segments root
@@ -387,7 +387,7 @@
 
 :~ agile_list_entry () : i32 =
     := ok, reason, status, load, assignee, json, query, sort =
-        $'kit_agile_list_args::kit_agile_list_request()'
+        $'rig_agile_list_args::rig_agile_list_request()'
         : bool * string * string * string * string * bool * string * string
     ? ok
     ?>
@@ -405,9 +405,9 @@
                 sort = sort_of_word sort
                 unsettled = ""
             }
-        agile_list (kit_agile_list_args.args.list_root ()) request
+        agile_list (rig_agile_list_args.args.list_root ()) request
     |: agile_list_failure reason
 := main () : i32 =
-    export "kit_agile_list_run" agile_list_entry
+    export "rig_agile_list_run" agile_list_entry
     := _ = agile_list_entry ()
     0i32

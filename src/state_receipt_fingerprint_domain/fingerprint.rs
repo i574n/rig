@@ -56,15 +56,15 @@ fn closure3() -> Rc<dyn Fn(i32, i32) -> i32> {
         fingerprint_high_step_binding_3(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_state_receipt_byte_valid(v0: i32, v1: i32) -> i32 {
+pub fn rig_state_receipt_byte_valid(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_state_receipt_mix_low(v0: i32, v1: i32) -> i32 {
+pub fn rig_state_receipt_mix_low(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_state_receipt_low_step(v0: i32, v1: i32) -> i32 {
+pub fn rig_state_receipt_low_step(v0: i32, v1: i32) -> i32 {
     closure2()(v0, v1)
 }
-pub fn kit_state_receipt_high_step(v0: i32, v1: i32) -> i32 {
+pub fn rig_state_receipt_high_step(v0: i32, v1: i32) -> i32 {
     closure3()(v0, v1)
 }

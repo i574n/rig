@@ -1,0 +1,97 @@
+///- --package .
+:# waits static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| wait_kind =
+    | WaitsTrain :: string -> wait_kind
+    | WaitsItem :: string -> wait_kind
+    | WaitsLane :: string -> wait_kind
+    | WaitsUser :: string -> wait_kind
+    | ResumeWhen :: string -> wait_kind
+
+:== task_wait = { item : string; kind : wait_kind }
+
+:= row_marker () : string = " = Waits (\""
+
+:~ kind_word (kind : wait_kind) : string =
+    ?= kind ?|
+    | WaitsTrain _ => "train"
+    | WaitsItem _ => "item"
+    | WaitsLane _ => "lane"
+    | WaitsUser _ => "user"
+    | ResumeWhen _ => "when"
+
+:~ kind_value (kind : wait_kind) : string =
+    ?= kind ?|
+    | WaitsTrain v => v
+    | WaitsItem v => v
+    | WaitsLane v => v
+    | WaitsUser v => v
+    | ResumeWhen v => v
+
+:~ kind_of (~word : string) (~value : string) : option wait_kind =
+    ? value = "" ?> None
+    |? word = "train" ?> Some (WaitsTrain value)
+    |? word = "item" ?> Some (WaitsItem value)
+    |? word = "lane" ?> Some (WaitsLane value)
+    |? word = "user" ?> Some (WaitsUser value)
+    |? word = "when" ?> Some (ResumeWhen value)
+    |: None
+
+:~ kind_of_flag (~flag : string) : option wait_kind =
+    := at = sm'.index_of ":" flag
+    ? at <= 0i32 ?> None
+    |: kind_of (sm'.substring 0i32 at flag) (sm'.substring (at + 1i32) (sm'.length flag - at - 1i32) flag)
+
+:~ ^ nth_quoted (~text : string) (n : i32) : string =
+    := start_at = sm'.index_of "\"" text
+    := after = ? start_at < 0i32 ?> "" |: sm'.substring (start_at + 1i32) (sm'.length text - start_at - 1i32) text
+    := close = sm'.index_of "\"" after
+    ? start_at < 0i32 || close < 0i32 ?> ""
+    |? n = 0i32 ?> sm'.substring 0i32 close after
+    |: nth_quoted (sm'.substring (close + 1i32) (sm'.length after - close - 1i32) after) (n - 1i32)
+
+:~ wait_of_line (~line : string) : option task_wait =
+    := at = sm'.index_of (row_marker ()) line
+    ? at < 0i32 ?> None
+    |:
+        := rest = sm'.substring (at + 3i32) (sm'.length line - at - 3i32) line
+        := item = nth_quoted rest 0i32
+        ?= kind_of (nth_quoted rest 1i32) (nth_quoted rest 2i32) ?|
+        | Some kind ?& item <> "" => Some { item = item; kind = kind }
+        | _ => None
+
+:~ waits_of_text (~text : string) : list task_wait =
+    := gathered = \ (found : list task_wait) (line : string) =>
+        ?= wait_of_line line ?|
+        | Some w => listm.append found [ w ]
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold gathered []
+
+:~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_" |> sm'.replace "." "_"
+
+:~ quoted (~text : string) : string = "\"" ++# sm'.replace "\"" "'" text ++# "\""
+
+:~ row_of_wait (w : task_wait) : string =
+    := fields = quoted w.item ++# ", " ++# quoted (kind_word w.kind) ++# ", " ++# quoted (kind_value w.kind)
+    "inl wait_of_" ++# slug_of w.item ++# " () = Waits (" ++# fields ++# ")"
+
+:~ waiting_ids (waits : list task_wait) : list string = waits |> listm.map (\ (w : task_wait) => w.item)
+
+:~ wait_line (w : task_wait) : string = w.item ++# " waits on " ++# kind_word w.kind ++# " " ++# kind_value w.kind
+
+///> rust
+:# wait_rows_round_trip_and_carry_a_typed_kind =
+    := w = { item = "KIT-A"; kind = WaitsTrain "TRAIN40" }
+    := row = row_of_wait w
+    testing.expect (row = "inl wait_of_kit_a () = Waits (\"KIT-A\", \"train\", \"TRAIN40\")") row
+    testing.expect (wait_of_line row = Some w) "a written row reads back"
+    testing.expect (kind_of_flag "item:DELEGATE-2" = Some (WaitsItem "DELEGATE-2")) "an item wait"
+    testing.expect (kind_of_flag "when:the box is quiet" = Some (ResumeWhen "the box is quiet")) "a resume condition"
+    testing.expect (kind_of_flag "pack:x" = None && kind_of_flag "train:" = None) "unknown kinds and empty values"
+    := other = row_of_wait { item = "C"; kind = WaitsTrain "TRAIN40" }
+    := text = row ++# "\ninl wait_of_b () = Waits (\"B\", \"pack\", \"x\")\n" ++# other
+    testing.expect (waiting_ids (waits_of_text text) = [ "KIT-A"; "C" ]) "only rows with a known kind"
+    testing.expect (wait_line w = "KIT-A waits on train TRAIN40") "line"

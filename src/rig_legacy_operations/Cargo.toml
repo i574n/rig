@@ -1,0 +1,39 @@
+[package.metadata.spiral]
+entry = "operations.spi"
+output = "operations.rs"
+
+[package]
+name = "rig-legacy-operations"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_legacy_operations"
+path = "operations.rs"
+
+[dependencies]
+rig-process = { path = "../rig_process" }
+rig-process-observation = { path = "../rig_process_observation" }
+proxy-command-output = { path = "../proxy_command_output" }
+rig-toolchain-proxy = { path = "../rig_toolchain_proxy" }
+rig-source-topology = { path = "../rig_source_topology" }
+rig-source-map = { path = "../rig_source_map" }
+rig-cold-rebuild-matrix = { path = "../rig_cold_rebuild_matrix" }
+rig-ingest-frontier = { path = "../rig_ingest_frontier" }
+rig-coverage-prune = { path = "../rig_coverage_prune" }
+rig-bundle-zip = { path = "../rig_bundle_zip" }
+evidence-currentness-domain = { path = "../evidence_currentness_domain" }
+cold-proof-domain = { path = "../cold_proof_domain" }
+rig-patch-control-domain = { path = "../patch_control_domain" }
+proxy-text-replacement = { path = "../proxy_text_replacement" }
+proxy-file-removal = { path = "../proxy_file_removal" }
+proxy-file-receipt = { path = "../proxy_file_receipt" }
+proxy-directory-listing = { path = "../proxy_directory_listing" }
+proxy-file-reading = { path = "../proxy_file_reading" }
+proxy-failure-classification = { path = "../proxy_failure_classification" }
+rig-rust-std-fs = { path = "../rust_std_fs" }
+rig-delete-guard = { path = "../rig_delete_guard" }
+rig-proxy-search = { path = "../rig_proxy_search" }
+legacy-capability-domain = { path = "../legacy_capability_domain" }

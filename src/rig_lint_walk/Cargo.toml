@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "entry.spi"
+output = "lint_walk.rs"
+
+[package]
+name = "rig-lint-walk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_lint_walk"
+path = "lint_walk.rs"

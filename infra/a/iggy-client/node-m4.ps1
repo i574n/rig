@@ -14,7 +14,7 @@ $sample = Join-Path $Project 'sample-job.ps1'
 @'
 function Say([string] $text) { "$(Get-Date -Format 'HH:mm:ss') $text" }
 Say 'fix: ok  files 1  replacements 1'
-Say 'regen of kit_sample exit 0; generated code checked'
+Say 'regen of rig_sample exit 0; generated code checked'
 Say 'debug build exit 0; candidate ABCDEF'
 Start-Sleep -Seconds 2
 Say 'positive control src\x.spi (a pure model notebook): exit 0, executed 2, passed 2, unsupported 0'
@@ -31,7 +31,7 @@ $finished = $follower.WaitForExit(30000)
 Say "sample job: publish exit $publishExit; follower finished $finished in $($watch.ElapsedMilliseconds) ms after the job ended, exit $(if ($finished) { $follower.ExitCode } else { '-' })"
 Get-Content (Join-Path $Project 'follow-ok.txt') | ForEach-Object { Say "  follow: $_" }
 $stopSample = Join-Path $Project 'sample-stop.ps1'
-"function Say([string] `$text) { `"`$(Get-Date -Format 'HH:mm:ss') `$text`" }`nSay 'regen of kit_sample exit 1; failed'`nSay 'STOP: regen failed'`nexit 1" | Set-Content $stopSample
+"function Say([string] `$text) { `"`$(Get-Date -Format 'HH:mm:ss') `$text`" }`nSay 'regen of rig_sample exit 1; failed'`nSay 'STOP: regen failed'`nexit 1" | Set-Content $stopSample
 $labelStop = "m4-stop-$(Get-Date -Format HHmmss)"
 & (Join-Path $Project 'target\release\publish.exe') $labelStop $stopSample *> (Join-Path $Project 'publish-stop.txt')
 $stopFollow = @(& (Join-Path $Project 'target\release\follow.exe') $labelStop 1 2>&1 | ForEach-Object { "$_" })

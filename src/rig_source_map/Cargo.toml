@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "map.rs"
+
+[package]
+name = "rig-source-map"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "map.rs"
+
+[[test]]
+name = "source_ownership"
+path = "source_ownership.rs"
+
+[dependencies]
+rig-proxy-search = { path = "../rig_proxy_search" }
+rig-source-topology = { path = "../rig_source_topology" }

@@ -1,8 +1,8 @@
-///- --package ../kit_cli_check --timeout 900000
+///- --package ../rig_cli_check --timeout 900000
 :< cli
 
 := agile_call (root : fixture_root) (args : cli_args) : cli_run =
-    kit_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
+    rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
 
 := exited (run : cli_run) (~code : i32) (~part : string) : () =
     expect (run.code = code) (cat "unexpected exit, " (run_text run))

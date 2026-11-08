@@ -88,12 +88,12 @@ fn closure2() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         toolchain_receipt_catalog_2(v0.clone())
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_toolchain_execution_gate(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_execution_gate(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
-pub fn kit_toolchain_observed_outcome(v0: i32, v1: i32) -> i32 {
+pub fn rig_toolchain_observed_outcome(v0: i32, v1: i32) -> i32 {
     closure1()(v0, v1)
 }
-pub fn kit_toolchain_receipt_catalog(v0: &str) -> Rc<str> {
+pub fn rig_toolchain_receipt_catalog(v0: &str) -> Rc<str> {
     closure2()(Rc::<str>::from(v0))
 }

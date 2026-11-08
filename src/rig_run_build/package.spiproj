@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_run_model
+    rig_os_machine
+    rig_os_run
+modules:
+    builder

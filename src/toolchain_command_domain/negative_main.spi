@@ -1,11 +1,11 @@
 := execution (~action : i32) (~witness : i32) : i32 =
-    $'toolchain_command_domain::kit_toolchain_execution_plan(!action, !witness)'
+    $'toolchain_command_domain::rig_toolchain_execution_plan(!action, !witness)'
 
 := environment_entry (~profile : i32) (~index : i32) : i32 =
-    $'toolchain_command_domain::kit_toolchain_environment_entry(!profile, !index)'
+    $'toolchain_command_domain::rig_toolchain_environment_entry(!profile, !index)'
 
 := environment_count (~profile : i32) (~witness : i32) : i32 =
-    $'toolchain_command_domain::kit_toolchain_environment_entry_count(!profile, !witness)'
+    $'toolchain_command_domain::rig_toolchain_environment_entry_count(!profile, !witness)'
 
 := main () : i32 =
     := rejected_action = execution -1i32 0i32

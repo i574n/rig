@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_NoHelpRequested,
@@ -193,10 +203,7 @@ fn command_descriptor_by_index_3(mut v0: Rc<str>) -> (Rc<str>, Rc<str>, Rc<str>,
     }
 }
 fn concat5_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
-    let v5: Rc<str> = Rc::<str>::from(format!("{}{}", v0, v1));
-    let v6: Rc<str> = Rc::<str>::from(format!("{}{}", v5, v2));
-    let v7: Rc<str> = Rc::<str>::from(format!("{}{}", v6, v3));
-    let v8: Rc<str> = Rc::<str>::from(format!("{}{}", v7, v4));
+    let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
     v8
 }
 fn command_descriptor_json_by_index_4(mut v0: Rc<str>) -> Rc<str> {
@@ -429,7 +436,7 @@ fn help_flag_from_15(mut v0: i32, mut v1: i32) -> bool {
 }
 fn method17(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
     let v2: Rc<str> = v0.borrow().l0.clone();
-    let v3: Rc<str> = Rc::<str>::from(format!("{}{}", v2, v1));
+    let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
@@ -817,7 +824,7 @@ fn direct_verb_usage_19(mut v0: Rc<str>) -> Rc<str> {
                                                                                                                             } else {
                                                                                                                                 let v63: bool = "metrics" == &*v0;
                                                                                                                                 if v63 {
-                                                                                                                                    let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("metrics export --notebooks <dir> [--machine box|node] (Prometheus text: one kit_exec_duration_ms{machine,backend,phase} line per phase of every Cells notebook cell)"); } LIT.with(|lit| lit.clone()) };
+                                                                                                                                    let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("metrics export --notebooks <dir> [--machine box|node] (Prometheus text: one rig_exec_duration_ms{machine,backend,phase} line per phase of every Cells notebook cell)"); } LIT.with(|lit| lit.clone()) };
                                                                                                                                     v64
                                                                                                                                 } else {
                                                                                                                                     let v65: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -860,52 +867,52 @@ fn closure15() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         direct_verb_usage_19(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-pub fn kit_command_code(v0: &str) -> u64 {
+pub fn rig_command_code(v0: &str) -> u64 {
     closure0()(Rc::<str>::from(v0))
 }
-pub fn kit_command_effect_code(v0: &str) -> u64 {
+pub fn rig_command_effect_code(v0: &str) -> u64 {
     closure1()(Rc::<str>::from(v0))
 }
-pub fn kit_command_subcommand_effect_code(v0: &str) -> u64 {
+pub fn rig_command_subcommand_effect_code(v0: &str) -> u64 {
     closure2()(Rc::<str>::from(v0))
 }
-pub fn kit_command_descriptor(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
+pub fn rig_command_descriptor(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
     closure3()(Rc::<str>::from(v0))
 }
-pub fn kit_command_descriptor_named(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
+pub fn rig_command_descriptor_named(v0: &str) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) {
     closure4()(Rc::<str>::from(v0))
 }
-pub fn kit_command_descriptor_json(v0: &str) -> Rc<str> {
+pub fn rig_command_descriptor_json(v0: &str) -> Rc<str> {
     closure5()(Rc::<str>::from(v0))
 }
-pub fn kit_command_count() -> i32 {
+pub fn rig_command_count() -> i32 {
     closure6()()
 }
-pub fn kit_command_schema_witness() -> i32 {
+pub fn rig_command_schema_witness() -> i32 {
     closure7()()
 }
-pub fn kit_toolchain_action_name_code(v0: &str) -> u64 {
+pub fn rig_toolchain_action_name_code(v0: &str) -> u64 {
     closure8()(Rc::<str>::from(v0))
 }
-pub fn kit_command_proxy_usage(v0: &str) -> Rc<str> {
+pub fn rig_command_proxy_usage(v0: &str) -> Rc<str> {
     closure9()(Rc::<str>::from(v0))
 }
-pub fn kit_proxy_route_code(v0: &str) -> u64 {
+pub fn rig_proxy_route_code(v0: &str) -> u64 {
     closure10()(Rc::<str>::from(v0))
 }
-pub fn kit_proxy_route_witness() -> i32 {
+pub fn rig_proxy_route_witness() -> i32 {
     closure11()()
 }
-pub fn kit_help_flag_code(v0: &str) -> u64 {
+pub fn rig_help_flag_code(v0: &str) -> u64 {
     closure12()(Rc::<str>::from(v0))
 }
-pub fn kit_help_flag_witness() -> i32 {
+pub fn rig_help_flag_witness() -> i32 {
     closure13()()
 }
-pub fn kit_help_request_text() -> Rc<str> {
+pub fn rig_help_request_text() -> Rc<str> {
     closure14()()
 }
-pub fn kit_direct_verb_usage(v0: &str) -> Rc<str> {
+pub fn rig_direct_verb_usage(v0: &str) -> Rc<str> {
     closure15()(Rc::<str>::from(v0))
 }
 pub type SpiralShape_97df63ebabc3 = Mut0;
