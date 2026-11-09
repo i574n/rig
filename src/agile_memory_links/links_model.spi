@@ -33,8 +33,10 @@
         MemoryUntyped
 
 := citation_of (~status : string) : citation =
-    ? status = "" ?> CitesMissing
-    |? status = "Done" ?> CitesDone
+    ? status = ""
+    ?> CitesMissing
+    |? status = "Done"
+    ?> CitesDone
     |: CitesOpen
 
 := rule_bearing = \|
@@ -54,8 +56,10 @@
 := hyphen_count (~slug : string) : i32 = $'(!slug).matches(char::from(45u8)).count() as i32' : i32
 
 := memory_cite_finding (~names : string) (~id : string) (~slug : string) : link_finding =
-    ? sm'.listed "|" slug names ?> NoFinding
-    |? hyphen_count slug >= 2i32 ?> UnknownMemory (id, slug)
+    ? sm'.listed "|" slug names
+    ?> NoFinding
+    |? hyphen_count slug >= 2i32
+    ?> UnknownMemory (id, slug)
     |: NoFinding
 
 := finding_word = \|
@@ -95,7 +99,9 @@
             = "done  rule  OLD-ONE  the item is Done; check that the rule still holds\n"
         )
         "done in a rule"
-    testing.expect (finding_text (id_finding MemoryReference "pointer" "OLD-ONE" "Done") = "") "references may cite history"
+    testing.expect
+        (finding_text (id_finding MemoryReference "pointer" "OLD-ONE" "Done") = "")
+        "references may cite history"
     testing.expect (gating (id_finding MemoryUser "me" "NEW-ONE" "")) "a dangling id gates"
 
 ///> rust
@@ -115,4 +121,6 @@
     testing.expect
         (finding_word (memory_cite_finding "no-sleep-polling" "KIT-X" "gone-old-rule") = "unknown-memory")
         "a cited memory that does not exist"
-    testing.expect (finding_text (memory_cite_finding "no-sleep-polling" "KIT-X" "re-measure") = "") "one hyphen reads as prose"
+    testing.expect
+        (finding_text (memory_cite_finding "no-sleep-polling" "KIT-X" "re-measure") = "")
+        "one hyphen reads as prose"

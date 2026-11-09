@@ -32,7 +32,7 @@ enum US2 {
     US2_None,
 }
 fn migrate_usage_1() -> i32 {
-    let v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: agile usage: migrate-activity preview|apply <root>"); } LIT.with(|lit| lit.clone()) };
+    let v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: agile usage: migrate-activity preview|apply <root>"); } LIT.with(|lit| lit.clone()) };
     eprintln!("{}", v0);
     2i32
 }
@@ -99,7 +99,7 @@ fn migrated_2(mut v0: US0, mut v1: Rc<str>) -> i32 {
     let v8: bool = file_exists_3(v6.clone());
     let v9: bool = v8 == false;
     if v9 {
-        let v10: Rc<str> = string_concat(&["kit error: agile migrate-activity: no state/package.spiproj under ", &*v1]);
+        let v10: Rc<str> = string_concat(&["rig error: agile migrate-activity: no state/package.spiproj under ", &*v1]);
         eprintln!("{}", v10);
         2i32
     } else {
@@ -165,7 +165,7 @@ fn migrated_2(mut v0: US0, mut v1: Rc<str>) -> i32 {
                 v47
             }
         };
-        let v54: Rc<str> = string_concat(&["kit agile migrate-activity ok mode=", &*v49, " schema=", &*v42, " module=", &*v46]);
+        let v54: Rc<str> = string_concat(&["rig agile migrate-activity ok mode=", &*v49, " schema=", &*v42, " module=", &*v46]);
         println!("{}", v54);
         0i32
     }

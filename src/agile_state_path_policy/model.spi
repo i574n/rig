@@ -1,6 +1,8 @@
 :~ state_path_candidate_code (~name : string) : u64 =
-    ? (name = "typecheck_receipts.spi") ?> 0u64
-    |? sm'.ends_with ".spi" name ?> 1u64
+    ? (name = "typecheck_receipts.spi")
+    ?> 0u64
+    |? sm'.ends_with ".spi" name
+    ?> 1u64
     |: 0u64
 
 := main () : i32 =

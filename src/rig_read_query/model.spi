@@ -49,7 +49,8 @@
         := first = decimal_or_zero (before_index text dash)
         := last = decimal_or_zero (after_index text dash)
         ? first = 0u64 || last < first ?> WholeFile |: FromTo (first, last)
-    |? all_digits text ?> OneLine (decimal_or_zero text)
+    |? all_digits text
+    ?> OneLine (decimal_or_zero text)
     |: WholeFile
 
 :~ read_spec_of (~spec : string) : read_spec =

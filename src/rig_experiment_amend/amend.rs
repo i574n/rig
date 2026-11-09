@@ -44,7 +44,7 @@ fn stderr_line_3(mut v0: Rc<str>) -> () {
     ()
 }
 fn failed_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: experiment "); } LIT.with(|lit| lit.clone()) };
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: experiment "); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = concat5_2(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_3(v3);
@@ -612,7 +612,7 @@ fn amended_0() -> i32 {
                                         let v67: Rc<str> = string_concat(&["amend: ", &*v65]);
                                         failed_1(v67)
                                     } else {
-                                        let v75: Rc<str> = string_concat(&["kit experiment amend ok id=", &*v1, " field=", &*v3, " value=", &*v5, " amended=", &*v22]);
+                                        let v75: Rc<str> = string_concat(&["rig experiment amend ok id=", &*v1, " field=", &*v3, " value=", &*v5, " amended=", &*v22]);
                                         stdout_line_25(v75);
                                         0i32
                                     }
@@ -679,7 +679,7 @@ fn addended_26() -> i32 {
                     let v32: Rc<str> = string_concat(&["addendum: ", &*v30]);
                     failed_1(v32)
                 } else {
-                    let v36: Rc<str> = string_concat(&["kit experiment addendum ok id=", &*v1, " at=", &*v20]);
+                    let v36: Rc<str> = string_concat(&["rig experiment addendum ok id=", &*v1, " at=", &*v20]);
                     let v37: bool = looked_at_8(v0, v1);
                     let v40: Rc<str> = if v37 {
                         let v38: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" after_look=yes"); } LIT.with(|lit| lit.clone()) };

@@ -425,7 +425,7 @@ fn agile_add_entry_0() -> i32 {
         let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
         let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let v12: Rc<str> = concat5_1(v9, v8, v10, v6, v11);
-        let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v12 + "
+        let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v12 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v13
     } else {
@@ -593,7 +593,7 @@ fn agile_add_entry_0() -> i32 {
                 let v344: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                 let v345: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 let v346: Rc<str> = concat5_1(v343, v342, v344, v340, v345);
-                let v347: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v346 + "
+                let v347: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v346 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v347
             }
@@ -608,7 +608,7 @@ fn agile_add_entry_0() -> i32 {
                         let v334: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                         let v335: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v336: Rc<str> = concat5_1(v333, v332, v334, v330, v335);
-                        let v337: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v336 + "
+                        let v337: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v336 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                         v337
                     }
@@ -623,7 +623,7 @@ fn agile_add_entry_0() -> i32 {
                                 let v324: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                 let v325: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                                 let v326: Rc<str> = concat5_1(v323, v322, v324, v320, v325);
-                                let v327: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v326 + "
+                                let v327: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v326 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                 v327
                             }
@@ -638,7 +638,7 @@ fn agile_add_entry_0() -> i32 {
                                         let v314: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                         let v315: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                                         let v316: Rc<str> = concat5_1(v313, v312, v314, v310, v315);
-                                        let v317: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v316 + "
+                                        let v317: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v316 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                         v317
                                     }
@@ -679,7 +679,7 @@ fn agile_add_entry_0() -> i32 {
                                                         let v141: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile add "); } LIT.with(|lit| lit.clone()) };
                                                         let v142: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                                         let v143: Rc<str> = concat5_1(v141, v111, v142, v140, v117);
-                                                        let v144: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v143 + "
+                                                        let v144: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v143 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                                         v144
                                                     }
@@ -696,7 +696,7 @@ fn agile_add_entry_0() -> i32 {
                                                             let v153: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile add "); } LIT.with(|lit| lit.clone()) };
                                                             let v154: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                                             let v155: Rc<str> = concat5_1(v153, v111, v154, v152, v117);
-                                                            let v156: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v155 + "
+                                                            let v156: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v155 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                                             v156
                                                         } else {
@@ -839,7 +839,7 @@ fn agile_add_entry_0() -> i32 {
                                                                     let v231: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile add "); } LIT.with(|lit| lit.clone()) };
                                                                     let v232: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                                                     let v233: Rc<str> = concat5_1(v231, v111, v232, v230, v117);
-                                                                    let v234: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v233 + "
+                                                                    let v234: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v233 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                                                     v234
                                                                 }
@@ -853,7 +853,7 @@ fn agile_add_entry_0() -> i32 {
                                                                             let v239: u64 = v147.len() as u64;
                                                                             let v240: u64 = v235.len() as u64;
                                                                             let v241: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v132);
-                                                                            let v242: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile add ok id="); } LIT.with(|lit| lit.clone()) };
+                                                                            let v242: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile add ok id="); } LIT.with(|lit| lit.clone()) };
                                                                             let v243: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" binding="); } LIT.with(|lit| lit.clone()) };
                                                                             let v244: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" status=Planned progress=0"); } LIT.with(|lit| lit.clone()) };
                                                                             let v245: bool = &*v123 == "";
@@ -942,7 +942,7 @@ fn agile_add_entry_0() -> i32 {
                                                                             let v293: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile add "); } LIT.with(|lit| lit.clone()) };
                                                                             let v294: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                                                             let v295: Rc<str> = concat5_1(v293, v111, v294, v292, v117);
-                                                                            let v296: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v295 + "
+                                                                            let v296: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v295 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                                                             v296
                                                                         }
@@ -958,7 +958,7 @@ fn agile_add_entry_0() -> i32 {
                                                 let v304: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile add "); } LIT.with(|lit| lit.clone()) };
                                                 let v305: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" rejected: "); } LIT.with(|lit| lit.clone()) };
                                                 let v306: Rc<str> = concat5_1(v304, v111, v305, v303, v117);
-                                                let v307: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v306 + "
+                                                let v307: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v306 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                                 v307
                                             }

@@ -14,7 +14,7 @@
     | RecordCatalogPartial missing => counted ++# " missing=" ++# missing ++# " (agile check does not need them)"
 
 :~ agile_record_catalog_text (~version : string) (present : i32) (required : i32) (~missing : string) : string =
-    := counted = "kit agile records catalog=" ++# version ++# " present=" ++# i32_text present ++# "/"
+    := counted = "rig agile records catalog=" ++# version ++# " present=" ++# i32_text present ++# "/"
     agile_record_catalog_line (counted ++# i32_text required) (agile_record_catalog_of present required missing)
 
 := main () : i32 =

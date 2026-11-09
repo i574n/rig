@@ -20,7 +20,7 @@ fn agile_init_entry_0() -> i32 {
     if v4 {
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi already exists"); } LIT.with(|lit| lit.clone()) };
         let v8: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v5]);
-        let v9: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v8 + "
+        let v9: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v8 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v9
     } else {
@@ -29,7 +29,7 @@ fn agile_init_entry_0() -> i32 {
         if v11 {
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/package.spiproj already exists"); } LIT.with(|lit| lit.clone()) };
             let v15: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v12]);
-            let v16: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v15 + "
+            let v16: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v15 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v16
         } else {
@@ -38,7 +38,7 @@ fn agile_init_entry_0() -> i32 {
             if v18 {
                 let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/prompt.spi already exists"); } LIT.with(|lit| lit.clone()) };
                 let v22: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v19]);
-                let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v22 + "
+                let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v22 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v23
             } else {
@@ -69,35 +69,35 @@ fn agile_init_entry_0() -> i32 {
                                 let v54: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v2);
                                 let v57: Rc<str> = std::rc::Rc::<str>::from((v53).to_string());
                                 let v60: Rc<str> = std::rc::Rc::<str>::from((v54).to_string());
-                                let v62: Rc<str> = string_concat(&["kit agile init ok root=", &*v1, " files=3 bytes=", &*v57, " elapsed_ms=", &*v60, " next=kit agile begin <root> <title>"]);
+                                let v62: Rc<str> = string_concat(&["rig agile init ok root=", &*v1, " files=3 bytes=", &*v57, " elapsed_ms=", &*v60, " next=kit agile begin <root> <title>"]);
                                 let v63: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v62.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                                 v63
                             } else {
                                 let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write state/prompt.spi"); } LIT.with(|lit| lit.clone()) };
                                 let v67: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v64]);
-                                let v68: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v67 + "
+                                let v68: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v67 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                 v68
                             }
                         } else {
                             let v70: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write state/agile.spi"); } LIT.with(|lit| lit.clone()) };
                             let v73: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v70]);
-                            let v74: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v73 + "
+                            let v74: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v73 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                             v74
                         }
                     } else {
                         let v76: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write state/package.spiproj"); } LIT.with(|lit| lit.clone()) };
                         let v79: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v76]);
-                        let v80: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v79 + "
+                        let v80: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v79 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                         v80
                     }
                 } else {
                     let v82: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not create the state directory"); } LIT.with(|lit| lit.clone()) };
                     let v85: Rc<str> = string_concat(&["agile init ", &*v1, " rejected: ", &*v82]);
-                    let v86: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v85 + "
+                    let v86: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v85 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v86
                 }

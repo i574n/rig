@@ -78,7 +78,7 @@ pub fn patch_resume_complete(root: &str, source: &str) -> Result<(), String> {
     if rig_patch_source_adapter_source_resume_completion_binding(1, removed) != 1 {
         return Err("typed patch resume receipt close rejected".to_owned());
     }
-    println!("kit patch resume closed receipt={}", receipt.display());
+    println!("rig patch resume closed receipt={}", receipt.display());
     Ok(())
 }
 
@@ -99,7 +99,7 @@ pub fn prepare_patch_source(root: &str, plan: &str) -> Result<String, String> {
     let matches = i32::from(patch_resume_matches(root, &expected)?);
     let decision = rig_patch_source_adapter_source_resume_decision_binding(present, matches);
     if decision == 1 {
-        println!("kit patch resume phase=identified resumed=true compiler={} receipt={}", compiler_status, receipt.display());
+        println!("rig patch resume phase=identified resumed=true compiler={} receipt={}", compiler_status, receipt.display());
         return Ok(source);
     }
     if decision < 0 {
@@ -115,7 +115,7 @@ pub fn prepare_patch_source(root: &str, plan: &str) -> Result<String, String> {
         let _ = remove_regular_if_present(&receipt);
         return Err("typed patch resume receipt verification rejected".to_owned());
     }
-    println!("kit patch resume phase=identified resumed=false compiler={} receipt={}", compiler_status, receipt.display());
+    println!("rig patch resume phase=identified resumed=false compiler={} receipt={}", compiler_status, receipt.display());
     Ok(source)
 }
 fn bool_pair_binding_1(mut v0: i32, mut v1: i32) -> i32 {

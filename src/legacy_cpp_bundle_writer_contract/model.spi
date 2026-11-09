@@ -41,10 +41,14 @@
     | CurrentRejectNested => 2i32
 
 :~ bool_pair_binding (left : i32) (right : i32) : i32 =
-    ? left < 1i32 ?> 0i32
-    |? 1i32 < left ?> 0i32
-    |? right < 1i32 ?> 0i32
-    |? 1i32 < right ?> 0i32
+    ? left < 1i32
+    ?> 0i32
+    |? 1i32 < left
+    ?> 0i32
+    |? right < 1i32
+    ?> 0i32
+    |? 1i32 < right
+    ?> 0i32
     |: 1i32
 
 :~ source_comparison_binding (legacy_source_found : i32) (current_source_found : i32) : i32 =
@@ -57,10 +61,14 @@
     bool_pair_binding legacy_exact_count current_exact_count
 
 :~ nested_policy_binding (legacy_mode : i32) (current_mode : i32) : i32 =
-    ? legacy_mode < 1i32 ?> 0i32
-    |? 1i32 < legacy_mode ?> 0i32
-    |? current_mode < 2i32 ?> 0i32
-    |? 2i32 < current_mode ?> 0i32
+    ? legacy_mode < 1i32
+    ?> 0i32
+    |? 1i32 < legacy_mode
+    ?> 0i32
+    |? current_mode < 2i32
+    ?> 0i32
+    |? 2i32 < current_mode
+    ?> 0i32
     |: 1i32
 
 :~ epoch_binding (legacy_fixed_epoch : i32) (current_fixed_epoch : i32) : i32 =
@@ -73,12 +81,18 @@
     (source_ok : i32) (order_ok : i32) (count_ok : i32) (nested_ok : i32) (epoch_ok : i32) (determinism_ok : i32)
     : i32
     =
-    ? source_ok < 1i32 ?> 0i32
-    |? order_ok < 1i32 ?> 0i32
-    |? count_ok < 1i32 ?> 0i32
-    |? nested_ok < 1i32 ?> 0i32
-    |? epoch_ok < 1i32 ?> 0i32
-    |? determinism_ok < 1i32 ?> 0i32
+    ? source_ok < 1i32
+    ?> 0i32
+    |? order_ok < 1i32
+    ?> 0i32
+    |? count_ok < 1i32
+    ?> 0i32
+    |? nested_ok < 1i32
+    ?> 0i32
+    |? epoch_ok < 1i32
+    ?> 0i32
+    |? determinism_ok < 1i32
+    ?> 0i32
     |: 1i32
 
 := full_plan \* owner. () : legacy_bundle_writer_plan (legacy_bundle_pending owner) (legacy_bundle_settled owner) =

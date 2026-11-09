@@ -106,7 +106,8 @@
 :~ planning_id (~line : string) : string =
     := marker = "= Planning ("
     := at = sm'.index_of marker line
-    ? at < 0i32 ?> ""
+    ? at < 0i32
+    ?> ""
     |:
         := from = at + sm'.length marker
         := rest = sm'.trim_start [ '"' ] (sm'.substring from (sm'.length line - from) line)
@@ -114,7 +115,8 @@
         ? stop < 0i32 ?> rest |: sm'.substring 0i32 stop rest
 
 :~ ^ planning_entries (lines : array string) (at : i32) (index : planning_index) : planning_index =
-    ? am'.length lines <= at ?> index
+    ? am'.length lines <= at
+    ?> index
     |:
         := line = am'.index at lines
         := id = ? sm'.starts_with "inl planning_of_" line ?> planning_id line |: ""
@@ -140,7 +142,10 @@
 := sort_word (sort : list_sort) : string = union_reflection.cases.union_case_kebab "Sort" sort
 
 := sort_of_word (~word : string) : list_sort =
-    union_reflection.cases.union_case_where (\ (sort : list_sort) => word = sort_word sort) (\ sort => sort) SortPriority
+    union_reflection.cases.union_case_where
+        \ (sort : list_sort) => word = sort_word sort
+        \ sort => sort
+        SortPriority
 
 :== list_request =
     {
@@ -233,7 +238,8 @@
         && query_passes request.query row.id row.title row.tags row.status (deps_settled request.unsettled row.deps)
     ?>
         ? any_planning request.load ?>
-            ? any_planning request.assignee ?> !+
+            ? any_planning request.assignee
+            ?> !+
             |: planning_selected (planning_row_in request.planning row.id) row.id 0i32 request.load request.assignee
         |: planning_selected (planning_row_in request.planning row.id) row.id 0i32 request.load request.assignee
     |: !-
@@ -265,8 +271,7 @@
     ?> list
     |:
         := arguments = (found + (task_arguments_offset ()))
-        ? declared_task text found
-        ?>
+        ? declared_task text found ?>
             := row = task_row_at text arguments length
             ? row_selected text request row
             ?> rows_from text arguments length request (row_inserted (row_key request.sort row) row list)
@@ -310,8 +315,7 @@
     |: " load=" ++# request.load ++# " assignee=" ++# request.assignee
 
 := planning_filter_json (request : list_request) : string =
-    ? any_planning request.load
-    ?>
+    ? any_planning request.load ?>
         ? any_planning request.assignee
         ?> ""
         |: ",\"assignee\":" ++# (json_string request.assignee)
@@ -328,7 +332,7 @@
 
 :~ table_footer (text : string) (length : i32) (request : list_request) (shown : i32) (~elapsed : string) : string =
     := head =
-            "kit agile list ok shown="
+            "rig agile list ok shown="
             ++# (i32_text shown)
             ++# " filter="
             ++# (filter_text request.status)
@@ -389,8 +393,7 @@
     := ok, reason, status, load, assignee, json, query, sort =
         $'rig_agile_list_args::rig_agile_list_request()'
         : bool * string * string * string * string * bool * string * string
-    ? ok
-    ?>
+    ? ok ?>
         := filter = ? status = "all" ?> AllStatuses |: OnlyStatus status
         := format = ? json ?> JsonFormat |: TableFormat
         := request =

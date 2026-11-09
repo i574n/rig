@@ -12,11 +12,11 @@
     := id = row.id
     := claimed = row.registered_at
     := evidence = row.evidence
-    ? row.rejected <> "" ?> failed ("import: " ++# row.rejected)
+    ? row.rejected <> ""
+    ?> failed ("import: " ++# row.rejected)
     |? identifier_ok id = !-
     ?> failed ("import: the ID must be letters, digits, '-' or '_', received '" ++# id ++# "'")
-    |? dated claimed = !-
-    ?>
+    |? dated claimed = !- ?>
         failed (
             "import: --registered-at needs the source's registration date or time (YYYY-MM-DD...), as the source "
             ^^ "states it"
@@ -62,8 +62,7 @@
                     ++# (field_line "decision" row.plan.decision)
                     ++# (field_line "time" row.plan.time)
                 := problem = text_created (record_path ledger id "registration") (provenance ++# plan ++# rest)
-                ? problem <> ""
-                ?>
+                ? problem <> "" ?>
                     failed (
                         "import: "
                         ++# id
@@ -73,7 +72,7 @@
                     )
                 |:
                     stdout_line (
-                        "kit experiment import ok id="
+                        "rig experiment import ok id="
                         ++# id
                         ++# " imported=yes registered="
                         ++# claimed
@@ -88,11 +87,11 @@
     := plan = plan_text ledger id
     := verdict = row.verdict
     := claimed = row.at
-    ? row.rejected <> "" ?> failed ("record-verdict: " ++# row.rejected)
+    ? row.rejected <> ""
+    ?> failed ("record-verdict: " ++# row.rejected)
     |? plan = ""
     ?> failed ("record-verdict: no registration for " ++# id ++# " in " ++# ledger)
-    |? field_of plan "imported" <> "yes"
-    ?>
+    |? field_of plan "imported" <> "yes" ?>
         failed (
             "record-verdict: only imported registrations take a recorded verdict; a live registration is analyzed "
             ^^ "(experiment analyze)"
@@ -114,9 +113,10 @@
                     ++# (field_line "imported_at" now)
                     ++# (field_line "evidence" evidence)
                 )
-        ? problem <> "" ?> failed ("record-verdict: " ++# id ++# " already has a verdict (" ++# problem ++# ")")
+        ? problem <> ""
+        ?> failed ("record-verdict: " ++# id ++# " already has a verdict (" ++# problem ++# ")")
         |:
-            stdout_line ("kit experiment record-verdict ok id=" ++# id ++# " at=" ++# claimed ++# " imported=yes")
+            stdout_line ("rig experiment record-verdict ok id=" ++# id ++# " at=" ++# claimed ++# " imported=yes")
             0i32
 
 := main () : i32 =

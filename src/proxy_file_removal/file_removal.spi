@@ -41,13 +41,14 @@
     | DirectoryEntry => "directory"
 
 := removal_receipt (~path : string) (entry : removed_entry) (bytes : u64) (started : u64) : removal_outcome =
-    := head = "kit proxy fs-remove ok path=" ++# path ++# " kind=" ++# (entry_kind_text entry) ++# " bytes="
+    := head = "rig proxy fs-remove ok path=" ++# path ++# " kind=" ++# (entry_kind_text entry) ++# " bytes="
     RemovalReceipt (head ++# (u64_text bytes) ++# " elapsed_ms=" ++# (u64_text (ms_since started)))
 
 := remove_entry (~path : string) (entry : removed_entry) (started : u64) : removal_outcome =
     := bytes = entry_bytes path
     := problem = unlink_error path
-    ? (problem = "") ?> removal_receipt path entry bytes started
+    ? (problem = "")
+    ?> removal_receipt path entry bytes started
     |: RemovalRejected ("fs-remove failed: " ++# problem)
 
 :~ file_removal_outcome () : removal_outcome =
@@ -55,7 +56,8 @@
     := operands = proxy_argument_count ()
     ? $"!operands == 3" ?>
         := path = rooted_path (proxy_argument 1i32) (proxy_argument 2i32)
-        ? (path = "") ?> RemovalRejected "fs-remove target escapes the root"
+        ? (path = "")
+        ?> RemovalRejected "fs-remove target escapes the root"
         |:
             ?= removed_entry_of (entry_code path) ?|
             | MissingEntry => RemovalRejected ("fs-remove target is missing: " ++# path)

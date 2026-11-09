@@ -23,9 +23,12 @@
     | [] => listm.rev acc
     | (line :: rest) =>
         := trimmed = sm'.trim line
-        ? trimmed = "packages:" ?> section_uses rest !+ acc
-        |? trimmed = "modules:" ?> listm.rev acc
-        |? inside && trimmed <> "" ?> section_uses rest !+ (package_word trimmed :: acc)
+        ? trimmed = "packages:"
+        ?> section_uses rest !+ acc
+        |? trimmed = "modules:"
+        ?> listm.rev acc
+        |? inside && trimmed <> ""
+        ?> section_uses rest !+ (package_word trimmed :: acc)
         |: section_uses rest inside acc
 
 :~ project_uses (~text : string) : list string =
@@ -49,8 +52,10 @@
     ?= pending ?|
     | [] => !-
     | (name :: rest) =>
-        ? listm'.contains name changed ?> !+
-        |? listm'.contains name visited ?> reaches nodes changed visited rest
+        ? listm'.contains name changed
+        ?> !+
+        |? listm'.contains name visited
+        ?> reaches nodes changed visited rest
         |:
             ?= node_named name nodes ?|
             | Some node => reaches nodes changed (name :: visited) (prepended node.uses rest)
@@ -71,7 +76,10 @@
     { name = name; uses = uses; crate = crate }
 
 := sample_graph () : list package_node =
-    ((node "jobs" ("core" :: ("spiral" :: [])) !-) :: ((node "job_after" ("core" :: ("jobs" :: [])) !+) :: ((node "windows" ("jobs" :: []) !+) :: ((node "watch" ("windows" :: []) !+) :: ((node "notes" ("core" :: []) !+) :: ((node "loop_a" ("loop_b" :: []) !+) :: ((node "loop_b" ("loop_a" :: []) !+) :: [])))))))
+    (node "jobs" ("core" :: ("spiral" :: [])) !-) :: ((node "job_after" ("core" :: ("jobs" :: [])) !+) :: (
+        (node "windows" ("jobs" :: []) !+) :: ((node "watch" ("windows" :: []) !+) :: (
+        (node "notes" ("core" :: []) !+) :: ((node "loop_a" ("loop_b" :: []) !+) :: (
+        (node "loop_b" ("loop_a" :: []) !+) :: []))))))
 
 := joined (names : list string) : string =
     listm.fold (\ text name => ? text = "" ?> name |: text ++# "," ++# name) "" names

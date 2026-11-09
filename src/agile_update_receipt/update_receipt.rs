@@ -26,7 +26,7 @@ fn agile_set_receipt_text_1(mut v0: Rc<str>, mut v1: i32, mut v2: Rc<str>, mut v
     let v14: Rc<str> = std::rc::Rc::<str>::from((v3).to_string());
     let v17: Rc<str> = std::rc::Rc::<str>::from((v4).to_string());
     let v20: Rc<str> = std::rc::Rc::<str>::from((v13).to_string());
-    let v22: Rc<str> = string_concat(&["kit agile set ok id=", &*v0, " progress=", &*v8, " status=", &*v2, " validation=runtime-attested compiler=not-required bytes_before=", &*v14, " bytes_after=", &*v17, " elapsed_ms=", &*v20]);
+    let v22: Rc<str> = string_concat(&["rig agile set ok id=", &*v0, " progress=", &*v8, " status=", &*v2, " validation=runtime-attested compiler=not-required bytes_before=", &*v14, " bytes_after=", &*v17, " elapsed_ms=", &*v20]);
     v22
 }
 fn closure1() -> Rc<dyn Fn(Rc<str>, i32, Rc<str>, u64, u64, u64) -> Rc<str>> {

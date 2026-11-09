@@ -46,10 +46,10 @@
     $'{ let arguments = !text.lines().map(|line| line.trim_end_matches(char::from(13u8)).to_owned()).chain(std::env::a\
         rgs().skip(3)).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| \
         std::process::Command::new(exe).args(&arguments).status()) { Ok(status) => status.code().unwrap_or(1), \
-        Err(error) => { eprintln\!("kit error: --args-from relaunch: {error}"); 2 } } }' : i32
+        Err(error) => { eprintln\!("rig error: --args-from relaunch: {error}"); 2 } } }' : i32
 
 := rejected (~message : string) : i32 =
-    $'{ eprintln\!("kit error: {}", &*!message); 2 }' : i32
+    $'{ eprintln\!("rig error: {}", &*!message); 2 }' : i32
 
 := relaunched (text : argument_text) : i32 =
     ? text_read text ?> relaunched_with (text_value text) |: rejected (text_value text)

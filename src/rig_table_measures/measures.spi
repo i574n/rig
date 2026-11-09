@@ -39,8 +39,7 @@
     =
     ? total < row
     ?> found, matched
-    |? row_kept kept row
-    ?>
+    |? row_kept kept row ?>
         grouped_from cells kept group chosen empty
             (row + 1i32)
             total
@@ -76,7 +75,7 @@
             " matched=" ++# (i32_text matched) ++# " groups=" ++# (i32_text (group_count found 0i32)) ++# " shown="
         ? request.quiet
         ?> ()
-        |: stdout_line ("kit table query ok total=" ++# (i32_text (row_total cells)) ++# counts ++# (i32_text shown))
+        |: stdout_line ("rig table query ok total=" ++# (i32_text (row_total cells)) ++# counts ++# (i32_text shown))
         0i32
 
 := measured (request : table_request) : bool = request.measured <> ""

@@ -472,7 +472,7 @@ fn wrappers_listed_1(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: i32) -> i32 {
     let v32: i32 = 0i32;
     let v33: i32 = method24(v20, v32);
     let v34: Rc<str> = format_real_17(v33);
-    let v35: Rc<str> = string_concat(&["kit standards wrappers files=", &*v24, " wrappers=", &*v29, " high=", &*v34]);
+    let v35: Rc<str> = string_concat(&["rig standards wrappers files=", &*v24, " wrappers=", &*v29, " high=", &*v34]);
     println!("{}", v35);
     0i32
 }
@@ -782,7 +782,7 @@ fn wrappers_run_0() -> i32 {
                             let v8: US1 = listed_files_28(v6.clone());
                             match v8 {
                                 US1::US1_None => {
-                                    let v13: Rc<str> = string_concat(&["kit error: standards --wrappers: git could not list ", &*v6]);
+                                    let v13: Rc<str> = string_concat(&["rig error: standards --wrappers: git could not list ", &*v6]);
                                     eprintln!("{}", v13);
                                     2i32
                                 }
@@ -795,21 +795,21 @@ fn wrappers_run_0() -> i32 {
                             }
                         }
                         _ => {
-                            let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --wrappers <repo> [--top n]"); } LIT.with(|lit| lit.clone()) };
+                            let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --wrappers <repo> [--top n]"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v16);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --wrappers <repo> [--top n]"); } LIT.with(|lit| lit.clone()) };
+                    let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --wrappers <repo> [--top n]"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v18);
                     2i32
                 }
             }
         }
         _ => {
-            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --wrappers <repo> [--top n]"); } LIT.with(|lit| lit.clone()) };
+            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --wrappers <repo> [--top n]"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v20);
             2i32
         }

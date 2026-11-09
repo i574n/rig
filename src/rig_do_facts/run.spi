@@ -174,8 +174,7 @@
     |: state
 
 :~ ^ first_rejection (~records : record_list) (~index : i32) : string =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         ? field_at records index 0i32 <> "query"
         ?> "edit and query statements cannot share one program yet; run them as two calls"
         |:
@@ -228,7 +227,8 @@
     := started = now_ms ()
     := records = records_of encoded
     := rejection = first_rejection records 1i32
-    ? tables_delegated records ?> tables_run root encoded
+    ? tables_delegated records
+    ?> tables_run root encoded
     |? rejection = "" ?>
         := state = facts_run root records 1i32 (empty_fact_tally ())
         := report = state.report

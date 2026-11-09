@@ -1,8 +1,10 @@
 :< flat_bundle_contract.model
 
 := one_is (value : i32) : bool =
-    ? value < 1i32 ?> !-
-    |? 1i32 < value ?> !-
+    ? value < 1i32
+    ?> !-
+    |? 1i32 < value
+    ?> !-
     |: !+
 
 := main () : i32 =

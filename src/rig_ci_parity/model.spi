@@ -19,18 +19,27 @@
     }
 
 :~ action_of (~line : string) (current : setup_action) : setup_action =
-    ? sm'.contains "uses:" line = !- ?> current
-    |? sm'.contains "setup-rust" line || sm'.contains "rust-toolchain" line ?> SetupRust
-    |? sm'.contains "setup-zig" line ?> SetupZig
-    |? sm'.contains "setup-beam" line ?> SetupBeam
-    |? sm'.contains "setup-python" line ?> SetupPython
+    ? sm'.contains "uses:" line = !-
+    ?> current
+    |? sm'.contains "setup-rust" line || sm'.contains "rust-toolchain" line
+    ?> SetupRust
+    |? sm'.contains "setup-zig" line
+    ?> SetupZig
+    |? sm'.contains "setup-beam" line
+    ?> SetupBeam
+    |? sm'.contains "setup-python" line
+    ?> SetupPython
     |: OtherAction
 
 :~ beam_tool (~key : string) : option ci_tool =
-    ? key = "otp-version" ?> Some ToolOtp
-    |? key = "elixir-version" ?> Some ToolElixir
-    |? key = "gleam-version" ?> Some ToolGleam
-    |? key = "rebar3-version" ?> Some ToolRebar
+    ? key = "otp-version"
+    ?> Some ToolOtp
+    |? key = "elixir-version"
+    ?> Some ToolElixir
+    |? key = "gleam-version"
+    ?> Some ToolGleam
+    |? key = "rebar3-version"
+    ?> Some ToolRebar
     |: None
 
 :~ key_tool (action : setup_action) (~key : string) : option ci_tool =
@@ -52,7 +61,8 @@
     pins |> listm'.try_find_ (\ (seen : tool_pin) => seen.tool = pin.tool && seen.version = pin.version) <> None
 
 :~ ^ pins_from (lines : array string) (at : i32) (action : setup_action) (found : list tool_pin) : list tool_pin =
-    ? at >= (am'.length lines : i32) ?> listm.rev found
+    ? at >= (am'.length lines : i32)
+    ?> listm.rev found
     |:
         := line = am'.index at lines
         := next_action = action_of line action

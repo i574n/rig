@@ -70,7 +70,8 @@
         line_count = am'.length lines
     }
 
-:~ archived_binding (~known : string) (~line : string) : bool = sm'.contains ("\ninl " ++# binding_of line ++# " () =") known
+:~ archived_binding (~known : string) (~line : string) : bool =
+    sm'.contains ("\ninl " ++# binding_of line ++# " () =") known
 
 :~ archived_line (~known : string) (~line : string) : bool = sm'.contains ("\n" ++# line ++# "\n") (known ++# "\n")
 
@@ -80,7 +81,8 @@
 
 :~ archive_row (~known : string) (~line : string) : string =
     := binding = binding_of line
-    ? archived_binding known line |> not ?> line
+    ? archived_binding known line |> not
+    ?> line
     |: "inl " ++# free_binding known binding 2i32 ++# byte_slice line (4i32 + byte_len binding) (byte_len line)
 
 :~ fresh_rows (~known : string) (sealed : array string) : array string =
@@ -96,7 +98,7 @@
 :~ seal_receipt (mode : seal_mode) (split : sealing) (fresh : i32) (before : u64) (after : u64) (started : u64) : i32 =
     := word = ?= mode ?| | SealApply => "ok" | SealDryRun => "dry-run"
     := counts = " sealed=" ++# i32_text split.sealed_count ++# " new_in_archive=" ++# i32_text fresh
-    stdout_line ("kit agile seal " ++# word ++# counts ++# (measured_sizes before after (ms_since started)))
+    stdout_line ("rig agile seal " ++# word ++# counts ++# (measured_sizes before after (ms_since started)))
 
 :~ sealed_written (~root : string) (~path : string) (~raw : string) (split : sealing) (~ending : string) : string =
     := archive = archive_path root
@@ -130,7 +132,8 @@
             ?> seal_failure "the split is not a partition of the state lines; nothing written"
             |:
                 ?= mode ?|
-                | SealDryRun => seal_receipt mode split 0i32 (text_bytes text) (text_bytes (split.kept ++# ending)) started
+                | SealDryRun =>
+                    seal_receipt mode split 0i32 (text_bytes text) (text_bytes (split.kept ++# ending)) started
                 | SealApply =>
                     := outcome = sealed_written root path raw split ending
                     ? sm'.starts_with "!" outcome
@@ -142,8 +145,10 @@
 :~ seal_entry () : i32 =
     := root = rust_std_env.model.argument_owned 1i32
     := flag = rust_std_env.model.argument_owned 2i32
-    ? flag = "--dry-run" ?> seal_run root SealDryRun
-    |? flag = "" ?> seal_run root SealApply
+    ? flag = "--dry-run"
+    ?> seal_run root SealDryRun
+    |? flag = ""
+    ?> seal_run root SealApply
     |: seal_failure "usage: agile seal <root> [--dry-run]"
 
 ///> rust

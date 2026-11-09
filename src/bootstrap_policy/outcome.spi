@@ -102,8 +102,10 @@
     | ProcessTerminated _ => 137i32
     | ProcessStreamsCaptured (process_stream_word word) =>
         := code = stream_word_exit_code word
-        ? u64_eq code 0u64 ?> 0i32
-        |? u64_eq code 2u64 ?> 2i32
+        ? u64_eq code 0u64
+        ?> 0i32
+        |? u64_eq code 2u64
+        ?> 2i32
         |: 127i32
 
 := receipt_elapsed \* from to. (bounded_process_receipt event : bounded_process_receipt from to) : u64 =

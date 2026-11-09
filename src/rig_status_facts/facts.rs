@@ -243,7 +243,7 @@ fn method12(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
             UH0::UH0_Cons(v2, v3) => {
                 let mut v2: Rc<str> = v2;
                 let v3: Rc<UH0> = v3;
-                let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit crate gate "); } LIT.with(|lit| lit.clone()) };
+                let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig crate gate "); } LIT.with(|lit| lit.clone()) };
                 let mut v5: bool = v2.starts_with(&*v4);
                 let v6: Rc<str> = if v5 {
                     v2
@@ -271,7 +271,7 @@ fn verdict_of_8(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i64) -> US0 {
         let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("gate"); } LIT.with(|lit| lit.clone()) };
         US0::US0_FactMissing(v10, v1)
     } else {
-        let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit crate gate "); } LIT.with(|lit| lit.clone()) };
+        let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig crate gate "); } LIT.with(|lit| lit.clone()) };
         let v13: Rc<str> = Rc::<str>::from(v8.replace(&*v12, &*v5));
         US0::US0_GateVerdict(v13, v1, v2)
     }
@@ -462,13 +462,13 @@ fn fact_line_23(mut v0: US0) -> Rc<str> {
         US0::US0_BacklogCounts(v17, v18) => {
             let v17: Rc<str> = v17;
             let v18: Rc<str> = v18;
-            let v21: Rc<str> = string_concat(&["kit status backlog", &*v17, " source=", &*v18]);
+            let v21: Rc<str> = string_concat(&["rig status backlog", &*v17, " source=", &*v18]);
             v21
         }
         US0::US0_FactMissing(v22, v23) => {
             let v22: Rc<str> = v22;
             let v23: Rc<str> = v23;
-            let v26: Rc<str> = string_concat(&["kit status missing ", &*v22, " source=", &*v23]);
+            let v26: Rc<str> = string_concat(&["rig status missing ", &*v22, " source=", &*v23]);
             v26
         }
         US0::US0_GateVerdict(v9, v10, v11) => {
@@ -476,7 +476,7 @@ fn fact_line_23(mut v0: US0) -> Rc<str> {
             let v10: Rc<str> = v10;
             let v11: i64 = v11;
             let v13: Rc<str> = age_text_24(v11);
-            let v16: Rc<str> = string_concat(&["kit status gate ", &*v9, &*v13, " source=", &*v10]);
+            let v16: Rc<str> = string_concat(&["rig status gate ", &*v9, &*v13, " source=", &*v10]);
             v16
         }
         US0::US0_InstalledTrain(v1, v2, v3) => {
@@ -484,7 +484,7 @@ fn fact_line_23(mut v0: US0) -> Rc<str> {
             let mut v2: Rc<str> = v2;
             let v3: i64 = v3;
             let mut v5: Rc<str> = age_text_24(v3);
-            let mut v8: Rc<str> = string_concat(&["kit status train=", &*v1, &*v5, " source=", &*v2]);
+            let mut v8: Rc<str> = string_concat(&["rig status train=", &*v1, &*v5, " source=", &*v2]);
             v8
         }
     }
@@ -559,7 +559,7 @@ fn receipt_line_26(mut v0: Rc<UH1>) -> Rc<str> {
     let mut v7: i32 = v6.wrapping_sub(v4);
     let mut v8: Rc<str> = format_real_20(v7);
     let v11: Rc<str> = format_real_20(v4);
-    let v12: Rc<str> = string_concat(&["kit status ok facts=", &*v8, " missing=", &*v11]);
+    let v12: Rc<str> = string_concat(&["rig status ok facts=", &*v8, " missing=", &*v11]);
     v12
 }
 fn method30(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {

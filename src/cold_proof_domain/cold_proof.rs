@@ -5,7 +5,7 @@ use std::rc::Rc;
 struct Fixture(std::path::PathBuf);
 impl Fixture { fn new() -> Self {
 let stamp=std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
-let root=std::env::temp_dir().join(format!("kit cold binary ü {} {stamp}",std::process::id()));
+let root=std::env::temp_dir().join(format!("rig cold binary ü {} {stamp}",std::process::id()));
 std::fs::create_dir_all(root.join("state")).unwrap();
 std::fs::create_dir_all(root.join("src")).unwrap(); Self(root) } }
 impl Drop for Fixture { fn drop(&mut self) { let _=std::fs::remove_dir_all(&self.0); } }

@@ -49,7 +49,7 @@ enum US3 {
 }
 pub struct Mut0 { pub l0: Rc<str> }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let mut v1: Rc<str> = string_concat(&["kit error: schedule ", &*v0]);
+    let mut v1: Rc<str> = string_concat(&["rig error: schedule ", &*v0]);
     println!("{}", v1);
     2i32
 }
@@ -743,14 +743,14 @@ fn schedule_run_0() -> i32 {
                     };
                     let v260: Rc<str> = match &v250 {
                         US3::US3_ScheduleDue => {
-                            let v252: Rc<str> = string_concat(&["kit schedule due ok name=", &*v237, " due=yes"]);
+                            let v252: Rc<str> = string_concat(&["rig schedule due ok name=", &*v237, " due=yes"]);
                             v252
                         }
                         US3::US3_ScheduleWaits(v253) => {
                             let v253: u64 = *v253;
                             let v256: u64 = v253.wrapping_div(1000u64);
                             let v257: Rc<str> = format_real_16(v256);
-                            let v258: Rc<str> = string_concat(&["kit schedule due ok name=", &*v237, " due=no next_in_s=", &*v257]);
+                            let v258: Rc<str> = string_concat(&["rig schedule due ok name=", &*v237, " due=no next_in_s=", &*v257]);
                             v258
                         }
                     };
@@ -770,7 +770,7 @@ fn schedule_run_0() -> i32 {
                     }
                 }
                 US0::US0_ListSchedules => {
-                    let v269: Rc<str> = string_concat(&["kit schedule list ok root=", &*v236]);
+                    let v269: Rc<str> = string_concat(&["rig schedule list ok root=", &*v236]);
                     println!("{}", v269);
                     0i32
                 }
@@ -779,12 +779,12 @@ fn schedule_run_0() -> i32 {
                     let v264: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
                     stamp_written_18(v236, v263.clone(), v264);
                     let v267: Rc<str> = format_real_16(v264);
-                    let v268: Rc<str> = string_concat(&["kit schedule ran ok name=", &*v263, " at_ms=", &*v267]);
+                    let v268: Rc<str> = string_concat(&["rig schedule ran ok name=", &*v263, " at_ms=", &*v267]);
                     println!("{}", v268);
                     0i32
                 }
                 US0::US0_ScheduleUsage => {
-                    let v270: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit schedule: due <name> <minutes> (exit 0 when due, 1 when not) | ran <name> | list (a name has no path characters; stamps under KIT_SCHEDULES_HOME, else LOCALAPPDATA\\kit\\schedules; never a relative folder)"); } LIT.with(|lit| lit.clone()) };
+                    let v270: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig schedule: due <name> <minutes> (exit 0 when due, 1 when not) | ran <name> | list (a name has no path characters; stamps under KIT_SCHEDULES_HOME, else LOCALAPPDATA\\kit\\schedules; never a relative folder)"); } LIT.with(|lit| lit.clone()) };
                     refused_1(v270)
                 }
             }

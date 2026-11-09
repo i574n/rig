@@ -779,7 +779,7 @@ fn writes_answered_36(mut v0: Rc<str>) -> Rc<str> {
     let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/tool_input/command"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = std::rc::Rc::<str>::from(v2.pointer(&*v3).and_then(serde_json::Value::as_str).unwrap_or(""));
     let mut v5: Rc<str> = rig_hook_verbs::rig_hook_sign_line(&v4);
-    let mut v6: Rc<str> = string_concat(&["kit hook ", &*v5]);
+    let mut v6: Rc<str> = string_concat(&["rig hook ", &*v5]);
     v6
 }
 fn hook_run_0() -> i32 {

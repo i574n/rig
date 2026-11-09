@@ -156,7 +156,7 @@ fn guide_run_0() -> i32 {
     let v2: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v1).unwrap_or_default().replace(char::from(13u8), "").as_str());
     let v3: bool = &*v2 == "";
     if v3 {
-        let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: guide needs a readable spec file; usage: guide <spec/one-call.md> [--out <file.md>]"); } LIT.with(|lit| lit.clone()) };
+        let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: guide needs a readable spec file; usage: guide <spec/one-call.md> [--out <file.md>]"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v4);
         2i32
     } else {
@@ -182,13 +182,13 @@ fn guide_run_0() -> i32 {
             match v18 {
                 US2::US2_WriteFailed(v23) => {
                     let v23: Rc<str> = v23;
-                    let v26: Rc<str> = string_concat(&["kit error: guide could not write ", &*v12, ": ", &*v23]);
+                    let v26: Rc<str> = string_concat(&["rig error: guide could not write ", &*v12, ": ", &*v23]);
                     eprintln!("{}", v26);
                     2i32
                 }
                 US2::US2_Written => {
                     let v19: Rc<str> = format_real_5(v9);
-                    let v22: Rc<str> = string_concat(&["kit guide ok intents=", &*v19, " out=", &*v12]);
+                    let v22: Rc<str> = string_concat(&["rig guide ok intents=", &*v19, " out=", &*v12]);
                     println!("{}", v22);
                     0i32
                 }

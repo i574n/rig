@@ -25,7 +25,9 @@
     | JobStatus => rig_job_query.query.status_placed first
     | JobWait => rig_job_query.query.wait_placed (first, second)
     | JobList =>
-        ? first = "--on" ?> rig_job_dispatch.dispatch.list_on_run (jobs_root ()) |: rig_job_control.control.job_listed ()
+        ? first = "--on"
+        ?> rig_job_dispatch.dispatch.list_on_run (jobs_root ())
+        |: rig_job_control.control.job_listed ()
     | JobTail => rig_job_query.query.tail_placed first
     | JobStop => rig_job_query.query.stop_placed first
     | JobAfter => rig_job_rechain.rechain.rechain_run ()

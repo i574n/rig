@@ -11,11 +11,16 @@
     | OtherLine
 
 := entry_kind_of (~line : string) : entry_kind =
-    ? sm'.starts_with "1 " line ?> TrackedChange
-    |? sm'.starts_with "2 " line ?> RenamedChange
-    |? sm'.starts_with "? " line ?> UntrackedEntry
-    |? sm'.starts_with "u " line ?> UnmergedEntry
-    |? sm'.starts_with "# " line ?> HeaderLine
+    ? sm'.starts_with "1 " line
+    ?> TrackedChange
+    |? sm'.starts_with "2 " line
+    ?> RenamedChange
+    |? sm'.starts_with "? " line
+    ?> UntrackedEntry
+    |? sm'.starts_with "u " line
+    ?> UnmergedEntry
+    |? sm'.starts_with "# " line
+    ?> HeaderLine
     |: OtherLine
 
 :== change_counts =
@@ -79,7 +84,9 @@
     := both = counts_of "1 MM N... 100644 100644 100644 abc def src/rig_cli/main.spi"
     testing.expect (both.staged = 1u64 && both.modified = 1u64) "staged and modified"
     testing.expect ((counts_of "? lab/KIT-CORE-OPERATORS/sweep.ps1").untracked = 1u64) "untracked"
-    testing.expect (path_of "1 .M N... 100644 100644 100644 abc def src/a b/c.spi" = "src/a b/c.spi") "paths keep spaces"
+    testing.expect
+        (path_of "1 .M N... 100644 100644 100644 abc def src/a b/c.spi" = "src/a b/c.spi")
+        "paths keep spaces"
     testing.expect
         (path_of "2 R. N... 100644 100644 100644 abc def R100 src/new.spi\tsrc/old.spi" = "src/new.spi")
         "renames report the new path"

@@ -50,11 +50,13 @@
         ?= present ?|
         | file :: _ => row_from file dir (file_system.read_all_text (manifest_path dir file)) :: found
         | [] => found
-    ? depth >= 8i32 ?> here
+    ? depth >= 8i32
+    ?> here
     |:
         := descended = \ (acc : list manifest_row) (name : string) =>
             := child = dir ++# "/" ++# name
-            ? listm'.contains name (skipped_names ()) || file_system.directory_exists child |> not ?> acc
+            ? listm'.contains name (skipped_names ()) || file_system.directory_exists child |> not
+            ?> acc
             |: manifests_in child (depth + 1i32) acc
         child_names dir |> listm.fold descended here
 

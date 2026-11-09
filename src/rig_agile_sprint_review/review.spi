@@ -11,7 +11,8 @@
 :~ sprints_read (~text : string) : list sprint = sprints_from (rig_agile_sprint_read.read.flat_rows_of text)
 
 :~ chosen (sprints : list sprint) (~id : string) : option sprint =
-    ? id = "" ?> first_open sprints
+    ? id = ""
+    ?> first_open sprints
     |: listm'.try_find_ (\ (s : sprint) => s.terms.id = id) sprints
 
 :== task_row = { task : string }
@@ -19,8 +20,10 @@
 :== review_row = { done : i32; carried : i32; dropped : i32 }
 
 :~ ^ task_listed (rows : array_base task_row) (~task : string) (at : i32) : bool =
-    ? at >= am'.length_base rows ?> !-
-    |? (am'.index_base at rows).task = task ?> !+
+    ? at >= am'.length_base rows
+    ?> !-
+    |? (am'.index_base at rows).task = task
+    ?> !+
     |: task_listed rows task (at + 1i32)
 
 :~ closing ((text, id, finished) : string * string * array_base task_row) : option (sprint * sprint_review) =

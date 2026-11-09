@@ -19,13 +19,15 @@
     (rows : array_base rig_style_measure.measure.probe_row) (at : i32) (totals : list round_count)
     : list round_count
     =
-    ? at >= am'.length_base rows ?> totals
+    ? at >= am'.length_base rows
+    ?> totals
     |:
         := row = am'.index_base at rows
         summed rows (at + 1i32) (added totals row.word row.count)
 
 :~ ^ packages_summed (packages : array_base string) (at : i32) (totals : list round_count) : list round_count =
-    ? at >= am'.length_base packages ?> totals
+    ? at >= am'.length_base packages
+    ?> totals
     |:
         := rows = rig_style_measure.measure.measured (am'.index_base at packages)
         packages_summed packages (at + 1i32) (summed rows 0i32 totals)
@@ -43,7 +45,8 @@
 :~ line_of (~line : string) : round_line =
     := marker = " = RoundCount (\""
     := at = sm'.index_of marker line
-    ? at < 0i32 ?> OtherLine
+    ? at < 0i32
+    ?> OtherLine
     |:
         := fields = sm'.split ", " (sm'.slice (at + sm'.length marker - 1i32) (sm'.length line - 2i32) line) |> array
         := field = \ (k : i32) => ? am'.length fields > k ?> am'.index k fields |> sm'.replace "\"" "" |: ""
@@ -72,11 +75,14 @@
     "  " ++# c.word ++# "=" ++# sm'.show c.count ++# " (" ++# change ++# ")"
 
 :~ config_path () : string =
-    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := rig_home = env.get_environment_variable "RIG_CONFIG_HOME"
+    := home = ? rig_home <> "" ?> rig_home |: env.get_environment_variable "KIT_CONFIG_HOME"
     := app_data = env.get_environment_variable "APPDATA"
     := dir =
-        ? home <> "" ?> home
-        |? app_data <> "" ?> app_data ++# "/kit"
+        ? home <> ""
+        ?> home
+        |? app_data <> ""
+        ?> app_data ++# "/kit"
         |: env.get_environment_variable "HOME" ++# "/.config/kit"
     dir ++# "/granular_rounds.spi"
 
@@ -100,10 +106,10 @@
         := rows = totals |> listm.map (\ (c : round_count) => row_text repo stamp c ++# "\n") |> sm'.concat_list ""
         file_system.write_all_text path (before ++# rows)
         := counts = " words=" ++# sm'.show (listm.length totals : i32) ++# " file=" ++# path
-        console.write_line ("kit standards round ok repo=" ++# repo ++# counts)
+        console.write_line ("rig standards round ok repo=" ++# repo ++# counts)
         0i32
     | _ =>
-        console.write_error_line "kit error: usage: standards --round <repo-label> <dir>..."
+        console.write_error_line "rig error: usage: standards --round <repo-label> <dir>..."
         2i32
 
 ///> rust

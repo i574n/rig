@@ -1,4 +1,3 @@
-
 := emit_coverage_union () : () =
     global """
         fn coverage_union_records(path: &Path) -> Result<BTreeMap<String, BTreeMap<u32, u64>>, String> {
@@ -42,7 +41,7 @@
             let receipt = PathBuf::from(format!("{}.receipt", output.display()));
             let receipt_text = format!("route=lcov-union\ninputs={}\nlines={}\ncovered_permille={ratio}\nsha256={hash}\n", args.len() - 2, flat.len());
             coverage_atomic_write(&receipt, receipt_text.as_bytes())?;
-            println!("kit proxy coverage-union ok inputs={} lines={} covered={ratio}/1000 sha256={hash}", args.len() - 2, flat.len());
+            println!("rig proxy coverage-union ok inputs={} lines={} covered={ratio}/1000 sha256={hash}", args.len() - 2, flat.len());
             Ok(())
         }
 

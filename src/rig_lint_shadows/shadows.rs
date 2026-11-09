@@ -676,7 +676,7 @@ fn shadows_run_0() -> i32 {
         v15
     };
     if v16 {
-        let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: lint usage: lint shadows <root> [<path>...] [--baseline <rows>] [--opens [--lib <dir>]]"); } LIT.with(|lit| lit.clone()) };
+        let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: lint usage: lint shadows <root> [<path>...] [--baseline <rows>] [--opens [--lib <dir>]]"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v17);
         2i32
     } else {
@@ -689,7 +689,7 @@ fn shadows_run_0() -> i32 {
             false
         };
         if v21 {
-            let v22: Rc<str> = string_concat(&["kit error: lint shadows: no baseline file at ", &*v2]);
+            let v22: Rc<str> = string_concat(&["rig error: lint shadows: no baseline file at ", &*v2]);
             eprintln!("{}", v22);
             2i32
         } else {

@@ -43,7 +43,8 @@
     | SitesVanished _ => { tally ?| vanished = (tally.vanished + 1i32) }
 
 :~ noted (tally : record_tally) (~id : string) (~body : string) (~stamp : string) : record_tally =
-    ? body = "" || task_declared tally.text id = !- ?> tally
+    ? body = "" || task_declared tally.text id = !-
+    ?> tally
     |:
         := ready = note_schema_ensured tally.text
         := seq = note_count ready id + 1i32
@@ -54,7 +55,8 @@
     (~ids : string) (~before : string) (~after : string) (~stamp : string) (tally : record_tally)
     : record_tally
     =
-    ? ids = "" ?> tally
+    ? ids = ""
+    ?> tally
     |:
         := id = line_head ids
         := change = site_change_of (sites_of before id "") (sites_of after id "")
@@ -87,10 +89,9 @@
             ++# " moved="
             ++# i32_text tally.moved
             ++# (" vanished=" ++# (i32_text tally.vanished) ++# " notes=" ++# (i32_text tally.notes))
-        ? updated = original
-        ?>
+        ? updated = original ?>
             stdout_line (
-                "kit agile todos record ok sites="
+                "rig agile todos record ok sites="
                 ++# i32_text ($'(!after).lines().count() as i32' : i32)
                 ++# counts
                 ++# " unchanged=true elapsed_ms="
@@ -100,7 +101,7 @@
             ?= state_written state raw updated ?|
             | StateWritten =>
                 stdout_line (
-                    "kit agile todos record ok sites="
+                    "rig agile todos record ok sites="
                     ++# i32_text ($'(!after).lines().count() as i32' : i32)
                     ++# counts
                     ++# measured_sizes (text_bytes original) (text_bytes updated) (ms_since started)

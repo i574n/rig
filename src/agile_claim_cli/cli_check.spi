@@ -28,15 +28,15 @@
     fixture_write root "state/agile.spi" (backlog ())
     fixture_write root "state/package.spiproj" "modules:\n    agile\n"
     := listed = succeeded (next_listed root "lane-a")
-    shows listed "kit agile next ok listed="
+    shows listed "rig agile next ok listed="
     shows listed " lane=lane-a claimed=none\nitem MAIN-C P0 D1 Planned main other team"
     := first = succeeded (next_any root "lane-a")
-    shows first "kit agile next ok claimed=MAIN-C owner=lane-a expires="
+    shows first "rig agile next ok claimed=MAIN-C owner=lane-a expires="
     shows first " ttl_min=90 wip=1 rank=1"
     shows first "\nitem MAIN-C P0 D1 Planned main other team\nlast-note none\npaths none"
     shows (succeeded (next_any root "lane-b")) "claimed=KIT-A owner=lane-b"
     shows (succeeded (next_any root "lane-c")) "claimed=KIT-D owner=lane-c"
-    exited (next_any root "lane-e") 3i32 "kit agile next ok claimed=none reason=all-leased wip=3"
+    exited (next_any root "lane-e") 3i32 "rig agile next ok claimed=none reason=all-leased wip=3"
     shows (fixture_read root "state/claims.spi") "inl claim_kit_a () = Claim (\"KIT-A\", \"lane-b\", "
     shows (fixture_read root "state/package.spiproj") "modules:\n    claims\n    agile\n"
     shows (succeeded (next_any root "lane-b")) "claimed=KIT-A owner=lane-b"
@@ -51,12 +51,14 @@
         agile_call root (Arg ("claim", Arg (here, Arg (item, Arg ("--as", Arg (lane, rest))))))
     := release = \ (~item : string) (~lane : string) =>
         agile_call root (Arg ("release", Arg (here, Arg (item, Arg ("--as", Arg (lane, NoArgs))))))
-    shows (succeeded (claim "KIT-A" "lane-b" (Arg ("--paths", Arg ("src/x/**", NoArgs))))) "kit agile claim ok claimed=KIT-A"
-    exited (claim "KIT-A" "lane-c" NoArgs) 5i32 "kit agile claim refused id=KIT-A reason=leased-by:lane-b:"
+    shows
+        (succeeded (claim "KIT-A" "lane-b" (Arg ("--paths", Arg ("src/x/**", NoArgs)))))
+        "rig agile claim ok claimed=KIT-A"
+    exited (claim "KIT-A" "lane-c" NoArgs) 5i32 "rig agile claim refused id=KIT-A reason=leased-by:lane-b:"
     exited (claim "KIT-D" "lane-c" (Arg ("--paths", Arg ("src/x/y.spi", NoArgs))))
         5i32 "reason=path-overlap:KIT-A:"
-    exited (release "KIT-A" "lane-c") 5i32 "kit agile release refused id=KIT-A reason=leased-by:lane-b:"
-    shows (succeeded (release "KIT-A" "lane-b")) "kit agile release ok id=KIT-A owner=lane-b released=yes wip=0"
+    exited (release "KIT-A" "lane-c") 5i32 "rig agile release refused id=KIT-A reason=leased-by:lane-b:"
+    shows (succeeded (release "KIT-A" "lane-b")) "rig agile release ok id=KIT-A owner=lane-b released=yes wip=0"
     shows (succeeded (release "KIT-A" "lane-b")) "released=none"
     shows (succeeded (claim "KIT-D" "lane-c" (Arg ("--paths", Arg ("src/x/y.spi", NoArgs))))) "/src/x/y.spi"
     rejected_with (claim "NOPE" "lane-c" NoArgs) 2i32 "no open task with id NOPE"

@@ -10,7 +10,8 @@
     := ledger = row.ledger
     := id = row.id
     := plan = plan_text ledger id
-    ? row.rejected <> "" ?> failed ("amend: " ++# row.rejected)
+    ? row.rejected <> ""
+    ?> failed ("amend: " ++# row.rejected)
     |? plan = ""
     ?> failed ("amend: no registration for " ++# id ++# " in " ++# ledger)
     |:
@@ -47,7 +48,7 @@
                     ?> failed ("amend: " ++# problem)
                     |:
                         stdout_line (
-                            "kit experiment amend ok id="
+                            "rig experiment amend ok id="
                             ++# id
                             ++# " field="
                             ++# field
@@ -60,7 +61,8 @@
     := ledger = row.ledger
     := id = row.id
     := note = row.note
-    ? row.rejected <> "" ?> failed ("addendum: " ++# row.rejected)
+    ? row.rejected <> ""
+    ?> failed ("addendum: " ++# row.rejected)
     |? plan_text ledger id = ""
     ?> failed ("addendum: no registration for " ++# id ++# " in " ++# ledger)
     |? note = ""
@@ -72,7 +74,7 @@
         ?> failed ("addendum: " ++# problem)
         |:
             stdout_line (
-                "kit experiment addendum ok id="
+                "rig experiment addendum ok id="
                 ++# id
                 ++# " at="
                 ++# at

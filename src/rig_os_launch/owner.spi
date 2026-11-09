@@ -34,9 +34,12 @@
 
 :~ launcher_kind_of (~name : string) : launcher_kind =
     := base = sm'.trim_end_suffix ".exe" (sm'.to_lower name)
-    ? shell_base base || console_base base ?> ShellLauncher
-    |? sm'.starts_with "kit" base ?> KitLauncher
-    |? remote_session_base base ?> RemoteSession
+    ? shell_base base || console_base base
+    ?> ShellLauncher
+    |? sm'.starts_with "kit" base
+    ?> KitLauncher
+    |? remote_session_base base
+    ?> RemoteSession
     |: OwnerProcess
 
 :~ number_of (~text : string) : u64 = optionm'.default_value 0u64 (convert.try_convert (sm'.trim text))

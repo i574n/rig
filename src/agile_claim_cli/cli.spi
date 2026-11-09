@@ -49,7 +49,7 @@
     (~verb : string) (~item : string) (~owner : string) (expires_ms : u64) (ttl_min : i32) (wip : i32) (rank : i32)
     : string
     =
-    := head = "kit agile " ++# verb ++# " ok claimed=" ++# item ++# " owner=" ++# owner
+    := head = "rig agile " ++# verb ++# " ok claimed=" ++# item ++# " owner=" ++# owner
     := expiry = " expires=" ++# utc_stamp expires_ms
     := ranked = ? rank > 0i32 ?> " rank=" ++# sm'.show rank |: ""
     head ++# expiry ++# " ttl_min=" ++# sm'.show ttl_min ++# " wip=" ++# sm'.show wip ++# ranked
@@ -84,7 +84,10 @@
             paths = detail
             known = known
         }
-    := problem = agile_claim_store.store.applied_claims ((;[ application ] : array agile_claim_store.store.claim_application) |> am'.base)
+    := problem =
+        agile_claim_store.store.applied_claims (
+            (;[ application ] : array agile_claim_store.store.claim_application) |> am'.base
+        )
     ? problem <> "" ?> failed problem
     |:
         ?= outcome_of kind ?|
@@ -92,21 +95,21 @@
             := where = ? detail = "" ?> "paths none" |: "paths " ++# detail
             := line = receipt r.verb item owner expires r.ttl_min wip rank
             printed [ line; claim_item_lines root item; where ] 0i32
-        | OutcomeRefused => printed [ "kit agile claim refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
+        | OutcomeRefused => printed [ "rig agile claim refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
         | OutcomeNone =>
-            := text = "kit agile next ok claimed=none reason=" ++# detail ++# " wip=" ++# sm'.show wip
+            := text = "rig agile next ok claimed=none reason=" ++# detail ++# " wip=" ++# sm'.show wip
             printed [ text ] 3i32
         | OutcomeDropped =>
-            := head = "kit agile release ok id=" ++# r.item ++# " owner=" ++# r.lane
+            := head = "rig agile release ok id=" ++# r.item ++# " owner=" ++# r.lane
             printed [ head ++# " released=" ++# detail ++# " wip=" ++# sm'.show wip ] 0i32
-        | OutcomeReleaseRefused => printed [ "kit agile release refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
+        | OutcomeReleaseRefused => printed [ "rig agile release refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
         | OutcomeUnknown => failed ("no open task with id " ++# r.item)
 :~ listed_next (~root : string) (~lane : string) (~wsjf : string) (~active : string) : i32 =
     := _, rows = claims_loaded root
     := picked = agile_claim_listing.listing.listed_ids (rows, lane, wsjf, active, unix_ms ())
     := picks = am'.to_list_base' picked |> listm'.unbox
     := count : i32 = listm.length picks
-    := head = "kit agile next ok listed=" ++# sm'.show count ++# " lane=" ++# lane ++# " claimed=none"
+    := head = "rig agile next ok listed=" ++# sm'.show count ++# " lane=" ++# lane ++# " claimed=none"
     := hint = "take one: kit agile claim " ++# root ++# " <ID> --as " ++# lane ++# " (or next --claim takes the first)"
     printed (head :: listm.append (picks |> listm.map (claim_item_lines root)) [ ? count > 0i32 ?> hint |: "" ]) 0i32
 
@@ -116,8 +119,10 @@
     := found, ranked, started, known, live = claim_ranking root
     := mine = ? asked.next ?> agile_team_lane.lane.lane_items (root, asked.lane) |: ""
     := wsjf, active = ? asked.next ?> agile_claim_listing.listing.lane_order (ranked, started, mine) |: ranked, started
-    ? found = !- ?> stderr_failure ("agile " ++# asked.verb ++# ": state/agile.spi is missing")
-    |? asked.next && asked.grab |> not ?> listed_next root asked.lane wsjf active
+    ? found = !-
+    ?> stderr_failure ("agile " ++# asked.verb ++# ": state/agile.spi is missing")
+    |? asked.next && asked.grab |> not
+    ?> listed_next root asked.lane wsjf active
     |: claim_answered r root (claims_loaded root) wsjf active known live
 
 :~ claim_run () : i32 =
@@ -125,7 +130,8 @@
     | _ :: word :: root :: words =>
         := gather = \ (kept : array string) (item : string) => kept ++ ;[ item ]
         := parsed = am'.index_base 0i32 (request_parsed (word, words |> listm.fold gather ;[] |> am'.base))
-        ? parsed.refusal <> "" ?> stderr_failure ("agile " ++# word ++# ": " ++# parsed.refusal)
+        ? parsed.refusal <> ""
+        ?> stderr_failure ("agile " ++# word ++# ": " ++# parsed.refusal)
         |: claim_requested root (order_of parsed)
     | _ => stderr_failure "agile: usage: next|claim|release <root> ..."
 

@@ -37,7 +37,8 @@
     | NoModulesSection
 
 :~ module_listed (~package_text : string) : module_listing =
-    ? sm'.contains "\n    parents\n" package_text || sm'.ends_with "\n    parents" package_text ?> ModuleListed
+    ? sm'.contains "\n    parents\n" package_text || sm'.ends_with "\n    parents" package_text
+    ?> ModuleListed
     |? sm'.contains "modules:\n" package_text
     ?> ModuleAdded (sm'.replace "modules:\n" "modules:\n    parents\n" package_text)
     |: NoModulesSection
@@ -62,10 +63,14 @@
         | ParentSet (child, parent) => ? unknown child <> "" ?> child |: unknown parent
         | ParentCleared child => unknown child
     := links = links_changed (links_of_text before) change
-    ? agile_text = "" ?> ParentsRefused ("no backlog state at " ++# state)
-    |? missing <> "" ?> ParentsRefused ("no task " ++# missing ++# " in state/agile.spi")
-    |? text_of path <> before ?> ParentsRefused "state/parents.spi changed since it was read; run again"
-    |? replaced path (parents_text links) = !- ?> ParentsRefused "state/parents.spi could not be written"
+    ? agile_text = ""
+    ?> ParentsRefused ("no backlog state at " ++# state)
+    |? missing <> ""
+    ?> ParentsRefused ("no task " ++# missing ++# " in state/agile.spi")
+    |? text_of path <> before
+    ?> ParentsRefused "state/parents.spi changed since it was read; run again"
+    |? replaced path (parents_text links) = !-
+    ?> ParentsRefused "state/parents.spi could not be written"
     |:
         := package = state ++# "/package.spiproj"
         := count = listm.length links
@@ -83,13 +88,13 @@
         | ParentsWritten count =>
             := parent = ? target = "--clear" ?> "none" |: target
             := counts = " parent=" ++# parent ++# " links=" ++# sm'.format count
-            console.write_line ("kit agile edit ok child=" ++# child ++# counts)
+            console.write_line ("rig agile edit ok child=" ++# child ++# counts)
             0i32
         | ParentsRefused reason =>
-            console.write_error_line ("kit error: agile edit --parent: " ++# reason)
+            console.write_error_line ("rig error: agile edit --parent: " ++# reason)
             2i32
     | _ =>
-        console.write_error_line "kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"
+        console.write_error_line "rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"
         2i32
 
 ///> rust

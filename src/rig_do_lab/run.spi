@@ -42,9 +42,12 @@
     | Stale : u64
 
 :~ verdict_of (~item : string) (~id : string) (~days : u64) : lab_verdict =
-    ? item = "" ?> Orphan id
-    |? tab_part item 1i32 = "Done" ?> DoneItem
-    |? days > 14u64 ?> Stale days
+    ? item = ""
+    ?> Orphan id
+    |? tab_part item 1i32 = "Done"
+    ?> DoneItem
+    |? days > 14u64
+    ?> Stale days
     |: Keep
 
 :~ verdict_text (verdict : lab_verdict) : string =
@@ -66,8 +69,7 @@
     (~state : lab_tally)
     : lab_tally
     =
-    ? index < line_count names
-    ?>
+    ? index < line_count names ?>
         := name = line_at names index
         := path = folder ++# "/" ++# name
         := id = item_id_of name

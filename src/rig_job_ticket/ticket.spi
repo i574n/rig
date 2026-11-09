@@ -6,7 +6,8 @@
 :< rig_jobs.host
 
 :~ heavy_queue () : string =
-    := named = env.get_environment_variable "KIT_HEAVY_QUEUE"
+    := rig_named = env.get_environment_variable "RIG_HEAVY_QUEUE"
+    := named = ? rig_named <> "" ?> rig_named |: env.get_environment_variable "KIT_HEAVY_QUEUE"
     := local = env.get_environment_variable "LOCALAPPDATA"
     := base = ? local <> "" ?> local |: env.get_environment_variable "HOME"
     ? named <> "" ?> named |? base = "" ?> "" |: joined (joined base "spiral-bin") "heavy-queue"

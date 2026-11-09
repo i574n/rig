@@ -53,8 +53,10 @@
 
 := activity_line_of (line : string) : activity_line =
     := parts = sm'.split "\"" line |> array
-    ? sm'.starts_with "inl state_change_" line ?> change_line parts
-    |? sm'.starts_with "inl actual_minutes_" line ?> actual_line line parts
+    ? sm'.starts_with "inl state_change_" line
+    ?> change_line parts
+    |? sm'.starts_with "inl actual_minutes_" line
+    ?> actual_line line parts
     |: OtherLine
 
 := changes_of (text : string) : list state_change =

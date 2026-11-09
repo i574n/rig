@@ -5,7 +5,7 @@ param(
     [string[]]$Package = @(),
     [switch]$IncludeAuxiliary,
     [string]$TargetDirectory,
-    [string]$CompilerBundle = $env:KIT_SPIRAL_BUNDLE,
+    [string]$CompilerBundle = ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE),
     [ValidateRange(1, 1800)][int]$TimeoutSec = 180,
     [switch]$CargoCheck,
     [switch]$Test,
@@ -339,16 +339,16 @@ if ($CargoCheck) {
     } finally { Pop-Location }
 }
 if ($Test) {
-    $previousDotnet = $env:KIT_DOTNET
-    $previousBundle = $env:KIT_SPIRAL_BUNDLE
+    $previousDotnet = ($env:RIG_DOTNET ?? $env:KIT_DOTNET)
+    $previousBundle = ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE)
     try {
-        $env:KIT_DOTNET = $dotnet
-        $env:KIT_SPIRAL_BUNDLE = $BundleRoot
+        $env:RIG_DOTNET = $env:KIT_DOTNET = $dotnet
+        $env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = $BundleRoot
         & (Join-Path $staged 'build.ps1') -Test -Package $Package -TargetDirectory $TargetDirectory -SkipRelease:$SkipRelease -CompilerContracts:$CompilerContracts -Offline:$Offline -SpiralCompiler $compiler
         if ($LASTEXITCODE -ne 0) { throw "Regenerated KIT runtime contracts failed: $staged" }
     } finally {
-        $env:KIT_DOTNET = $previousDotnet
-        $env:KIT_SPIRAL_BUNDLE = $previousBundle
+        $env:RIG_DOTNET = $env:KIT_DOTNET = $previousDotnet
+        $env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = $previousBundle
     }
     if (-not $Package.Count) {
         $binaryName = if ($IsWindows) { 'kit.exe' } else { 'kit' }

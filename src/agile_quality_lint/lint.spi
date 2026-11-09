@@ -48,10 +48,14 @@
     | PlanningFields => []
 
 :~ checks_for (~status : string) (~tags : string) : list lint_check =
-    ? status = "Done" ?> [ DoneEvidence ]
-    |? status = "Blocked" ?> [ BlockerNamed ]
-    |? status = "Paused" ?> [ PauseResume ]
-    |? code_tagged tags ?> [ PlanningFields; DoneDefinition; NextStep; TypeFeatures; ProseWait ]
+    ? status = "Done"
+    ?> [ DoneEvidence ]
+    |? status = "Blocked"
+    ?> [ BlockerNamed ]
+    |? status = "Paused"
+    ?> [ PauseResume ]
+    |? code_tagged tags
+    ?> [ PlanningFields; DoneDefinition; NextStep; TypeFeatures; ProseWait ]
     |: [ PlanningFields; DoneDefinition; NextStep; ProseWait ]
 
 :~ last_note (~notes : string) : string =
@@ -83,7 +87,8 @@
 :== failure_row = { id : string; status : string; check : string }
 
 :~ ^ rows_from (facts : array_base fact_row) (at : i32) (rows : list failure_row) : list failure_row =
-    ? at < 0i32 ?> rows
+    ? at < 0i32
+    ?> rows
     |:
         := r = am'.index_base at facts
         := f =

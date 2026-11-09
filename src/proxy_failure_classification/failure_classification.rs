@@ -87,7 +87,7 @@ fn proxy_corrected_command_1(mut v0: Rc<str>) -> Rc<str> {
                 let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" --create-or-replace -- "); } LIT.with(|lit| lit.clone()) };
                 v15
             };
-            let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy "); } LIT.with(|lit| lit.clone()) };
+            let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig proxy "); } LIT.with(|lit| lit.clone()) };
             let v18: Rc<str> = std::rc::Rc::<str>::from(std::env::args().skip(2 + 0i32 as usize).take((3i32 - 0i32).max(0) as usize).map(|word| Some(word.clone()).filter(|plain| plain.is_empty() == false && plain.chars().enumerate().all(|(at, c)| c.is_ascii_alphanumeric() || "_-./:=+,".contains(c) || c == char::from(92u8) || (c == char::from(126u8) && at > 0))).unwrap_or_else(|| [String::from(char::from(39u8)), word.replace(char::from(39u8), &String::from_iter([char::from(39u8); 2])), String::from(char::from(39u8))].concat())).collect::<Vec<_>>().join(" ").as_str());
             let v19: Rc<str> = std::rc::Rc::<str>::from([&*v17, &*v18, &*v16].concat().as_str());
             let v20: i32 = proxy_argument_count_2();
@@ -100,13 +100,13 @@ fn proxy_corrected_command_1(mut v0: Rc<str>) -> Rc<str> {
             let v24: u64 = v24;
             let v25: bool = v24 == 1;
             if v25 {
-                let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy "); } LIT.with(|lit| lit.clone()) };
+                let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig proxy "); } LIT.with(|lit| lit.clone()) };
                 let v27: Rc<str> = std::rc::Rc::<str>::from(std::env::args().skip(2 + 0i32 as usize).take((6i32 - 0i32).max(0) as usize).map(|word| Some(word.clone()).filter(|plain| plain.is_empty() == false && plain.chars().enumerate().all(|(at, c)| c.is_ascii_alphanumeric() || "_-./:=+,".contains(c) || c == char::from(92u8) || (c == char::from(126u8) && at > 0))).unwrap_or_else(|| [String::from(char::from(39u8)), word.replace(char::from(39u8), &String::from_iter([char::from(39u8); 2])), String::from(char::from(39u8))].concat())).collect::<Vec<_>>().join(" ").as_str());
                 let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 let v29: Rc<str> = std::rc::Rc::<str>::from([&*v26, &*v27, &*v28].concat().as_str());
                 v29
             } else {
-                let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit proxy "); } LIT.with(|lit| lit.clone()) };
+                let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig proxy "); } LIT.with(|lit| lit.clone()) };
                 let v31: Rc<str> = std::rc::Rc::<str>::from(std::env::args().skip(2 + 0i32 as usize).take((6i32 - 0i32).max(0) as usize).map(|word| Some(word.clone()).filter(|plain| plain.is_empty() == false && plain.chars().enumerate().all(|(at, c)| c.is_ascii_alphanumeric() || "_-./:=+,".contains(c) || c == char::from(92u8) || (c == char::from(126u8) && at > 0))).unwrap_or_else(|| [String::from(char::from(39u8)), word.replace(char::from(39u8), &String::from_iter([char::from(39u8); 2])), String::from(char::from(39u8))].concat())).collect::<Vec<_>>().join(" ").as_str());
                 let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" --expect "); } LIT.with(|lit| lit.clone()) };
                 let v33: Rc<str> = std::rc::Rc::<str>::from([&*v30, &*v31, &*v32].concat().as_str());

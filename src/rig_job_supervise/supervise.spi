@@ -51,10 +51,13 @@
 
 :~ supervise_cleared (~id : string) : i32 =
     := gate =
-        ? file_exists (job_file id "heavy-wrapper.ps1") ?> rig_job_gate.gate.job_window_gate id
-        |? file_exists (job_file id "window-class") ?> rig_job_gate.gate.job_compile_gate id
+        ? file_exists (job_file id "heavy-wrapper.ps1")
+        ?> rig_job_gate.gate.job_window_gate id
+        |? file_exists (job_file id "window-class")
+        ?> rig_job_gate.gate.job_compile_gate id
         |: 0i32
-    ? gate <> 0i32 ?> gate
+    ? gate <> 0i32
+    ?> gate
     |:
         := cap = decimal_u64 (text_or_empty (job_file id "memory_cap_mb"))
         := _ =

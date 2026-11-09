@@ -6,7 +6,8 @@
 :< rig_jobs_doctor_model.model
 
 :~ ^ names_from (lines : array string) (at : i32) (found : list string) : list string =
-    ? at >= (am'.length lines : i32) ?> found
+    ? at >= (am'.length lines : i32)
+    ?> found
     |:
         := name = sm'.trim (sm'.split "=" (am'.index at lines) |> array |> am'.index 0i32)
         names_from lines (at + 1i32) (? name = "" ?> found |: name :: found)

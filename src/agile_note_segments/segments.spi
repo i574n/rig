@@ -12,8 +12,7 @@
 :~ text_or_empty (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
 
 :~ written (~path : string) (~original : string) (~text : string) : string =
-    ? file_system.file_exists path
-    ?>
+    ? file_system.file_exists path ?>
         ?= replace_file_unchanged path original text ?|
         | Replaced => ""
         | problem => file_replacement_problem problem
@@ -29,9 +28,11 @@
     := manifest_path = state_path state_dir "package.spiproj"
     := manifest = text_or_empty manifest_path
     := manifest_problem =
-        ? registered manifest segment ?> ""
+        ? registered manifest segment
+        ?> ""
         |: written manifest_path manifest (agile_note_model.model.manifest_with_segment manifest segment)
-    ? manifest_problem <> "" ?> manifest_problem
+    ? manifest_problem <> ""
+    ?> manifest_problem
     |:
         := path = state_path state_dir (sm'.concat_list "" [ segment; ".spi" ])
         := original = text_or_empty path
@@ -43,7 +44,9 @@
     (~stamp : string)
     : string * u64
     =
-    ? env.get_environment_variable "KIT_AGILE_NOTE_SEGMENTS" = "1"
+    ?
+        env.get_environment_variable "RIG_AGILE_NOTE_SEGMENTS" = "1"
+        || env.get_environment_variable "KIT_AGILE_NOTE_SEGMENTS" = "1"
     ?> note_appended state_dir row stamp, convert.u64 (sm'.length raw : i32)
     |:
         := updated = notes_appended schema_ready id row

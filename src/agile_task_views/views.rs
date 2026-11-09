@@ -428,7 +428,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
             let v140: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" flags='"); } LIT.with(|lit| lit.clone()) };
             let v141: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) };
             let v145: Rc<str> = string_concat(&[&*v139, &*v2, &*v140, &*v3, &*v141]);
-            let v146: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile view-add ok name="); } LIT.with(|lit| lit.clone()) };
+            let v146: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile view-add ok name="); } LIT.with(|lit| lit.clone()) };
             let v149: Rc<str> = if v32 {
                 let v147: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" replaced=yes"); } LIT.with(|lit| lit.clone()) };
                 v147
@@ -456,7 +456,7 @@ fn view_stored_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
                 _ => unreachable!(),
             };
             let v164: Rc<str> = string_concat(&[&*v155, &*v1, &*v156, &*v160, &*v22]);
-            let v165: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v164 + "
+            let v165: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v164 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v165
         }
@@ -503,7 +503,7 @@ fn view_add_run_1() -> i32 {
                     view_stored_2(v1, v3, v29, v30)
                 } else {
                     let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile view-add: each stored flag must be one word without spaces"); } LIT.with(|lit| lit.clone()) };
-                    let v33: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v32 + "
+                    let v33: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v32 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v33
                 }
@@ -513,14 +513,14 @@ fn view_add_run_1() -> i32 {
                 let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("list|next"); } LIT.with(|lit| lit.clone()) };
                 let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 let v22: Rc<str> = string_concat(&[&*v16, &*v17, &*v18, &*v18, &*v18]);
-                let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v22 + "
+                let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v22 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v23
             }
         }
     } else {
         let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile view-add: view names are lowercase letters, digits and hyphens"); } LIT.with(|lit| lit.clone()) };
-        let v38: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v37 + "
+        let v38: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v37 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v38
     }
@@ -699,7 +699,7 @@ fn view_run_9() -> i32 {
     let v4: bool = &*v3 == "";
     if v4 {
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: agile view <root> <name> [extra flags...]"); } LIT.with(|lit| lit.clone()) };
-        let v6: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v5 + "
+        let v6: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v5 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v6
     } else {
@@ -733,12 +733,12 @@ fn view_run_9() -> i32 {
             let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/views.spi"); } LIT.with(|lit| lit.clone()) };
             let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("; agile views <root> lists them"); } LIT.with(|lit| lit.clone()) };
             let v46: Rc<str> = string_concat(&[&*v35, &*v3, &*v36, &*v1, &*v37, &*v25, &*v25, &*v25, &*v42]);
-            let v47: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v46 + "
+            let v47: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v46 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v47
         } else {
             let (mut v48, mut v49, mut v50): (Rc<str>, Rc<str>, Rc<str>) = view_at_10(v8, v33);
-            let v51: i32 = { let extra = std::env::args().skip(5i32 as usize).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).arg("agile").arg(&*v49).arg(&*v1).args((v50).split_whitespace()).args(&extra).status()) { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("kit error: agile view could not start: {}", error); 2 } } };
+            let v51: i32 = { let extra = std::env::args().skip(5i32 as usize).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).arg("agile").arg(&*v49).arg(&*v1).args((v50).split_whitespace()).args(&extra).status()) { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("rig error: agile view could not start: {}", error); 2 } } };
             v51
         }
     }
@@ -773,7 +773,7 @@ fn views_run_16() -> i32 {
     let v4: i32 = 0i32;
     let v5: i32 = 0i32;
     let v6: i32 = views_listed_17(v3, v4, v5);
-    let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile views ok views="); } LIT.with(|lit| lit.clone()) };
+    let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile views ok views="); } LIT.with(|lit| lit.clone()) };
     let v8: Rc<str> = std::rc::Rc::<str>::from((v6).to_string().as_str());
     let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" path="); } LIT.with(|lit| lit.clone()) };
     let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state/views.spi"); } LIT.with(|lit| lit.clone()) };
@@ -822,7 +822,7 @@ fn views_entry_0() -> i32 {
         }
         US6::US6_CommandUnknown => {
             let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile views: expected views, view or view-add"); } LIT.with(|lit| lit.clone()) };
-            let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v22 + "
+            let v23: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v22 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v23
         }

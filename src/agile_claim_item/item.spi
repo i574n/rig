@@ -55,7 +55,9 @@
     := first = note_row "A-1" 1i32 { at = "2026-11-02T01:00Z"; author = "kit"; text = "first" }
     := second = note_row "A-1" 2i32 { at = "2026-11-02T02:00Z"; author = "x"; text = "second\nline" }
     := notes = sm'.concat_list "\n" [ first; second; "" ]
-    testing.expect (last_note_line notes "A-1" = "last-note 2026-11-02T02:00Z x second line") (last_note_line notes "A-1")
+    testing.expect
+        (last_note_line notes "A-1" = "last-note 2026-11-02T02:00Z x second line")
+        (last_note_line notes "A-1")
     testing.expect (last_note_line notes "B-2" = "last-note none") "no notes"
 
 := main () : i32 =

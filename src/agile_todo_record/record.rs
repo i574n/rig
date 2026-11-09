@@ -700,7 +700,7 @@ fn state_written_20(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US2 {
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".paused"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = concat5_1(v0.clone(), v3, v4.clone(), v4.clone(), v4.clone());
-    std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
+    std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
     let v6: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
     if v6 {
         let v7: Rc<str> = string_concat(&[&*v0, ".pending"]);
@@ -779,7 +779,7 @@ fn record_entry_0() -> i32 {
             let v10: Rc<str> = v10;
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v12: Rc<str> = string_concat(&["agile todos --record rejected: ", &*v11]);
-            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v12 + "
+            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v12 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v13
         }
@@ -809,7 +809,7 @@ fn record_entry_0() -> i32 {
                 let v49: Rc<str> = std::rc::Rc::<str>::from((v48).to_string());
                 let v53: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                 let v54: Rc<str> = std::rc::Rc::<str>::from((v53).to_string());
-                let v55: Rc<str> = string_concat(&["kit agile todos record ok sites=", &*v49, &*v46, " unchanged=true elapsed_ms=", &*v54]);
+                let v55: Rc<str> = string_concat(&["rig agile todos record ok sites=", &*v49, &*v46, " unchanged=true elapsed_ms=", &*v54]);
                 let v56: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v55.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                 v56
@@ -825,7 +825,7 @@ fn record_entry_0() -> i32 {
                         let v65: Rc<str> = std::rc::Rc::<str>::from((v62).to_string());
                         let v68: Rc<str> = std::rc::Rc::<str>::from((v63).to_string());
                         let v71: Rc<str> = std::rc::Rc::<str>::from((v64).to_string());
-                        let v73: Rc<str> = string_concat(&["kit agile todos record ok sites=", &*v59, &*v46, " bytes_before=", &*v65, " bytes_after=", &*v68, " elapsed_ms=", &*v71]);
+                        let v73: Rc<str> = string_concat(&["rig agile todos record ok sites=", &*v59, &*v46, " bytes_before=", &*v65, " bytes_after=", &*v68, " elapsed_ms=", &*v71]);
                         let v74: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v73.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                         v74
@@ -843,7 +843,7 @@ fn record_entry_0() -> i32 {
                             _ => unreachable!(),
                         };
                         let v79: Rc<str> = string_concat(&["agile todos --record rejected: ", &*v78]);
-                        let v80: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v79 + "
+                        let v80: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v79 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                         v80
                     }

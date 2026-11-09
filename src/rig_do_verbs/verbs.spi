@@ -142,15 +142,18 @@
 
 :~ query_family (~records : record_list) (index : i32) : option program_family =
     := verb = field_at records index 1i32
-    ? verb = "files" && field_index records index "count" >= 0i32 ?> Some Facts
+    ? verb = "files" && field_index records index "count" >= 0i32
+    ?> Some Facts
     |:
         ?= program_verb_named verb ?|
         | Some named => Some (program_verb_family named)
         | None => None
 
 :~ ^ families_of (~records : record_list) (index : i32) (seen : families_seen) : families_seen =
-    ? index >= record_count records ?> seen
-    |? field_at records index 0i32 <> "query" ?> families_of records (index + 1i32) seen
+    ? index >= record_count records
+    ?> seen
+    |? field_at records index 0i32 <> "query"
+    ?> families_of records (index + 1i32) seen
     |:
         ?= query_family records index ?|
         | Some family => families_of records (index + 1i32) (seen_with seen family)

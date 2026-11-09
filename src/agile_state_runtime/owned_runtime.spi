@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         #[must_use]

@@ -1,4 +1,3 @@
-
 := emit_atomic_write () : () =
     global "pub use rig_rust_std_fs_mutation::atomic_write;"
 

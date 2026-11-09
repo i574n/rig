@@ -32,7 +32,8 @@
     := marker = " = TargetLimit (\"" ++# backend_word backend ++# "\", "
     := found = \ (limit : i32) (line : string) =>
         := at = sm'.index_of marker line
-        ? at < 0i32 ?> limit
+        ? at < 0i32
+        ?> limit
         |:
             := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
             := digits = sm'.replace "i32)" "" (sm'.trim rest)
@@ -83,9 +84,12 @@
 :~ gate_outcome_of (enforce : bool) (limit : i32) (measures : list crate_measure) : gate_outcome =
     := over = over_count limit measures
     := missing = missing_count limit measures
-    ? enforce && listm.length measures = 0i32 ?> GateFailedVacuous
-    |? enforce && over > 0i32 ?> GateFailedOver over
-    |? enforce && missing > 0i32 ?> GateFailedMissing missing
+    ? enforce && listm.length measures = 0i32
+    ?> GateFailedVacuous
+    |? enforce && over > 0i32
+    ?> GateFailedOver over
+    |? enforce && missing > 0i32
+    ?> GateFailedMissing missing
     |: GatePassed
 
 ///> rust

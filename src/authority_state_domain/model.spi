@@ -46,17 +46,21 @@
             \ mask (blocker : formal_authority_blocker) => mask + blocker_bit blocker
             0i32
     ? reserved = 0i32 ?>
-        ? proof_flags < 0i32 ?> -1i32
-        |? full < proof_flags ?> -1i32
+        ? proof_flags < 0i32
+        ?> -1i32
+        |? full < proof_flags
+        ?> -1i32
         |: full - proof_flags
     |: -1i32
 
 :~ authority_blocker_bit_binding (index : i32) (reserved : i32) : i32 =
-    ? reserved = 0i32 ?> union_reflection.cases.union_case_where (blocker_at index) blocker_bit (-1i32)
+    ? reserved = 0i32
+    ?> union_reflection.cases.union_case_where (blocker_at index) blocker_bit (-1i32)
     |: -1i32
 
 :~ authority_blocker_labels (~input : string) : string * string * string * string * string =
-    ? input = "v1" ?> label_at 1i32, label_at 2i32, label_at 3i32, label_at 4i32, label_at 5i32
+    ? input = "v1"
+    ?> label_at 1i32, label_at 2i32, label_at 3i32, label_at 4i32, label_at 5i32
     |: "", "", "", "", ""
 
 := expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail

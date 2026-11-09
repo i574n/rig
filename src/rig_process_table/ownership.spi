@@ -10,8 +10,10 @@
     | NoOwningJob
 
 :~ job_owner_of (~job : string) (~job_author : string) (~author : string) : job_owner =
-    ? job = "" ?> NoOwningJob
-    |? author <> "" && job_author = author ?> YourJob job
+    ? job = ""
+    ?> NoOwningJob
+    |? author <> "" && job_author = author
+    ?> YourJob job
     |: TheirJob (job, job_author)
 
 :~ mine_verdict (in_session : bool) (owner : job_owner) (~theirs : string) : option string =

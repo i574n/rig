@@ -4,10 +4,13 @@
 :< workspace_primitives.clock
 
 :~ schedules_root () : option string =
-    := explicit = env.get_environment_variable "KIT_SCHEDULES_HOME"
+    := rig_explicit = env.get_environment_variable "RIG_SCHEDULES_HOME"
+    := explicit = ? rig_explicit <> "" ?> rig_explicit |: env.get_environment_variable "KIT_SCHEDULES_HOME"
     := local = env.get_environment_variable "LOCALAPPDATA"
-    ? explicit <> "" ?> Some explicit
-    |? local <> "" ?> Some (local </> "kit" </> "schedules")
+    ? explicit <> ""
+    ?> Some explicit
+    |? local <> ""
+    ?> Some (local </> "kit" </> "schedules")
     |: None
 
 :~ stamp_of (~root : string) (~name : string) : option u64 =
@@ -19,7 +22,7 @@
     file_system.write_all_text (root </> name) (sm'.show now)
 
 :~ refused (~message : string) : i32 =
-    console.write_line ("kit error: schedule " ++# message)
+    console.write_line ("rig error: schedule " ++# message)
     2i32
 
 :~ schedule_run () : i32 =
@@ -35,9 +38,9 @@
         | MarkRan name =>
             := now = unix_ms ()
             stamp_written root name now
-            console.write_line ("kit schedule ran ok name=" ++# name ++# " at_ms=" ++# sm'.show now)
+            console.write_line ("rig schedule ran ok name=" ++# name ++# " at_ms=" ++# sm'.show now)
             0i32
         | ListSchedules =>
-            console.write_line ("kit schedule list ok root=" ++# root)
+            console.write_line ("rig schedule list ok root=" ++# root)
             0i32
         | ScheduleUsage => refused (usage ())

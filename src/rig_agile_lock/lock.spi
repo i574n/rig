@@ -15,7 +15,8 @@
 
 :~ holder_stale_by (alive : u64 -> bool) (~holder : string) (now : u64) : bool =
     := space = sm'.index_of " " holder
-    ? space < 0i32 ?> !+
+    ? space < 0i32
+    ?> !+
     |:
         := pid = lock_number (sm'.substring 0i32 space holder)
         := started = lock_number (sm'.substring (space + 1i32) ((sm'.length holder : i32) - space - 1i32) holder)
@@ -34,7 +35,8 @@
         := started = workspace_primitives.clock.unix_ms ()
         file_system.write_all_text (lock_holder_path root) (lock_holder_text pid started)
         !+
-    |? file_system.directory_exists (root ++# "/state") |> not ?> !+
+    |? file_system.directory_exists (root ++# "/state") |> not
+    ?> !+
     |:
         := holder = file_system.read_text_or_empty (lock_holder_path root)
         ? holder = "" && unread < 400i32 ?>
@@ -43,7 +45,8 @@
         |? lock_holder_stale holder (workspace_primitives.clock.unix_ms ()) ?>
             state_lock_cleared root
             state_lock_waited root deadline 0i32
-        |? workspace_primitives.clock.unix_ms () >= deadline ?> !-
+        |? workspace_primitives.clock.unix_ms () >= deadline
+        ?> !-
         |:
             threading.rust_sleep_ms 25u64
             state_lock_waited root deadline unread
@@ -57,7 +60,8 @@
     inherited <> "" && inherited <> sm'.show own && sm'.starts_with (inherited ++# " ") holder
 
 :~ lock_taken (~root : string) : bool =
-    ? held_by_ancestor root ?> !+
+    ? held_by_ancestor root
+    ?> !+
     |? state_lock_waited root (workspace_primitives.clock.unix_ms () + 300000u64) 0i32 ?>
         := own : u64 = convert.convert (rig_os_process.process.own_pid ())
         env.set_environment_variable (inherited_key ()) (sm'.show own)
@@ -65,7 +69,8 @@
     |: !-
 
 :~ lock_released (~root : string) : bool =
-    ? held_by_ancestor root ?> !+
+    ? held_by_ancestor root
+    ?> !+
     |:
         state_lock_cleared root
         !+

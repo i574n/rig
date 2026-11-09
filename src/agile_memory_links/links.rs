@@ -573,7 +573,7 @@ fn links_checked_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: bool) -> i32 {
         v5
     };
     if v6 {
-        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: agile links rejected: --memory <dir> must name a memory directory"); } LIT.with(|lit| lit.clone()) };
+        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: agile links rejected: --memory <dir> must name a memory directory"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v7);
         2i32
     } else {
@@ -622,7 +622,7 @@ fn links_checked_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: bool) -> i32 {
                 println!("{}", v72);
                 ()
             };
-            let v73: Rc<str> = string_concat(&["kit agile links ok ", &*v62]);
+            let v73: Rc<str> = string_concat(&["rig agile links ok ", &*v62]);
             println!("{}", v73);
             ()
         };

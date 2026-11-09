@@ -617,18 +617,18 @@ fn verdict_lines_25(mut v0: US0) -> Rc<UH0> {
         US0::US0_Formatted(v1) => {
             let mut v1: i32 = v1;
             let mut v2: Rc<str> = format_real_26(v1);
-            let v4: Rc<str> = string_concat(&["kit standards toml ok files=", &*v2, " unformatted=0"]);
+            let v4: Rc<str> = string_concat(&["rig standards toml ok files=", &*v2, " unformatted=0"]);
             let v5: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
             Rc::new(UH0::UH0_Cons(v4, v5))
         }
         US0::US0_NoConfig(v17) => {
             let v17: Rc<str> = v17;
-            let v19: Rc<str> = string_concat(&["kit standards toml: no .taplo.toml at ", &*v17, " and TAPLO_CONFIG names no file"]);
+            let v19: Rc<str> = string_concat(&["rig standards toml: no .taplo.toml at ", &*v17, " and TAPLO_CONFIG names no file"]);
             let v20: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
             Rc::new(UH0::UH0_Cons(v19, v20))
         }
         US0::US0_NoTaplo => {
-            let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit standards toml: taplo is not on PATH"); } LIT.with(|lit| lit.clone()) };
+            let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig standards toml: taplo is not on PATH"); } LIT.with(|lit| lit.clone()) };
             let v23: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
             Rc::new(UH0::UH0_Cons(v22, v23))
         }
@@ -639,7 +639,7 @@ fn verdict_lines_25(mut v0: US0) -> Rc<UH0> {
             let v10: i32 = 0i32;
             let v11: i32 = method24(v7, v10);
             let v12: Rc<str> = format_real_26(v11);
-            let v13: Rc<str> = string_concat(&["kit standards toml refused unformatted=", &*v12]);
+            let v13: Rc<str> = string_concat(&["rig standards toml refused unformatted=", &*v12]);
             let v14: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
             let v15: Rc<UH0> = Rc::new(UH0::UH0_Cons(v13, v14));
             method15(v9, v15)
@@ -684,21 +684,21 @@ fn toml_run_0() -> i32 {
                             verdict_code_1(v8)
                         }
                         _ => {
-                            let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --toml <repo>"); } LIT.with(|lit| lit.clone()) };
+                            let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --toml <repo>"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v11);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --toml <repo>"); } LIT.with(|lit| lit.clone()) };
+                    let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --toml <repo>"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v13);
                     2i32
                 }
             }
         }
         _ => {
-            let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --toml <repo>"); } LIT.with(|lit| lit.clone()) };
+            let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --toml <repo>"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v15);
             2i32
         }

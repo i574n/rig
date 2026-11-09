@@ -1,4 +1,3 @@
-
 inl emit_runtime () : () = global """
     pub fn agile_package_input_fingerprint(state_dir: &Path, include_state: bool) -> Option<u64> {
         fn absolute(path: &Path) -> Option<PathBuf> {

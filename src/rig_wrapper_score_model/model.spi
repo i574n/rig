@@ -30,12 +30,14 @@
 
 :~ ^ params_from (~text : string) (found : list string) : list string * string =
     := rest = sm'.trim text
-    ? sm'.starts_with "(" rest |> not ?> listm.rev found, rest
+    ? sm'.starts_with "(" rest |> not
+    ?> listm.rev found, rest
     |:
         := close = sm'.index_of ")" rest
         := inner = ? close < 0i32 ?> "" |: sm'.substring 1i32 (close - 1i32) rest
         := name = sm'.replace "~" "" (head_word inner)
-        ? close < 0i32 || sm'.contains "(" inner || name = "" ?> [], ""
+        ? close < 0i32 || sm'.contains "(" inner || name = ""
+        ?> [], ""
         |: params_from (sm'.substring (close + 1i32) (sm'.length rest - close - 1i32) rest) (name :: found)
 
 :~ identifier (~word : string) : bool =
@@ -49,9 +51,12 @@
 
 :~ called_shape (params : list string) (~callee : string) (args : list string) : option (wrapper_shape * string) =
     := same_length = (listm.length args : i32) = listm.length params
-    ? identifier callee |> not || args = [] || listm'.contains callee params ?> None
-    |? args = params ?> Some (passed_shape callee, callee)
-    |? same_length && all_within args params && all_within params args ?> Some (Reorder, callee)
+    ? identifier callee |> not || args = [] || listm'.contains callee params
+    ?> None
+    |? args = params
+    ?> Some (passed_shape callee, callee)
+    |? same_length && all_within args params && all_within params args
+    ?> Some (Reorder, callee)
     |: None
 
 :~ shape_of (params : list string) (body : list string) : option (wrapper_shape * string) =
@@ -68,7 +73,8 @@
     := params, tail = params_from after []
     := spaced = " " ++# tail
     := at = sm'.index_of " = " spaced
-    ? name = "" || params = [] || at < 0i32 ?> None
+    ? name = "" || params = [] || at < 0i32
+    ?> None
     |:
         := body = sm'.substring (at + 3i32) (sm'.length spaced - at - 3i32) spaced |> sm'.trim
         := words = sm'.split_list " " body |> listm'.filter (\ (w : string) => w <> "")
@@ -93,7 +99,8 @@
 :~ uses_in (~text : string) (~name : string) : i32 =
     := counted = \ ((count, before) : i32 * string) (piece : string) =>
         (? word_char (last_char before) || word_char (first_char piece) ?> count |: count + 1i32), piece
-    ? sm'.contains name text |> not ?> 0i32
+    ? sm'.contains name text |> not
+    ?> 0i32
     |:
         ?= sm'.split_list name text ?|
         | head :: rest =>

@@ -33,8 +33,10 @@
 
 :~ history_parsed (~records : record_list) (~record : i32) (~repo : string) : git_parse =
     := in_at = field_index records record "in"
-    ? quoted_at records record 4i32 = !- ?> GitRejected "git history: expected git history <repo> \"text\" in <file>"
-    |? in_at < 0i32 ?> GitRejected "git history: expected in <file>"
+    ? quoted_at records record 4i32 = !-
+    ?> GitRejected "git history: expected git history <repo> \"text\" in <file>"
+    |? in_at < 0i32
+    ?> GitRejected "git history: expected in <file>"
     |: GitParsed (GitHistory (repo, body_at records record 4i32, body_at records record (in_at + 1i32)))
 
 :~ status_parsed (~records : record_list) (~record : i32) : git_parse =
@@ -59,8 +61,7 @@
     := repo = body_at records record 3i32
     ? kind = ""
     ?> GitParsed Blank
-    |? kind <> "query" || field_at records record 1i32 <> "git"
-    ?>
+    |? kind <> "query" || field_at records record 1i32 <> "git" ?>
         GitRejected (
             concat5
                 (field_at records record 1i32)

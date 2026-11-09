@@ -20,7 +20,8 @@
 
 := row_total (cells : table_cells) : i32 = $'((!cells).len().max(1) - 1) as i32' : i32
 
-:= row_width (cells : table_cells) (row : i32) : i32 = $'(!cells).get(!row as usize).map_or(0, |r| r.len()) as i32' : i32
+:= row_width (cells : table_cells) (row : i32) : i32 =
+    $'(!cells).get(!row as usize).map_or(0, |r| r.len()) as i32' : i32
 
 := cell_at (cells : table_cells) (row : i32) (column : i32) : string =
     $'std::rc::Rc::<str>::from((!cells).get(!row as usize).and_then(|cells| cells.get(!column as usize)).map(|cell| \
@@ -57,5 +58,5 @@
 := below_limit (count : i32) (limit : u64) : bool = $'(!count as u64) < !limit' : bool
 
 := rejected (~message : string) : i32 =
-    stderr_line ("kit error: table " ++# message)
+    stderr_line ("rig error: table " ++# message)
     2i32

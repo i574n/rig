@@ -21,14 +21,17 @@ inl line_at (~text : string) (index : i32) : string = $'std::rc::Rc::<str>::from
 := appended (~text : string) (~line : string) : string = ? text = "" ?> line |: concat5 text "\n" line "" ""
 
 :~ ^ owner_cores (~rows : process_rows) (~owner : string) (at : i32) (total : f64) : f64 =
-    ? at >= row_count rows ?> total
+    ? at >= row_count rows
+    ?> total
     |? row_cores rows at >= 0.1f64 && owner_text (owner_of rows at) = owner
     ?> owner_cores rows owner (at + 1i32) (total + row_cores rows at)
     |: owner_cores rows owner (at + 1i32) total
 
 :~ ^ cells_cores (~rows : process_rows) (at : i32) (total : f64) : f64 =
-    ? at >= row_count rows ?> total
-    |? row_cores rows at < 0.1f64 ?> cells_cores rows (at + 1i32) total
+    ? at >= row_count rows
+    ?> total
+    |? row_cores rows at < 0.1f64
+    ?> cells_cores rows (at + 1i32) total
     |:
         := busy = starts_with (owner_text (owner_of rows at)) "cells-vm:"
         cells_cores rows (at + 1i32) (? busy ?> total + row_cores rows at |: total)
@@ -47,7 +50,8 @@ inl line_at (~text : string) (index : i32) : string = $'std::rc::Rc::<str>::from
     (cells : f64) (now : u64) (pass : job_pass)
     : job_pass
     =
-    ? index >= line_count ids ?> pass
+    ? index >= line_count ids
+    ?> pass
     |:
         := id = line_at ids index
         ? job_running id ?>
@@ -124,7 +128,8 @@ let live_block_held (~windows : string) : bool = $'(&*!windows).lines().any(|row
     := job_lines = ? pass.report = "" ?> jobs |: concat5 jobs "\n" pass.report "" ""
     := gate = gate_summary ()
     := gate_lines =
-        ? gate = "" ?> "== stop gate: no gate.log"
+        ? gate = ""
+        ?> "== stop gate: no gate.log"
         |: concat5 "== stop gate (gate.log, newest 4000 lines)\n" gate "" "" ""
     := now = now_ms ()
     := crowding = $'rig_machine_crowding::rig_machine_crowding(&*!windows, !now)' : string

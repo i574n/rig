@@ -509,7 +509,7 @@ fn gaps_from_1(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<str>) -> Rc<str> {
                         let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         v34
                     } else {
-                        let v38: Rc<str> = string_concat(&["kit agile check warn missing=", &*v32, " id=", &*v3, "\n"]);
+                        let v38: Rc<str> = string_concat(&["rig agile check warn missing=", &*v32, " id=", &*v3, "\n"]);
                         v38
                     }
                 } else {

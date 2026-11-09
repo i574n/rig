@@ -21,8 +21,7 @@
     ? right = "" ?> left |? left = "" ?> right |: left ++# "\n" ++# right
 
 :~ ^ tables_run (~root : string) (~records : record_list) (~index : i32) (~state : diff_tally) : diff_tally =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         ?= table_parsed records index ?|
         | TableParsed (TablesDiffed (left, right, keys, columns)) =>
             := outcome = tables_diffed root left right keys columns
@@ -40,8 +39,7 @@
     |: state
 
 :~ ^ first_rejection (~records : record_list) (~index : i32) : string =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         ? field_at records index 0i32 <> "query"
         ?> "edit and diff statements cannot share one program yet; run them as two calls"
         |:

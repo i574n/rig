@@ -850,7 +850,7 @@ fn reviewed_files_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("refused"); } LIT.with(|lit| lit.clone()) };
         v28
     };
-    let v34: Rc<str> = string_concat(&["kit repo accept-review ", &*v29, " before=", &*v0, " after=", &*v1]);
+    let v34: Rc<str> = string_concat(&["rig repo accept-review ", &*v29, " before=", &*v0, " after=", &*v1]);
     println!("{}", v34);
     if v24 {
         0i32
@@ -929,21 +929,21 @@ fn accept_review_run_0() -> i32 {
         v23
     };
     if v24 {
-        let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: repo usage: repo accept-review <before> <after> (passes when every changed line differs in numeric literals only)"); } LIT.with(|lit| lit.clone()) };
+        let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: repo usage: repo accept-review <before> <after> (passes when every changed line differs in numeric literals only)"); } LIT.with(|lit| lit.clone()) };
         println!("{}", v25);
         2i32
     } else {
         let v26: bool = file_exists_20(v10.clone());
         let v27: bool = v26 == false;
         if v27 {
-            let v28: Rc<str> = string_concat(&["kit error: repo accept-review: no file at ", &*v10]);
+            let v28: Rc<str> = string_concat(&["rig error: repo accept-review: no file at ", &*v10]);
             println!("{}", v28);
             2i32
         } else {
             let v29: bool = file_exists_20(v21.clone());
             let v30: bool = v29 == false;
             if v30 {
-                let v31: Rc<str> = string_concat(&["kit error: repo accept-review: no file at ", &*v21]);
+                let v31: Rc<str> = string_concat(&["rig error: repo accept-review: no file at ", &*v21]);
                 println!("{}", v31);
                 2i32
             } else {

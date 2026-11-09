@@ -18,11 +18,12 @@
         console.write text
         0i32
     | Refused why =>
-        console.write_line (sm'.concat_list "" [ "kit error: k3s render: "; refusal_text why; " in "; spec_path ])
+        console.write_line (sm'.concat_list "" [ "rig error: k3s render: "; refusal_text why; " in "; spec_path ])
         1i32
 
 :~ ^ usage () : i32 =
-    console.write_line "kit error: k3s usage: k3s render <spec.spi> (typed row spec; prints a v1 List for kubectl apply -f -)"
+    console.write_line
+        "rig error: k3s usage: k3s render <spec.spi> (typed row spec; prints a v1 List for kubectl apply -f -)"
     2i32
 
 :~ k3s_run () : i32 =

@@ -6,45 +6,61 @@
 := empty (value : string) : bool = equal value ""
 := not (value : bool) : bool = ? value ?> !- |: !+
 := flag_name (name : string) : bool =
-    ? equal name "--test" ?> !+
-    |? equal name "--skip-release" ?> !+
-    |? equal name "--offline" ?> !+
-    |? equal name "--compiler-contracts" ?> !+
-    |? equal name "--dry-run" ?> !+
+    ? equal name "--test"
+    ?> !+
+    |? equal name "--skip-release"
+    ?> !+
+    |? equal name "--offline"
+    ?> !+
+    |? equal name "--compiler-contracts"
+    ?> !+
+    |? equal name "--dry-run"
+    ?> !+
     |: equal name "--help"
 := value_name (name : string) : bool =
-    ? equal name "--root" ?> !+
-    |? equal name "--package" ?> !+
-    |? equal name "--target-dir" ?> !+
-    |? equal name "--compiler" ?> !+
+    ? equal name "--root"
+    ?> !+
+    |? equal name "--package"
+    ?> !+
+    |? equal name "--target-dir"
+    ?> !+
+    |? equal name "--compiler"
+    ?> !+
     |: equal name "--timeout-ms"
 
 :~ ^ validate (index : i32) (length : i32) : bool =
-    ? index = length ?> !+
+    ? index = length
+    ?> !+
     |:
         := name = host.argument index
-        ? flag_name name ?> validate (index + 1i32) length
+        ? flag_name name
+        ?> validate (index + 1i32) length
         |? value_name name ?>
             := next = index + 1i32
             ? next < length ?>
                 := value = host.argument next
-                ? empty value ?> !-
-                |? sm'.starts_with "--" value ?> !-
+                ? empty value
+                ?> !-
+                |? sm'.starts_with "--" value
+                ?> !-
                 |: validate (index + 2i32) length
             |: !-
         |: !-
 
 :~ ^ has_from (index : i32) (length : i32) (name : string) : bool =
-    ? index = length ?> !-
+    ? index = length
+    ?> !-
     |:
         := current = host.argument index
-        ? equal name current ?> !+
+        ? equal name current
+        ?> !+
         |:
             := width = ? value_name current ?> 2i32 |: 1i32
             has_from (index + width) length name
 
 :~ ^ value_from (index : i32) (length : i32) (name : string) (fallback : string) : string =
-    ? index = length ?> fallback
+    ? index = length
+    ?> fallback
     |:
         := current = host.argument index
         := width = ? value_name current ?> 2i32 |: 1i32
@@ -52,14 +68,16 @@
         value_from (index + width) length name next_value
 
 :~ ^ packages_from (index : i32) (length : i32) (out : string) (with_flags : bool) : string =
-    ? index = length ?> out
+    ? index = length
+    ?> out
     |:
         := current = host.argument index
         := width = ? value_name current ?> 2i32 |: 1i32
         := next =
             ? equal current "--package" ?>
                 := name = host.argument (index + 1i32)
-                ? with_flags ?> arg (arg out "--package") name
+                ? with_flags
+                ?> arg (arg out "--package") name
                 |? empty out ?> name |: arg out name
             |: out
         packages_from (index + width) length next with_flags
@@ -70,7 +88,8 @@
 :~ ^ quoted_arguments (args : string) (cursor : i32) (separator : char) : string =
     := next = find_char args cursor separator
     := current = predicate_lex.model.encode (slice_exclusive args cursor next)
-    ? (=.) next (sm.length args : i32) ?> current
+    ? (=.) next (sm.length args : i32)
+    ?> current
     |: current ++# " " ++# (quoted_arguments args ((+.) next 1i32) separator)
 := show (args : string) : () =
     := text = quoted_arguments args 0i32 (sm.index (host.separator ()) 0i32)

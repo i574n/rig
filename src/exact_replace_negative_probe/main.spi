@@ -1,8 +1,10 @@
 :< exact_replace_contract.model
 
 := zero_is (value : i32) : bool =
-    ? value < 0i32 ?> !-
-    |? 0i32 < value ?> !-
+    ? value < 0i32
+    ?> !-
+    |? 0i32 < value
+    ?> !-
     |: !+
 
 := main () : i32 =

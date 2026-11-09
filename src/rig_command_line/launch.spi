@@ -93,8 +93,10 @@
 := on_windows () : bool = $'cfg\!(windows)' : bool
 
 := search_dirs (~cwd : string) (~name : string) : string =
-    ? names_directory name ?> cwd
-    |? on_windows () ?> cwd ++# "\n" ++# (path_entries "\n")
+    ? names_directory name
+    ?> cwd
+    |? on_windows ()
+    ?> cwd ++# "\n" ++# (path_entries "\n")
     |: path_entries "\n"
 
 := extensions_of (~name : string) : string =
@@ -138,8 +140,10 @@
 
 :~ ^ words_scanned (~text : string) (index : i32) (acc : command_words) : command_words =
     := byte = byte_at text index
-    ? byte < 0i32 ?> acc
-    |? byte = 32i32 ?> words_scanned text (index + 1i32) acc
+    ? byte < 0i32
+    ?> acc
+    |? byte = 32i32
+    ?> words_scanned text (index + 1i32) acc
     |? byte = 34i32 ?>
         := stop = word_end text (index + 1i32) 34i32
         words_scanned text (stop + 1i32) (WordThen (Quoted (text_between text (index + 1i32) stop), acc))
@@ -172,12 +176,15 @@
 
 :~ ^ candidate_in (~dir : string) (~name : string) (~extensions : string) : string =
     := path = path_joined dir name (first_line extensions)
-    ? is_file path ?> path
-    |? rest_lines extensions = "" ?> ""
+    ? is_file path
+    ?> path
+    |? rest_lines extensions = ""
+    ?> ""
     |: candidate_in dir name (rest_lines extensions)
 
 :~ ^ program_in (~dirs : string) (~name : string) (~extensions : string) : string =
-    ? dirs = "" ?> ""
+    ? dirs = ""
+    ?> ""
     |:
         := dir = first_line dirs
         := found = ? dir = "" ?> "" |: candidate_in dir name extensions
@@ -197,12 +204,16 @@
     | WordThen (program, arguments) =>
         := syntax = syntax_word words
         := name = word_text program
-        ? syntax <> "" ?> on (any_launch (\? (ShellLaunch (ShellSyntax syntax, words))))
-        |? on_windows () && builtin_named name ?> on (any_launch (\? (ShellLaunch (ShellBuiltin name, words))))
+        ? syntax <> ""
+        ?> on (any_launch (\? (ShellLaunch (ShellSyntax syntax, words))))
+        |? on_windows () && builtin_named name
+        ?> on (any_launch (\? (ShellLaunch (ShellBuiltin name, words))))
         |:
             := path = program_found cwd name
-            ? path = "" ?> on (any_launch (\? (ShellLaunch (ProgramMissing name, words))))
-            |? native_program path ?> on (any_launch (\? (DirectLaunch (path, arguments))))
+            ? path = ""
+            ?> on (any_launch (\? (ShellLaunch (ProgramMissing name, words))))
+            |? native_program path
+            ?> on (any_launch (\? (DirectLaunch (path, arguments))))
             |: on (any_launch (\? (ShellLaunch (ScriptProgram path, words))))
 
 := launch_argv (any_launch l : any_launch) : string =
@@ -261,8 +272,7 @@
     testing.expect (launch_of dir (words_of_line "build.cmd > out.txt") launch_mode = "shell (syntax >)") "redirect"
     testing.expect (launch_of dir (words_of_line "no-such-program-kit") launch_mode = "shell (not found)") "missing"
     testing.expect (sm'.starts_with "Assoc|Break|Call|Cd|" (builtin_names ())) (builtin_names ())
-    ? on_windows ()
-    ?>
+    ? on_windows () ?>
         testing.expect (launch_of dir (words_of_line "ECHO hi") launch_mode = "shell (builtin ECHO)") "builtin"
         testing.expect (launch_of dir (words_of_line "job.cmd arg") launch_mode = "shell (script)") "cwd script"
         testing.expect (launch_of dir (words_of_line "job arg") launch_mode = "shell (script)") "PATHEXT finds job.cmd"

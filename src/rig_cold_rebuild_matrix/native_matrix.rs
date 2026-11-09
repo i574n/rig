@@ -5,7 +5,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new() -> Self {
         let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
-        let root = std::env::temp_dir().join(format!("kit cold ü {} {stamp}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("rig cold ü {} {stamp}", std::process::id()));
         let owner = root.join("src/owner with spaces");
         fs::create_dir_all(&owner).unwrap();
         fs::write(owner.join("Cargo.toml"), "[package]\nname = 'owner'\n[lib]\npath = 'generated.rs'\n[package.metadata.spiral]\nentry = 'chosen.spi'\noutput = 'generated.rs'\n").unwrap();
@@ -76,7 +76,7 @@ fn cold_plan_does_not_require_a_previous_generated_file() {
 fn fake_compiler() -> &'static PathBuf {
     static COMPILER: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
     COMPILER.get_or_init(|| {
-        let root = std::env::temp_dir().join(format!("kit cold compiler {}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("rig cold compiler {}", std::process::id()));
         fs::create_dir_all(&root).unwrap();
         let source = root.join("compiler.rs");
         fs::write(&source, r#"

@@ -130,7 +130,8 @@
 :~ ^ short_at (~text : string) (~verb : string) (from : i32) : bool =
     := rest = sm'.substring from (sm'.length text - from) text
     := found = sm'.index_of verb rest
-    ? found < 0i32 ?> !-
+    ? found < 0i32
+    ?> !-
     |:
         := at = from + found
         ? apart text (at - 1i32) && apart text (at + sm'.length verb) ?> !+ |: short_at text verb (at + 1i32)
@@ -154,7 +155,8 @@
 :~ ^ git_from (~text : string) (from : i32) : option string =
     := rest = sm'.substring from (sm'.length text - from) text
     := found = sm'.index_of "git" rest
-    ? found < 0i32 ?> None
+    ? found < 0i32
+    ?> None
     |:
         := after = from + found + 3i32
         := word_at = spaces_end text after

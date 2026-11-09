@@ -21,14 +21,17 @@
     | _ => !+
 
 :~ priority_of (~word : string) : ask_priority =
-    ? word = "P0" ?> UrgentAsk
-    |? word = "P1" ?> HighAsk
+    ? word = "P0"
+    ?> UrgentAsk
+    |? word = "P1"
+    ?> HighAsk
     |: LowerAsk
 
 :~ task_priority (~line : string) : option (string * ask_priority) =
     := parts = sm'.split "\"" line |> array
     := count = am'.length parts
-    ? sm'.starts_with "inl " line |> not || sm'.contains "() = Task (" line |> not || count < 10i32 ?> None
+    ? sm'.starts_with "inl " line |> not || sm'.contains "() = Task (" line |> not || count < 10i32
+    ?> None
     |:
         := words = sm'.split_list "," (am'.index (count - 9i32) parts) |> listm.map sm'.trim
         := found = \ (best : ask_priority) (w : string) => ? w = "P0" || w = "P1" ?> priority_of w |: best
@@ -53,7 +56,8 @@
     (acc : list neglected_ask)
     : list neglected_ask
     =
-    ? at < 0i32 ?> acc
+    ? at < 0i32
+    ?> acc
     |:
         := priorities, asks, now_hour, days, team = context
         := r = am'.index_base at rows
@@ -72,7 +76,7 @@
         neglected_from rows (at - 1i32) context next
 
 :~ ask_line (n : neglected_ask) : string =
-    "kit agile cadence neglected-ask id=" ++# n.id ++# " priority=" ++# priority_word n.priority ++# " asked="
+    "rig agile cadence neglected-ask id=" ++# n.id ++# " priority=" ++# priority_word n.priority ++# " asked="
     ++# n.asked_on ++# " idle_days=" ++# sm'.show (n.idle_hours / 24i64)
 
 :~ asks_report
@@ -95,7 +99,7 @@
     := asks_text = sm'.concat_list "\n" [ asked "A"; asked "B"; asked "C" ]
     := now_hour = agile_quality_state.state_rows.stamp_hour "2026-11-06T12:00Z"
     := lines = asks_report (text, asks_text, now_hour, 3i64, "") |> am'.to_list_base' |> listm'.unbox
-    testing.expect (lines = [ "kit agile cadence neglected-ask id=A priority=P1 asked=2026-11-01 idle_days=5" ]) "A"
+    testing.expect (lines = [ "rig agile cadence neglected-ask id=A priority=P1 asked=2026-11-01 idle_days=5" ]) "A"
     testing.expect (task_priority (task "X" "P0" "Active") = Some ("X", UrgentAsk)) "the priority cell"
     := other_team = asks_report (text, asks_text, now_hour, 3i64, "x") |> am'.length_base
     testing.expect (other_team = 0i32) "--team x drops kit asks"

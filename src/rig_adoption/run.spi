@@ -19,7 +19,8 @@
     ?= days ?|
     | NoDays => DayThen (key, counted call (empty_tally ()), NoDays)
     | DayThen (found, tally, rest) =>
-        ? found = key ?> DayThen (found, counted call tally, rest)
+        ? found = key
+        ?> DayThen (found, counted call tally, rest)
         |: DayThen (found, tally, tally_added key call rest)
 
 :| tally_mode =
@@ -31,7 +32,8 @@
 :~ habit_words (command : string) : string = $'rig_adoption_habits::rig_adoption_habit_words(&*!command)' : string
 
 :~ ^ words_added (~words : string) (start : u64) (days : day_tallies) : day_tallies =
-    ? start >= text_count words ?> days
+    ? start >= text_count words
+    ?> days
     |:
         := stop = line_end words start
         := word = slice_of words start stop
@@ -46,7 +48,8 @@
     (mode : tally_mode) (client : agent_client) (~calls : string) (start : u64) (days : day_tallies)
     : day_tallies
     =
-    ? start >= text_count calls ?> days
+    ? start >= text_count calls
+    ?> days
     |:
         := stop = line_end calls start
         := row = slice_of calls start stop
@@ -59,7 +62,8 @@
     (mode : tally_mode) (client : agent_client) (~files : string) (~cutoff : string) (start : u64) (days : day_tallies)
     : day_tallies
     =
-    ? start >= text_count files ?> days
+    ? start >= text_count files
+    ?> days
     |:
         := stop = line_end files start
         := path = slice_of files start stop
@@ -91,7 +95,7 @@ inl sorted_lines (~text : string) : string = $'{ let mut lines = (&*!text).lines
     := counts =
         " shell_calls=" ++# (u64_text total.shell) ++# " rig_calls=" ++# (u64_text total.kit) ++# (
             " habit_calls=" ++# (u64_text total.habit) ++# " rig_share=" ++# (share_text (rig_share total)))
-    "kit adoption ok days_back=" ++# (u64_text days_back) ++# counts ++# (? out = "" ?> "" |: " out=") ++# out
+    "rig adoption ok days_back=" ++# (u64_text days_back) ++# counts ++# (? out = "" ?> "" |: " out=") ++# out
 
 :~ ^ max_habit (days : day_tallies) (~best_key : string) (best : u64) : string * u64 =
     ?= days ?|
@@ -106,7 +110,8 @@ inl sorted_lines (~text : string) : string = $'{ let mut lines = (&*!text).lines
 
 :~ ^ habit_lines (days : day_tallies) (~acc : string) (shown : u64) : string * u64 =
     := key, calls = max_habit days "" 0u64
-    ? key = "" ?> acc, shown
+    ? key = ""
+    ?> acc, shown
     |: habit_lines (without_key key days) (acc ++# key ++# "\t" ++# u64_text calls ++# "\n") (shown + 1u64)
 
 :~ adoption_reported (args : adoption_args) : i32 =
@@ -122,7 +127,7 @@ inl sorted_lines (~text : string) : string = $'{ let mut lines = (&*!text).lines
         | ByHabit => "habit\tcalls\n" ++# habit_table
     := problem = ? out = "" ?> "" |: written out table
     ? problem <> "" ?>
-        console.write_error_line ("kit error: adoption: " ++# problem)
+        console.write_error_line ("rig error: adoption: " ++# problem)
         2i32
     |:
         := _ = ? out = "" ?> console.write table |: ()
@@ -130,7 +135,7 @@ inl sorted_lines (~text : string) : string = $'{ let mut lines = (&*!text).lines
             ?= mode ?|
             | ByDay => receipt_of days_back total out
             | ByHabit =>
-                "kit adoption ok mode=habits days="
+                "rig adoption ok mode=habits days="
                 ++# u64_text days_back
                 ++# " habits="
                 ++# u64_text habit_count
@@ -142,7 +147,7 @@ inl sorted_lines (~text : string) : string = $'{ let mut lines = (&*!text).lines
 :~ adoption_run () : i32 =
     := args = adoption_args_read ()
     ? args.rejected <> "" ?>
-        console.write_error_line ("kit error: adoption: " ++# args.rejected)
+        console.write_error_line ("rig error: adoption: " ++# args.rejected)
         2i32
     |: adoption_reported args
 

@@ -2,7 +2,8 @@
 :< model
 
 :~ config_dir () : string =
-    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := rig_home = env.get_environment_variable "RIG_CONFIG_HOME"
+    := home = ? rig_home <> "" ?> rig_home |: env.get_environment_variable "KIT_CONFIG_HOME"
     := app_data = env.get_environment_variable "APPDATA"
     := base = ? app_data <> "" ?> app_data |: env.get_environment_variable "HOME" ++# "/.config"
     := rig_exists = file_system.directory_exists (base ++# "/rig")

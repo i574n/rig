@@ -1,4 +1,3 @@
-
 inl emit_rooted () : () = global """
     use std::io::Read;
     include!(concat!(env!("CARGO_MANIFEST_DIR"), "/portable.rs"));

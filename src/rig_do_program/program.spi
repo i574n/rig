@@ -76,13 +76,17 @@
     | Unterminated : string
 
 :~ token_at (~tokens : token_list) (~index : i32) : token =
-    ? index >= token_count tokens ?> StatementEnd
+    ? index >= token_count tokens
+    ?> StatementEnd
     |:
         := kind = token_kind tokens index
         := text = token_text tokens index
-        ? kind = 0i32 ?> Word text
-        |? kind = 1i32 ?> Quoted text
-        |? kind = 2i32 ?> StatementEnd
+        ? kind = 0i32
+        ?> Word text
+        |? kind = 1i32
+        ?> Quoted text
+        |? kind = 2i32
+        ?> StatementEnd
         |: Unterminated text
 
 :| parsed a =
@@ -108,8 +112,7 @@
     ?> Parsed (Once, index + 1i32)
     |? word_is tokens index "all"
     ?> Parsed (Every, index + 1i32)
-    |? word_is tokens (index + 1i32) "times"
-    ?>
+    |? word_is tokens (index + 1i32) "times" ?>
         ?= token_at tokens index ?|
         | Word times =>
             ? all_digits times
@@ -126,8 +129,7 @@
     | Parsed (count, at) =>
         ?= token_at tokens at ?|
         | Quoted anchor =>
-            ? word_is tokens (at + 1i32) "with"
-            ?>
+            ? word_is tokens (at + 1i32) "with" ?>
                 ?= token_at tokens (at + 2i32) ?|
                 | Quoted replacement =>
                     ?= token_at tokens (at + 3i32) ?|
@@ -150,17 +152,19 @@
         | StatementEnd =>
             := stray = patch_stray_line text
             := hunks = hunks_of text
-            ? stray <> "" ?> Rejected (quoted_problem "patch: not a hunk line" stray)
-            |? hunks_unchanged hunks ?> Rejected "patch: a hunk changes nothing"
-            |? hunks_anchorless hunks ?> Rejected "patch: a hunk needs context or removed lines to anchor it"
+            ? stray <> ""
+            ?> Rejected (quoted_problem "patch: not a hunk line" stray)
+            |? hunks_unchanged hunks
+            ?> Rejected "patch: a hunk changes nothing"
+            |? hunks_anchorless hunks
+            ?> Rejected "patch: a hunk needs context or removed lines to anchor it"
             |: Parsed (hunks, index + 2i32)
         | _ => Rejected "patch: unexpected text after the hunks"
     | Unterminated text => Rejected (quoted_problem "unterminated string" text)
     | _ => Rejected "patch: expected a <<< block of hunks"
 
 :~ ^ hunk_rules (~hunks : hunk_list) (~index : i32) (~after : rule_list) : rule_list =
-    ? index < hunk_count hunks
-    ?>
+    ? index < hunk_count hunks ?>
         Rule (
             { anchor = hunk_old hunks index; replacement = hunk_new hunks index; count = Once; matcher = Literal },
             hunk_rules hunks (index + 1i32) after
@@ -191,20 +195,17 @@
     | Word word =>
         ? word = "dry-run"
         ?> header_options tokens (index + 1i32) { block ?| mode = Preview }
-        |? word = "except"
-        ?>
+        |? word = "except" ?>
             ?= token_at tokens (index + 1i32) ?|
             | Word globs => header_options tokens (index + 2i32) { block ?| excluded = globs }
             | Quoted globs => header_options tokens (index + 2i32) { block ?| excluded = globs }
             | _ => Rejected "edit: except expects a glob or a comma list of globs"
-        |? word = "expect" && word_is tokens (index + 1i32) "files" && word_is tokens (index + 3i32) "replacements"
-        ?>
+        |? word = "expect" && word_is tokens (index + 1i32) "files" && word_is tokens (index + 3i32) "replacements" ?>
             ?= token_at tokens (index + 2i32) ?|
             | Word files =>
                 ?= token_at tokens (index + 4i32) ?|
                 | Word count =>
-                    ? all_digits files && all_digits count
-                    ?>
+                    ? all_digits files && all_digits count ?>
                         header_options tokens (index + 5i32) { block ?|
                             expectation = Expected (decimal_of files, decimal_of count)
                         }
@@ -263,11 +264,16 @@
 :~ step_at (query_verb_known : string -> bool) (~tokens : token_list) (~index : i32) : parsed step =
     ?= token_at tokens index ?|
     | Word word =>
-        ? word = "edit" ?> edit_at tokens index
-        |? word = "show" ?> show_at tokens index
-        |? query_verb_known word ?> query_at tokens index word
-        |? word = "replace" ?> Rejected "replace: needs an edit line above it"
-        |? word = "patch" ?> Rejected "patch: needs an edit line above it"
+        ? word = "edit"
+        ?> edit_at tokens index
+        |? word = "show"
+        ?> show_at tokens index
+        |? query_verb_known word
+        ?> query_at tokens index word
+        |? word = "replace"
+        ?> Rejected "replace: needs an edit line above it"
+        |? word = "patch"
+        ?> Rejected "patch: needs an edit line above it"
         |: Rejected (concat5 "unsupported statement: " word "" "" "")
     | Unterminated text => Rejected (quoted_problem "unterminated string" text)
     | Quoted text => Rejected (quoted_problem "unexpected quoted text" text)
@@ -275,7 +281,8 @@
 
 :~ ^ steps_at (query_verb_known : string -> bool) (~tokens : token_list) (~index : i32) : parsed steps =
     := at = skip_ends tokens index
-    ? at >= token_count tokens ?> Parsed (Done, at)
+    ? at >= token_count tokens
+    ?> Parsed (Done, at)
     |:
         ?= step_at query_verb_known tokens at ?|
         | Rejected message => Rejected message
@@ -360,7 +367,9 @@
     expect
         (
             rejection_of (
-                program_knowing_search ("edit a.txt expect files two replacements 3\n" ^^ " replace once \"a\" with \"b\"")
+                program_knowing_search (
+                    "edit a.txt expect files two replacements 3\n" ^^ " replace once \"a\" with \"b\""
+                )
             )
             = "edit: expect files <n> replacements <n>"
         )

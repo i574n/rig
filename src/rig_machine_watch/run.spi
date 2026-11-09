@@ -17,15 +17,19 @@ inl now_text () : string = $'std::rc::Rc::<str>::from(format\!("{}", std::time::
     time::UNIX_EPOCH).map(|elapsed| elapsed.as_secs()).unwrap_or(0)))' : string
 
 :~ ^ option_value (~name : string) (index : i32) : string =
-    ? index + 1i32 >= argument_count () ?> ""
-    |? argument index = name ?> argument (index + 1i32)
+    ? index + 1i32 >= argument_count ()
+    ?> ""
+    |? argument index = name
+    ?> argument (index + 1i32)
     |: option_value name (index + 1i32)
 
 :~ ^ busy_lines (~rows : process_rows) (at : i32) (~acc : string) (total : f64) : string * f64 =
-    ? at >= row_count rows ?> acc, total
+    ? at >= row_count rows
+    ?> acc, total
     |:
         := cores = row_cores rows at
-        ? cores < 0.1f64 ?> busy_lines rows (at + 1i32) acc total
+        ? cores < 0.1f64
+        ?> busy_lines rows (at + 1i32) acc total
         |:
             := busy = busy_at rows at
             := line =
@@ -45,8 +49,10 @@ inl now_text () : string = $'std::rc::Rc::<str>::from(format\!("{}", std::time::
             busy_lines rows (at + 1i32) (? acc = "" ?> line |: concat5 acc "\n" line "" "") (total + cores)
 
 :~ ^ rogue_lines (limits : watch_limits) (~rows : process_rows) (at : i32) (~acc : string) : string =
-    ? at >= row_count rows ?> acc
-    |? row_cores rows at < limits.rogue_cores ?> rogue_lines limits rows (at + 1i32) acc
+    ? at >= row_count rows
+    ?> acc
+    |? row_cores rows at < limits.rogue_cores
+    ?> rogue_lines limits rows (at + 1i32) acc
     |:
         := busy = busy_at rows at
         ? rogue limits busy ?>
@@ -68,7 +74,8 @@ inl now_text () : string = $'std::rc::Rc::<str>::from(format\!("{}", std::time::
         |: rogue_lines limits rows (at + 1i32) acc
 
 :~ ^ hog_lines (limits : watch_limits) (~rows : process_rows) (at : i32) (~acc : string) : string =
-    ? at >= row_count rows ?> acc
+    ? at >= row_count rows
+    ?> acc
     |? row_megabytes rows at >= limits.hog_megabytes ?>
         := line =
             concat5
@@ -91,7 +98,8 @@ inl sorted_busy (~lines : string) : string = $'{ let mut rows = (&*!lines).lines
     $'rig_notebook_progress::rig_notebook_batch_line(&*!command, !age_minutes)' : string
 
 :~ ^ notebook_lines (~rows : process_rows) (at : i32) (~acc : string) : string =
-    ? at >= row_count rows ?> acc
+    ? at >= row_count rows
+    ?> acc
     |:
         := line = notebook_batch_line (row_command rows at) (row_age rows at)
         := shown = ? line = "" ?> "" |: concat5 "  pid " (u64_text (row_pid rows at)) " " line ""
@@ -125,7 +133,7 @@ inl sorted_busy (~lines : string) : string = $'{ let mut rows = (&*!lines).lines
     stdout_line (jobs_and_windows limits rows)
     stdout_line (
         concat5
-            "kit machine watch ok processes="
+            "rig machine watch ok processes="
             (u64_text ($'!(row_count rows) as u64' : u64))
             " rogues="
             (u64_text (line_total rogues))
@@ -134,20 +142,23 @@ inl sorted_busy (~lines : string) : string = $'{ let mut rows = (&*!lines).lines
     0i32
 
 :~ ^ fleet_printed (lines : array_base rig_net_topology.topology.report_line) (at : i32) (code : i32) : i32 =
-    ? at >= am'.length_base lines ?> code
+    ? at >= am'.length_base lines
+    ?> code
     |:
         := line = am'.index_base at lines
-        := missing = line.error && sm'.starts_with "kit error:" line.text
+        := missing = line.error && (sm'.starts_with "kit error:" line.text || sm'.starts_with "rig error:" line.text)
         := next = ? missing ?> 2i32 |? line.error && code = 0i32 ?> 1i32 |: code
         := _ = ? line.error ?> console.write_error_line line.text |: console.write_line line.text
         fleet_printed lines (at + 1i32) next
 
 :~ machine_run () : i32 =
-    ? argument 2i32 = "watch" ?> watch_run ()
-    |? argument 2i32 = "health" ?> health_run ()
+    ? argument 2i32 = "watch"
+    ?> watch_run ()
+    |? argument 2i32 = "health"
+    ?> health_run ()
     |? argument 2i32 = "fleet" ?> fleet_printed (rig_net_topology.topology.fleet_report ()) 0i32 0i32
     |:
-        := _ = $'eprintln\!("kit error: machine: usage: machine watch [--sample-seconds n] | machine health [--all] \
+        := _ = $'eprintln\!("rig error: machine: usage: machine watch [--sample-seconds n] | machine health [--all] \
             [--every s [--times n]] | machine fleet")' : ()
         2i32
 

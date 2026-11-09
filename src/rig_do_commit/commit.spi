@@ -19,28 +19,33 @@
     rust_std_fs.model.hidden_sibling (target_at pending root index) ".rig-do.tmp"
 
 :~ ^ discarded (~pending : pending_writes) (~root : string) (index : i32) (until : i32) : () =
-    ? index >= until ?> ()
+    ? index >= until
+    ?> ()
     |:
         := _ = rust_std_fs.model.remove_file (temporary_at pending root index)
         discarded pending root (index + 1i32) until
 
 :~ ^ written (~pending : pending_writes) (~root : string) (index : i32) : commit_outcome =
-    ? index >= entry_count pending ?> Committed
+    ? index >= entry_count pending
+    ?> Committed
     |:
         := problem = rust_std_fs.model.write_problem (temporary_at pending root index) (entry_text pending index)
-        ? problem = "" ?> written pending root (index + 1i32)
+        ? problem = ""
+        ?> written pending root (index + 1i32)
         |:
             discarded pending root 0i32 index
             WriteFailed (entry_path pending index, problem)
 
 :~ ^ unread_changes (~pending : pending_writes) (~root : string) (index : i32) : commit_outcome =
-    ? index >= entry_count pending ?> Committed
+    ? index >= entry_count pending
+    ?> Committed
     |? rust_std_fs.model.text_equals (entry_base pending index) (target_at pending root index)
     ?> unread_changes pending root (index + 1i32)
     |: ChangedSinceRead (entry_path pending index)
 
 :~ ^ restored (~pending : pending_writes) (~root : string) (index : i32) (until : i32) (whole : bool) : bool =
-    ? index >= until ?> whole
+    ? index >= until
+    ?> whole
     |:
         := temporary = temporary_at pending root index
         := written = rust_std_fs.model.write_problem temporary (entry_base pending index) = ""
@@ -49,7 +54,8 @@
         restored pending root (index + 1i32) until (whole && back)
 
 :~ ^ promoted (~pending : pending_writes) (~root : string) (index : i32) : commit_outcome =
-    ? index >= entry_count pending ?> Committed
+    ? index >= entry_count pending
+    ?> Committed
     |? renamed_within (target_at pending root index) (temporary_at pending root index) 40i32
     ?> promoted pending root (index + 1i32)
     |:

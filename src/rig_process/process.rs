@@ -58,7 +58,7 @@ pub fn compile_spiral_plan_ir(compiler: &str, input: &std::path::Path, output: &
     run_bounded(&mut command, total)
 }
 pub fn typecheck_spiral_file(compiler: &SpiralCompilerDiscovery, path: &std::path::Path) -> Result<(), String> {
-    let timeout_ms = std::env::var("KIT_SPIRAL_TIMEOUT_MS").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(30000);
+    let timeout_ms = std::env::var("RIG_SPIRAL_TIMEOUT_MS").or_else(|_| std::env::var("KIT_SPIRAL_TIMEOUT_MS")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(30000);
     let check_compiler = if compiler.path.file_name().and_then(|value| value.to_str()) == Some("spiral-compile-session") {
         let candidate = compiler.path.with_file_name("spiral-compile");
         if candidate.is_file() { candidate } else { compiler.path.clone() }

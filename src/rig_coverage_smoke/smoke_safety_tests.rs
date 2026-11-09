@@ -61,7 +61,7 @@ fn snapshot_rejects_windows_junctions_without_touching_targets() {
     let linked = source.0.join("linked");
     let created = Command::new("pwsh").args(["-NoProfile", "-NonInteractive", "-Command",
         "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:KIT_TEST_JUNCTION -Target $env:KIT_TEST_TARGET | Out-Null"])
-        .env("KIT_TEST_JUNCTION", &linked).env("KIT_TEST_TARGET", &outside.0).output().unwrap();
+        .env("RIG_TEST_JUNCTION", &&linked).env("KIT_TEST_JUNCTION", &linked).env("RIG_TEST_TARGET", &&outside.0).env("KIT_TEST_TARGET", &outside.0).output().unwrap();
     assert!(created.status.success(), "{created:?}");
     let output = CoverageSmokeScratch::create("test-output").unwrap();
     assert!(coverage_smoke_copy_tree(&source.0, &output.0.join("copy"), &mut 100, &mut 10, 0).unwrap_err().contains("links or special"));

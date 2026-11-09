@@ -63,32 +63,51 @@
     | FailAfterLinkCommit => 3i32
 
 :~ self_install_preflight_binding (source_regular : i32) (source_executable : i32) : i32 =
-    ? source_regular < 1i32 ?> 0i32
-    |? 1i32 < source_regular ?> 0i32
-    |? source_executable < 1i32 ?> 0i32
-    |? 1i32 < source_executable ?> 0i32
+    ? source_regular < 1i32
+    ?> 0i32
+    |? 1i32 < source_regular
+    ?> 0i32
+    |? source_executable < 1i32
+    ?> 0i32
+    |? 1i32 < source_executable
+    ?> 0i32
     |: 1i32
 
 :~ self_install_target_binding (destination_safe : i32) (link_state_code : i32) : i32 =
-    ? destination_safe < 1i32 ?> 0i32
-    |? 1i32 < destination_safe ?> 0i32
-    |? link_state_code < 0i32 ?> 0i32
-    |? 3i32 < link_state_code ?> 0i32
-    |? link_state_code = 3i32 ?> 0i32
+    ? destination_safe < 1i32
+    ?> 0i32
+    |? 1i32 < destination_safe
+    ?> 0i32
+    |? link_state_code < 0i32
+    ?> 0i32
+    |? 3i32 < link_state_code
+    ?> 0i32
+    |? link_state_code = 3i32
+    ?> 0i32
     |: 1i32
 
 :~ self_install_fault_binding (configured : i32) (observed : i32) : i32 =
-    ? configured < 1i32 ?> 0i32
-    |? 3i32 < configured ?> 0i32
-    |? observed < 1i32 ?> 0i32
-    |? 3i32 < observed ?> 0i32
-    |? configured < observed ?> 0i32
-    |? observed < configured ?> 0i32
+    ? configured < 1i32
+    ?> 0i32
+    |? 3i32 < configured
+    ?> 0i32
+    |? observed < 1i32
+    ?> 0i32
+    |? 3i32 < observed
+    ?> 0i32
+    |? configured < observed
+    ?> 0i32
+    |? observed < configured
+    ?> 0i32
     |: 1i32
 
 :~ self_install_complete_binding (binary_matches : i32) (link_matches : i32) : i32 =
-    ? binary_matches < 1i32 ?> 0i32
-    |? 1i32 < binary_matches ?> 0i32
-    |? link_matches < 1i32 ?> 0i32
-    |? 1i32 < link_matches ?> 0i32
+    ? binary_matches < 1i32
+    ?> 0i32
+    |? 1i32 < binary_matches
+    ?> 0i32
+    |? link_matches < 1i32
+    ?> 0i32
+    |? 1i32 < link_matches
+    ?> 0i32
     |: 1i32

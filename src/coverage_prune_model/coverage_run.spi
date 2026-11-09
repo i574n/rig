@@ -1,4 +1,3 @@
-
 := emit_coverage_run () : () =
     global """
         pub fn coverage_finish(code: i32) -> i32 {
@@ -6,7 +5,7 @@
             {
                 unsafe extern "C" { fn __llvm_profile_write_file() -> i32; }
                 if unsafe { __llvm_profile_write_file() } != 0 {
-                    eprintln!("kit error: coverage profile flush failed");
+                    eprintln!("rig error: coverage profile flush failed");
                     return if code == 0 { 1 } else { code };
                 }
             }
@@ -18,7 +17,7 @@
         }
 
         fn coverage_jobs() -> Result<String, String> {
-            let requested = env::var("KIT_COVERAGE_JOBS").or_else(|_| env::var("CARGO_BUILD_JOBS")).ok();
+            let requested = env::var("RIG_COVERAGE_JOBS").or_else(|_| env::var("KIT_COVERAGE_JOBS")).or_else(|_| env::var("CARGO_BUILD_JOBS")).ok();
             let requested = match requested {
                 Some(value) => value.parse::<i32>().ok().filter(|value| *value > 0).unwrap_or(-1),
                 None => 0,
@@ -69,12 +68,12 @@
         fn coverage_run_phase(context: &CoverageRunContext<'_>, command_args: &[String], phase: &str) -> Result<(), String> {
             let started = std::time::Instant::now();
             let mut command = Command::new(context.cargo);
-            command.current_dir(context.source).args(command_args).env("CARGO_TARGET_DIR", context.target).env("CARGO_BUILD_JOBS", context.jobs).env("RUST_TEST_THREADS", env::var("RUST_TEST_THREADS").unwrap_or_else(|_| context.jobs.to_owned())).env("CARGO_INCREMENTAL", "1").env_remove("CARGO_ENCODED_RUSTFLAGS").env("RUSTFLAGS", "-C instrument-coverage --cfg rig_coverage").env("LLVM_PROFILE_FILE", context.profile_pattern).env("KIT_SPIRAL_COMPILE", context.compiler).env("KIT_BIN_UNDER_TEST", context.binary).env("RAYON_NUM_THREADS", context.jobs);
+            command.current_dir(context.source).args(command_args).env("CARGO_TARGET_DIR", context.target).env("CARGO_BUILD_JOBS", context.jobs).env("RUST_TEST_THREADS", env::var("RUST_TEST_THREADS").unwrap_or_else(|_| context.jobs.to_owned())).env("CARGO_INCREMENTAL", "1").env_remove("CARGO_ENCODED_RUSTFLAGS").env("RUSTFLAGS", "-C instrument-coverage --cfg rig_coverage").env("LLVM_PROFILE_FILE", context.profile_pattern).env("RIG_SPIRAL_COMPILE", &context.compiler).env("KIT_SPIRAL_COMPILE", context.compiler).env("RIG_BIN_UNDER_TEST", &context.binary).env("KIT_BIN_UNDER_TEST", context.binary).env("RAYON_NUM_THREADS", context.jobs);
             let _observation = coverage_run_bounded_streaming_checked(&mut command, context.timeout_ms, phase, None)?;
         """
 
     global """
-            println!("kit coverage phase={phase} status=passed elapsed_ms={}", started.elapsed().as_millis());
+            println!("rig coverage phase={phase} status=passed elapsed_ms={}", started.elapsed().as_millis());
             Ok(())
         }
 
@@ -102,13 +101,13 @@
             fs::create_dir_all(target).map_err(|error| format!("create {}: {error}", target.display()))?;
             let profile_pattern = profraw.join("%p-%m.profraw").to_string_lossy().into_owned();
             let binary = target.join("release").join(if cfg!(windows) { "kit.exe" } else { "kit" });
-            let smoke_child = env::var("KIT_COVERAGE_SMOKE_CHILD").ok().as_deref() == Some("1");
+            let smoke_child = env::var("RIG_COVERAGE_SMOKE_CHILD").or_else(|_| env::var("KIT_COVERAGE_SMOKE_CHILD")).ok().as_deref() == Some("1");
             if smoke_child {
                 if scope != "smoke" { return Err("coverage smoke child requires smoke scope".to_owned()); }
                 if !binary.is_file() { return Err(format!("instrumented KIT binary missing: {}", binary.display())); }
                 let smoke_context = CoverageSmokeContext { root, cargo, compiler, binary: &binary, target, profile_pattern: &profile_pattern, timeout_ms, jobs: &jobs };
                 coverage_smoke_run(&smoke_context)?;
-                println!("kit coverage smoke child ok target={}", target.display());
+                println!("rig coverage smoke child ok target={}", target.display());
                 return Ok(());
             }
             let removed = coverage_clear_profraw(profraw)?;
@@ -125,7 +124,7 @@
 
             if scope == "smoke" {
                 let mut command = Command::new(&binary);
-                command.current_dir(root).arg("proxy").args(args).env("KIT_COVERAGE_SMOKE_CHILD", "1").env("LLVM_PROFILE_FILE", &profile_pattern).env("KIT_SPIRAL_COMPILE", compiler).env("KIT_BIN_UNDER_TEST", &binary).env("CARGO_TARGET_DIR", target).env("RAYON_NUM_THREADS", &jobs);
+                command.current_dir(root).arg("proxy").args(args).env("RIG_COVERAGE_SMOKE_CHILD", "1").env("KIT_COVERAGE_SMOKE_CHILD", "1").env("LLVM_PROFILE_FILE", &profile_pattern).env("RIG_SPIRAL_COMPILE", &compiler).env("KIT_SPIRAL_COMPILE", compiler).env("RIG_BIN_UNDER_TEST", &&binary).env("KIT_BIN_UNDER_TEST", &binary).env("CARGO_TARGET_DIR", target).env("RAYON_NUM_THREADS", &jobs);
                 let _observation = coverage_run_bounded_streaming_checked(&mut command, timeout_ms, "smoke-reentry", None)?;
             } else {
                 let tests = coverage_run_test_args(scope, &jobs)?;
@@ -133,7 +132,7 @@
             }
             let profiles = coverage_profile_count(profraw)?;
             if profiles == 0 { return Err("coverage run produced no profraw files".to_owned()); }
-            println!("kit proxy coverage-run ok scope={scope} profiles={profiles} cleared={removed} target={}", target.display());
+            println!("rig proxy coverage-run ok scope={scope} profiles={profiles} cleared={removed} target={}", target.display());
             Ok(())
         }
 

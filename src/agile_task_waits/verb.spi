@@ -32,8 +32,10 @@
     waits_schema () ++# (waits |> listm.map (\ (w : task_wait) => row_of_wait w ++# "\n") |> sm'.concat_list "")
 
 :~ module_added (~package_text : string) : option string =
-    ? sm'.contains "\n    waits\n" package_text || sm'.ends_with "\n    waits" package_text ?> Some package_text
-    |? sm'.contains "modules:\n" package_text ?> Some (sm'.replace "modules:\n" "modules:\n    waits\n" package_text)
+    ? sm'.contains "\n    waits\n" package_text || sm'.ends_with "\n    waits" package_text
+    ?> Some package_text
+    |? sm'.contains "modules:\n" package_text
+    ?> Some (sm'.replace "modules:\n" "modules:\n    waits\n" package_text)
     |: None
 
 :~ text_of (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
@@ -51,19 +53,24 @@
     := item = change_item change
     := waits = waits_changed (waits_of_text before) change
     := package = state ++# "/package.spiproj"
-    ? agile_text = "" ?> WaitsRefused ("no backlog state at " ++# state)
-    |? sm'.contains ("Task (\"" ++# item ++# "\"") agile_text |> not ?> WaitsRefused ("no task " ++# item)
-    |? text_of path <> before ?> WaitsRefused "state/waits.spi changed since it was read; run again"
-    |? replaced path (waits_text waits) |> not ?> WaitsRefused "state/waits.spi could not be written"
+    ? agile_text = ""
+    ?> WaitsRefused ("no backlog state at " ++# state)
+    |? sm'.contains ("Task (\"" ++# item ++# "\"") agile_text |> not
+    ?> WaitsRefused ("no task " ++# item)
+    |? text_of path <> before
+    ?> WaitsRefused "state/waits.spi changed since it was read; run again"
+    |? replaced path (waits_text waits) |> not
+    ?> WaitsRefused "state/waits.spi could not be written"
     |:
         ?= module_added (text_of package) ?|
         | None => WaitsRefused "state/package.spiproj has no modules section to list waits in"
         | Some listed =>
-            ? listed = text_of package || replaced package listed ?> WaitsWritten (listm.length waits)
+            ? listed = text_of package || replaced package listed
+            ?> WaitsWritten (listm.length waits)
             |: WaitsRefused "state/package.spiproj not updated"
 
 :~ wait_run () : i32 =
-    := usage = "kit error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"
+    := usage = "rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"
     := change =
         ?= env.command_line_arguments () ?|
         | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait" && value = "--clear" =>
@@ -80,10 +87,10 @@
     | Some (root, c) =>
         ?= waits_written root c ?|
         | WaitsWritten count =>
-            console.write_line ("kit agile edit ok id=" ++# change_item c ++# " waits=" ++# sm'.show count)
+            console.write_line ("rig agile edit ok id=" ++# change_item c ++# " waits=" ++# sm'.show count)
             0i32
         | WaitsRefused reason =>
-            console.write_error_line ("kit error: agile edit --wait: " ++# reason)
+            console.write_error_line ("rig error: agile edit --wait: " ++# reason)
             2i32
 
 :~ waiting_of (text : string) : array_base task_wait = waits_of_text text |> listm'.box |> listm'.to_array'

@@ -31,12 +31,18 @@
     | Ecosystem => "Ecosystem"
 
 :~ layer_named (~word : string) (~backend : string) : option lib_layer =
-    ? word = "Meta" ?> Some Meta
-    |? word = "Core" ?> Some Core
-    |? word = "Std" ?> Some Std
-    |? word = "Os" ?> Some Os
-    |? word = "Host" && backend <> "" ?> Some (Host backend)
-    |? word = "Ecosystem" ?> Some Ecosystem
+    ? word = "Meta"
+    ?> Some Meta
+    |? word = "Core"
+    ?> Some Core
+    |? word = "Std"
+    ?> Some Std
+    |? word = "Os"
+    ?> Some Os
+    |? word = "Host" && backend <> ""
+    ?> Some (Host backend)
+    |? word = "Ecosystem"
+    ?> Some Ecosystem
     |: None
 
 :== layer_row = { module : string; layer : option lib_layer; word : string }
@@ -52,7 +58,8 @@
     := marker = " = LayerRow ("
     := picked = \ (found : list layer_row) (line : string) =>
         := at = sm'.index_of marker line
-        ? at < 0i32 ?> found
+        ? at < 0i32
+        ?> found
         |:
             := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
             := m = nth_quoted rest 0i32
@@ -81,7 +88,8 @@
     := kept = \ ((code, inside) : string * bool) (line : string) =>
         := trimmed = sm'.trim_start [] line
         := test_body = inside && (trimmed = "" || sm'.starts_with " " line)
-        ? sm'.starts_with ":#" line ?> code, !+
+        ? sm'.starts_with ":#" line
+        ?> code, !+
         |? test_body || sm'.starts_with "//" trimmed ?> code, inside
         |: code ++# line ++# "\n", !-
     := code, _ = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold kept ("", !-)
@@ -104,7 +112,8 @@
 
 :~ referenced_by (~code : string) (~name : string) (~separator : string) : bool =
     := needle = name ++# separator
-    ? sm'.contains needle code |> not ?> !-
+    ? sm'.contains needle code |> not
+    ?> !-
     |:
         := found = \ ((any, before) : bool * string) (piece : string) =>
             any || (word_char (last_char before) |> not && member_start (first_char piece)), piece

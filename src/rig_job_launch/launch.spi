@@ -35,7 +35,8 @@
     := state = shared_state id
     ?= state ?|
     | Live _ =>
-        ? left_ms = 0u64 ?> state
+        ? left_ms = 0u64
+        ?> state
         |:
             sleep_ms 100u64
             settled_within id (? left_ms < 100u64 ?> 0u64 |: left_ms - 100u64)
@@ -56,7 +57,7 @@
     | Live _ => SettleHealthy
 
 := settle_failure_line (~id : string) (settled : job_settled) (~detail : string) : string =
-    "kit job start failed id="
+    "rig job start failed id="
     ++# id
     ++# " state="
     ++# settled_word settled
@@ -103,7 +104,7 @@
                 settled_exit settled, id
             | SettleHealthy =>
                 stdout_line (
-                    (? attached ?> "kit job run started id=" |: "kit job start ok id=")
+                    (? attached ?> "rig job run started id=" |: "rig job start ok id=")
                     ++# id
                     ++# " supervisor_pid="
                     ++# supervisor

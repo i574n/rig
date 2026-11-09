@@ -23,9 +23,9 @@ $spiralScripts = @("$bundle/../scripts", "$bundle/scripts") | Where-Object { Tes
 { pwsh "$spiralScripts/test-rust-exports.ps1" } | Invoke-Block
 
 . "$spiralScripts/env.ps1"
-$env:KIT_DOTNET = Resolve-SpiralDotnet
-$env:KIT_SPIRAL_COMPILE = Get-SpiralCompilerDll 'single-flight'
-$env:KIT_SPIRAL_BUNDLE = $bundle
+$env:RIG_DOTNET = $env:KIT_DOTNET = Resolve-SpiralDotnet
+$env:RIG_SPIRAL_COMPILE = $env:KIT_SPIRAL_COMPILE = Get-SpiralCompilerDll 'single-flight'
+$env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = $bundle
 
 { pwsh build.ps1 -Test -CompilerContracts } | Invoke-Block -Location ..
 { pwsh compiler-contracts/test-native-probes.ps1 } | Invoke-Block -Location ..

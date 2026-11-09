@@ -18,7 +18,8 @@
 
 :~ ^ count_status (text : string) (offset : i32) (length : i32) (~status : string) (counted : i32) : i32 =
     := found = byte_find_from text (task_marker ()) offset
-    ? found < 0i32 ?> counted
+    ? found < 0i32
+    ?> counted
     |:
         := arguments = (found + (task_arguments_offset ()))
         := matching = ? declared_task text found ?> ((tuple_field text arguments length 6i32) = status) |: !-
@@ -47,10 +48,12 @@
 
 :~ ^ status_of_id (text : string) (~anchor : string) (offset : i32) (length : i32) : string =
     := found = byte_find_from text anchor offset
-    ? found < 0i32 ?> ""
+    ? found < 0i32
+    ?> ""
     |:
         := arguments = (found + (task_arguments_offset ()))
-        ? declared_task text found ?> tuple_field text arguments length 6i32
+        ? declared_task text found
+        ?> tuple_field text arguments length 6i32
         |: status_of_id text anchor (found + 1i32) length
 
 :~ task_status_of (text : string) (~id : string) : string =

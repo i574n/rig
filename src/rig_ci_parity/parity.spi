@@ -10,7 +10,8 @@
 :~ workflow_file (name : string) : bool = sm'.ends_with ".yml" name || sm'.ends_with ".yaml" name
 
 :~ names_in (directory : string) : list string =
-    ? file_system.directory_exists directory |> not ?> []
+    ? file_system.directory_exists directory |> not
+    ?> []
     |:
         file_system.read_directory_names directory
         |> resultm.unwrap'
@@ -49,10 +50,10 @@
     := repo = argument 2i32
     := directory = repo </> ".github" </> "workflows"
     ? argument 1i32 <> "parity" || repo = "" ?>
-        console.write_line ("kit error: ci usage: " ++# usage ())
+        console.write_line ("rig error: ci usage: " ++# usage ())
         2i32
     |? file_system.directory_exists directory |> not ?>
-        console.write_line ("kit ci parity refused: no workflow folder at " ++# directory)
+        console.write_line ("rig ci parity refused: no workflow folder at " ++# directory)
         1i32
     |:
         := pins = workflow_and_file_pins repo directory
@@ -60,15 +61,15 @@
         := count = (listm.length pins : i32)
         := summary = " tools=" ++# sm'.format count ++# " differs=" ++# sm'.format differing ++# " repo=" ++# repo
         ? count = 0i32 ?>
-            console.write_line ("kit ci parity refused: no setup-* or rust-toolchain pin found;" ++# summary)
+            console.write_line ("rig ci parity refused: no setup-* or rust-toolchain pin found;" ++# summary)
             1i32
         |? differing > 0i32 ?>
             console.write_line (
-                "kit ci parity refused: " ++# sm'.format differing ++# " tool(s) differ from CI;" ++# summary
+                "rig ci parity refused: " ++# sm'.format differing ++# " tool(s) differ from CI;" ++# summary
             )
             1i32
         |:
-            console.write_line ("kit ci parity ok" ++# summary)
+            console.write_line ("rig ci parity ok" ++# summary)
             0i32
 
 ///> rust

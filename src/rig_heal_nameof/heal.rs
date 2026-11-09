@@ -36,7 +36,7 @@ enum US3 {
     US3_None,
 }
 fn heal_usage_1() -> i32 {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: heal usage: heal nameof <dir>... (lists matches that map 3 or more cases to their own names as strings, or back, per file and per root; the compiler's tokens command reads each .spi)"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: heal usage: heal nameof <dir>... (lists matches that map 3 or more cases to their own names as strings, or back, per file and per root; the compiler's tokens command reads each .spi)"); } LIT.with(|lit| lit.clone()) };
     eprintln!("{}", v0);
     2i32
 }
@@ -347,7 +347,7 @@ fn root_report_7(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let v19: Rc<str> = format_real_20(v11);
     let v22: Rc<str> = format_real_20(v12);
     let v25: Rc<str> = format_real_20(v13);
-    let v26: Rc<str> = string_concat(&["kit heal nameof root=", &*v1, " files=", &*v16, " unreadable=", &*v19, " findings=", &*v22, " arms=", &*v25]);
+    let v26: Rc<str> = string_concat(&["rig heal nameof root=", &*v1, " files=", &*v16, " unreadable=", &*v19, " findings=", &*v22, " arms=", &*v25]);
     println!("{}", v26);
     v13
 }
@@ -402,7 +402,7 @@ fn heal_ran_2(mut v0: US0, mut v1: Rc<UH0>) -> i32 {
                 let mut v5: bool = file_exists_5(v2.clone());
                 let mut v6: bool = v5 == false;
                 if v6 {
-                    let mut v8: Rc<str> = string_concat(&["kit error: heal nameof: no compiler at ", &*v2, "; set SPIRAL_COMPILER_DLL"]);
+                    let mut v8: Rc<str> = string_concat(&["rig error: heal nameof: no compiler at ", &*v2, "; set SPIRAL_COMPILER_DLL"]);
                     eprintln!("{}", v8);
                     2i32
                 } else {
@@ -412,7 +412,7 @@ fn heal_ran_2(mut v0: US0, mut v1: Rc<UH0>) -> i32 {
                     let v12: i32 = method22(v1, v11);
                     let v13: Rc<str> = format_real_20(v12);
                     let v16: Rc<str> = format_real_20(v10);
-                    let v17: Rc<str> = string_concat(&["kit heal nameof ok roots=", &*v13, " arms=", &*v16]);
+                    let v17: Rc<str> = string_concat(&["rig heal nameof ok roots=", &*v13, " arms=", &*v16]);
                     println!("{}", v17);
                     0i32
                 }

@@ -63,7 +63,7 @@ fn stderr_line_3(mut v0: Rc<str>) -> () {
     ()
 }
 fn rejected_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job "); } LIT.with(|lit| lit.clone()) };
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job "); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<str> = concat5_2(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_3(v3);
@@ -74,7 +74,7 @@ fn joined_6(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     v2
 }
 fn jobs_root_7() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_JOBS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
     v0
 }
 fn job_directory_5(mut v0: Rc<str>) -> Rc<str> {
@@ -591,7 +591,7 @@ fn job_amended_31() -> i32 {
             };
             let v39: Rc<str> = decimal_text_11(v11);
             let v42: Rc<str> = decimal_text_11(v15);
-            let v43: Rc<str> = string_concat(&["kit job amend ok id=", &*v1, " timeout_ms=", &*v39, " was=", &*v42]);
+            let v43: Rc<str> = string_concat(&["rig job amend ok id=", &*v1, " timeout_ms=", &*v39, " was=", &*v42]);
             stdout_line_10(v43);
             0i32
         }
@@ -704,7 +704,7 @@ fn parent_pid_40() -> u64 {
     v0
 }
 fn watched_caller_39() -> u64 {
-    let mut v0: u64 = std::env::var("KIT_JOB_WATCH").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0);
+    let mut v0: u64 = std::env::var("RIG_JOB_WATCH").or_else(|_| std::env::var("KIT_JOB_WATCH")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0);
     let v1: bool = v0 == 0u64;
     if v1 {
         parent_pid_40()

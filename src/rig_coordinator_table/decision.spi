@@ -21,13 +21,16 @@
     := sorted = list_sort.sorted_by (\ (a : u64) (b : u64) => a <= b) samples
     := count : i32 = listm.length sorted
     := rank = (count * 95i32 + 99i32) / 100i32 - 1i32
-    ? count = 0i32 ?> 0u64
+    ? count = 0i32
+    ?> 0u64
     |: listm.fold (\ (found, at) (s : u64) => (? at = rank ?> s |: found), at + 1i32) (0u64, 0i32) sorted |> fst
 
 :~ beam_decision_of (m : beam_measure) : beam_decision =
     := start, cpu = (?= m.start_p95 ?| | Millis ms => ms), (?= m.coordinator_cpu ?| | CoreHundredths h => h)
-    ? cpu >= 100u64 ?> MoveToRust
-    |? start > 2000u64 ?> StayResident
+    ? cpu >= 100u64
+    ?> MoveToRust
+    |? start > 2000u64
+    ?> StayResident
     |: PerCall
 
 :~ decision_word (d : beam_decision) : string = reflection.union_to_string d

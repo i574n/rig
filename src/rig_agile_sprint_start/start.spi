@@ -36,16 +36,18 @@
     | [] => []
 
 :~ modules_with_sprints (~text : string) : string =
-    ? sm'.contains "\n    sprints\n" ("\n" ++# text) ?> text
-    |? sm'.ends_with "\n" text ?> text ++# "    sprints\n"
+    ? sm'.contains "\n    sprints\n" ("\n" ++# text)
+    ?> text
+    |? sm'.ends_with "\n" text
+    ?> text ++# "    sprints\n"
     |: text ++# "\n    sprints\n"
 
 :~ outcome_text (outcome : start_outcome) : i32 * string =
-    := refused = "kit error: agile sprint start refused: "
+    := refused = "rig error: agile sprint start refused: "
     ?= outcome ?|
     | Started s =>
         := count : i32 = listm.length s.items
-        := head = "kit agile sprint start ok id=" ++# s.terms.id
+        := head = "rig agile sprint start ok id=" ++# s.terms.id
         0i32, head ++# " items=" ++# sm'.show count ++# " finish=" ++# s.terms.finish
     | AnotherSprintOpen id => 1i32, refused ++# "sprint " ++# id ++# " is still open"
     | ItemNotOpen task => 1i32, refused ++# "item " ++# task ++# " is unknown or Done"
@@ -53,9 +55,8 @@
 
 :~ sprint_started (~root : string) (~id : string) (~days : string) (~goal : string) (rest : list string) : i32 =
     := count = optionm'.default_value 0i64 (convert.try_convert days)
-    ? count <= 0i64 || id = ""
-    ?>
-        console.write_error_line "kit error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B]"
+    ? count <= 0i64 || id = "" ?>
+        console.write_error_line "rig error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B]"
         2i32
     |:
         := state = sm'.replace "\\" "/" root ++# "/state"
@@ -67,7 +68,8 @@
         := candidates = items_given rest |> listm.map (\ (task : string) => candidate_of agile_text task)
         := running = rig_agile_sprint_state.state.open_sprint_of existing
         := outcome =
-            ? running <> "" ?> AnotherSprintOpen running
+            ? running <> ""
+            ?> AnotherSprintOpen running
             |:
                 ?= first_refusal candidates ?|
                 | Some refused => refused

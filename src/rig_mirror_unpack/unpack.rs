@@ -304,7 +304,7 @@ fn method16(mut v0: Rc<UH0>) -> () {
             UH0::UH0_Cons(v1, v2) => {
                 let mut v1: Rc<str> = v1;
                 let v2: Rc<UH0> = v2;
-                let v3: Rc<str> = string_concat(&["kit mirror unpack refused ", &*v1]);
+                let v3: Rc<str> = string_concat(&["rig mirror unpack refused ", &*v1]);
                 eprintln!("{}", v3);
                 v0 = v2;
                 continue;
@@ -372,14 +372,14 @@ fn unpack_printed_0(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         v13
     };
     if v14 {
-        let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: mirror unpack: the removal list name must be a plain relative name"); } LIT.with(|lit| lit.clone()) };
+        let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: mirror unpack: the removal list name must be a plain relative name"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v15);
         2i32
     } else {
         let v16: bool = file_exists_6(v6.clone());
         let v17: bool = v16 == false;
         if v17 {
-            let v18: Rc<str> = string_concat(&["kit error: mirror unpack: no .kit-mirror-incoming.tar under ", &*v4]);
+            let v18: Rc<str> = string_concat(&["rig error: mirror unpack: no .kit-mirror-incoming.tar under ", &*v4]);
             eprintln!("{}", v18);
             2i32
         } else {
@@ -428,7 +428,7 @@ fn unpack_printed_0(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
             };
             let v51: bool = v50 == false;
             if v51 {
-                let v52: Rc<str> = string_concat(&["kit error: mirror unpack: tar could not extract ", &*v6]);
+                let v52: Rc<str> = string_concat(&["rig error: mirror unpack: tar could not extract ", &*v6]);
                 eprintln!("{}", v52);
                 2i32
             } else {
@@ -506,7 +506,7 @@ fn unpack_printed_0(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
                 let v105: i32 = 0i32;
                 let v106: i32 = method19(v74.clone(), v105);
                 let v107: Rc<str> = format_real_17(v106);
-                let v109: Rc<str> = string_concat(&["kit mirror unpack ok removed=", &*v102, " refused=", &*v107]);
+                let v109: Rc<str> = string_concat(&["rig mirror unpack ok removed=", &*v102, " refused=", &*v107]);
                 eprintln!("{}", v109);
                 let v110: bool = match Rc::unwrap_or_clone(v74) {
                     UH0::UH0_Nil => {

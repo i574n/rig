@@ -37,7 +37,7 @@
     ? (names = "") ?> 0i32 |: stdout_line names
 
 := listing_receipt (~path : string) (entries : u64) (started : u64) : listing_outcome =
-    := head = "kit proxy fs-list ok path=" ++# path ++# " entries=" ++# (u64_text entries) ++# " elapsed_ms="
+    := head = "rig proxy fs-list ok path=" ++# path ++# " entries=" ++# (u64_text entries) ++# " elapsed_ms="
     ListingShown (head ++# (u64_text (ms_since started)))
 
 := list_directory (~path : string) (started : u64) : listing_outcome =
@@ -50,14 +50,17 @@
 
 := list_scope (~root : string) (~relative : string) (started : u64) : listing_outcome =
     := path = listing_path root (listing_scope_of relative)
-    ? (path = "") ?> ListingRejected ("fs-list path rejected: " ++# (rooted_path_problem root relative))
+    ? (path = "")
+    ?> ListingRejected ("fs-list path rejected: " ++# (rooted_path_problem root relative))
     |: list_directory path started
 
 :~ directory_listing_outcome () : listing_outcome =
     := started = unix_ms ()
     := operands = proxy_argument_count ()
-    ? $"!operands == 2" ?> list_scope (proxy_argument 1i32) (root_scope_marker ()) started
-    |? $"!operands == 3" ?> list_scope (proxy_argument 1i32) (proxy_argument 2i32) started
+    ? $"!operands == 2"
+    ?> list_scope (proxy_argument 1i32) (root_scope_marker ()) started
+    |? $"!operands == 3"
+    ?> list_scope (proxy_argument 1i32) (proxy_argument 2i32) started
     |: ListingRejected "fs-list expects <root> [relative]"
 
 :~ directory_listing_report () : i32 * string =

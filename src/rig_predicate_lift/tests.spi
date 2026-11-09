@@ -15,7 +15,8 @@
     | _ => !-
 := contains (text : string) (part : string) : bool = sm'.contains part text
 :~ check (success : bool) (label : string) : i32 =
-    ? success ?> 0i32
+    ? success
+    ?> 0i32
     |:
         host.print (predicate_rules.model.append label " failed\n")
         1i32

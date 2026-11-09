@@ -843,26 +843,26 @@ fn tree_run_1() -> i32 {
                             let v29: i32 = 0i32;
                             let v30: i32 = method42(v14, v29);
                             let v31: Rc<str> = format_real_36(v30);
-                            let v34: Rc<str> = string_concat(&["kit agile list ok tree epics=", &*v28, " links=", &*v31]);
+                            let v34: Rc<str> = string_concat(&["rig agile list ok tree epics=", &*v28, " links=", &*v31]);
                             println!("{}", v34);
                             0i32
                         }
                         _ => {
-                            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile list <root> --tree"); } LIT.with(|lit| lit.clone()) };
+                            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile list <root> --tree"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v35);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile list <root> --tree"); } LIT.with(|lit| lit.clone()) };
+                    let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile list <root> --tree"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v37);
                     2i32
                 }
             }
         }
         _ => {
-            let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile list <root> --tree"); } LIT.with(|lit| lit.clone()) };
+            let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile list <root> --tree"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v39);
             2i32
         }

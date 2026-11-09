@@ -1,4 +1,3 @@
-
 := main () : i32 =
     global "#![allow(clippy::needless_late_init)]"
     := _ = archive_deflate_domain.deflate_extract_plan ()
@@ -16,13 +15,22 @@
         archive_deflate_domain.archive_format_binding
             (archive_deflate_domain.archive_format_code archive_deflate_domain.TarXzArchive)
             1i32
-    ? preflight < 1i32 ?> 1i32
-    |? tar_symlink < 1i32 ?> 1i32
-    |? tar_hardlink < 1i32 ?> 1i32
-    |? tar_long_link < 1i32 ?> 1i32
-    |? tar_pax_path < 1i32 ?> 1i32
-    |? compression < 1i32 ?> 1i32
-    |? budget < 1i32 ?> 1i32
-    |? tree < 1i32 ?> 1i32
-    |? format < 1i32 ?> 1i32
+    ? preflight < 1i32
+    ?> 1i32
+    |? tar_symlink < 1i32
+    ?> 1i32
+    |? tar_hardlink < 1i32
+    ?> 1i32
+    |? tar_long_link < 1i32
+    ?> 1i32
+    |? tar_pax_path < 1i32
+    ?> 1i32
+    |? compression < 1i32
+    ?> 1i32
+    |? budget < 1i32
+    ?> 1i32
+    |? tree < 1i32
+    ?> 1i32
+    |? format < 1i32
+    ?> 1i32
     |: 0i32

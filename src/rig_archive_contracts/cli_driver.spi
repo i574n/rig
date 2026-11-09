@@ -1,4 +1,3 @@
-
 := emit_archive_contract_cli_driver () =
     global """
         #![cfg(test)]
@@ -9,7 +8,7 @@
         use std::time::{SystemTime, UNIX_EPOCH};
 
         fn rig_binary() -> PathBuf {
-            if let Ok(path) = env::var("KIT_BIN_UNDER_TEST") { return PathBuf::from(path); }
+            if let Ok(path) = env::var("RIG_BIN_UNDER_TEST").or_else(|_| env::var("KIT_BIN_UNDER_TEST")) { return PathBuf::from(path); }
             let current = env::current_exe().expect("current test executable");
             let name = if cfg!(windows) { "kit.exe" } else { "kit" };
             let debug = current.parent().and_then(Path::parent).expect("target profile directory");

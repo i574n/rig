@@ -696,7 +696,7 @@ fn format_real_19(mut v0: i32) -> Rc<str> {
 fn import_receipt_18(mut v0: i32, mut v1: i32, mut v2: Rc<str>, mut v3: Rc<str>) -> Rc<str> {
     let v4: Rc<str> = format_real_19(v0);
     let v7: Rc<str> = format_real_19(v1);
-    let v12: Rc<str> = string_concat(&["kit memory import ok memories=", &*v4, " identical=", &*v7, " index_identical=", &*v2, " data=", &*v3]);
+    let v12: Rc<str> = string_concat(&["rig memory import ok memories=", &*v4, " identical=", &*v7, " index_identical=", &*v2, " data=", &*v3]);
     v12
 }
 fn memory_import_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
@@ -706,7 +706,7 @@ fn memory_import_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let v5: bool = v4 == false;
     if v5 {
         let v7: Rc<str> = string_concat(&["import needs ", &*v0, "/MEMORY.md"]);
-        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
         let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let v10: Rc<str> = concat5_3(v8, v7, v9.clone(), v9.clone(), v9.clone());
         eprintln!("{}", v10);
@@ -721,7 +721,7 @@ fn memory_import_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v18: bool = &*v17 != "";
         if v18 {
             let v19: Rc<str> = string_concat(&["import refused, nothing written:\n", &*v17]);
-            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
             let v21: Rc<str> = concat5_3(v20, v19, v14.clone(), v14.clone(), v14.clone());
             eprintln!("{}", v21);
             2i32
@@ -753,7 +753,7 @@ fn memory_import_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
                 0i32
             } else {
                 let v43: Rc<str> = string_concat(&["import could not write ", &*v1]);
-                let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                 let v45: Rc<str> = concat5_3(v44, v43, v14.clone(), v14.clone(), v14.clone());
                 eprintln!("{}", v45);
                 2i32

@@ -12,7 +12,8 @@
 
 :~ agile_state_mutation_target_decision_binding (parent_is_state : i32) (package_owned : i32) : i32 =
     ? parent_is_state = 1i32 ?>
-        ? package_owned = 1i32 ?> agile_state_mutation_target_decision_code PermitPackageOwnedMutation
+        ? package_owned = 1i32
+        ?> agile_state_mutation_target_decision_code PermitPackageOwnedMutation
         |: agile_state_mutation_target_decision_code RejectNonPackageOwnedModule
     |: agile_state_mutation_target_decision_code RejectEscapedStateRoot
 
@@ -26,7 +27,8 @@
 
 :~ agile_lease_budget_decision_binding (budget_positive : i32) (guard_less_than_budget : i32) : i32 =
     ? budget_positive = 1i32 ?>
-        ? guard_less_than_budget = 1i32 ?> agile_lease_budget_decision_code PermitLeaseBudget
+        ? guard_less_than_budget = 1i32
+        ?> agile_lease_budget_decision_code PermitLeaseBudget
         |: agile_lease_budget_decision_code RejectLeaseBudget
     |: agile_lease_budget_decision_code RejectLeaseBudget
 
@@ -44,7 +46,8 @@
     | NonEmptyPromptTitle => 1u64
 
 :~ agile_prompt_title_code (~title : string) : u64 =
-    ? (title = "") ?> agile_prompt_title_class_code EmptyPromptTitle
+    ? (title = "")
+    ?> agile_prompt_title_class_code EmptyPromptTitle
     |: agile_prompt_title_class_code NonEmptyPromptTitle
 
 :| agile_task_line_class =
@@ -58,7 +61,8 @@
 :~ agile_task_line_candidate_code (~line : string) : u64 =
     := line = sm'.trim line
     ? sm'.starts_with "inl " line ?>
-        ? sm'.contains "Task (" line ?> agile_task_line_class_code TaskStateLine
+        ? sm'.contains "Task (" line
+        ?> agile_task_line_class_code TaskStateLine
         |: agile_task_line_class_code NonTaskStateLine
     |: agile_task_line_class_code NonTaskStateLine
 
@@ -83,7 +87,8 @@
     | ActivePromptLeaseStatus => 1u64
 
 :~ agile_prompt_lease_status_code (~status : string) : u64 =
-    ? (status = "LeaseActive") ?> agile_prompt_lease_status_code_value ActivePromptLeaseStatus
+    ? (status = "LeaseActive")
+    ?> agile_prompt_lease_status_code_value ActivePromptLeaseStatus
     |: agile_prompt_lease_status_code_value UnknownPromptLeaseStatus
 
 :~ agile_prompt_lease_marker_text (~code : string) : string =
@@ -103,8 +108,10 @@
     | LeaseClockYield => 2i32
 
 :~ agile_lease_clock_phase_binding (at_or_after_wrap : i32) (at_or_after_deadline : i32) : i32 =
-    ? at_or_after_deadline = 1i32 ?> agile_lease_clock_phase_code LeaseClockYield
-    |? at_or_after_wrap = 1i32 ?> agile_lease_clock_phase_code LeaseClockWrap
+    ? at_or_after_deadline = 1i32
+    ?> agile_lease_clock_phase_code LeaseClockYield
+    |? at_or_after_wrap = 1i32
+    ?> agile_lease_clock_phase_code LeaseClockWrap
     |: agile_lease_clock_phase_code LeaseClockWork
 
 :| agile_lease_policy =
@@ -116,11 +123,13 @@
     | RenewingLeasePolicy => 1u64
 
 :~ agile_lease_policy_from_text (~value : string) : u64 =
-    ? ((sm'.trim value) = "bounded") ?> agile_lease_policy_code BoundedLeasePolicy
+    ? ((sm'.trim value) = "bounded")
+    ?> agile_lease_policy_code BoundedLeasePolicy
     |: agile_lease_policy_code RenewingLeasePolicy
 
 :~ agile_lease_effective_phase_binding (renewing : i32) (phase : i32) : i32 =
-    ? renewing = 1i32 ?> agile_lease_clock_phase_code LeaseClockWork
+    ? renewing = 1i32
+    ?> agile_lease_clock_phase_code LeaseClockWork
     |: phase
 :~ agile_status_text (~code : string) : string =
     union_reflection.cases.union_cases_fold
@@ -156,7 +165,8 @@
 
 :~ agile_state_package_line_code (~raw : string) : u64 =
     := trimmed = sm'.trim raw
-    ? (trimmed = "modules:") ?> agile_state_package_line_kind_code StatePackageModulesHeader
+    ? (trimmed = "modules:")
+    ?> agile_state_package_line_kind_code StatePackageModulesHeader
     |? sm'.starts_with " " raw || sm'.starts_with "\t" raw ?>
         ? (trimmed = "") || sm'.starts_with "//" trimmed ?> agile_state_package_line_kind_code IgnoreStatePackageLine
         |: agile_state_package_line_kind_code StatePackageModuleCandidate
@@ -167,7 +177,8 @@
     := name = sm'.trim_end_suffix "*" name
     := name = sm'.trim_end_suffix "-" name
     := name = sm'.trim name
-    ? (name = "") || sm'.contains "/" name || sm'.contains "\\" name ?> ""
+    ? (name = "") || sm'.contains "/" name || sm'.contains "\\" name
+    ?> ""
     |: name ++# ".spi"
 
 := main () : i32 =

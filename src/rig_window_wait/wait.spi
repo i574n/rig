@@ -38,8 +38,7 @@
 
 :~ window_wait_cleared (~words : string) : i32 =
     := every = option_or "--every" 30u64 * 1000u64
-    ? words = "" || sm'.starts_with "--" words || (sm'.split "," words |> am'.any (\ word => unknown_class word))
-    ?>
+    ? words = "" || sm'.starts_with "--" words || (sm'.split "," words |> am'.any (\ word => unknown_class word)) ?>
         refused (
             (
                 "wait-clear: give known window classes separated by commas, e.g. window wait-clear "
@@ -65,10 +64,10 @@
             ++# contention_text progress
         ?= verdict ?|
         | ClearNow =>
-            stdout_line ("kit window wait-clear ok" ++# tail)
+            stdout_line ("rig window wait-clear ok" ++# tail)
             0i32
         | _ =>
-            stdout_line ("kit window wait-clear gave-up" ++# tail)
+            stdout_line ("rig window wait-clear gave-up" ++# tail)
             1i32
 
 :~ wait_run () : i32 =

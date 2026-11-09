@@ -1,14 +1,12 @@
 :< rewriter
 
 := main () : i32 =
-    ? (=.) (host.count ()) 5i32
-    ?>
+    ? (=.) (host.count ()) 5i32 ?>
         := kind = host.argument 1i32
         := name = host.argument 2i32
         := input = host.argument 3i32
         := output = host.argument 4i32
-        ? sm'.ends_with ".spi" input && sm'.ends_with ".spi" output
-        ?>
+        ? sm'.ends_with ".spi" input && sm'.ends_with ".spi" output ?>
             ?= rewriter.rewrite (host.read input) name kind ?|
             | Rejected reason =>
                 host.print (predicate_rules.model.append reason "\n")

@@ -129,7 +129,8 @@
     := verb = argument_file.process_argument 1i32
     := target = argument_file.process_argument 2i32
     := usage = ? verb = "help" ?> $'command_spec_domain::rig_direct_verb_usage(&*!target)' : string |: ""
-    ? usage <> "" ?> direct_help usage
+    ? usage <> ""
+    ?> direct_help usage
     |:
         ?= direct_of verb ?|
         | DirectKnown known => direct_routed known

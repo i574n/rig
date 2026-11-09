@@ -69,9 +69,10 @@
         stdout_line ("usage: kit " ++# (usage ()))
         2i32
     |? directory_exists root = !- ?>
-        stdout_line ("kit error: root is not a directory: " ++# root)
+        stdout_line ("rig error: root is not a directory: " ++# root)
         2i32
-    |? argument first = "-" ?> program_run mode root (stdin_text ())
+    |? argument first = "-"
+    ?> program_run mode root (stdin_text ())
     |: program_run mode root (program_from first count "")
 
 := main () : i32 =

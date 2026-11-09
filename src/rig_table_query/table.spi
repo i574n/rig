@@ -10,7 +10,8 @@
 
 :~ ^ options_from (index : i32) (count : i32) (request : table_request) : option_step =
     ? index < count ?>
-        ? argument index = "--quiet" ?> options_from (index + 1i32) count { request ?| quiet = !+ }
+        ? argument index = "--quiet"
+        ?> options_from (index + 1i32) count { request ?| quiet = !+ }
         |? index + 1i32 < count ?>
             ?= option_applied request (argument index) (argument (index + 1i32)) ?|
             | StepTaken next => options_from (index + 2i32) count next
@@ -36,21 +37,25 @@
 :~ table_run () : i32 =
     ?= table_command_of (argument 2i32) ?|
     | TableQuery =>
-        ? argument_count () < 4i32 ?> rejected (table_usage ())
+        ? argument_count () < 4i32
+        ?> rejected (table_usage ())
         |:
             ?= options_from 4i32 (argument_count ()) (no_request ()) ?|
             | StepTaken request =>
-                ? measured request ?> measured_query (argument 3i32) request
+                ? measured request
+                ?> measured_query (argument 3i32) request
                 |: plain_query (argument 3i32) request
             | StepRejected reason => rejected reason
     | TableToSpi =>
         := opened = ? argument 5i32 = "--open" ?> argument 6i32 |? argument 6i32 = "--open" ?> argument 7i32 |: ""
         := whole = argument 5i32 = "--whole" || argument 7i32 = "--whole"
         := layout = ? whole ?> rig_table_rows.rows.WholeTable |: rig_table_rows.rows.PerRow
-        ? argument_count () < 5i32 ?> rejected (table_usage ())
+        ? argument_count () < 5i32
+        ?> rejected (table_usage ())
         |: to_spi_run (argument 3i32) (argument 4i32) opened layout
     | TableDiff =>
-        ? argument_count () < 5i32 ?> rejected (table_usage ())
+        ? argument_count () < 5i32
+        ?> rejected (table_usage ())
         |:
             ?= options_from 5i32 (argument_count ()) (no_request ()) ?|
             | StepTaken request =>

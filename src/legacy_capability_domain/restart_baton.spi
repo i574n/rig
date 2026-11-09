@@ -57,26 +57,42 @@
     | FailBeforeBatonCommit => 1i32
     | FailAfterBatonCommit => 2i32
 :~ restart_baton_preflight_binding (root_safe : i32) (bundle_safe : i32) : i32 =
-    ? root_safe < 1i32 ?> 0i32
-    |? 1i32 < root_safe ?> 0i32
-    |? bundle_safe < 1i32 ?> 0i32
-    |? 1i32 < bundle_safe ?> 0i32
+    ? root_safe < 1i32
+    ?> 0i32
+    |? 1i32 < root_safe
+    ?> 0i32
+    |? bundle_safe < 1i32
+    ?> 0i32
+    |? 1i32 < bundle_safe
+    ?> 0i32
     |: 1i32
 :~ restart_baton_migration_binding (expected : i32) (observed : i32) : i32 =
-    ? expected < 1i32 ?> 0i32
-    |? 1000i32 < expected ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 1i32
+    ?> 0i32
+    |? 1000i32 < expected
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 :~ restart_baton_fault_binding (configured : i32) (observed : i32) : i32 =
-    ? configured < 1i32 ?> 0i32
-    |? 2i32 < configured ?> 0i32
-    |? configured < observed ?> 0i32
-    |? observed < configured ?> 0i32
+    ? configured < 1i32
+    ?> 0i32
+    |? 2i32 < configured
+    ?> 0i32
+    |? configured < observed
+    ?> 0i32
+    |? observed < configured
+    ?> 0i32
     |: 1i32
 :~ restart_baton_complete_binding (regular_receipt : i32) (bytes_match : i32) : i32 =
-    ? regular_receipt < 1i32 ?> 0i32
-    |? 1i32 < regular_receipt ?> 0i32
-    |? bytes_match < 1i32 ?> 0i32
-    |? 1i32 < bytes_match ?> 0i32
+    ? regular_receipt < 1i32
+    ?> 0i32
+    |? 1i32 < regular_receipt
+    ?> 0i32
+    |? bytes_match < 1i32
+    ?> 0i32
+    |? 1i32 < bytes_match
+    ?> 0i32
     |: 1i32

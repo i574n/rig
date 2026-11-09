@@ -61,7 +61,7 @@ fn read_receipt_text_4(mut v0: Rc<str>, mut v1: u64, mut v2: i32, mut v3: u64) -
     let v4: u64 = rig_rust_std_fs::rooted_regular_size(std::path::Path::new(&*v0)).unwrap_or(0);
     let v5: Rc<str> = std::rc::Rc::<str>::from((v4).to_string());
     let v8: Rc<str> = std::rc::Rc::<str>::from((v1).to_string());
-    let v9: Rc<str> = string_concat(&["kit proxy fs-read ok bytes=", &*v5, " shown=", &*v8]);
+    let v9: Rc<str> = string_concat(&["rig proxy fs-read ok bytes=", &*v5, " shown=", &*v8]);
     let v10: bool = v1 < v4;
     let v13: US2 = if v10 {
         US2::US2_LeadingBytesShown

@@ -25,13 +25,13 @@ $isolatedCwd = Join-Path ([IO.Path]::GetTempPath()) ('kit-native-probes-' + [gui
 
 function Invoke-ProbeCapture([string]$Name, [string]$Program, [string[]]$Arguments, [int]$Budget = $TimeoutMs) {
     $receiptPath = Join-Path $work "$Name.txt"
-    $leaseRoot = $env:KIT_LEASE_ROOT
+    $leaseRoot = ($env:RIG_LEASE_ROOT ?? $env:KIT_LEASE_ROOT)
     Push-Location -LiteralPath $isolatedCwd
     try {
-        $env:KIT_LEASE_ROOT = $null
+        $env:RIG_LEASE_ROOT = $env:KIT_LEASE_ROOT = $null
         & $KitBinary proxy command-capture $work "$Name.txt" $Budget $Program @Arguments | ForEach-Object { Write-Host $_ }
         $captureExit = $LASTEXITCODE
-    } finally { Pop-Location; $env:KIT_LEASE_ROOT = $leaseRoot }
+    } finally { Pop-Location; $env:RIG_LEASE_ROOT = $env:KIT_LEASE_ROOT = $leaseRoot }
     if ($captureExit -ne 0) { throw "KIT could not capture $Name." }
     $receipt = [IO.File]::ReadAllText($receiptPath)
     $startMarker = "--- stdout ---" + [char]10

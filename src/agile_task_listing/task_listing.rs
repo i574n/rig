@@ -587,7 +587,7 @@ fn json_footer_18(mut v0: Rc<str>, mut v1: i32, mut v2: US0, mut v3: Rc<str>, mu
 fn table_footer_21(mut v0: Rc<str>, mut v1: i32, mut v2: US0, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: US1, mut v6: std::rc::Rc<std::collections::HashMap<String, (u32, String)>>, mut v7: std::rc::Rc<std::collections::BTreeMap<Rc<str>, Rc<str>>>, mut v8: Rc<str>, mut v9: US2, mut v10: &Rc<str>, mut v11: i32, mut v12: Rc<str>) -> Rc<str> {
     let mut v13: Rc<str> = std::rc::Rc::<str>::from((v11).to_string());
     let v16: Rc<str> = filter_text_20(v2.clone());
-    let v17: Rc<str> = string_concat(&["kit agile list ok shown=", &*v13, " filter=", &*v16]);
+    let v17: Rc<str> = string_concat(&["rig agile list ok shown=", &*v13, " filter=", &*v16]);
     let v18: bool = &*v3 == "all";
     let v26: Rc<str> = if v18 {
         let v19: bool = &*v4 == "all";
@@ -766,7 +766,7 @@ fn agile_list_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: Rc<str>, 
             let v18: Rc<str> = v18;
             let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v20: Rc<str> = string_concat(&["agile list rejected: ", &*v19]);
-            let v21: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v20 + "
+            let v21: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v20 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v21
         }
@@ -800,7 +800,7 @@ fn agile_list_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: Rc<str>, 
                 let v39: Rc<str> = std::rc::Rc::<str>::from((v26).to_string());
                 let v42: Rc<str> = std::rc::Rc::<str>::from((11i32).to_string());
                 let v45: Rc<str> = string_concat(&["agile list rejected: malformed Task fields at byte ", &*v39, " (expected ", &*v42, " fields)"]);
-                let v46: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v45 + "
+                let v46: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v45 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v46
             }
@@ -845,7 +845,7 @@ fn agile_list_entry_0() -> i32 {
         agile_list_1(v29, v11, v3, v4, v14, v15, v18, v6, v28, v30)
     } else {
         let v32: Rc<str> = string_concat(&["agile list rejected: ", &*v1]);
-        let v33: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v32 + "
+        let v33: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v32 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v33
     }

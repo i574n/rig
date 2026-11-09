@@ -4,18 +4,21 @@
 :< rig_table_query.stats
 
 :~ ^ indices_from (cells : table_cells) (~names : string) : string =
-    ? names = "" ?> ""
+    ? names = ""
+    ?> ""
     |: listed (i32_text (column_of cells (head_of names ","))) (indices_from cells (tail_of names ","))
 
 :~ ^ absent_from (left : table_cells) (right : table_cells) (~names : string) : string =
-    ? names = "" ?> ""
+    ? names = ""
+    ?> ""
     |:
         := name = head_of names ","
         := rest = absent_from left right (tail_of names ",")
         ? column_of left name < 0i32 || column_of right name < 0i32 ?> listed name rest |: rest
 
 :~ ^ shared_columns (right : table_cells) (~names : string) (~keys : string) : string =
-    ? names = "" ?> ""
+    ? names = ""
+    ?> ""
     |:
         := name = head_of names ","
         := rest = shared_columns right (tail_of names ",") keys
@@ -26,7 +29,8 @@
     | PairThen : string * i32 * i32 * column_pairs
 
 :~ ^ pairs_from (left : table_cells) (right : table_cells) (~names : string) : column_pairs =
-    ? names = "" ?> NoPairs
+    ? names = ""
+    ?> NoPairs
     |:
         := name = head_of names ","
         PairThen (name, column_of left name, column_of right name, pairs_from left right (tail_of names ","))
@@ -39,8 +43,10 @@
     ?= list ?|
     | NoDifferences => DifferenceThen (name, 1i32, NoDifferences)
     | DifferenceThen (other, count, rest) =>
-        ? other = name ?> DifferenceThen (other, count + 1i32, rest)
-        |? text_before name other ?> DifferenceThen (name, 1i32, list)
+        ? other = name
+        ?> DifferenceThen (other, count + 1i32, rest)
+        |? text_before name other
+        ?> DifferenceThen (name, 1i32, list)
         |: DifferenceThen (other, count, difference_counted rest name)
 
 :~ ^ differences_printed (list : differences) (total : i32) : i32 =
@@ -60,7 +66,8 @@
     }
 
 := at_least (~candidate : string) (~current : string) : bool =
-    ? numeric candidate && numeric current ?> number_of current <= number_of candidate
+    ? numeric candidate && numeric current
+    ?> number_of current <= number_of candidate
     |: text_before candidate current = !-
 
 :~ ^ winners_from
@@ -169,7 +176,7 @@
         := differing = differences_printed tally.differing 0i32
         := _ = ? tally.samples <> "" ?> stdout_line ("key\tcolumn\tleft\tright\n" ++# tally.samples) |: ()
         := head =
-            "kit table diff ok left_rows="
+            "rig table diff ok left_rows="
             ++# i32_text tally.considered
             ++# " right_rows="
             ++# i32_text right_rows

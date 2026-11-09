@@ -53,9 +53,9 @@ Row 'lint macros on lib: 0 flow rows' ($flow -eq 0 -and $lint[-1] -match 'violat
 $kitLint = @(& $Candidate lint macros C:\home\git\kit\src --baseline C:\home\git\kit\standards\lint-macros.spi 2>&1)
 Row 'lint macros on kit: no new rows past baseline' ("$($kitLint[-1])" -match '\bnew 0\b') (Clip "$($kitLint[-1])")
 $growth = @(& $Candidate lint growth C:/home/git/kit standards/lint-macros.spi C:/home/git/kit src 2>&1)
-Row 'kit lint baseline grows only for code at HEAD' ($LASTEXITCODE -eq 0 -and "$($growth[-1])" -match '^kit lint growth ok') (Clip "$($growth[-1])")
+Row 'kit lint baseline grows only for code at HEAD' ($LASTEXITCODE -eq 0 -and "$($growth[-1])" -match '^(kit|rig) lint growth ok') (Clip "$($growth[-1])")
 $libGrowth = @(& $Candidate lint growth C:/home/git/kit standards/lint-macros-lib.spi C:/home/git/spiral lib/spiral 2>&1)
-Row 'lib lint baseline grows only for code at HEAD' ($LASTEXITCODE -eq 0 -and "$($libGrowth[-1])" -match '^kit lint growth ok') (Clip "$($libGrowth[-1])")
+Row 'lib lint baseline grows only for code at HEAD' ($LASTEXITCODE -eq 0 -and "$($libGrowth[-1])" -match '^(kit|rig) lint growth ok') (Clip "$($libGrowth[-1])")
 
 $backlog = Join-Path $Work 'backlog'
 & $installed agile init $backlog *> $null
@@ -118,7 +118,7 @@ $counted = (& $Candidate table sequences (Join-Path $tables 'model.trace') --sec
 Row 'table sequences --count/--in-set' ($counted -match "run 1`t2`t1`t1" -and $counted -match "run 2`t1`t0`t0") (Clip $counted)
 
 $health = (& $Candidate machine health 2>&1 | Select-Object -Last 1 | Out-String)
-Row 'machine health verdict and history' ($health -match 'kit machine health (ok|failed) tools=\d+ .* stalled=\d+ history=') (Clip $health)
+Row 'machine health verdict and history' ($health -match '(kit|rig) machine health (ok|failed) tools=\d+ .* stalled=\d+ history=') (Clip $health)
 
 $marker = Get-Random -Minimum 20000 -Maximum 29999
 & $Candidate process start-under-shell cmd /c ping -n $marker 127.0.0.1 *> $null
@@ -138,7 +138,7 @@ $clock = [Diagnostics.Stopwatch]::StartNew()
 $next = (& $Candidate agile next C:\home\git\i574n.github\docs\backlog 50 2>&1 | Select-Object -Last 1 | Out-String)
 $clock.Stop()
 $ownMs = if ($next -match 'elapsed_ms=(\d+)') { [int]$Matches[1] } else { [int]::MaxValue }
-Row 'agile next on the live backlog under 4 s' ($next -match 'kit agile next ok' -and $ownMs -lt 4000) "$ownMs ms by kit's clock, $($clock.ElapsedMilliseconds) ms wall"
+Row 'agile next on the live backlog under 4 s' ($next -match '(kit|rig) agile next ok' -and $ownMs -lt 4000) "$ownMs ms by kit's clock, $($clock.ElapsedMilliseconds) ms wall"
 
 ''
 "acceptance: $(@($rows | Where-Object { $_ -like 'PASS*' }).Count)/$($rows.Count) pass"

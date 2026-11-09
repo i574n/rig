@@ -141,5 +141,6 @@
     ]
 
 := selects (names : string) (separator : string) (package : string) : bool =
-    ? (names = "") ?> !+
+    ? (names = "")
+    ?> !+
     |: sm'.contains (separator ++# package ++# separator) (separator ++# names ++# separator)

@@ -11,8 +11,7 @@
 
 :~ node_at (~src : string) (~name : string) : option package_node =
     := project = src ++# "/" ++# name ++# "/package.spiproj"
-    ? file_system.file_exists project
-    ?>
+    ? file_system.file_exists project ?>
         Some {
             name = name
             uses = project_uses (file_system.read_all_text project)
@@ -29,7 +28,8 @@
         | None => nodes_of src rest acc
 
 :~ ^ arguments_from (index : i32) (count : i32) (acc : list string) : list string =
-    ? index >= count ?> listm.rev acc
+    ? index >= count
+    ?> listm.rev acc
     |: arguments_from (index + 1i32) count (optionm'.default_value "" (env.try_command_line_argument index) :: acc)
 
 :~ ^ lines_printed (names : list string) (count : i32) : i32 =
@@ -46,7 +46,7 @@
     ?= changed ?|
     | [] =>
         console.write_line (
-            "kit error: repo usage: repo affected <src> <package>... (crates whose package graph reaches a changed "
+            "rig error: repo usage: repo affected <src> <package>... (crates whose package graph reaches a changed "
             ^^ "package)"
         )
         2i32
@@ -54,7 +54,7 @@
         := nodes = nodes_of src (directory_names src) []
         := printed = lines_printed (affected_crates nodes nodes changed []) 0i32
         console.write_line (
-            "kit repo affected ok crates="
+            "rig repo affected ok crates="
             ++# sm'.format printed
             ++# " packages="
             ++# sm'.format (listm.length nodes : i32)

@@ -27,7 +27,8 @@
 
 :~ job_of (~line : string) : option lane_job =
     := state, label = text_field line "state", text_field line "label"
-    ? sm'.starts_with "kit job list ok " line && (state = "running" || state = "queued")
+    := listed = sm'.starts_with "kit job list ok " line || sm'.starts_with "rig job list ok " line
+    ? listed && (state = "running" || state = "queued")
     ?> Some { lane = lane_of label; label = label; running = state = "running" }
     |: None
 
@@ -45,7 +46,7 @@
     ?= activity ?|
     | NodeIdle queued =>
         [
-            "kit remote status IDLE machine=" ++# machine ++# " running=0 queued=" ++# sm'.show queued
+            "rig remote status IDLE machine=" ++# machine ++# " running=0 queued=" ++# sm'.show queued
             ++# " (start the top node-runnable item: kit agile next <backlog root> --tag node --open 3)"
         ]
     | NodeBusy jobs =>
@@ -55,7 +56,7 @@
             := mine = jobs |> listm'.filter (\ (job : lane_job) => job.lane = lane)
             := running : i32 = mine |> listm'.filter (\ (job : lane_job) => job.running) |> listm.length
             := total : i32 = listm.length mine
-            "kit remote status jobs machine=" ++# machine ++# " lane=" ++# lane ++# " running=" ++# sm'.show running
+            "rig remote status jobs machine=" ++# machine ++# " lane=" ++# lane ++# " running=" ++# sm'.show running
             ++# " queued=" ++# sm'.show (total - running)
         lanes |> listm.map line
 
@@ -67,7 +68,7 @@
 ///> rust
 :# a_job_list_becomes_per_lane_activity_or_idle =
     := row = \ (id : string) (state : string) (label : string) =>
-        "kit job list ok id=" ++# id ++# " state=" ++# state ++# " exit=- elapsed_ms=1 label=" ++# label
+        "rig job list ok id=" ++# id ++# " state=" ++# state ++# " exit=- elapsed_ms=1 label=" ++# label
     := busy =
         sm'.concat_list "\n" [
             row "job-1" "running" "kit-TRAIN22-node"
@@ -76,8 +77,8 @@
             row "job-4" "queued" "x-parity"
         ]
     := lines = activity_lines "node" (activity_of busy)
-    := rig_line = "kit remote status jobs machine=node lane=kit running=1 queued=1"
-    testing.expect (lines = [ rig_line; "kit remote status jobs machine=node lane=x running=0 queued=1" ]) "per lane"
+    := rig_line = "rig remote status jobs machine=node lane=kit running=1 queued=1"
+    testing.expect (lines = [ rig_line; "rig remote status jobs machine=node lane=x running=0 queued=1" ]) "per lane"
     ?= activity_of (row "job-4" "queued" "x-parity" ++# "\n" ++# row "job-3" "finished" "x-proof") ?|
     | NodeIdle queued => testing.expect (queued = 1i32) "idle with one queued job"
     | NodeBusy _ => testing.expect !- "no running job means idle"

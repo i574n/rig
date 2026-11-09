@@ -163,8 +163,7 @@
     sm'.starts_with "/" slashed || sm'.index_of ":/" slashed = 1i32
 
 := tree_label_problem (wanted : window_class) (~label : string) : string =
-    ? tree_access wanted && rooted_path label |> not
-    ?>
+    ? tree_access wanted && rooted_path label |> not ?>
         "a tree window guards the path in its label; give the rooted path it reads or writes, "
         ^^ "e.g. C:/home/git/spiral/lib"
     |: ""
@@ -180,8 +179,7 @@
     =
     ? row.id = mine
     ?> !-
-    |? tree_clash row.kind wanted && path_overlaps row.label label
-    ?>
+    |? tree_clash row.kind wanted && path_overlaps row.label label ?>
         ?= row.state ?|
         | Held => !+
         | Waiting => writes_tree row.kind && row.start_ms < since
@@ -244,8 +242,10 @@
     ? min_free > needed_mb wanted ?> min_free |: needed_mb wanted
 
 :~ admission_needing (need : u64) (~blocker : string) (free : u64) (now : u64) : admission =
-    ? blocker <> "" ?> HeldBack (blocker_terms blocker now)
-    |? free < need ?> LowMemory (free, need)
+    ? blocker <> ""
+    ?> HeldBack (blocker_terms blocker now)
+    |? free < need
+    ?> LowMemory (free, need)
     |: Admitted
 
 :~ admission_of (wanted : window_class) (~blocker : string) (free : u64) (now : u64) : admission =
@@ -280,9 +280,12 @@
     | KeepWaiting
 
 :~ wait_step_of (admitted : bool) (released : bool) (now : u64) (deadline : u64) : wait_step =
-    ? released ?> ReleasedWhileWaiting
-    |? admitted ?> Granted
-    |? now >= deadline ?> WaitExpired
+    ? released
+    ?> ReleasedWhileWaiting
+    |? admitted
+    ?> Granted
+    |? now >= deadline
+    ?> WaitExpired
     |: KeepWaiting
 
 := wait_step_word (step : wait_step) : string =
@@ -321,7 +324,10 @@
 ///> rust
 :# classes_round_trip_through_their_words =
     testing.expect
-        (class_words () = "live-gui|test-suite|heavy-build|compile|compiler-install|tree-read|bench|compile-hold|tree-write")
+        (
+            class_words ()
+            = "live-gui|test-suite|heavy-build|compile|compiler-install|tree-read|bench|compile-hold|tree-write"
+        )
         "class list"
     testing.expect (class_word LiveGui = "live-gui") "live word"
     testing.expect (parsed_word "compiler-install" = "compiler-install") "parsed back"
@@ -353,7 +359,9 @@
     := waiting = row_at LiveGui Waiting "win-1" 1000u64 31000u64
     testing.expect (row_blocks Compile "" "win-2" 2000u64 !- waiting) "a newer compile waits behind the live request"
     testing.expect (row_blocks Compile "" "win-2" 500u64 !- waiting = !-) "an older compile is not overtaken"
-    testing.expect (row_blocks HeavyBuild "" "win-3" 2000u64 !- waiting) "a newer heavy build waits behind the live request"
+    testing.expect
+        (row_blocks HeavyBuild "" "win-3" 2000u64 !- waiting)
+        "a newer heavy build waits behind the live request"
     testing.expect
         (row_blocks Compile "" "win-2" 2000u64 !- (row_at HeavyBuild Waiting "win-1" 1000u64 31000u64) = !-)
         "shared waiters never block"
@@ -382,8 +390,12 @@
     testing.expect
         (settling_mb (row_at HeavyBuild Held "win-1" 1000u64 999999u64) 50000u64 = 1024u64)
         "a heavy build granted 49 s ago still reserves its need"
-    testing.expect (settling_mb (row_at HeavyBuild Held "win-1" 1000u64 999999u64) 100000u64 = 0u64) "settled after 90 s"
-    testing.expect (settling_mb (row_at Compile Held "win-2" 1000u64 999999u64) 15000u64 = 1024u64) "a compile settles in 20 s"
+    testing.expect
+        (settling_mb (row_at HeavyBuild Held "win-1" 1000u64 999999u64) 100000u64 = 0u64)
+        "settled after 90 s"
+    testing.expect
+        (settling_mb (row_at Compile Held "win-2" 1000u64 999999u64) 15000u64 = 1024u64)
+        "a compile settles in 20 s"
     testing.expect
         (settling_mb (row_at Compile Waiting "win-3" 1000u64 999999u64) 2000u64 = 0u64)
         "waiting rows reserve nothing"

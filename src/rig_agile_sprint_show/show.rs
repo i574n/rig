@@ -401,7 +401,7 @@ fn sprint_shown_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US0) -> i32 {
             v14
         };
         let v16: Rc<str> = depth_word_2(v2);
-        let v19: Rc<str> = string_concat(&["kit error: agile sprint ", &*v16, ": no ", &*v15]);
+        let v19: Rc<str> = string_concat(&["rig error: agile sprint ", &*v16, ": no ", &*v15]);
         eprintln!("{}", v19);
         1i32
     } else {
@@ -426,7 +426,7 @@ fn sprint_shown_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US0) -> i32 {
         };
         let v39: Rc<str> = depth_word_2(v2.clone());
         let v50: Rc<str> = format_real_6(v35);
-        let v53: Rc<str> = string_concat(&["kit agile sprint ", &*v39, " ok id=", &*v20, " status=", &*v38, " start=", &*v22, " finish=", &*v23, " days_left=", &*v50, " goal=", &*v21]);
+        let v53: Rc<str> = string_concat(&["rig agile sprint ", &*v39, " ok id=", &*v20, " status=", &*v38, " start=", &*v22, " finish=", &*v23, " days_left=", &*v50, " goal=", &*v21]);
         println!("{}", v53);
         let v54: i32 = 0i32;
         let v55: i32 = 0i32;
@@ -608,7 +608,7 @@ fn retro_since_15(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let v5: i64 = days_of_4(v0.clone());
     let v6: bool = v5 <= 0i64;
     if v6 {
-        let v7: Rc<str> = string_concat(&["kit error: agile sprint retro --since expects a YYYY-MM-DD date, got ", &*v0]);
+        let v7: Rc<str> = string_concat(&["rig error: agile sprint retro --since expects a YYYY-MM-DD date, got ", &*v0]);
         eprintln!("{}", v7);
         2i32
     } else {
@@ -625,7 +625,7 @@ fn retro_since_15(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v18: i32 = 0i32;
         let v19: i32 = method19(v17.clone(), v18);
         let mut v22: Rc<str> = format_real_9(v19);
-        let v23: Rc<str> = string_concat(&["kit agile sprint retro ok since=", &*v0, " done=", &*v22]);
+        let v23: Rc<str> = string_concat(&["rig agile sprint retro ok since=", &*v0, " done=", &*v22]);
         println!("{}", v23);
         method20(v11, v17);
         0i32

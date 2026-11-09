@@ -45,7 +45,7 @@
     hides run.stdout "KIT-L"
     shows run.stdout "unknown-memory  KIT-OPEN  gone-old-rule  a backlog note cites this memory, which does not exist"
     hides run.stdout "re-measure"
-    shows run.stdout "kit agile links ok memories=2 cited=3 dangling=0 done=1 unwritten_links=1 unknown_memories=1"
+    shows run.stdout "rig agile links ok memories=2 cited=3 dangling=0 done=1 unwritten_links=1 unknown_memories=1"
     fixture_root_remove root
 
 ///> rust

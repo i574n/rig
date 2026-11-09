@@ -823,7 +823,7 @@ fn parent_edit_run_14() -> i32 {
                                                                 match v19 {
                                                                     US4::US4_ParentsRefused(v29) => {
                                                                         let v29: Rc<str> = v29;
-                                                                        let v30: Rc<str> = string_concat(&["kit error: agile edit --parent: ", &*v29]);
+                                                                        let v30: Rc<str> = string_concat(&["rig error: agile edit --parent: ", &*v29]);
                                                                         eprintln!("{}", v30);
                                                                         2i32
                                                                     }
@@ -836,61 +836,61 @@ fn parent_edit_run_14() -> i32 {
                                                                             v12
                                                                         };
                                                                         let v25: Rc<str> = format_real_35(v20);
-                                                                        let v28: Rc<str> = string_concat(&["kit agile edit ok child=", &*v8, " parent=", &*v22, " links=", &*v25]);
+                                                                        let v28: Rc<str> = string_concat(&["rig agile edit ok child=", &*v8, " parent=", &*v22, " links=", &*v25]);
                                                                         println!("{}", v28);
                                                                         0i32
                                                                     }
                                                                 }
                                                             } else {
-                                                                let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                                                                let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                                                                 eprintln!("{}", v33);
                                                                 2i32
                                                             }
                                                         }
                                                         _ => {
-                                                            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                                                            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                                                             eprintln!("{}", v35);
                                                             2i32
                                                         }
                                                     }
                                                 }
                                                 _ => {
-                                                    let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                                                    let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                                                     eprintln!("{}", v37);
                                                     2i32
                                                 }
                                             }
                                         }
                                         _ => {
-                                            let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                                            let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                                             eprintln!("{}", v39);
                                             2i32
                                         }
                                     }
                                 }
                                 _ => {
-                                    let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                                    let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                                     eprintln!("{}", v41);
                                     2i32
                                 }
                             }
                         }
                         _ => {
-                            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v43);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+                    let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v45);
                     2i32
                 }
             }
         }
         _ => {
-            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
+            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <child-id> --parent <epic-id|--clear>"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v47);
             2i32
         }

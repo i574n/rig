@@ -52,7 +52,8 @@
     ? paths = "" ?> "" |: row repo (row label (row (decimal_text (line_count paths)) (replace paths "\n" ", ")))
 
 :~ ^ staged_from (~rows : array string) (index : i32) (~found : string) : string =
-    ? index >= am'.length rows ?> found
+    ? index >= am'.length rows
+    ?> found
     |:
         := row = am'.index index rows
         := size : i32 = sm'.length row
@@ -67,12 +68,10 @@
     (fresh : u64)
     : string * bool * u64 * u64 * u64
     =
-    ? index < line_count repos
-    ?>
+    ? index < line_count repos ?>
         := repo = line_at repos index
         := outcome = git_run root repo "status\n--porcelain\n--untracked-files=all" ""
-        ? succeeded outcome
-        ?>
+        ? succeeded outcome ?>
             := lines = part_at outcome 1i32
             := modified = porcelain_paths lines !-
             := untracked = porcelain_paths lines !+

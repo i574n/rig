@@ -32,8 +32,10 @@
     ? pending_path "state/agile.spi" = "state/agile.spi.pending" ?> () |: failwith "one pending copy per file"
 
 :~ ^ renamed_within (~path : string) (~temporary : string) (tries : i32) : bool =
-    ? rename path temporary ?> !+
-    |? tries <= 1i32 ?> !-
+    ? rename path temporary
+    ?> !+
+    |? tries <= 1i32
+    ?> !-
     |:
         threading.sleep 50i32
         renamed_within path temporary (tries - 1i32)
@@ -43,7 +45,8 @@
     ? write_text temporary text ?>
         ? renamed_within path temporary 40i32 ?>
             ? text_equals text path ?> Replaced |: ReadbackMismatch
-        |? remove_file temporary ?> RenameFailed
+        |? remove_file temporary
+        ?> RenameFailed
         |: RenameFailedTemporaryKept
     |: TemporaryWriteFailed
 

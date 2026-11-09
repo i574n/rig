@@ -5,14 +5,17 @@
     (wanted : window_class) (~label : string) (~mine : string) (since : u64) (backfills : bool) (~rows : string)
     : string
     =
-    ? rows = "" ?> ""
+    ? rows = ""
+    ?> ""
     |:
         := row = first_row rows
-        ? row_blocks wanted label mine since backfills row ?> row
+        ? row_blocks wanted label mine since backfills row
+        ?> row
         |: first_blocker wanted label mine since backfills (other_rows rows)
 
 :~ ^ held_until_latest (~rows : string) (latest : u64) : u64 =
-    ? rows = "" ?> latest
+    ? rows = ""
+    ?> latest
     |:
         := row = first_row rows
         := until = ? tab_field row 2i32 = "held" ?> decimal_of (tab_field row 5i32) |: 0u64

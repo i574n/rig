@@ -27,10 +27,12 @@
 :~ entry_step (~folder : string) (seen : list string * list string) (~name : string) : list string * list string =
     := folders, files = seen
     := child = folder ++# "/" ++# name
-    ? file_system.rust_is_symlink child ?> folders, files
+    ? file_system.rust_is_symlink child
+    ?> folders, files
     |? file_system.directory_exists child
     ?> (? listm'.contains name (skipped_folders ()) ?> folders |: child :: folders), files
-    |? file_system.file_exists child ?> folders, child :: files
+    |? file_system.file_exists child
+    ?> folders, child :: files
     |: folders, files
 
 :~ ^ files_walked (todo : list string) (found : list string) : list string =
@@ -49,8 +51,10 @@
 :~ glob_wanted (~glob : string) (~name : string) : bool =
     := star : i32 = sm'.index_of "*" glob
     := size : i32 = sm'.length glob
-    ? glob = "" ?> !+
-    |? star < 0i32 ?> name = glob
+    ? glob = ""
+    ?> !+
+    |? star < 0i32
+    ?> name = glob
     |:
         := head = sm'.substring 0i32 star glob
         := tail = sm'.substring (star + 1i32) (size - star - 1i32) glob
@@ -74,8 +78,10 @@
     | Error _ => \ (_ : string) => !-
 
 :~ matcher_of (~needle : string) (caseless : bool) (pattern : bool) : line_matcher =
-    ? pattern ?> pattern_matcher needle caseless
-    |? caseless ?> caseless_matcher needle
+    ? pattern
+    ?> pattern_matcher needle caseless
+    |? caseless
+    ?> caseless_matcher needle
     |: literal_matcher needle
 
 :~ found_problem (pattern : string) : string =
@@ -90,7 +96,8 @@
     ? unix = "" ?> (;[] : array string) |: sm'.split "\n" body |> array
 
 :~ ^ found_in (lines : array string) (matches : line_matcher) (at : i32) (found : list i32) : list i32 =
-    ? at < 0i32 ?> found
+    ? at < 0i32
+    ?> found
     |: found_in lines matches (at - 1i32) (? matches (am'.index at lines) ?> at :: found |: found)
 
 :~ shown_path (~base : string) (~path : string) : string =
@@ -104,7 +111,8 @@
 :~ file_hits_of (~base : string) (matches : line_matcher) (~path : string) : option file_hits =
     := lines = lines_of (text_lossy path)
     := found = found_in lines matches (am'.length lines - 1i32) []
-    ? found = [] ?> None
+    ? found = []
+    ?> None
     |:
         := indices = found |> listm.fold (\ (kept : array i32) (at : i32) => kept ++ ;[ at ]) ;[]
         Some { path = shown_path base path; found = am'.base indices; lines = am'.base lines }
@@ -112,7 +120,8 @@
 :~ ^ hits_from (~base : string) (matches : line_matcher) (files : array_base string) (at : i32) (kept : array file_hits)
     : array file_hits
     =
-    ? at >= am'.length_base files ?> kept
+    ? at >= am'.length_base files
+    ?> kept
     |:
         := next =
             ?= file_hits_of base matches (am'.index_base at files) ?|

@@ -332,12 +332,12 @@ fn status_line_12(mut v0: Rc<str>, mut v1: US0) -> Rc<str> {
             let v7: Rc<str> = format_real_13(v2);
             let v10: Rc<str> = format_real_13(v3);
             let v13: Rc<str> = format_real_13(v4);
-            let v14: Rc<str> = string_concat(&["kit remote status ok machine=", &*v0, " windows=", &*v7, " free_mb=", &*v10, " heavy_slots=", &*v13]);
+            let v14: Rc<str> = string_concat(&["rig remote status ok machine=", &*v0, " windows=", &*v7, " free_mb=", &*v10, " heavy_slots=", &*v13]);
             v14
         }
         US0::US0_RemoteUnreachable(v15) => {
             let mut v15: Rc<str> = v15;
-            let mut v18: Rc<str> = string_concat(&["kit remote status unreachable machine=", &*v0, " reason=", &*v15]);
+            let mut v18: Rc<str> = string_concat(&["rig remote status unreachable machine=", &*v0, " reason=", &*v15]);
             v18
         }
     }
@@ -376,24 +376,24 @@ fn disk_line_17(mut v0: Rc<str>, mut v1: US3) -> Rc<str> {
         US3::US3_DiskAbove(v5) => {
             let v5: u64 = v5;
             let v8: Rc<str> = format_real_13(v5);
-            let v10: Rc<str> = string_concat(&["kit remote status disk machine=", &*v0, " free_gb=", &*v8, &*v4]);
+            let v10: Rc<str> = string_concat(&["rig remote status disk machine=", &*v0, " free_gb=", &*v8, &*v4]);
             v10
         }
         US3::US3_DiskBelow(v11) => {
             let mut v11: u64 = v11;
             let v14: Rc<str> = format_real_13(v11);
-            let mut v17: Rc<str> = string_concat(&["kit remote status DISK-LOW machine=", &*v0, " free_gb=", &*v14, &*v4, " (prune finished staged workspaces before a heavy job)"]);
+            let mut v17: Rc<str> = string_concat(&["rig remote status DISK-LOW machine=", &*v0, " free_gb=", &*v14, &*v4, " (prune finished staged workspaces before a heavy job)"]);
             v17
         }
         US3::US3_DiskUnknown(v18) => {
             let mut v18: Rc<str> = v18;
-            let v21: Rc<str> = string_concat(&["kit remote status disk unknown machine=", &*v0, " reason=", &*v18]);
+            let v21: Rc<str> = string_concat(&["rig remote status disk unknown machine=", &*v0, " reason=", &*v18]);
             v21
         }
     }
 }
 fn disk_of_18(mut v0: Rc<str>) -> US3 {
-    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit machine health gate="); } LIT.with(|lit| lit.clone()) };
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig machine health gate="); } LIT.with(|lit| lit.clone()) };
     let mut v2: i32 = v0.get(0i32 as usize..).and_then(|rest| rest.find(&*v1)).map(|found| (found + 0i32 as usize) as i32).unwrap_or(-1);
     let v3: bool = v2 < 0i32;
     let v7: Rc<str> = if v3 {
@@ -476,7 +476,7 @@ fn remote_status_run_0(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     };
     match v25 {
         US2::US2_None => {
-            let v29: Rc<str> = string_concat(&["kit remote status jobs unknown machine=", &*v0, " reason=ssh did not run"]);
+            let v29: Rc<str> = string_concat(&["rig remote status jobs unknown machine=", &*v0, " reason=ssh did not run"]);
             println!("{}", v29);
             ()
         }

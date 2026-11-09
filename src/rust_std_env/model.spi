@@ -1,3 +1,5 @@
+:< sm'_operators
+
 := argument_flag_present (skip : i32) (~flag : string) : bool =
     $'std::env::args().skip(!skip as usize).any(|argument| argument == &*!flag)' : bool
 
@@ -25,8 +27,16 @@
     $'usize::try_from(!index).ok().and_then(|index| std::env::args().skip(2).nth(index)).is_some_and(|value| \
         value.as_str() == !expected.as_ref())' : bool
 
-:= variable_or_empty (~name : string) : string =
+:= variable_named (~name : string) : string =
     $'std::env::var(&*!name).map_or_else(|_| std::rc::Rc::<str>::default(), std::rc::Rc::<str>::from)' : string
+
+:= variable_or_empty (~name : string) : string =
+    ? sm'.starts_with "KIT_" name || sm'.starts_with "RIG_" name
+    ?>
+        := rest = sm'.substring 4i32 ((sm'.length name : i32) - 4i32) name
+        := renamed = variable_named ("RIG_" ++# rest)
+        ? renamed <> "" ?> renamed |: variable_named ("KIT_" ++# rest)
+    |: variable_named name
 
 := argument_owned (~index : i32) : string =
     $'usize::try_from(!index).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str\

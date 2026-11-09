@@ -4,7 +4,7 @@ use std::rc::Rc;
 const DEV_BIN: &str = env!("CARGO_BIN_EXE_kit-dev");
 #[cfg(test)] mod native_selected_tests {
 struct Fixture(std::path::PathBuf);
-impl Fixture { fn new() -> Self { let stamp=std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos(); let root=std::env::temp_dir().join(format!("kit native workflow ü {} {stamp}",std::process::id())); std::fs::create_dir(&root).unwrap(); Self(root) } }
+impl Fixture { fn new() -> Self { let stamp=std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos(); let root=std::env::temp_dir().join(format!("rig native workflow ü {} {stamp}",std::process::id())); std::fs::create_dir(&root).unwrap(); Self(root) } }
 impl Drop for Fixture { fn drop(&mut self) { let _=std::fs::remove_dir_all(&self.0); } }
 #[test] fn selected_packages_preserve_native_build_contracts() { let fixture=Fixture::new(); assert_eq!(super::rig_dev_selected_scenarios(fixture.0.to_str().unwrap()),0); }
 }
@@ -91,7 +91,7 @@ fn scenarios_0(mut v0: Rc<str>) -> i32 {
     let v18: Rc<str> = std::rc::Rc::<str>::from(char::from(0u8).to_string());
     let v20: Rc<str> = string_concat(&["generate-lockfile", &*v18, "--offline"]);
     let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let v22: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v0).join("src")); command.args(v20.split(char::from(0u8))); if v21.len() > 0 { command.env("KIT_SPIRAL_COMPILE", &*v21); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,60000u64) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
+    let v22: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v0).join("src")); command.args(v20.split(char::from(0u8))); if v21.len() > 0 { command.env("RIG_SPIRAL_COMPILE", &&*v21).env("KIT_SPIRAL_COMPILE", &*v21); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,60000u64) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
     let v23: bool = v22 == 0i32;
     let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("fixture lock generation failed"); } LIT.with(|lit| lit.clone()) };
     require_3(v23, v24);

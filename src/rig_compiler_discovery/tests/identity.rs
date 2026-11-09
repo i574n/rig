@@ -4,7 +4,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new() -> Self {
         let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-        let root = std::env::temp_dir().join(format!("kit compiler identity ü {} {nonce}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("rig compiler identity ü {} {nonce}", std::process::id()));
         fs::create_dir(&root).unwrap();
         let fixture = Self(root);
         fixture.write("SpiralCompiler.dll", b"entry");
@@ -93,7 +93,7 @@ fn dependency_identity_rejects_oversized_files_and_deep_trees() {
 fn link_directory(source: &Path, link: &Path) {
     let output = std::process::Command::new("pwsh").args(["-NoProfile", "-NonInteractive", "-Command",
         "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:KIT_TEST_LINK -Target $env:KIT_TEST_SOURCE | Out-Null"])
-        .env("KIT_TEST_LINK", link).env("KIT_TEST_SOURCE", source).output().unwrap();
+        .env("RIG_TEST_LINK", &link).env("KIT_TEST_LINK", link).env("RIG_TEST_SOURCE", &source).env("KIT_TEST_SOURCE", source).output().unwrap();
     assert!(output.status.success(), "{output:?}");
 }
 #[cfg(unix)]

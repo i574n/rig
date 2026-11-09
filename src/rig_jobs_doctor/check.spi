@@ -31,13 +31,16 @@
     facts_from rows 0i32 (rig_machine_watch.host.row_count rows) []
 
 :~ standing_of (job : string) : job_standing =
-    ? rig_jobs.jobs.known_job job |> not ?> JobMissing
-    |? file_system.file_exists (rig_jobs.jobs.job_file job "exit") ?> JobSettled
+    ? rig_jobs.jobs.known_job job |> not
+    ?> JobMissing
+    |? file_system.file_exists (rig_jobs.jobs.job_file job "exit")
+    ?> JobSettled
     |: JobLive
 
 :~ job_names () : list string =
     := root = rig_jobs.host.jobs_root ()
-    ? file_system.directory_exists root |> not ?> []
+    ? file_system.directory_exists root |> not
+    ?> []
     |:
         file_system.read_directory_names root
         |> resultm.unwrap'
@@ -61,8 +64,10 @@
 
 :~ environment_finding (env_drift : () -> bool * string) : option finding =
     := ran, changes = env_drift ()
-    ? ran |> not ?> Some (HostEnvironmentDiffers "(an environment listing did not run)")
-    |? changes = "" ?> None
+    ? ran |> not
+    ?> Some (HostEnvironmentDiffers "(an environment listing did not run)")
+    |? changes = ""
+    ?> None
     |: Some (HostEnvironmentDiffers changes)
 
 :~ doctor_run (env_drift : () -> bool * string) (server_report : () -> i32 * string) : i32 =
@@ -73,7 +78,8 @@
         listm.rev (listm.fold (\ (all : list finding) (item : finding) => item :: all) (listm.rev findings) (
             chain_findings (chain_facts ())))
     := findings =
-        ? with_environment |> not ?> findings
+        ? with_environment |> not
+        ?> findings
         |:
             ?= environment_finding env_drift ?|
             | Some item => listm.rev (item :: listm.rev findings)
@@ -83,12 +89,11 @@
     ? server_text <> "" ?> console.write_line server_text |: ()
     := total = (listm.length findings : i32) + server_count
     := summary = " processes=" ++# sm'.format (listm.length processes : i32) ++# " findings=" ++# sm'.format total
-    ? total = 0i32
-    ?>
-        console.write_line ("kit job doctor ok" ++# summary)
+    ? total = 0i32 ?>
+        console.write_line ("rig job doctor ok" ++# summary)
         0i32
     |:
-        console.write_line ("kit job doctor refused:" ++# summary)
+        console.write_line ("rig job doctor refused:" ++# summary)
         1i32
 
 ///> rust

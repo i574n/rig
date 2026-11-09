@@ -9,7 +9,7 @@ $env:SPIRAL_CELLS_LIB = $env:SPIRAL_LIB
 $env:SPIRAL_CELLS_WARM = '0'; $env:SPIRAL_CELLS_MEMO = '0'; $env:SPIRAL_CELLS_COMPILER = 'process'
 [void][IO.Directory]::CreateDirectory($Out)
 $env:MIX_BUILD_PATH = Join-Path $Out 'mix'
-if ($Bin) { $env:KIT_BIN_UNDER_TEST = (Resolve-Path -LiteralPath $Bin).Path }
+if ($Bin) { $env:RIG_BIN_UNDER_TEST = $env:KIT_BIN_UNDER_TEST = (Resolve-Path -LiteralPath $Bin).Path }
 $Module = @($Module | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 $red = 0
 foreach ($relative in $Module) {

@@ -11,15 +11,15 @@
     running==target)' : bool
 := compiler_path (value : string) : string = $'std::fs::canonicalize(&*!value).ok().filter(|p| \
     p.is_file()).and_then(|p| p.to_str().map(std::rc::Rc::<str>::from)).unwrap_or_default()' : string
-:= compiler_environment () : string = $'std::env::var("KIT_SPIRAL_COMPILE").map(std::rc::Rc::<str>::from).unwrap_or_de\
+:= compiler_environment () : string = $'std::env::var("RIG_SPIRAL_COMPILE").or_else(|_| std::env::var("KIT_SPIRAL_COMPILE")).map(std::rc::Rc::<str>::from).unwrap_or_de\
     fault()' : string
 := parse_u64 (value : string) : u64 = $'!value.parse::<u64>().unwrap_or(0)' : u64
 := print (value : string) : () = $'std::io::Write::write_all(&mut std::io::stdout(),!value.as_bytes()).unwrap()' : ()
 
 := cargo (root : string) (args : string) (compiler : string) (timeout : u64) : i32 =
     $'{ let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*!root).join("s\
-        rc")); command.args(!args.split(char::from(0u8))); if !compiler.len() > 0 { command.env("KIT_SPIRAL_COMPILE", \
-        &*!compiler); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); \
+        rc")); command.args(!args.split(char::from(0u8))); if !compiler.len() > 0 { command.env("RIG_SPIRAL_COMPILE", \
+        &*!compiler).env("KIT_SPIRAL_COMPILE", &*!compiler); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); \
         } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); \
         } match rig_process::run_bounded(&mut command,!timeout) { Ok(status) => status.code().unwrap_or(1), \
         Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } }' : i32

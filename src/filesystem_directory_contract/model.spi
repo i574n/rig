@@ -80,8 +80,10 @@
 := agile_plan () : directory_plan (directory_pending agile_owner) (directory_cleaned agile_owner) = full_plan ()
 
 := cleanup (path : string) : bool =
-    ? cleanup_tree path ?> tree_missing path && file_missing path
-    |? remove_file path ?> tree_missing path && file_missing path
+    ? cleanup_tree path
+    ?> tree_missing path && file_missing path
+    |? remove_file path
+    ?> tree_missing path && file_missing path
     |: !-
 
 := policy_directory (path : string) : directory_outcome =

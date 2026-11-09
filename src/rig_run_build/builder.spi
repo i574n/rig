@@ -39,8 +39,10 @@
     rig_os_run.run_os.inherited_exit program (args |> listm.fold gather ;[])
 
 :~ linked (~link : string) (~target : string) : bool =
-    ? file_system.directory_exists link ?> !+
-    |? windows () ?> step_code "cmd" [ "/c"; "mklink"; "/J"; native link; native target ] = 0i32
+    ? file_system.directory_exists link
+    ?> !+
+    |? windows ()
+    ?> step_code "cmd" [ "/c"; "mklink"; "/J"; native link; native target ] = 0i32
     |: step_code "ln" [ "-s"; target; link ] = 0i32
 
 :~ step_failed (~step : string) (code : i32) : built = BuildFailed (step ++# " failed with exit " ++# sm'.show code)
@@ -48,8 +50,10 @@
 :~ program_built (s : build_setup) (~file : string) : built =
     := text = file_system.read_text_or_empty file
     := p = paths_of (s.cache_root ++# "/" ++# cache_name (key_of s text)) (stem_of file) (windows ())
-    ? text = "" ?> BuildFailed ("cannot read " ++# file)
-    |? file_system.file_exists p.exe ?> BuiltReady p.exe
+    ? text = ""
+    ?> BuildFailed ("cannot read " ++# file)
+    |? file_system.file_exists p.exe
+    ?> BuiltReady p.exe
     |:
         := _ = file_system.create_dir_all p.package
         file_system.write_all_text p.source text
@@ -58,7 +62,8 @@
         ?> BuildFailed "could not link the lib and core packages beside the script"
         |:
             := compiled = step_code "dotnet" [ s.compiler; "--backend"; "Rust"; p.source; p.rs ]
-            ? compiled <> 0i32 ?> step_failed "compile" compiled
+            ? compiled <> 0i32
+            ?> step_failed "compile" compiled
             |:
                 := rustc = step_code "rustc" [ "-O"; "--edition"; "2021"; p.rs; "-o"; p.exe ]
                 ? rustc = 0i32 ?> BuiltReady p.exe |: step_failed "rustc" rustc

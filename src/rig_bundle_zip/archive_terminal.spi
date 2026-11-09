@@ -245,7 +245,7 @@
                     verify_manifest_parity(&before, &after)?;
                     print_report(&report);
                     if !report.errors.is_empty() { return Err(format!("bundle contract failed with {} errors", report.errors.len())); }
-                    println!("kit bundle check ok profile={} public_binaries={} manifest_fingerprint={:016x}", if profile == 2 { "kit" } else { "generic" }, report.public_bins, manifest_fingerprint(&after));
+                    println!("rig bundle check ok profile={} public_binaries={} manifest_fingerprint={:016x}", if profile == 2 { "kit" } else { "generic" }, report.public_bins, manifest_fingerprint(&after));
                     Ok(())
                 }
                 "create" => {
@@ -276,7 +276,7 @@
                         Ok((count, bytes))
                     })?;
                     let fingerprint = manifest_fingerprint(&manifest);
-                    println!("kit bundle create ok profile={} entries={count} bytes={bytes} manifest_fingerprint={fingerprint:016x} output={}", if profile == 2 { "kit" } else { "generic" }, output.display());
+                    println!("rig bundle create ok profile={} entries={count} bytes={bytes} manifest_fingerprint={fingerprint:016x} output={}", if profile == 2 { "kit" } else { "generic" }, output.display());
                     Ok(())
                 }
                 "create-flat" => {
@@ -298,7 +298,7 @@
                         verify_archive_parity(candidate, &manifest)?;
                         Ok((count, bytes))
                     })?;
-                    println!("kit bundle create-flat ok entries={count} bytes={bytes} manifest_fingerprint={:016x} output={}", manifest_fingerprint(&manifest), output.display());
+                    println!("rig bundle create-flat ok entries={count} bytes={bytes} manifest_fingerprint={:016x} output={}", manifest_fingerprint(&manifest), output.display());
                     Ok(())
                 }
                 "verify-flat" => {
@@ -306,7 +306,7 @@
                     let max_bytes = parsed_max_bytes(arg(args, 2, "max-bytes")?)?;
                     let (count, bytes) = verify_generic_flat_zip(archive, max_bytes)?;
                     flat_verification_receipt(count, bytes, max_bytes)?;
-                    println!("kit bundle verify-flat ok entries={count} bytes={bytes} limit={max_bytes}");
+                    println!("rig bundle verify-flat ok entries={count} bytes={bytes} limit={max_bytes}");
                     Ok(())
                 }
                 "verify" => {
@@ -326,7 +326,7 @@
                         })?
                     } else { verify_generic_flat_zip(archive, BUNDLE_ARCHIVE_MAX_BYTES)?.0 };
                     if rig_bundle_verify_complete_binding(i32::from(count > 0), size_ok) != 1 { return Err("bundle verify completion rejected".to_owned()); }
-                    println!("kit bundle verify ok profile={} entries={count} bytes={bytes}", if profile == 2 { "kit" } else { "generic" });
+                    println!("rig bundle verify ok profile={} entries={count} bytes={bytes}", if profile == 2 { "kit" } else { "generic" });
                     Ok(())
                 }
                 "rehydrate" => {
@@ -352,7 +352,7 @@
                     if validate_ok != 1 { rollback_rehydrate_destination(destination)?; return Err(format!("rehydrated {} bundle validation rejected", if profile == 2 { "kit" } else { "generic" })); }
                     let preflight_extract_ok = rig_bundle_complete_binding(preflight_ok, extract_ok);
                     if rig_bundle_rehydrate_receipt_binding(preflight_extract_ok, validate_ok) != 1 { rollback_rehydrate_destination(destination)?; return Err("typed rehydration receipt incomplete".to_owned()); }
-                    println!("kit bundle rehydrate ok profile={} entries={extracted_entries} destination={} receipt=typed", if profile == 2 { "kit" } else { "generic" }, destination.display());
+                    println!("rig bundle rehydrate ok profile={} entries={extracted_entries} destination={} receipt=typed", if profile == 2 { "kit" } else { "generic" }, destination.display());
                     Ok(())
                 }
                 _ => Err("bundle supports growth-baseline, growth-receipt, check, create, create-flat, verify, verify-flat, rehydrate".to_owned()),
@@ -362,7 +362,7 @@
         #[must_use]
         pub fn bundle_run() -> i32 {
             let args = env::args().skip(2).collect::<Vec<_>>();
-            if let Err(error) = dispatch(&args) { eprintln!("kit error: {error}"); 2 } else { 0 }
+            if let Err(error) = dispatch(&args) { eprintln!("rig error: {error}"); 2 } else { 0 }
         }
 
 

@@ -21,11 +21,11 @@
         )
     testing.expect (run.code = 0i32) (run_text run)
     same run.stdout "file\tvariant\tmillis\tmisses\nruns/run-1-fast.log\tfast\t15\t1\nruns/run-2-slow.log\tslow\t0\t2\n"
-    shows run.stderr "kit table logs ok files=2 columns=3"
+    shows run.stderr "rig table logs ok files=2 columns=3"
     := written =
         succeeded (logs_run root (Arg ("runs", Arg ("--glob", Arg ("*.log", Arg ("--count", Arg ("misses=Miss on a",
             Arg ("--out", Arg ("misses.tsv", NoArgs)))))))))
-    shows written "kit table logs ok files=2 columns=1 out=misses.tsv"
+    shows written "rig table logs ok files=2 columns=1 out=misses.tsv"
     shows
         (
             succeeded (rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("table", Arg ("query", Arg ("misses.tsv",
@@ -94,7 +94,7 @@
         logs_run root (Arg ("runs", Arg ("--glob", Arg ("*.log", Arg ("--values", Arg ("hit=Request took (\\d+) ms",
             NoArgs))))))
     same run.stdout "file\thit\nruns/run-1-fast.log\t12\nruns/run-1-fast.log\t3\n"
-    shows run.stderr "kit table logs ok files=2 rows=2 columns=1"
+    shows run.stderr "rig table logs ok files=2 rows=2 columns=1"
     rejected_with
         (
             logs_run root (Arg ("runs", Arg ("--values", Arg ("hit=Request took (\\d+)", Arg ("--count",
@@ -113,6 +113,6 @@
             Arg ("--quiet", NoArgs)))))))
     testing.expect (run.code = 0i32) (run_text run)
     shows run.stdout "misses"
-    hides run.stdout "kit table logs ok"
-    hides run.stderr "kit table logs ok"
+    hides run.stdout "rig table logs ok"
+    hides run.stderr "rig table logs ok"
     fixture_root_remove root

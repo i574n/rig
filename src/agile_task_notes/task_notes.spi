@@ -38,8 +38,10 @@
     ? ((sm'.trim (rust_std_env.model.variable_or_empty name)) = "") ?> !- |: !+
 
 := unnamed_choice () : note_author_choice =
-    ? variable_set "KIT_AUTHOR" ?> AuthorNamed (sm'.trim (rust_std_env.model.variable_or_empty "KIT_AUTHOR"))
-    |? variable_set "AI_AGENT" || variable_set "CLAUDECODE" ?> AuthorUnnamedAgent
+    ? variable_set "KIT_AUTHOR"
+    ?> AuthorNamed (sm'.trim (rust_std_env.model.variable_or_empty "KIT_AUTHOR"))
+    |? variable_set "AI_AGENT" || variable_set "CLAUDECODE"
+    ?> AuthorUnnamedAgent
     |: AuthorDefault
 
 :== note_request =
@@ -67,7 +69,7 @@
     stderr_failure ("agile note " ++# id ++# " rejected: " ++# reason)
 
 := note_success (~id : string) (seq : i32) (note : task_note) (before : u64) (after : u64) (elapsed : u64) : i32 =
-    := head = "kit agile note ok id=" ++# id ++# " note=" ++# (i32_text seq) ++# " at="
+    := head = "rig agile note ok id=" ++# id ++# " note=" ++# (i32_text seq) ++# " at="
     := middle =
         note.at ++# " author=" ++# (spi_quoted note.author) ++# " text_bytes=" ++# (i32_text (byte_len note.text))
     stdout_line (head ++# middle ++# (measured_sizes before after elapsed))

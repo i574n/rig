@@ -101,8 +101,10 @@
     | Quarantined => 0i32
 
 :~ legacy_surface_status_binding (family_code : i32) (status_code : i32) : i32 =
-    ? family_code < 0i32 ?> 0i32
-    |? 9i32 < family_code ?> 0i32
+    ? family_code < 0i32
+    ?> 0i32
+    |? 9i32 < family_code
+    ?> 0i32
     |? family_code = 9i32 ?>
         ? status_code = 0i32 ?> 1i32 |: 0i32
     |:

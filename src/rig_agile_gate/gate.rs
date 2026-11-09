@@ -571,7 +571,7 @@ fn gate_lines_23(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<U
     let v18: i32 = 0i32;
     let v19: i32 = method24(v5.clone(), v18);
     let v20: Rc<str> = format_real_25(v19);
-    let v21: Rc<str> = string_concat(&["kit agile gate ok team=", &*v1, " ready=", &*v10, " paused=", &*v15, " waiting=", &*v20]);
+    let v21: Rc<str> = string_concat(&["rig agile gate ok team=", &*v1, " ready=", &*v10, " paused=", &*v15, " waiting=", &*v20]);
     let v22: Rc<str> = ready_line_27(v0.clone(), &v1, v2.clone(), v3);
     let v23: Rc<str> = parked_line_29(&v0, v1, &v2, v4);
     let v24: Rc<str> = waiting_line_30(v5);

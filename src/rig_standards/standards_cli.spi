@@ -17,7 +17,7 @@
     testing.expect (run.code = 1i32) (run_text run)
     shows run.stdout "bad.spi:2  no-comment-lines  a comment line; encode it in names or drop it"
     shows run.stdout (
-        "kit standards ok packages=1 declared=0 files=2 findings=1 "
+        "rig standards ok packages=1 declared=0 files=2 findings=1 "
         ^^ "rules=no-comment-lines,line-width,lf-only,test-targets"
     )
     := json = standards_run root (Arg (fixture_path root "pkg", Arg ("--json", NoArgs)))
@@ -34,7 +34,7 @@
     := run = standards_run root (Arg (fixture_path root "pkg", NoArgs))
     testing.expect (run.code = 1i32) (run_text run)
     shows run.stdout "sub/entry.spi:3  no-comment-lines"
-    shows run.stdout "kit standards ok packages=1 declared=0 files=2 findings=1 "
+    shows run.stdout "rig standards ok packages=1 declared=0 files=2 findings=1 "
     fixture_root_remove root
 ///> rust
 :# declared_rows_replace_the_defaults_and_a_clean_package_passes =
@@ -42,7 +42,7 @@
     fixture_write root "pkg/standards.spi" "inl width () = LineWidth 200u32\n"
     := run = standards_run root (Arg (fixture_path root "pkg", NoArgs))
     testing.expect (run.code = 0i32) (run_text run)
-    shows run.stdout "kit standards ok packages=1 declared=1 files=2 findings=0 rules=line-width"
+    shows run.stdout "rig standards ok packages=1 declared=1 files=2 findings=0 rules=line-width"
     := missing = standards_run root (Arg (fixture_path root "nope", NoArgs))
     testing.expect (missing.code = 1i32) (run_text missing)
     shows missing.stdout "package  not a directory"

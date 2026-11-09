@@ -193,7 +193,7 @@ fn next_printed_0(mut v0: i32, mut v1: u64, mut v2: Rc<str>, mut v3: bool, mut v
             };
             let v29: Rc<str> = format_real_1(v0);
             let v34: Rc<str> = format_real_8(v1);
-            let v38: Rc<str> = string_concat(&["kit agile next ok role=", &*v5, " ready=", &*v29, " shown=", &*v8, &*v28, " elapsed_ms=", &*v34]);
+            let v38: Rc<str> = string_concat(&["rig agile next ok role=", &*v5, " ready=", &*v29, " shown=", &*v8, &*v28, " elapsed_ms=", &*v34]);
             println!("{}", v38);
             ()
         }

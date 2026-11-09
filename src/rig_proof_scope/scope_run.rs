@@ -910,7 +910,7 @@ fn scope_run_0() -> i32 {
     let (mut v4, mut v5, mut v6): (Rc<str>, Rc<UH0>, Rc<str>) = scope_args_of_5(v3);
     let v7: bool = &*v6 != "";
     if v7 {
-        let v8: Rc<str> = string_concat(&["kit error: repo scope: ", &*v6]);
+        let v8: Rc<str> = string_concat(&["rig error: repo scope: ", &*v6]);
         eprintln!("{}", v8);
         2i32
     } else {
@@ -938,7 +938,7 @@ fn scope_run_0() -> i32 {
         let v31: i32 = 0i32;
         let v32: i32 = method26(v26, v31);
         let v33: Rc<str> = format_real_41(v32);
-        let v35: Rc<str> = string_concat(&["kit repo scope ok packages=", &*v28, " proof_sets=", &*v33]);
+        let v35: Rc<str> = string_concat(&["rig repo scope ok packages=", &*v28, " proof_sets=", &*v33]);
         println!("{}", v35);
         0i32
     }

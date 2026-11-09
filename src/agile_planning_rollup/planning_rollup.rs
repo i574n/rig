@@ -307,7 +307,7 @@ fn print_rollup_2(mut v0: Rc<str>, mut v1: US0, mut v2: u64) -> i32 {
             let v52: Rc<str> = std::rc::Rc::<str>::from((v40).to_string());
             let v56: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v2);
             let v57: Rc<str> = std::rc::Rc::<str>::from((v56).to_string());
-            let v58: Rc<str> = string_concat(&["kit agile plan ok tasks=", &*v41, " open=", &*v44, " estimated=", &*v47, " minutes=", &*v49, " open_minutes=", &*v52, " elapsed_ms=", &*v57]);
+            let v58: Rc<str> = string_concat(&["rig agile plan ok tasks=", &*v41, " open=", &*v44, " estimated=", &*v47, " minutes=", &*v49, " open_minutes=", &*v52, " elapsed_ms=", &*v57]);
             v58
         }
     };
@@ -335,7 +335,7 @@ fn planning_rollup_1(mut v0: Rc<str>, mut v1: US0) -> i32 {
             let v10: Rc<str> = v10;
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v12: Rc<str> = string_concat(&["agile plan rejected: ", &*v11]);
-            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v12 + "
+            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v12 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v13
         }
@@ -387,7 +387,7 @@ fn planning_rollup_entry_0() -> i32 {
                 US3::US3_Invalid => {
                     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("plan expects <root> [--json]"); } LIT.with(|lit| lit.clone()) };
                     let v19: Rc<str> = string_concat(&["agile plan rejected: ", &*v18]);
-                    let v20: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v19 + "
+                    let v20: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v19 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v20
                 }
@@ -401,7 +401,7 @@ fn planning_rollup_entry_0() -> i32 {
         } else {
             let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("plan expects <root> [--json]"); } LIT.with(|lit| lit.clone()) };
             let v24: Rc<str> = string_concat(&["agile plan rejected: ", &*v23]);
-            let v25: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v24 + "
+            let v25: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v24 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v25
         }

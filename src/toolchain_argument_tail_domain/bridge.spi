@@ -5,8 +5,7 @@
     ?> -1i32
     |? position < 0i32
     ?> -1i32
-    |? action_code = 4i32
-    ?>
+    |? action_code = 4i32 ?>
         ? position = 0i32
         ?> 6i32
         |? position = 1i32
@@ -20,8 +19,7 @@
         |? position = 5i32
         ?> 10i32
         |: -1i32
-    |? action_code = 5i32
-    ?>
+    |? action_code = 5i32 ?>
         ? position = 0i32
         ?> 11i32
         |? position = 1i32

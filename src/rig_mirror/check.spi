@@ -15,7 +15,8 @@
     |> am'.sort_by id
 
 :~ ^ children_pushed (~relative : string) (names : array string) (index : i32) (pending : list string) : list string =
-    ? index < 0i32 ?> pending
+    ? index < 0i32
+    ?> pending
     |: children_pushed relative names (index - 1i32) (child relative (am'.index index names) :: pending)
 
 :~ ^ files_under (~root : string) (pending : list string) (acc : list string) : list string =
@@ -26,7 +27,8 @@
         ? file_system.directory_exists full ?>
             := names = sorted_names full
             files_under root (children_pushed relative names (am'.length names - 1i32) rest) acc
-        |? file_system.file_exists full ?> files_under root rest (relative :: acc)
+        |? file_system.file_exists full
+        ?> files_under root rest (relative :: acc)
         |: files_under root rest acc
 
 :~ ^ merged (extra : list string) (acc : list string) : list string =
@@ -73,14 +75,12 @@
     ^^ "every file under it)"
 
 :~ mirror_checked (~left : string) (~right : string) (paths : list string) : i32 =
-    ? paths = []
-    ?>
-        console.write_error_line ("kit error: mirror " ++# usage ())
+    ? paths = [] ?>
+        console.write_error_line ("rig error: mirror " ++# usage ())
         2i32
-    |? file_system.directory_exists left = !- || file_system.directory_exists right = !-
-    ?>
+    |? file_system.directory_exists left = !- || file_system.directory_exists right = !- ?>
         console.write_error_line (
-            "kit error: mirror check needs two existing roots, received " ++# left ++# " and " ++# right
+            "rig error: mirror check needs two existing roots, received " ++# left ++# " and " ++# right
         )
         2i32
     |:
@@ -89,7 +89,7 @@
         := state = mirror_state_of files "" ""
         ? lines <> "" ?> console.write_line (sm'.trim_end_suffix "\n" lines)
         console.write_error_line (
-            "kit mirror check "
+            "rig mirror check "
             ++# state_word state
             ++# " files="
             ++# sm'.format (listm.length files : i32)

@@ -137,7 +137,7 @@ fn job_of_6(mut v0: Rc<str>) -> US1 {
     let v2: Rc<str> = text_field_7(v0.clone(), v1);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("label"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = text_field_7(v0.clone(), v3);
-    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit job list ok "); } LIT.with(|lit| lit.clone()) };
+    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig job list ok "); } LIT.with(|lit| lit.clone()) };
     let v6: bool = v0.starts_with(&*v5);
     let v10: bool = if v6 {
         let mut v7: bool = &*v2 == "running";
@@ -333,7 +333,7 @@ fn method13(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH1>, mut v3: Rc<UH1>) 
             let v19: Rc<str> = format_real_16(v12);
             let v22: i32 = v14.wrapping_sub(v12);
             let v23: Rc<str> = format_real_16(v22);
-            let v24: Rc<str> = string_concat(&["kit remote status jobs machine=", &*v0, " lane=", &*v4, " running=", &*v19, " queued=", &*v23]);
+            let v24: Rc<str> = string_concat(&["rig remote status jobs machine=", &*v0, " lane=", &*v4, " running=", &*v19, " queued=", &*v23]);
             Rc::new(UH1::UH1_Cons(v24, v6))
         }
         UH1::UH1_Nil => {
@@ -413,7 +413,7 @@ fn activity_lines_12(mut v0: Rc<str>, mut v1: US0) -> Rc<UH1> {
         US0::US0_NodeIdle(v2) => {
             let v2: i32 = v2;
             let v5: Rc<str> = format_real_16(v2);
-            let mut v7: Rc<str> = string_concat(&["kit remote status IDLE machine=", &*v0, " running=0 queued=", &*v5, " (start the top node-runnable item: kit agile next <backlog root> --tag node --open 3)"]);
+            let mut v7: Rc<str> = string_concat(&["rig remote status IDLE machine=", &*v0, " running=0 queued=", &*v5, " (start the top node-runnable item: kit agile next <backlog root> --tag node --open 3)"]);
             let v8: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
             Rc::new(UH1::UH1_Cons(v7, v8))
         }

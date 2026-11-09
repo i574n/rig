@@ -2,7 +2,7 @@
 :< review
 
 := usage () : string =
-    "kit error: repo usage: repo accept-review <before> <after> (passes when every changed line differs in numeric "
+    "rig error: repo usage: repo accept-review <before> <after> (passes when every changed line differs in numeric "
     ^^ "literals only)"
 
 :~ reviewed_files (~before_path : string) (~after_path : string) : i32 =
@@ -10,7 +10,7 @@
     := _ = ? review.report = "" ?> () |: console.write_line review.report
     := verdict = ? review.passed ?> "ok" |: "refused"
     console.write_line (
-        "kit repo accept-review " ++# verdict ++# " before=" ++# before_path ++# " after=" ++# after_path
+        "rig repo accept-review " ++# verdict ++# " before=" ++# before_path ++# " after=" ++# after_path
     )
     ? review.passed ?> 0i32 |: 1i32
 
@@ -21,10 +21,10 @@
         console.write_line (usage ())
         2i32
     |? file_system.file_exists before_path |> not ?>
-        console.write_line ("kit error: repo accept-review: no file at " ++# before_path)
+        console.write_line ("rig error: repo accept-review: no file at " ++# before_path)
         2i32
     |? file_system.file_exists after_path |> not ?>
-        console.write_line ("kit error: repo accept-review: no file at " ++# after_path)
+        console.write_line ("rig error: repo accept-review: no file at " ++# after_path)
         2i32
     |: reviewed_files before_path after_path
 

@@ -12,13 +12,17 @@
 
 :~ ^ session_root (~rows : process_rows) (pid : u64) (hops : i32) : u64 =
     := at = row_of_pid rows pid
-    ? at < 0i32 || hops > 32i32 ?> 0u64
-    |? agent_named (row_name rows at) ?> pid
+    ? at < 0i32 || hops > 32i32
+    ?> 0u64
+    |? agent_named (row_name rows at)
+    ?> pid
     |: session_root rows (row_parent rows at) (hops + 1i32)
 
 :~ ^ descends_from (~rows : process_rows) (pid : u64) (root : u64) (hops : i32) : bool =
-    ? pid = root ?> !+
-    |? pid = 0u64 || hops > 64i32 ?> !-
+    ? pid = root
+    ?> !+
+    |? pid = 0u64 || hops > 64i32
+    ?> !-
     |:
         := at = row_of_pid rows pid
         ? at < 0i32 ?> !- |: descends_from rows (row_parent rows at) root (hops + 1i32)
@@ -38,7 +42,8 @@
 := job_of_pid (~rows : process_rows) (pid : u64) : string =
     :< rig_machine_watch_model.model
     := at = row_of_pid rows pid
-    ? at < 0i32 ?> ""
+    ? at < 0i32
+    ?> ""
     |:
         ?= owner_walk rows at 0i32 ?|
         | KitJob id => id
@@ -191,7 +196,8 @@ inl padded (~text : string) (width : i32) : string = $'std::rc::Rc::<str>::from(
     (~rows : process_rows) (parent : u64) (depth : i32) (offset : i64) (at : i32) (listing : ps_listing)
     : ps_listing
     =
-    ? at >= row_count rows ?> listing
+    ? at >= row_count rows
+    ?> listing
     |:
         := pid = row_pid rows at
         := next =
@@ -205,7 +211,8 @@ inl padded (~text : string) (width : i32) : string = $'std::rc::Rc::<str>::from(
     (listing : ps_listing)
     : ps_listing
     =
-    ? at >= row_count rows ?> listing
+    ? at >= row_count rows
+    ?> listing
     |:
         := pid = row_pid rows at
         := wanted =

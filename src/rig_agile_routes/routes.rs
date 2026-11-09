@@ -489,14 +489,14 @@ fn agile_usage_error_0() -> i32 {
     let v3: bool = &*v2 == "";
     if v3 {
         let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile supports init <root>, begin <root> <title>, lease <root>, status <root>, handoff <root>, list <root> [all|Planned|Active|Blocked|Paused|Done] [--team <team>] [--tag <tag>] [--prefix <ID prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--sort priority|difficulty|progress] [--load light|medium|heavy|none] [--assignee agent|pair|user|none] [--json], check <root> [--compiler <absolute>], record <root>, set <root> <id> <progress> <Planned|Active|Blocked|Paused|Done>, add <root> <ID> <Epic|Feature|Story|TaskKind> <P0..P5> <D0..D8> <title> <tags> [--estimate <m>] [--load <l>] [--assignee <a>] [--deps <A,B>] [--note <text> --as <author>], edit <root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value>, show <root> <id> [--json], plan <root> [--json], migrate-tags preview|apply <root>, migrate-activity preview|apply <root>, sprint start <root> <id> <days> <goal> [--items A,B] | show <root> [<id>] | add|drop <root> <id> <item> | close <root> <id> | velocity <root> [--last n], lint <root> [--census | --team <team>], gate <root> --team <team> --as <lane>, cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h], note <root> <id> <text> [--as <author>], note-edit <root> <id> <note-number> <text> [--as <author>] [--append] [--expect-at <iso> | --expect-prefix <text>], notes from-title <root> <id>, rename <root> <old-id> <new-id>, seal <root> [--dry-run], todos <root> [<path>...] [--json] [--tagged | --id <ID>] | <root> --record, next <root> [--as main|subagent] [--team <team>] [--tag <tag>] [--prefix <ID prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--load <loads>] [--fits] [count] | <root> --any --as <lane> [--ttl <minutes>] (claims the top free item), claim <root> <ID> --as <lane> [--paths <glob,glob>] [--ttl <minutes>], release <root> <ID> --as <lane>, roots <root> [add|drop <path>...], links <root> --memory <dir> [--json], wip <root>, views <root>, view <root> <name> [extra flags...], view-add <root> <name> <list|next> [flags...]"); } LIT.with(|lit| lit.clone()) };
-        let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v4 + "
+        let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v4 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v5
     } else {
         let v10: i32 = std::env::args().skip(3i32 as usize).count() as i32;
         let v11: Rc<str> = format_real_2(v10);
         let v13: Rc<str> = string_concat(&["agile ", &*v1, " expects ", &*v2, ", received ", &*v11, " operands; see kit agile --help"]);
-        let v14: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v13 + "
+        let v14: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v13 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v14
     }
@@ -519,7 +519,7 @@ fn closure1() -> Rc<dyn Fn() -> i32> {
             v6
         } else {
             let mut v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("begin title must contain 3..7 visible words"); } LIT.with(|lit| lit.clone()) };
-            let v8: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v7 + "
+            let v8: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v7 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v8
         }
@@ -560,7 +560,7 @@ fn lint_warned_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> () {
     if v12 {
         ()
     } else {
-        let v18: Rc<str> = string_concat(&["kit agile lint warning id=", &*v1, " status=", &*v2, " failing=", &*v11, " (add the marker lines; a later train refuses the change)"]);
+        let v18: Rc<str> = string_concat(&["rig agile lint warning id=", &*v1, " status=", &*v2, " failing=", &*v11, " (add the marker lines; a later train refuses the change)"]);
         eprintln!("{}", v18);
         ()
     }
@@ -714,7 +714,7 @@ fn closure2() -> Rc<dyn Fn() -> i32> {
                 let v125: i32 = 3i32;
                 let v126: Rc<str> = usize::try_from(v125).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
                 let v130: Rc<str> = string_concat(&["agile set: ", &*v120, " must be ", &*v121, ", received '", &*v126, "'; usage: agile set <root> <id> <progress> <Planned|Active|Blocked|Paused|Done>"]);
-                let v131: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v130 + "
+                let v131: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v130 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v131
             }
@@ -727,7 +727,7 @@ fn closure2() -> Rc<dyn Fn() -> i32> {
                         let v111: i32 = 4i32;
                         let v112: Rc<str> = usize::try_from(v111).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
                         let v116: Rc<str> = string_concat(&["agile set: ", &*v106, " must be ", &*v107, ", received '", &*v112, "'; usage: agile set <root> <id> <progress> <Planned|Active|Blocked|Paused|Done>"]);
-                        let v117: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v116 + "
+                        let v117: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v116 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                         v117
                     }
@@ -742,7 +742,7 @@ fn closure2() -> Rc<dyn Fn() -> i32> {
                                     v87
                                 } else {
                                     let v90: Rc<str> = string_concat(&["agile set ", &*v3, " rejected: TODO blocks still name it; cut them or keep the item open:\n", &*v85]);
-                                    let v91: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v90 + "
+                                    let v91: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v90 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                     v91
                                 }

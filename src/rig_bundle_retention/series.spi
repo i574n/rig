@@ -43,13 +43,15 @@
     ? sm'.ends_with (zip_suffix ()) current ?>
         := stem = without_suffix current (zip_suffix ())
         := marker = last_index_of stem (alpha_marker ())
-        ? marker < 0i64 ?> SeriesRejected MissingAlphaSuffix
+        ? marker < 0i64
+        ?> SeriesRejected MissingAlphaSuffix
         |:
             := prefix_end = marker + 5i64
             := digits = from_index stem prefix_end
             ? ascii_digits digits ?>
                 := overflow = decimal_overflow digits
-                ? (overflow = "") ?> SeriesMember (through_index stem prefix_end, decimal_value digits)
+                ? (overflow = "")
+                ?> SeriesMember (through_index stem prefix_end, decimal_value digits)
                 |: SeriesRejected (AlphaOutOfRange overflow)
             |: SeriesRejected InvalidAlphaSuffix
     |: SeriesRejected MissingZipSuffix

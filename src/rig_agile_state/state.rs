@@ -18,7 +18,7 @@ use rig_agile_lease::{agile_escape_spi, agile_now_unix_ms, agile_parse_u64_decim
 
 
 fn agile_finish(result: Result<(), String>) -> i32 {
-    if let Err(error) = result { eprintln!("kit error: {error}"); 2 } else { 0 }
+    if let Err(error) = result { eprintln!("rig error: {error}"); 2 } else { 0 }
 }
 
 fn agile_arg<'a>(args: &'a [String], index: usize, name: &str) -> Result<&'a str, String> {
@@ -178,9 +178,9 @@ fn agile_begin_from_args(args: Vec<String>) -> Result<(), String> {
     if !root.is_dir() { return Err(format!("agile root is not a directory: {}", root.display())); }
     let title = agile_arg(&args, 2, "title")?;
     if rig_agile_prompt_title_code(title) != 1 { return Err("typed prompt title is empty".to_owned()); }
-    let prompt_id = env::var("KIT_PROMPT_ID").unwrap_or_else(|_| "current".to_owned());
-    let budget_ms = env::var("KIT_BUDGET_MS").ok().map(|value| agile_parse_u64_decimal(&value, "KIT_BUDGET_MS")).transpose()?.unwrap_or(4_500_000);
-    let guard_ms = env::var("KIT_GUARD_MS").ok().map(|value| agile_parse_u64_decimal(&value, "KIT_GUARD_MS")).transpose()?.unwrap_or(600_000);
+    let prompt_id = env::var("RIG_PROMPT_ID").or_else(|_| env::var("KIT_PROMPT_ID")).unwrap_or_else(|_| "current".to_owned());
+    let budget_ms = env::var("RIG_BUDGET_MS").or_else(|_| env::var("KIT_BUDGET_MS")).ok().map(|value| agile_parse_u64_decimal(&value, "KIT_BUDGET_MS")).transpose()?.unwrap_or(4_500_000);
+    let guard_ms = env::var("RIG_GUARD_MS").or_else(|_| env::var("KIT_GUARD_MS")).ok().map(|value| agile_parse_u64_decimal(&value, "KIT_GUARD_MS")).transpose()?.unwrap_or(600_000);
     if rig_agile_lease_budget_decision_binding(i32::from(budget_ms > 0), i32::from(guard_ms < budget_ms)) != 1 { return Err("prompt budget must be positive and larger than guard".to_owned()); }
     let started_unix_ms = agile_now_unix_ms()?;
     let deadline_unix_ms = started_unix_ms.checked_add(budget_ms).and_then(|value| value.checked_add(guard_ms)).ok_or_else(|| "prompt lease deadline overflow".to_owned())?;
@@ -198,7 +198,7 @@ fn agile_begin_from_args(args: Vec<String>) -> Result<(), String> {
         if let Some(original) = original { agile_atomic_write(&state, &original)?; } else { let _ = fs::remove_file(&state); }
         return Err(format!("prompt lease rolled back: {error}"));
     }
-    println!("kit agile begin ok prompt={prompt_id} budget_ms={budget_ms} guard_ms={guard_ms} started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} validation=runtime-attested compiler=not-required");
+    println!("rig agile begin ok prompt={prompt_id} budget_ms={budget_ms} guard_ms={guard_ms} started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} validation=runtime-attested compiler=not-required");
     Ok(())
 }
 
@@ -222,10 +222,10 @@ fn agile_set_from_args(args: Vec<String>, progress: i32, status_code: i32) -> Re
                 let end = line.rfind(')').ok_or_else(|| "malformed Task terminator".to_owned())?;
                 let mut parts = agile_tuple_fields(&line[start..end])?;
                 if rig_agile_task_identity_binding(parts.len() as i32, 1) != 1 { return Err(format!("Task {id} has a shape rejected by the typed Spiral policy: fields={}", parts.len())); }
-                if parts[6] == "Done" && status != "Done" && env::var("KIT_AGILE_REOPEN").ok().as_deref() != Some("1") { return Err(format!("{id} is Done; nothing written. Reopening needs KIT_AGILE_REOPEN=1 (a stale script replaying old values cannot revert a closure)")); }
+                if parts[6] == "Done" && status != "Done" && env::var("RIG_AGILE_REOPEN").or_else(|_| env::var("KIT_AGILE_REOPEN")).ok().as_deref() != Some("1") { return Err(format!("{id} is Done; nothing written. Reopening needs KIT_AGILE_REOPEN=1 (a stale script replaying old values cannot revert a closure)")); }
                 parts[5] = format!("{progress}u32");
                 parts[6] = status.to_owned();
-                let prompt_id = env::var("KIT_PROMPT_ID").unwrap_or_else(|_| "current".to_owned());
+                let prompt_id = env::var("RIG_PROMPT_ID").or_else(|_| env::var("KIT_PROMPT_ID")).unwrap_or_else(|_| "current".to_owned());
                 parts[10] = format!("\"{}\"", agile_escape_spi(&prompt_id));
                 lines.push(format!("{}{}{}", &line[..start], parts.join(", "), &line[end..]));
                 found = true;
@@ -328,7 +328,7 @@ fn agile_check_classified_from_args(args: Vec<String>) -> Result<(), String> {
     if graph_before != rig_agile_lease::agile_package_input_fingerprint(&state_dir, true) || paths != agile_state_paths(&state_dir)? || paths.iter().zip(&identities).any(|(path, identity)| agile_module_identity(path).ok().as_ref() != Some(identity)) { return Err("state or package inputs changed during attestation; retry agile check".to_owned()); }
     agile_write_receipts(&receipt_path, snapshot, &receipts)?;
     let (started_unix_ms, deadline_unix_ms, wrap_at_unix_ms, remaining_ms, should_wrap, should_yield) = agile_prompt_lease_clock(root)?;
-    println!("kit agile lease started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} wrap_at_unix_ms={wrap_at_unix_ms} remaining_ms={remaining_ms} should_wrap={} should_yield={}", i32::from(should_wrap), i32::from(should_yield));
+    println!("rig agile lease started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} wrap_at_unix_ms={wrap_at_unix_ms} remaining_ms={remaining_ms} should_wrap={} should_yield={}", i32::from(should_wrap), i32::from(should_yield));
     let record_catalog = rig_agile_state_record_required_catalog("v1");
     let record_required = record_catalog.as_ref().split('|').filter(|name| !name.is_empty()).collect::<Vec<_>>();
     let record_missing = record_required.iter().filter(|name| !state_dir.join(name).is_file()).copied().collect::<Vec<_>>();
@@ -340,7 +340,7 @@ fn agile_check_classified_from_args(args: Vec<String>) -> Result<(), String> {
     let gaps = agile_planning_gaps::rig_agile_planning_gaps_text(&std::fs::read_to_string(state_dir.join("agile.spi")).unwrap_or_default());
     if !gaps.is_empty() { print!("{gaps}"); }
     let compiler_status = compiler.as_ref().map(|value| format!("available source={} fingerprint={} sha256={} path={}", value.source, value.fingerprint, value.sha256, value.path.display())).unwrap_or_else(|| "absent".to_owned());
-    println!("kit agile check ok files={} skipped={skipped} transient={transient} runtime_attested={runtime_attested} build_attested={build_attested} build_batches={build_batches} validation=receipt-first compiler={compiler_status}", paths.len() + 1);
+    println!("rig agile check ok files={} skipped={skipped} transient={transient} runtime_attested={runtime_attested} build_attested={build_attested} build_batches={build_batches} validation=receipt-first compiler={compiler_status}", paths.len() + 1);
     Ok(())
 }
 
@@ -393,7 +393,7 @@ fn agile_record_from_args(args: Vec<String>) -> Result<(), String> {
     let bench_tag = mnemonic_path_tag(bench_relative)?;
     if rig_agile_state_series_source_binding(ratings_relative.len() as i32, rig_state_receipt_dash_shape(&ratings_tag) as i32) != 1 || rig_agile_state_series_source_binding(bench_relative.len() as i32, rig_state_receipt_dash_shape(&bench_tag) as i32) != 1 { return Err("typed series source rejected".to_owned()); }
     if rig_agile_state_series_pair_binding(1, 1) != 1 || rig_agile_state_series_fingerprint_binding(i32::from(ratings_identity.fingerprint != 0), i32::from(bench_identity.fingerprint != 0)) != 1 { return Err("typed series evidence pair rejected".to_owned()); }
-    let prompt_id = env::var("KIT_PROMPT_ID").unwrap_or_else(|_| "current".to_owned());
+    let prompt_id = env::var("RIG_PROMPT_ID").or_else(|_| env::var("KIT_PROMPT_ID")).unwrap_or_else(|_| "current".to_owned());
     let record = format!("inl series_record_{sequence:06} () : series_record = SeriesRecord ({sequence}u32, {settled_units}u32, {migration_score}u32, \"{}\", \"{}\", {}u64, \"{}\", \"{}\", {}u64, \"{}\")\n", ratings_relative, agile_escape_spi(&ratings_tag), ratings_identity.fingerprint, bench_relative, agile_escape_spi(&bench_tag), bench_identity.fingerprint, agile_escape_spi(&prompt_id));
     let marker = "inl retired_module_count () : u32";
     if !original.contains(marker) { return Err("history insertion marker is missing".to_owned()); }
@@ -409,7 +409,7 @@ fn agile_record_from_args(args: Vec<String>) -> Result<(), String> {
         if agile_read_regular_text_limited(&history_path, 64 * 1024 * 1024).ok().as_deref() == Some(updated.as_str()) { agile_atomic_write(&history_path, original.as_bytes())?; return Err(format!("series append rolled back: {error}")); }
         return Err(format!("series append not rolled back: another writer changed the history meanwhile, and their write is kept: {error}"));
     }
-    println!("kit agile record ok sequence={sequence} units={settled_units} migration={migration_score}/1000 ratings_tag={ratings_tag} bench_tag={bench_tag} validation=runtime-attested compiler=not-required");
+    println!("rig agile record ok sequence={sequence} units={settled_units} migration={migration_score}/1000 ratings_tag={ratings_tag} bench_tag={bench_tag} validation=runtime-attested compiler=not-required");
     Ok(())
 }
 

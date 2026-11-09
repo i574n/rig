@@ -19,10 +19,14 @@
         patch_resume_plan from to
 
 :~ bool_pair_binding (left : i32) (right : i32) : i32 =
-    ? left < 1i32 ?> 0i32
-    |? 1i32 < left ?> 0i32
-    |? right < 1i32 ?> 0i32
-    |? 1i32 < right ?> 0i32
+    ? left < 1i32
+    ?> 0i32
+    |? 1i32 < left
+    ?> 0i32
+    |? right < 1i32
+    ?> 0i32
+    |? 1i32 < right
+    ?> 0i32
     |: 1i32
 
 :~ receipt_shape_binding (schema_ok : i32) (phase_ok : i32) (plan_match : i32) (source_match : i32) : i32 =
@@ -31,10 +35,14 @@
     bool_pair_binding header identity
 
 :~ resume_decision_binding (receipt_present : i32) (receipt_matches : i32) : i32 =
-    ? receipt_present < 1i32 ?> 0i32
-    |? 1i32 < receipt_present ?> -1i32
-    |? receipt_matches < 1i32 ?> -1i32
-    |? 1i32 < receipt_matches ?> -1i32
+    ? receipt_present < 1i32
+    ?> 0i32
+    |? 1i32 < receipt_present
+    ?> -1i32
+    |? receipt_matches < 1i32
+    ?> -1i32
+    |? 1i32 < receipt_matches
+    ?> -1i32
     |: 1i32
 
 :~ completion_binding (mutation_ok : i32) (receipt_removed : i32) : i32 =

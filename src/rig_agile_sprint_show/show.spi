@@ -7,7 +7,8 @@
 :~ days_of (~date : string) : i64 =
     := part = \ (from : i32) (size : i32) =>
         optionm'.default_value 0i64 (convert.try_convert (sm'.substring from size date))
-    ? (sm'.length date : i32) < 10i32 ?> 0i64
+    ? (sm'.length date : i32) < 10i32
+    ?> 0i64
     |: date_time.days_from_civil (part 0i32 4i32) (part 5i32 2i32) (part 8i32 2i32)
 
 :| show_depth =
@@ -24,7 +25,8 @@
     ? am'.length_base lines < 2i32 ?> "" |: clipped (sm'.trim (am'.index_base 1i32 lines))
 
 :~ ^ committed_from (items : array_base rig_agile_sprint_state.state.item_shown) (at : i32) (sum : i32) : i32 =
-    ? at >= am'.length_base items ?> sum
+    ? at >= am'.length_base items
+    ?> sum
     |:
         := item = am'.index_base at items
         committed_from items (at + 1i32) (? item.committed ?> sum + item.minutes |: sum)
@@ -34,7 +36,8 @@
     (at : i32) (done : i32)
     : i32
     =
-    ? at >= am'.length_base items ?> done
+    ? at >= am'.length_base items
+    ?> done
     |:
         := item = am'.index_base at items
         := status = agile_task_census.task_census.status_pair (agile_text, item.task)
@@ -50,10 +53,9 @@
     := state = sm'.replace "\\" "/" root ++# "/state"
     := sprints_text = file_system.read_text_or_empty (state ++# "/sprints.spi")
     := heads = rig_agile_sprint_state.state.sprint_head_of (sprints_text, id)
-    ? am'.length_base heads = 0i32
-    ?>
+    ? am'.length_base heads = 0i32 ?>
         := which = ? id = "" ?> "open sprint" |: "sprint " ++# id
-        console.write_error_line ("kit error: agile sprint " ++# depth_word depth ++# ": no " ++# which)
+        console.write_error_line ("rig error: agile sprint " ++# depth_word depth ++# ": no " ++# which)
         1i32
     |:
         := head = am'.index_base 0i32 heads
@@ -64,7 +66,7 @@
         := left = days_of head.finish - today
         := state_word = ? head.running ?> "open" |: "closed"
         console.write_line (
-            "kit agile sprint " ++# depth_word depth ++# " ok id="
+            "rig agile sprint " ++# depth_word depth ++# " ok id="
             ++# head.id
             ++# " status="
             ++# state_word
@@ -91,7 +93,8 @@
     (rows : array_base agile_status_changes.changes.status_change) (at : i32) (since_ms : u64) (found : list string)
     : list string
     =
-    ? at >= am'.length_base rows ?> found
+    ? at >= am'.length_base rows
+    ?> found
     |:
         := r = am'.index_base at rows
         := fresh = r.status = "Done" && r.at_ms >= since_ms && listm'.contains r.item found |> not
@@ -100,9 +103,8 @@
 :~ retro_since ((root, since) : string * string) : i32 =
     := base = sm'.replace "\\" "/" root
     := day = days_of since
-    ? day <= 0i64
-    ?>
-        console.write_error_line ("kit error: agile sprint retro --since expects a YYYY-MM-DD date, got " ++# since)
+    ? day <= 0i64 ?>
+        console.write_error_line ("rig error: agile sprint retro --since expects a YYYY-MM-DD date, got " ++# since)
         2i32
     |:
         := changes = file_system.read_text_or_empty (base ++# "/history/status_changes.spi")
@@ -110,7 +112,7 @@
         := since_ms : u64 = conv (day * 86400000i64)
         := items = done_since (agile_status_changes.changes.changes_of changes) 0i32 since_ms []
         := count : i32 = listm.length items
-        console.write_line ("kit agile sprint retro ok since=" ++# since ++# " done=" ++# sm'.show count)
+        console.write_line ("rig agile sprint retro ok since=" ++# since ++# " done=" ++# sm'.show count)
         := item_shown = \ (task : string) =>
             := status = agile_task_census.task_census.status_pair (agile_text, task)
             console.write_line ("  " ++# task ++# " " ++# (? status = "" ?> "unknown" |: status))

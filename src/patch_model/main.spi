@@ -1,4 +1,3 @@
-
 := main () : i32 =
     global "#![allow(dead_code)]"
     model.transaction_probe_result ()

@@ -32,8 +32,10 @@
 
 :~ options_of (row : agile_note_edit_args.args.note_args_row) : edit_options =
     := guard =
-        ? row.expect_at <> "" ?> ExpectedAt row.expect_at
-        |? row.expect_prefix <> "" ?> ExpectedPrefix row.expect_prefix
+        ? row.expect_at <> ""
+        ?> ExpectedAt row.expect_at
+        |? row.expect_prefix <> ""
+        ?> ExpectedPrefix row.expect_prefix
         |: NoGuard
     { editor = row.editor; change = (? row.append ?> AppendText |: ReplaceText); guard = guard; valid = row.valid }
 
@@ -61,7 +63,7 @@
     (~id : string) (seq : i32) (previous : task_note) (revised : task_note) (before : u64) (after : u64) (elapsed : u64)
     : i32
     =
-    := head = "kit agile note-edit ok id=" ++# id ++# " note=" ++# (i32_text seq) ++# " at="
+    := head = "rig agile note-edit ok id=" ++# id ++# " note=" ++# (i32_text seq) ++# " at="
     := middle =
         previous.at
         ++# " author="
@@ -98,8 +100,7 @@
             := refused = guard_problem seq guard previous
             ? refused <> ""
             ?> note_edit_failure refused id
-            |? editor = "" || previous.author = editor
-            ?>
+            |? editor = "" || previous.author = editor ?>
                 := revised = { previous ?| text = changed_text change previous.text body }
                 := updated = spliced original row (line_end_after original row) (note_row id seq revised)
                 ?= state_written state raw updated ?|

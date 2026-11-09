@@ -25,7 +25,8 @@
         oin(&char::from(10u8).to_string()).as_str())' : string
 
 := joined_path (~base : string) (~relative : string) : string =
-    ? (base = "") ?> relative
+    ? (base = "")
+    ?> relative
     |: base ++# "/" ++# relative
 
 := appended (~listing : string) (~relative : string) : string = listing ++# relative ++# (nul_text ())
@@ -58,7 +59,8 @@
 :~ todo_sources (~path : string) : bool * string =
     ? entry_code path = walked_directory_code () ?>
         := inside, _ = git_output path "rev-parse\t--is-inside-work-tree"
-        ? inside ?> git_output path "ls-files\t-co\t--exclude-standard\t-z"
+        ? inside
+        ?> git_output path "ls-files\t-co\t--exclude-standard\t-z"
         |: !+, walked_directory path "" ""
     |: !-, ""
 

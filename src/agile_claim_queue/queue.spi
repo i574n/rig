@@ -6,7 +6,8 @@
 :< sm'_operators
 :< agile_claim_model.claim
 
-:~ position_of (~id : string) (ids : list string) : i32 = optionm'.default_value -1i32 (listm'.try_index_of_ id ids) + 1i32
+:~ position_of (~id : string) (ids : list string) : i32 =
+    optionm'.default_value -1i32 (listm'.try_index_of_ id ids) + 1i32
 
 :~ words (~text : string) : list string = sm'.split_list " " text |> listm'.filter (\ (w : string) => w <> "")
 
@@ -14,7 +15,8 @@
     claims |> listm.fold (\ found (c : claim) => ? c.item = item ?> c.paths |: found) []
 
 :~ claim_next
-    (~lane : string) (ttl_min : i32) (~wsjf : string) (~active : string) (~live : string) (~rows : string) (now_ms : u64)
+    (~lane : string) (ttl_min : i32) (~wsjf : string) (~active : string) (~live : string) (~rows : string)
+    (now_ms : u64)
     : string * string * string * u64 * i32 * i32 * string * string
     =
     := ranked = words wsjf
@@ -24,11 +26,32 @@
     := running = words live
     ?= choose order claims (\ (id : string) => ? listm'.contains id running ?> LiveJob id |: Idle) lane now_ms ?|
     | Claimed (item, _) =>
-        := lease = { item = item; owner = lane; expires_ms = now_ms + (conv ttl_min : u64) * 60000u64; paths = held_paths claims item }
+        := lease =
+            {
+                item = item
+                owner = lane
+                expires_ms = now_ms + (conv ttl_min : u64) * 60000u64
+                paths = held_paths claims item
+            }
         := wip = live_count (upserted claims lease) now_ms
         := paths = sm'.concat_list ";" lease.paths
-        outcome_word OutcomeGranted, item, lane, lease.expires_ms, position_of item ranked, wip, paths, change_word ChangeUpsert
-    | none => outcome_word OutcomeNone, "", lane, 0u64, 0i32, live_count claims now_ms, none_reason none, change_word ChangeNone
+        outcome_word OutcomeGranted,
+        item,
+        lane,
+        lease.expires_ms,
+        position_of item ranked,
+        wip,
+        paths,
+        change_word ChangeUpsert
+    | none =>
+        outcome_word OutcomeNone,
+        "",
+        lane,
+        0u64,
+        0i32,
+        live_count claims now_ms,
+        none_reason none,
+        change_word ChangeNone
 
 := rows_of (claims : list claim) : string = claims_text claims
 
@@ -39,8 +62,11 @@
 
 ///> rust
 :# next_any_hands_active_work_first_and_never_the_same_item_twice =
-    := kind, item, owner, expires, rank, wip, _, change = claim_next "x" 90i32 (wsjf ()) "GATE BIG-P0" "" (rows_of []) 1000u64
-    testing.expect (kind = "granted" && item = "GATE" && owner = "x" && rank = 1i32 && wip = 1i32 && change = "upsert") item
+    := kind, item, owner, expires, rank, wip, _, change =
+        claim_next "x" 90i32 (wsjf ()) "GATE BIG-P0" "" (rows_of []) 1000u64
+    testing.expect
+        (kind = "granted" && item = "GATE" && owner = "x" && rank = 1i32 && wip = 1i32 && change = "upsert")
+        item
     testing.expect (expires = 5401000u64) "ttl"
     := held = rows_of [ lease_of "GATE" "x" 5401000u64 [] ]
     := _, second, _, _, rank, wip, _, _ = claim_next "z" 90i32 (wsjf ()) "GATE BIG-P0" "" held 1000u64
@@ -73,8 +99,10 @@
     := _, theirs, _, _, _, _, _, _ = claim_next "z" 90i32 (wsjf ()) "GATE BIG-P0" "" declined 1000u64
     testing.expect (theirs = "GATE") "another lane is still offered the declined item"
 := main () : i32 =
-    export "rig_claim_next" (
-        (\ (lane, ttl, wsjf, active, live, rows, now) => claim_next lane ttl wsjf active live rows now)
-        : string * i32 * string * string * string * string * u64 -> string * string * string * u64 * i32 * i32 * string * string
-    )
+    export
+        "rig_claim_next"
+        (
+            \ (lane, ttl, wsjf, active, live, rows, now) => claim_next lane ttl wsjf active live rows now
+            : string * i32 * string * string * string * string * u64 -> string * string * string * u64 * i32 * i32 * string * string
+        )
     0i32

@@ -32,7 +32,7 @@ pub enum ProcessStreamKind {
 }
 
 fn process_output_max_bytes() -> Result<usize, String> {
-    let (policy_code, requested) = match std::env::var("KIT_PROCESS_OUTPUT_MAX_BYTES").ok().as_deref() { Some(text) => (2, text.parse::<i32>().map_err(|_| "KIT_PROCESS_OUTPUT_MAX_BYTES must be an integer".to_owned())?), None => (1, 0) };
+    let (policy_code, requested) = match std::env::var("RIG_PROCESS_OUTPUT_MAX_BYTES").or_else(|_| std::env::var("KIT_PROCESS_OUTPUT_MAX_BYTES")).ok().as_deref() { Some(text) => (2, text.parse::<i32>().map_err(|_| "KIT_PROCESS_OUTPUT_MAX_BYTES must be an integer".to_owned())?), None => (1, 0) };
     let resolved = rig_process_streaming_policy_binding(policy_code, requested);
     if resolved < 1 { return Err(format!("KIT_PROCESS_OUTPUT_MAX_BYTES rejected by Spiral policy: {requested}")); }
     usize::try_from(resolved).map_err(|_| "resolved process output limit does not fit usize".to_owned())

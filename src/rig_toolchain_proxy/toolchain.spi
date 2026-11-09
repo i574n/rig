@@ -9,15 +9,19 @@
     | NestedCargoRoot => 1i32
 
 :~ toolchain_cwd_binding (action : i32) (manifest_code : i32) : i32 =
-    ? manifest_code < 0i32 || 3i32 < manifest_code ?> -1i32
-    |? action = 7i32 || manifest_code = 1i32 || manifest_code = 3i32 ?> toolchain_cwd_code RequestedCargoRoot
-    |? manifest_code = 2i32 ?> toolchain_cwd_code NestedCargoRoot
+    ? manifest_code < 0i32 || 3i32 < manifest_code
+    ?> -1i32
+    |? action = 7i32 || manifest_code = 1i32 || manifest_code = 3i32
+    ?> toolchain_cwd_code RequestedCargoRoot
+    |? manifest_code = 2i32
+    ?> toolchain_cwd_code NestedCargoRoot
     |: -1i32
 
 := toolchain_u64_decimal_normalize (input : string) : string =
     := input_len = sm.length input : i32
     ? starts_with input "+" ?>
-        ? (=.) input_len 1i32 ?> codec_empty ()
+        ? (=.) input_len 1i32
+        ?> codec_empty ()
         |: codec_u64_decimal_normalize (slice_exclusive input 1i32 input_len)
     |: codec_u64_decimal_normalize input
 
@@ -30,7 +34,8 @@
 
 :~ toolchain_u32_decimal_valid (input : string) : u64 =
     := normalized = toolchain_u64_decimal_normalize input
-    ? (=.) normalized "" ?> 0u64
+    ? (=.) normalized ""
+    ?> 0u64
     |:
         := value = codec_u64_decimal_value normalized
         ? (<=) value 4294967295u64 ?> 1u64 |: 0u64
@@ -41,16 +46,19 @@
     := positive = starts_with input "+"
     := body =
         ? negative || positive ?>
-            ? (=.) input_len 1i32 ?> codec_empty ()
+            ? (=.) input_len 1i32
+            ?> codec_empty ()
             |: slice_exclusive input 1i32 input_len
         |: input
     := normalized = codec_u64_decimal_normalize body
-    ? (=.) normalized "" ?> 0u64
+    ? (=.) normalized ""
+    ?> 0u64
     |:
         := magnitude = codec_u64_decimal_value normalized
         ? negative ?>
             ? (<=) magnitude 2147483648u64 ?> (+.) 2147483649u64 magnitude |: 0u64
-        |? (<=) magnitude 2147483647u64 ?> (+.) 1u64 magnitude
+        |? (<=) magnitude 2147483647u64
+        ?> (+.) 1u64 magnitude
         |: 0u64
 
 := main () : i32 =

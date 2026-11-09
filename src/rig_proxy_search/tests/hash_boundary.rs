@@ -4,7 +4,7 @@ use std::{env, fs, time::{SystemTime, UNIX_EPOCH}};
 #[test]
 fn linux_fifo_is_rejected_without_waiting_for_a_writer() {
     use std::{ffi::CString, os::unix::{ffi::OsStrExt as _, fs::FileTypeExt as _}, process::{Command, Stdio}, time::{Duration, Instant}};
-    if let Some(root) = env::var_os("KIT_FIFO_CHILD") {
+    if let Some(root) = env::var_os("RIG_FIFO_CHILD").or_else(|| env::var_os("KIT_FIFO_CHILD")) {
         let root = std::path::PathBuf::from(root);
         let fifo = root.join("fifo");
         assert!(rig_proxy_search::inspection_file_sha256(&fifo).is_err());
@@ -24,7 +24,7 @@ fn linux_fifo_is_rejected_without_waiting_for_a_writer() {
     assert_eq!(unsafe { mkfifo(path.as_ptr(), 0o600) }, 0);
     let mut child = Command::new(env::current_exe().unwrap())
         .args(["--exact", "linux_fifo_is_rejected_without_waiting_for_a_writer", "--nocapture"])
-        .env("KIT_FIFO_CHILD", &root).stdout(Stdio::null()).spawn().unwrap();
+        .env("RIG_FIFO_CHILD", &&root).env("KIT_FIFO_CHILD", &root).stdout(Stdio::null()).spawn().unwrap();
     let deadline = Instant::now() + Duration::from_secs(5);
     let status = loop {
         if let Some(status) = child.try_wait().unwrap() { break Some(status); }

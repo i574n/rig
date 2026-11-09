@@ -598,13 +598,13 @@ fn outcome_text_31(mut v0: US0, mut v1: US3, mut v2: Rc<str>) -> (i32, Rc<str>) 
         US3::US3_GateFailedMissing(v9) => {
             let mut v9: i32 = v9;
             let v10: Rc<str> = format_real_21(v9);
-            let v13: Rc<str> = string_concat(&["kit crate gate refused: ", &*v10, " crate(s) have no generated output, so generation did not run or failed;", &*v2]);
+            let v13: Rc<str> = string_concat(&["rig crate gate refused: ", &*v10, " crate(s) have no generated output, so generation did not run or failed;", &*v2]);
             (1i32, v13)
         }
         US3::US3_GateFailedOver(v4) => {
             let v4: i32 = v4;
             let v5: Rc<str> = format_real_21(v4);
-            let mut v8: Rc<str> = string_concat(&["kit crate gate refused: ", &*v5, " crate(s) over the limit;", &*v2]);
+            let mut v8: Rc<str> = string_concat(&["rig crate gate refused: ", &*v5, " crate(s) over the limit;", &*v2]);
             (1i32, v8)
         }
         US3::US3_GateFailedVacuous => {
@@ -629,11 +629,11 @@ fn outcome_text_31(mut v0: US0, mut v1: US3, mut v2: Rc<str>) -> (i32, Rc<str>) 
                     v20
                 }
             };
-            let v24: Rc<str> = string_concat(&["kit crate gate refused: ", &*v21, ", so nothing was measured;", &*v2]);
+            let v24: Rc<str> = string_concat(&["rig crate gate refused: ", &*v21, ", so nothing was measured;", &*v2]);
             (1i32, v24)
         }
         US3::US3_GatePassed => {
-            let v3: Rc<str> = string_concat(&["kit crate gate ok", &*v2]);
+            let v3: Rc<str> = string_concat(&["rig crate gate ok", &*v2]);
             (0i32, v3)
         }
     }
@@ -657,13 +657,13 @@ fn gate_checked_2(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<str
         v14
     };
     if v15 {
-        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: crate usage: crate gate <root> [--enforce] [--limit n] [--backend rust|gleam|zig] (rust: generated output of every Cargo.toml with [package.metadata.spiral] under root; gleam and zig: every .gleam or .zig file under root)"); } LIT.with(|lit| lit.clone()) };
+        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: crate usage: crate gate <root> [--enforce] [--limit n] [--backend rust|gleam|zig] (rust: generated output of every Cargo.toml with [package.metadata.spiral] under root; gleam and zig: every .gleam or .zig file under root)"); } LIT.with(|lit| lit.clone()) };
         println!("{}", v16);
         2i32
     } else {
         let v17: bool = v11 <= 0i32;
         if v17 {
-            let v18: Rc<str> = string_concat(&["kit error: crate gate: --limit expects a positive whole number, got ", &*v2]);
+            let v18: Rc<str> = string_concat(&["rig error: crate gate: --limit expects a positive whole number, got ", &*v2]);
             println!("{}", v18);
             2i32
         } else {
@@ -750,7 +750,7 @@ fn gate_started_1(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<str
     let mut v7: US4 = backend_named_32(v6);
     match v7 {
         US4::US4_None => {
-            let v10: Rc<str> = string_concat(&["kit error: crate gate: --backend expects rust, gleam or zig, got ", &*v3]);
+            let v10: Rc<str> = string_concat(&["rig error: crate gate: --backend expects rust, gleam or zig, got ", &*v3]);
             println!("{}", v10);
             2i32
         }

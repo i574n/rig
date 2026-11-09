@@ -18,7 +18,8 @@
     (rows : array_base agile_quality_state.state_rows.cadence_row) (at : i32) (acc : list item_teams)
     : list item_teams
     =
-    ? at < 0i32 ?> acc
+    ? at < 0i32
+    ?> acc
     |:
         := r = am'.index_base at rows
         teams_from rows (at - 1i32) ({ id = r.id; teams = team_words r.tags } :: acc)
@@ -27,7 +28,8 @@
     (rows : array_base agile_note_events.events.note_event_row) (at : i32) (acc : list note_event)
     : list note_event
     =
-    ? at < 0i32 ?> acc
+    ? at < 0i32
+    ?> acc
     |:
         := r = am'.index_base at rows
         events_from rows (at - 1i32) ({ id = r.id; hour = r.hour; author = r.author } :: acc)
@@ -59,7 +61,7 @@
 
 :~ activity_line (now_day : i64) (r : team_activity) : string =
     := touched : i32 = listm.length r.touched
-    "kit agile cadence activity team=" ++# r.team ++# " days_ago=" ++# sm'.show (now_day - r.day)
+    "rig agile cadence activity team=" ++# r.team ++# " days_ago=" ++# sm'.show (now_day - r.day)
     ++# " notes=" ++# sm'.show r.notes ++# " touched=" ++# sm'.show touched
 
 :~ activity_lines (items : list item_teams) (events : list note_event) (now_day : i64) (days : i64) (~team : string)
@@ -81,10 +83,10 @@
     := authors = events |> listm.fold seen [] |> listm.rev
     := line = \ (author : string) =>
         := c = round_counters_of author from until events
-        "kit agile cadence round author=" ++# author ++# " notes=" ++# sm'.show c.notes
+        "rig agile cadence round author=" ++# author ++# " notes=" ++# sm'.show c.notes
         ++# " items=" ++# sm'.show c.items_touched
     := count : i32 = listm.length authors
-    := summary = "kit agile cadence round ok authors=" ++# sm'.show count ++# " window_hours=" ++# sm'.show hours
+    := summary = "rig agile cadence round ok authors=" ++# sm'.show count ++# " window_hours=" ++# sm'.show hours
     listm.append (authors |> listm.map line) [ summary ]
 
 :~ round_report ((text, now_hour, hours) : string * i64 * i64) : array_base string =
@@ -98,8 +100,8 @@
     := day = 100i64 * 24i64
     := events = [ note "K-1" (day + 1i64); note "K-1" (day + 2i64); note "K-2" (day + 3i64); note "X-1" (day - 30i64) ]
     := lines = activity_lines items events 100i64 0i64 ""
-    testing.expect (listm'.contains "kit agile cadence activity team=kit days_ago=0 notes=3 touched=2" lines) "kit"
-    testing.expect (listm'.contains "kit agile cadence activity team=x days_ago=0 notes=1 touched=1" lines) "x via K-2"
+    testing.expect (listm'.contains "rig agile cadence activity team=kit days_ago=0 notes=3 touched=2" lines) "kit"
+    testing.expect (listm'.contains "rig agile cadence activity team=x days_ago=0 notes=1 touched=1" lines) "x via K-2"
     := rig_only = activity_lines items events 100i64 0i64 "kit"
     := x_lines : i32 = rig_only |> listm'.filter (sm'.contains "team=x") |> listm.length
     testing.expect (x_lines = 0i32) "--team keeps one team's rows"
@@ -110,9 +112,9 @@
     := e = \ (id : string) (hour : i64) (author : string) => { id = id; hour = hour; author = author }
     := events = [ e "A" 10i64 "kit"; e "A" 11i64 "kit"; e "B" 11i64 "kit"; e "C" 11i64 "x"; e "D" 5i64 "main" ]
     := lines = round_lines events 11i64 2i64
-    := rig_line = "kit agile cadence round author=kit notes=3 items=2"
+    := rig_line = "rig agile cadence round author=kit notes=3 items=2"
     testing.expect (listm'.contains rig_line lines) "kit: 3 notes on 2 items"
-    testing.expect (listm'.contains "kit agile cadence round author=x notes=1 items=1" lines) "x"
+    testing.expect (listm'.contains "rig agile cadence round author=x notes=1 items=1" lines) "x"
     := counted_main : i32 = lines |> listm'.filter (sm'.contains "author=main") |> listm.length
     testing.expect (counted_main = 0i32) "a note before the window is not counted"
 := main () : i32 =

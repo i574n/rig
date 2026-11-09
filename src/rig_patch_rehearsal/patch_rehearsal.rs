@@ -6,7 +6,7 @@ use rig_process::run_bounded_program_in_dir;
 
 #[must_use]
 fn patch_gated_error(message: &str) -> i32 {
-    eprintln!("kit error: {message}");
+    eprintln!("rig error: {message}");
     2
 }
 
@@ -31,7 +31,7 @@ use rig_patch_compat_driver::{patch_plan_error, patch_prepare_source_owned, patc
 
 #[must_use]
 fn patch_mutation_error(message: &str) -> i32 {
-    eprintln!("kit error: {message}");
+    eprintln!("rig error: {message}");
     2
 }
 

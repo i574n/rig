@@ -225,7 +225,7 @@ pub fn source_map_run(args: &[String]) -> Result<(), String> {
         cargo += usize::from(record.cargo); mains += record.main_files; residuals += record.rust_files; imports += record.imports;
         println!("source-package path={} cargo={} spi_files={} rust_files={} main_files={} imports={} source_lines={} fingerprint={:016x}", record.path, record.cargo, record.spi_files, record.rust_files, record.main_files, record.imports, record.source_lines, record.fingerprint);
     }
-    println!("kit proxy spi-map ok root={} packages={} cargo_crates={} package_only={} mains={} rust_residuals={} imports={}", root.display(), map.len(), cargo, map.len().saturating_sub(cargo), mains, residuals, imports);
+    println!("rig proxy spi-map ok root={} packages={} cargo_crates={} package_only={} mains={} rust_residuals={} imports={}", root.display(), map.len(), cargo, map.len().saturating_sub(cargo), mains, residuals, imports);
     Ok(())
 }
 
@@ -239,7 +239,7 @@ pub fn source_diff_run(args: &[String]) -> Result<(), String> {
     let total = counts.added + counts.removed + counts.changed + counts.unchanged;
     let changed = counts.added + counts.removed + counts.changed;
     if rig_source_diff_record_binding(changed as i32, total as i32) != 1 { return Err("invalid source diff counts".to_owned()); }
-    println!("kit proxy spi-diff ok left={} right={} added={} removed={} changed={} unchanged={} total={}", left_root.display(), right_root.display(), counts.added, counts.removed, counts.changed, counts.unchanged, total);
+    println!("rig proxy spi-diff ok left={} right={} added={} removed={} changed={} unchanged={} total={}", left_root.display(), right_root.display(), counts.added, counts.removed, counts.changed, counts.unchanged, total);
     Ok(())
 }
 

@@ -56,7 +56,8 @@
     ? version = "" ?> None |: Some version
 
 :~ ^ channels_from (lines : array string) (at : i32) (found : list string) : list string =
-    ? at >= (am'.length lines : i32) ?> listm.rev found
+    ? at >= (am'.length lines : i32)
+    ?> listm.rev found
     |:
         := channel = without_host_triple (word_at 0i32 (sm'.trim (am'.index at lines)))
         channels_from lines (at + 1i32) (? channel = "" ?> found |: channel :: found)

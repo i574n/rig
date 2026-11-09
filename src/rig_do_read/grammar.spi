@@ -21,7 +21,8 @@
 
 :~ item_at (~records : record_list) (~record : i32) (~field : i32) : query_item =
     := raw = field_at records record field
-    ? raw = "" ?> Finished
+    ? raw = ""
+    ?> Finished
     |:
         := kind = $'std::rc::Rc::<str>::from(&(&*!raw)[..1])' : string
         := body = $'std::rc::Rc::<str>::from(&(&*!raw)[1..])' : string
@@ -134,16 +135,20 @@
         ?= query_flag_named word ?|
         | Some flag => query_options records record (field + 1i32) (query_flag_applied flag q)
         | None =>
-            ? query_filler_named word ?> query_options records record (field + 1i32) q
+            ? query_filler_named word
+            ?> query_options records record (field + 1i32) q
             |:
                 ?= query_option_named word ?|
                 | Some valued =>
-                    ? value = "" ?> QueryRejected (word ++# ": expected a value after it")
+                    ? value = ""
+                    ?> QueryRejected (word ++# ": expected a value after it")
                     |: query_options records record (field + 2i32) (query_option_applied valued value q)
                 | None =>
                     := next = field + 1i32
-                    ? all_digits word ?> query_options records record next { q ?| count = decimal_of word }
-                    |? q.target = "" ?> query_options records record next { q ?| target = word }
+                    ? all_digits word
+                    ?> query_options records record next { q ?| count = decimal_of word }
+                    |? q.target = ""
+                    ?> query_options records record next { q ?| target = word }
                     |: QueryRejected ("unexpected word: " ++# word)
 
 :~ query_problem (~q : query) : string =
@@ -217,7 +222,9 @@
     ?= query_parsed (records_from_bars "ok\nquery|wait|wout.log|w~|qSUITE-EXIT|wtimeout|w5s") 1i32 ?|
     | QueryRejected message => testing.expect !- message
     | QueryParsed wait =>
-        testing.expect (wait.target = "out.log" && wait.needle = "SUITE-EXIT" && wait.timeout_ms = 5000u64) "wait with timeout"
+        testing.expect
+            (wait.target = "out.log" && wait.needle = "SUITE-EXIT" && wait.timeout_ms = 5000u64)
+            "wait with timeout"
 
 ///> rust
 :# incomplete_queries_are_rejected_with_a_reason =

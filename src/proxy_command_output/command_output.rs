@@ -38,7 +38,7 @@ fn command_output_receipt_text_0(mut v0: i32, mut v1: u64, mut v2: u64, mut v3: 
     let v18: Rc<str> = std::rc::Rc::<str>::from((v2).to_string());
     let v21: Rc<str> = std::rc::Rc::<str>::from((v3).to_string());
     let v23: Rc<str> = std::rc::Rc::<str>::from((v1).to_string());
-    let v25: Rc<str> = string_concat(&["kit proxy command-output ", &*v12, " status=", &*v15, " elapsed_ms=", &*v23, " stdout_bytes=", &*v18, " stderr_bytes=", &*v21]);
+    let v25: Rc<str> = string_concat(&["rig proxy command-output ", &*v12, " status=", &*v15, " elapsed_ms=", &*v23, " stdout_bytes=", &*v18, " stderr_bytes=", &*v21]);
     v25
 }
 fn closure0() -> Rc<dyn Fn(i32, u64, u64, u64) -> Rc<str>> {

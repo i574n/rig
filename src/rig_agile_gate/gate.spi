@@ -16,30 +16,34 @@
     { root = root; team = flag_value words "--team"; lane = flag_value words "--as" }
 
 :~ ready_line (t : gate_terms) (ready : list string) : string =
-    ? ready = [] ?> ""
+    ? ready = []
+    ?> ""
     |:
-        := claim = "kit agile claim " ++# t.root ++# " <ID> --as " ++# t.lane
+        := claim = "rig agile claim " ++# t.root ++# " <ID> --as " ++# t.lane
         "Your team's top ready light items: " ++# sm'.concat_list ", " ready
         ++# ". Claim one explicitly (" ++# claim
         ++# ") and start it now; while a run or train you started is pending, work another of these"
         ++# " instead of stopping."
 
 :~ parked_line (t : gate_terms) (parked : list string) : string =
-    ? parked = [] ?> ""
+    ? parked = []
+    ?> ""
     |:
         "Paused P0/P1 items for team " ++# t.team
         ++# " (re-decide each: resume as Planned, or keep Paused only with a reason AND a resume condition): "
         ++# sm'.concat_list ", " parked ++# "."
 
 :~ waiting_line (waiting : list string) : string =
-    ? waiting = [] ?> ""
+    ? waiting = []
+    ?> ""
     |: "Built and waiting on a train install (not ready work): " ++# sm'.concat_list ", " waiting ++# "."
 
 :~ install_waiting (~records : string) : list string =
     := marker = " = Note (\""
     := seen = \ (waiting : list string) (line : string) =>
         := at = sm'.index_of marker line
-        ? at < 0i32 ?> waiting
+        ? at < 0i32
+        ?> waiting
         |:
             := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
             := first_piece = \ (first : string) (p : string) => ? first = "" ?> p |: first
@@ -49,7 +53,8 @@
     sm'.split_list "\n" records |> listm.fold seen []
 
 :~ ^ ids_where (rows : array_base agile_team_work.work.gate_row) (parked : bool) (at : i32) : list string =
-    ? at < 0i32 ?> []
+    ? at < 0i32
+    ?> []
     |:
         := row = am'.index_base at rows
         := earlier = ids_where rows parked (at - 1i32)
@@ -57,7 +62,7 @@
 
 :~ gate_lines (t : gate_terms) (ready : list string) (parked : list string) (waiting : list string) : list string =
     := receipt =
-        "kit agile gate ok team=" ++# t.team ++# " ready=" ++# sm'.show (listm.length ready : i32)
+        "rig agile gate ok team=" ++# t.team ++# " ready=" ++# sm'.show (listm.length ready : i32)
         ++# " paused=" ++# sm'.show (listm.length parked : i32)
         ++# " waiting=" ++# sm'.show (listm.length waiting : i32)
     := lines = [ ready_line t ready; parked_line t parked; waiting_line waiting; receipt ]
@@ -67,8 +72,7 @@
     ?= env.command_line_arguments () ?|
     | _ :: _ :: root :: words ?& sm'.starts_with "-" root |> not =>
         := t = terms_of root words
-        ? t.team = "" || t.lane = ""
-        ?>
+        ? t.team = "" || t.lane = "" ?>
             console.write_error_line "usage: kit agile gate <root> --team <team> --as <lane>"
             2i32
         |:
@@ -104,7 +108,7 @@
     testing.expect (listm.length (gate_lines t [] [] [ "A-3" ]) = 2i32) "a waiting line and the receipt"
     := expected = "items: A-1, A-2. Claim one explicitly (kit agile claim B <ID> --as kit-1)"
     testing.expect (listm'.exists' (sm'.contains expected) lines) "ready"
-    testing.expect (gate_lines t [] [] [] = [ "kit agile gate ok team=kit ready=0 paused=0 waiting=0" ]) "receipt only"
+    testing.expect (gate_lines t [] [] [] = [ "rig agile gate ok team=kit ready=0 paused=0 waiting=0" ]) "receipt only"
 := main () : i32 =
     export "rig_agile_gate_run" gate_run
     0i32

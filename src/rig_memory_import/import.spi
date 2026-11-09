@@ -9,14 +9,16 @@
         identical_count rest dir (? same ?> count + 1i32 |: count)
 
 :~ import_receipt (~count : i32) (~identical : i32) (~index_same : string) (~data : string) : string =
-    "kit memory import ok memories=" ++# count_text count ++# " identical=" ++# count_text identical
+    "rig memory import ok memories=" ++# count_text count ++# " identical=" ++# count_text identical
     ++# " index_identical=" ++# index_same ++# " data=" ++# data
 
 :~ memory_import (~dir : string) (~data : string) : i32 =
-    ? file_present (path_joined dir "MEMORY.md") = !- ?> failed ("import needs " ++# dir ++# "/MEMORY.md")
+    ? file_present (path_joined dir "MEMORY.md") = !-
+    ?> failed ("import needs " ++# dir ++# "/MEMORY.md")
     |:
         := tally = entries_from dir (markdown_names dir) { memories = NoMemories; count = 0i32; refused = "" }
-        ? tally.refused <> "" ?> failed ("import refused, nothing written:\n" ++# tally.refused)
+        ? tally.refused <> ""
+        ?> failed ("import refused, nothing written:\n" ++# tally.refused)
         |:
             := index = exact_text (path_joined dir "MEMORY.md")
             ? text_written data (data_text (memories_flipped tally.memories NoMemories) index) ?>

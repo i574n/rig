@@ -83,7 +83,7 @@ fn file_removal_outcome_1() -> US0 {
                     let v25: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::rooted_unlink_nondirectory(std::path::Path::new(&*v5)).err().unwrap_or_default().as_str());
                     let v26: bool = &*v25 == "";
                     if v26 {
-                        let v28: Rc<str> = string_concat(&["kit proxy fs-remove ok path=", &*v5, " kind="]);
+                        let v28: Rc<str> = string_concat(&["rig proxy fs-remove ok path=", &*v5, " kind="]);
                         let v32: Rc<str> = match v19 {
                             US1::US1_RemovedFile => {
                                 let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("file"); } LIT.with(|lit| lit.clone()) };

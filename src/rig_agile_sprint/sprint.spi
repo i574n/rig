@@ -23,7 +23,7 @@
 
 :~ sprint_usage () : i32 =
     console.write_error_line (
-        "kit error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B] | "
+        "rig error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B] | "
         ^^ "sprint show <root> [<id>] | sprint retro <root> [<id> | --since <YYYY-MM-DD>] | "
         ^^ "sprint add|drop <root> <id> <item> | sprint close <root> <id> | sprint velocity <root> [--last n]"
     )

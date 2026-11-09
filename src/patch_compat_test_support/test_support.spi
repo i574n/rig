@@ -1,4 +1,3 @@
-
 inl emit_test_support () : () = global """
     #[cfg(feature = "test-support")]
     pub mod test_support {

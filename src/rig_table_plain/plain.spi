@@ -61,14 +61,15 @@
 :~ ^ printed_groups (counts : key_rows) (sorted : list string) (limit : u64) (shown : i32) : i32 =
     ?= sorted ?|
     | value :: rest =>
-        ? below_limit shown limit = !- ?> shown
+        ? below_limit shown limit = !-
+        ?> shown
         |:
             stdout_line (group_line (key_row counts value) value)
             printed_groups counts rest limit (shown + 1i32)
     | [] => shown
 
 := query_ok (total : i32) (matched : i32) : string =
-    "kit table query ok total=" ++# i32_text total ++# " matched=" ++# i32_text matched
+    "rig table query ok total=" ++# i32_text total ++# " matched=" ++# i32_text matched
 
 := plain_summary (n : plain_count) : string = query_ok n.total n.matched ++# " shown=" ++# i32_text n.shown
 
@@ -104,8 +105,10 @@
     := indexes, missing = projection cells request.cols missing
     := group = group_column cells request.group
     := missing = ? request.group <> "" && group < 0i32 ?> listed missing request.group |: missing
-    ? missing <> "" ?> unknown_columns cells missing
-    |? group >= 0i32 ?> plain_grouped cells list group request
+    ? missing <> ""
+    ?> unknown_columns cells missing
+    |? group >= 0i32
+    ?> plain_grouped cells list group request
     |: plain_listed cells list indexes request
 
 :~ plain_query (~file : string) (request : table_request) : i32 =

@@ -29,7 +29,8 @@
     := found = \ (rule : gate_rule) (line : string) =>
         := row = sm'.trim line
         := at = sm'.index_of (row_marker ()) row
-        ? at < 0i32 || sm'.ends_with ")" row |> not ?> rule
+        ? at < 0i32 || sm'.ends_with ")" row |> not
+        ?> rule
         |:
             := inner = sm'.slice (at + sm'.length (row_marker ())) (sm'.length row - 2i32) row
             ?= sm'.split_list "," inner ?|
@@ -62,7 +63,8 @@
     | _ => None
 
 :~ memory_line (~line : string) : option i32 =
-    ? sm'.starts_with "MemAvailable:" line |> not ?> None
+    ? sm'.starts_with "MemAvailable:" line |> not
+    ?> None
     |:
         ?= sm'.replace "MemAvailable:" "" line |> sm'.replace "kB" "" |> number_of ?|
         | Some kb => Some (kb / 1024i32)
@@ -81,8 +83,10 @@
     | _ => None
 
 :~ admitted_by (g : machine_gate) (s : machine_sample) : admission =
-    ? s.load_x100 >= g.max_load_x100 ?> TooLoaded (s.load_x100, g.max_load_x100)
-    |? s.available_mb < g.memory_max_mb + g.floor_mb ?> TooLittleMemory (s.available_mb, g.memory_max_mb + g.floor_mb)
+    ? s.load_x100 >= g.max_load_x100
+    ?> TooLoaded (s.load_x100, g.max_load_x100)
+    |? s.available_mb < g.memory_max_mb + g.floor_mb
+    ?> TooLittleMemory (s.available_mb, g.memory_max_mb + g.floor_mb)
     |: Admitted
 
 :~ hundredths_text (value : i32) : string =
@@ -137,16 +141,16 @@
     testing.expect (gate_of_text "" = Ungated) "no gate file, no gate"
     := calm = "0.52 0.61 0.70 1/180 4242\nMemAvailable:    3481600 kB\n"
     testing.expect (sample_of calm = Some { load_x100 = 52i32; available_mb = 3400i32 }) "load and memory"
-    := ok = gated_of rule calm "kit job start x"
+    := ok = gated_of rule calm "rig job start x"
     := scope = "systemd-run --scope --quiet -p MemoryMax=2500M -p MemorySwapMax=0 "
-    testing.expect (ok.admitted && ok.line = scope ++# "kit job start x") ok.line
+    testing.expect (ok.admitted && ok.line = scope ++# "rig job start x") ok.line
     := loaded = "4.20 3.9 3.1 2/200 99\nMemAvailable: 3481600 kB\n"
-    := busy = gated_of rule loaded "kit job start x"
+    := busy = gated_of rule loaded "rig job start x"
     testing.expect (busy.admitted = !- && busy.reason = "admission: load 4.20 >= 4.00") busy.reason
-    := tight = gated_of rule "0.10 0.1 0.1 1/1 1\nMemAvailable: 2097152 kB\n" "kit job start x"
+    := tight = gated_of rule "0.10 0.1 0.1 1/1 1\nMemAvailable: 2097152 kB\n" "rig job start x"
     testing.expect (tight.reason = "admission: MemAvailable 2048 MB < cap + floor 3100 MB") tight.reason
     testing.expect ((gated_of rule "" "x").admitted = !-) "an unread sample refuses"
-    testing.expect ((gated_of Ungated "" "kit job start x").line = "kit job start x") "ungated lines pass unchanged"
+    testing.expect ((gated_of Ungated "" "rig job start x").line = "rig job start x") "ungated lines pass unchanged"
     testing.expect (load_x100_of "1.5" = Some 150i32 && load_x100_of "12" = Some 1200i32) "load words"
 := main () : i32 =
     export "rig_job_remote_gated_line" gated_line

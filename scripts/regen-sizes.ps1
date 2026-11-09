@@ -2,7 +2,7 @@ param([Parameter(Mandatory)][string[]] $Package, [int] $Limit = 1000)
 $ErrorActionPreference = 'Stop'
 $kitRoot = Split-Path $PSScriptRoot -Parent
 $Package = @($Package | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-if (-not $env:KIT_SPIRAL_BUNDLE) { $env:KIT_SPIRAL_BUNDLE = (Resolve-Path -LiteralPath (Join-Path $kitRoot '..\spiral\apps\compiler\tmp')).Path }
+if (-not ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE)) { $env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = (Resolve-Path -LiteralPath (Join-Path $kitRoot '..\spiral\apps\compiler\tmp')).Path }
 $quoted = ($Package | ForEach-Object { "'$_'" }) -join ','
 $text = (& pwsh -NoProfile -Command "& '$(Join-Path $kitRoot 'compiler-contracts\test-regeneration.ps1')' -KitRoot '$kitRoot' -Package $quoted -CargoCheck -KeepStaged" 2>&1 | Out-String)
 $staged = [regex]::Match($text, 'Staged workspace: (\S+)').Groups[1].Value

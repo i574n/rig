@@ -15,8 +15,10 @@
 :~ load_words (~loads : string) : array string = sm'.split "," loads |> array
 
 :~ ^ loads_pass (~text : string) (~id : string) (words : array string) (at : i32) : bool =
-    ? am'.length words <= at ?> !-
-    |? planned_load_selected text id (am'.index at words) ?> !+
+    ? am'.length words <= at
+    ?> !-
+    |? planned_load_selected text id (am'.index at words)
+    ?> !+
     |: loads_pass text id words (at + 1i32)
 := argument_owned index : string = rust_std_env.model.argument_owned index
 := unquoted (~token : string) : string = byte_slice token 1i32 (byte_len token - 1i32)
@@ -91,7 +93,8 @@
     ?= list ?|
     | NoRanked => kept
     | RankedThen (item, rest) =>
-        ? am'.length kept >= limit ?> kept
+        ? am'.length kept >= limit
+        ?> kept
         |:
             := row =
                 {
@@ -102,8 +105,10 @@
             rows_of rest limit (kept ++ ;[ row ])
 
 :~ ^ listed_at (ids : array_base string) (~id : string) (at : i32) : bool =
-    ? at >= am'.length_base ids ?> !-
-    |? am'.index_base at ids = id ?> !+
+    ? at >= am'.length_base ids
+    ?> !-
+    |? am'.index_base at ids = id
+    ?> !+
     |: listed_at ids id (at + 1i32)
 
 := next_failure (~reason : string) : i32 =
@@ -119,8 +124,7 @@
         := text = records_text (loaded_string (read_text file))
         := length = byte_len text
         := malformed = first_malformed_task text 0i32 length
-        ? malformed < 0i32
-        ?>
+        ? malformed < 0i32 ?>
             := holding = agile_waits_hold.hold.holding_ids (root, text)
             := waiting = \ (id : string) => listed_at holding id 0i32
             := list =
@@ -145,8 +149,7 @@
 :~ agile_next_entry () : i32 =
     := parsed, reason, role, limit, filters, load, json =
         $'rig_agile_next_args::rig_agile_next_request()' : bool * string * string * i32 * string * string * bool
-    ? parsed
-    ?>
+    ? parsed ?>
         := request =
             {
                 role = (? role = "subagent" ?> Subagent |: MainAgent)

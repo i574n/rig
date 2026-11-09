@@ -12,7 +12,8 @@ inl label_job (~label : string) : string = $'std::rc::Rc::<str>::from((&*!label)
     ").nth(1).and_then(|rest| rest.split(char::from(41u8)).next()).unwrap_or(""))' : string
 
 :~ ^ windows_watched (~windows : string) (index : i32) (~report : string) : string =
-    ? index >= line_count windows ?> report
+    ? index >= line_count windows
+    ?> report
     |:
         := row = line_at windows index
         := job = label_job (tab_field row 3i32)

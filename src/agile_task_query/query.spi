@@ -15,7 +15,8 @@
 :~ team_tagged (~tags : string) : bool = sm'.index_of ",team:" ("," ++# (sm'.replace " " "" tags)) >= 0
 
 :~ on_team (~word : string) (~id : string) (~tags : string) : bool =
-    if team_tagged tags then tag_listed tags ("team:" ++# word)
+    if team_tagged tags
+    then tag_listed tags ("team:" ++# word)
     else
         tag_listed tags word || tag_listed tags (word ++# "-team")
         || sm'.starts_with (team_id_prefix word) id
@@ -204,7 +205,8 @@
 
 :~ ^ filters_of_query (~query : string) (index : i32) (acc : query_filters) : query_filters =
     := argument = query_token query index
-    ? argument = "" ?> acc
+    ? argument = ""
+    ?> acc
     |:
         ?= flag_read_of argument (query_token query (index + 1i32)) ?|
         | FilterRead (filter, used) => filters_of_query query (index + used) (FilterThen (filter, acc))
@@ -275,8 +277,12 @@
     testing.expect (filters_pass filters "OPS-A" "" "" "Active" !+) "open ops item passes"
     testing.expect (filters_pass filters "OPS-A" "" "" "Done" !+ = !-) "done item fails open"
     testing.expect (filters_text filters "" = " prefix=OPS- open") (filters_text filters "")
-    testing.expect (query_passes "--team ops --open" "OPS-A" "" "" "Active" !+) "a query text reads back into the same filters"
-    testing.expect (query_passes "--team ops --open" "CI-A" "" "" "Active" !+ = !-) "the team filter holds after the round trip"
+    testing.expect
+        (query_passes "--team ops --open" "OPS-A" "" "" "Active" !+)
+        "a query text reads back into the same filters"
+    testing.expect
+        (query_passes "--team ops --open" "CI-A" "" "" "Active" !+ = !-)
+        "the team filter holds after the round trip"
     testing.expect
         (flag_width "--team" "Ops" = -1i32 && flag_width "--tag" "x" = 2i32 && flag_width "Done" "" = 0i32)
         "flag widths"
@@ -313,8 +319,12 @@
     testing.expect (query_passes "--words LEASES" "T-1" title "" "Active" !+) "case and punctuation do not matter"
     testing.expect (query_passes "--words lea" "T-1" title "lease" "Active" !+ = !-) "a prefix is not a word"
     testing.expect (query_passes "--words tree,rows" "T-1" title "" "Active" !+ = !-) "one missing word fails the item"
-    testing.expect (query_passes "--words record --open" "T-1" title "" "Done" !+ = !-) "words combine with the other filters"
-    testing.expect (flag_read_shown (flag_read_of "--words" "a,b") = "words=a,b used=2") "the words flag reads its value"
+    testing.expect
+        (query_passes "--words record --open" "T-1" title "" "Done" !+ = !-)
+        "words combine with the other filters"
+    testing.expect
+        (flag_read_shown (flag_read_of "--words" "a,b") = "words=a,b used=2")
+        "the words flag reads its value"
     testing.expect
         (flag_read_shown (flag_read_of "--words" "") = "--words expects comma-separated words")
         "an empty value is refused"

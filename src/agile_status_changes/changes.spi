@@ -27,7 +27,8 @@
 :~ change_of_line (~line : string) : option status_change =
     := row = sm'.trim line
     := at = sm'.index_of (row_marker ()) row
-    ? at < 0i32 || sm'.ends_with "u64)" row |> not ?> None
+    ? at < 0i32 || sm'.ends_with "u64)" row |> not
+    ?> None
     |:
         := inner = sm'.slice (at + sm'.length (row_marker ())) (sm'.length row - 5i32) row
         ?= sm'.split_list "\", " inner ?|
@@ -66,11 +67,14 @@
     := base = sm'.replace "\\" "/" root
     := path = history_path root
     := before = text_of path
-    ? text_of (base ++# "/state/agile.spi") = "" ?> ChangeRefused ("no backlog state at " ++# base ++# "/state")
-    |? last_status before change.item = change.status ?> ChangeUnchanged
+    ? text_of (base ++# "/state/agile.spi") = ""
+    ?> ChangeRefused ("no backlog state at " ++# base ++# "/state")
+    |? last_status before change.item = change.status
+    ?> ChangeUnchanged
     |:
         := _ = file_system.create_dir_all (base ++# "/history")
-        ? replaced path (appended before change) ?> ChangeAppended
+        ? replaced path (appended before change)
+        ?> ChangeAppended
         |: ChangeRefused "history/status_changes.spi could not be written"
 
 :~ change_recorded ((root, item, status) : string * string * string) : i32 =
@@ -79,7 +83,7 @@
     | ChangeAppended => 0i32
     | ChangeUnchanged => 0i32
     | ChangeRefused reason =>
-        console.write_error_line ("kit agile status change not recorded id=" ++# item ++# ": " ++# reason)
+        console.write_error_line ("rig agile status change not recorded id=" ++# item ++# ": " ++# reason)
         1i32
 
 :~ changes_of (text : string) : array_base status_change = changes_of_text text |> listm'.box |> listm'.to_array'

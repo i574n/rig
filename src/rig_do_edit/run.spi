@@ -94,8 +94,7 @@
     ?= rules ?|
     | NoRules => pass
     | Rule (rule, rest) =>
-        ? pass.problem = ""
-        ?>
+        ? pass.problem = "" ?>
             := anchor = rule.anchor
             := before = pass.text
             := outcome =
@@ -154,9 +153,12 @@
         := problem = edited.problem
         := count = edited.replacements
         := outcome =
-            ? problem <> "" ?> Refused problem
-            |? count = 0u64 ?> Untouched
-            |? edited.text = "" && before <> "" ?> Refused (emptied_problem before)
+            ? problem <> ""
+            ?> Refused problem
+            |? count = 0u64
+            ?> Untouched
+            |? edited.text = "" && before <> ""
+            ?> Refused (emptied_problem before)
             |: Changed (before, edited.text, count, edited.marks)
         { outcome = outcome; sites = edited.sites }
     |: { outcome = Refused (read_error read); sites = "" }
@@ -204,8 +206,7 @@
     (~index : i32) (~pass : block_pass)
     : block_pass
     =
-    ? index < path_count paths
-    ?>
+    ? index < path_count paths ?>
         := path = path_at paths index
         files_run root pending block globbed paths
             (index + 1i32)
@@ -226,8 +227,7 @@
     := pass = files_run root pending block globbed paths 0i32 (opened_block opened)
     := tally = pass.tally
     := head = "edit " ++# target
-    ? pass.problems = 0u64
-    ?>
+    ? pass.problems = 0u64 ?>
         ?= block.expectation ?|
         | Expected (files, count) =>
             ? files = pass.matched && count = pass.found
@@ -242,8 +242,7 @@
                         lines_joined (lines_joined tally.failures (row2 head (wanted ++# got))) pass.sites
                 }
         | Unchecked =>
-            ? pass.matched = 0u64
-            ?>
+            ? pass.matched = 0u64 ?>
                 { tally ?|
                     failed = (tally.failed + 1u64)
                     failures = lines_joined tally.failures (row2 head "no file matched")
@@ -267,10 +266,8 @@
     := files = decimal_text state.files
     := replacements = decimal_text state.replacements
     := previewed = decimal_text state.previewed
-    ? state.previewed = 0u64
-    ?>
-        ? state.globbed
-        ?>
+    ? state.previewed = 0u64 ?>
+        ? state.globbed ?>
             concat5
                 "files "
                 files
@@ -335,7 +332,8 @@
 
 :~ edits_then_runs (~root : string) (~dry : bool) (~steps : steps) (~encoded : string) (~started : u64) : i32 =
     := rejection = run_rejection encoded
-    ? rejection <> "" ?> refused ("program rejected: " ++# rejection) 2i32 started
+    ? rejection <> ""
+    ?> refused ("program rejected: " ++# rejection) 2i32 started
     |:
         ?= edits_applied root dry steps started ?|
         | EditsStopped code => code
@@ -349,7 +347,8 @@
     := records = records_of encoded
     := steps = steps_decoded records 1i32
     := dry = field_at records 0i32 0i32 = "dry"
-    ? runs_in encoded ?> edits_then_runs root dry steps encoded started
+    ? runs_in encoded
+    ?> edits_then_runs root dry steps encoded started
     |:
         ?= edits_applied root dry steps started ?|
         | EditsCommitted counts => finished !- counts started

@@ -51,10 +51,10 @@
         tree_text_of facts links |> listm.iter (\ (line : string) => console.write_line line)
         := epics = sm'.format (listm.length (epics_of links) : i32)
         := count = sm'.format (listm.length links : i32)
-        console.write_line ("kit agile list ok tree epics=" ++# epics ++# " links=" ++# count)
+        console.write_line ("rig agile list ok tree epics=" ++# epics ++# " links=" ++# count)
         0i32
     | _ =>
-        console.write_error_line "kit error: usage: agile list <root> --tree"
+        console.write_error_line "rig error: usage: agile list <root> --tree"
         2i32
 
 :~ list_routed () : i32 = ? tree_wanted () ?> tree_run () |: agile_task_listing.task_listing.agile_list_entry ()

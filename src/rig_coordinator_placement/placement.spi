@@ -62,7 +62,8 @@
 
 := placement_of (wanted : slot_class) (need : tree_need) (samples : list machine_sample) : placement_verdict =
     := pick = \ (best : option machine_sample) (sample : machine_sample) =>
-        ? free_of wanted sample.slots = 0u64 || (eligible need sample |> not) ?> best
+        ? free_of wanted sample.slots = 0u64 || (eligible need sample |> not)
+        ?> best
         |:
             ?= best ?|
             | None => Some sample

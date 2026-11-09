@@ -187,13 +187,17 @@
 
 :~ ^ unescaped_from (~text : string) (index : i32) (start : i32) (~acc : string) : string * i32 =
     := byte = byte_at text index
-    ? byte < 0i32 || byte = 34i32 ?> concat5 acc (text_between text start index) "" "" "", index + 1i32
+    ? byte < 0i32 || byte = 34i32
+    ?> concat5 acc (text_between text start index) "" "" "", index + 1i32
     |? byte = 92i32 ?>
         := next = byte_at text (index + 1i32)
         := taken = concat5 acc (text_between text start index) "" "" ""
-        ? next = 110i32 ?> unescaped_from text (index + 2i32) (index + 2i32) (concat5 taken "\n" "" "" "")
-        |? next = 114i32 ?> unescaped_from text (index + 2i32) (index + 2i32) (concat5 taken "\r" "" "" "")
-        |? next = 116i32 ?> unescaped_from text (index + 2i32) (index + 2i32) (concat5 taken "\t" "" "" "")
+        ? next = 110i32
+        ?> unescaped_from text (index + 2i32) (index + 2i32) (concat5 taken "\n" "" "" "")
+        |? next = 114i32
+        ?> unescaped_from text (index + 2i32) (index + 2i32) (concat5 taken "\r" "" "" "")
+        |? next = 116i32
+        ?> unescaped_from text (index + 2i32) (index + 2i32) (concat5 taken "\t" "" "" "")
         |: unescaped_from text (index + 2i32) (index + 1i32) taken
     |: unescaped_from text (index + 1i32) start acc
 
@@ -244,14 +248,12 @@
         := stop = ? stop < 0i32 ?> text_count text |: stop
         := line = text_between text offset stop
         := next =
-            ? starts_with line "inl memory_" && contains line "= Memory ("
-            ?>
+            ? starts_with line "inl memory_" && contains line "= Memory (" ?>
                 ?= entry_of_line line ?|
                 | EntryRead entry =>
                     { store ?| memories = MemoryThen (entry, store.memories); count = store.count + 1i32 }
                 | EntryRefused reason => { store ?| problems = concat5 store.problems reason "\n" "" "" }
-            |? starts_with line (index_marker ())
-            ?>
+            |? starts_with line (index_marker ()) ?>
                 := index, _ = quoted_at line 0i32
                 { store ?| index = index }
             |: store
@@ -261,7 +263,7 @@
     store_from text 0i32 { memories = NoMemories; count = 0i32; index = ""; problems = "" }
 
 := failed (~reason : string) : i32 =
-    stderr_line (concat5 "kit error: memory " reason "" "" "")
+    stderr_line (concat5 "rig error: memory " reason "" "" "")
     2i32
 
 := decimal_of (~text : string) (fallback : i32) : i32 = $'(!text).trim().parse::<i32>().ok().filter(|value| *value > \

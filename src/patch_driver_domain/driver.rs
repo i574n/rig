@@ -128,7 +128,7 @@ pub fn source_authoring_run(args: &[String]) -> Result<(), String> {
         if rig_patch_driver_source_authoring_mode_binding(0, 0) != 1 {
             return Err("typed preview mode rejected".to_owned());
         }
-        println!("kit proxy source-author preview ok target={} tag={} bytes={} sha256={} mutation=false", target.display(), tag, rendered.len(), rendered_hash);
+        println!("rig proxy source-author preview ok target={} tag={} bytes={} sha256={} mutation=false", target.display(), tag, rendered.len(), rendered_hash);
         return Ok(());
     }
     if rig_patch_driver_source_authoring_mode_binding(1, 1) != 1 {
@@ -158,7 +158,7 @@ pub fn source_authoring_run(args: &[String]) -> Result<(), String> {
         let _ = source_authoring_restore(&target, original.as_deref());
         return Err("typed authoring commit rejected and was rolled back".to_owned());
     }
-    println!("kit proxy source-author apply ok target={} tag={} bytes={} sha256={} mutation=true", target.display(), tag, rendered.len(), rendered_hash);
+    println!("rig proxy source-author apply ok target={} tag={} bytes={} sha256={} mutation=true", target.display(), tag, rendered.len(), rendered_hash);
     Ok(())
 }
 

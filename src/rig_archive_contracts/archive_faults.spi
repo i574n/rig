@@ -50,8 +50,8 @@
                     archive.to_str().expect("archive"),
                     destination.to_str().expect("destination"),
                 ])
-                .env("KIT_ARCHIVE_FAULT", fault)
-                .env("KIT_ARCHIVE_MAX_BYTES", "4096")
+                .env("RIG_ARCHIVE_FAULT", &fault).env("KIT_ARCHIVE_FAULT", fault)
+                .env("RIG_ARCHIVE_MAX_BYTES", "4096").env("KIT_ARCHIVE_MAX_BYTES", "4096")
                 .output()
                 .expect("run archive fault")
         }
@@ -100,8 +100,8 @@
                     archive.to_str().expect("archive"),
                     destination.to_str().expect("destination"),
                 ])
-                .env_remove("KIT_ARCHIVE_FAULT")
-                .env("KIT_ARCHIVE_MAX_BYTES", "4096")
+                .env_remove("RIG_ARCHIVE_FAULT").env_remove("KIT_ARCHIVE_FAULT")
+                .env("RIG_ARCHIVE_MAX_BYTES", "4096").env("KIT_ARCHIVE_MAX_BYTES", "4096")
                 .output()
                 .expect("run successful extraction");
             assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));

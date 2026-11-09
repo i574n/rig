@@ -28,7 +28,7 @@ pub use rig_patch_control_domain::patch_plan_error;
 
 fn patch_finish(result: Result<(), String>) -> i32 {
     if let Err(error) = result {
-        eprintln!("kit error: {error}");
+        eprintln!("rig error: {error}");
         2
     } else {
         0
@@ -113,7 +113,7 @@ enum PatchFault {
 
 
 fn patch_fault_from_env() -> Option<PatchFault> {
-    match env::var("KIT_PATCH_FAULT").ok().as_deref() {
+    match env::var("RIG_PATCH_FAULT").or_else(|_| env::var("KIT_PATCH_FAULT")).ok().as_deref() {
         Some("between-promotions") => Some(PatchFault::BetweenPromotions),
         Some("between-promotions-rollback-failure") => {
             Some(PatchFault::BetweenPromotionsRollbackFailure)
@@ -357,7 +357,7 @@ fn apply_patch_context_with_fault(
             }
         }
         println!(
-            "kit patch rehearse ok operations={} files={} {}",
+            "rig patch rehearse ok operations={} files={} {}",
             patches.len(),
             current.len(),
             receipt.public_context()
@@ -366,7 +366,7 @@ fn apply_patch_context_with_fault(
     }
 
     println!(
-        "kit patch ok operations={} files={} witness=spiral",
+        "rig patch ok operations={} files={} witness=spiral",
         patches.len(),
         current.len()
     );
@@ -829,7 +829,7 @@ pub fn patch_prepare_source_owned(root: &str, plan: &str) -> std::rc::Rc<str> {
     match prepare_patch_source(root, plan) {
         Ok(source) => std::rc::Rc::<str>::from(source),
         Err(error) => {
-            eprintln!("kit error: {error}");
+            eprintln!("rig error: {error}");
             std::rc::Rc::<str>::default()
         }
     }
@@ -846,7 +846,7 @@ pub fn patch_check_context_owned(root: &str, source: &str, validated_count: i32)
     ) {
         Ok(()) => validated_count,
         Err(error) => {
-            eprintln!("kit error: {error}");
+            eprintln!("rig error: {error}");
             -1
         }
     }
@@ -854,7 +854,7 @@ pub fn patch_check_context_owned(root: &str, source: &str, validated_count: i32)
 
 #[must_use]
 pub fn patch_apply_context_owned(root: &str, source: &str, validated_count: i32) -> i32 {
-    if std::env::var("KIT_PATCH_FAULT").ok().as_deref() == Some("after-typecheck") {
+    if std::env::var("RIG_PATCH_FAULT").or_else(|_| std::env::var("KIT_PATCH_FAULT")).ok().as_deref() == Some("after-typecheck") {
         return patch_finish(Err("injected patch fault after typecheck".to_owned()));
     }
     let result = apply_patch_context(std::path::Path::new(root), source, validated_count);

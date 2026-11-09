@@ -92,9 +92,9 @@
     := preview = agile root (ModeThenRoot ("migrate-tags", "preview"))
     accepted preview "ID-A moved=3 estimate=300m load=heavy assignee=agent tags=kit"
     accepted preview "ID-B moved=2 estimate=- load=light assignee=user tags=est:abc,web rejected=est:abc"
-    accepted preview "kit agile migrate-tags preview tasks=2 tags_moved=5 rejected=1"
+    accepted preview "rig agile migrate-tags preview tasks=2 tags_moved=5 rejected=1"
     same (state_read root) before
-    accepted (agile root (ModeThenRoot ("migrate-tags", "apply"))) "kit agile migrate-tags ok tasks=2"
+    accepted (agile root (ModeThenRoot ("migrate-tags", "apply"))) "rig agile migrate-tags ok tasks=2"
     := migrated = state_read root
     shows migrated "\"kit\", \"current\""
     shows migrated "\"est:abc,web\""
@@ -113,7 +113,7 @@
     accepted table "300m   heavy  agent"
     failed_with (agile root (RootThen ("list", with_arg "--load" "huge"))) "invalid planning filter"
     := plan = agile root (RootThen ("plan", ""))
-    accepted plan "kit agile plan ok tasks=3 open=2 estimated=1 minutes=300 open_minutes=300"
+    accepted plan "rig agile plan ok tasks=3 open=2 estimated=1 minutes=300 open_minutes=300"
     expect (epic_deps_line_counts_two plan.stdout) plan.stdout
     accepted
         (agile root (RootThen ("plan", "--json")))

@@ -10,13 +10,15 @@
     sm'.show (tenths / 10i64) ++# "." ++# sm'.show (tenths % 10i64)
 
 :~ ^ row_count (rows : array_base probe_row) (~word : string) (at : i32) (sum : i32) : i32 =
-    ? at >= am'.length_base rows ?> sum
+    ? at >= am'.length_base rows
+    ?> sum
     |:
         := row = am'.index_base at rows
         row_count rows word (at + 1i32) (? row.word = word ?> sum + row.count |: sum)
 
 :~ ^ first_totals (rows : array_base probe_row) (at : i32) (kept : list word_total) : list word_total =
-    ? at < 0i32 ?> kept
+    ? at < 0i32
+    ?> kept
     |: first_totals rows (at - 1i32) ({ word = (am'.index_base at rows).word; count = 0i32 } :: kept)
 
 :~ totals_added (totals : list word_total) (rows : array_base probe_row) : list word_total =
@@ -43,10 +45,10 @@
     | _ :: _ :: roots ?& roots <> [] =>
         roots |> listm.iter (\ (root : string) => console.write_line (scoreboard_line root))
         := count : i32 = listm.length roots
-        console.write_line ("kit standards scoreboard ok roots=" ++# sm'.show count)
+        console.write_line ("rig standards scoreboard ok roots=" ++# sm'.show count)
         0i32
     | _ =>
-        console.write_error_line "kit error: standards --scoreboard needs at least one root directory"
+        console.write_error_line "rig error: standards --scoreboard needs at least one root directory"
         2i32
 
 ///> rust

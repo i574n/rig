@@ -1,4 +1,3 @@
-
 := emit_owned_runtime () : () =
     global """
         #[must_use]
@@ -6,7 +5,7 @@
             match prepare_patch_source(root, plan) {
                 Ok(source) => std::rc::Rc::<str>::from(source),
                 Err(error) => {
-                    eprintln!("kit error: {error}");
+                    eprintln!("rig error: {error}");
                     std::rc::Rc::<str>::default()
                 }
             }
@@ -23,7 +22,7 @@
             ) {
                 Ok(()) => validated_count,
                 Err(error) => {
-                    eprintln!("kit error: {error}");
+                    eprintln!("rig error: {error}");
                     -1
                 }
             }
@@ -31,7 +30,7 @@
 
         #[must_use]
         pub fn patch_apply_context_owned(root: &str, source: &str, validated_count: i32) -> i32 {
-            if std::env::var("KIT_PATCH_FAULT").ok().as_deref() == Some("after-typecheck") {
+            if std::env::var("RIG_PATCH_FAULT").or_else(|_| std::env::var("KIT_PATCH_FAULT")).ok().as_deref() == Some("after-typecheck") {
                 return patch_finish(Err("injected patch fault after typecheck".to_owned()));
             }
             let result = apply_patch_context(std::path::Path::new(root), source, validated_count);

@@ -31,7 +31,8 @@
     | Reverse (relay, port) => PullOnly (relay, port)
 
 := in_window (w : day_window) (minute : i32) : bool =
-    ? w.from_minute <= w.until_minute ?> minute >= w.from_minute && minute < w.until_minute
+    ? w.from_minute <= w.until_minute
+    ?> minute >= w.from_minute && minute < w.until_minute
     |: minute >= w.from_minute || minute < w.until_minute
 
 := clock_minute (hour : i32) (minute : i32) : i32 = hour * 60i32 + minute
@@ -46,8 +47,10 @@
     ? am'.length_base found = 1i32 ?> Some (am'.index_base 0i32 found) |: None
 
 :~ link_of (~kind : string) (~address : string) (~extra : string) : option link =
-    ? kind = "direct" ?> Some (Direct address)
-    |? kind = "jump" ?> Some (Jump (sm'.split_list "," extra |> listm'.filter (\ (hop : string) => hop <> ""), address))
+    ? kind = "direct"
+    ?> Some (Direct address)
+    |? kind = "jump"
+    ?> Some (Jump (sm'.split_list "," extra |> listm'.filter (\ (hop : string) => hop <> ""), address))
     |? kind = "reverse" ?>
         := port = optionm'.default_value -1i32 (convert.try_convert extra)
         ? port > 0i32 ?> Some (Reverse (address, port)) |: None
@@ -69,15 +72,18 @@
     | _ => UnreadRow line
 
 :~ row_of_fleet_line (line : rig_net_fleet_file.fleet_file.fleet_line) : fleet_row =
-    ? line.kind = "network" ?> network_row line.text line.fields
-    |? line.kind = "machine" ?> machine_row line.text line.fields
+    ? line.kind = "network"
+    ?> network_row line.text line.fields
+    |? line.kind = "machine"
+    ?> machine_row line.text line.fields
     |: UnreadRow line.text
 
 :~ ^ rows_from
     (lines : array_base rig_net_fleet_file.fleet_file.fleet_line) (at : i32) (kept : list fleet_row)
     : list fleet_row
     =
-    ? at >= am'.length_base lines ?> listm.rev kept
+    ? at >= am'.length_base lines
+    ?> listm.rev kept
     |: rows_from lines (at + 1i32) (row_of_fleet_line (am'.index_base at lines) :: kept)
 
 :~ fleet_rows (~text : string) : list fleet_row = rows_from (rig_net_fleet_file.fleet_file.fleet_lines_of text) 0i32 []
@@ -96,10 +102,13 @@
     "  " ++# m.id ++# "  " ++# m.network ++# "  " ++# role ++# "  " ++# link_text m.link ++# "  " ++# os
 
 :~ config_dir () : string =
-    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := rig_home = env.get_environment_variable "RIG_CONFIG_HOME"
+    := home = ? rig_home <> "" ?> rig_home |: env.get_environment_variable "KIT_CONFIG_HOME"
     := app_data = env.get_environment_variable "APPDATA"
-    ? home <> "" ?> home
-    |? app_data <> "" ?> app_data ++# "/kit"
+    ? home <> ""
+    ?> home
+    |? app_data <> ""
+    ?> app_data ++# "/kit"
     |: env.get_environment_variable "HOME" ++# "/.config/kit"
 
 :~ ^ partitioned (rows : list fleet_row) (nets : list network) (ms : list machine) (bad : list string)
@@ -140,7 +149,7 @@
     := path = config_dir () ++# "/fleet.spi"
     := lines =
         ? file_system.file_exists path |> not
-        ?> [ { error = !+; text = "kit error: machine fleet: no fleet file at " ++# path } ]
+        ?> [ { error = !+; text = "rig error: machine fleet: no fleet file at " ++# path } ]
         |:
             := rows = fleet_rows (file_system.read_all_text path)
             := networks, machines, unread = partitioned rows [] [] []
@@ -150,7 +159,7 @@
             := more = " machines=" ++# sm'.show (listm.length machines : i32)
             := issues = " problems=" ++# sm'.show (listm.length problems : i32)
             := unread_count = " unread=" ++# sm'.show (listm.length unread : i32)
-            := receipt = "kit machine fleet ok" ++# counts ++# more ++# issues ++# unread_count ++# " file=" ++# path
+            := receipt = "rig machine fleet ok" ++# counts ++# more ++# issues ++# unread_count ++# " file=" ++# path
             := listing = report_of !- (fleet_lines networks machines)
             := closing = [ { error = !-; text = receipt } ]
             listm.concat [ listing; report_of !+ problems; report_of !+ unread_lines; closing ]

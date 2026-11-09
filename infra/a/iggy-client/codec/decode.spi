@@ -23,14 +23,21 @@
         first_number = 0i32; second_number = 0i32; third_number = 0i32
     }
 
-:= texts (e : iggy.event) (tag : i32) (first_text : string) (second_text : string) (third_text : string) (fourth_text : string) : decoded_fields =
+:= texts
+    (e : iggy.event) (tag : i32) (first_text : string) (second_text : string) (third_text : string)
+    (fourth_text : string)
+    : decoded_fields
+    =
     {
         status = 0i32; refused_value = 0i32; seq = e.seq; machine = e.machine; tag
         first_text; second_text; third_text; fourth_text
         first_number = 0i32; second_number = 0i32; third_number = 0i32
     }
 
-:= with_numbers (fields : decoded_fields) (first_number : i32) (second_number : i32) (third_number : i32) : decoded_fields =
+:= with_numbers
+    (fields : decoded_fields) (first_number : i32) (second_number : i32) (third_number : i32)
+    : decoded_fields
+    =
     { fields ?| first_number; second_number; third_number }
 
 :~ fields_of (e : iggy.event) : decoded_fields =
@@ -60,7 +67,18 @@
         (
             \ bytes =>
                 := f = decoded bytes
-                f.status, f.refused_value, f.seq, f.machine, f.tag, f.first_text, f.second_text, f.third_text, f.fourth_text, f.first_number, f.second_number, f.third_number
+                f.status,
+                f.refused_value,
+                f.seq,
+                f.machine,
+                f.tag,
+                f.first_text,
+                f.second_text,
+                f.third_text,
+                f.fourth_text,
+                f.first_number,
+                f.second_number,
+                f.third_number
             : array u8 -> i32 * i32 * u64 * string * i32 * string * string * string * string * i32 * i32 * i32
         )
     )

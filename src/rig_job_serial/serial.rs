@@ -246,7 +246,7 @@ fn serial_ran_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<UH0>, mut v3: i32, mut 
                     US1::US1_None => {
                         let v49: i32 = v3.wrapping_add(1i32);
                         let v50: Rc<str> = format_real_5(v49);
-                        let v52: Rc<str> = string_concat(&["kit error: job chain link ", &*v50, " failed"]);
+                        let v52: Rc<str> = string_concat(&["rig error: job chain link ", &*v50, " failed"]);
                         eprintln!("{}", v52);
                         let v54: bool = match &v1 {
                             US0::US0_AfterAny => {
@@ -265,7 +265,7 @@ fn serial_ran_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<UH0>, mut v3: i32, mut 
                             let v58: i32 = method7(v13, v57);
                             let v59: Rc<str> = format_real_5(v58);
                             let v60: Rc<str> = format_real_5(v49);
-                            let v64: Rc<str> = string_concat(&["kit job chain stopped serial ran=", &*v60, " failed=1 skipped=", &*v59]);
+                            let v64: Rc<str> = string_concat(&["rig job chain stopped serial ran=", &*v60, " failed=1 skipped=", &*v59]);
                             println!("{}", v64);
                             return 1i32;
                         }
@@ -290,7 +290,7 @@ fn serial_ran_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<UH0>, mut v3: i32, mut 
             UH0::UH0_Nil => {
                 let v5: Rc<str> = format_real_5(v3);
                 let v8: Rc<str> = format_real_5(v4);
-                let v9: Rc<str> = string_concat(&["kit job chain ok serial ran=", &*v5, " failed=", &*v8]);
+                let v9: Rc<str> = string_concat(&["rig job chain ok serial ran=", &*v5, " failed=", &*v8]);
                 println!("{}", v9);
                 let v10: bool = v4 == 0i32;
                 if v10 {
@@ -591,7 +591,7 @@ fn serial_run_0() -> i32 {
         }
         US2::US2_ChainRefused(v45) => {
             let v45: Rc<str> = v45;
-            let v46: Rc<str> = string_concat(&["kit error: job chain refused: ", &*v45]);
+            let v46: Rc<str> = string_concat(&["rig error: job chain refused: ", &*v45]);
             eprintln!("{}", v46);
             2i32
         }

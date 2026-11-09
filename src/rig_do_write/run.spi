@@ -47,7 +47,8 @@
 :~ append_run (~root : string) (~path : string) (~line : string) (~state : write_tally) : write_tally =
     := row, failed, lines, bytes =
         $'rig_do_file_steps::rig_do_append_step(&*!root, &*!path, &*!line)' : string * bool * u64 * u64
-    ? failed ?> { state ?| report = lines_joined state.report row; failed = !+; appends = state.appends + 1u64 }
+    ? failed
+    ?> { state ?| report = lines_joined state.report row; failed = !+; appends = state.appends + 1u64 }
     |:
         { state ?|
             report = lines_joined state.report row
@@ -157,8 +158,10 @@
 :~ written_counts (~state : write_tally) : string =
     := appends = "files " ++# (decimal_text state.appended_files) ++# "  appended " ++# (decimal_text state.appended)
     := head =
-        ? state.copies = 0u64 ?> appends
-        |? state.appends = 0u64 ?> "files " ++# (decimal_text state.copied) ++# " copied"
+        ? state.copies = 0u64
+        ?> appends
+        |? state.appends = 0u64
+        ?> "files " ++# (decimal_text state.copied) ++# " copied"
         |: appends ++# "  copied " ++# (decimal_text state.copied)
     := with_bytes = head ++# "  bytes " ++# (decimal_text state.bytes)
     ? state.copies = 0u64 ?> with_bytes |: with_bytes ++# "  skipped " ++# (decimal_text state.skipped)
@@ -166,7 +169,8 @@
 :~ receipt_counts (~state : write_tally) : string =
     ? state.writes > 0u64 && state.appends = 0u64 && state.copies = 0u64 && state.moves = 0u64 ?>
         "files " ++# (decimal_text state.written) ++# " written  bytes " ++# (decimal_text state.bytes)
-    |? state.appends = 0u64 && state.copies = 0u64 ?> "files " ++# (decimal_text state.moved) ++# " moved"
+    |? state.appends = 0u64 && state.copies = 0u64
+    ?> "files " ++# (decimal_text state.moved) ++# " moved"
     |:
         := written = written_counts state
         ? state.moves = 0u64 ?> written |: written ++# "  moved " ++# (decimal_text state.moved)

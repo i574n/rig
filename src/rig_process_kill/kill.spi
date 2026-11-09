@@ -69,22 +69,24 @@
     | _ :: rest => rest
     | [] => []
 
+:~ variable_of (~name : string) : string =
+    := renamed = env.get_environment_variable ("RIG_" ++# name)
+    ? renamed <> "" ?> renamed |: env.get_environment_variable ("KIT_" ++# name)
+
 :~ stop_run (~started : u64) : i32 =
     := words = kill_words ()
     := flags = kill_flags_read words { tree = !-; mine = !-; theirs = ""; targets = [] }
-    ? words = []
-    ?>
+    ? words = [] ?>
         stdout_line ("usage: kit " ++# (process_usage ()))
         2i32
     |:
         := own = own_pid ()
         := guard =
-            ? flags.mine
-            ?>
+            ? flags.mine ?>
                 MineOnly {
                     rows = rig_machine_watch.host.process_rows_sampled 100u64
                     own = own
-                    author = env.get_environment_variable "KIT_AUTHOR"
+                    author = variable_of "AUTHOR"
                     theirs = flags.theirs
                 }
             |: AnyProcess

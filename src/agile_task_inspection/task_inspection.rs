@@ -58,7 +58,7 @@ fn show_receipt_4(mut v0: Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: &
     let v13: Rc<str> = std::rc::Rc::<str>::from((v12).to_string());
     let v16: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v9);
     let v17: Rc<str> = std::rc::Rc::<str>::from((v16).to_string());
-    let v18: Rc<str> = string_concat(&["kit agile show ok id=", &*v0, " title_bytes=", &*v13, " elapsed_ms=", &*v17]);
+    let v18: Rc<str> = string_concat(&["rig agile show ok id=", &*v0, " title_bytes=", &*v13, " elapsed_ms=", &*v17]);
     v18
 }
 fn show_task_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: Rc<str>, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: Rc<str>, mut v10: Rc<str>, mut v11: u64) -> i32 {
@@ -469,7 +469,7 @@ fn agile_show_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US0) -> i32 {
             let v11: Rc<str> = v11;
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v15: Rc<str> = string_concat(&["agile show ", &*v1, " rejected: ", &*v12]);
-            let v16: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v15 + "
+            let v16: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v15 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v16
         }
@@ -486,7 +486,7 @@ fn agile_show_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US0) -> i32 {
             if v26 {
                 let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("no task with this id"); } LIT.with(|lit| lit.clone()) };
                 let v30: Rc<str> = string_concat(&["agile show ", &*v1, " rejected: ", &*v27]);
-                let v31: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v30 + "
+                let v31: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v30 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v31
             } else {
@@ -613,7 +613,7 @@ fn agile_show_entry_0() -> i32 {
                 let v45: i32 = 2i32;
                 let v46: Rc<str> = usize::try_from(v45).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
                 let v49: Rc<str> = string_concat(&["agile show ", &*v46, " rejected: ", &*v44]);
-                let v50: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v49 + "
+                let v50: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v49 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v50
             }

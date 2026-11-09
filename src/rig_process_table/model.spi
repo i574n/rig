@@ -59,8 +59,10 @@
 :~ stop_refusal_of (~pid_text : string) (~own : u64) (~ancestors : string) : stop_refusal =
     ? all_digits pid_text ?>
         := pid = decimal_of pid_text
-        ? pid = own ?> OwnProcess
-        |? sm'.contains ("," ++# pid_text ++# ",") ("," ++# ancestors ++# ",") ?> OwnAncestor
+        ? pid = own
+        ?> OwnProcess
+        |? sm'.contains ("," ++# pid_text ++# ",") ("," ++# ancestors ++# ",")
+        ?> OwnAncestor
         |: Allowed pid
     |: NotAProcessId
 
@@ -93,7 +95,8 @@
             "stop "
             ++# pid_text
             ++# ("  stopped " ++# (count_text stopped) ++# " of " ++# (count_text total) ++# " processes")
-        |? total = 1u64 ?> "stop " ++# pid_text ++# "  stopped"
+        |? total = 1u64
+        ?> "stop " ++# pid_text ++# "  stopped"
         |: "stop " ++# pid_text ++# "  stopped (tree: " ++# (count_text total) ++# " processes)"
 
 := expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail

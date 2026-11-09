@@ -90,7 +90,7 @@ fn census_printed_5(mut v0: &Rc<RefCell<Vec<(Rc<str>, i32)>>>, mut v1: i32) -> (
         if v3 {
             let (mut v4, mut v5): (Rc<str>, i32) = v0.borrow()[v1 as usize].clone();
             let v8: Rc<str> = format_real_6(v5);
-            let v9: Rc<str> = string_concat(&["kit agile lint census check=", &*v4, " items=", &*v8]);
+            let v9: Rc<str> = string_concat(&["rig agile lint census check=", &*v4, " items=", &*v8]);
             println!("{}", v9);
             let v10: i32 = v1.wrapping_add(1i32);
             v1 = v10;
@@ -194,7 +194,7 @@ fn lint_run_0() -> i32 {
                                             let v31: i32 = distinct_ids_9(&v25, v28, v29, v30);
                                             let v32: Rc<str> = format_real_6(v31);
                                             let v35: Rc<str> = format_real_6(v27);
-                                            let v37: Rc<str> = string_concat(&["kit agile lint ok failing_items=", &*v32, " failing_checks=", &*v35, " (report only; legacy items ratchet)"]);
+                                            let v37: Rc<str> = string_concat(&["rig agile lint ok failing_items=", &*v32, " failing_checks=", &*v35, " (report only; legacy items ratchet)"]);
                                             println!("{}", v37);
                                             0i32
                                         } else {
@@ -220,7 +220,7 @@ fn lint_run_0() -> i32 {
                                         let v51: i32 = distinct_ids_9(&v46, v49, v45, v50);
                                         let v52: Rc<str> = format_real_6(v51);
                                         let v55: Rc<str> = format_real_6(v48);
-                                        let v57: Rc<str> = string_concat(&["kit agile lint ok failing_items=", &*v52, " failing_checks=", &*v55, " (report only; legacy items ratchet)"]);
+                                        let v57: Rc<str> = string_concat(&["rig agile lint ok failing_items=", &*v52, " failing_checks=", &*v55, " (report only; legacy items ratchet)"]);
                                         println!("{}", v57);
                                         0i32
                                     } else {

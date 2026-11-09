@@ -100,7 +100,7 @@ pub fn copy_tree_run(args: &[String]) -> Result<(), String> {
     let destination = Path::new(&args[2]);
     let started = proxy_file_receipt::rig_file_clock_ms();
     let copied = legacy_copy_tree_with_hook(source, destination, |_| Ok(()))?;
-    println!("kit proxy fs-copy-tree ok source={} destination={} files={copied}{}", source.display(), destination.display(), proxy_file_receipt::rig_elapsed_field(started));
+    println!("rig proxy fs-copy-tree ok source={} destination={} files={copied}{}", source.display(), destination.display(), proxy_file_receipt::rig_elapsed_field(started));
     Ok(())
 }
 

@@ -71,7 +71,7 @@ fn remote_arguments_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<U
         let mut v5: Rc<str> = string_concat(&[" --skip ", &*v2]);
         v5
     };
-    let v8: Rc<str> = string_concat(&["kit mirror manifest ", &*v1, &*v6]);
+    let v8: Rc<str> = string_concat(&["rig mirror manifest ", &*v1, &*v6]);
     let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-o"); } LIT.with(|lit| lit.clone()) };
     let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("BatchMode=yes"); } LIT.with(|lit| lit.clone()) };
     let mut v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ConnectTimeout=12"); } LIT.with(|lit| lit.clone()) };

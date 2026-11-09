@@ -72,17 +72,18 @@
     ?= step ?|
     | RunForeground (command, timeout) =>
         := problem = run_started runs root command ""
-        ? problem = "" ?> foreground_run runs state records record command "" timeout
+        ? problem = ""
+        ?> foreground_run runs state records record command "" timeout
         |: { (reported state (concat5 "run " command "  " problem "") !+) ?| runs = state.runs + 1u64 }
     | RunUntil (command, needle, timeout) =>
         := problem = run_started runs root command ""
-        ? problem = "" ?> foreground_run runs state records record command needle timeout
+        ? problem = ""
+        ?> foreground_run runs state records record command needle timeout
         |: { (reported state (concat5 "run " command "  " problem "") !+) ?| runs = state.runs + 1u64 }
     | RunBackground (command, name) =>
         := problem = run_started runs root command name
         := line =
-            ? problem = ""
-            ?>
+            ? problem = "" ?>
                 concat5
                     "run "
                     command
@@ -132,8 +133,7 @@
     |: state
 
 :~ ^ first_rejection (~records : record_list) (~index : i32) : string =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         ? field_at records index 0i32 <> "query"
         ?> "edit and run statements cannot share one program yet; run them as two calls"
         |:
@@ -178,7 +178,8 @@
 
 :~ ^ query_rejection (~records : record_list) (~index : i32) : string =
     ? index < record_count records ?>
-        ? field_at records index 0i32 <> "query" ?> query_rejection records (index + 1i32)
+        ? field_at records index 0i32 <> "query"
+        ?> query_rejection records (index + 1i32)
         |:
             ?= step_parsed records index ?|
             | StepRejected message => message

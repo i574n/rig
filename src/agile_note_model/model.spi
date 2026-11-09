@@ -52,8 +52,10 @@
 
 :~ ^ declared_from (text : string) (~needle : string) (offset : i32) : i32 =
     := found = byte_find_from text needle offset
-    ? found < 0i32 ?> found
-    |? declared_task text found ?> found
+    ? found < 0i32
+    ?> found
+    |? declared_task text found
+    ?> found
     |: declared_from text needle (found + 1i32)
 
 :~ ^ declared_count (text : string) (~needle : string) (offset : i32) (counted : i32) : i32 =
@@ -111,16 +113,20 @@
 
 := escape_target (text : string) (escaped : i32) : string =
     := code = byte_at text escaped
-    ? code = ascii_n () ?> "\n"
-    |? code = ascii_r () ?> "\r"
-    |? code = ascii_t () ?> "\t"
+    ? code = ascii_n ()
+    ?> "\n"
+    |? code = ascii_r ()
+    ?> "\r"
+    |? code = ascii_t ()
+    ?> "\t"
     |: byte_slice text escaped (escaped + 1i32)
 
 :~ ^ unescaped_from
     (~text : string) (~offset : i32) (~run_start : i32) (~length : i32) (~decoded : string)
     : string
     =
-    ? length <= offset ?> rust_std_string.model.concat5 decoded (byte_slice text run_start length) "" "" ""
+    ? length <= offset
+    ?> rust_std_string.model.concat5 decoded (byte_slice text run_start length) "" "" ""
     |? byte_at text offset = backslash_byte () ?>
         := escaped = offset + 1i32
         := resumed = escaped + 1i32
@@ -167,7 +173,8 @@
 
 :~ ^ note_lines_from (text : string) (~needle : string) (offset : i32) (~lines : string) : string =
     := found = declared_from text needle offset
-    ? found < 0i32 ?> lines
+    ? found < 0i32
+    ?> lines
     |:
         note_lines_from text needle
             (found + 1i32)
@@ -175,7 +182,8 @@
 
 :~ ^ note_json_from (text : string) (~needle : string) (offset : i32) (~items : string) (~joint : string) : string =
     := found = declared_from text needle offset
-    ? found < 0i32 ?> items
+    ? found < 0i32
+    ?> items
     |:
         note_json_from text needle
             (found + 1i32)
@@ -184,7 +192,8 @@
 
 :~ notes_text (text : string) (~id : string) : string =
     := count = note_count text id
-    ? count = 0i32 ?> ""
+    ? count = 0i32
+    ?> ""
     |:
         note_lines_from text
             (item_anchor NoteItem id)
@@ -245,7 +254,7 @@
 := pause_marker (~path : string) : string = rust_std_string.model.concat5 path ".paused" "" "" ""
 := pause_after_read_for_tests (~path : string) : () =
     := marker = pause_marker path
-    $'std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = \
+    $'std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = \
         std::fs::write(&*!marker, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = \
         std::fs::remove_file(&*!marker); }).unwrap_or(())' : ()
 
@@ -267,8 +276,10 @@
     | [] => listm.rev found
     | line :: rest =>
         := trimmed = sm'.trim line
-        ? sm'.ends_with ":" trimmed ?> segment_modules rest (trimmed = "modules:") found
-        |? in_modules && sm'.starts_with "notes_" trimmed ?> segment_modules rest !+ (trimmed :: found)
+        ? sm'.ends_with ":" trimmed
+        ?> segment_modules rest (trimmed = "modules:") found
+        |? in_modules && sm'.starts_with "notes_" trimmed
+        ?> segment_modules rest !+ (trimmed :: found)
         |: segment_modules rest in_modules found
 
 :~ state_file_text (~state_dir : string) (~name : string) : string =
@@ -296,10 +307,12 @@
         listm.rev (? placed || not in_modules ?> found |: entry_of segment :: found)
     | line :: rest =>
         := trimmed = sm'.trim line
-        ? trimmed = segment ?> listm.append (listm.rev found) lines
+        ? trimmed = segment
+        ?> listm.append (listm.rev found) lines
         |? sm'.ends_with ":" trimmed && in_modules && not placed
         ?> manifest_lines_with rest segment (trimmed = "modules:") !+ (line :: entry_of segment :: found)
-        |? sm'.ends_with ":" trimmed ?> manifest_lines_with rest segment (trimmed = "modules:") placed (line :: found)
+        |? sm'.ends_with ":" trimmed
+        ?> manifest_lines_with rest segment (trimmed = "modules:") placed (line :: found)
         |? in_modules && not placed && trimmed <> "agile" && not (sm'.starts_with "notes_" trimmed)
         ?> manifest_lines_with rest segment in_modules !+ (line :: entry_of segment :: found)
         |: manifest_lines_with rest segment in_modules placed (line :: found)

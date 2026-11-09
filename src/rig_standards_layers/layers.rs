@@ -634,11 +634,11 @@ fn layers_measured_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
     let v38: Rc<str> = string_concat(&[" modules=", &*v28, " unassigned=", &*v31, " violations=", &*v34, " baseline=", &*v37]);
     let v39: bool = v23 > v25;
     if v39 {
-        let v40: Rc<str> = string_concat(&["kit standards layers refused: violations grew past the HEAD baseline;", &*v38]);
+        let v40: Rc<str> = string_concat(&["rig standards layers refused: violations grew past the HEAD baseline;", &*v38]);
         println!("{}", v40);
         1i32
     } else {
-        let v41: Rc<str> = string_concat(&["kit standards layers ok", &*v38]);
+        let v41: Rc<str> = string_concat(&["rig standards layers ok", &*v38]);
         println!("{}", v41);
         0i32
     }
@@ -712,14 +712,14 @@ fn layers_checked_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let mut v3: i32 = rig_standards_layers_model::rig_layers_table_count(&v2);
     let mut v4: bool = v3 == 0i32;
     if v4 {
-        let mut v5: Rc<str> = string_concat(&["kit error: standards --layers: no LayerRow rows in ", &*v1]);
+        let mut v5: Rc<str> = string_concat(&["rig error: standards --layers: no LayerRow rows in ", &*v1]);
         eprintln!("{}", v5);
         2i32
     } else {
         let v6: US2 = tree_of_31(v0.clone());
         match v6 {
             US2::US2_None => {
-                let v12: Rc<str> = string_concat(&["kit error: standards --layers: git could not list ", &*v0, "; the baseline needs HEAD"]);
+                let v12: Rc<str> = string_concat(&["rig error: standards --layers: git could not list ", &*v0, "; the baseline needs HEAD"]);
                 eprintln!("{}", v12);
                 2i32
             }
@@ -832,21 +832,21 @@ fn layers_run_0() -> i32 {
                             layers_checked_1(v6, v15)
                         }
                         _ => {
-                            let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --layers <lib root> [--table <layers.spi>]"); } LIT.with(|lit| lit.clone()) };
+                            let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --layers <lib root> [--table <layers.spi>]"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v17);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --layers <lib root> [--table <layers.spi>]"); } LIT.with(|lit| lit.clone()) };
+                    let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --layers <lib root> [--table <layers.spi>]"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v19);
                     2i32
                 }
             }
         }
         _ => {
-            let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --layers <lib root> [--table <layers.spi>]"); } LIT.with(|lit| lit.clone()) };
+            let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --layers <lib root> [--table <layers.spi>]"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v21);
             2i32
         }

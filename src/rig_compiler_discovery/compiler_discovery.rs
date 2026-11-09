@@ -116,7 +116,7 @@ fn validate_spiral_compiler(candidate: &std::path::Path, source: &'static str) -
 }
 
 fn spiral_compiler_config_path() -> Option<std::path::PathBuf> {
-    if let Some(value) = std::env::var_os("KIT_CONFIG_HOME").filter(|value| !value.is_empty()) { return Some(std::path::PathBuf::from(value).join("spiral-compiler.path")); }
+    if let Some(value) = std::env::var_os("RIG_CONFIG_HOME").or_else(|| std::env::var_os("KIT_CONFIG_HOME")).filter(|value| !value.is_empty()) { return Some(std::path::PathBuf::from(value).join("spiral-compiler.path")); }
     if let Some(value) = std::env::var_os("XDG_CONFIG_HOME").filter(|value| !value.is_empty()) { return Some(std::path::PathBuf::from(value).join("kit/spiral-compiler.path")); }
     #[cfg(windows)] if let Some(value) = std::env::var_os("APPDATA").filter(|v| !v.is_empty()) { return Some(std::path::PathBuf::from(value).join("kit/spiral-compiler.path")); }
     std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).filter(|value| !value.is_empty()).map(|value| std::path::PathBuf::from(value).join(".config/kit/spiral-compiler.path"))
@@ -149,7 +149,7 @@ fn path_spiral_compiler() -> Result<Option<SpiralCompilerDiscovery>, String> {
 
 pub fn resolve_spiral_compiler(explicit: Option<&str>) -> Result<Option<SpiralCompilerDiscovery>, String> {
     if let Some(value) = explicit.filter(|value| !value.trim().is_empty()) { return validate_spiral_compiler(std::path::Path::new(value), "argument").map(Some); }
-    if let Some(value) = std::env::var_os("KIT_SPIRAL_COMPILE").filter(|value| !value.is_empty()) {
+    if let Some(value) = std::env::var_os("RIG_SPIRAL_COMPILE").or_else(|| std::env::var_os("KIT_SPIRAL_COMPILE")).filter(|value| !value.is_empty()) {
         let value = value.to_string_lossy();
         return validate_spiral_compiler(std::path::Path::new(value.as_ref()), "environment").map(Some);
     }

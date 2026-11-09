@@ -383,7 +383,7 @@ fn joined_16(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     v2
 }
 fn jobs_root_17() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_JOBS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
     v0
 }
 fn job_directory_15(mut v0: Rc<str>) -> Rc<str> {
@@ -940,11 +940,11 @@ fn doctor_run_1(mut v0: Rc<dyn Fn() -> (bool, Rc<str>)>, mut v1: Rc<dyn Fn() -> 
     let v57: Rc<str> = string_concat(&[" processes=", &*v53, " findings=", &*v56]);
     let v58: bool = v50 == 0i32;
     if v58 {
-        let v59: Rc<str> = string_concat(&["kit job doctor ok", &*v57]);
+        let v59: Rc<str> = string_concat(&["rig job doctor ok", &*v57]);
         println!("{}", v59);
         0i32
     } else {
-        let mut v60: Rc<str> = string_concat(&["kit job doctor refused:", &*v57]);
+        let mut v60: Rc<str> = string_concat(&["rig job doctor refused:", &*v57]);
         println!("{}", v60);
         1i32
     }

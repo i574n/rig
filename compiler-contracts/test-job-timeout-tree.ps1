@@ -1,6 +1,6 @@
 param([string]$Kit = (Join-Path $PSScriptRoot '..\src\target\debug\kit.exe'))
 $ErrorActionPreference = 'Stop'
-$env:KIT_JOBS_HOME = Join-Path ([IO.Path]::GetTempPath()) "kit-timeout-tree-$PID"
+$env:RIG_JOBS_HOME = $env:KIT_JOBS_HOME = Join-Path ([IO.Path]::GetTempPath()) "kit-timeout-tree-$PID"
 $marker = "kit-timeout-tree-$PID"
 $started = & $Kit job start timeout-tree 3000 pwsh -NoProfile -Command "`$null = '$marker'; Start-Process pwsh -ArgumentList '-NoProfile','-Command','`$null = ''$marker''; Start-Sleep 60' -NoNewWindow; Start-Sleep 60"
 $id = [regex]::Match("$started", 'id=(\S+)').Groups[1].Value

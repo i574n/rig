@@ -71,7 +71,8 @@
             := valid = file_nonempty archive
             := cleanup = cleanup_archive archive
             ? valid ?>
-                ? cleanup ?> BundleVerifyAccepted "bundle-verify-valid-accepted"
+                ? cleanup
+                ?> BundleVerifyAccepted "bundle-verify-valid-accepted"
                 |: BundleVerifyFailed "bundle-verify-valid-cleanup-failed"
             |: BundleVerifyRejected "bundle-verify-valid-rejected"
         |: BundleVerifyFailed "bundle-verify-fixture-write-failed"
@@ -85,7 +86,8 @@
                 := corrupt = file_nonempty archive
                 := cleanup = cleanup_archive archive
                 ? corrupt ?>
-                    ? cleanup ?> BundleVerifyRejected "bundle-verify-corruption-rejected"
+                    ? cleanup
+                    ?> BundleVerifyRejected "bundle-verify-corruption-rejected"
                     |: BundleVerifyFailed "bundle-verify-corruption-cleanup-failed"
                 |: BundleVerifyFailed "bundle-verify-corruption-empty"
             |: BundleVerifyFailed "bundle-verify-fixture-truncate-failed"

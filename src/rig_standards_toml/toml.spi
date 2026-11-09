@@ -14,7 +14,8 @@
     := marker = "not properly formatted path=\""
     := picked = \ (found : list string) (line : string) =>
         := at = sm'.index_of marker line
-        ? at < 0i32 ?> found
+        ? at < 0i32
+        ?> found
         |:
             := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
             := first_piece = \ (first : string) (p : string) => ? first = "" ?> p |: first
@@ -30,12 +31,12 @@
 
 :~ verdict_lines (verdict : toml_verdict) : list string =
     ?= verdict ?|
-    | Formatted count => [ "kit standards toml ok files=" ++# sm'.show count ++# " unformatted=0" ]
+    | Formatted count => [ "rig standards toml ok files=" ++# sm'.show count ++# " unformatted=0" ]
     | Unformatted paths =>
         := rows = paths |> listm.map (\ (p : string) => p ++# ":1  toml-format  not formatted by the taplo config")
-        listm.append rows [ "kit standards toml refused unformatted=" ++# sm'.show (listm.length paths : i32) ]
-    | NoConfig repo => [ "kit standards toml: no .taplo.toml at " ++# repo ++# " and TAPLO_CONFIG names no file" ]
-    | NoTaplo => [ "kit standards toml: taplo is not on PATH" ]
+        listm.append rows [ "rig standards toml refused unformatted=" ++# sm'.show (listm.length paths : i32) ]
+    | NoConfig repo => [ "rig standards toml: no .taplo.toml at " ++# repo ++# " and TAPLO_CONFIG names no file" ]
+    | NoTaplo => [ "rig standards toml: taplo is not on PATH" ]
 
 :~ verdict_code (verdict : toml_verdict) : i32 =
     ?= verdict ?|
@@ -49,12 +50,14 @@
     := own = sm'.replace "\\" "/" repo ++# "/.taplo.toml"
     := shared = sm'.replace "\\" "/" (env.get_environment_variable "TAPLO_CONFIG")
     := config = taplo_config own (file_system.file_exists own) shared
-    ? config = "" || (file_system.file_exists config |> not) ?> NoConfig repo
+    ? config = "" || (file_system.file_exists config |> not)
+    ?> NoConfig repo
     |:
         := listed = process.captured_by "git" [ "-C"; repo; "ls-files"; "*.toml" ] !-
         := files = toml_files listed.stdout
         := checked = process.captured_by "taplo" (listm.append [ "fmt"; "--check"; "--config"; config ] files) !+
-        ? checked.ran |> not ?> NoTaplo
+        ? checked.ran |> not
+        ?> NoTaplo
         |:
             ?= unformatted_paths checked.stdout ?|
             | [] => Formatted (listm.length files)
@@ -67,7 +70,7 @@
         verdict_lines verdict |> listm.iter console.write_line
         verdict_code verdict
     | _ =>
-        console.write_error_line "kit error: usage: standards --toml <repo>"
+        console.write_error_line "rig error: usage: standards --toml <repo>"
         2i32
 
 ///> rust
@@ -79,7 +82,7 @@
     := listing = "Cargo.toml\nsrc/x/Cargo.toml\ngleam/manifest.toml\n\n"
     testing.expect (toml_files listing = [ "Cargo.toml"; "src/x/Cargo.toml" ]) "files"
     testing.expect (verdict_code (Unformatted [ "a" ]) = 1i32 && verdict_code NoTaplo = 2i32) "exit codes"
-    testing.expect (verdict_lines (Formatted 3i32) = [ "kit standards toml ok files=3 unformatted=0" ]) "a clean line"
+    testing.expect (verdict_lines (Formatted 3i32) = [ "rig standards toml ok files=3 unformatted=0" ]) "a clean line"
 
 ///> rust
 :# a_repo_config_wins_and_the_shared_one_is_the_fallback =

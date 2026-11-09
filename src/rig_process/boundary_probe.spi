@@ -105,8 +105,10 @@
                                 "/opt/spiral/compiler-session/lib/SpiralHelloRunner"
                                 "--server"
                                 "/tmp/lane.sock"
-                        ? matching_scope <> 1i32 ?> 26i32
-                        |? other_scope <> 0i32 ?> 27i32
+                        ? matching_scope <> 1i32
+                        ?> 26i32
+                        |? other_scope <> 0i32
+                        ?> 27i32
                         |:
                             := _ : process_boundary_probe boundary_session boundary_done = FinishBoundaryProbe
                             0i32

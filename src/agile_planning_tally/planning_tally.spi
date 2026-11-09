@@ -72,12 +72,14 @@
     : planning_tally
     =
     := found = byte_find_from text (task_marker ()) offset
-    ? found < 0i32 ?> tally
+    ? found < 0i32
+    ?> tally
     |:
         := arguments = (found + (task_arguments_offset ()))
         ? declared_task text found ?>
             := task = rollup_task_at text arguments length
-            ? bucket_holds bucket task ?> tally_from text arguments length bucket (tally_with tally task)
+            ? bucket_holds bucket task
+            ?> tally_from text arguments length bucket (tally_with tally task)
             |: tally_from text arguments length bucket tally
         |: tally_from text arguments length bucket tally
 

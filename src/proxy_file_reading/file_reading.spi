@@ -62,8 +62,10 @@
 := ascii_newline () : i32 = 10i32
 
 := content_ending_of (last_byte : i32) : content_ending =
-    ? last_byte < 0i32 ?> ContentClosed
-    |? last_byte = ascii_newline () ?> ContentClosed
+    ? last_byte < 0i32
+    ?> ContentClosed
+    |? last_byte = ascii_newline ()
+    ?> ContentClosed
     |: ContentOpen
 
 := content_ending_text (ending : content_ending) : string =
@@ -79,7 +81,7 @@
 :~ read_receipt_text (~path : string) (shown : u64) (last_byte : i32) (started : u64) : string =
     := file_bytes = regular_file_bytes path
     := head =
-        "kit proxy fs-read ok bytes="
+        "rig proxy fs-read ok bytes="
         ++# u64_text file_bytes
         ++# " shown="
         ++# u64_text shown
@@ -96,10 +98,12 @@
 
 := read_rooted (~root : string) (~relative : string) (limit : read_limit) (started : u64) : read_outcome =
     := path = rooted_path root relative
-    ? (path = "") ?> ReadRejected ("fs-read path rejected: " ++# (rooted_path_problem root relative))
+    ? (path = "")
+    ?> ReadRejected ("fs-read path rejected: " ++# (rooted_path_problem root relative))
     |:
         := problem = open_problem path
-        ? (problem = "") ?> stream_file path limit started
+        ? (problem = "")
+        ?> stream_file path limit started
         |: ReadRejected ("fs-read failed: " ++# problem)
 
 := read_with_limit (~root : string) (~relative : string) (~limit_text : string) (started : u64) : read_outcome =
@@ -110,8 +114,10 @@
 :~ file_reading_outcome () : read_outcome =
     := started = unix_ms ()
     := operands = proxy_argument_count ()
-    ? $"!operands == 3" ?> read_rooted (proxy_argument 1i32) (proxy_argument 2i32) WholeFile started
-    |? $"!operands == 4" ?> read_with_limit (proxy_argument 1i32) (proxy_argument 2i32) (proxy_argument 3i32) started
+    ? $"!operands == 3"
+    ?> read_rooted (proxy_argument 1i32) (proxy_argument 2i32) WholeFile started
+    |? $"!operands == 4"
+    ?> read_with_limit (proxy_argument 1i32) (proxy_argument 2i32) (proxy_argument 3i32) started
     |: ReadRejected "fs-read expects <root> <relative> [max-bytes]"
 
 :~ file_reading_report () : i32 * string =

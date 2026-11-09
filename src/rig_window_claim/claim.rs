@@ -103,7 +103,7 @@ fn now_ms_3() -> u64 {
     v0
 }
 fn windows_root_4() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_WINDOWS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
     v0
 }
 fn stored_rows_5(mut v0: Rc<str>) -> Rc<str> {
@@ -604,7 +604,7 @@ fn stdout_line_31(mut v0: Rc<str>) -> () {
 fn window_claimed_1(mut v0: Rc<str>) -> i32 {
     let mut v1: bool = &*v0 == "";
     if v1 {
-        let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: window claim <path> (refused while a tree-read window covers the path)"); } LIT.with(|lit| lit.clone()) };
+        let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: window claim <path> (refused while a tree-read window covers the path)"); } LIT.with(|lit| lit.clone()) };
         stderr_line_2(v2);
         2i32
     } else {
@@ -629,7 +629,7 @@ fn window_claimed_1(mut v0: Rc<str>) -> i32 {
         };
         match v17 {
             US10::US10_EditAllowed => {
-                let v20: Rc<str> = string_concat(&["kit window claim ok path=", &*v0, " edit allowed"]);
+                let v20: Rc<str> = string_concat(&["rig window claim ok path=", &*v0, " edit allowed"]);
                 stdout_line_31(v20);
                 0i32
             }
@@ -641,7 +641,7 @@ fn window_claimed_1(mut v0: Rc<str>) -> i32 {
                 let v31: u64 = v30.wrapping_add(59999u64);
                 let v32: u64 = v31.wrapping_div(60000u64);
                 let v33: Rc<str> = format_real_22(v32);
-                let v36: Rc<str> = string_concat(&["kit window claim refused path=", &*v0, " edit refused: ", &*v21, " is read by ", &*v22, " for ", &*v33, " more min"]);
+                let v36: Rc<str> = string_concat(&["rig window claim refused path=", &*v0, " edit refused: ", &*v21, " is read by ", &*v22, " for ", &*v33, " more min"]);
                 stdout_line_31(v36);
                 1i32
             }

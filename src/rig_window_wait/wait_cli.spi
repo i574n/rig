@@ -17,7 +17,7 @@
     := waited =
         succeeded (wait_call root (Arg ("live-gui,compiler-install", Arg ("--settle", Arg ("2", Arg ("--every",
             Arg ("1", Arg ("--max", Arg ("1", NoArgs)))))))))
-    shows waited "kit window wait-clear ok classes=live-gui,compiler-install"
+    shows waited "rig window wait-clear ok classes=live-gui,compiler-install"
     shows waited "contended busy_samples="
     fixture_root_remove root
 

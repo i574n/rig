@@ -22,7 +22,8 @@
 :~ newest_labeled (label : string) : string =
     := root = jobs_root ()
     := labeled = \ (name : string) => sm'.trim (text_or_empty (joined (joined root name) "label")) = label
-    ? label = "" ?> ""
+    ? label = ""
+    ?> ""
     |: rig_os_files.files.entry_names root |> listm'.filter labeled |> listm.fold (\ best name => newer_of best name) ""
 
 := dashed_of (~name : string) : string = sm'.replace "." "-" (sm'.replace "_" "-" (sm'.to_lower name)) ++# "-"

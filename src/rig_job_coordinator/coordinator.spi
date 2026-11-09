@@ -26,8 +26,10 @@
 
 :~ receipt_of (~text : string) : receipt_read =
     := found = sm'.split_list "\n" text |> listm.fold receipt_folded { package = ""; ebins = []; entry = "" }
-    ? found.ebins = [] ?> ReceiptRefused "the receipt names no ebin; run the build again"
-    |? found.entry = "" ?> ReceiptRefused "the receipt names no entry module"
+    ? found.ebins = []
+    ?> ReceiptRefused "the receipt names no ebin; run the build again"
+    |? found.entry = ""
+    ?> ReceiptRefused "the receipt names no entry module"
     |: ReceiptRead found
 
 :~ erl_args (found : receipt) : list string =
@@ -64,12 +66,12 @@
     ?= receipt_of ran.stdout ?|
     | ReceiptRefused reason =>
         := exit = " (exit " ++# sm'.show ran.code ++# ")"
-        console.write_error_line ("kit error: job coordinator build: " ++# reason ++# exit)
+        console.write_error_line ("rig error: job coordinator build: " ++# reason ++# exit)
         1i32
     | ReceiptRead found =>
         file_system.write_all_text (root ++# "/coordinator.receipt") ran.stdout
         := ebins = sm'.show (listm.length found.ebins : i32)
-        console.write_line ("kit job coordinator build ok ebins=" ++# ebins ++# " package=" ++# found.package)
+        console.write_line ("rig job coordinator build ok ebins=" ++# ebins ++# " package=" ++# found.package)
         0i32
 
 :~ missing_ebins (found : receipt) : list string =
@@ -80,13 +82,13 @@
     := text = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
     ?= receipt_of text ?|
     | ReceiptRefused reason =>
-        console.write_error_line ("kit error: job coordinator start: " ++# reason ++# "; run kit job coordinator build")
+        console.write_error_line ("rig error: job coordinator start: " ++# reason ++# "; run kit job coordinator build")
         2i32
     | ReceiptRead found ?& missing_ebins found <> [] =>
-        console.write_error_line "kit error: job coordinator start: a built ebin is gone; run kit job coordinator build"
+        console.write_error_line "rig error: job coordinator start: a built ebin is gone; run kit job coordinator build"
         2i32
     | ReceiptRead found ?& args.spool = "" =>
-        console.write_error_line "kit error: job coordinator start: --spool <dir> is required"
+        console.write_error_line "rig error: job coordinator start: --spool <dir> is required"
         2i32
     | ReceiptRead found =>
         := kit = env.current_executable ()
@@ -99,9 +101,10 @@
 :~ coordinator_run (~root : string) : i32 =
     := args = am'.index_base 0i32 (rig_job_coordinator_args.args.coordinator_args_read 2i32)
     ? args.rejected <> "" ?>
-        console.write_error_line ("kit error: job coordinator: " ++# args.rejected)
+        console.write_error_line ("rig error: job coordinator: " ++# args.rejected)
         2i32
-    |? args.build ?> built root args
+    |? args.build
+    ?> built root args
     |: started root args
 
 :~ submission_line (~id : string) (~label : string) (~machine : string) (timeout_ms : u64) (command : list string)

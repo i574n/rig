@@ -4,7 +4,7 @@
 :< window_model
 
 :~ windows_root () : string =
-    $'std::rc::Rc::<str>::from(std::env::var_os("KIT_WINDOWS_HOME").map(std::path::PathBuf::from).or_else(|| \
+    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| \
         std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_el\
         se(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("wind\
         ows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref())' : string
@@ -46,7 +46,7 @@
         \#[cfg(not(windows))] fn free() -> u64 { std::fs::read_to_string("/proc/meminfo").ok().and_then(|text| \
         text.lines().find(|line| line.starts_with("MemAvailable:")).and_then(|line| \
         line.split_whitespace().nth(1)).and_then(|kb| kb.parse::<u64>().ok())).map(|kb| kb / \
-        1024).unwrap_or(u64::MAX) } std::env::var("KIT_WINDOWS_FREE_MB").ok().and_then(|text| \
+        1024).unwrap_or(u64::MAX) } std::env::var("RIG_WINDOWS_FREE_MB").or_else(|_| std::env::var("KIT_WINDOWS_FREE_MB")).ok().and_then(|text| \
         text.trim().parse::<u64>().ok()).unwrap_or_else(free) }' : u64
 
 :~ option_value (~flag : string) : string = rust_std_env.model.argument_after_flag flag
@@ -74,7 +74,8 @@
     | LeaseHolder => !-
 
 :~ ^ live_rows (~root : string) (~rows : string) (now : u64) (~kept : string) : string =
-    ? rows = "" ?> kept
+    ? rows = ""
+    ?> kept
     |:
         := row = first_row rows
         ? row_expired row now || orphaned_window row ?>
@@ -94,7 +95,7 @@
     : string
 
 :~ refused (~message : string) : i32 =
-    stderr_line (concat5 "kit error: window " message "" "" "")
+    stderr_line (concat5 "rig error: window " message "" "" "")
     2i32
 
 := window_usage () : string =
@@ -133,7 +134,7 @@
     }
 
 :~ request_head (ask : request) (~verdict : string) : string =
-    concat5 "kit window request " verdict " id=" ask.id (concat5 " class=" (class_word ask.wanted) "" "" "")
+    concat5 "rig window request " verdict " id=" ask.id (concat5 " class=" (class_word ask.wanted) "" "" "")
 
 :~ ^ requested (ask : request) (announced : bool) : i32 =
     := root = windows_root ()
@@ -207,8 +208,7 @@
     | ClassUnknown => refused (concat5 "request: unknown class '" class_text "'; " (window_usage ()) "")
     | ClassKnown wanted =>
         := minutes = decimal_of minutes_text
-        ? minutes = 0u64
-        ?>
+        ? minutes = 0u64 ?>
             refused (
                 concat5
                     "request: minutes must be a whole number above 0, received '"
@@ -217,7 +217,8 @@
                     (window_usage ())
                     ""
             )
-        |? announce_refusal class_text minutes <> "" ?> refused (concat5 "request: " (announce_refusal class_text minutes) "" "" "")
+        |? announce_refusal class_text minutes <> ""
+        ?> refused (concat5 "request: " (announce_refusal class_text minutes) "" "" "")
         |? tree_label_problem wanted (option_value "--label") <> ""
         ?> refused ("request: " ++# tree_label_problem wanted (option_value "--label"))
         |:
@@ -247,12 +248,13 @@
 :~ window_released (~id : string) : i32 =
     := root = windows_root ()
     := row = text_or_empty (window_file root id)
-    ? starts_with id "win-" = !- ?> refused (concat5 "release: unknown window id '" id "'" "" "")
+    ? starts_with id "win-" = !-
+    ?> refused (concat5 "release: unknown window id '" id "'" "" "")
     |? file_removed (window_file root id) ?>
         := was_waiting = tab_field row 2i32 = state_word Waiting
         event_logged root WindowReleased row
         := _ = ? was_waiting ?> text_written (released_mark root id) "released" |: ""
-        stdout_line (concat5 "kit window release ok id=" id (? was_waiting ?> " requester=told" |: "") "" "")
+        stdout_line (concat5 "rig window release ok id=" id (? was_waiting ?> " requester=told" |: "") "" "")
         0i32
     |: refused (concat5 "release: unknown window id '" id "'; it was released or expired" "" "")
 
@@ -284,7 +286,8 @@
         | None => refused ("unknown verb '" ++# word ++# "'; " ++# window_usage ())
     | _ => refused ("unknown verb ''; " ++# window_usage ())
 :~ ^ dropped_tagged (~root : string) (~rows : string) (~tag : string) (count : u64) : u64 =
-    ? rows = "" ?> count
+    ? rows = ""
+    ?> count
     |:
         := row = first_row rows
         ? contains (tab_field row 3i32) tag ?>

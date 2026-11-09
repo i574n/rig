@@ -15,8 +15,7 @@
 
 ///> rust
 :# hashes_regular_bytes_with_a_bound_and_rejects_linked_ancestors =
-    ? on_windows () || on_linux ()
-    ?>
+    ? on_windows () || on_linux () ?>
         := root = fixture_root_create "hash ü"
         fixture_write root "real/input" "abc"
         same

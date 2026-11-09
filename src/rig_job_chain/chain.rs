@@ -381,7 +381,7 @@ fn serial_started_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: bool,
     let mut v7: US1 = links_timeout_2(v5.clone(), v6);
     match v7 {
         US1::US1_None => {
-            let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job chain refused: every --serial link needs a positive <timeout-ms>"); } LIT.with(|lit| lit.clone()) };
+            let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job chain refused: every --serial link needs a positive <timeout-ms>"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v8);
             2i32
         }
@@ -456,7 +456,7 @@ fn serial_started_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: bool,
             let v51: US3 = captured_9(v0, v50);
             match v51 {
                 US3::US3_None => {
-                    let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job chain could not start its serial job"); } LIT.with(|lit| lit.clone()) };
+                    let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job chain could not start its serial job"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v53);
                     2i32
                 }
@@ -603,7 +603,7 @@ fn chain_started_16(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: Rc<UH
                     let v91: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v90).as_ref().clone()));
                     let v92: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
                     let v93: Rc<str> = Rc::<str>::from((*v91.borrow()).join(&*v92));
-                    let v94: Rc<str> = string_concat(&["kit error: job chain stopped: link ", &*v72, " did not start (", &*v82, "); started before it: ", &*v93]);
+                    let v94: Rc<str> = string_concat(&["rig error: job chain stopped: link ", &*v72, " did not start (", &*v82, "); started before it: ", &*v93]);
                     eprintln!("{}", v94);
                     return 2i32;
                 } else {
@@ -626,7 +626,7 @@ fn chain_started_16(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: Rc<UH
                 let v16: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v15).as_ref().clone()));
                 let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
                 let v18: Rc<str> = Rc::<str>::from((*v16.borrow()).join(&*v17));
-                let v19: Rc<str> = string_concat(&["kit job chain ok jobs=", &*v7, " ids=", &*v18]);
+                let v19: Rc<str> = string_concat(&["rig job chain ok jobs=", &*v7, " ids=", &*v18]);
                 println!("{}", v19);
                 return 0i32;
             }
@@ -925,7 +925,7 @@ fn chain_run_0() -> i32 {
         }
         US4::US4_ChainRefused(v45) => {
             let v45: Rc<str> = v45;
-            let v46: Rc<str> = string_concat(&["kit error: job chain refused: ", &*v45]);
+            let v46: Rc<str> = string_concat(&["rig error: job chain refused: ", &*v45]);
             eprintln!("{}", v46);
             2i32
         }

@@ -20,7 +20,8 @@
 :== item_shown = { task : string; minutes : i32; committed : bool }
 
 :~ chosen (sprints : list sprint) (~id : string) : option sprint =
-    ? id = "" ?> first_open sprints
+    ? id = ""
+    ?> first_open sprints
     |: listm'.try_find_ (\ (s : sprint) => s.terms.id = id) sprints
 
 :~ sprint_head_of ((text, id) : string * string) : array_base sprint_head =

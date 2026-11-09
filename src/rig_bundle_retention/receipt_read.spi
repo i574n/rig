@@ -57,20 +57,28 @@
 
 := counted (fields : receipt_fields) (~key : string) (~value : string) : field_step =
     := error = count_error value
-    ? error <> "" ?> FieldRejected error
-    |? key = "candidates" ?> FieldTaken { fields ?| candidates = Present (count_text value) }
-    |? key = "deletes" ?> FieldTaken { fields ?| deletes = Present (count_text value) }
+    ? error <> ""
+    ?> FieldRejected error
+    |? key = "candidates"
+    ?> FieldTaken { fields ?| candidates = Present (count_text value) }
+    |? key = "deletes"
+    ?> FieldTaken { fields ?| deletes = Present (count_text value) }
     |: FieldTaken { fields ?| remaining = Present (count_text value) }
 
 :~ field_applied (fields : receipt_fields) (~field : string) : field_step =
     ? has_equals field ?>
         := key = key_of field
         := value = value_of field
-        ? key = "schema" ?> FieldTaken { fields ?| schema = Present value }
-        |? key = "fingerprint" ?> FieldTaken { fields ?| fingerprint = Present value }
-        |? key = "current" ?> FieldTaken { fields ?| current = Present value }
-        |? key = "candidates" || key = "deletes" || key = "remaining" ?> counted fields key value
-        |? key = "status" ?> FieldTaken { fields ?| status = Present value }
+        ? key = "schema"
+        ?> FieldTaken { fields ?| schema = Present value }
+        |? key = "fingerprint"
+        ?> FieldTaken { fields ?| fingerprint = Present value }
+        |? key = "current"
+        ?> FieldTaken { fields ?| current = Present value }
+        |? key = "candidates" || key = "deletes" || key = "remaining"
+        ?> counted fields key value
+        |? key = "status"
+        ?> FieldTaken { fields ?| status = Present value }
         |: FieldRejected ("unknown retention receipt field: " ++# key)
     |: FieldRejected ("invalid retention receipt field: " ++# field)
 
@@ -123,8 +131,7 @@
                         | ReceiptRejected reason, _ => ReceiptRejected reason
                         | _, ReceiptRejected reason => ReceiptRejected reason
                         | ReceiptRead remaining, ReceiptRead status =>
-                            ? status = "planned" || status = "applied"
-                            ?>
+                            ? status = "planned" || status = "applied" ?>
                                 ReceiptRead (
                                     (fingerprint ++# "\t" ++# current ++# "\t" ++# candidates)
                                     ++# "\t"

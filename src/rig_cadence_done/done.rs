@@ -580,7 +580,7 @@ fn done_line_25(mut v0: i64, mut v1: Rc<str>, mut v2: i64, mut v3: i32) -> Rc<st
     let v6: i64 = v0.wrapping_sub(v2);
     let v7: Rc<str> = format_real_26(v6);
     let mut v10: Rc<str> = format_real_28(v3);
-    let v11: Rc<str> = string_concat(&["kit agile cadence done team=", &*v1, " days_ago=", &*v7, " done=", &*v10]);
+    let v11: Rc<str> = string_concat(&["rig agile cadence done team=", &*v1, " days_ago=", &*v7, " done=", &*v10]);
     v11
 }
 fn method24(mut v0: i64, mut v1: Rc<UH3>, mut v2: Rc<UH1>) -> Rc<UH1> {
@@ -701,7 +701,7 @@ fn silent_line_32(mut v0: i64, mut v1: Rc<str>, mut v2: US0, mut v3: Rc<UH1>, mu
     let v14: Rc<str> = Rc::<str>::from((*v12.borrow()).join(&*v13));
     let v17: i64 = v0.wrapping_sub(v5);
     let v18: Rc<str> = format_real_26(v17);
-    let v19: Rc<str> = string_concat(&["kit agile cadence silent id=", &*v1, " teams=", &*v14, " hours=", &*v18]);
+    let v19: Rc<str> = string_concat(&["rig agile cadence silent id=", &*v1, " teams=", &*v14, " hours=", &*v18]);
     v19
 }
 fn method31(mut v0: i64, mut v1: Rc<UH0>, mut v2: Rc<UH1>) -> Rc<UH1> {

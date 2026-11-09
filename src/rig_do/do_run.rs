@@ -437,7 +437,7 @@ fn do_run_0() -> i32 {
         let v13: bool = directory_exists_22(v2.clone());
         let v14: bool = v13 == false;
         if v14 {
-            let v15: Rc<str> = string_concat(&["kit error: root is not a directory: ", &*v2]);
+            let v15: Rc<str> = string_concat(&["rig error: root is not a directory: ", &*v2]);
             println!("{}", v15);
             2i32
         } else {

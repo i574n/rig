@@ -21,10 +21,10 @@
     := listed = succeeded (repo root (Arg ("affected", Arg (fixture_path root "src", Arg ("base", NoArgs)))))
     shows listed "middle\ntop\n"
     hides listed "other"
-    shows listed "kit repo affected ok crates=2 packages=4"
+    shows listed "rig repo affected ok crates=2 packages=4"
     shows
         (succeeded (repo root (Arg ("affected", Arg (fixture_path root "src", Arg ("top", NoArgs))))))
-        "kit repo affected ok crates=1 packages=4"
+        "rig repo affected ok crates=1 packages=4"
     := usage = repo root (Arg ("affected", Arg (fixture_path root "src", NoArgs)))
     testing.expect (usage.code = 2i32) (run_text usage)
     shows usage.stdout "repo usage: repo affected <src> <package>..."

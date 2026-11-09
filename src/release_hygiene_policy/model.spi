@@ -3,13 +3,17 @@
     | RemoveCompilerSidecar
 
 :~ hygiene_primary_binding (spiral_entry : i32) (typecheck_rs : i32) : i32 =
-    ? 0i32 < spiral_entry ?> 1i32
-    |? 0i32 < typecheck_rs ?> 1i32
+    ? 0i32 < spiral_entry
+    ?> 1i32
+    |? 0i32 < typecheck_rs
+    ?> 1i32
     |: 0i32
 
 :~ hygiene_secondary_binding (typecheck_tmp : i32) (c_with_spi : i32) : i32 =
-    ? 0i32 < typecheck_tmp ?> 1i32
-    |? 0i32 < c_with_spi ?> 1i32
+    ? 0i32 < typecheck_tmp
+    ?> 1i32
+    |? 0i32 < c_with_spi
+    ?> 1i32
     |: 0i32
 
 :| hygiene_root_transient =
@@ -27,18 +31,24 @@
     | RootCargoDirectory => ".cargo"
 
 :~ hygiene_root_file_binding (receipt : i32) (release_candidate : i32) : i32 =
-    ? 0i32 < receipt ?> 1i32
-    |? 0i32 < release_candidate ?> 1i32
+    ? 0i32 < receipt
+    ?> 1i32
+    |? 0i32 < release_candidate
+    ?> 1i32
     |: 0i32
 
 :~ hygiene_root_aux_binding (probe_source : i32) (cold_rebuild : i32) : i32 =
-    ? 0i32 < probe_source ?> 1i32
-    |? 0i32 < cold_rebuild ?> 1i32
+    ? 0i32 < probe_source
+    ?> 1i32
+    |? 0i32 < cold_rebuild
+    ?> 1i32
     |: 0i32
 
 :~ hygiene_root_directory_binding (cold_rebuild : i32) (toolchain_config : i32) : i32 =
-    ? 0i32 < cold_rebuild ?> 1i32
-    |? 0i32 < toolchain_config ?> 1i32
+    ? 0i32 < cold_rebuild
+    ?> 1i32
+    |? 0i32 < toolchain_config
+    ?> 1i32
     |: 0i32
 
 
@@ -75,8 +85,12 @@
     | HygieneRootTransientDirectory => 3u64
 
 :~ hygiene_directory_ignored (~name : string) : u64 =
-    ? (name = "target") ?> 1u64
-    |? (name = "vendor") ?> 1u64
-    |? (name = ".git") ?> 1u64
-    |? (name = ".cache") ?> 1u64
+    ? (name = "target")
+    ?> 1u64
+    |? (name = "vendor")
+    ?> 1u64
+    |? (name = ".git")
+    ?> 1u64
+    |? (name = ".cache")
+    ?> 1u64
     |: 0u64

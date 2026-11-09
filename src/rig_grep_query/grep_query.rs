@@ -684,7 +684,7 @@ fn grep_searched_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
     };
     if v18 {
         let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("read <path|glob>[:from-to|:-last]... [--max-lines n] [--json] | lines <path|glob>... | grep <root> <needle> [--glob pattern] [--context n] [--max n] [--ignore-case] [--regex] [--json]"); } LIT.with(|lit| lit.clone()) };
-        let v20: Rc<str> = string_concat(&["kit error: ", &*v19]);
+        let v20: Rc<str> = string_concat(&["rig error: ", &*v19]);
         eprintln!("{}", v20);
         2i32
     } else {
@@ -706,7 +706,7 @@ fn grep_searched_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
         };
         let v29: bool = &*v28 != "";
         if v29 {
-            let v31: Rc<str> = string_concat(&["kit error: grep: invalid --regex pattern: ", &*v28]);
+            let v31: Rc<str> = string_concat(&["rig error: grep: invalid --regex pattern: ", &*v28]);
             eprintln!("{}", v31);
             2i32
         } else {
@@ -723,7 +723,7 @@ fn grep_searched_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
             };
             match v38 {
                 US8::US8_MissingRoot => {
-                    let v40: Rc<str> = string_concat(&["kit error: grep root not found: ", &*v0]);
+                    let v40: Rc<str> = string_concat(&["rig error: grep root not found: ", &*v0]);
                     eprintln!("{}", v40);
                     2i32
                 }

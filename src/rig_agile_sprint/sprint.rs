@@ -32,7 +32,7 @@ enum US3 {
     US3_None,
 }
 fn sprint_usage_1() -> i32 {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B] | sprint show <root> [<id>] | sprint retro <root> [<id> | --since <YYYY-MM-DD>] | sprint add|drop <root> <id> <item> | sprint close <root> <id> | sprint velocity <root> [--last n]"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B] | sprint show <root> [<id>] | sprint retro <root> [<id> | --since <YYYY-MM-DD>] | sprint add|drop <root> <id> <item> | sprint close <root> <id> | sprint velocity <root> [--last n]"); } LIT.with(|lit| lit.clone()) };
     eprintln!("{}", v0);
     2i32
 }

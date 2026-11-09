@@ -755,7 +755,7 @@ fn delete_target_refusal_0(mut v0: Rc<str>) -> Rc<str> {
     };
     let v19: bool = v18 == false;
     if v19 {
-        let v20: Rc<str> = string_concat(&["kit refuses to remove a relative path, which resolves against the current folder: ", &*v0]);
+        let v20: Rc<str> = string_concat(&["rig refuses to remove a relative path, which resolves against the current folder: ", &*v0]);
         v20
     } else {
         let v21: Rc<str> = delete_comparable_path_3(v0.clone());
@@ -790,7 +790,7 @@ fn delete_target_refusal_0(mut v0: Rc<str>) -> Rc<str> {
             delete_variable_protected_25(v21, v43)
         };
         if v45 {
-            let mut v47: Rc<str> = string_concat(&["kit refuses to remove a protected folder (a drive or system root, a user profile, its AppData or temp, or an ancestor of one): ", &*v0]);
+            let mut v47: Rc<str> = string_concat(&["rig refuses to remove a protected folder (a drive or system root, a user profile, its AppData or temp, or an ancestor of one): ", &*v0]);
             v47
         } else {
             let mut v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };

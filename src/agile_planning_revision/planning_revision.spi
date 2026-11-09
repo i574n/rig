@@ -34,7 +34,7 @@
     =
     ?= replace_records_unchanged state original updated ?|
     | Replaced =>
-        := head = "kit agile edit ok id=" ++# id ++# " field=" ++# field_name ++# " "
+        := head = "rig agile edit ok id=" ++# id ++# " field=" ++# field_name ++# " "
         stdout_line (head ++# (planning_summary updated id) ++# (
             measured_sizes (text_bytes original) (text_bytes updated) (ms_since started)))
     | problem => planning_edit_failure (file_replacement_problem problem) id
@@ -56,7 +56,7 @@
     ?= revision_of original (rewritten original id field_name token) ?|
     | PlanningRefused reason => planning_edit_failure reason id
     | PlanningUnchanged =>
-        := head = "kit agile edit ok id=" ++# id ++# " field=" ++# field_name ++# " unchanged "
+        := head = "rig agile edit ok id=" ++# id ++# " field=" ++# field_name ++# " unchanged "
         := sizes = measured_sizes (text_bytes original) (text_bytes original) (ms_since started)
         stdout_line (head ++# planning_summary original id ++# sizes)
     | PlanningRewritten updated => planning_written state id field_name original updated started

@@ -86,7 +86,9 @@
     expect_idiom "$'(fun () ->'" ThunkOpener
     expect_idiom "Gleam = \\ () => $'let out = fn () { case x { _ -> 1 } }' : ()" ScopingIdiom
     expect_idiom "$'|> fun x -> _cell_!name <- Some x'" FsharpPipeMutate
-    ? idiom_of "$'|> fun x -> _cell_!name <- Some x'" = Some FsharpPipeMutate ?> () |: failwith "the specific class wins"
+    ? idiom_of "$'|> fun x -> _cell_!name <- Some x'" = Some FsharpPipeMutate
+    ?> ()
+    |: failwith "the specific class wins"
 
 ///> rust
 :# a_candidate_is_flow_that_no_family_exempts =

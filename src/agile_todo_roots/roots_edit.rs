@@ -100,7 +100,7 @@ fn roots_receipt_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
     let v7: i32 = 0i32;
     let v8: i32 = roots_printed_4(v5, v6, v7);
     let v11: Rc<str> = std::rc::Rc::<str>::from((v8).to_string());
-    let v13: Rc<str> = string_concat(&["kit agile roots ok action=", &*v0, " roots=", &*v11, &*v2]);
+    let v13: Rc<str> = string_concat(&["rig agile roots ok action=", &*v0, " roots=", &*v11, &*v2]);
     let v14: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v13.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
     v14
@@ -191,7 +191,7 @@ fn roots_written_6(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc
                 _ => unreachable!(),
             };
             let v28: Rc<str> = string_concat(&["agile roots rejected: ", &*v27]);
-            let v29: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v28 + "
+            let v29: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v28 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v29
         }
@@ -502,7 +502,7 @@ fn roots_edited_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: u64
     if v5 {
         let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("add and drop need at least one path"); } LIT.with(|lit| lit.clone()) };
         let v7: Rc<str> = string_concat(&["agile roots rejected: ", &*v6]);
-        let v8: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v7 + "
+        let v8: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v7 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v8
     } else {
@@ -518,7 +518,7 @@ fn roots_edited_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: u64
             US1::US1_RootsRefused(v13) => {
                 let v13: Rc<str> = v13;
                 let v14: Rc<str> = string_concat(&["agile roots rejected: ", &*v13]);
-                let v15: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v14 + "
+                let v15: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v14 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v15
             }
@@ -543,7 +543,7 @@ fn roots_entry_0() -> i32 {
             let v10: Rc<str> = v10;
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v12: Rc<str> = string_concat(&["agile roots rejected: ", &*v11]);
-            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v12 + "
+            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v12 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v13
         }
@@ -572,7 +572,7 @@ fn roots_entry_0() -> i32 {
                     roots_edited_5(v5, v18, v16, v0)
                 } else {
                     let v31: Rc<str> = string_concat(&["agile roots rejected: unknown action ", &*v18, " (expected add or drop)"]);
-                    let v32: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v31 + "
+                    let v32: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v31 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v32
                 }

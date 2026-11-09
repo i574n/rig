@@ -771,7 +771,7 @@ fn read_run_0() -> i32 {
                     match v15 {
                         US9::US9_None => {
                             let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("read <path|glob>[:from-to|:-last]... [--max-lines n] [--json] | lines <path|glob>... | grep <root> <needle> [--glob pattern] [--context n] [--max n] [--ignore-case] [--regex] [--json]"); } LIT.with(|lit| lit.clone()) };
-                            let v20: Rc<str> = string_concat(&["kit error: ", &*v19]);
+                            let v20: Rc<str> = string_concat(&["rig error: ", &*v19]);
                             eprintln!("{}", v20);
                             2i32
                         }
@@ -784,7 +784,7 @@ fn read_run_0() -> i32 {
                 }
                 _ => {
                     let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("read <path|glob>[:from-to|:-last]... [--max-lines n] [--json] | lines <path|glob>... | grep <root> <needle> [--glob pattern] [--context n] [--max n] [--ignore-case] [--regex] [--json]"); } LIT.with(|lit| lit.clone()) };
-                    let v24: Rc<str> = string_concat(&["kit error: ", &*v23]);
+                    let v24: Rc<str> = string_concat(&["rig error: ", &*v23]);
                     eprintln!("{}", v24);
                     2i32
                 }
@@ -792,7 +792,7 @@ fn read_run_0() -> i32 {
         }
         _ => {
             let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("read <path|glob>[:from-to|:-last]... [--max-lines n] [--json] | lines <path|glob>... | grep <root> <needle> [--glob pattern] [--context n] [--max n] [--ignore-case] [--regex] [--json]"); } LIT.with(|lit| lit.clone()) };
-            let v27: Rc<str> = string_concat(&["kit error: ", &*v26]);
+            let v27: Rc<str> = string_concat(&["rig error: ", &*v26]);
             eprintln!("{}", v27);
             2i32
         }

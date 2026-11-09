@@ -39,7 +39,7 @@
         ?> failed ("register: " ++# id ++# " is already registered or the ledger is unwritable (" ++# problem ++# ")")
         |:
             stdout_line (
-                "kit experiment register ok id="
+                "rig experiment register ok id="
                 ++# id
                 ++# " test="
                 ++# test_word kind
@@ -52,9 +52,12 @@
 
 :~ registered (~ledger : string) (~id : string) : i32 =
     := row = am'.index_base 0i32 (rig_experiment_args.args.register_args_read 4i32)
-    ? identifier_ok id = !-
-    ?> failed ("register: the ID must be letters, digits, '-' or '_', received '" ++# id ++# "'; " ++# experiment_usage ())
-    |? row.rejected <> "" ?> failed ("register: " ++# row.rejected ++# "; " ++# experiment_usage ())
+    ? identifier_ok id = !- ?>
+        failed (
+            "register: the ID must be letters, digits, '-' or '_', received '" ++# id ++# "'; " ++# experiment_usage ()
+        )
+    |? row.rejected <> ""
+    ?> failed ("register: " ++# row.rejected ++# "; " ++# experiment_usage ())
     |:
         ?= test_of row.test ?|
         | TestUnknown => failed ("register: --test must be " ++# test_words () ++# ", received '" ++# row.test ++# "'")
@@ -82,7 +85,7 @@
         )
         stdout_line (
             concat5
-                "kit experiment show ok id="
+                "rig experiment show ok id="
                 id
                 (? path_exists (record_path ledger id "verdict") ?> " verdict=recorded" |: " verdict=pending")
                 ""

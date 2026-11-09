@@ -13,8 +13,7 @@
 
 :~ module_path (~root : string) (~dir : string) (~lib : string) (~name : string) : string =
     := dot = sm'.index_of "." name
-    ? dot >= 0i32
-    ?>
+    ? dot >= 0i32 ?>
         := rest = sm'.substring (dot + 1i32) (sm'.length name - dot - 1i32) name
         (root </> sm'.substring 0i32 dot name </> sm'.replace "." "/" rest) ++# ".spi"
     |:

@@ -79,7 +79,7 @@ fn stderr_line_4(mut v0: Rc<str>) -> () {
     ()
 }
 fn refused_2(mut v0: Rc<str>) -> i32 {
-    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: window "); } LIT.with(|lit| lit.clone()) };
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: window "); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<str> = concat5_3(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_4(v3);
@@ -259,7 +259,7 @@ fn loop_8(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: i32, mut v2: i32) -> bool {
     }
 }
 fn windows_root_12() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_WINDOWS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
     v0
 }
 fn stored_rows_13(mut v0: Rc<str>) -> Rc<str> {
@@ -645,12 +645,12 @@ fn window_wait_cleared_1(mut v0: Rc<str>) -> i32 {
             let v96: Rc<str> = string_concat(&[&*v85, &*v95]);
             match v77 {
                 US3::US3_ClearNow => {
-                    let v97: Rc<str> = string_concat(&["kit window wait-clear ok", &*v96]);
+                    let v97: Rc<str> = string_concat(&["rig window wait-clear ok", &*v96]);
                     stdout_line_34(v97);
                     0i32
                 }
                 _ => {
-                    let v98: Rc<str> = string_concat(&["kit window wait-clear gave-up", &*v96]);
+                    let v98: Rc<str> = string_concat(&["rig window wait-clear gave-up", &*v96]);
                     stdout_line_34(v98);
                     1i32
                 }

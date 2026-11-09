@@ -841,7 +841,7 @@ fn rules_run_1() -> i32 {
     let mut v0: i32 = argument_count_2();
     let v1: bool = v0 < 3i32;
     if v1 {
-        let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: standards <package-dir>... [--json]"); } LIT.with(|lit| lit.clone()) };
+        let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: standards <package-dir>... [--json]"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v2);
         2i32
     } else {
@@ -869,7 +869,7 @@ fn rules_run_1() -> i32 {
                 println!("{}", v37);
                 ()
             };
-            let v40: Rc<str> = string_concat(&["kit standards ok ", &*v27, " rules=", &*v16]);
+            let v40: Rc<str> = string_concat(&["rig standards ok ", &*v27, " rules=", &*v16]);
             println!("{}", v40);
             ()
         };

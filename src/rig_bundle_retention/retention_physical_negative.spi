@@ -1,4 +1,3 @@
-
 := main () : i32 =
     global "#![allow(clippy::needless_return, clippy::needless_late_init)]"
     global "use rig_bundle_retention::{apply_retention_with_fault, plan_retention, RetentionFault};"

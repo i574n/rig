@@ -19,16 +19,16 @@
     := root = mirror_fixture ()
     := steady = mirror_call root (Arg ("ci.yml", NoArgs))
     testing.expect (steady.code = 0i32) (run_text steady)
-    shows steady.stderr "kit mirror check in-step files=1 differing=0"
+    shows steady.stderr "rig mirror check in-step files=1 differing=0"
     := moved = mirror_call root (Arg ("scripts", Arg ("ci.yml", NoArgs)))
     testing.expect (moved.code = 1i32) (run_text moved)
     same moved.stdout "left-newer\tscripts/build.ps1\n"
-    shows moved.stderr "kit mirror check left-ahead files=2 differing=1"
+    shows moved.stderr "rig mirror check left-ahead files=2 differing=1"
     := extra = mirror_call root (Arg ("extra.txt", NoArgs))
     same extra.stdout "left-only\textra.txt\n"
     fixture_write root "right/ci.yml" "on: pull_request\n"
     := both = mirror_call root (Arg ("scripts", Arg ("ci.yml", NoArgs)))
-    shows both.stderr "kit mirror check diverged files=2 differing=2"
+    shows both.stderr "rig mirror check diverged files=2 differing=2"
     fixture_root_remove root
 
 ///> rust
@@ -65,9 +65,9 @@
             ^^ "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b 1 extra.txt\n"
             ^^ "7aa7a5359173d05b63cfd682e3c38487f3cb4f7f1d60659fe59fab1505977d4c 4 scripts/build.ps1\n"
         )
-    shows listed.stderr "kit mirror manifest ok files=3 fingerprint="
+    shows listed.stderr "rig mirror manifest ok files=3 fingerprint="
     := skipped =
         rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("mirror", Arg ("manifest", Arg ("left", Arg ("--skip",
             Arg ("scripts", NoArgs))))))
-    shows skipped.stderr "kit mirror manifest ok files=2 fingerprint="
+    shows skipped.stderr "rig mirror manifest ok files=2 fingerprint="
     fixture_root_remove root

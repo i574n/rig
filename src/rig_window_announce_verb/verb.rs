@@ -56,7 +56,7 @@ enum US5 {
 }
 pub struct Mut1 { pub l0: Rc<str> }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = string_concat(&["kit error: window announce: ", &*v0]);
+    let v1: Rc<str> = string_concat(&["rig error: window announce: ", &*v0]);
     eprintln!("{}", v1);
     2i32
 }
@@ -759,7 +759,7 @@ fn announce_run_0(mut v0: Rc<str>) -> i32 {
                                                                     let v74: u64 = minutes_left_26(v26, v8);
                                                                     let v75: Rc<str> = format_real_25(v74);
                                                                     let v78: Rc<str> = format_real_25(v27);
-                                                                    let v81: Rc<str> = string_concat(&["kit window announce ok class=", &*v69, " holder=", &*v44, " starts_in_min=", &*v75, " minutes=", &*v78, " path=", &*v47]);
+                                                                    let v81: Rc<str> = string_concat(&["rig window announce ok class=", &*v69, " holder=", &*v44, " starts_in_min=", &*v75, " minutes=", &*v78, " path=", &*v47]);
                                                                     println!("{}", v81);
                                                                     0i32
                                                                 }

@@ -27,7 +27,8 @@
     ? regex |> not && regex_syntax_in needle ?> LiteralLooksLikePattern |: NoNeedleHint
 
 := hint_text (hint : needle_hint) (total : i32) : string =
-    ? total <> 0i32 ?> ""
+    ? total <> 0i32
+    ?> ""
     |:
         ?= hint ?|
         | NoNeedleHint => ""
@@ -37,7 +38,7 @@
 :~ decimal_u64 (~text : string) : u64 = optionm'.default_value 0u64 (convert.try_convert text)
 
 := rejected (~message : string) : i32 =
-    stderr_line ("kit error: " ++# message)
+    stderr_line ("rig error: " ++# message)
     2i32
 
 :== search_options =
@@ -132,14 +133,18 @@
     := options = options_read flags (search_start ())
     := context = options.context
     := limit = options.limit
-    ? root = "" || needle = "" ?> rejected (rig_read_query.model.read_usage ())
+    ? root = "" || needle = ""
+    ?> rejected (rig_read_query.model.read_usage ())
     |:
         := kind =
-            ? options.regex ?> PatternNeedle options.ignore_case
-            |? options.ignore_case ?> CaselessNeedle
+            ? options.regex
+            ?> PatternNeedle options.ignore_case
+            |? options.ignore_case
+            ?> CaselessNeedle
             |: LiteralNeedle
         := problem = ? options.regex ?> found_problem needle |: ""
-        ? problem <> "" ?> rejected ("grep: invalid --regex pattern: " ++# problem)
+        ? problem <> ""
+        ?> rejected ("grep: invalid --regex pattern: " ++# problem)
         |:
             ?= root_kind root ?|
             | MissingRoot => rejected ("grep root not found: " ++# root)

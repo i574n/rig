@@ -55,18 +55,24 @@
     | BundleOutputFailed : string
 
 :~ preflight_binding (outside_root : i32) (output_absent : i32) : i32 =
-    ? outside_root < 1i32 ?> 0i32
-    |? 1i32 < outside_root ?> 0i32
-    |? output_absent < 1i32 ?> 0i32
-    |? 1i32 < output_absent ?> 0i32
+    ? outside_root < 1i32
+    ?> 0i32
+    |? 1i32 < outside_root
+    ?> 0i32
+    |? output_absent < 1i32
+    ?> 0i32
+    |? 1i32 < output_absent
+    ?> 0i32
     |: 1i32
 
 :~ complete_binding (outside_root : i32) (output_file : i32) : i32 =
     preflight_binding outside_root output_file
 
 := binding_passed (value : i32) : bool =
-    ? value < 1i32 ?> !-
-    |? 1i32 < value ?> !-
+    ? value < 1i32
+    ?> !-
+    |? 1i32 < value
+    ?> !-
     |: !+
 
 := prepare_step \* owner. () : bundle_output_plan (output_pending owner) (output_root_ready owner) =
@@ -103,8 +109,10 @@
 := agile_plan () : bundle_output_plan (output_pending agile_owner) (output_cleaned agile_owner) = full_plan ()
 
 := cleanup_path (path : string) : bool =
-    ? cleanup_tree path ?> path_missing path
-    |? remove_file path ?> path_missing path
+    ? cleanup_tree path
+    ?> path_missing path
+    |? remove_file path
+    ?> path_missing path
     |: !-
 
 := cleanup_pair (root : string) (candidate : string) : bool =

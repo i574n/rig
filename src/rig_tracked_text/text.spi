@@ -13,9 +13,12 @@
     := name = ?= sm'.split_list "/" path |> listm.rev ?|
               | last :: _ => last
               | [] => path
-    ? sm'.contains "tree-sitter" path && sm'.contains "/test/corpus/" path ?> Some ToolCorpus
-    |? name = "requirements.txt" ?> Some ToolManifest
-    |? path = "apps/cells/data/tlds.txt" ?> Some UpstreamData
+    ? sm'.contains "tree-sitter" path && sm'.contains "/test/corpus/" path
+    ?> Some ToolCorpus
+    |? name = "requirements.txt"
+    ?> Some ToolManifest
+    |? path = "apps/cells/data/tlds.txt"
+    ?> Some UpstreamData
     |: None
 
 :~ untyped_of (~listing : string) : list string =
@@ -27,9 +30,9 @@
     ?= process.try_capture_combined_list "git" [ "-C"; repo; "ls-files"; "*.txt" ] ?|
     | Some listing =>
         := untyped = untyped_of listing
-        := found = untyped |> listm.map (\ (path : string) => "kit lint tracked-text " ++# repo ++# ": " ++# path)
+        := found = untyped |> listm.map (\ (path : string) => "rig lint tracked-text " ++# repo ++# ": " ++# path)
         found, listm.length untyped
-    | None => [ "kit lint tracked-text " ++# repo ++# ": git did not run" ], 1i32
+    | None => [ "rig lint tracked-text " ++# repo ++# ": git did not run" ], 1i32
 
 :~ tracked_text_run (repos : array_base string) : i32 =
     := listed = am'.to_list_base' repos |> listm'.unbox
@@ -39,7 +42,7 @@
         total + count
     := total = listed |> listm.fold counted 0i32
     := repos_text = sm'.show (listm.length listed : i32)
-    console.write_line ("kit lint tracked-text ok repos=" ++# repos_text ++# " untyped=" ++# sm'.show total)
+    console.write_line ("rig lint tracked-text ok repos=" ++# repos_text ++# " untyped=" ++# sm'.show total)
     ? total = 0i32 ?> 0i32 |: 1i32
 
 ///> rust

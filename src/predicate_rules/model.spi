@@ -4,8 +4,10 @@
 := equal (a : string) (b : string) : bool = (a = b)
 := append (a : string) (b : string) : string = a ++# b
 := family_of (name : string) : family =
-    ? equal name "sha256" ?> Sha256
-    |? equal name "receipt-text" ?> ReceiptText
+    ? equal name "sha256"
+    ?> Sha256
+    |? equal name "receipt-text"
+    ?> ReceiptText
     |: Unsupported
 := body (kind : family) (value : string) (byte : string) : string =
     ?= kind ?|
@@ -19,7 +21,8 @@
     | Unsupported => ""
 :~ expected (kind : string) (name : string) (value : string) (byte : string) : string =
     := expression = body (family_of kind) value byte
-    ? equal expression "" ?> ""
+    ? equal expression ""
+    ?> ""
     |: append ("fn " ++# name ++# "(" ++# value ++# ":&str)->bool") expression
 :~ wrapper (kind : string) (name : string) (literal : string) : string =
     := constructor =

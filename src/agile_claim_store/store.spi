@@ -19,8 +19,10 @@
     | FileMissing _ => StateWritten
     | FileReadable file =>
         := text = loaded_string (read_text file)
-        ? listed text ?> StateWritten
-        |? sm'.contains "modules:\n" text = !- ?> StateWriteFailed "state/package.spiproj has no modules section to list claims in"
+        ? listed text
+        ?> StateWritten
+        |? sm'.contains "modules:\n" text = !-
+        ?> StateWriteFailed "state/package.spiproj has no modules section to list claims in"
         |:
             ?= replace_file_checked (package_path root) (sm'.replace "modules:\n" "modules:\n    claims\n" text) ?|
             | Replaced => StateWritten
@@ -30,7 +32,8 @@
     := path = claims_path root
     := unchanged = ? existed ?> text_equals original path |: file_exists path = !-
     := written =
-        ? unchanged = !- ?> StateChangedSinceRead
+        ? unchanged = !-
+        ?> StateChangedSinceRead
         |:
             ?= replace_file_checked path updated ?|
             | Replaced => module_registered root
@@ -47,7 +50,16 @@
     =
     := claims = claims_of_text original
     := listed_ids = sm'.split_list " " known
-    := lease = { item = item; owner = owner; expires_ms = expires_ms; paths = ? sm'.starts_with "~" owner ?> [] |: sm'.split_list ";" paths |> listm'.filter (\ (g : string) => g <> "") }
+    := lease =
+        {
+            item = item
+            owner = owner
+            expires_ms = expires_ms
+            paths =
+                ? sm'.starts_with "~" owner
+                ?> []
+                |: sm'.split_list ";" paths |> listm'.filter \ (g : string) => g <> ""
+        }
     := changed =
         ?= change_of change ?|
         | ChangeUpsert => upserted claims lease

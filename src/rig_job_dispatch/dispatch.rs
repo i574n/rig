@@ -405,7 +405,7 @@ fn split_list_20(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<UH0> {
     }
 }
 fn receipt_id_18(mut v0: Rc<str>) -> Rc<str> {
-    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit job start ok id="); } LIT.with(|lit| lit.clone()) };
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig job start ok id="); } LIT.with(|lit| lit.clone()) };
     let mut v2: Option<usize> = v0.find(&*v1);
     let v3: Option<usize> = method19(v2);
     let mut v4: Rc<dyn Fn((usize)) -> i32> = closure1();
@@ -571,7 +571,7 @@ fn outcome_line_28(mut v0: US0, mut v1: Rc<str>) -> Rc<str> {
         US0::US0_Dispatched(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<str> = v3;
-            let v7: Rc<str> = string_concat(&["kit job start ok id=", &*v3, " machine=", &*v2, " placement=remote"]);
+            let v7: Rc<str> = string_concat(&["rig job start ok id=", &*v3, " machine=", &*v2, " placement=remote"]);
             v7
         }
         US0::US0_RemoteRefused(v15) => {
@@ -579,7 +579,7 @@ fn outcome_line_28(mut v0: US0, mut v1: Rc<str>) -> Rc<str> {
             let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
             let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
             let v20: Rc<str> = Rc::<str>::from(v15.replace(&*v18, &*v19));
-            let v21: Rc<str> = string_concat(&["kit job start refused machine=", &*v1, " reason=", &*v20]);
+            let v21: Rc<str> = string_concat(&["rig job start refused machine=", &*v1, " reason=", &*v20]);
             v21
         }
         US0::US0_RemoteUnreachable(v8) => {
@@ -587,7 +587,7 @@ fn outcome_line_28(mut v0: US0, mut v1: Rc<str>) -> Rc<str> {
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
             let mut v13: Rc<str> = Rc::<str>::from(v8.replace(&*v11, &*v12));
-            let v14: Rc<str> = string_concat(&["kit job start unreachable machine=", &*v1, " reason=", &*v13]);
+            let v14: Rc<str> = string_concat(&["rig job start unreachable machine=", &*v1, " reason=", &*v13]);
             v14
         }
     }
@@ -609,7 +609,7 @@ fn dispatch_run_0(mut v0: Rc<str>) -> i32 {
             let (mut v14, mut v15, mut v16): (bool, Rc<str>, Rc<str>) = v13.borrow()[0i32 as usize].clone();
             let v17: bool = v14 == false;
             if v17 {
-                let v20: Rc<str> = string_concat(&["kit job start busy machine=", &*v8, " reason=", &*v16]);
+                let v20: Rc<str> = string_concat(&["rig job start busy machine=", &*v8, " reason=", &*v16]);
                 println!("{}", v20);
                 3i32
             } else {
@@ -652,7 +652,7 @@ fn dispatch_run_0(mut v0: Rc<str>) -> i32 {
         }
         US1::US1_RequestRefused(v6) => {
             let mut v6: Rc<str> = v6;
-            let v7: Rc<str> = string_concat(&["kit error: job start ", &*v6]);
+            let v7: Rc<str> = string_concat(&["rig error: job start ", &*v6]);
             eprintln!("{}", v7);
             2i32
         }
@@ -774,7 +774,7 @@ fn forward_run_29(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let v34: bool = method32(v32.clone(), v33);
     let v35: bool = v34 == false;
     if v35 {
-        let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job forwarding refuses quote characters in arguments"); } LIT.with(|lit| lit.clone()) };
+        let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job forwarding refuses quote characters in arguments"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v36);
         2i32
     } else {
@@ -816,7 +816,7 @@ fn forward_run_29(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
             false
         };
         let v76: Rc<str> = if v66 {
-            let v67: Rc<str> = string_concat(&["kit job unreachable machine=", &*v0]);
+            let v67: Rc<str> = string_concat(&["rig job unreachable machine=", &*v0]);
             v67
         } else {
             let v68: i32 = (v54.clone().len() as i32);
@@ -879,7 +879,7 @@ fn listed_on_37(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
         false
     };
     let v44: Rc<str> = if v34 {
-        let v35: Rc<str> = string_concat(&["kit job unreachable machine=", &*v0]);
+        let v35: Rc<str> = string_concat(&["rig job unreachable machine=", &*v0]);
         v35
     } else {
         let v36: i32 = (v22.clone().len() as i32);
@@ -937,7 +937,7 @@ fn list_on_run_36(mut v0: Rc<str>) -> i32 {
             }
         }
         UH0::UH0_Nil => {
-            let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job list --on needs a machine (an ssh alias)"); } LIT.with(|lit| lit.clone()) };
+            let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job list --on needs a machine (an ssh alias)"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v26);
             2i32
         }

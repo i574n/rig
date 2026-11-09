@@ -65,8 +65,7 @@
     ?= pattern ?|
     | [] => ?= path ?| | [] => !+ | _ => !-
     | head :: rest =>
-        ? head = "**"
-        ?>
+        ? head = "**" ?>
             :~ ^ any_suffix (tail : list string) : bool =
                 glob_match rest tail || (?= tail ?| | _ :: shorter => any_suffix shorter | [] => !-)
             any_suffix path
@@ -100,11 +99,13 @@
     | folder :: rest =>
         := entries = entries_of (rules.root </> sm'.concat_list "/" folder)
         :~ ^ scan (at : i32) (folders : list (list string)) : list (list string) =
-            ? at >= entry_count entries ?> folders
+            ? at >= entry_count entries
+            ?> folders
             |:
                 := name = entry_name entries at
                 := relative = listm.append folder [ name ]
-                ? entry_is_link entries at ?> scan (at + 1i32) folders
+                ? entry_is_link entries at
+                ?> scan (at + 1i32) folders
                 |? entry_is_directory entries at
                 ?> scan (at + 1i32) (? listm'.contains name (skipped_folders ()) ?> folders |: relative :: folders)
                 |:
@@ -117,8 +118,7 @@
     := globbed = listm'.try_find_ (\ (part : string) => sm'.contains "*" part) pattern <> None
     := joined = sm'.concat_list "/" pattern
     := buffer = buffer_new ()
-    ? not globbed && not (file_system.directory_exists (root </> joined))
-    ?>
+    ? not globbed && not (file_system.directory_exists (root </> joined)) ?>
         := _ = buffer_added buffer joined
         paths_of buffer
     |:
@@ -133,7 +133,8 @@
 :# globs_match_like_the_walker_did =
     ? wildcard "*.spi" "a.spi" && wildcard "a*b*c" "axxbyyc" && not (wildcard "a*b" "ab c") ?> () |: failwith "wildcard"
     ? wildcard "exact" "exact" && not (wildcard "exact" "exactly") ?> () |: failwith "a mask without a star is exact"
-    ? glob_match [ "src"; "**" ] [ "src"; "a"; "b.spi" ] && glob_match [ "**"; "*.spi" ] [ "x.spi" ] ?> ()
+    ? glob_match [ "src"; "**" ] [ "src"; "a"; "b.spi" ] && glob_match [ "**"; "*.spi" ] [ "x.spi" ]
+    ?> ()
     |: failwith "double star spans any depth, including none"
     ? not (glob_match [ "src"; "*.spi" ] [ "src"; "a"; "b.spi" ]) ?> () |: failwith "a single star stays in one folder"
     ? segments "./src\\a//b/" = [ "src"; "a"; "b" ] ?> () |: failwith "segments"

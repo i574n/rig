@@ -567,7 +567,7 @@ pub fn archive_extract_generic_run(args: &[String]) -> Result<(), String> {
     if args.len() != 3 { return Err("archive-extract expects archive destination".to_owned()); }
     let archive = Path::new(&args[1]);
     let destination = Path::new(&args[2]);
-    let limit = std::env::var("KIT_ARCHIVE_MAX_BYTES").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(256 * 1024 * 1024);
+    let limit = std::env::var("RIG_ARCHIVE_MAX_BYTES").or_else(|_| std::env::var("KIT_ARCHIVE_MAX_BYTES")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(256 * 1024 * 1024);
     let regular = i32::from(archive.is_file());
     let absent = i32::from(!destination.exists());
     if archive_deflate_domain::rig_archive_preflight_binding(regular, absent) != 1 { return Err(format!("archive preflight rejected archive={} destination={}", archive.display(), destination.display())); }
@@ -575,7 +575,7 @@ pub fn archive_extract_generic_run(args: &[String]) -> Result<(), String> {
     let (format_code, format_name) = archive_format(archive)?;
     if format_code == 0 {
         let (entries, payloads, bytes) = archive_deflate_domain::archive_extract_with_limit(archive, destination, limit)?;
-        println!("kit proxy archive-extract ok entries_total={entries} payloads={payloads} bytes={bytes} format=zip receipt=typed-generic");
+        println!("rig proxy archive-extract ok entries_total={entries} payloads={payloads} bytes={bytes} format=zip receipt=typed-generic");
         return Ok(());
     }
     if archive_deflate_domain::rig_archive_format_binding(format_code, 1) != 1 { return Err(format!("typed archive format rejected code={format_code}")); }
@@ -585,7 +585,7 @@ pub fn archive_extract_generic_run(args: &[String]) -> Result<(), String> {
     let stage = parent.join(format!(".{name}.kit-tar-extract-{}", std::process::id()));
     if stage.exists() { return Err(format!("staging path already exists: {}", stage.display())); }
     rooted_create_directory_within(parent, &stage)?;
-    let fault = match std::env::var("KIT_ARCHIVE_FAULT").ok().as_deref() { None | Some("") | Some("none") => 0, Some("after-first-payload") => 1, Some("before-commit") => 2, Some(value) => return Err(format!("unknown KIT_ARCHIVE_FAULT: {value}")) };
+    let fault = match std::env::var("RIG_ARCHIVE_FAULT").or_else(|_| std::env::var("KIT_ARCHIVE_FAULT")).ok().as_deref() { None | Some("") | Some("none") => 0, Some("after-first-payload") => 1, Some("before-commit") => 2, Some(value) => return Err(format!("unknown KIT_ARCHIVE_FAULT: {value}")) };
     let result = (|| {
         let receipt = match format_code {
             1 => { let mut file = File::open(archive).map_err(|error| format!("open {}: {error}", archive.display()))?; extract_tar_stream(&mut file, &stage, limit, fault) },
@@ -614,7 +614,7 @@ pub fn archive_extract_generic_run(args: &[String]) -> Result<(), String> {
         Ok(receipt)
     })();
     match result {
-        Ok((entries, payloads, bytes)) => { rooted_promote_directory_within(parent, &stage, destination)?; println!("kit proxy archive-extract ok entries_total={entries} payloads={payloads} bytes={bytes} format={format_name} receipt=typed-generic"); Ok(()) },
+        Ok((entries, payloads, bytes)) => { rooted_promote_directory_within(parent, &stage, destination)?; println!("rig proxy archive-extract ok entries_total={entries} payloads={payloads} bytes={bytes} format={format_name} receipt=typed-generic"); Ok(()) },
         Err(error) => match rooted_remove_tree_within(parent, &stage) { Ok(_) => Err(format!("archive extraction rolled back: {error}")), Err(rollback) => Err(format!("archive extraction failed: {error}; rollback failed: {rollback}")) },
     }
 }

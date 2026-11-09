@@ -23,8 +23,10 @@
 
 := proxy_repair_of (~message : string) : proxy_repair =
     := matches = observed_match_digits message
-    ? message_starts message "fs-write refuses to overwrite existing file" ?> AddCreateOrReplace
-    |? message_starts message "text-replace expected " && $"!matches > 0" ?> ExpectObservedMatches matches
+    ? message_starts message "fs-write refuses to overwrite existing file"
+    ?> AddCreateOrReplace
+    |? message_starts message "text-replace expected " && $"!matches > 0"
+    ?> ExpectObservedMatches matches
     |: NoRepair
 
 := process_exit_code (code : i32) : i32 = ? (code > 255i32) ?> 255i32 |: code
@@ -58,10 +60,11 @@
     ?= proxy_repair_of message ?|
     | AddCreateOrReplace =>
         := flag = ? proxy_flags_follow 3i32 ?> " --create-or-replace " |: " --create-or-replace -- "
-        joined (joined "kit proxy " (proxy_words 0i32 3i32) flag) (proxy_words 3i32 (proxy_argument_count ())) ""
+        joined (joined "rig proxy " (proxy_words 0i32 3i32) flag) (proxy_words 3i32 (proxy_argument_count ())) ""
     | ExpectObservedMatches matches =>
-        ? $"!matches == 1" ?> joined "kit proxy " (proxy_words 0i32 6i32) ""
-        |: joined (joined "kit proxy " (proxy_words 0i32 6i32) " --expect ") (u64_text matches) ""
+        ? $"!matches == 1"
+        ?> joined "rig proxy " (proxy_words 0i32 6i32) ""
+        |: joined (joined "rig proxy " (proxy_words 0i32 6i32) " --expect ") (u64_text matches) ""
     | NoRepair => ""
 
 := main () : i32 =

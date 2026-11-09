@@ -33,7 +33,8 @@
         ?= section_on ?|
         | Some pattern => group_in line pattern "section"
         | None => ""
-    ? section <> "" ?> Header section
+    ? section <> ""
+    ?> Header section
     |:
         ?= carry ?|
         | Some pattern => ? matched_in line pattern ?> Carried |: Plain
@@ -58,13 +59,15 @@
 
 := column_of (~text : string) : option column_pattern =
     := parts = sm'.split "\t" text |> array
-    ? am'.length parts < 3i32 ?> None
+    ? am'.length parts < 3i32
+    ?> None
     |:
         := pick = ? part 0i32 parts = "last" ?> Last |: First
         Some { spec = { name = part 1i32 parts; pick = pick }; pattern = compiled_pattern (part 2i32 parts) }
 
 :~ ^ columns_from (lines : array string) (index : i32) (found : list column_pattern) : list column_pattern =
-    ? index < 0i32 ?> found
+    ? index < 0i32
+    ?> found
     |:
         ?= column_of (am'.index index lines) ?|
         | Some column => columns_from lines (index - 1i32) (column :: found)

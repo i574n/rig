@@ -26,7 +26,7 @@ inl emit_runtime () : () = global """
 
     fn patch_finish(result: Result<(), String>) -> i32 {
         if let Err(error) = result {
-            eprintln!("kit error: {error}");
+            eprintln!("rig error: {error}");
             2
         } else {
             0
@@ -111,7 +111,7 @@ inl emit_runtime () : () = global """
 
 
     fn patch_fault_from_env() -> Option<PatchFault> {
-        match env::var("KIT_PATCH_FAULT").ok().as_deref() {
+        match env::var("RIG_PATCH_FAULT").or_else(|_| env::var("KIT_PATCH_FAULT")).ok().as_deref() {
             Some("between-promotions") => Some(PatchFault::BetweenPromotions),
             Some("between-promotions-rollback-failure") => {
                 Some(PatchFault::BetweenPromotionsRollbackFailure)
@@ -355,7 +355,7 @@ inl emit_runtime () : () = global """
                 }
             }
             println!(
-                "kit patch rehearse ok operations={} files={} {}",
+                "rig patch rehearse ok operations={} files={} {}",
                 patches.len(),
                 current.len(),
                 receipt.public_context()
@@ -364,7 +364,7 @@ inl emit_runtime () : () = global """
         }
 
         println!(
-            "kit patch ok operations={} files={} witness=spiral",
+            "rig patch ok operations={} files={} witness=spiral",
             patches.len(),
             current.len()
         );

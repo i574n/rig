@@ -31,10 +31,12 @@
 
 := tool_resolved (probe : tool_probe) (resolver : tool_resolver) : tool_found =
     := chosen = probe.option resolver.option
-    ? chosen <> "" ?> ByOption chosen
+    ? chosen <> ""
+    ?> ByOption chosen
     |:
         := inherited = probe.environment resolver.environment
-        ? inherited <> "" ?> ByEnvironment (resolver.environment, inherited)
+        ? inherited <> ""
+        ?> ByEnvironment (resolver.environment, inherited)
         |: first_fallback probe resolver.fallbacks
 
 := tool_path = \|

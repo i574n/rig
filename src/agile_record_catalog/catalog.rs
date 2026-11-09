@@ -19,7 +19,7 @@ enum US0 {
 fn agile_record_catalog_text_0(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>) -> Rc<str> {
     let v6: Rc<str> = std::rc::Rc::<str>::from((v1).to_string());
     let v9: Rc<str> = std::rc::Rc::<str>::from((v2).to_string());
-    let v10: Rc<str> = string_concat(&["kit agile records catalog=", &*v0, " present=", &*v6, "/", &*v9]);
+    let v10: Rc<str> = string_concat(&["rig agile records catalog=", &*v0, " present=", &*v6, "/", &*v9]);
     let v11: bool = v1 == v2;
     let v14: US0 = if v11 {
         US0::US0_RecordCatalogComplete

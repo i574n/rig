@@ -398,14 +398,14 @@ fn reported_15(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US1) -> i32 {
     match v2 {
         US1::US1_AsksRefused(v10) => {
             let v10: Rc<str> = v10;
-            let mut v11: Rc<str> = string_concat(&["kit error: agile edit --asked: ", &*v10]);
+            let mut v11: Rc<str> = string_concat(&["rig error: agile edit --asked: ", &*v10]);
             eprintln!("{}", v11);
             2i32
         }
         US1::US1_AsksWritten(v3) => {
             let v3: i32 = v3;
             let mut v6: Rc<str> = format_real_16(v3);
-            let mut v9: Rc<str> = string_concat(&["kit agile edit ok id=", &*v0, " asked=", &*v1, " asks=", &*v6]);
+            let mut v9: Rc<str> = string_concat(&["rig agile edit ok id=", &*v0, " asked=", &*v1, " asks=", &*v6]);
             println!("{}", v9);
             0i32
         }
@@ -903,7 +903,7 @@ fn ask_edit_run_14() -> i32 {
     let mut v0: US2 = ask_request_18();
     match v0 {
         US2::US2_None => {
-            let mut v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"); } LIT.with(|lit| lit.clone()) };
+            let mut v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v12);
             2i32
         }

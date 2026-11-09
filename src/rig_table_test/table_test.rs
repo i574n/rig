@@ -45,7 +45,7 @@ fn stderr_line_2(mut v0: Rc<str>) -> () {
     ()
 }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = string_concat(&["kit error: table test ", &*v0]);
+    let v1: Rc<str> = string_concat(&["rig error: table test ", &*v0]);
     stderr_line_2(v1);
     2i32
 }
@@ -392,7 +392,7 @@ fn tested_run_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
             let v124: Rc<str> = string_concat(&[&*v49, " ", &*v121, &*v123]);
             v124
         };
-        let v131: Rc<str> = string_concat(&["kit table test ok test=", &*v97, " n=", &*v125, " ", &*v107, " post_hoc=yes"]);
+        let v131: Rc<str> = string_concat(&["rig table test ok test=", &*v97, " n=", &*v125, " ", &*v107, " post_hoc=yes"]);
         stdout_line_20(v131);
         0i32
     }

@@ -44,9 +44,12 @@
 := tag_rest (~tag : string) (~prefix : string) : string = byte_slice tag (byte_len prefix) (byte_len tag)
 
 :~ tag_kind_of (~tag : string) : tag_kind =
-    ? sm'.starts_with "est:" tag ?> PlanningTag ("estimate", tag_rest tag "est:")
-    |? sm'.starts_with "load:" tag ?> PlanningTag ("load", tag_rest tag "load:")
-    |? sm'.starts_with "agent:" tag ?> PlanningTag ("assignee", legacy_agent_value (tag_rest tag "agent:"))
+    ? sm'.starts_with "est:" tag
+    ?> PlanningTag ("estimate", tag_rest tag "est:")
+    |? sm'.starts_with "load:" tag
+    ?> PlanningTag ("load", tag_rest tag "load:")
+    |? sm'.starts_with "agent:" tag
+    ?> PlanningTag ("assignee", legacy_agent_value (tag_rest tag "agent:"))
     |: PlainTag
 
 :== tag_pass =
@@ -82,7 +85,8 @@
         | StepRejected _ => tag_rejected pass tag
 
 :~ ^ tags_applied (pass : tag_pass) (~id : string) (~tags : string) (offset : i32) : tag_pass =
-    ? byte_len tags <= offset ?> pass
+    ? byte_len tags <= offset
+    ?> pass
     |:
         := comma = byte_find_from tags "," offset
         := stop = ? comma < 0i32 ?> byte_len tags |: comma
@@ -140,7 +144,8 @@
     := text = migration.state
     := length = byte_len text
     := found = byte_find_from text (task_marker ()) offset
-    ? found < 0i32 ?> migration
+    ? found < 0i32
+    ?> migration
     |:
         := arguments = (found + (task_arguments_offset ()))
         ? declared_task text found ?>
@@ -150,7 +155,8 @@
             ? 1i32 <= pass.moved ?>
                 := next = task_migrated migration id pass
                 migrated_from next (task_line_end next.state id)
-            |? 1i32 <= pass.rejections ?> migrated_from (task_with_rejections migration id pass) arguments
+            |? 1i32 <= pass.rejections
+            ?> migrated_from (task_with_rejections migration id pass) arguments
             |: migrated_from migration arguments
         |: migrated_from migration arguments
 
@@ -160,13 +166,14 @@
     counts ++# (i32_text migration.rejections)
 
 :~ migration_receipt (~verdict : string) (migration : migration_pass) (~original : string) (started : u64) : i32 =
-    := head = "kit agile migrate-tags " ++# verdict ++# (migration_counts migration)
+    := head = "rig agile migrate-tags " ++# verdict ++# (migration_counts migration)
     stdout_line (head ++# (measured_sizes (text_bytes original) (text_bytes migration.state) (ms_since started)))
 
 := migration_failure (~reason : string) : i32 = stderr_failure ("agile migrate-tags rejected: " ++# reason)
 
 :~ migration_written (~path : string) (migration : migration_pass) (~original : string) (started : u64) : i32 =
-    ? migration.tasks = 0i32 ?> migration_receipt "ok unchanged" migration original started
+    ? migration.tasks = 0i32
+    ?> migration_receipt "ok unchanged" migration original started
     |:
         ?= replace_records_unchanged path original migration.state ?|
         | Replaced => migration_receipt "ok" migration original started
@@ -187,8 +194,10 @@
         |: migration_failure "malformed Task fields"
 
 := migration_mode_of (~mode : string) : validation_result migration_mode =
-    ? (mode = "apply") ?> Valid MigrationApply
-    |? (mode = "preview") ?> Valid MigrationDryRun
+    ? (mode = "apply")
+    ?> Valid MigrationApply
+    |? (mode = "preview")
+    ?> Valid MigrationDryRun
     |: Invalid
 
 :~ tags_migration_entry () : i32 =

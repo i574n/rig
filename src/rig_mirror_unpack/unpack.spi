@@ -38,29 +38,31 @@
     := tar = base ++# "/" ++# incoming_name ()
     := list = base ++# "/" ++# list_name
     ? list_name = "" || removal_of list_name <> RemovalInside list_name ?>
-        console.write_error_line ("kit error: mirror unpack: the removal list name must be a plain relative name")
+        console.write_error_line ("rig error: mirror unpack: the removal list name must be a plain relative name")
         2i32
     |? file_system.file_exists tar = !- ?>
-        console.write_error_line ("kit error: mirror unpack: no " ++# incoming_name () ++# " under " ++# base)
+        console.write_error_line ("rig error: mirror unpack: no " ++# incoming_name () ++# " under " ++# base)
         2i32
     |? process.succeeded (process.captured_by (tar_program ()) [ "-xf"; tar; "-C"; base ] !+) = !- ?>
-        console.write_error_line ("kit error: mirror unpack: tar could not extract " ++# tar)
+        console.write_error_line ("rig error: mirror unpack: tar could not extract " ++# tar)
         2i32
     |:
         := wanted = ? file_system.file_exists list ?> sm'.split_list "\n" (file_system.read_all_text list) |: []
         := count, refused = removed_inside base (listm'.filter (\ (path : string) => path <> "") wanted) 0i32 []
         file_system.file_delete tar
         ? file_system.file_exists list ?> file_system.file_delete list
-        refused |> listm.iter (\ (path : string) => console.write_error_line ("kit mirror unpack refused " ++# path))
+        refused |> listm.iter (\ (path : string) => console.write_error_line ("rig mirror unpack refused " ++# path))
         := counts = "removed=" ++# sm'.format count ++# " refused=" ++# sm'.format (listm.length refused : i32)
-        console.write_error_line ("kit mirror unpack ok " ++# counts)
+        console.write_error_line ("rig mirror unpack ok " ++# counts)
         ? refused = [] ?> 0i32 |: 1i32
 
 ///> rust
 :# removals_stay_inside_the_root =
     testing.expect (removal_of "sub/a.txt" = RemovalInside "sub/a.txt") "a relative path is inside"
     testing.expect (removal_of "../x" = RemovalRefused "../x" && removal_of "C:/x" = RemovalRefused "C:/x") "escapes"
-    testing.expect (removal_of "/etc/x" = RemovalRefused "/etc/x" && removal_of "a\\..\\..\\b" = RemovalRefused "a\\..\\..\\b") "more"
+    testing.expect
+        (removal_of "/etc/x" = RemovalRefused "/etc/x" && removal_of "a\\..\\..\\b" = RemovalRefused "a\\..\\..\\b")
+        "more"
 := main () : i32 =
     export "rig_mirror_unpack_printed" unpack_printed
     0i32

@@ -7,10 +7,10 @@ $fixture = Join-Path ([IO.Path]::GetTempPath()) ('kit publication ü ' + [guid]:
 [void][IO.Directory]::CreateDirectory($fixture)
 $source = Join-Path $fixture ('candidate' + $(if ($IsWindows) { '.exe' } else { '' }))
 $destination = Join-Path $fixture ('installed' + $(if ($IsWindows) { '.exe' } else { '' }))
-$previousMode = $env:KIT_PUBLICATION_TEST_MODE
+$previousMode = ($env:RIG_PUBLICATION_TEST_MODE ?? $env:KIT_PUBLICATION_TEST_MODE)
 function Assert-Publication([bool]$Condition, [string]$Message) { if (-not $Condition) { throw $Message } }
 function Assert-Rejected([string]$Label, [string]$Mode, [string]$InputPath = $source, [int]$Budget = 1000, [string]$Root) {
-    $env:KIT_PUBLICATION_TEST_MODE = $Mode
+    $env:RIG_PUBLICATION_TEST_MODE = $env:KIT_PUBLICATION_TEST_MODE = $Mode
     [IO.File]::WriteAllText($destination, 'previous executable')
     $before = (Get-FileHash -LiteralPath $destination).Hash
     $rejected = $false
@@ -48,7 +48,7 @@ fn main() {
 '@, [Text.UTF8Encoding]::new($false))
     & rustc --crate-name publication_candidate $rust -o $source
     if ($LASTEXITCODE -ne 0) { throw 'Cannot compile publication fixture.' }
-    $env:KIT_PUBLICATION_TEST_MODE = 'good'
+    $env:RIG_PUBLICATION_TEST_MODE = $env:KIT_PUBLICATION_TEST_MODE = 'good'
     Assert-Publication (Publish-KitBinary -Source $source -Destination $destination) 'First install was not published.'
     Assert-Publication ((Get-FileHash -LiteralPath $source).Hash -ceq (Get-FileHash -LiteralPath $destination).Hash) 'Installed bytes differ.'
     Write-Host 'PASS first install validates and publishes the candidate'
@@ -65,11 +65,11 @@ fn main() {
     Assert-Rejected 'topology rejection' 'topology-exit' -Root $fixture
     Assert-Rejected 'invalid topology output' 'topology-output' -Root $fixture
     Assert-Rejected 'topology timeout' 'topology-timeout' -Root $fixture -Budget 100
-    $env:KIT_PUBLICATION_TEST_MODE = 'good'
+    $env:RIG_PUBLICATION_TEST_MODE = $env:KIT_PUBLICATION_TEST_MODE = 'good'
     Assert-Publication (Publish-KitBinary -Source $source -Destination $destination -ValidationRoot $fixture) 'Validated topology was not published.'
     Write-Host 'PASS publication requires the requested topology gate'
     if ($IsWindows) {
-        $env:KIT_PUBLICATION_TEST_MODE = 'good'
+        $env:RIG_PUBLICATION_TEST_MODE = $env:KIT_PUBLICATION_TEST_MODE = 'good'
         [IO.File]::WriteAllText($destination, 'locked executable')
         $handle = [IO.File]::Open($destination, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
         $rejected = $false
@@ -80,7 +80,7 @@ fn main() {
         } finally { $handle.Dispose() }
         Write-Host 'PASS a Windows destination lock preserves the installed bytes'
     }
-    $env:KIT_PUBLICATION_TEST_MODE = 'good'
+    $env:RIG_PUBLICATION_TEST_MODE = $env:KIT_PUBLICATION_TEST_MODE = 'good'
     [IO.File]::WriteAllText($destination, 'stale executable')
     Assert-Publication (Publish-KitBinary -Source $source -Destination $destination) 'Replacement was not published.'
     Assert-Publication ((Get-FileHash -LiteralPath $source).Hash -ceq (Get-FileHash -LiteralPath $destination).Hash) 'Replacement bytes differ.'
@@ -89,7 +89,7 @@ fn main() {
     Write-Host 'KIT binary publication contracts passed.'
 } finally {
     if ($null -eq $previousMode) { Remove-Item Env:KIT_PUBLICATION_TEST_MODE -ErrorAction SilentlyContinue }
-    else { $env:KIT_PUBLICATION_TEST_MODE = $previousMode }
+    else { $env:RIG_PUBLICATION_TEST_MODE = $env:KIT_PUBLICATION_TEST_MODE = $previousMode }
     $resolved = [IO.Path]::GetFullPath($fixture)
     $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     if (-not $resolved.StartsWith($temporaryRoot, [StringComparison]::OrdinalIgnoreCase)) { throw "Unsafe fixture cleanup: $resolved" }

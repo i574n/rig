@@ -302,7 +302,7 @@ fn method14(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
             let v3: Rc<str> = v3;
             let v4: Rc<UH0> = v4;
             let v5: Rc<UH0> = method14(v0.clone(), v4, v2);
-            let v8: Rc<str> = string_concat(&["kit lint tracked-text ", &*v0, ": ", &*v3]);
+            let v8: Rc<str> = string_concat(&["rig lint tracked-text ", &*v0, ": ", &*v3]);
             Rc::new(UH0::UH0_Cons(v8, v5))
         }
         UH0::UH0_Nil => {
@@ -372,7 +372,7 @@ fn repo_lines_3(mut v0: Rc<str>) -> (Rc<UH0>, i32) {
     };
     match v32 {
         US0::US0_None => {
-            let v40: Rc<str> = string_concat(&["kit lint tracked-text ", &*v0, ": git did not run"]);
+            let v40: Rc<str> = string_concat(&["rig lint tracked-text ", &*v0, ": git did not run"]);
             let v41: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
             let v42: Rc<UH0> = Rc::new(UH0::UH0_Cons(v40, v41));
             (v42, 1i32)
@@ -450,7 +450,7 @@ fn tracked_text_run_0(mut v0: Rc<RefCell<Vec<Rc<str>>>>) -> i32 {
     let v10: i32 = method15(v6, v9);
     let v11: Rc<str> = format_real_17(v10);
     let v14: Rc<str> = format_real_17(v8);
-    let v15: Rc<str> = string_concat(&["kit lint tracked-text ok repos=", &*v11, " untyped=", &*v14]);
+    let v15: Rc<str> = string_concat(&["rig lint tracked-text ok repos=", &*v11, " untyped=", &*v14]);
     println!("{}", v15);
     let v16: bool = v8 == 0i32;
     if v16 {

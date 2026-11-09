@@ -34,7 +34,7 @@ enum US2 {
     US2_None,
 }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = string_concat(&["kit error: mirror ", &*v0]);
+    let v1: Rc<str> = string_concat(&["rig error: mirror ", &*v0]);
     eprintln!("{}", v1);
     2i32
 }
@@ -80,7 +80,7 @@ fn manifest_printed_3(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         print!("{}", v6);
         std::io::Write::flush(&mut std::io::stdout()).unwrap();
         let v9: Rc<str> = format_real_6(v8);
-        let v12: Rc<str> = string_concat(&["kit mirror manifest ok files=", &*v9, " fingerprint=", &*v7]);
+        let v12: Rc<str> = string_concat(&["rig mirror manifest ok files=", &*v9, " fingerprint=", &*v7]);
         eprintln!("{}", v12);
         0i32
     }
@@ -189,7 +189,7 @@ fn plan_printed_8(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<
             let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("drift"); } LIT.with(|lit| lit.clone()) };
             v22
         };
-        let v28: Rc<str> = string_concat(&["kit mirror plan ", &*v23, " machine=", &*v0, " local=", &*v5]);
+        let v28: Rc<str> = string_concat(&["rig mirror plan ", &*v23, " machine=", &*v0, " local=", &*v5]);
         eprintln!("{}", v28);
         if v20 {
             0i32

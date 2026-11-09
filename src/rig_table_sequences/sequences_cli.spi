@@ -21,7 +21,7 @@
     expect (latency.code = 0i32) (run_text latency)
     same latency.stdout
         "file\tline\tlat\nruns/a.log\t1\t250\nruns/a.log\t3\t1900\nruns/a.log\t5\t400\nruns/b.log\t1\t400\n"
-    shows latency.stderr "kit table sequences ok files=2 rows=4"
+    shows latency.stderr "rig table sequences ok files=2 rows=4"
     := gaps =
         sequences_run root (Arg ("runs/a.log", Arg ("--time", Arg ("t=(?<ms>\\d+)", Arg ("--interval",
             Arg ("gap=request", NoArgs))))))
@@ -33,7 +33,7 @@
     := written =
         sequences_run root (Arg ("runs", Arg ("--time", Arg ("t=(?<ms>\\d+)", Arg ("--latency", Arg ("lat=request",
             Arg ("--to", Arg ("reply", Arg ("--out", Arg ("lat.tsv", NoArgs))))))))))
-    shows written.stderr "kit table sequences ok files=2 rows=4 out=lat.tsv"
+    shows written.stderr "rig table sequences ok files=2 rows=4 out=lat.tsv"
     same
         (fixture_read root "lat.tsv")
         "file\tline\tlat\nruns/a.log\t1\t250\nruns/a.log\t3\t1900\nruns/a.log\t5\t400\nruns/b.log\t1\t400\n"
@@ -82,7 +82,7 @@
         "section\tid\tappear_time\tappear_value\tthink_time\tthink_value\nA\t81\t-1\t1931,1352\t900\t1930,1352\n"
         ^^ "B\t71\t-1\t1931,1352\t-\t-\n"
     )
-    shows run.stderr "kit table sequences ok files=1 sections=2 rows=2"
+    shows run.stderr "rig table sequences ok files=1 sections=2 rows=2"
     rejected_with
         (sequences_run root (Arg ("trace.log", Arg ("--first", Arg ("appear=monster (?<id>\\d+)", NoArgs)))))
         2i32
@@ -107,7 +107,7 @@
             Arg (monsters_set, NoArgs)))))))))))))))))
     expect (run.code = 0i32) (run_text run)
     same run.stdout "section\tsamples\tknight\tmonsters\nrun 1\t2\t1\t1\nrun 2\t1\t0\t0\nlive.log\t1\t1\t1\n"
-    shows run.stderr "kit table sequences ok files=2 sections=3 rows=3"
+    shows run.stderr "rig table sequences ok files=2 sections=3 rows=3"
     rejected_with
         (sequences_run root (Arg ("live.log", Arg ("--count", Arg ("k=seen", Arg ("--in-set", Arg ("x=zone.txt",
             NoArgs)))))))

@@ -100,7 +100,8 @@
     | TaskThen (task, rest) => ? task.id = id ?> task.status |: status_of rest id
 
 :~ ^ deps_settled (tasks : task_list) (~deps : string) (offset : i32) : bool =
-    ? byte_len deps <= offset ?> !+
+    ? byte_len deps <= offset
+    ?> !+
     |:
         := comma = byte_find_from deps "," offset
         := stop = ? comma < 0i32 ?> byte_len deps |: comma
@@ -108,7 +109,8 @@
         ? status = "" || status = "Done" ?> deps_settled tasks deps (stop + 1i32) |: !-
 
 :~ ^ open_deps (tasks : task_list) (~deps : string) (offset : i32) (count : i32) : i32 =
-    ? byte_len deps <= offset ?> count
+    ? byte_len deps <= offset
+    ?> count
     |:
         := comma = byte_find_from deps "," offset
         := stop = ? comma < 0i32 ?> byte_len deps |: comma

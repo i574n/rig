@@ -13,7 +13,8 @@
     := marker = " = PathFirst ("
     := picked = \ (found : list path_first_row) (line : string) =>
         := at = sm'.index_of marker line
-        ? at < 0i32 ?> found
+        ? at < 0i32
+        ?> found
         |:
             := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
             ?= sm'.split_list "\"" rest ?|

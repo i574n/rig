@@ -15,12 +15,11 @@
 
 := main () : i32 =
     := _ = model.static_probe_result ()
-    := root = $'std::env::temp_dir().join("kit patch batch ü ".to_owned() + &std::process::id().to_string() + "-" + \
+    := root = $'std::env::temp_dir().join("rig patch batch ü ".to_owned() + &std::process::id().to_string() + "-" + \
         &std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_nanos().to_string()\
         ).display().to_string().into()' : string
     := created = $'std::fs::create_dir(&*!root).is_ok()' : bool
-    ? created
-    ?>
+    ? created ?>
         := paths = fixture_paths root
         := contents = fixture_contents ()
         := passed = model.run_fault patch_model.model.FailBetweenPromotions contents paths

@@ -38,8 +38,10 @@
     := after = at + byte_len key
     ? at < 8i32
     ?> 0i32, 0u64, 0u64, "", 0i32, -1i32
-    |? byte_slice cache (at - 8i32) at = "Skipped " ?> 1i32, 0u64, 0u64, "", 0i32, after + 1i32
-    |? byte_slice cache (at - 7i32) at <> "Cached " ?> 0i32, 0u64, 0u64, "", 0i32, -1i32
+    |? byte_slice cache (at - 8i32) at = "Skipped "
+    ?> 1i32, 0u64, 0u64, "", 0i32, after + 1i32
+    |? byte_slice cache (at - 7i32) at <> "Cached "
+    ?> 0i32, 0u64, 0u64, "", 0i32, -1i32
     |:
         := size, after_size = number_between cache (after + 2i32) "u64, "
         := mtime, after_mtime = ? after_size < 0i32 ?> 0u64, -1i32 |: number_between cache (after_size + 5i32) "u64, \""
@@ -71,7 +73,9 @@
 
 ///> rust
 :# cache_rows_round_trip_by_path_and_by_root =
-    ? ids_in "{\"path\":\"a\",\"id\":\"KIT-X\",\"text\":\"t\"},{\"path\":\"b\",\"id\":\"KIT-Y\"}" 0i32 "" = "KIT-X KIT-Y"
+    ?
+        ids_in "{\"path\":\"a\",\"id\":\"KIT-X\",\"text\":\"t\"},{\"path\":\"b\",\"id\":\"KIT-Y\"}" 0i32 ""
+        = "KIT-X KIT-Y"
     ?> ()
     |: failwith "ids"
     := row = cache_row "C:/r/a.spi" 12u64 34u64 "KIT-X" 1i32

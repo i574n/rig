@@ -1,6 +1,6 @@
 param([string]$Kit = (Join-Path $PSScriptRoot '..\src\target\debug\kit.exe'))
 $ErrorActionPreference = 'Stop'
-$env:KIT_JOBS_HOME = Join-Path ([IO.Path]::GetTempPath()) "kit-hidden-window-$PID"
+$env:RIG_JOBS_HOME = $env:KIT_JOBS_HOME = Join-Path ([IO.Path]::GetTempPath()) "kit-hidden-window-$PID"
 $marker = "kit-hidden-window-$PID"
 $started = & $Kit job start hidden-window 6000 pwsh -NoProfile -Command "`$null = '$marker'; Start-Sleep 30"
 $id = [regex]::Match("$started", 'id=(\S+)').Groups[1].Value

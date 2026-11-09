@@ -44,7 +44,8 @@
 
 := line_kind_of (~line : string) : line_kind =
     := lead = trimmed_start line
-    ? lead = "" || lead = "\r" ?> BlankLine
+    ? lead = "" || lead = "\r"
+    ?> BlankLine
     |? sm'.starts_with "///" lead ?> DirectiveLine
     |? sm'.starts_with "//" lead ?> (? sm'.contains (todo_marker ()) lead ?> TodoLine |: CommentLine)
     |: CodeLine
@@ -72,11 +73,16 @@
     sm'.starts_with "inl " row || sm'.starts_with "let " row || sm'.starts_with ":= " row || sm'.starts_with ":~ " row
 
 :~ declared_row_of (~row : string) : declared_row =
-    ? declaration_row row = !- ?> NotARule
-    |? sm'.contains "= NoCommentLines" row ?> DeclaredRule NoCommentLines
-    |? sm'.contains "= LfOnly" row ?> DeclaredRule LfOnly
-    |? sm'.contains "= TestTargets" row ?> DeclaredRule TestTargets
-    |? sm'.contains "= HostFree" row ?> DeclaredRule HostFree
+    ? declaration_row row = !-
+    ?> NotARule
+    |? sm'.contains "= NoCommentLines" row
+    ?> DeclaredRule NoCommentLines
+    |? sm'.contains "= LfOnly" row
+    ?> DeclaredRule LfOnly
+    |? sm'.contains "= TestTargets" row
+    ?> DeclaredRule TestTargets
+    |? sm'.contains "= HostFree" row
+    ?> DeclaredRule HostFree
     |? sm'.contains "= LibReferenced" row ?> DeclaredRule LibReferenced
     |? sm'.contains "= LineWidth " row ?> DeclaredRule (LineWidth ($'(!(row_value row "= LineWidth ")).parse::<i32>().\
         unwrap_or(120)' : i32))
@@ -85,7 +91,8 @@
     |: NotARule
 
 :~ ^ declared_from (~text : string) (found : standards) : standards =
-    ? text = "" ?> found
+    ? text = ""
+    ?> found
     |:
         ?= declared_row_of (line_head text) ?|
         | DeclaredRule rule => declared_from (line_rest text) (StandardThen (rule, found))
@@ -163,8 +170,7 @@
                 "///> _ is retired: Cells infers the cells that never run (a file with tests never runs its main, "
                 ^^ "nor does an export-only or backend-dispatching main); delete the line"
             )
-        |? test_line && scan.seen_test = !- && scan.notebook_header = !-
-        ?>
+        |? test_line && scan.seen_test = !- && scan.notebook_header = !- ?>
             finding path number rule (
                 "a test block in a module without a notebook header never runs; start the file with "
                 ^^ "///- --package . and a :# <module> static = prelude"
@@ -181,8 +187,7 @@
     | HostFree =>
         ?= kind ?|
         | CodeLine =>
-            ? sm'.contains "$'" (unquoted line)
-            ?>
+            ? sm'.contains "$'" (unquoted line) ?>
                 finding path number rule (
                     "a host macro in a host-free package; reach for lib/spiral (sm', am', listm', file_system) or "
                     ^^ "the OS boundary package"

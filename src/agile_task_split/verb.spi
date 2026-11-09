@@ -18,7 +18,8 @@
 
 :~ split_plan_of (estimate : i32) (steps : list step) : split_plan =
     := too_big = steps |> listm'.filter (\ (m : step) => m.minutes > split_limit ())
-    ? estimate <= item_limit () ?> AlreadySmall estimate
+    ? estimate <= item_limit ()
+    ?> AlreadySmall estimate
     |:
         ?= too_big ?|
         | big :: _ => MilestoneTooBig (big.name, big.minutes)
@@ -27,7 +28,8 @@
 :~ child_id (~parent : string) (index : i32) : string = parent ++# "-M" ++# sm'.show index
 
 :~ ^ gathered (shown : array_base agile_split_plan.plan.milestone) (at : i32) (acc : list step) : list step =
-    ? at < 0i32 ?> acc
+    ? at < 0i32
+    ?> acc
     |:
         := m = am'.index_base at shown
         gathered shown (at - 1i32) ({ name = m.name; minutes = m.minutes } :: acc)
@@ -67,27 +69,27 @@
     := id = rust_std_env.model.argument_owned 2i32
     := shown, text = rig_said [ "agile"; "show"; root; id ]
     ? shown = !- || id = "" ?>
-        console.write_error_line "kit error: usage: agile edit <root> <id> --split milestones (needs MILESTONES:)"
+        console.write_error_line "rig error: usage: agile edit <root> <id> --split milestones (needs MILESTONES:)"
         2i32
     |:
         := item = agile_split_plan.plan.shown_fields_of text
         ?= split_plan_of item.estimate (steps_of text) ?|
         | AlreadySmall minutes =>
             := why = " children=0 reason=already-small estimate=" ++# sm'.show minutes
-            console.write_line ("kit agile split ok id=" ++# id ++# why)
+            console.write_line ("rig agile split ok id=" ++# id ++# why)
             0i32
         | NoMilestones =>
-            console.write_error_line ("kit error: agile split refused: " ++# id ++# " has no note with MILESTONES:")
+            console.write_error_line ("rig error: agile split refused: " ++# id ++# " has no note with MILESTONES:")
             1i32
         | MilestoneTooBig (name, minutes) =>
             := size = " is " ++# sm'.show minutes ++# " m; split it to 120 m or less first"
-            console.write_error_line ("kit error: agile split refused: milestone " ++# name ++# size)
+            console.write_error_line ("rig error: agile split refused: milestone " ++# name ++# size)
             1i32
         | SplitInto steps =>
             := made = children_added root id item steps 1i32 ""
             := said = "split into " ++# sm'.show made ++# " chained children by kit agile split"
             := _ = rig_said [ "agile"; "note"; root; id; said; "--as"; "kit-split" ]
-            console.write_line ("kit agile split ok id=" ++# id ++# " children=" ++# sm'.show made)
+            console.write_line ("rig agile split ok id=" ++# id ++# " children=" ++# sm'.show made)
             ? made = listm.length steps ?> 0i32 |: 1i32
 
 ///> rust

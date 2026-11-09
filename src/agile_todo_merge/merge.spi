@@ -93,13 +93,13 @@
 :~ findings_of (syntax : comment_syntax) (~backlog : string) (~text : string) (~display : string) : string * i32 =
     := code = case_index syntax
     := rendered, count, _ =
-        $'agile_todo_lines::rig_agile_todo_findings(!code, "", &*!backlog, &*!text, &*!display, true)' : string * i32 * string
+        $'agile_todo_lines::rig_agile_todo_findings(!code, "", &*!backlog, &*!text, &*!display, true)'
+        : string * i32 * string
     rendered, count
 
 :~ file_read (state : walk) (syntax : comment_syntax) (~absolute : string) (size : u64) (mtime : u64) : walk =
     := has_nul, text = rust_std_fs.model.scan_text_of absolute
-    ? has_nul
-    ?>
+    ? has_nul ?>
         := binary = recorded state absolute size mtime "" 0i32
         { binary ?| scanned = (state.scanned + 1i32) }
     |:
@@ -150,8 +150,10 @@
     := since, was_dirty = cached_head_of state.cache root
     := dirty = ? head = "" ?> "" |: $'agile_todo_sources::rig_agile_todo_git_changed(&*!root, &*!head)' : string
     := moved =
-        ? head = "" || since = "" ?> ""
-        |? since = head ?> dirty
+        ? head = "" || since = ""
+        ?> ""
+        |? since = head
+        ?> dirty
         |: $'agile_todo_sources::rig_agile_todo_git_changed(&*!root, &*!since)' : string
     := changed = ? moved = "" || dirty = "" ?> "" |: moved ++# dirty ++# nul_text () ++# was_dirty ++# nul_text ()
     := scoped = { state ?| trusted = (changed <> ""); changed = changed }
@@ -215,7 +217,7 @@
         := _ = stdout_line ("stale wip: " ++# sm'.show (tagged - markers) ++# " markers naming a Done or unknown item")
         := _ = stdout_line ("untracked wip: " ++# sm'.show done.untracked ++# " markers without an ID")
         stdout_line (
-            "kit agile wip ok items=" ++# sm'.show items ++# " markers=" ++# sm'.show markers ++# " untracked="
+            "rig agile wip ok items=" ++# sm'.show items ++# " markers=" ++# sm'.show markers ++# " untracked="
             ++# sm'.show done.untracked ++# " scanned=" ++# sm'.show done.scanned ++# " cached=" ++# sm'.show done.hits
             ++# " elapsed_ms=" ++# sm'.show (ms_since started)
         )
@@ -223,9 +225,11 @@
 ///> rust
 :# words_siblings_and_changed_paths =
     ? words_in "KIT-X KIT-Y" = 2i32 && words_in "" = 0i32 ?> () |: failwith "words"
-    ? spiral_sibling_relative "a/b.rs" = "a/b.spi" && spiral_sibling_relative "a.b/c" = "a.b/c.spi" ?> ()
+    ? spiral_sibling_relative "a/b.rs" = "a/b.spi" && spiral_sibling_relative "a.b/c" = "a.b/c.spi"
+    ?> ()
     |: failwith "sibling of a path with and without an extension"
-    ? spiral_sibling_relative ".gitignore" = ".gitignore.spi" && spiral_sibling_relative "x.tar.gz" = "x.tar.spi" ?> ()
+    ? spiral_sibling_relative ".gitignore" = ".gitignore.spi" && spiral_sibling_relative "x.tar.gz" = "x.tar.spi"
+    ?> ()
     |: failwith "sibling of a dotfile and a double extension"
     := dirty = nul_text () ++# "a.spi" ++# nul_text () ++# "b/c.spi" ++# nul_text ()
     ? changed_in dirty "b/c.spi" && changed_in dirty "c.spi" = !- ?> () |: failwith "changed set matches whole paths"

@@ -5,7 +5,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new() -> Self {
         let stamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-        let path = std::env::temp_dir().join(format!("kit zip limit {} {stamp}", std::process::id()));
+        let path = std::env::temp_dir().join(format!("rig zip limit {} {stamp}", std::process::id()));
         fs::create_dir_all(path.join("source")).unwrap();
         fs::write(path.join("source/a.txt"), vec![b'a'; 512]).unwrap();
         fs::write(path.join("source/b.txt"), vec![b'b'; 512]).unwrap();

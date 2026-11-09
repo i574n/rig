@@ -7,7 +7,7 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn rig_binary() -> PathBuf {
-    if let Ok(path) = env::var("KIT_BIN_UNDER_TEST") { return PathBuf::from(path); }
+    if let Ok(path) = env::var("RIG_BIN_UNDER_TEST").or_else(|_| env::var("KIT_BIN_UNDER_TEST")) { return PathBuf::from(path); }
     let current = env::current_exe().expect("current test executable");
     let name = if cfg!(windows) { "kit.exe" } else { "kit" };
     let debug = current.parent().and_then(Path::parent).expect("target profile directory");
@@ -213,8 +213,8 @@ fn run_archive_fault(archive: &Path, destination: &Path, fault: &str) -> Output 
             archive.to_str().expect("archive"),
             destination.to_str().expect("destination"),
         ])
-        .env("KIT_ARCHIVE_FAULT", fault)
-        .env("KIT_ARCHIVE_MAX_BYTES", "4096")
+        .env("RIG_ARCHIVE_FAULT", &fault).env("KIT_ARCHIVE_FAULT", fault)
+        .env("RIG_ARCHIVE_MAX_BYTES", "4096").env("KIT_ARCHIVE_MAX_BYTES", "4096")
         .output()
         .expect("run archive fault")
 }
@@ -263,8 +263,8 @@ fn zip_extract_faults_restore_parent_bytes_before_commit() {
             archive.to_str().expect("archive"),
             destination.to_str().expect("destination"),
         ])
-        .env_remove("KIT_ARCHIVE_FAULT")
-        .env("KIT_ARCHIVE_MAX_BYTES", "4096")
+        .env_remove("RIG_ARCHIVE_FAULT").env_remove("KIT_ARCHIVE_FAULT")
+        .env("RIG_ARCHIVE_MAX_BYTES", "4096").env("KIT_ARCHIVE_MAX_BYTES", "4096")
         .output()
         .expect("run successful extraction");
     assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));

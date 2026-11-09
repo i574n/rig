@@ -10,7 +10,8 @@
     | _ => !-
 
 :~ ^ leases_of_rows (~rows : string) (leases : stored_leases) : stored_leases =
-    ? rows = "" ?> leases
+    ? rows = ""
+    ?> leases
     |:
         := rest = leases_of_rows (other_rows rows) leases
         ?= row_of (first_row rows) ?|
@@ -22,7 +23,7 @@
 
 :~ window_claimed (~path : string) : i32 =
     ? path = "" ?>
-        stderr_line "kit error: window claim <path> (refused while a tree-read window covers the path)"
+        stderr_line "rig error: window claim <path> (refused while a tree-read window covers the path)"
         2i32
     |:
         := now = now_ms ()
@@ -31,10 +32,10 @@
             edit_verdict_of (claim_of (leases_of_rows (live_rows root (stored_rows root) now "") NoLeases) path now)
         ?= verdict ?|
         | EditAllowed =>
-            stdout_line ("kit window claim ok path=" ++# path ++# " " ++# verdict_text verdict now)
+            stdout_line ("rig window claim ok path=" ++# path ++# " " ++# verdict_text verdict now)
             0i32
         | EditRefused _ =>
-            stdout_line ("kit window claim refused path=" ++# path ++# " " ++# verdict_text verdict now)
+            stdout_line ("rig window claim refused path=" ++# path ++# " " ++# verdict_text verdict now)
             1i32
 
 :~ claim_run () : i32 =

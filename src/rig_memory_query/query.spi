@@ -4,7 +4,8 @@
 :~ ^ dangling_in (~body : string) (from : i32) (~slugs : string) (~file : string) (~acc : string) : string =
     := opening = index_of body "[[" from
     := close = ? opening < 0i32 ?> -1i32 |: index_of body "]]" opening
-    ? close < 0i32 ?> acc
+    ? close < 0i32
+    ?> acc
     |:
         := target = text_between body (opening + 2i32) close
         := known = contains slugs (concat5 "\n" target "\n" "" "")
@@ -83,7 +84,7 @@
                 " missing_reasons="
         stdout_line (
             concat5
-                (? problems = 0i32 ?> "kit memory check ok" |: "kit memory check failed")
+                (? problems = 0i32 ?> "rig memory check ok" |: "rig memory check failed")
                 counts
                 (count_text tally.reasons)
                 (concat5 " unindexed=" (count_text tally.unindexed) " index_missing=" (count_text missing_count) "")
@@ -118,7 +119,7 @@
             := shown = listed (store_of (exact_text data)).memories kind 0i32
             stdout_line (
                 concat5
-                    "kit memory list ok shown="
+                    "rig memory list ok shown="
                     (count_text shown)
                     (? kind = "" ?> "" |: concat5 " kind=" kind "" "" "")
                     ""
@@ -165,8 +166,7 @@
     ?= list ?|
     | NoRanked => shown
     | RankedThen (score, entry, rest) =>
-        ? shown < limit
-        ?>
+        ? shown < limit ?>
             stdout_line (
                 concat5
                     (count_text score)
@@ -188,7 +188,7 @@
         := shown = ranked_printed (ranked_from store.memories (query_words query) NoRanked) limit 0i32
         stdout_line (
             concat5
-                "kit memory recall ok shown="
+                "rig memory recall ok shown="
                 (count_text shown)
                 " of="
                 (count_text store.count)

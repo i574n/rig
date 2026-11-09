@@ -28,45 +28,63 @@
         ingest_frontier_plan from to
 
 :~ manifest_binding (has_manifest : i32) (payload_files : i32) : i32 =
-    ? has_manifest < 1i32 ?> 0i32
-    |? payload_files < 0i32 ?> 0i32
-    |? payload_files < 1i32 ?> 1i32
+    ? has_manifest < 1i32
+    ?> 0i32
+    |? payload_files < 0i32
+    ?> 0i32
+    |? payload_files < 1i32
+    ?> 1i32
     |: 2i32
 
 :~ trim_binding (toolchain_tarballs : i32) : i32 =
-    ? toolchain_tarballs < 0i32 ?> 0i32
-    |? 0i32 < toolchain_tarballs ?> 0i32
+    ? toolchain_tarballs < 0i32
+    ?> 0i32
+    |? 0i32 < toolchain_tarballs
+    ?> 0i32
     |: 1i32
 
 :~ extracted_binding (has_ingest_md : i32) (has_extracted_manifest : i32) (toolchain_tarballs : i32) : i32 =
     := trim_ok = trim_binding toolchain_tarballs
-    ? has_ingest_md < 1i32 ?> 0i32
-    |? has_extracted_manifest < 1i32 ?> 0i32
-    |? trim_ok < 1i32 ?> 0i32
+    ? has_ingest_md < 1i32
+    ?> 0i32
+    |? has_extracted_manifest < 1i32
+    ?> 0i32
+    |? trim_ok < 1i32
+    ?> 0i32
     |: 1i32
 
 :~ targets_binding (manual_targets : i32) (derived_targets : i32) : i32 =
-    ? manual_targets < 0i32 ?> 0i32
-    |? derived_targets < 0i32 ?> 0i32
+    ? manual_targets < 0i32
+    ?> 0i32
+    |? derived_targets < 0i32
+    ?> 0i32
     |? manual_targets < 1i32 ?>
         ? derived_targets < 1i32 ?> 0i32 |: 1i32
     |: 1i32
 
 :~ frontier_binding (frontier_count : i32) (top_priority : i32) : i32 =
-    ? frontier_count < 1i32 ?> 0i32
-    |? top_priority < 1i32 ?> 0i32
-    |? 3i32 < top_priority ?> 0i32
+    ? frontier_count < 1i32
+    ?> 0i32
+    |? top_priority < 1i32
+    ?> 0i32
+    |? 3i32 < top_priority
+    ?> 0i32
     |: 1i32
 
 :~ complete_binding
     (manifest_code : i32) (trim_ok : i32) (extracted_ok : i32) (targets_ok : i32) (frontier_ok : i32)
     : i32
     =
-    ? manifest_code < 1i32 ?> 0i32
-    |? trim_ok < 1i32 ?> 0i32
-    |? extracted_ok < 1i32 ?> 0i32
-    |? targets_ok < 1i32 ?> 0i32
-    |? frontier_ok < 1i32 ?> 0i32
+    ? manifest_code < 1i32
+    ?> 0i32
+    |? trim_ok < 1i32
+    ?> 0i32
+    |? extracted_ok < 1i32
+    ?> 0i32
+    |? targets_ok < 1i32
+    ?> 0i32
+    |? frontier_ok < 1i32
+    ?> 0i32
     |: 1i32
 
 := full_plan \* owner. () : ingest_frontier_plan (ingest_unmapped owner) (ingest_frontier_settled owner) =

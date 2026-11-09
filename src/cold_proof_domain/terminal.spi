@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         fn cold_public_binary(root: &Path) -> Result<&'static str, String> {

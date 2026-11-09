@@ -32,25 +32,37 @@
     ))
 
 :~ manifest_parity_binding (entry_count_equal : i32) (fingerprint_equal : i32) : i32 =
-    ? entry_count_equal < 1i32 ?> 0i32
-    |? 1i32 < entry_count_equal ?> 0i32
-    |? fingerprint_equal < 1i32 ?> 0i32
-    |? 1i32 < fingerprint_equal ?> 0i32
+    ? entry_count_equal < 1i32
+    ?> 0i32
+    |? 1i32 < entry_count_equal
+    ?> 0i32
+    |? fingerprint_equal < 1i32
+    ?> 0i32
+    |? 1i32 < fingerprint_equal
+    ?> 0i32
     |: 1i32
 
 :~ manifest_executable_mode_binding (root_kit_seen : i32) (root_kit_executable : i32) : i32 =
-    ? root_kit_seen < 1i32 ?> 1i32
-    |? 1i32 < root_kit_seen ?> 0i32
-    |? root_kit_executable < 1i32 ?> 0i32
-    |? 1i32 < root_kit_executable ?> 0i32
+    ? root_kit_seen < 1i32
+    ?> 1i32
+    |? 1i32 < root_kit_seen
+    ?> 0i32
+    |? root_kit_executable < 1i32
+    ?> 0i32
+    |? 1i32 < root_kit_executable
+    ?> 0i32
     |: 1i32
 
 := executable_mode_passed (value : i32) : bool =
-    ? value < 1i32 ?> !-
-    |? 1i32 < value ?> !-
+    ? value < 1i32
+    ?> !-
+    |? 1i32 < value
+    ?> !-
     |: !+
 
 := parity_passed (value : i32) : bool =
-    ? value < 1i32 ?> !-
-    |? 1i32 < value ?> !-
+    ? value < 1i32
+    ?> !-
+    |? 1i32 < value
+    ?> !-
     |: !+

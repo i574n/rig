@@ -1,4 +1,3 @@
-
 inl emit_runtime () : () = global """
     #![allow(clippy::items_after_test_module)]
     use std::collections::BTreeSet;
@@ -12,7 +11,7 @@ inl emit_runtime () : () = global """
     const DEFAULT_ARCHIVE_LIMIT_BYTES: u64 = 256 * 1024 * 1024;
 
     fn archive_fault_code() -> Result<i32, String> {
-        match std::env::var("KIT_ARCHIVE_FAULT").ok().as_deref() {
+        match std::env::var("RIG_ARCHIVE_FAULT").or_else(|_| std::env::var("KIT_ARCHIVE_FAULT")).ok().as_deref() {
             None | Some("") | Some("none") => Ok(0),
             Some("after-first-payload") => Ok(1),
             Some("before-commit") => Ok(2),
@@ -194,9 +193,9 @@ inl emit_runtime () : () = global """
         if args.len() != 3 { return Err("zip-extract expects archive.zip destination".to_owned()); }
         let archive = Path::new(archive_arg(args, 1, "archive.zip")?);
         let destination = Path::new(archive_arg(args, 2, "destination")?);
-        let limit = std::env::var("KIT_ARCHIVE_MAX_BYTES").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(DEFAULT_ARCHIVE_LIMIT_BYTES);
+        let limit = std::env::var("RIG_ARCHIVE_MAX_BYTES").or_else(|_| std::env::var("KIT_ARCHIVE_MAX_BYTES")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(DEFAULT_ARCHIVE_LIMIT_BYTES);
         let (entries, payloads, bytes) = archive_extract_with_limit(archive, destination, limit)?;
-        println!("kit proxy zip-extract ok entries_total={entries} payloads={payloads} bytes={bytes} compression=stored,deflate receipt=typed-generic");
+        println!("rig proxy zip-extract ok entries_total={entries} payloads={payloads} bytes={bytes} compression=stored,deflate receipt=typed-generic");
         Ok(())
     }
     """

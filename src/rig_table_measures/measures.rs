@@ -751,7 +751,7 @@ fn grouped_measures_2(mut v0: bool, mut v1: Rc<str>, mut v2: std::rc::Rc<Vec<Vec
     if v40 {
         let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
         let v44: Rc<str> = std::rc::Rc::<str>::from((v2).first().map(|header| header.iter().map(|item| &**item).collect::<Vec<_>>().join(&*v43)).unwrap_or_default().as_str());
-        let v47: Rc<str> = string_concat(&["kit error: table unknown columns: ", &*v39, " (header: ", &*v44, ")"]);
+        let v47: Rc<str> = string_concat(&["rig error: table unknown columns: ", &*v39, " (header: ", &*v44, ")"]);
         eprintln!("{}", v47);
         2i32
     } else {
@@ -785,7 +785,7 @@ fn grouped_measures_2(mut v0: bool, mut v1: Rc<str>, mut v2: std::rc::Rc<Vec<Vec
             let v72: i32 = ((v2).len().max(1) - 1) as i32;
             let v73: Rc<str> = std::rc::Rc::<str>::from((v72).to_string().as_str());
             let v76: Rc<str> = std::rc::Rc::<str>::from((v63).to_string().as_str());
-            let v77: Rc<str> = string_concat(&["kit table query ok total=", &*v73, &*v71, &*v76]);
+            let v77: Rc<str> = string_concat(&["rig table query ok total=", &*v73, &*v71, &*v76]);
             println!("{}", v77);
             ()
         };
@@ -808,7 +808,7 @@ fn measured_query_1(mut v0: Rc<str>, mut v1: bool, mut v2: Rc<str>, mut v3: Rc<s
         }
         US1::US1_TableUnreadable(v17) => {
             let v17: Rc<str> = v17;
-            let v18: Rc<str> = string_concat(&["kit error: table ", &*v17]);
+            let v18: Rc<str> = string_concat(&["rig error: table ", &*v17]);
             eprintln!("{}", v18);
             2i32
         }

@@ -302,7 +302,7 @@ fn note_added_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
             let v12: Rc<str> = v12;
             let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v16: Rc<str> = string_concat(&["agile note ", &*v1, " rejected: ", &*v13]);
-            let v17: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v16 + "
+            let v17: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v16 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v17
         }
@@ -357,20 +357,20 @@ fn note_added_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
                     let v74: Rc<str> = std::rc::Rc::<str>::from((v45).to_string());
                     let v77: Rc<str> = std::rc::Rc::<str>::from((v43).to_string());
                     let v80: Rc<str> = std::rc::Rc::<str>::from((v46).to_string());
-                    let v82: Rc<str> = string_concat(&["kit agile note ok id=", &*v1, " note=", &*v49, " at=", &*v40, " author=", &*v67, " text_bytes=", &*v71, " bytes_before=", &*v74, " bytes_after=", &*v77, " elapsed_ms=", &*v80]);
+                    let v82: Rc<str> = string_concat(&["rig agile note ok id=", &*v1, " note=", &*v49, " at=", &*v40, " author=", &*v67, " text_bytes=", &*v71, " bytes_before=", &*v74, " bytes_after=", &*v77, " elapsed_ms=", &*v80]);
                     let v83: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v82.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                     v83
                 } else {
                     let v86: Rc<str> = string_concat(&["agile note ", &*v1, " rejected: ", &*v42]);
-                    let v87: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v86 + "
+                    let v87: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v86 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v87
                 }
             } else {
                 let v89: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("no task with this id"); } LIT.with(|lit| lit.clone()) };
                 let v92: Rc<str> = string_concat(&["agile note ", &*v1, " rejected: ", &*v89]);
-                let v93: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v92 + "
+                let v93: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v92 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v93
             }
@@ -739,7 +739,7 @@ fn note_entry_0() -> i32 {
     if v4 {
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the note text is empty"); } LIT.with(|lit| lit.clone()) };
         let v8: Rc<str> = string_concat(&["agile note ", &*v1, " rejected: ", &*v5]);
-        let mut v9: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v8 + "
+        let mut v9: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v8 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v9
     } else {
@@ -753,7 +753,7 @@ fn note_entry_0() -> i32 {
             US1::US1_AuthorMalformed => {
                 let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: agile note <root> <id> <text> [--as <author>]"); } LIT.with(|lit| lit.clone()) };
                 let v26: Rc<str> = string_concat(&["agile note ", &*v1, " rejected: ", &*v23]);
-                let v27: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v26 + "
+                let v27: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v26 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v27
             }
@@ -766,7 +766,7 @@ fn note_entry_0() -> i32 {
             US1::US1_AuthorUnnamedAgent => {
                 let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("an agent session must name the note's author: agile note <root> <id> <text> --as <author> (or set KIT_AUTHOR)"); } LIT.with(|lit| lit.clone()) };
                 let v21: Rc<str> = string_concat(&["agile note ", &*v1, " rejected: ", &*v18]);
-                let v22: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v21 + "
+                let v22: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v21 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v22
             }

@@ -160,7 +160,7 @@ fn empty_lab_tally_8() -> (Rc<str>, bool, u64, u64, u64, u64, u64, u64, u64) {
 }
 fn backlog_items_12(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let mut v2: Rc<str> = { let listed = std::env::current_exe().and_then(|program| std::process::Command::new(program).current_dir(&*v0).args(["agile", "list", &*v1, "all", "--json"]).stdin(std::process::Stdio::null()).output()); std::rc::Rc::<str>::from(match listed { Ok(output) if output.status.success() => serde_json::from_slice::<serde_json::Value>(&output.stdout).ok().and_then(|value| value.get("tasks").and_then(|tasks| tasks.as_array()).map(|tasks| tasks.iter().map(|task| format!("{}{tab}{}{tab}{}{tab}{}", task["id"].as_str().unwrap_or(""), task["status"].as_str().unwrap_or(""), task["progress"].as_u64().unwrap_or(0), task["last_note"].as_str().unwrap_or(""), tab = char::from(9u8))).collect::<Vec<_>>().join("
-"))).unwrap_or_else(|| String::from("error: agile list printed no tasks")), Ok(output) => format!("error: {}", String::from_utf8_lossy(&output.stderr).trim().trim_start_matches("kit error: ")), Err(error) => format!("error: agile list: {error}") }) };
+"))).unwrap_or_else(|| String::from("error: agile list printed no tasks")), Ok(output) => format!("error: {}", String::from_utf8_lossy(&output.stderr).trim().trim_start_matches("rig error: ")), Err(error) => format!("error: agile list: {error}") }) };
     v2
 }
 fn lines_joined_13(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {

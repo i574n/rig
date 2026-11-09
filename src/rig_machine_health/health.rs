@@ -402,7 +402,7 @@ fn gate_run_1() -> i32 {
     let v125: Rc<str> = std::rc::Rc::<str>::from((v74).to_string());
     let v128: Rc<str> = std::rc::Rc::<str>::from((v79).to_string());
     let v131: Rc<str> = std::rc::Rc::<str>::from((v90).to_string());
-    let v133: Rc<str> = string_concat(&["kit machine health gate=", &*v120, " reason=", &*v117, " disk=", &*v125, "gb ram=", &*v128, "mb busy=", &*v131, "pct"]);
+    let v133: Rc<str> = string_concat(&["rig machine health gate=", &*v120, " reason=", &*v117, " disk=", &*v125, "gb ram=", &*v128, "mb busy=", &*v131, "pct"]);
     println!("{}", v133);
     if v95 {
         0i32
@@ -820,7 +820,7 @@ fn health_pass_16(mut v0: u64, mut v1: bool) -> bool {
     let v63: Rc<str> = std::rc::Rc::<str>::from((v20).to_string());
     let v66: Rc<str> = std::rc::Rc::<str>::from((v21).to_string());
     let v69: Rc<str> = std::rc::Rc::<str>::from((v30).to_string());
-    let v72: Rc<str> = string_concat(&["kit machine health ", &*v48, " tools=", &*v51, " ok=", &*v54, " unowned=", &*v57, " dangling=", &*v60, " leftover=", &*v63, " hogs=", &*v66, " stalled=", &*v69, " history=", &*v43]);
+    let v72: Rc<str> = string_concat(&["rig machine health ", &*v48, " tools=", &*v51, " ok=", &*v54, " unowned=", &*v57, " dangling=", &*v60, " leftover=", &*v63, " hogs=", &*v66, " stalled=", &*v69, " history=", &*v43]);
     println!("{}", v72);
     v45
 }

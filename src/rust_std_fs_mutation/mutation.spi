@@ -1,4 +1,3 @@
-
 := emit_types () : () =
     global """
         #[rustfmt::skip]

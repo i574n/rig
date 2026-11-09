@@ -44,7 +44,7 @@
 
 :~ writes_answered (~payload_text : string) : string =
     := command = rig_os_json.json.text_at (rig_os_json.json.parsed payload_text) "/tool_input/command"
-    "kit hook " ++# rig_hook_verbs.lease_verbs.sign_line command
+    "rig hook " ++# rig_hook_verbs.lease_verbs.sign_line command
 
 :~ hook_usage () : i32 =
     console.write_error_line "usage: kit hook pre [--repos-root d] [--closed-root d,..] [--refuse .x,..] [--advise .x]"

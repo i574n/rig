@@ -5,7 +5,7 @@ param(
     [switch]$CheckOnly,
     [switch]$Publish,
     [switch]$Offline,
-    [string]$CompilerBundle = $env:KIT_SPIRAL_BUNDLE,
+    [string]$CompilerBundle = ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE),
     [ValidateRange(1, 600)][int]$TimeoutSec = 180
 )
 $ErrorActionPreference = 'Stop'

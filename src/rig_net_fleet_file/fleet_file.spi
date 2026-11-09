@@ -26,7 +26,8 @@
     := row = sm'.trim line
     := marker = row_marker kind
     := at = sm'.index_of marker row
-    ? at < 0i32 || sm'.ends_with "\")" row = !- ?> (;[] : array string) |> am'.base
+    ? at < 0i32 || sm'.ends_with "\")" row = !-
+    ?> (;[] : array string) |> am'.base
     |:
         := start = at + sm'.length marker
         sm'.split "\", \"" (sm'.trim_end_suffix "\")" (sm'.slice start (sm'.length row - 1i32) row))
@@ -35,14 +36,17 @@
     := network = fields_of line NetworkLine
     := machine = fields_of line MachineLine
     := sized = \ (kind : row_kind) (fields : array_base string) => am'.length_base fields = row_arity kind
-    ? sized NetworkLine network ?> Some { kind = row_word NetworkLine; fields = network; text = line }
-    |? sized MachineLine machine ?> Some { kind = row_word MachineLine; fields = machine; text = line }
+    ? sized NetworkLine network
+    ?> Some { kind = row_word NetworkLine; fields = network; text = line }
+    |? sized MachineLine machine
+    ?> Some { kind = row_word MachineLine; fields = machine; text = line }
     |? am'.length_base network > 0i32 || am'.length_base machine > 0i32 ?>
         Some { kind = "unread"; fields = network; text = line }
     |: None
 
 :~ ^ lines_from (lines : array string) (at : i32) (kept : array fleet_line) : array fleet_line =
-    ? at >= am'.length lines ?> kept
+    ? at >= am'.length lines
+    ?> kept
     |:
         ?= line_of (am'.index at lines) ?|
         | Some found => lines_from lines (at + 1i32) (kept ++ ;[ found ])

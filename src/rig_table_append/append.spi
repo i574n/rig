@@ -29,9 +29,14 @@
 :~ appended_to (target : append_target) (u : row_union) (t : table) (cells : list string) : append_result =
     := width : i32 = listm.length t.columns
     := given : i32 = listm.length cells
-    ? width = 0i32 ?> AppendRefused "the table has no header row"
-    |? given <> width ?> AppendRefused ("the row has " ++# sm'.show given ++# " cells but the table has " ++# sm'.show width ++# " columns")
-    |? listm.fold (\ ok (cell : string) => ok && cell_plain cell) !+ cells = !- ?> AppendRefused "a cell holds a tab or a newline"
+    ? width = 0i32
+    ?> AppendRefused "the table has no header row"
+    |? given <> width ?>
+        AppendRefused (
+            "the row has " ++# sm'.show given ++# " cells but the table has " ++# sm'.show width ++# " columns"
+        )
+    |? listm.fold (\ ok (cell : string) => ok && cell_plain cell) !+ cells = !-
+    ?> AppendRefused "a cell holds a tab or a newline"
     |:
         := grown = { t ?| rows = listm.append t.rows [ cells ] }
         ?= target ?|
@@ -45,15 +50,20 @@
     ? count <= index ?> [] |: argument index :: cells_from (index + 1i32) count
 
 :~ refused (~reason : string) : i32 =
-    console.write_error_line ("kit error: table append: " ++# reason)
+    console.write_error_line ("rig error: table append: " ++# reason)
     2i32
 
 :~ append_run () : i32 =
     := path = argument 3i32
     := count = env.command_line_argument_count () + 1i32
-    := cells = ? argument 4i32 = "--row-tsv" && count = 6i32 ?> sm'.split_list (tab ()) (argument 5i32) |: cells_from 4i32 count
-    ? path = "" || cells = [] ?> refused "usage: table append <table.spi|table.tsv> <cell>... | --row-tsv <line>"
-    |? file_system.file_exists path = !- ?> refused (path ++# ": file not found")
+    := cells =
+        ? argument 4i32 = "--row-tsv" && count = 6i32
+        ?> sm'.split_list (tab ()) (argument 5i32)
+        |: cells_from 4i32 count
+    ? path = "" || cells = []
+    ?> refused "usage: table append <table.spi|table.tsv> <cell>... | --row-tsv <line>"
+    |? file_system.file_exists path = !-
+    ?> refused (path ++# ": file not found")
     |:
         := text = file_system.read_all_text path
         := target = target_of path
@@ -64,9 +74,17 @@
             := pending = path ++# ".pending"
             file_system.write_all_text pending written
             := _ = file_system.rename path pending
-            ? file_system.file_exists pending ?> refused ("could not move " ++# pending ++# " over " ++# path)
+            ? file_system.file_exists pending
+            ?> refused ("could not move " ++# pending ++# " over " ++# path)
             |:
-                console.write_line ("kit table append ok rows=" ++# sm'.show (listm.length grown.rows : i32) ++# " columns=" ++# sm'.show (listm.length grown.columns : i32) ++# " out=" ++# path)
+                console.write_line (
+                    "rig table append ok rows="
+                    ++# sm'.show (listm.length grown.rows : i32)
+                    ++# " columns="
+                    ++# sm'.show (listm.length grown.columns : i32)
+                    ++# " out="
+                    ++# path
+                )
                 0i32
 
 := sample () : table = { columns = [ "run"; "score" ]; rows = [ [ "a"; "1" ] ] }
@@ -81,9 +99,24 @@
     ?= appended_to PlainTsv DeclaredHere (sample ()) [ "b"; "2" ] ?|
     | Appended (grown, written) => testing.expect (table_of_tsv written = grown) written
     | AppendRefused reason => testing.expect !- reason
-    testing.expect (appended_to PlainTsv DeclaredHere (sample ()) [ "b" ] = AppendRefused "the row has 1 cells but the table has 2 columns") "width"
-    testing.expect (appended_to NotAppendable DeclaredHere (sample ()) [ "b"; "2" ] = AppendRefused "append writes .spi or .tsv tables") "format"
-    testing.expect (union_of "///- --no-respell\nopen table_rows\ninl table () = ..." = OpenedFrom "table_rows" && target_of "R.SPI" = WholeSpi) "union and target"
+    testing.expect
+        (
+            appended_to PlainTsv DeclaredHere (sample ()) [ "b" ]
+            = AppendRefused "the row has 1 cells but the table has 2 columns"
+        )
+        "width"
+    testing.expect
+        (
+            appended_to NotAppendable DeclaredHere (sample ()) [ "b"; "2" ]
+            = AppendRefused "append writes .spi or .tsv tables"
+        )
+        "format"
+    testing.expect
+        (
+            union_of "///- --no-respell\nopen table_rows\ninl table () = ..." = OpenedFrom "table_rows"
+            && target_of "R.SPI" = WholeSpi
+        )
+        "union and target"
 
 := main () : i32 =
     export "rig_table_append_run" ((\ () => append_run ()) : () -> i32)

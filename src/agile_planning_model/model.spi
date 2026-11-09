@@ -67,7 +67,8 @@
 
 :~ parse_planned_load (~text : string) : validation_result planned_load =
     := lowered = ascii_lowercase text
-    ? cleared_value lowered ?> Valid LoadUnset
+    ? cleared_value lowered
+    ?> Valid LoadUnset
     |:
         ?= parse_case_named task_load_name lowered ?|
         | Valid load => Valid (PlannedLoad load)
@@ -75,7 +76,8 @@
 
 :~ parse_planned_assignee (~text : string) : validation_result planned_assignee =
     := lowered = ascii_lowercase text
-    ? cleared_value lowered ?> Valid Unassigned
+    ? cleared_value lowered
+    ?> Valid Unassigned
     |:
         ?= parse_case_named task_assignee_name lowered ?|
         | Valid assignee => Valid (PlannedAssignee assignee)
@@ -114,7 +116,8 @@
 
 :~ decimal_value (~digits : string) : validation_result i32 =
     := length = byte_len digits
-    ? length <= 0i32 ?> Invalid
+    ? length <= 0i32
+    ?> Invalid
     |? length <= estimate_digit_limit () ?>
         := value = decimal_digits_value digits 0i32 length 0i32
         ? value < 0i32 ?> Invalid |: Valid value
@@ -124,8 +127,10 @@
     ? sm'.ends_with "h" text ?> HourUnit |: MinuteUnit
 
 := estimate_digits (~text : string) : string =
-    ? sm'.ends_with "h" text ?> byte_slice text 0i32 (byte_len text - 1i32)
-    |? sm'.ends_with "m" text ?> byte_slice text 0i32 (byte_len text - 1i32)
+    ? sm'.ends_with "h" text
+    ?> byte_slice text 0i32 (byte_len text - 1i32)
+    |? sm'.ends_with "m" text
+    ?> byte_slice text 0i32 (byte_len text - 1i32)
     |: text
 
 := estimate_minute_ceiling () : i32 = 999999i32
@@ -134,7 +139,8 @@
     ? minutes <= estimate_minute_ceiling () ?> Valid (EstimateMinutes minutes) |: Invalid
 
 :~ parse_planned_estimate (~text : string) : validation_result planned_estimate =
-    ? cleared_value text ?> Valid Unestimated
+    ? cleared_value text
+    ?> Valid Unestimated
     |:
         ?= decimal_value (estimate_digits text) ?|
         | Valid value => bounded_estimate (i32_scaled value (estimate_unit_factor (estimate_unit_of text)))
@@ -225,7 +231,8 @@
     |: Unestimated
 
 := load_of_token (~token : string) : planned_load =
-    ? sm'.starts_with "Load " token ?> planned_or_unset (parse_planned_load (byte_slice token 5i32 (byte_len token)))
+    ? sm'.starts_with "Load " token
+    ?> planned_or_unset (parse_planned_load (byte_slice token 5i32 (byte_len token)))
     |: LoadUnset
 
 := assignee_of_token (~token : string) : planned_assignee =
@@ -304,8 +311,10 @@
 
 :~ ^ declared_from (text : string) (~needle : string) (offset : i32) : i32 =
     := found = byte_find_from text needle offset
-    ? found < 0i32 ?> found
-    |? declared_task text found ?> found
+    ? found < 0i32
+    ?> found
+    |? declared_task text found
+    ?> found
     |: declared_from text needle (found + 1i32)
 
 := planning_offset (text : string) (~id : string) : i32 = declared_from text (planning_anchor id) 0i32
@@ -336,7 +345,8 @@
 
 :~ planning_tokens_of (text : string) (~id : string) : planning_tokens =
     := found = planning_offset text id
-    ? found < 0i32 ?> unset_tokens ()
+    ? found < 0i32
+    ?> unset_tokens ()
     |:
         := field = tuple_field text ((found + (planning_arguments_offset ()))) (byte_len text)
         { estimate_token = field 1i32; load_token = field 2i32; assignee_token = field 3i32 }
@@ -354,8 +364,7 @@
     ?> Invalid
     |:
         := existing = planning_offset text id
-        ? existing < 0i32
-        ?>
+        ? existing < 0i32 ?>
             := stop = line_end_after text task
             Valid (spliced text stop stop ("\n" ++# (planning_row id tokens)))
         |:

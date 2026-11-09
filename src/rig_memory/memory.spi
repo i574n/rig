@@ -11,13 +11,14 @@
         )
 
 :~ memory_render (~data : string) (~out : string) : i32 =
-    ? file_present data = !- ?> failed (concat5 "render needs a readable data file: " data "" "" "")
+    ? file_present data = !-
+    ?> failed (concat5 "render needs a readable data file: " data "" "" "")
     |:
         := store = store_of (exact_text data)
         := written = rendered_into store.memories out 0i32
         := index_written = text_written (path_joined out "MEMORY.md") store.index
         ? written = store.count && index_written ?>
-            stdout_line (concat5 "kit memory render ok memories=" (count_text written) " out=" out "")
+            stdout_line (concat5 "rig memory render ok memories=" (count_text written) " out=" out "")
             0i32
         |: failed (concat5 "render wrote " (count_text written) " of " (count_text store.count) " memories")
 
@@ -74,7 +75,8 @@
             := limit = decimal_of (option_value "--limit") 10i32
             ? query = "" ?> failed (memory_usage ()) |: rig_memory_query.query.memory_recall (data, query, limit)
         | VerbSave =>
-            ? argument 7i32 = "" ?> failed (memory_usage ())
+            ? argument 7i32 = ""
+            ?> failed (memory_usage ())
             |:
                 := dir, kind, slug = argument 3i32, argument 4i32, argument 5i32
                 := description, body = argument 6i32, argument 7i32
@@ -84,7 +86,8 @@
             ? slug = "" ?> failed (memory_usage ()) |: rig_memory_save.entry.memory_forget_run (dir, slug)
         | VerbEdit =>
             := dir, slug, field, text = argument 3i32, argument 4i32, argument 5i32, argument 6i32
-            ? text = "" ?> failed (memory_usage ())
+            ? text = ""
+            ?> failed (memory_usage ())
             |: rig_memory_save.entry.memory_edit_run (dir, slug, field, text)
 
 := main () : i32 =

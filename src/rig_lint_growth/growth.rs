@@ -955,7 +955,7 @@ fn growth_run_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
         let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("refused"); } LIT.with(|lit| lit.clone()) };
         v59
     };
-    let v62: Rc<str> = string_concat(&["kit lint growth ", &*v60, &*v56]);
+    let v62: Rc<str> = string_concat(&["rig lint growth ", &*v60, &*v56]);
     println!("{}", v62);
     if v57 {
         0i32

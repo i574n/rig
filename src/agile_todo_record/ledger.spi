@@ -35,8 +35,7 @@
         := line = line_head ledger
         := prefix = id ++# "\t"
         := next =
-            ? sm'.starts_with prefix line
-            ?>
+            ? sm'.starts_with prefix line ?>
                 ? found = ""
                 ?> byte_slice line (byte_len prefix) (byte_len line)
                 |: found ++# ", " ++# (byte_slice line (byte_len prefix) (byte_len line))
@@ -44,9 +43,12 @@
         sites_of (line_rest ledger) id next
 
 := site_change_of (~before : string) (~after : string) : site_change =
-    ? before = after ?> SitesKept
-    |? before = "" ?> SitesAppeared after
-    |? after = "" ?> SitesVanished before
+    ? before = after
+    ?> SitesKept
+    |? before = ""
+    ?> SitesAppeared after
+    |? after = ""
+    ?> SitesVanished before
     |: SitesMoved (before, after)
 
 := change_note = \|
@@ -57,7 +59,8 @@
 
 :~ ^ ledger_from_rows (~text : string) (offset : i32) (~found : string) : string =
     := at = byte_find_from text (site_row_marker ()) offset
-    ? at < 0i32 ?> lines_sorted found
+    ? at < 0i32
+    ?> lines_sorted found
     |:
         := id_start = at + byte_len (site_row_marker ()) + 2i32
         := id_stop = byte_find_from text "\"" id_start
@@ -68,7 +71,8 @@
 
 :~ ^ rows_removed (~text : string) : string =
     := at = byte_find text (site_row_marker ())
-    ? at < 0i32 ?> text
+    ? at < 0i32
+    ?> text
     |:
         := start = line_start_before text at
         := newline = byte_find_from text "\n" at
@@ -92,7 +96,8 @@
         site_rows (line_rest ledger) (index + 1i32) (rows ++# row)
 
 := first_item_offset (~text : string) : i32 =
-    ? sm'.starts_with "inl " text ?> 0i32
+    ? sm'.starts_with "inl " text
+    ?> 0i32
     |:
         := found = byte_find text "\ninl "
         ? found < 0i32 ?> byte_len text |: found + 1i32

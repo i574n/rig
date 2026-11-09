@@ -18,9 +18,14 @@
     := mismatch = migration 290i32 275i32
     := second_fault = fault 2i32 2i32
     := completed = complete 1i32 1i32
-    ? prepared < 1i32 ?> 1i32
-    |? exact < 1i32 ?> 2i32
-    |? 0i32 < mismatch ?> 3i32
-    |? second_fault < 1i32 ?> 4i32
-    |? completed < 1i32 ?> 5i32
+    ? prepared < 1i32
+    ?> 1i32
+    |? exact < 1i32
+    ?> 2i32
+    |? 0i32 < mismatch
+    ?> 3i32
+    |? second_fault < 1i32
+    ?> 4i32
+    |? completed < 1i32
+    ?> 5i32
     |: 0i32

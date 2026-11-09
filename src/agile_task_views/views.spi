@@ -48,7 +48,8 @@
 := views_module () : string = "    views\n"
 := views_module_listed (~text : string) : bool =
     sm'.contains (concat5 "\n" (views_module ()) "" "" "") text || sm'.ends_with "\n    views" text
-:= view_schema () : string = "///- --no-respell\nunion agile_view =\n    | View :: string * string * string -> agile_view\n"
+:= view_schema () : string =
+    "///- --no-respell\nunion agile_view =\n    | View :: string * string * string -> agile_view\n"
 := view_constructor () : string = "View ("
 := view_needle () : string = concat5 (view_constructor ()) "\"" "" "" ""
 := view_anchor (~name : string) : string = concat5 (view_constructor ()) (spi_quoted name) "," "" ""
@@ -85,8 +86,7 @@
         := text = loaded_string (read_text file)
         ? views_module_listed text
         ?> StateWritten
-        |? sm'.contains (modules_header ()) text
-        ?>
+        |? sm'.contains (modules_header ()) text ?>
             ?=
                 replace_file_checked path (
                     sm'.replace (modules_header ()) (concat5 (modules_header ()) (views_module ()) "" "" "") text
@@ -109,12 +109,13 @@
     $'{ let extra = std::env::args().skip(!skip as usize).collect::<Vec<_>>(); \
         match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).arg("agile").arg(&*!verb).arg(&*!root\
         ).args((!flags).split_whitespace()).args(&extra).status()) { Ok(status) => status.code().unwrap_or(1), \
-        Err(error) => { eprintln\!("kit error: agile view could not start: {}", error); 2 } } }'
+        Err(error) => { eprintln\!("rig error: agile view could not start: {}", error); 2 } } }'
     : i32
 
 :~ ^ views_listed (text : string) (offset : i32) (count : i32) : i32 =
     := found = declared_from text (view_needle ()) offset
-    ? found < 0i32 ?> count
+    ? found < 0i32
+    ?> count
     |:
         := view = view_at text found
         := _ = stdout_line (concat5 view.name "  " view.verb "  " view.flags)
@@ -126,7 +127,7 @@
     := count = views_listed loaded.text 0i32 0i32
     stdout_line (
         concat5
-            "kit agile views ok views="
+            "rig agile views ok views="
             ($'std::rc::Rc::<str>::from((!count).to_string().as_str())' : string)
             " path="
             (views_path root)
@@ -141,8 +142,7 @@
     |:
         := loaded = views_loaded root
         := found = declared_from loaded.text (view_anchor name) 0i32
-        ? found < 0i32
-        ?>
+        ? found < 0i32 ?>
             stderr_failure (
                 concat5 "agile view: no view named " name " in " (views_path root) "; agile views <root> lists them"
             )
@@ -173,15 +173,14 @@
     | StateWritten =>
         := detail = concat5 " verb=" view.verb " flags='" view.flags "'"
         stdout_line (
-            concat5 "kit agile view-add ok name=" view.name detail (? replaced ?> " replaced=yes" |: " replaced=no") ""
+            concat5 "rig agile view-add ok name=" view.name detail (? replaced ?> " replaced=yes" |: " replaced=no") ""
         )
     | problem => stderr_failure (concat5 "agile view-add " view.name " rejected: " (state_write_problem problem) "")
 
 :~ view_add_run () : i32 =
     := root = argument_owned 1i32
     := name = argument_owned 2i32
-    ? view_name_valid name
-    ?>
+    ? view_name_valid name ?>
         ?= view_verb_of (argument_owned 3i32) ?|
         | VerbRefused => stderr_failure (concat5 "agile view-add: view verbs are " (view_verb_words ()) "" "" "")
         | VerbRead verb =>

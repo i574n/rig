@@ -10,9 +10,12 @@
     := code = ? success ?> inspect json names (host.separator ()) |: -1i32
     ? (<) code 0i32 ?>
         := message =
-            ? (=.) code -2i32 ?> "Unknown selected Cargo package or ambiguous workspace name\n"
-            |? (=.) code -3i32 ?> "kit test metadata must be a table\n"
-            |? (=.) code -4i32 ?> "test-requires-cli must be a boolean\n"
+            ? (=.) code -2i32
+            ?> "Unknown selected Cargo package or ambiguous workspace name\n"
+            |? (=.) code -3i32
+            ?> "rig test metadata must be a table\n"
+            |? (=.) code -4i32
+            ?> "test-requires-cli must be a boolean\n"
             |: "Cannot inspect selected Cargo test requirements\n"
         host.print message
     code

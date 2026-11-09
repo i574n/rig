@@ -30,8 +30,10 @@
     ?= state ?|
     | ScanEscaped => ScanQuoted
     | ScanQuoted =>
-        ? byte = backslash_byte () ?> ScanEscaped
-        |? byte = quote_byte () ?> ScanPlain
+        ? byte = backslash_byte ()
+        ?> ScanEscaped
+        |? byte = quote_byte ()
+        ?> ScanPlain
         |: ScanQuoted
     | ScanPlain => ? byte = quote_byte () ?> ScanQuoted |: ScanPlain
 
@@ -41,17 +43,20 @@
     | _ => !-
 
 :~ ^ field_end (text : string) (offset : i32) (length : i32) (~state : scan_state) : i32 =
-    ? length <= offset ?> length
+    ? length <= offset
+    ?> length
     |:
         := byte = byte_at text offset
-        ? ends_field state byte ?> offset
+        ? ends_field state byte
+        ?> offset
         |: field_end text (offset + 1i32) length (next_scan_state state byte)
 
 :~ ^ skip_spaces (text : string) (offset : i32) : i32 =
     ? byte_at text offset = space_byte () ?> skip_spaces text (offset + 1i32) |: offset
 
 :~ ^ field_start (text : string) (offset : i32) (length : i32) (position : i32) : i32 =
-    ? position = 0i32 ?> offset
+    ? position = 0i32
+    ?> offset
     |: field_start text (skip_spaces text (field_end text offset length ScanPlain + 1i32)) length (position - 1i32)
 
 := spi_escaped (~value : string) : string =
@@ -80,8 +85,10 @@
 
 :~ ^ top_level_field_count (text : string) (offset : i32) (length : i32) (counted : i32) : i32 =
     := stop = field_end text offset length ScanPlain
-    ? length <= stop ?> -1i32
-    |? byte_at text stop = close_paren_byte () ?> counted + 1i32
+    ? length <= stop
+    ?> -1i32
+    |? byte_at text stop = close_paren_byte ()
+    ?> counted + 1i32
     |: top_level_field_count text (skip_spaces text (stop + 1i32)) length (counted + 1i32)
 
 :~ ^ first_malformed_task (text : string) (offset : i32) (length : i32) : i32 =
@@ -90,8 +97,7 @@
     ?> -1i32
     |:
         := arguments = (found + (task_arguments_offset ()))
-        ? declared_task text found
-        ?>
+        ? declared_task text found ?>
             ? top_level_field_count text arguments length 0i32 = task_field_count ()
             ?> first_malformed_task text arguments length
             |: found

@@ -15,8 +15,10 @@
     file_system.file_exists (after_path id) && file_system.file_exists (rig_jobs.jobs.job_file id "after-done") |> not
 
 :~ ^ chain_reaches (~from : string) (~target : string) (steps : i32) : bool =
-    ? from = target ?> !+
-    |? steps <= 0i32 || waits_on_after from |> not ?> !-
+    ? from = target
+    ?> !+
+    |? steps <= 0i32 || waits_on_after from |> not
+    ?> !-
     |: chain_reaches (after_file_predecessor (text_at (after_path from))) target (steps - 1i32)
 
 :~ facts_of (~id : string) (~predecessor : string) : rechain_facts =
@@ -38,17 +40,17 @@
     := predecessor = argument 3i32
     ?= ? id = "" || predecessor = "" ?> None |: mode_of_flag (argument 4i32) ?|
     | None =>
-        console.write_error_line ("kit error: job usage: " ++# usage ())
+        console.write_error_line ("rig error: job usage: " ++# usage ())
         2i32
     | Some mode =>
         ?= rechain_of (facts_of id predecessor) ?|
         | Refused refusal =>
-            console.write_error_line ("kit error: job after refused: " ++# refusal_text refusal id predecessor)
+            console.write_error_line ("rig error: job after refused: " ++# refusal_text refusal id predecessor)
             2i32
         | Repointed previous =>
             file_system.write_all_text (after_path id) (after_file_text predecessor mode)
             console.write_line (
-                "kit job after ok id=" ++# id ++# " after=" ++# predecessor ++# " after_mode=" ++# mode_word mode
+                "rig job after ok id=" ++# id ++# " after=" ++# predecessor ++# " after_mode=" ++# mode_word mode
                 ++# " previous=" ++# previous
             )
             0i32

@@ -18,7 +18,8 @@
 :~ link_of_line (~line : string) : option parent_link =
     := row = sm'.trim line
     := at = sm'.index_of (row_marker ()) row
-    ? at < 0i32 ?> None
+    ? at < 0i32
+    ?> None
     |:
         := start = at + sm'.length (row_marker ())
         ?= quoted_pair (sm'.slice start (sm'.length row - 1i32) row) ?|

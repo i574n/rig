@@ -20,8 +20,7 @@
     ?= words ?|
     | [] => ""
     | word :: rest =>
-        ? word = flag
-        ?>
+        ? word = flag ?>
             ?= rest ?|
             | value :: _ => value
             | [] => ""
@@ -88,7 +87,7 @@
     := history = history_written (history_row tally stalled_count)
     := failing = tally.dangling + tally.leftover > 0u64
     console.write_line (
-        "kit machine health " ++# (? failing ?> "failed" |: "ok") ++# " tools=" ++# sm'.decimal_text tally.tools
+        "rig machine health " ++# (? failing ?> "failed" |: "ok") ++# " tools=" ++# sm'.decimal_text tally.tools
         ++# " ok=" ++# sm'.decimal_text tally.healthy ++# " unowned=" ++# sm'.decimal_text tally.unowned
         ++# " dangling=" ++# sm'.decimal_text tally.dangling
         ++# " leftover=" ++# sm'.decimal_text tally.leftover ++# " hogs=" ++# sm'.decimal_text tally.hogs
@@ -120,7 +119,19 @@
         |? ram < min_ram ?> "ram-" ++# sm'.decimal_text ram ++# "mb<" ++# sm'.decimal_text min_ram
         |? busy >= max_busy ?> "busy-" ++# sm'.decimal_text busy ++# "pct>=" ++# sm'.decimal_text max_busy
         |: "ok"
-    console.write_line ("kit machine health gate=" ++# (? ok ?> "ok" |: "refused") ++# " reason=" ++# reason ++# " disk=" ++# sm'.decimal_text disk ++# "gb ram=" ++# sm'.decimal_text ram ++# "mb busy=" ++# sm'.decimal_text busy ++# "pct")
+    console.write_line (
+        "rig machine health gate="
+        ++# (? ok ?> "ok" |: "refused")
+        ++# " reason="
+        ++# reason
+        ++# " disk="
+        ++# sm'.decimal_text disk
+        ++# "gb ram="
+        ++# sm'.decimal_text ram
+        ++# "mb busy="
+        ++# sm'.decimal_text busy
+        ++# "pct"
+    )
     ? ok ?> 0i32 |: 1i32
 
 :~ health_normal_run () : i32 =

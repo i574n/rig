@@ -14,7 +14,7 @@
     (~id : string) (progress : i32) (~status : string) (before : u64) (after : u64) (started : u64)
     : string
     =
-    := head = "kit agile set ok id=" ++# id ++# " progress=" ++# (i32_text progress) ++# " status="
+    := head = "rig agile set ok id=" ++# id ++# " progress=" ++# (i32_text progress) ++# " status="
     := attested = head ++# status ++# " validation=runtime-attested compiler=not-required"
     attested ++# (measured_sizes before after (ms_since started))
 
@@ -23,7 +23,7 @@
 ///> rust
 :# the_set_receipt_carries_the_fields_kit_agile_set_promises =
     := text = agile_set_receipt_text "KIT-A" 50i32 "Active" 10u64 12u64 (agile_clock_ms ())
-    := head = "kit agile set ok id=KIT-A progress=50 status=Active validation=runtime-attested compiler=not-required"
+    := head = "rig agile set ok id=KIT-A progress=50 status=Active validation=runtime-attested compiler=not-required"
     := sizes = " bytes_before=10 bytes_after=12 elapsed_ms="
     testing.expect (sm'.starts_with (head ++# sizes) text) "receipt fields in order"
     testing.expect (agile_clock_ms () > 1700000000000u64) "the clock reads real epoch milliseconds"

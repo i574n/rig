@@ -3,7 +3,7 @@ fn native_spiral_host(path: &std::path::Path) -> bool {
 }
 
 fn spiral_dotnet_from(env: impl Fn(&str) -> Option<std::ffi::OsString>) -> std::ffi::OsString {
-    if let Some(value) = env("KIT_DOTNET").or_else(|| env("SPIRAL_DOTNET")).filter(|value| !value.is_empty()) {
+    if let Some(value) = env("RIG_DOTNET").or_else(|| env("KIT_DOTNET")).or_else(|| env("SPIRAL_DOTNET")).filter(|value| !value.is_empty()) {
         return value;
     }
     let cache = env("SPIRAL_BIN_CACHE_DIR").filter(|value| !value.is_empty()).map(std::path::PathBuf::from).or_else(|| {
@@ -31,7 +31,7 @@ fn spiral_compiler_command(path: &std::path::Path) -> std::process::Command {
     } else {
         std::process::Command::new(path)
     };
-    if let Some(root) = std::env::var_os("KIT_SPIRAL_BUNDLE") {
+    if let Some(root) = std::env::var_os("RIG_SPIRAL_BUNDLE").or_else(|| std::env::var_os("KIT_SPIRAL_BUNDLE")) {
         command.env("SPIRAL_WORKSPACE_ROOT", root);
     }
     command

@@ -1,8 +1,7 @@
-
 := emit_contracts () : () =
     := _ = multi_file_patch_contract.model.multi_patch_public_plan ()
     global """
-        fn run_with_fault(args: &[&str], fault: &str) -> Output { Command::new(rig_binary()).current_dir(env::temp_dir()).env("KIT_PATCH_FAULT", fault).args(args).output().expect("run KIT with fault") }
+        fn run_with_fault(args: &[&str], fault: &str) -> Output { Command::new(rig_binary()).current_dir(env::temp_dir()).env("RIG_PATCH_FAULT", &fault).env("KIT_PATCH_FAULT", fault).args(args).output().expect("run KIT with fault") }
 
         #[test]
         #[ignore = "requires a Spiral facade with --check/--plan-ir; run build.ps1 -Test -CompilerContracts"]

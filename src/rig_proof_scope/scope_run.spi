@@ -29,8 +29,10 @@
 
 :~ scope_args_of (words : list string) : scope_args =
     := args = scope_read words { root = ""; changed = []; rejected = "" }
-    ? args.rejected = "" && args.root = "" ?> { args ?| rejected = "expected <repo root> --changed <path,path...>" }
-    |? args.rejected = "" && args.changed = [] ?> { args ?| rejected = "--changed <path,path...> is required" }
+    ? args.rejected = "" && args.root = ""
+    ?> { args ?| rejected = "expected <repo root> --changed <path,path...>" }
+    |? args.rejected = "" && args.changed = []
+    ?> { args ?| rejected = "--changed <path,path...> is required" }
     |: args
 
 :~ ^ after_words (count : i32) (words : list string) : list string =
@@ -41,7 +43,7 @@
 :~ scope_run () : i32 =
     := args = scope_args_of (after_words 2i32 (env.command_line_arguments ()))
     ? args.rejected <> "" ?>
-        console.write_error_line ("kit error: repo scope: " ++# args.rejected)
+        console.write_error_line ("rig error: repo scope: " ++# args.rejected)
         2i32
     |:
         := rows = rig_proof_scope_manifests.manifest_walk.manifests_under args.root
@@ -50,8 +52,9 @@
         := pkgs = rows |> am'.to_list_base' |> listm'.unbox |> listm.map package_from
         := lines = scope_lines (scope_of pkgs paths)
         lines |> listm.iter (\ (line : string) => console.write_line line)
-        := counts = "packages=" ++# sm'.show (am'.length_base rows) ++# " proof_sets=" ++# sm'.show (listm.length lines : i32)
-        console.write_line ("kit repo scope ok " ++# counts)
+        := counts =
+            "packages=" ++# sm'.show (am'.length_base rows) ++# " proof_sets=" ++# sm'.show (listm.length lines : i32)
+        console.write_line ("rig repo scope ok " ++# counts)
         0i32
 
 ///> rust

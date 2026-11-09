@@ -36,7 +36,8 @@
     | NoModulesSection
 
 :~ module_listed (~package_text : string) : module_listing =
-    ? sm'.contains "\n    asks\n" package_text || sm'.ends_with "\n    asks" package_text ?> ModuleListed
+    ? sm'.contains "\n    asks\n" package_text || sm'.ends_with "\n    asks" package_text
+    ?> ModuleListed
     |? sm'.contains "modules:\n" package_text
     ?> ModuleAdded (sm'.replace "modules:\n" "modules:\n    asks\n" package_text)
     |: NoModulesSection
@@ -56,39 +57,45 @@
     := path = state ++# "/asks.spi"
     := before = text_of path
     := asks = asks_changed (asks_of_text before) change
-    ? agile_text = "" ?> AsksRefused ("no backlog state at " ++# state)
+    ? agile_text = ""
+    ?> AsksRefused ("no backlog state at " ++# state)
     |? task_known agile_text (change_item change) = !-
     ?> AsksRefused ("no task " ++# change_item change ++# " in state/agile.spi")
-    |? text_of path <> before ?> AsksRefused "state/asks.spi changed since it was read; run again"
-    |? replaced path (asks_text asks) = !- ?> AsksRefused "state/asks.spi could not be written"
+    |? text_of path <> before
+    ?> AsksRefused "state/asks.spi changed since it was read; run again"
+    |? replaced path (asks_text asks) = !-
+    ?> AsksRefused "state/asks.spi could not be written"
     |:
         := count = listm.length asks
         ?= module_listed (text_of (state ++# "/package.spiproj")) ?|
         | ModuleListed => AsksWritten count
         | NoModulesSection => AsksRefused "state/package.spiproj has no modules section to list asks in"
         | ModuleAdded listed =>
-            ? replaced (state ++# "/package.spiproj") listed ?> AsksWritten count
+            ? replaced (state ++# "/package.spiproj") listed
+            ?> AsksWritten count
             |: AsksRefused "state/package.spiproj not updated"
 
 := usage () : string =
-    "kit error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"
+    "rig error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"
 
 :~ reported (~item : string) (~asked_on : string) (outcome : asks_write) : i32 =
     ?= outcome ?|
     | AsksWritten count =>
         := counts = " asked=" ++# asked_on ++# " asks=" ++# sm'.format count
-        console.write_line ("kit agile edit ok id=" ++# item ++# counts)
+        console.write_line ("rig agile edit ok id=" ++# item ++# counts)
         0i32
     | AsksRefused reason =>
-        console.write_error_line ("kit error: agile edit --asked: " ++# reason)
+        console.write_error_line ("rig error: agile edit --asked: " ++# reason)
         2i32
 
 := word (index : i32) : string = rust_std_env.model.argument_owned index
 
 :~ ask_request () : option (string * ask_change * string) =
     := root, item, day, quote = word 1i32, word 2i32, word 4i32, word 6i32
-    ? word 3i32 <> "--asked" ?> None
-    |? day = "--clear" && word 5i32 = "" ?> Some (root, AskCleared item, "none")
+    ? word 3i32 <> "--asked"
+    ?> None
+    |? day = "--clear" && word 5i32 = ""
+    ?> Some (root, AskCleared item, "none")
     |? word 5i32 = "--quote" && word 7i32 = "" && day_shaped day && sm'.trim quote <> "" ?>
         Some (root, AskSet { item = item; asked_on = day; quote = quote }, day)
     |: None

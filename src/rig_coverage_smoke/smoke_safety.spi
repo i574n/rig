@@ -23,8 +23,8 @@ inl emit_runtime () : () = global """
 
     pub fn coverage_smoke_preflight(binary: &Path, root: &Path, timeout_ms: u64) -> Result<(), String> {
         coverage_smoke_check_release(binary, root, timeout_ms)?;
-        let grcov = env::var_os("KIT_GRCOV").map(PathBuf::from).ok_or_else(|| "KIT_GRCOV is required for coverage smoke".to_owned())?;
-        let llvm = env::var_os("KIT_LLVM_BIN").map(PathBuf::from).ok_or_else(|| "KIT_LLVM_BIN is required for coverage smoke".to_owned())?;
+        let grcov = env::var_os("RIG_GRCOV").or_else(|| env::var_os("KIT_GRCOV")).map(PathBuf::from).ok_or_else(|| "KIT_GRCOV is required for coverage smoke".to_owned())?;
+        let llvm = env::var_os("RIG_LLVM_BIN").or_else(|| env::var_os("KIT_LLVM_BIN")).map(PathBuf::from).ok_or_else(|| "KIT_LLVM_BIN is required for coverage smoke".to_owned())?;
         if !grcov.is_absolute() || !grcov.is_file() { return Err("KIT_GRCOV must be an absolute executable file path".to_owned()); }
         if !llvm.is_absolute() || !llvm.is_dir() { return Err("KIT_LLVM_BIN must be an absolute directory path".to_owned()); }
         for tool in ["llvm-profdata", "llvm-cov"] {

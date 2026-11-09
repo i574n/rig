@@ -2,9 +2,12 @@
 
 
 :~ fs_action_mode_valid_binding (mode : i32) (reserved : i32) : i32 =
-    ? reserved <> 0i32 ?> 0i32
-    |? mode < 0i32 ?> 0i32
-    |? 4095i32 < mode ?> 0i32
+    ? reserved <> 0i32
+    ?> 0i32
+    |? mode < 0i32
+    ?> 0i32
+    |? 4095i32 < mode
+    ?> 0i32
     |: 1i32
 
 := main () : i32 =

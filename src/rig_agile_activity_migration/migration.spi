@@ -20,8 +20,10 @@
 
 :~ modules_with_schema (~text : string) : string =
     := line = "    " ++# schema_module () ++# "\n"
-    ? sm'.contains ("\n" ++# line) ("\n" ++# text) ?> text
-    |? sm'.contains "modules:\n" text ?> sm'.replace "modules:\n" ("modules:\n" ++# line) text
+    ? sm'.contains ("\n" ++# line) ("\n" ++# text)
+    ?> text
+    |? sm'.contains "modules:\n" text
+    ?> sm'.replace "modules:\n" ("modules:\n" ++# line) text
     |: text ++# "modules:\n" ++# line
 
 :~ step_word (apply : bool) (changed : bool) (~done : string) (~pending : string) : string =
@@ -31,9 +33,8 @@
     := state = sm'.replace "\\" "/" root ++# "/state"
     := project_path = state ++# "/package.spiproj"
     := schema_path = state ++# "/activity_schema.spi"
-    ? file_system.file_exists project_path |> not
-    ?>
-        console.write_error_line ("kit error: agile migrate-activity: no state/package.spiproj under " ++# root)
+    ? file_system.file_exists project_path |> not ?>
+        console.write_error_line ("rig error: agile migrate-activity: no state/package.spiproj under " ++# root)
         2i32
     |:
         := apply = mode = MigrateApply
@@ -46,11 +47,11 @@
         := module = step_word apply (updated <> project) "added" "would-add"
         := word = union_reflection.cases.union_case_kebab "Migrate" mode
         := tail = " schema=" ++# schema ++# " module=" ++# module
-        console.write_line ("kit agile migrate-activity ok mode=" ++# word ++# tail)
+        console.write_line ("rig agile migrate-activity ok mode=" ++# word ++# tail)
         0i32
 
 :~ migrate_usage () : i32 =
-    console.write_error_line "kit error: agile usage: migrate-activity preview|apply <root>"
+    console.write_error_line "rig error: agile usage: migrate-activity preview|apply <root>"
     2i32
 
 :~ migrate_run () : i32 =

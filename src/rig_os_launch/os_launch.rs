@@ -292,7 +292,7 @@ fn process_run_0() -> i32 {
         v6
     };
     if v7 {
-        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: process usage: process start-under-shell <program> [args...] (the caller's session as its live parent, inside the caller's kit job, no inherited handles)"); } LIT.with(|lit| lit.clone()) };
+        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: process usage: process start-under-shell <program> [args...] (the caller's session as its live parent, inside the caller's kit job, no inherited handles)"); } LIT.with(|lit| lit.clone()) };
         println!("{}", v8);
         2i32
     } else {
@@ -303,11 +303,11 @@ fn process_run_0() -> i32 {
         let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("pid=0 "); } LIT.with(|lit| lit.clone()) };
         let v14: bool = v12.starts_with(&*v13);
         if v14 {
-            let v15: Rc<str> = string_concat(&["kit error: process start-under-shell: could not start ", &*v2]);
+            let v15: Rc<str> = string_concat(&["rig error: process start-under-shell: could not start ", &*v2]);
             println!("{}", v15);
             1i32
         } else {
-            let v18: Rc<str> = string_concat(&["kit process start-under-shell ok ", &*v12, " program=", &*v2]);
+            let v18: Rc<str> = string_concat(&["rig process start-under-shell ok ", &*v12, " program=", &*v2]);
             println!("{}", v18);
             0i32
         }

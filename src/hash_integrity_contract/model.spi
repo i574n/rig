@@ -40,12 +40,18 @@
     ))
 
 :~ file_hash_binding (regular_file : i32) (symlink : i32) (known_vector_match : i32) : i32 =
-    ? regular_file < 1i32 ?> 0i32
-    |? 1i32 < regular_file ?> 0i32
-    |? symlink < 0i32 ?> 0i32
-    |? 0i32 < symlink ?> 0i32
-    |? known_vector_match < 1i32 ?> 0i32
-    |? 1i32 < known_vector_match ?> 0i32
+    ? regular_file < 1i32
+    ?> 0i32
+    |? 1i32 < regular_file
+    ?> 0i32
+    |? symlink < 0i32
+    ?> 0i32
+    |? 0i32 < symlink
+    ?> 0i32
+    |? known_vector_match < 1i32
+    ?> 0i32
+    |? 1i32 < known_vector_match
+    ?> 0i32
     |: 1i32
 
 :~ tree_request_binding (root_valid : i32) (relative_segments : i32) : i32 =
@@ -54,14 +60,17 @@
     |: 0i32
 
 :~ tree_parity_binding (source_entries : i32) (copy_entries : i32) (hash_equal : i32) : i32 =
-    ? source_entries < 1i32 ?> 0i32
-    |? copy_entries < 1i32 ?> 0i32
+    ? source_entries < 1i32
+    ?> 0i32
+    |? copy_entries < 1i32
+    ?> 0i32
     |? source_entries = copy_entries ?>
         ? hash_equal = 1i32 ?> 1i32 |: 0i32
     |: 0i32
 
 :~ shadow_deletion_binding (before_entries : i32) (after_entries : i32) (hash_changed : i32) : i32 =
-    ? after_entries < 0i32 ?> 0i32
+    ? after_entries < 0i32
+    ?> 0i32
     |? after_entries < before_entries ?>
         ? hash_changed = 1i32 ?> 1i32 |: 0i32
     |: 0i32

@@ -10,18 +10,24 @@
 
 :~ ^ function_end (source : string) (cursor : i32) (depth : i32) (started : bool) : i32 =
     := _, after, token, ok = predicate_lex.model.token source cursor
-    ? (=.) ok !- || (=.) token "" ?> -1i32
-    |? (=.) token "{" ?> function_end source after ((+.) depth 1i32) !+
+    ? (=.) ok !- || (=.) token ""
+    ?> -1i32
+    |? (=.) token "{"
+    ?> function_end source after ((+.) depth 1i32) !+
     |? (=.) token "}" ?>
-        ? (=.) depth 1i32 ?> after
-        |? (<=) depth 0i32 ?> -1i32
+        ? (=.) depth 1i32
+        ?> after
+        |? (<=) depth 0i32
+        ?> -1i32
         |: function_end source after ((-.) depth 1i32) started
-    |? (=.) token ";" && (=.) started !- ?> -1i32
+    |? (=.) token ";" && (=.) started !-
+    ?> -1i32
     |: function_end source after depth started
 
 :~ ^ closure_name (source : string) (cursor : i32) : string =
     := _, after, token, ok = predicate_lex.model.token source cursor
-    ? (=.) ok !- || (=.) token "" ?> ""
+    ? (=.) ok !- || (=.) token ""
+    ?> ""
     |? (=.) token "|" ?>
         := _, _, name, _ = predicate_lex.model.token source after
         name
@@ -50,23 +56,19 @@
     := first, after, token, ok = predicate_lex.model.token source cursor
     ? (=.) ok !-
     ?> "", found, !-
-    |? (=.) token ""
-    ?>
+    |? (=.) token "" ?>
         predicate_lex_core.model.append out (
             predicate_lex_core.model.cut source last (predicate_lex_core.model.length source)
         ),
         found,
         (=.) depth 0i32
-    |? (=.) depth 0i32 && (=.) token "fn"
-    ?>
+    |? (=.) depth 0i32 && (=.) token "fn" ?>
         := _, _, next, _ = predicate_lex.model.token source after
-        ? (=.) next name
-        ?>
+        ? (=.) next name ?>
             := end_function = function_end source after 0i32 !-
             ? (<) end_function 0i32 || (=.) ready !-
             ?> "", found, !-
-            |? supported (predicate_lex_core.model.cut source first end_function) name kind
-            ?>
+            |? supported (predicate_lex_core.model.cut source first end_function) name kind ?>
                 rust_loop source name kind end_function 0i32 !+ end_function
                     (predicate_lex_core.model.append out (predicate_lex_core.model.cut source last first))
                     ((+.) found 1i32)
@@ -75,19 +77,18 @@
     |:
         := next_depth = ? opening token ?> (+.) depth 1i32 |? closing token ?> (-.) depth 1i32 |: depth
         := next_ready = (=.) next_depth 0i32 && ((=.) token ";" || (=.) token "}")
-        ? (<) next_depth 0i32 ?> "", found, !-
+        ? (<) next_depth 0i32
+        ?> "", found, !-
         |: rust_loop source name kind after next_depth next_ready last out found
 
 :~ ^ argument (source : string) (cursor : i32) (depth : i32) : i32 * i32 * i32 * string * bool =
     := first = predicate_lex.model.skip source cursor
     ? (<) first 0i32 || (>=) first (predicate_lex_core.model.length source) || (>) depth 16i32
     ?> cursor, cursor, cursor, "", !-
-    |? (=.) (predicate_lex_core.model.at source first) (char_quote ())
-    ?>
+    |? (=.) (predicate_lex_core.model.at source first) (char_quote ()) ?>
         := code, after, ok = predicate_lex.model.literal source first
         after, first, after, code, ok
-    |? predicate_lex_core.model.starts source first "("
-    ?>
+    |? predicate_lex_core.model.starts source first "(" ?>
         := begin = predicate_lex.model.skip source ((+.) first 1i32)
         := hash = "typed_predicate.model.lift_sha256"
         := receipt = "typed_predicate.model.lift_receipt_text"
@@ -125,15 +126,12 @@
     ?> fail "Unsupported or malformed source syntax; input unchanged"
     |? (>) found 1i32
     ?> fail "Ambiguous function: multiple definitions; input unchanged"
-    |? (=.) token ""
-    ?>
-        ? (=.) found 1i32
-        ?>
+    |? (=.) token "" ?>
+        ? (=.) found 1i32 ?>
             Candidate (predicate_lex_core.model.append out (predicate_lex_core.model.cut source last (
                 predicate_lex_core.model.length source)))
         |: fail "No supported top-level predicate definition; input unchanged"
-    |? (=.) token "rust_global"
-    ?>
+    |? (=.) token "rust_global" ?>
         := next = predicate_lex.model.skip source after
         ? (<) next 0i32
         ?> fail "Malformed comment after RustGlobal; input unchanged"

@@ -3,7 +3,8 @@
 
 :~ stdout_line (~text : string) : () = console.write_line text
 :~ stderr_line (~text : string) : () = console.write_error_line text
-:~ stdout_text (~text : string) : () = console.write_line (? sm'.ends_with "\n" text ?> sm'.substring 0i32 ((sm'.length text : i32) - 1i32) text |: text)
+:~ stdout_text (~text : string) : () =
+    console.write_line (? sm'.ends_with "\n" text ?> sm'.substring 0i32 ((sm'.length text : i32) - 1i32) text |: text)
 :~ count_text (value : i32) : string = (sm'.show value)
 :~ whole_spi (~table : string) : string = $'rig_table_text::rig_table_spi_of_tsv(&*!table)' : string
 
@@ -76,7 +77,8 @@
     (words : array_base string) (values : array_base string) (at : i32) (acc : request)
     : request_step
     =
-    ? at >= am'.length_base words ?> RequestTaken acc
+    ? at >= am'.length_base words
+    ?> RequestTaken acc
     |:
         := word = am'.index_base at words
         ?= kind_of word ?|
@@ -89,7 +91,8 @@
 :~ request_of (row : rig_table_logs_args.args.logs_args_row) : request_step =
     := start =
         { paths = row.paths; glob = row.glob; out = row.out; since = row.since; quiet = row.quiet; list = NoMeasures }
-    ? row.rejected <> "" ?> RequestRejected row.rejected
+    ? row.rejected <> ""
+    ?> RequestRejected row.rejected
     |: measures_applied row.measure_words row.measure_values 0i32 start
 
 :~ ^ pattern_problem (list : measures) : string =
@@ -130,8 +133,7 @@
     ?> acc, count, missing
     |:
         := path = first_of files
-        ? missing_marker path
-        ?>
+        ? missing_marker path ?>
             rows_of list since
                 (rest_of files)
                 acc
@@ -167,7 +169,8 @@
     : string * i32
     =
     := stop = match_end_from text pattern offset
-    ? stop < 0i32 || stop > text_count text ?> rows, count
+    ? stop < 0i32 || stop > text_count text
+    ?> rows, count
     |:
         := value = sm'.replace "\t" " " (capture_from text pattern offset)
         matched_rows path text pattern stop (rows ++# path ++# "\t" ++# value ++# "\n") (count + 1i32)
@@ -181,8 +184,7 @@
     ?> acc, count, rows, missing
     |:
         := path = first_of files
-        ? missing_marker path
-        ?>
+        ? missing_marker path ?>
             values_rows pattern since
                 (rest_of files)
                 acc
@@ -206,12 +208,14 @@
 
 :~ shape_of (list : measures) : table_shape =
     := name, pattern = values_measure list
-    ? name = "" ?> PerFile
-    |? measure_count list 0i32 = 1i32 ?> PerMatch (name, pattern)
+    ? name = ""
+    ?> PerFile
+    |? measure_count list 0i32 = 1i32
+    ?> PerMatch (name, pattern)
     |: MixedShapes
 
 :~ failed (~message : string) : i32 =
-    stderr_line ("kit error: table logs " ++# message)
+    stderr_line ("rig error: table logs " ++# message)
     2i32
 
 :~ table_written (~out : string) (quiet : bool) (~table : string) (~receipt : string) : i32 =
@@ -223,7 +227,8 @@
     |:
         := spi = sm'.ends_with ".spi" (sm'.to_lower out)
         := problem = text_written out (? spi ?> whole_spi table |: table)
-        ? problem <> "" ?> failed problem
+        ? problem <> ""
+        ?> failed problem
         |:
             := _ = ? quiet ?> () |: stdout_line full
             0i32
@@ -239,7 +244,7 @@
     |:
         table_written out quiet
             ("file\t" ++# name ++# "\n" ++# body)
-            ("kit table logs ok files=" ++# (count_text files) ++# " rows=" ++# (count_text rows) ++# " columns=1")
+            ("rig table logs ok files=" ++# (count_text files) ++# " rows=" ++# (count_text rows) ++# " columns=1")
 
 := logs_usage () : string =
     "usage: table logs <file|dir>... [--glob *.log] [--since regex] (--count name=regex | --count-by name=regex | "
@@ -276,7 +281,7 @@
                 ?> failed ("no such file or directory: " ++# missing)
                 |:
                     table_written ask.out ask.quiet ("file" ++# (measure_header columns) ++# "\n" ++# body) (
-                        "kit table logs ok files=" ++# (count_text files) ++# " columns=" ++# (count_text (
+                        "rig table logs ok files=" ++# (count_text files) ++# " columns=" ++# (count_text (
                         measure_count columns 0i32)))
 
 := main () : i32 =

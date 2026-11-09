@@ -20,7 +20,8 @@
         }
 
 :~ ^ events_of (lines : array string) (index : i32) (events : list event) : list event =
-    ? index < 0i32 ?> events
+    ? index < 0i32
+    ?> events
     |:
         ?= event_of (am'.index index lines) ?|
         | Some event => events_of lines (index - 1i32) (event :: events)
@@ -80,7 +81,8 @@
     (~text : string)
     : string
     =
-    ? index >= am'.length lines ?> text
+    ? index >= am'.length lines
+    ?> text
     |:
         := line = am'.index index lines
         := at = stamp_in line time

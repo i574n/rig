@@ -14,11 +14,15 @@
     | ModuleReceiptRow => "module"
 
 :~ receipt_row_kind_code (kind : string) : u64 =
-    ? (=.) kind "snapshot" ?> receipt_row_kind_code_value SnapshotReceiptRow
-    |? (=.) kind "module" ?> receipt_row_kind_code_value ModuleReceiptRow
+    ? (=.) kind "snapshot"
+    ?> receipt_row_kind_code_value SnapshotReceiptRow
+    |? (=.) kind "module"
+    ?> receipt_row_kind_code_value ModuleReceiptRow
     |: receipt_row_kind_code_value UnknownReceiptRow
 
 :~ receipt_row_kind_text (code : string) : string =
-    ? (=.) code "1" ?> receipt_row_kind_text_value SnapshotReceiptRow
-    |? (=.) code "2" ?> receipt_row_kind_text_value ModuleReceiptRow
+    ? (=.) code "1"
+    ?> receipt_row_kind_text_value SnapshotReceiptRow
+    |? (=.) code "2"
+    ?> receipt_row_kind_text_value ModuleReceiptRow
     |: receipt_row_kind_text_value UnknownReceiptRow

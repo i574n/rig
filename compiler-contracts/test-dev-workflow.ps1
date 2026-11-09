@@ -8,8 +8,8 @@ $root = Join-Path $fixture 'workspace with spaces'
 $bundle = Join-Path $fixture 'compiler with spaces'
 $targetDirectory = Join-Path $root 'src/target/shared validation'
 $pwsh = (Get-Process -Id $PID).Path
-$previousMutation = $env:KIT_TEST_MUTATE_CHECKOUT
-$previousDriver = $env:KIT_DEV_BINARY
+$previousMutation = ($env:RIG_TEST_MUTATE_CHECKOUT ?? $env:KIT_TEST_MUTATE_CHECKOUT)
+$previousDriver = ($env:RIG_DEV_BINARY ?? $env:KIT_DEV_BINARY)
 $suffix = if ($IsWindows) { '.exe' } else { '' }
 $driverTarget = Join-Path $eoiRoot 'src/target/workflow-driver'
 $bootstrapped = Join-Path $driverTarget "debug/kit-dev$suffix"
@@ -54,7 +54,7 @@ function Invoke-Regeneration([string]$Label, [bool]$Success, [string[]]$Extra = 
     Write-Host "PASS $Label"
 }
 try {
-    $env:KIT_DEV_BINARY = $DevBinary
+    $env:RIG_DEV_BINARY = $env:KIT_DEV_BINARY = $DevBinary
     . (Join-Path $PSScriptRoot 'workspace.ps1')
     $managed = Join-Path $fixture 'managed compiler/Compiler.DLL'
     Write-Fixture $managed 'first compiler'
@@ -129,7 +129,7 @@ $rust = if ($source -eq 'bad-rust') { 'this is invalid Rust' } else {
 }
 [IO.File]::WriteAllText([IO.Path]::ChangeExtension($args[2], '.rs'), $rust)
 [IO.File]::WriteAllText($args[3], $rust)
-if ($env:KIT_TEST_MUTATE_CHECKOUT) { [IO.File]::AppendAllText($env:KIT_TEST_MUTATE_CHECKOUT, ' changed concurrently') }
+if (($env:RIG_TEST_MUTATE_CHECKOUT ?? $env:KIT_TEST_MUTATE_CHECKOUT)) { [IO.File]::AppendAllText(($env:RIG_TEST_MUTATE_CHECKOUT ?? $env:KIT_TEST_MUTATE_CHECKOUT), ' changed concurrently') }
 '@
     Push-Location (Join-Path $root 'src')
     try {
@@ -168,27 +168,27 @@ if ($env:KIT_TEST_MUTATE_CHECKOUT) { [IO.File]::AppendAllText($env:KIT_TEST_MUTA
         Assert-Contract ([IO.File]::GetLastWriteTimeUtc($target) -eq $stamp) "$failure touched output timestamp."
     }
     Write-Fixture $source 'good'
-    $env:KIT_TEST_MUTATE_CHECKOUT = $source
+    $env:RIG_TEST_MUTATE_CHECKOUT = $env:KIT_TEST_MUTATE_CHECKOUT = $source
     Invoke-Regeneration 'concurrent source edit blocks publication' $false @('-CargoCheck', '-Publish') 'Checkout changed during validation'
     Assert-Contract ([IO.File]::ReadAllText($source).Contains('changed concurrently')) 'Concurrent-edit fixture did not run.'
     Assert-Contract ([IO.File]::GetLastWriteTimeUtc($target) -eq $stamp) 'Stale validation published output.'
     Write-Fixture $source 'good'
     $newSource = Join-Path $root 'src/alpha/new_dependency.spi'
-    $env:KIT_TEST_MUTATE_CHECKOUT = $newSource
+    $env:RIG_TEST_MUTATE_CHECKOUT = $env:KIT_TEST_MUTATE_CHECKOUT = $newSource
     Invoke-Regeneration 'concurrent new source blocks publication' $false @('-CargoCheck', '-Publish') 'source file inventory differs'
     Assert-Contract (Test-Path -LiteralPath $newSource) 'New-source fixture did not run.'
     Assert-Contract ([IO.File]::GetLastWriteTimeUtc($target) -eq $stamp) 'New-source drift published output.'
     [IO.File]::Delete($newSource)
     $cacheFile = Join-Path $root '.cache/parallel-build.txt'
     [void][IO.Directory]::CreateDirectory((Split-Path $cacheFile -Parent))
-    $env:KIT_TEST_MUTATE_CHECKOUT = $cacheFile
+    $env:RIG_TEST_MUTATE_CHECKOUT = $env:KIT_TEST_MUTATE_CHECKOUT = $cacheFile
     Invoke-Regeneration 'ignored cache additions allow unchanged publication' $true @('-CargoCheck', '-Publish')
     Assert-Contract (Test-Path -LiteralPath $cacheFile) 'Cache-addition fixture did not run.'
     Assert-Contract ([IO.File]::GetLastWriteTimeUtc($target) -eq $stamp) 'Ignored cache activity touched unchanged output.'
     Write-Host 'KIT developer workflow contracts passed.'
 } finally {
-    $env:KIT_TEST_MUTATE_CHECKOUT = $previousMutation
-    $env:KIT_DEV_BINARY = $previousDriver
+    $env:RIG_TEST_MUTATE_CHECKOUT = $env:KIT_TEST_MUTATE_CHECKOUT = $previousMutation
+    $env:RIG_DEV_BINARY = $env:KIT_DEV_BINARY = $previousDriver
     $resolvedFixture = [IO.Path]::GetFullPath($fixture)
     $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     if (-not $resolvedFixture.StartsWith($temporaryRoot, [StringComparison]::OrdinalIgnoreCase)) { throw "Unsafe fixture cleanup: $resolvedFixture" }

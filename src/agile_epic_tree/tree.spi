@@ -24,7 +24,8 @@
     nodes |> listm.fold (\ found (n : node) => ? n.id = id ?> Some n.parent |: found) None
 
 :~ ^ chain_check (nodes : list node) (start : string) (current : string) (steps : i32) : parent_check =
-    ? steps > (listm.length nodes : i32) ?> ParentCycle start
+    ? steps > (listm.length nodes : i32)
+    ?> ParentCycle start
     |:
         ?= parent_of nodes current ?|
         | None => ParentUnknown current

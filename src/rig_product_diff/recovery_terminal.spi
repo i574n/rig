@@ -1,4 +1,3 @@
-
 inl emit_runtime () : () = global """
     #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     enum SourceRecoveryProvenance { Authored, Generated, CompilerSidecar }
@@ -92,7 +91,7 @@ inl emit_runtime () : () = global """
         let current = source_recovery_collect(current_root)?;
         let exact = current.authored.iter().map(|file| file.fingerprint).collect::<std::collections::BTreeSet<_>>();
         let basenames = current.authored.iter().map(|file| file.name.clone()).collect::<std::collections::BTreeSet<_>>();
-        println!("kit proxy source-recovery-diff current={} authored={} generated={} sidecars={} fingerprints={} basenames={}", current_root.display(), current.authored.len(), current.generated, current.sidecars, exact.len(), basenames.len());
+        println!("rig proxy source-recovery-diff current={} authored={} generated={} sidecars={} fingerprints={} basenames={}", current_root.display(), current.authored.len(), current.generated, current.sidecars, exact.len(), basenames.len());
         let mut any_warning = false;
         for candidate_arg in &args[2..] {
             let candidate_root = std::path::Path::new(candidate_arg);
@@ -116,7 +115,7 @@ inl emit_runtime () : () = global """
             any_warning |= missing_large > 0;
             println!("source-recovery candidate={} authored={} exact={} basename={} missing_by_name={} missing_large={} filtered_generated={} filtered_sidecars={} status={}", candidate_root.display(), candidate.authored.len(), exact_count, basename_count, missing_by_name, missing_large, candidate.generated, candidate.sidecars, if missing_large == 0 { "pass" } else { "warn" });
         }
-        println!("kit proxy source-recovery-diff ok status={}", if any_warning { "warn" } else { "pass" });
+        println!("rig proxy source-recovery-diff ok status={}", if any_warning { "warn" } else { "pass" });
         Ok(())
     }
 

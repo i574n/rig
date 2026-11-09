@@ -25,7 +25,7 @@ fn directory_link(target: &Path, path: &Path) {
         use std::os::windows::process::CommandExt as _;
         let output = Command::new("pwsh").creation_flags(0x08000000)
             .args(["-NoProfile", "-NonInteractive", "-Command", "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:KIT_TEST_LINK -Target $env:KIT_TEST_TARGET | Out-Null"])
-            .env("KIT_TEST_LINK", path).env("KIT_TEST_TARGET", target).output().unwrap();
+            .env("RIG_TEST_LINK", &path).env("KIT_TEST_LINK", path).env("RIG_TEST_TARGET", &target).env("KIT_TEST_TARGET", target).output().unwrap();
         assert!(output.status.success(), "{output:?}");
     }
     #[cfg(unix)] std::os::unix::fs::symlink(target, path).unwrap();

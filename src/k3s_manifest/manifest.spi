@@ -153,8 +153,10 @@
     ?= mode ?|
     | Outside => ? ch = "\"" ?> InCell "", cells |: Outside, cells
     | InCell text =>
-        ? ch = "\\" ?> AfterEscape text, cells
-        |? ch = "\"" ?> Outside, text :: cells
+        ? ch = "\\"
+        ?> AfterEscape text, cells
+        |? ch = "\""
+        ?> Outside, text :: cells
         |: InCell (text ++# ch), cells
     | AfterEscape text => InCell (text ++# ch), cells
 
@@ -163,7 +165,8 @@
 
 :~ cells_of (line : string) : list string =
     := open_at = sm'.index_of "[" line
-    ? open_at < 0i32 ?> []
+    ? open_at < 0i32
+    ?> []
     |:
         := body = sm'.substring open_at ((sm'.length line : i32) - open_at) line
         := _, cells = chars_from body ((sm'.length body : i32) - 1i32) [] |> listm.fold scanned (Outside, [])
@@ -171,7 +174,8 @@
 
 :~ ctor_of (line : string) : string =
     := at = sm'.index_of "() = " line
-    ? at < 0i32 ?> ""
+    ? at < 0i32
+    ?> ""
     |:
         := rest = sm'.substring (at + 5i32) ((sm'.length line : i32) - at - 5i32) line
         := bracket = sm'.index_of " [" rest
@@ -235,8 +239,10 @@
         | image :: workdir :: command =>
             Built { d ?| container = { name = d.name; image = image; command = command; workdir = workdir } }
         | _ => Broken (MissingCells "Container")
-    |? ctor = "Resources" ?> sized d cells
-    |? ctor = "Volume" ?> mounted d cells
+    |? ctor = "Resources"
+    ?> sized d cells
+    |? ctor = "Volume"
+    ?> mounted d cells
     |: Broken (UnknownRow ctor)
 
 :~ step (done : list deployment) (line : string) : building =
@@ -254,7 +260,8 @@
     ?= lines ?|
     | [] => Building done
     | line :: rest =>
-        ? not (sm'.starts_with "inl row_" line) ?> steps done rest
+        ? not (sm'.starts_with "inl row_" line)
+        ?> steps done rest
         |:
             ?= step done line ?|
             | Building next => steps next rest

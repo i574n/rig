@@ -35,8 +35,7 @@
     := filled = clock_filled line (local_offset_minutes ())
     := added = (? ended_with_newline before ?> "" |: newline) ++# filled ++# newline
     := problem = appended_to root path added
-    ? problem = ""
-    ?>
+    ? problem = "" ?>
         := after = file_text root path
         := bytes = text_bytes added
         := lines = line_count filled
@@ -84,11 +83,11 @@
     (failed : bool)
     : string * u64 * u64 * bool
     =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         := next = index + 1i32
         := kind = field_at records index 0i32
-        ? kind = "" ?> previews_from root records next rows appends bytes failed
+        ? kind = ""
+        ?> previews_from root records next rows appends bytes failed
         |:
             ?= write_named (field_at records index 1i32) ?|
             | None => previews_from root records next rows appends bytes failed
@@ -104,8 +103,7 @@
     ? rows = "" ?> () |: stdout_line rows
     := counts = "appends " ++# decimal_text appends ++# "  bytes " ++# decimal_text bytes
     := counts = counts ++# "  dry run, nothing written"
-    ? failed
-    ?>
+    ? failed ?>
         receipt_line Failed counts started
         2i32
     |:
@@ -120,7 +118,8 @@
     ? index < line_count paths ?>
         := path = line_at paths index
         := next =
-            ? excluded_by excluded path ?> { state ?| skipped = state.skipped + 1u64 }
+            ? excluded_by excluded path
+            ?> { state ?| skipped = state.skipped + 1u64 }
             |:
                 := bytes = copied_bytes root path (destination ++# "/" ++# (relative_under base path))
                 ? bytes < 0i64
@@ -131,7 +130,8 @@
 
 :~ copy_base (~source : string) (literal_file : bool) : string =
     := base = glob_base source
-    ? not literal_file || base <> sm'.replace "\\" "/" source ?> base
+    ? not literal_file || base <> sm'.replace "\\" "/" source
+    ?> base
     |:
         := at = sm'.last_index_of "/" base
         ? at < 0i32 ?> "" |: sm'.substring 0i32 at base
@@ -151,7 +151,8 @@
             bytes = 0u64
         }
     := exclusions =
-        ? excluded = "" ?> ""
+        ? excluded = ""
+        ?> ""
         |: "  " ++# decimal_text after.skipped ++# " skipped (" ++# (sm'.replace "\n" ", " excluded) ++# ")"
     := row =
         "copy "

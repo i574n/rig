@@ -11,7 +11,8 @@
 
 :~ host_started (~executable : string) (owner_pid : u64) (owner_start : u64) : u64 =
     := args = host_args owner_pid owner_start
-    ? owner_pid = 0u64 ?> shell_started executable args
+    ? owner_pid = 0u64
+    ?> shell_started executable args
     |:
         := pid = owner_started executable args owner_pid
         ? pid = 0u64 ?> shell_started executable args |: pid
@@ -20,8 +21,10 @@
     ?= supervisor_wait_of (decimal_u64 (text_or_empty (job_file id "supervisor"))) (now_ms ()) deadline ?|
     | Some wait => wait
     | None =>
-        ? file_exists (held_file id) ?> SupervisorHeld "held"
-        |? file_exists (job_file id "exit") ?> SupervisorHeld "settled"
+        ? file_exists (held_file id)
+        ?> SupervisorHeld "held"
+        |? file_exists (job_file id "exit")
+        ?> SupervisorHeld "settled"
         |:
             sleep_ms 50u64
             supervisor_awaited id deadline
@@ -45,7 +48,8 @@
     | SupervisorLate =>
         ? request_removed request ?>
             := pid = shell_started executable ;[ "job"; "supervise"; id ]
-            ? pid = 0u64 ?> "error: neither the job host nor a detached start launched the supervisor"
+            ? pid = 0u64
+            ?> "error: neither the job host nor a detached start launched the supervisor"
             |: decimal_text pid
         |:
             ?= supervisor_awaited id (now_ms () + 20000u64) ?|
@@ -54,7 +58,8 @@
             | SupervisorLate => "starting host_home=" ++# (? home = "" ?> "shared" |: home)
 
 :~ held_revived () : string =
-    ? am'.length (held_names ()) = 0i32 ?> "idle"
+    ? am'.length (held_names ()) = 0i32
+    ?> "idle"
     |:
         := home, owner_pid, owner_start = caller_owner ()
         := recorded = decimal_u64 (text_or_empty (host_pid_file home))

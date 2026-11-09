@@ -6,7 +6,8 @@
 :~ path_first_noted (~id : string) : string =
     := config = rig_path_first.path_first.config_dir ()
     := applied = rig_path_first.path_first.path_first_value (config, env.get_environment_variable "PATH")
-    ? applied = "" ?> ""
+    ? applied = ""
+    ?> ""
     |:
         env.set_environment_variable "PATH" applied
         text_written (job_file id "path-first") ("path-first PATH=" ++# applied)

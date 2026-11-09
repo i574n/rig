@@ -50,8 +50,10 @@
     : verdict_standing
     =
     := unchanged = listm.fold (\ found (u : unit_state) => found || (u.target = v.target && u.hash = v.hash)) !- tree
-    ? v.rubric = rubric && v.version <> version ?> VerdictStale
-    |? unchanged ?> VerdictCurrent
+    ? v.rubric = rubric && v.version <> version
+    ?> VerdictStale
+    |? unchanged
+    ?> VerdictCurrent
     |: VerdictStale
 
 :~ current_verdicts

@@ -20,7 +20,7 @@
 ///> rust
 :# recording_notes_blocks_that_appear_move_and_vanish =
     := root = record_fixture ()
-    shows (recorded root) "kit agile todos record ok sites=1 appeared=1 moved=0 vanished=0 notes=1 bytes_before="
+    shows (recorded root) "rig agile todos record ok sites=1 appeared=1 moved=0 vanished=0 notes=1 bytes_before="
     shows (fixture_read root "state/agile.spi") "todos: block appeared at "
     shows (fixture_read root "state/agile.spi") "repo/a.spi:2"
     shows (recorded root) "appeared=0 moved=0 vanished=0 notes=0 unchanged=true"

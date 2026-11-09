@@ -34,7 +34,7 @@ enum US0 {
 pub struct Mut1 { pub l0: i32 }
 pub struct Mut2 { pub l0: i32 }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let v3: Rc<str> = string_concat(&["kit error: table sequences ", &*v0, "; usage: table sequences <file|dir>... --time <regex with (?<ms>digits)> (--interval name=A [--between B] [--modulo ms] | --window name=A --from M --ms lo..hi | --order name=A,B | --latency name=A --to B | [--section-on <regex with (?<section>)>] [--carry <regex>] (--first|--last) name=<regex with (?<id>) and (?<value>)>... | [--section-on <regex>] (--count name=<regex [(?<value>)]>... [--count-in name=<regex with (?<rest>)>] [--in-set name=<file>[:<regex with (?<value>)>]])) [--out file.tsv]"]);
+    let v3: Rc<str> = string_concat(&["rig error: table sequences ", &*v0, "; usage: table sequences <file|dir>... --time <regex with (?<ms>digits)> (--interval name=A [--between B] [--modulo ms] | --window name=A --from M --ms lo..hi | --order name=A,B | --latency name=A --to B | [--section-on <regex with (?<section>)>] [--carry <regex>] (--first|--last) name=<regex with (?<id>) and (?<value>)>... | [--section-on <regex>] (--count name=<regex [(?<value>)]>... [--count-in name=<regex with (?<rest>)>] [--in-set name=<file>[:<regex with (?<value>)>]])) [--out file.tsv]"]);
     eprintln!("{}", v3);
     2i32
 }
@@ -100,7 +100,7 @@ fn counts_written_2(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<str>, mut v3: u
     let v10: Rc<str> = format_real_4(v9);
     let v13: Rc<str> = format_real_6(v4);
     let v16: Rc<str> = format_real_6(v3);
-    let v17: Rc<str> = string_concat(&["kit table sequences ok files=", &*v10, " sections=", &*v13, " rows=", &*v16]);
+    let v17: Rc<str> = string_concat(&["rig table sequences ok files=", &*v10, " sections=", &*v13, " rows=", &*v16]);
     let v18: bool = &*v0 == "";
     if v18 {
         let v19: Rc<str> = loop_7(v7);

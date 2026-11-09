@@ -105,8 +105,7 @@
     (count : i32) (seconds : f64)
     : ()
     =
-    ? at < count
-    ?>
+    ? at < count ?>
         := pid = pid_at pids at
         := used = process_cpu_milliseconds system pid
         := now = now_seconds ()
@@ -127,8 +126,7 @@
     |:
         := id = am'.index index ids
         := job_pid, job_supervisor = job_number id "pid", job_number id "supervisor"
-        ? id <> "" && (job_pid = parent || job_supervisor = parent)
-        ?>
+        ? id <> "" && (job_pid = parent || job_supervisor = parent) ?>
             := settled = sm'.trim (rig_jobs.host.text_or_empty (rig_jobs.jobs.job_file id "exit")) <> ""
             := started = job_number id "started_ms"
             ? rig_machine_watch_model.model.left_by parent born job_pid job_supervisor started settled

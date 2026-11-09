@@ -31,7 +31,7 @@ fn coverage_toolchain_smoke(context: &CoverageSmokeContext<'_>, scratch: &Path, 
 
 #[rustfmt::skip]
 fn coverage_export_union_smoke(context: &CoverageSmokeContext<'_>, scratch: &Path, lcov_test: &Path, lcov_smoke: &Path) -> Result<(), String> {
-    let grcov = env::var("KIT_GRCOV").map_err(|_| "KIT_GRCOV is required for coverage smoke".to_owned())?; let llvm_bin = env::var("KIT_LLVM_BIN").map_err(|_| "KIT_LLVM_BIN is required for coverage smoke".to_owned())?;
+    let grcov = env::var("RIG_GRCOV").or_else(|_| env::var("KIT_GRCOV")).map_err(|_| "KIT_GRCOV is required for coverage smoke".to_owned())?; let llvm_bin = env::var("RIG_LLVM_BIN").or_else(|_| env::var("KIT_LLVM_BIN")).map_err(|_| "KIT_LLVM_BIN is required for coverage smoke".to_owned())?;
     let profraw = Path::new(context.profile_pattern).parent().ok_or_else(|| "coverage profile pattern has no parent".to_owned())?; let binary = context.binary; let source_root = context.root.join("src");
     let exported = scratch.join("exported.lcov"); let union = scratch.join("union.lcov"); let profraw_text = profraw.to_string_lossy().into_owned(); let binary_text = binary.to_string_lossy().into_owned(); let source_root_text = source_root.to_string_lossy().into_owned();
     let exported_text = exported.to_string_lossy().into_owned(); let union_text = union.to_string_lossy().into_owned(); let test_text = lcov_test.to_string_lossy().into_owned(); let smoke_text = lcov_smoke.to_string_lossy().into_owned(); let timeout_text = context.timeout_ms.to_string();
@@ -64,8 +64,8 @@ fn coverage_smoke_check_release(binary: &Path, root: &Path, timeout_ms: u64) -> 
 
 pub fn coverage_smoke_preflight(binary: &Path, root: &Path, timeout_ms: u64) -> Result<(), String> {
     coverage_smoke_check_release(binary, root, timeout_ms)?;
-    let grcov = env::var_os("KIT_GRCOV").map(PathBuf::from).ok_or_else(|| "KIT_GRCOV is required for coverage smoke".to_owned())?;
-    let llvm = env::var_os("KIT_LLVM_BIN").map(PathBuf::from).ok_or_else(|| "KIT_LLVM_BIN is required for coverage smoke".to_owned())?;
+    let grcov = env::var_os("RIG_GRCOV").or_else(|| env::var_os("KIT_GRCOV")).map(PathBuf::from).ok_or_else(|| "KIT_GRCOV is required for coverage smoke".to_owned())?;
+    let llvm = env::var_os("RIG_LLVM_BIN").or_else(|| env::var_os("KIT_LLVM_BIN")).map(PathBuf::from).ok_or_else(|| "KIT_LLVM_BIN is required for coverage smoke".to_owned())?;
     if !grcov.is_absolute() || !grcov.is_file() { return Err("KIT_GRCOV must be an absolute executable file path".to_owned()); }
     if !llvm.is_absolute() || !llvm.is_dir() { return Err("KIT_LLVM_BIN must be an absolute directory path".to_owned()); }
     for tool in ["llvm-profdata", "llvm-cov"] {
@@ -137,10 +137,10 @@ fn coverage_smoke_temp(label: &str) -> PathBuf {
 #[rustfmt::skip]
 fn coverage_smoke_exec(context: &CoverageSmokeContext<'_>, cwd: &Path, args: &[String], phase: &str, expect_success: bool) -> Result<(), String> {
     let mut command = Command::new(context.binary);
-    command.current_dir(cwd).args(args).env("LLVM_PROFILE_FILE", context.profile_pattern).env("KIT_SPIRAL_COMPILE", context.compiler).env("KIT_BIN_UNDER_TEST", context.binary).env("CARGO_TARGET_DIR", context.target).env("CARGO_BUILD_JOBS", context.jobs).env("RAYON_NUM_THREADS", context.jobs);
+    command.current_dir(cwd).args(args).env("LLVM_PROFILE_FILE", context.profile_pattern).env("RIG_SPIRAL_COMPILE", &context.compiler).env("KIT_SPIRAL_COMPILE", context.compiler).env("RIG_BIN_UNDER_TEST", &context.binary).env("KIT_BIN_UNDER_TEST", context.binary).env("CARGO_TARGET_DIR", context.target).env("CARGO_BUILD_JOBS", context.jobs).env("RAYON_NUM_THREADS", context.jobs);
     let observation = run_bounded_observed_with_input(&mut command, context.timeout_ms, None)?;
     if observation.status.success() != expect_success { return Err(format!("smoke phase {phase} expected success={expect_success} observed={} termination={:?} stderr={}", observation.status, observation.termination, String::from_utf8_lossy(&observation.stderr))); }
-    println!("kit coverage smoke phase={phase} status=passed expected_success={expect_success} termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={}", observation.termination, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len());
+    println!("rig coverage smoke phase={phase} status=passed expected_success={expect_success} termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={}", observation.termination, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len());
     Ok(())
 }
 
@@ -159,10 +159,10 @@ fn coverage_smoke_current_migration(context: &CoverageSmokeContext<'_>) -> Resul
 #[rustfmt::skip]
 fn coverage_smoke_cargo(context: &CoverageSmokeContext<'_>, args: &[&str], phase: &str) -> Result<(), String> {
     let mut command = Command::new(context.cargo);
-    command.current_dir(context.root.join("src")).args(args).env("CARGO_TARGET_DIR", context.target).env("CARGO_INCREMENTAL", "1").env_remove("CARGO_ENCODED_RUSTFLAGS").env("RUSTFLAGS", "-C instrument-coverage --cfg rig_coverage").env("LLVM_PROFILE_FILE", context.profile_pattern).env("KIT_SPIRAL_COMPILE", context.compiler).env("KIT_BIN_UNDER_TEST", context.binary).env("RAYON_NUM_THREADS", context.jobs).env("CARGO_BUILD_JOBS", context.jobs).env("RUST_TEST_THREADS", context.jobs);
+    command.current_dir(context.root.join("src")).args(args).env("CARGO_TARGET_DIR", context.target).env("CARGO_INCREMENTAL", "1").env_remove("CARGO_ENCODED_RUSTFLAGS").env("RUSTFLAGS", "-C instrument-coverage --cfg rig_coverage").env("LLVM_PROFILE_FILE", context.profile_pattern).env("RIG_SPIRAL_COMPILE", &context.compiler).env("KIT_SPIRAL_COMPILE", context.compiler).env("RIG_BIN_UNDER_TEST", &context.binary).env("KIT_BIN_UNDER_TEST", context.binary).env("RAYON_NUM_THREADS", context.jobs).env("CARGO_BUILD_JOBS", context.jobs).env("RUST_TEST_THREADS", context.jobs);
     let observation = run_bounded_observed_with_input(&mut command, context.timeout_ms, None)?;
     if !observation.status.success() { return Err(format!("probe phase {phase} failed status={} termination={:?} stderr={}", observation.status, observation.termination, String::from_utf8_lossy(&observation.stderr))); }
-    println!("kit coverage probe phase={phase} status=passed termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={}", observation.termination, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len());
+    println!("rig coverage probe phase={phase} status=passed termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={}", observation.termination, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len());
     Ok(())
 }
 
@@ -335,7 +335,7 @@ fn coverage_smoke_run_isolated(context: &CoverageSmokeContext<'_>) -> Result<(),
     let rehydrated_archive_text = rehydrated_archive.to_string_lossy().into_owned();
     coverage_smoke_exec(context, &rehydrated, &coverage_smoke_args(&["bundle", "create", &rehydrated_text, &rehydrated_archive_text]), "bundle-create-rehydrated", true)?;
     coverage_smoke_exec(context, &rehydrated, &coverage_smoke_args(&["bundle", "verify", &rehydrated_archive_text]), "bundle-verify-rehydrated", true)?;
-    println!("kit coverage smoke ok root={}", context.root.display());
+    println!("rig coverage smoke ok root={}", context.root.display());
     Ok(())
 }
 fn spiral_main() -> i32 {

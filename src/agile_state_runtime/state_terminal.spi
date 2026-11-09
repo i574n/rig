@@ -1,4 +1,3 @@
-
 inl emit_imports () : () = global """
     use agile_state_decision_domain::{rig_agile_state_series_sequence_binding, rig_agile_state_series_source_binding, rig_agile_state_series_pair_binding, rig_agile_state_series_monotonic_binding, rig_agile_state_series_fingerprint_binding, rig_agile_state_entry_kind_binding, rig_agile_state_transient_name_code, rig_agile_state_record_required_name_bit, rig_agile_state_record_required_catalog, rig_agile_state_record_preflight_binding, rig_agile_state_attestation_decision_binding};
     use rig_process::{resolve_spiral_compiler as agile_resolve_spiral_compiler, typecheck_spiral_file as agile_typecheck_spiral, SpiralCompilerDiscovery};
@@ -17,7 +16,7 @@ inl emit_imports () : () = global """
 
 
     fn agile_finish(result: Result<(), String>) -> i32 {
-        if let Err(error) = result { eprintln!("kit error: {error}"); 2 } else { 0 }
+        if let Err(error) = result { eprintln!("rig error: {error}"); 2 } else { 0 }
     }
 
     fn agile_arg<'a>(args: &'a [String], index: usize, name: &str) -> Result<&'a str, String> {
@@ -189,9 +188,9 @@ inl emit_mutations () : () = global """
         if !root.is_dir() { return Err(format!("agile root is not a directory: {}", root.display())); }
         let title = agile_arg(&args, 2, "title")?;
         if rig_agile_prompt_title_code(title) != 1 { return Err("typed prompt title is empty".to_owned()); }
-        let prompt_id = env::var("KIT_PROMPT_ID").unwrap_or_else(|_| "current".to_owned());
-        let budget_ms = env::var("KIT_BUDGET_MS").ok().map(|value| agile_parse_u64_decimal(&value, "KIT_BUDGET_MS")).transpose()?.unwrap_or(4_500_000);
-        let guard_ms = env::var("KIT_GUARD_MS").ok().map(|value| agile_parse_u64_decimal(&value, "KIT_GUARD_MS")).transpose()?.unwrap_or(600_000);
+        let prompt_id = env::var("RIG_PROMPT_ID").or_else(|_| env::var("KIT_PROMPT_ID")).unwrap_or_else(|_| "current".to_owned());
+        let budget_ms = env::var("RIG_BUDGET_MS").or_else(|_| env::var("KIT_BUDGET_MS")).ok().map(|value| agile_parse_u64_decimal(&value, "KIT_BUDGET_MS")).transpose()?.unwrap_or(4_500_000);
+        let guard_ms = env::var("RIG_GUARD_MS").or_else(|_| env::var("KIT_GUARD_MS")).ok().map(|value| agile_parse_u64_decimal(&value, "KIT_GUARD_MS")).transpose()?.unwrap_or(600_000);
         if rig_agile_lease_budget_decision_binding(i32::from(budget_ms > 0), i32::from(guard_ms < budget_ms)) != 1 { return Err("prompt budget must be positive and larger than guard".to_owned()); }
         let started_unix_ms = agile_now_unix_ms()?;
         let deadline_unix_ms = started_unix_ms.checked_add(budget_ms).and_then(|value| value.checked_add(guard_ms)).ok_or_else(|| "prompt lease deadline overflow".to_owned())?;
@@ -209,7 +208,7 @@ inl emit_mutations () : () = global """
             if let Some(original) = original { agile_atomic_write(&state, &original)?; } else { let _ = fs::remove_file(&state); }
             return Err(format!("prompt lease rolled back: {error}"));
         }
-        println!("kit agile begin ok prompt={prompt_id} budget_ms={budget_ms} guard_ms={guard_ms} started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} validation=runtime-attested compiler=not-required");
+        println!("rig agile begin ok prompt={prompt_id} budget_ms={budget_ms} guard_ms={guard_ms} started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} validation=runtime-attested compiler=not-required");
         Ok(())
     }
 
@@ -233,10 +232,10 @@ inl emit_mutations () : () = global """
                     let end = line.rfind(')').ok_or_else(|| "malformed Task terminator".to_owned())?;
                     let mut parts = agile_tuple_fields(&line[start..end])?;
                     if rig_agile_task_identity_binding(parts.len() as i32, 1) != 1 { return Err(format!("Task {id} has a shape rejected by the typed Spiral policy: fields={}", parts.len())); }
-                    if parts[6] == "Done" && status != "Done" && env::var("KIT_AGILE_REOPEN").ok().as_deref() != Some("1") { return Err(format!("{id} is Done; nothing written. Reopening needs KIT_AGILE_REOPEN=1 (a stale script replaying old values cannot revert a closure)")); }
+                    if parts[6] == "Done" && status != "Done" && env::var("RIG_AGILE_REOPEN").or_else(|_| env::var("KIT_AGILE_REOPEN")).ok().as_deref() != Some("1") { return Err(format!("{id} is Done; nothing written. Reopening needs KIT_AGILE_REOPEN=1 (a stale script replaying old values cannot revert a closure)")); }
                     parts[5] = format!("{progress}u32");
                     parts[6] = status.to_owned();
-                    let prompt_id = env::var("KIT_PROMPT_ID").unwrap_or_else(|_| "current".to_owned());
+                    let prompt_id = env::var("RIG_PROMPT_ID").or_else(|_| env::var("KIT_PROMPT_ID")).unwrap_or_else(|_| "current".to_owned());
                     parts[10] = format!("\"{}\"", agile_escape_spi(&prompt_id));
                     lines.push(format!("{}{}{}", &line[..start], parts.join(", "), &line[end..]));
                     found = true;

@@ -67,7 +67,7 @@ fn stderr_line_4(mut v0: Rc<str>) -> () {
     ()
 }
 fn rejected_2(mut v0: Rc<str>) -> i32 {
-    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job "); } LIT.with(|lit| lit.clone()) };
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job "); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = concat5_3(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_4(v3);
@@ -217,7 +217,7 @@ fn joined_12(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     v2
 }
 fn jobs_root_14() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_JOBS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
     v0
 }
 fn job_directory_13(mut v0: Rc<str>) -> Rc<str> {
@@ -515,7 +515,7 @@ fn job_started_1(mut v0: bool) -> (i32, Rc<str>) {
                     US2::US2_SettleFailed(v40, v41) => {
                         let v40: US3 = v40;
                         let v41: Rc<str> = v41;
-                        let v43: Rc<str> = string_concat(&["kit job start failed id=", &*v28, " state="]);
+                        let v43: Rc<str> = string_concat(&["rig job start failed id=", &*v28, " state="]);
                         let v55: Rc<str> = match &v40 {
                             US3::US3_JobExpiredInQueue => {
                                 let v54: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("expired-in-queue"); } LIT.with(|lit| lit.clone()) };
@@ -571,10 +571,10 @@ fn job_started_1(mut v0: bool) -> (i32, Rc<str>) {
                     }
                     US2::US2_SettleHealthy => {
                         let v70: Rc<str> = if v0 {
-                            let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit job run started id="); } LIT.with(|lit| lit.clone()) };
+                            let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig job run started id="); } LIT.with(|lit| lit.clone()) };
                             v68
                         } else {
-                            let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit job start ok id="); } LIT.with(|lit| lit.clone()) };
+                            let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig job start ok id="); } LIT.with(|lit| lit.clone()) };
                             v69
                         };
                         let v73: Rc<str> = string_concat(&[&*v70, &*v28, " supervisor_pid=", &*v29]);

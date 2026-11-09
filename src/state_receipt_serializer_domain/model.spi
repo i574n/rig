@@ -1,13 +1,19 @@
 :~ ^ escape_path_loop (path : string) (at : i32) (path_len : i32) (out : string) : string =
-    ? (=.) at path_len ?> out
+    ? (=.) at path_len
+    ?> out
     |:
         := current = sm.index path at
         := encoded =
-            ? (=.) current (char_backslash ()) ?> "\\\\"
-            |? (=.) current (char_quote ()) ?> "\\\""
-            |? (=.) current (char_newline ()) ?> "\\n"
-            |? (=.) current (char_carriage_return ()) ?> "\\r"
-            |? (=.) current (char_tab ()) ?> "\\t"
+            ? (=.) current (char_backslash ())
+            ?> "\\\\"
+            |? (=.) current (char_quote ())
+            ?> "\\\""
+            |? (=.) current (char_newline ())
+            ?> "\\n"
+            |? (=.) current (char_carriage_return ())
+            ?> "\\r"
+            |? (=.) current (char_tab ())
+            ?> "\\t"
             |: char_text path at
         escape_path_loop path ((+.) at 1i32) path_len (sm.concat out encoded)
 
@@ -30,19 +36,23 @@
     sm.concat "inl snapshot () : state_check_snapshot = StateCheckSnapshot " (sm.concat value "u64\n")
 
 :~ ^ digits_valid_loop (text : string) (at : i32) (text_len : i32) : bool =
-    ? (=.) at text_len ?> !+
+    ? (=.) at text_len
+    ?> !+
     |:
         := digit_at = find_text "0123456789" 0i32 (char_text text at)
         ? (<) digit_at 10i32 ?> digits_valid_loop text ((+.) at 1i32) text_len |: !-
 
 := serialize_attestation (attestation : string) : string =
     := kind = receipt_attestation_kind_code attestation
-    ? (=.) kind 1u64 ?> "RuntimeAttestation"
+    ? (=.) kind 1u64
+    ?> "RuntimeAttestation"
     |? (=.) kind 2u64 ?>
         := digits = receipt_attestation_build_payload attestation
         := digits_len = sm.length digits : i32
-        ? (=.) digits_len 0i32 ?> codec_empty ()
-        |? digits_valid_loop digits 0i32 digits_len ?> sm.concat "BuildAttestation " (sm.concat digits "u64")
+        ? (=.) digits_len 0i32
+        ?> codec_empty ()
+        |? digits_valid_loop digits 0i32 digits_len
+        ?> sm.concat "BuildAttestation " (sm.concat digits "u64")
         |: codec_empty ()
     |: codec_empty ()
 
@@ -82,7 +92,8 @@
                     sm.concat start (sm.concat middle finish)
 
 :~ ^ serialize_rows_loop (table : string) (at : i32) (table_len : i32) (module_index : i32) (out : string) : string =
-    ? (=.) at table_len ?> out
+    ? (=.) at table_len
+    ?> out
     |:
         := line_near_to = find_char_loop table at table_len (char_newline ())
         := line = slice_exclusive table at line_near_to
@@ -91,8 +102,10 @@
         := is_snapshot = starts_with_at line 0i32 snapshot_prefix
         := is_module = starts_with_at line 0i32 module_prefix
         := rendered =
-            ? is_snapshot ?> serialize_snapshot_row line
-            |? is_module ?> serialize_module_row line module_index
+            ? is_snapshot
+            ?> serialize_snapshot_row line
+            |? is_module
+            ?> serialize_module_row line module_index
             |: codec_empty ()
         := next_index = ? is_module ?> (+.) module_index 1i32 |: module_index
         := next = ? (=.) line_near_to table_len ?> table_len |: (+.) line_near_to 1i32

@@ -391,7 +391,7 @@ fn export_run_0() -> i32 {
                         let v55: i32 = 0i32;
                         let v56: i32 = method16(v54, v55);
                         let v57: Rc<str> = format_real_17(v56);
-                        let v58: Rc<str> = string_concat(&["kit metrics export ok parts=", &*v57]);
+                        let v58: Rc<str> = string_concat(&["rig metrics export ok parts=", &*v57]);
                         eprintln!("{}", v58);
                         0i32
                     } else {

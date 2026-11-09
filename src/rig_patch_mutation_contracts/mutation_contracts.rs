@@ -8,7 +8,7 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn rig_binary() -> PathBuf {
-    if let Ok(path) = env::var("KIT_BIN_UNDER_TEST") { return PathBuf::from(path); }
+    if let Ok(path) = env::var("RIG_BIN_UNDER_TEST").or_else(|_| env::var("KIT_BIN_UNDER_TEST")) { return PathBuf::from(path); }
     let current = env::current_exe().expect("current test executable");
     let name = if cfg!(windows) { "kit.exe" } else { "kit" };
     let debug = current.parent().and_then(Path::parent).expect("target profile directory");
@@ -157,7 +157,7 @@ fn owner_rejects_symlink_plan_before_compilation() {
     fs::remove_dir_all(root).expect("cleanup");
 }
 
-fn run_with_fault(args: &[&str], fault: &str) -> Output { Command::new(rig_binary()).current_dir(env::temp_dir()).env("KIT_PATCH_FAULT", fault).args(args).output().expect("run KIT with fault") }
+fn run_with_fault(args: &[&str], fault: &str) -> Output { Command::new(rig_binary()).current_dir(env::temp_dir()).env("RIG_PATCH_FAULT", &fault).env("KIT_PATCH_FAULT", fault).args(args).output().expect("run KIT with fault") }
 
 #[test]
 #[ignore = "requires a Spiral facade with --check/--plan-ir; run build.ps1 -Test -CompilerContracts"]
@@ -222,7 +222,7 @@ fn owner_resume_recompiles_provider_and_rolls_back_between_promotions() {
     let first = run_with_fault(&["patch", "apply", root.to_str().expect("root"), plan_path.to_str().expect("plan")], "after-typecheck");
     assert!(!first.status.success());
     assert!(root.join("state/patch_resume.spi").is_file());
-    let second = Command::new(rig_binary()).current_dir(env::temp_dir()).env("KIT_PATCH_FAULT", "between-promotions").args(["patch", "apply", root.to_str().expect("root"), plan_path.to_str().expect("plan")]).output().expect("resume patch");
+    let second = Command::new(rig_binary()).current_dir(env::temp_dir()).env("RIG_PATCH_FAULT", "between-promotions").env("KIT_PATCH_FAULT", "between-promotions").args(["patch", "apply", root.to_str().expect("root"), plan_path.to_str().expect("plan")]).output().expect("resume patch");
     assert!(!second.status.success());
     let stdout = String::from_utf8_lossy(&second.stdout);
     let stderr = String::from_utf8_lossy(&second.stderr);

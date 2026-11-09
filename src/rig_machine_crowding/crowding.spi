@@ -88,12 +88,16 @@
             )
         )
         (machine_crowding (block_end ()) 3690u64 1100000u64)
-    testing.expect (machine_crowding (block_end ()) 8000u64 1100000u64 = "") "enough memory for every fresh grant is calm"
+    testing.expect
+        (machine_crowding (block_end ()) 8000u64 1100000u64 = "")
+        "enough memory for every fresh grant is calm"
     testing.expect (machine_crowding (block_end ()) 3690u64 1300000u64 = "") "grants older than 3 min have settled"
 
 ///> rust
 :# one_grant_or_waiting_rows_are_calm =
-    testing.expect (machine_crowding (held_at LiveGui "win-9" 1000000u64) 1000u64 1010000u64 = "") "a single grant is no crowd"
+    testing.expect
+        (machine_crowding (held_at LiveGui "win-9" 1000000u64) 1000u64 1010000u64 = "")
+        "a single grant is no crowd"
     := asked = waiting_at HeavyBuild "win-5" 1000000u64 ++# "\n" ++# waiting_at HeavyBuild "win-6" 1000000u64
     testing.expect (machine_crowding asked 100u64 1010000u64 = "") "waiting rows reserve nothing"
 

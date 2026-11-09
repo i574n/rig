@@ -61,7 +61,7 @@ fn migration_receipt_3(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i3
     let v20: Rc<str> = std::rc::Rc::<str>::from((v17).to_string());
     let v23: Rc<str> = std::rc::Rc::<str>::from((v18).to_string());
     let v26: Rc<str> = std::rc::Rc::<str>::from((v19).to_string());
-    let v28: Rc<str> = string_concat(&["kit agile migrate-tags ", &*v0, " tasks=", &*v8, " tags_moved=", &*v11, " rejected=", &*v14, " bytes_before=", &*v20, " bytes_after=", &*v23, " elapsed_ms=", &*v26]);
+    let v28: Rc<str> = string_concat(&["rig agile migrate-tags ", &*v0, " tasks=", &*v8, " tags_moved=", &*v11, " rejected=", &*v14, " bytes_before=", &*v20, " bytes_after=", &*v23, " elapsed_ms=", &*v26]);
     let v29: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v28.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
     v29
@@ -151,7 +151,7 @@ fn migration_written_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i3
                     _ => unreachable!(),
                 };
                 let v23: Rc<str> = string_concat(&["agile migrate-tags rejected: ", &*v22]);
-                let v24: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v23 + "
+                let v24: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v23 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v24
             }
@@ -630,7 +630,7 @@ fn tags_migration_1(mut v0: Rc<str>, mut v1: US1) -> i32 {
             let v10: Rc<str> = v10;
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v12: Rc<str> = string_concat(&["agile migrate-tags rejected: ", &*v11]);
-            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v12 + "
+            let v13: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v12 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v13
         }
@@ -658,7 +658,7 @@ fn tags_migration_1(mut v0: Rc<str>, mut v1: US1) -> i32 {
             } else {
                 let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("malformed Task fields"); } LIT.with(|lit| lit.clone()) };
                 let v36: Rc<str> = string_concat(&["agile migrate-tags rejected: ", &*v35]);
-                let v37: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v36 + "
+                let v37: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v36 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v37
             }
@@ -704,7 +704,7 @@ fn tags_migration_entry_0() -> i32 {
             US6::US6_Invalid => {
                 let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("migrate-tags expects preview <root> or apply <root>"); } LIT.with(|lit| lit.clone()) };
                 let v18: Rc<str> = string_concat(&["agile migrate-tags rejected: ", &*v17]);
-                let v19: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v18 + "
+                let v19: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v18 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v19
             }
@@ -718,7 +718,7 @@ fn tags_migration_entry_0() -> i32 {
     } else {
         let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("migrate-tags expects preview <root> or apply <root>"); } LIT.with(|lit| lit.clone()) };
         let v23: Rc<str> = string_concat(&["agile migrate-tags rejected: ", &*v22]);
-        let v24: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v23 + "
+        let v24: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v23 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v24
     }

@@ -23,7 +23,8 @@
         | Some sample => sample :: acc
         | None => acc
     := root = rig_jobs.host.jobs_root ()
-    ? file_system.directory_exists root |> not ?> []
+    ? file_system.directory_exists root |> not
+    ?> []
     |:
         file_system.read_directory_names root
         |> resultm.unwrap'

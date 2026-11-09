@@ -54,11 +54,16 @@
     | AgileDone => 4i32
 
 := agile_status_code_valid code : bool =
-    ? code = 0i32 ?> !+
-    |? code = 1i32 ?> !+
-    |? code = 2i32 ?> !+
-    |? code = 3i32 ?> !+
-    |? code = 4i32 ?> !+
+    ? code = 0i32
+    ?> !+
+    |? code = 1i32
+    ?> !+
+    |? code = 2i32
+    ?> !+
+    |? code = 3i32
+    ?> !+
+    |? code = 4i32
+    ?> !+
     |: !-
 
 := agile_progress_valid value : bool =
@@ -96,7 +101,8 @@
     ? (=.) value ' ' ?> !+ |: (=.) value (char_tab ())
 
 :~ ^ agile_tuple_trim_right (text : string) (near_to : i32) : i32 =
-    ? (=.) near_to 0i32 ?> 0i32
+    ? (=.) near_to 0i32
+    ?> 0i32
     |:
         := before = (-.) near_to 1i32
         ? agile_tuple_space (sm.index text before) ?> agile_tuple_trim_right text before |: near_to
@@ -110,17 +116,17 @@
     (input : string) (at : i32) (input_len : i32) (field_from : i32) (quoted : bool) (escaped : bool) (out : string)
     : string
     =
-    ? (=.) at input_len
-    ?>
-        ? quoted ?> codec_empty ()
-        |? escaped ?> codec_empty ()
+    ? (=.) at input_len ?>
+        ? quoted
+        ?> codec_empty ()
+        |? escaped
+        ?> codec_empty ()
         |:
             := field = agile_tuple_trim (slice_exclusive input field_from input_len)
             sm.concat out (sm.concat field "\n")
     |:
         := current_char = sm.index input at
-        ? quoted
-        ?>
+        ? quoted ?>
             ? escaped ?>
                 agile_tuple_parse_loop input ((+.) at 1i32) input_len field_from !+ !- out
             |? (=.) current_char (char_backslash ()) ?>
@@ -131,8 +137,7 @@
                 agile_tuple_parse_loop input ((+.) at 1i32) input_len field_from !+ !- out
         |? (=.) current_char (char_quote ())
         ?> agile_tuple_parse_loop input ((+.) at 1i32) input_len field_from !+ !- out
-        |? (=.) current_char ','
-        ?>
+        |? (=.) current_char ',' ?>
             := field = agile_tuple_trim (slice_exclusive input field_from at)
             agile_tuple_parse_loop input
                 ((+.) at 1i32)
@@ -158,7 +163,8 @@
 :~ agile_u64_literal_normalize (input : string) : string =
     := input = agile_tuple_trim input
     := input_len = sm.length input : i32
-    ? (<) input_len 4i32 ?> codec_empty ()
+    ? (<) input_len 4i32
+    ?> codec_empty ()
     |:
         := suffix_from = (-.) input_len 3i32
         ? (=.) (sm.index input suffix_from) 'u' ?>
@@ -174,7 +180,8 @@
 
 :~ agile_attestation_normalize (input : string) : string =
     := input_len = sm.length input : i32
-    ? (=.) input "runtime" ?> "runtime"
+    ? (=.) input "runtime"
+    ?> "runtime"
     |? agile_build_prefix input ?>
         := digits = codec_u64_decimal_normalize (slice_exclusive input 6i32 input_len)
         ? (=.) digits "" ?> codec_empty () |: sm.concat "build:" digits
@@ -183,7 +190,8 @@
 :~ agile_attestation_value (input : string) : u64 =
     := normalized = agile_attestation_normalize input
     := normalized_len = sm.length normalized : i32
-    ? (=.) normalized "runtime" ?> 0u64
+    ? (=.) normalized "runtime"
+    ?> 0u64
     |? agile_build_prefix normalized ?>
         codec_u64_decimal_value (slice_exclusive normalized 6i32 normalized_len)
     |: 0u64

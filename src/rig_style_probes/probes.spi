@@ -80,7 +80,8 @@
     | GadtCase => "^\\s*\\|\\s*[A-Z]\\w*\\s*::[^=]*$"
     | Existential => "\\\\\\?(\\s*(\\w+|\\([^)]*\\)|\\{[^}]*\\}))+\\s*\\.|\\\\\\?\\s*\\(|\\bexists\\s+\\w+\\."
     | Forall => "\\\\\\*(\\s*(\\w+|\\([^)]*\\)|\\{[^}]*\\}))+\\s*\\.|\\bforall\\s+\\w+"
-    | IndexedUnion => "^\\s*union\\s+(rec\\s+)?(private\\s+)?\\w+\\s+\\w+\\s*=|^\\s*:\\|\\s+(\\^\\s*)?\\w+(\\s+\\w+)+\\s*="
+    | IndexedUnion =>
+        "^\\s*union\\s+(rec\\s+)?(private\\s+)?\\w+\\s+\\w+\\s*=|^\\s*:\\|\\s+(\\^\\s*)?\\w+(\\s+\\w+)+\\s*="
     | Prototype => "^\\s*(prototype|instance)\\b|^\\s*:[?+]\\s"
     | Nominal => "^\\s*(:!|nominal)\\s+\\w+"
     | VerdictUnion => "^:\\|\\s+(\\^\\s*)?\\w*(verdict|outcome|refusal|fault|violation|check|change)\\w*\\s"

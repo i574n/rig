@@ -62,8 +62,10 @@
 := starts_in_word (piece : string) : bool = (sm'.length piece : i32) > 0i32 && word_code (xml.code_point_at piece 0i32)
 
 :~ ^ bounded_at (pieces : array string) (at : i32) : bool =
-    ? am'.length pieces <= at + 1i32 ?> !-
-    |? not (ends_in_word (am'.index at pieces)) && not (starts_in_word (am'.index (at + 1i32) pieces)) ?> !+
+    ? am'.length pieces <= at + 1i32
+    ?> !-
+    |? not (ends_in_word (am'.index at pieces)) && not (starts_in_word (am'.index (at + 1i32) pieces))
+    ?> !+
     |: bounded_at pieces (at + 1i32)
 
 :~ habit_in (command : string) (h : habit) : bool =
@@ -103,9 +105,11 @@
 
 ///> rust
 :# counts_tally_each_habit_once_per_call =
-    := commands = [ "Get-Content a"; "Get-Content b | Select-String x"; "kit read a"; "Start-Sleep 5" ]
+    := commands = [ "Get-Content a"; "Get-Content b | Select-String x"; "rig read a"; "Start-Sleep 5" ]
     := text = habit_counts_text (habit_counts commands)
-    testing.expect (text = "get-content\t2\nselect-string\t1\nstart-sleep\t1\n") "only habits that occur, in union order"
+    testing.expect
+        (text = "get-content\t2\nselect-string\t1\nstart-sleep\t1\n")
+        "only habits that occur, in union order"
 
 :~ habit_any (command : string) : bool =
     all_habits () |> listm.fold (\ found (h : habit) => found || habit_in command h) !-

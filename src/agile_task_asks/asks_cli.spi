@@ -16,11 +16,11 @@
     := here = fixture_text_of root
     := ask = \ (rest : cli_args) => agile_call root (Arg ("edit", Arg (here, Arg ("KIT-A", Arg ("--asked", rest)))))
     := dated = Arg ("2026-11-01", Arg ("--quote", Arg ("plot it", NoArgs)))
-    shows (succeeded (ask dated)) "kit agile edit ok id=KIT-A asked=2026-11-01 asks=1"
+    shows (succeeded (ask dated)) "rig agile edit ok id=KIT-A asked=2026-11-01 asks=1"
     shows (fixture_read root "state/asks.spi") "inl asked_of_kit_a () = Asked (\"KIT-A\", \"2026-11-01\", \"plot it\")"
     shows (fixture_read root "state/package.spiproj") "    asks\n"
     rejected_with (ask (Arg ("11-01", Arg ("--quote", Arg ("plot it", NoArgs))))) 2i32 "usage"
-    shows (succeeded (ask (Arg ("--clear", NoArgs)))) "kit agile edit ok id=KIT-A asked=none asks=0"
+    shows (succeeded (ask (Arg ("--clear", NoArgs)))) "rig agile edit ok id=KIT-A asked=none asks=0"
     := unknown = agile_call root (Arg ("edit", Arg (here, Arg ("NOPE", Arg ("--asked", Arg ("--clear", NoArgs))))))
     rejected_with unknown 2i32 "no task NOPE"
     fixture_root_remove root

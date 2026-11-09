@@ -20,7 +20,8 @@
     ?= todo ?|
     | [] => listm.rev found
     | path :: rest =>
-        ? file_system.file_exists path ?> spi_files rest (? sm'.ends_with ".spi" path ?> path :: found |: found)
+        ? file_system.file_exists path
+        ?> spi_files rest (? sm'.ends_with ".spi" path ?> path :: found |: found)
         |? file_system.directory_exists path ?>
             := deeper =
                 entry_names path

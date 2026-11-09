@@ -19,7 +19,8 @@
     := declined = \ (~detail : string) => declined_row item lane until claims now_ms detail
     ?= state_of claims item now_ms ?|
     | LeasedTo c =>
-        ? c.owner = lane ?> declined "yes"
+        ? c.owner = lane
+        ?> declined "yes"
         |:
             := wip, reason = live_count claims now_ms, refusal_reason (LeasedBy c)
             outcome_word OutcomeReleaseRefused, item, c.owner, c.expires_ms, 0i32, wip, reason, change_word ChangeNone

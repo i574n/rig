@@ -50,8 +50,10 @@
     : i32
     =
     := listed = selected_notebooks root names separator (registered ()) ""
-    ? dry ?> announced listed 0i32
-    |? listed = "" ?> 0i32
+    ? dry
+    ?> announced listed 0i32
+    |? listed = ""
+    ?> 0i32
     |:
         := ordered = \ (kept : list string) (chunk : string) => chunk :: kept
         := chunks = chunks_from 32i32 (sm'.split_list "\n" listed) "" 0i32 [] |> listm.fold ordered []

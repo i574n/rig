@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         use rig_patch_compat_driver::patch_apply_gated_context_owned;
@@ -6,7 +5,7 @@
 
         #[must_use]
         fn patch_gated_error(message: &str) -> i32 {
-            eprintln!("kit error: {message}");
+            eprintln!("rig error: {message}");
             2
         }
 

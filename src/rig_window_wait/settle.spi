@@ -58,12 +58,15 @@
 
 := observed (progress : settle_progress) (busy : bool) : settle_progress =
     := taken = progress.samples_taken + 1u64
-    ? busy ?> { clear_streak = 0u64; samples_taken = taken; busy_samples = progress.busy_samples + 1u64 }
+    ? busy
+    ?> { clear_streak = 0u64; samples_taken = taken; busy_samples = progress.busy_samples + 1u64 }
     |: { progress ?| clear_streak = progress.clear_streak + 1u64; samples_taken = taken }
 
 := verdict_of (terms : settle_terms) (progress : settle_progress) : settle_verdict =
-    ? progress.clear_streak >= terms.clear_samples_needed ?> ClearNow
-    |? progress.samples_taken >= terms.max_samples ?> GaveUp
+    ? progress.clear_streak >= terms.clear_samples_needed
+    ?> ClearNow
+    |? progress.samples_taken >= terms.max_samples
+    ?> GaveUp
     |: KeepWaiting
 
 := contention_of (progress : settle_progress) : run_contention =

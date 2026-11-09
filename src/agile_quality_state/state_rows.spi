@@ -38,7 +38,8 @@
 :~ stamp_hour (~stamp : string) : i64 =
     := number = \ (from : i32) (size : i32) =>
         optionm'.default_value 0i64 (convert.try_convert (sm'.substring from size stamp))
-    ? (sm'.length stamp : i32) < 13i32 ?> 0i64
+    ? (sm'.length stamp : i32) < 13i32
+    ?> 0i64
     |: date_time.days_from_civil (number 0i32 4i32) (number 5i32 2i32) (number 8i32 2i32) * 24i64 + number 11i32 2i32
 
 :~ last_note_hour (~notes : string) : i64 =

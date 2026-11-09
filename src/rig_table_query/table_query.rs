@@ -282,7 +282,7 @@ fn to_spi_run_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: US0) 
     let mut v4: Rc<str> = rig_table_text::rig_table_problem(&*v0);
     let v5: bool = &*v4 != "";
     if v5 {
-        let v6: Rc<str> = string_concat(&["kit error: table ", &*v4]);
+        let v6: Rc<str> = string_concat(&["rig error: table ", &*v4]);
         eprintln!("{}", v6);
         2i32
     } else {
@@ -397,7 +397,7 @@ fn to_spi_run_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: US0) 
         let v109: i32 = 0i32;
         let v110: i32 = method18(v8, v109);
         let v111: Rc<str> = std::rc::Rc::<str>::from((v110).to_string().as_str());
-        let v114: Rc<str> = string_concat(&["kit table to-spi ok rows=", &*v106, " columns=", &*v111, " out=", &*v1]);
+        let v114: Rc<str> = string_concat(&["rig table to-spi ok rows=", &*v106, " columns=", &*v111, " out=", &*v1]);
         println!("{}", v114);
         0i32
     }
@@ -756,7 +756,7 @@ fn table_run_0() -> i32 {
             let v73: bool = v72 < 5i32;
             if v73 {
                 let v74: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("table query <file> [--where col=value|col!=value|col>value|col>=value|col<value|col<=value]... [--cols a,b] [--group col] [--mean|--sd|--median|--sum|--min|--max|--count a,b]... [--limit n] [--quiet] | table diff <left> <right> --key a,b [--cols x,y] [--latest-by col] [--limit n] | table to-spi <file.tsv> <out.spi> [--open <module>] [--whole] (typed row module; --open uses that module's table_row union instead of declaring one, plus an inl rows () index; --whole writes one Table literal of the whole table instead of a Row per line, for tables too big to compile as cell lists) | table append <table.spi|table.tsv> <cell>... | --row-tsv <line> (adds one row, checks its width, rewrites the file in place; a .spi table stays one whole Table literal)"); } LIT.with(|lit| lit.clone()) };
-                let v75: Rc<str> = string_concat(&["kit error: table ", &*v74]);
+                let v75: Rc<str> = string_concat(&["rig error: table ", &*v74]);
                 eprintln!("{}", v75);
                 2i32
             } else {
@@ -767,7 +767,7 @@ fn table_run_0() -> i32 {
                 match v86 {
                     US4::US4_StepRejected(v100) => {
                         let v100: Rc<str> = v100;
-                        let v101: Rc<str> = string_concat(&["kit error: table ", &*v100]);
+                        let v101: Rc<str> = string_concat(&["rig error: table ", &*v100]);
                         eprintln!("{}", v101);
                         2i32
                     }
@@ -795,7 +795,7 @@ fn table_run_0() -> i32 {
             let mut v4: bool = v3 < 4i32;
             if v4 {
                 let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("table query <file> [--where col=value|col!=value|col>value|col>=value|col<value|col<=value]... [--cols a,b] [--group col] [--mean|--sd|--median|--sum|--min|--max|--count a,b]... [--limit n] [--quiet] | table diff <left> <right> --key a,b [--cols x,y] [--latest-by col] [--limit n] | table to-spi <file.tsv> <out.spi> [--open <module>] [--whole] (typed row module; --open uses that module's table_row union instead of declaring one, plus an inl rows () index; --whole writes one Table literal of the whole table instead of a Row per line, for tables too big to compile as cell lists) | table append <table.spi|table.tsv> <cell>... | --row-tsv <line> (adds one row, checks its width, rewrites the file in place; a .spi table stays one whole Table literal)"); } LIT.with(|lit| lit.clone()) };
-                let v6: Rc<str> = string_concat(&["kit error: table ", &*v5]);
+                let v6: Rc<str> = string_concat(&["rig error: table ", &*v5]);
                 eprintln!("{}", v6);
                 2i32
             } else {
@@ -806,7 +806,7 @@ fn table_run_0() -> i32 {
                 match v17 {
                     US4::US4_StepRejected(v34) => {
                         let mut v34: Rc<str> = v34;
-                        let v35: Rc<str> = string_concat(&["kit error: table ", &*v34]);
+                        let v35: Rc<str> = string_concat(&["rig error: table ", &*v34]);
                         eprintln!("{}", v35);
                         2i32
                     }
@@ -872,7 +872,7 @@ fn table_run_0() -> i32 {
             let v63: bool = v62 < 5i32;
             if v63 {
                 let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("table query <file> [--where col=value|col!=value|col>value|col>=value|col<value|col<=value]... [--cols a,b] [--group col] [--mean|--sd|--median|--sum|--min|--max|--count a,b]... [--limit n] [--quiet] | table diff <left> <right> --key a,b [--cols x,y] [--latest-by col] [--limit n] | table to-spi <file.tsv> <out.spi> [--open <module>] [--whole] (typed row module; --open uses that module's table_row union instead of declaring one, plus an inl rows () index; --whole writes one Table literal of the whole table instead of a Row per line, for tables too big to compile as cell lists) | table append <table.spi|table.tsv> <cell>... | --row-tsv <line> (adds one row, checks its width, rewrites the file in place; a .spi table stays one whole Table literal)"); } LIT.with(|lit| lit.clone()) };
-                let v65: Rc<str> = string_concat(&["kit error: table ", &*v64]);
+                let v65: Rc<str> = string_concat(&["rig error: table ", &*v64]);
                 eprintln!("{}", v65);
                 2i32
             } else {
@@ -885,7 +885,7 @@ fn table_run_0() -> i32 {
         }
         US3::US3_TableUnknown => {
             let v106: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("table query <file> [--where col=value|col!=value|col>value|col>=value|col<value|col<=value]... [--cols a,b] [--group col] [--mean|--sd|--median|--sum|--min|--max|--count a,b]... [--limit n] [--quiet] | table diff <left> <right> --key a,b [--cols x,y] [--latest-by col] [--limit n] | table to-spi <file.tsv> <out.spi> [--open <module>] [--whole] (typed row module; --open uses that module's table_row union instead of declaring one, plus an inl rows () index; --whole writes one Table literal of the whole table instead of a Row per line, for tables too big to compile as cell lists) | table append <table.spi|table.tsv> <cell>... | --row-tsv <line> (adds one row, checks its width, rewrites the file in place; a .spi table stays one whole Table literal)"); } LIT.with(|lit| lit.clone()) };
-            let v107: Rc<str> = string_concat(&["kit error: table ", &*v106]);
+            let v107: Rc<str> = string_concat(&["rig error: table ", &*v106]);
             eprintln!("{}", v107);
             2i32
         }

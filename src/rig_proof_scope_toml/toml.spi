@@ -46,9 +46,12 @@
     := step = \ (acc : list string) (name : string) =>
         := child = dir ++# "/" ++# name
         := folder = file_system.directory_exists child
-        ? listm'.contains name (skipped ()) || folder && depth >= 6i32 ?> acc
-        |? folder ?> spi_modules_in child (prefix ++# name ++# "/") (depth + 1i32) acc
-        |? sm'.ends_with ".spi" name ?> (prefix ++# sm'.slice 0i32 (sm'.length name - 5i32) name) :: acc
+        ? listm'.contains name (skipped ()) || folder && depth >= 6i32
+        ?> acc
+        |? folder
+        ?> spi_modules_in child (prefix ++# name ++# "/") (depth + 1i32) acc
+        |? sm'.ends_with ".spi" name
+        ?> (prefix ++# sm'.slice 0i32 (sm'.length name - 5i32) name) :: acc
         |: acc
     names_in dir |> listm.fold step found
 

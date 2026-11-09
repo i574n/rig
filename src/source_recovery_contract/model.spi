@@ -22,19 +22,27 @@
         source_recovery_plan from to
 
 :~ source_recovery_provenance_binding (sidecar : i32) (generated : i32) : i32 =
-    ? sidecar < 0i32 ?> 0i32
-    |? 1i32 < sidecar ?> 0i32
-    |? generated < 0i32 ?> 0i32
-    |? 1i32 < generated ?> 0i32
+    ? sidecar < 0i32
+    ?> 0i32
+    |? 1i32 < sidecar
+    ?> 0i32
+    |? generated < 0i32
+    ?> 0i32
+    |? 1i32 < generated
+    ?> 0i32
     |? sidecar = 1i32 ?>
         ? generated = 1i32 ?> 0i32 |: 3i32
-    |? generated = 1i32 ?> 2i32
+    |? generated = 1i32
+    ?> 2i32
     |: 1i32
 
 :~ source_recovery_warning_binding (missing_large : i32) (authored : i32) : i32 =
-    ? missing_large < 0i32 ?> 0i32
-    |? authored < 0i32 ?> 0i32
-    |? authored < missing_large ?> 0i32
+    ? missing_large < 0i32
+    ?> 0i32
+    |? authored < 0i32
+    ?> 0i32
+    |? authored < missing_large
+    ?> 0i32
     |: 1i32
 
 := source_recovery_public_plan () : source_recovery_plan source_recovery_raw source_recovery_reported =

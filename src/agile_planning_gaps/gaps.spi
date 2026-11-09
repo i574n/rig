@@ -25,8 +25,7 @@
     ?> found
     |:
         := arguments = at + task_arguments_offset ()
-        ? declared_task text at
-        ?>
+        ? declared_task text at ?>
             := field = tuple_field text arguments length
             := task = { id = unquoted (field 0i32); kind = field 2i32; status = field 6i32 }
             gap_tasks_from text arguments length (task :: found)
@@ -39,7 +38,7 @@
     ? plan.assignee = Unassigned ?> joined with_load "assignee" |: with_load
 
 := gap_line (~id : string) (~fields : string) : string =
-    ? fields = "" ?> "" |: "kit agile check warn missing=" ++# fields ++# " id=" ++# id ++# "\n"
+    ? fields = "" ?> "" |: "rig agile check warn missing=" ++# fields ++# " id=" ++# id ++# "\n"
 
 := gap_candidate (task : gap_task) : bool =
     (task.status = "Planned" || task.status = "Active") && task.kind <> "Epic"
@@ -61,7 +60,8 @@
     := unestimated =
         "inl b () = Task (\"B\", \"t\", Story, P1, D2, 0u32, Active, \"\", \"\", \"current\", \"current\")\n"
         ^^ "inl planning_of_b () = Planning (\"B\", Unestimated, Load Medium, Assigned Pair)\n"
-    := no_row = "inl c () = Task (\"C\", \"t\", TaskKind, P2, D1, 0u32, Planned, \"\", \"\", \"current\", \"current\")\n"
+    := no_row =
+        "inl c () = Task (\"C\", \"t\", TaskKind, P2, D1, 0u32, Planned, \"\", \"\", \"current\", \"current\")\n"
     := epic = "inl e () = Task (\"E\", \"t\", Epic, P1, D6, 0u32, Planned, \"\", \"\", \"current\", \"current\")\n"
     := done = "inl d () = Task (\"D\", \"t\", TaskKind, P1, D1, 100u32, Done, \"\", \"\", \"current\", \"current\")\n"
     := text = planned ++# unestimated ++# no_row ++# epic ++# done

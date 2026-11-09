@@ -35,44 +35,64 @@
     | CaptureDenied
 
 := plan_capture (observed_content_length observed) (capture_limit limit) : capture_decision =
-    ? observed < 0i32 ?> CaptureDenied
-    |? limit < 0i32 ?> CaptureDenied
-    |? limit < observed ?> CaptureDenied
+    ? observed < 0i32
+    ?> CaptureDenied
+    |? limit < 0i32
+    ?> CaptureDenied
+    |? limit < observed
+    ?> CaptureDenied
     |: CaptureAuthorized
 
 :~ capture_authorized (observed : i32) (limit : i32) : i32 =
-    ? observed < 0i32 ?> 0i32
-    |? limit < 0i32 ?> 0i32
-    |? limit < observed ?> 0i32
+    ? observed < 0i32
+    ?> 0i32
+    |? limit < 0i32
+    ?> 0i32
+    |? limit < observed
+    ?> 0i32
     |: 1i32
 
 :~ capture_binding_slot (slot : i32) (authorized : i32) : i32 =
-    ? slot < 0i32 ?> -1i32
-    |? authorized < 1i32 ?> -1i32
-    |? 1i32 < authorized ?> -1i32
+    ? slot < 0i32
+    ?> -1i32
+    |? authorized < 1i32
+    ?> -1i32
+    |? 1i32 < authorized
+    ?> -1i32
     |: slot
 
 := plan_temporary_write
     (expected_temporary_length expected) (observed_temporary_length observed)
     : temporary_write_decision
     =
-    ? expected < 0i32 ?> TemporaryWriteDenied
-    |? observed < 0i32 ?> TemporaryWriteDenied
-    |? expected < observed ?> TemporaryWriteDenied
-    |? observed < expected ?> TemporaryWriteDenied
+    ? expected < 0i32
+    ?> TemporaryWriteDenied
+    |? observed < 0i32
+    ?> TemporaryWriteDenied
+    |? expected < observed
+    ?> TemporaryWriteDenied
+    |? observed < expected
+    ?> TemporaryWriteDenied
     |: TemporaryWriteAuthorized
 
 :~ temporary_write_authorized (expected : i32) (observed : i32) : i32 =
-    ? expected < 0i32 ?> 0i32
-    |? observed < 0i32 ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 0i32
+    ?> 0i32
+    |? observed < 0i32
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 
 :~ temporary_write_binding_slot (slot : i32) (authorized : i32) : i32 =
-    ? slot < 0i32 ?> -1i32
-    |? authorized < 1i32 ?> -1i32
-    |? 1i32 < authorized ?> -1i32
+    ? slot < 0i32
+    ?> -1i32
+    |? authorized < 1i32
+    ?> -1i32
+    |? 1i32 < authorized
+    ?> -1i32
     |: slot
 
 := plan_promotion
@@ -81,47 +101,72 @@
     (expected_promotion_slot expected_slot)
     (observed_promotion_slot observed_slot)
     : promotion_decision =
-    ? expected_stage < 0i32 ?> PromotionDenied
-    |? observed_stage < 0i32 ?> PromotionDenied
-    |? expected_stage < observed_stage ?> PromotionDenied
-    |? observed_stage < expected_stage ?> PromotionDenied
-    |? expected_slot < 0i32 ?> PromotionDenied
-    |? observed_slot < 0i32 ?> PromotionDenied
-    |? expected_slot < observed_slot ?> PromotionDenied
-    |? observed_slot < expected_slot ?> PromotionDenied
+    ? expected_stage < 0i32
+    ?> PromotionDenied
+    |? observed_stage < 0i32
+    ?> PromotionDenied
+    |? expected_stage < observed_stage
+    ?> PromotionDenied
+    |? observed_stage < expected_stage
+    ?> PromotionDenied
+    |? expected_slot < 0i32
+    ?> PromotionDenied
+    |? observed_slot < 0i32
+    ?> PromotionDenied
+    |? expected_slot < observed_slot
+    ?> PromotionDenied
+    |? observed_slot < expected_slot
+    ?> PromotionDenied
     |: PromotionAuthorized
 
 :~ promotion_stage_authorized (expected : i32) (observed : i32) : i32 =
-    ? expected < 0i32 ?> 0i32
-    |? observed < 0i32 ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 0i32
+    ?> 0i32
+    |? observed < 0i32
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 
 :~ promotion_slot_authorized (expected : i32) (observed : i32) : i32 =
-    ? expected < 0i32 ?> 0i32
-    |? observed < 0i32 ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 0i32
+    ?> 0i32
+    |? observed < 0i32
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 
 :~ promotion_authorized (stage_authorized : i32) (slot_authorized : i32) : i32 =
-    ? stage_authorized < 1i32 ?> 0i32
-    |? 1i32 < stage_authorized ?> 0i32
-    |? slot_authorized < 1i32 ?> 0i32
-    |? 1i32 < slot_authorized ?> 0i32
+    ? stage_authorized < 1i32
+    ?> 0i32
+    |? 1i32 < stage_authorized
+    ?> 0i32
+    |? slot_authorized < 1i32
+    ?> 0i32
+    |? 1i32 < slot_authorized
+    ?> 0i32
     |: 1i32
 
 :~ promotion_binding_slot (slot : i32) (authorized : i32) : i32 =
-    ? slot < 0i32 ?> -1i32
-    |? authorized < 1i32 ?> -1i32
-    |? 1i32 < authorized ?> -1i32
+    ? slot < 0i32
+    ?> -1i32
+    |? authorized < 1i32
+    ?> -1i32
+    |? 1i32 < authorized
+    ?> -1i32
     |: slot
 
 := capture_original_slot (backup_slot slot) (validated_stage_index stage) : captured_original_slot =
     captured_original_slot (
-        ? slot < 0i32 ?> -1i32
-        |? stage < 0i32 ?> -1i32
+        ? slot < 0i32
+        ?> -1i32
+        |? stage < 0i32
+        ?> -1i32
         |: slot
     )
 
@@ -150,8 +195,10 @@
     ? existing < 0i32 ?> next + 1i32 |: next
 
 :~ backup_should_capture (existing : i32) (next : i32) : i32 =
-    ? next < 0i32 ?> 0i32
-    |? existing < 0i32 ?> 1i32
+    ? next < 0i32
+    ?> 0i32
+    |? existing < 0i32
+    ?> 1i32
     |: 0i32
 
 :! committed_prefix = i32
@@ -178,17 +225,25 @@
     rollback_next committed cursor
 
 :~ restoration_bind (selected : i32) (observed : i32) : i32 =
-    ? selected < 0i32 ?> -1i32
-    |? observed < 0i32 ?> -1i32
-    |? selected < observed ?> -1i32
-    |? observed < selected ?> -1i32
+    ? selected < 0i32
+    ?> -1i32
+    |? observed < 0i32
+    ?> -1i32
+    |? selected < observed
+    ?> -1i32
+    |? observed < selected
+    ?> -1i32
     |: selected
 
 :~ restoration_complete (expected : i32) (observed : i32) : i32 =
-    ? expected < 0i32 ?> 0i32
-    |? observed < 0i32 ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 0i32
+    ?> 0i32
+    |? observed < 0i32
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 
 :! restoration_expected_attempts = i32
@@ -212,30 +267,45 @@
         restoration_accumulator_step restoration_accumulator_open restoration_accumulator_partial_failure
 
 :~ restoration_attempt_count (successes : i32) (failures : i32) : i32 =
-    ? successes < 0i32 ?> -1i32
-    |? failures < 0i32 ?> -1i32
-    |? 2147483647i32 - successes < failures ?> -1i32
+    ? successes < 0i32
+    ?> -1i32
+    |? failures < 0i32
+    ?> -1i32
+    |? 2147483647i32 - successes < failures
+    ?> -1i32
     |: successes + failures
 
 :~ restoration_attempt_authorized (expected : i32) (attempted : i32) : i32 =
-    ? expected < 0i32 ?> 0i32
-    |? attempted < 0i32 ?> 0i32
-    |? attempted < expected ?> 1i32
+    ? expected < 0i32
+    ?> 0i32
+    |? attempted < 0i32
+    ?> 0i32
+    |? attempted < expected
+    ?> 1i32
     |: 0i32
 
 :~ restoration_counter_next (current : i32) (authorized : i32) : i32 =
-    ? current < 0i32 ?> -1i32
-    |? authorized < 1i32 ?> -1i32
-    |? 1i32 < authorized ?> -1i32
-    |? current < 2147483647i32 ?> current + 1i32
+    ? current < 0i32
+    ?> -1i32
+    |? authorized < 1i32
+    ?> -1i32
+    |? 1i32 < authorized
+    ?> -1i32
+    |? current < 2147483647i32
+    ?> current + 1i32
     |: -1i32
 
 :~ restoration_accumulator_outcome (complete : i32) (failures : i32) : i32 =
-    ? failures < 0i32 ?> -1i32
-    |? complete < 0i32 ?> -1i32
-    |? 1i32 < complete ?> -1i32
-    |? complete < 1i32 ?> 0i32
-    |? failures < 1i32 ?> 1i32
+    ? failures < 0i32
+    ?> -1i32
+    |? complete < 0i32
+    ?> -1i32
+    |? 1i32 < complete
+    ?> -1i32
+    |? complete < 1i32
+    ?> 0i32
+    |? failures < 1i32
+    ?> 1i32
     |: 2i32
 
 := export_backup_slot () : () =

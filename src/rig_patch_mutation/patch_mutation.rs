@@ -5,19 +5,19 @@ use rig_patch_compat_driver::{patch_apply_context_owned, patch_check_context_own
 
 #[must_use]
 fn patch_mutation_error(message: &str) -> i32 {
-    eprintln!("kit error: {message}");
+    eprintln!("rig error: {message}");
     2
 }
 
 #[must_use]
 fn patch_check_success(count: i32) -> i32 {
-    println!("kit patch check ok operations={count} mutation=false");
+    println!("rig patch check ok operations={count} mutation=false");
     0
 }
 
 #[must_use]
 fn patch_preflight_error() -> i32 {
-    eprintln!("kit error: patch preflight contract rejected the validated plan");
+    eprintln!("rig error: patch preflight contract rejected the validated plan");
     2
 }
 

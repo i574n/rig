@@ -41,14 +41,16 @@
     | Chained (predecessor, _, _) => predecessor
 
 := step_of (job : queued_job) : queue_step =
-    ? job.stop_requested ?> SettleStopped ("stopped on request while waiting for " ++# waited_for job.wait)
+    ? job.stop_requested
+    ?> SettleStopped ("stopped on request while waiting for " ++# waited_for job.wait)
     |:
         ?= job.wait ?|
         | NoChain => StartSupervisor
         | Chained (_, _, PredecessorLive) => KeepWaiting
         | Chained (_, AfterAny, _) => StartSupervisor
         | Chained (predecessor, AfterOk, PredecessorSettled (word, code)) =>
-            ? code = 0i32 ?> StartSupervisor
+            ? code = 0i32
+            ?> StartSupervisor
             |: SettleSkipped ("--after-ok: " ++# predecessor ++# " ended " ++# word ++# " exit " ++# sm'.format code)
 
 := after_part (~text : string) (index : i32) : string =
@@ -77,8 +79,7 @@
 :~ held_file (~id : string) : string = joined (held_directory ()) id
 
 :~ held_names () : array string =
-    ? file_system.directory_exists (held_directory ())
-    ?>
+    ? file_system.directory_exists (held_directory ()) ?>
         file_system.read_directory_names (held_directory ())
         |> resultm.unwrap'
         |> am'.from_vec_base

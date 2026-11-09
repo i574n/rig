@@ -44,7 +44,7 @@ pub fn prune_release_transients(args: &[String]) -> Result<(), String> {
         for path in &files { rooted_remove_regular(path)?; }
         for path in &directories { rooted_remove_tree_within(root, path)?; }
     }
-    println!("kit proxy prune-release-transients ok files={} directories={} removed={} dry_run={}", files.len(), directories.len(), if dry_run { 0 } else { files.len() + directories.len() }, i32::from(dry_run));
+    println!("rig proxy prune-release-transients ok files={} directories={} removed={} dry_run={}", files.len(), directories.len(), if dry_run { 0 } else { files.len() + directories.len() }, i32::from(dry_run));
     Ok(())
 }
 
@@ -92,7 +92,7 @@ pub fn prune_compiler_sidecars(args: &[String]) -> Result<(), String> {
             rooted_remove_regular(path)?;
         }
     }
-    println!("kit proxy prune-compiler-sidecars ok candidates={} removed={} dry_run={}", candidates.len(), if dry_run { 0 } else { candidates.len() }, i32::from(dry_run));
+    println!("rig proxy prune-compiler-sidecars ok candidates={} removed={} dry_run={}", candidates.len(), if dry_run { 0 } else { candidates.len() }, i32::from(dry_run));
     Ok(())
 }
 
@@ -121,7 +121,7 @@ fn incident_snapshot(args: &[String]) -> Result<(), String> {
     let separated = incident_paths_separated(&source, &snapshot_parent) && incident_paths_separated(&source, &receipt) && incident_paths_separated(&snapshot, &receipt); if rig_incident_recovery_leaf_binding(1, i32::from(separated)) != 1 { return Err("typed incident snapshot path separation rejected".to_owned()); }
     if snapshot.exists() { return Err(format!("incident snapshot already exists: {}", snapshot.display())); }
     fs::create_dir_all(&snapshot_parent).map_err(|error| format!("create {}: {error}", snapshot_parent.display()))?; incident_copy_tree(&source, &snapshot)?; let source_hash = incident_tree_hash(&source)?; let snapshot_hash = incident_tree_hash(&snapshot)?; let parity = i32::from(source_hash == snapshot_hash); if rig_incident_recovery_snapshot_mask_binding(7 + 8 * parity,0) != 1 { let _ = fs::remove_dir_all(&snapshot); return Err("typed incident snapshot verification rejected".to_owned()); }
-    let body = format!("schema=1\nsource={}\nsnapshot={}\nsha256={}\n", source_relative.display(), snapshot_parent_relative.join(&leaf).display(), snapshot_hash); atomic_write(&receipt, body.as_bytes())?; println!("kit proxy incident-recovery snapshot ok source={} snapshot={} sha256={} receipt={}", source.display(), snapshot.display(), snapshot_hash, receipt.display()); Ok(())
+    let body = format!("schema=1\nsource={}\nsnapshot={}\nsha256={}\n", source_relative.display(), snapshot_parent_relative.join(&leaf).display(), snapshot_hash); atomic_write(&receipt, body.as_bytes())?; println!("rig proxy incident-recovery snapshot ok source={} snapshot={} sha256={} receipt={}", source.display(), snapshot.display(), snapshot_hash, receipt.display()); Ok(())
 }
 
 fn incident_rollback(target: &Path, quarantine: Option<&Path>, original_hash: Option<&str>) -> Result<(), String> { if target.exists() { fs::remove_dir_all(target).map_err(|error| format!("rollback remove {}: {error}", target.display()))?; }
@@ -138,11 +138,11 @@ fn incident_restore(args: &[String]) -> Result<(), String> {
     fs::create_dir_all(&stage_parent).map_err(|error| format!("create {}: {error}", stage_parent.display()))?; if let Err(error) = incident_copy_tree(&snapshot, &stage) { let _ = fs::remove_dir_all(&stage_parent); return Err(error); } let stage_hash = incident_tree_hash(&stage)?; if stage_hash != snapshot_hash { let _ = fs::remove_dir_all(&stage_parent); return Err("incident staged restore hash mismatch".to_owned()); }
     let original_hash = if target_kind == 1 { Some(incident_tree_hash(&target)?) } else { None }; let quarantine_parent = target_parent.join(format!(".kit-recovery-damaged-{pid}")); let quarantine = quarantine_parent.join(&target_leaf); if quarantine_parent.exists() { let _ = fs::remove_dir_all(&stage_parent); return Err(format!("incident quarantine already exists: {}", quarantine_parent.display())); }
     if target_kind == 1 { fs::create_dir_all(&quarantine_parent).map_err(|error| format!("create {}: {error}", quarantine_parent.display()))?; fs::rename(&target, &quarantine).map_err(|error| format!("quarantine {}: {error}", target.display()))?; }
-    let fault = std::env::var("KIT_INCIDENT_RECOVERY_FAULT").unwrap_or_default(); if fault == "after-quarantine" { if rig_incident_recovery_fault_binding(1,1) != 1 { return Err("typed incident fault rejected".to_owned()); } incident_rollback(&target, if target_kind == 1 { Some(quarantine.as_path()) } else { None }, original_hash.as_deref())?; let _ = fs::remove_dir_all(&stage_parent); let _ = fs::remove_dir_all(&quarantine_parent); return Err("injected incident recovery failure after quarantine".to_owned()); }
+    let fault = std::env::var("RIG_INCIDENT_RECOVERY_FAULT").or_else(|_| std::env::var("KIT_INCIDENT_RECOVERY_FAULT")).unwrap_or_default(); if fault == "after-quarantine" { if rig_incident_recovery_fault_binding(1,1) != 1 { return Err("typed incident fault rejected".to_owned()); } incident_rollback(&target, if target_kind == 1 { Some(quarantine.as_path()) } else { None }, original_hash.as_deref())?; let _ = fs::remove_dir_all(&stage_parent); let _ = fs::remove_dir_all(&quarantine_parent); return Err("injected incident recovery failure after quarantine".to_owned()); }
     if let Err(error) = fs::rename(&stage, &target) { incident_rollback(&target, if target_kind == 1 { Some(quarantine.as_path()) } else { None }, original_hash.as_deref())?; let _ = fs::remove_dir_all(&stage_parent); let _ = fs::remove_dir_all(&quarantine_parent); return Err(format!("promote incident restore: {error}")); } let _ = fs::remove_dir_all(&stage_parent);
     if fault == "after-promotion" { if rig_incident_recovery_fault_binding(2,2) != 1 { return Err("typed incident fault rejected".to_owned()); } incident_rollback(&target, if target_kind == 1 { Some(quarantine.as_path()) } else { None }, original_hash.as_deref())?; let _ = fs::remove_dir_all(&quarantine_parent); return Err("injected incident recovery failure after promotion".to_owned()); }
     let final_hash = incident_tree_hash(&target)?; let complete = rig_incident_recovery_completion_mask_binding(1 + 2 * i32::from(stage_hash == snapshot_hash) + 4 * i32::from(final_hash == snapshot_hash),0); if complete != 1 { incident_rollback(&target, if target_kind == 1 { Some(quarantine.as_path()) } else { None }, original_hash.as_deref())?; let _ = fs::remove_dir_all(&quarantine_parent); return Err("typed incident recovery completion rejected".to_owned()); }
-    println!("kit proxy incident-recovery restore ok target={} snapshot={} sha256={} damaged={}", target.display(), snapshot.display(), final_hash, if target_kind == 1 { quarantine.display().to_string() } else { "none".to_owned() }); Ok(())
+    println!("rig proxy incident-recovery restore ok target={} snapshot={} sha256={} damaged={}", target.display(), snapshot.display(), final_hash, if target_kind == 1 { quarantine.display().to_string() } else { "none".to_owned() }); Ok(())
 }
 
 pub fn incident_recovery_run(args: &[String]) -> Result<(), String> { match args.get(1).map(String::as_str) { Some("snapshot") => incident_snapshot(args), Some("restore") => incident_restore(args), _ => Err("incident-recovery expects snapshot or restore".to_owned()) } }

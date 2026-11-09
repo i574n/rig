@@ -71,39 +71,65 @@
     (bundle_only : i32) (fallback_present : i32) (candidate_present : i32) (route : i32)
     : i32
     =
-    ? bundle_only < 1i32 ?> 0i32
-    |? 1i32 < bundle_only ?> 0i32
-    |? fallback_present < 0i32 ?> 0i32
-    |? 0i32 < fallback_present ?> 0i32
-    |? candidate_present < 0i32 ?> 0i32
-    |? 0i32 < candidate_present ?> 0i32
-    |? route < 0i32 ?> 0i32
-    |? 0i32 < route ?> 0i32
+    ? bundle_only < 1i32
+    ?> 0i32
+    |? 1i32 < bundle_only
+    ?> 0i32
+    |? fallback_present < 0i32
+    ?> 0i32
+    |? 0i32 < fallback_present
+    ?> 0i32
+    |? candidate_present < 0i32
+    ?> 0i32
+    |? 0i32 < candidate_present
+    ?> 0i32
+    |? route < 0i32
+    ?> 0i32
+    |? 0i32 < route
+    ?> 0i32
     |: 1i32
 
 :~ bootstrap_seed_extract_binding (flat_root : i32) (public_binary : i32) (bundle_check : i32) : i32 =
-    ? flat_root < 1i32 ?> 0i32
-    |? 1i32 < flat_root ?> 0i32
-    |? public_binary < 1i32 ?> 0i32
-    |? 1i32 < public_binary ?> 0i32
-    |? bundle_check < 1i32 ?> 0i32
-    |? 1i32 < bundle_check ?> 0i32
+    ? flat_root < 1i32
+    ?> 0i32
+    |? 1i32 < flat_root
+    ?> 0i32
+    |? public_binary < 1i32
+    ?> 0i32
+    |? 1i32 < public_binary
+    ?> 0i32
+    |? bundle_check < 1i32
+    ?> 0i32
+    |? 1i32 < bundle_check
+    ?> 0i32
     |: 1i32
 
 :~ bootstrap_seed_install_binding (candidate_status : i32) (install_self : i32) (canonical_status : i32) : i32 =
-    ? candidate_status < 1i32 ?> 0i32
-    |? 1i32 < candidate_status ?> 0i32
-    |? install_self < 1i32 ?> 0i32
-    |? 1i32 < install_self ?> 0i32
-    |? canonical_status < 1i32 ?> 0i32
-    |? 1i32 < canonical_status ?> 0i32
+    ? candidate_status < 1i32
+    ?> 0i32
+    |? 1i32 < candidate_status
+    ?> 0i32
+    |? install_self < 1i32
+    ?> 0i32
+    |? 1i32 < install_self
+    ?> 0i32
+    |? canonical_status < 1i32
+    ?> 0i32
+    |? 1i32 < canonical_status
+    ?> 0i32
     |: 1i32
 
 :~ bootstrap_seed_rollback_binding (fault_observed : i32) (hash_restored : i32) (canonical_status : i32) : i32 =
-    ? fault_observed < 1i32 ?> 0i32
-    |? 1i32 < fault_observed ?> 0i32
-    |? hash_restored < 1i32 ?> 0i32
-    |? 1i32 < hash_restored ?> 0i32
-    |? canonical_status < 1i32 ?> 0i32
-    |? 1i32 < canonical_status ?> 0i32
+    ? fault_observed < 1i32
+    ?> 0i32
+    |? 1i32 < fault_observed
+    ?> 0i32
+    |? hash_restored < 1i32
+    ?> 0i32
+    |? 1i32 < hash_restored
+    ?> 0i32
+    |? canonical_status < 1i32
+    ?> 0i32
+    |? 1i32 < canonical_status
+    ?> 0i32
     |: 1i32

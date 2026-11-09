@@ -19,9 +19,9 @@ $work = Join-Path $KitRoot ('.cache/strict-renewal/' + [guid]::NewGuid().ToStrin
 if (-not $SpiralCompiler) { $SpiralCompiler = Get-SpiralCompilerDll 'single-flight' }
 $SpiralCompiler = Copy-KitCompilerSnapshot -Compiler (Resolve-Path -LiteralPath $SpiralCompiler).Path -Destination (Join-Path $work 'compiler')
 $env:SPIRAL_COMPILER_DLL = $SpiralCompiler
-$env:KIT_SPIRAL_COMPILE = $SpiralCompiler
-$env:KIT_DOTNET = Resolve-SpiralDotnet
-$env:KIT_SPIRAL_BUNDLE = $compilerRoot
+$env:RIG_SPIRAL_COMPILE = $env:KIT_SPIRAL_COMPILE = $SpiralCompiler
+$env:RIG_DOTNET = $env:KIT_DOTNET = Resolve-SpiralDotnet
+$env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = $compilerRoot
 $closeoutGateNames = @{
     CloseoutState = 'state'; CloseoutWorkspace = 'workspace'; CloseoutContracts = 'contracts'
     CloseoutBundle = 'bundle'; CloseoutColdReplay = 'cold'; CloseoutMigration = 'migration'

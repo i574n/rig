@@ -4,7 +4,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new() -> Self {
         let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-        let fixture = Self(std::env::temp_dir().join(format!("kit graph ü {} {nonce}", std::process::id())));
+        let fixture = Self(std::env::temp_dir().join(format!("rig graph ü {} {nonce}", std::process::id())));
         fixture.write("state/package.spiproj", "packageDir: ../src\npackages:\n    dep-\nmodules:\n    state\n");
         fixture.write("state/state.spi", "inl main () = 0i32\n");
         fixture.write("src/dep/package.spiproj", "modules:\n    model-\n");

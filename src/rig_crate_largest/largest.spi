@@ -14,8 +14,10 @@
     := lead = sm'.trim line
     := size : i32 = sm'.length lead
     := rest =
-        ? sm'.starts_with "pub fn " lead ?> sm'.substring 7i32 (size - 7i32) lead
-        |? sm'.starts_with "fn " lead ?> sm'.substring 3i32 (size - 3i32) lead
+        ? sm'.starts_with "pub fn " lead
+        ?> sm'.substring 7i32 (size - 7i32) lead
+        |? sm'.starts_with "fn " lead
+        ?> sm'.substring 3i32 (size - 3i32) lead
         |: ""
     := paren : i32 = sm'.index_of "(" rest
     := angle : i32 = sm'.index_of "<" rest

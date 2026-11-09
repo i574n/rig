@@ -51,8 +51,10 @@
 := sprint_line_of (line : string) : sprint_line =
     := parts = sm'.split "\"" line |> array
     := count = am'.length parts
-    ? sm'.starts_with "inl sprint_item_" line && count >= 5i32 ?> item_line line parts
-    |? sm'.starts_with "inl sprint_" line && count >= 9i32 ?> head_line parts
+    ? sm'.starts_with "inl sprint_item_" line && count >= 5i32
+    ?> item_line line parts
+    |? sm'.starts_with "inl sprint_" line && count >= 9i32
+    ?> head_line parts
     |: NoSprintLine
 
 := head_of (acc : list sprint) (line : sprint_line) : list sprint =
@@ -77,10 +79,12 @@
     row_text ("sprint_review_" ++# binding_of id) "SprintReview" (quoted id :: minutes)
 
 :~ review_of_line (line : string) : option sprint_review =
-    ? sm'.starts_with "inl sprint_review_" line |> not ?> None
+    ? sm'.starts_with "inl sprint_review_" line |> not
+    ?> None
     |:
         := parts = sm'.split "\"" line |> array
-        ? am'.length parts < 3i32 ?> None
+        ? am'.length parts < 3i32
+        ?> None
         |:
             := number = \ (text : string) =>
                 := digits = sm'.trim (sm'.replace ")" "" (sm'.replace "i32" "" text))
@@ -135,7 +139,8 @@
             minutes = minutes
             committed = committed
         }
-    ? s.items = [] ?> [ row "" 0i32 !+ ]
+    ? s.items = []
+    ?> [ row "" 0i32 !+ ]
     |: s.items |> listm.map (\ (i : sprint_item) => row i.task i.minutes (i.fate = Committed))
 
 :~ sprints_from (rows : array_base sprint_flat) : list sprint =
@@ -176,8 +181,10 @@
 
 :~ sprints_appended (existing : string) (s : sprint) : string =
     := base =
-        ? existing = "" ?> sprints_schema_text () ++# "\n"
-        |? sm'.ends_with "\n" existing ?> existing
+        ? existing = ""
+        ?> sprints_schema_text () ++# "\n"
+        |? sm'.ends_with "\n" existing
+        ?> existing
         |: existing ++# "\n"
     base ++# sm'.concat_list "\n" (sprint_rows s) ++# "\n"
 

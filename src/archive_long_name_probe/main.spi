@@ -29,8 +29,7 @@
         ^^ "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt"
     := _ = cleanup_tree base
     := _ : archive_long_name_probe probe_start probe_source_ready = PrepareSource
-    ? create_dir source && write_text long_path "ok"
-    ?>
+    ? create_dir source && write_text long_path "ok" ?>
         := _ : archive_long_name_probe probe_source_ready probe_archive_ready = BuildGnuTar
         := tar_code =
             status_code5

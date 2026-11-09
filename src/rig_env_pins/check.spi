@@ -26,10 +26,12 @@
             (? entry <> "" && file_system.file_exists candidate ?> (candidate :: acc) |: acc)
 
 :~ ^ pins_from (index : i32) (count : i32) (acc : list tool_pin) (~refusal : string) : list tool_pin * string =
-    ? index >= count || refusal <> "" ?> listm.rev acc, refusal
+    ? index >= count || refusal <> ""
+    ?> listm.rev acc, refusal
     |:
         := tool, path = split_pair (argument index) "="
-        ? path = "" ?> acc, "expects tool=pinned-path, received " ++# argument index
+        ? path = ""
+        ?> acc, "expects tool=pinned-path, received " ++# argument index
         |: pins_from (index + 1i32) count ({ tool = tool; path = path } :: acc) ""
 
 :~ ^ checked (entries : array string) (pins : list tool_pin) (~text : string) (drifted : u64) : string * u64 =
@@ -50,24 +52,25 @@
     ^^ "be the pinned one; with no pins given, the PathFirst rows of <kit config>/path_first.spi are the pins)"
 
 :~ env_refused (~refusal : string) : i32 =
-    console.write_error_line ("kit error: env check " ++# refusal ++# "; " ++# usage ())
+    console.write_error_line ("rig error: env check " ++# refusal ++# "; " ++# usage ())
     2i32
 
 :~ env_run () : i32 =
     := count = env.command_line_argument_count ()
-    ? argument 1i32 <> "check"
-    ?>
-        console.write_error_line ("kit error: env " ++# usage ())
+    ? argument 1i32 <> "check" ?>
+        console.write_error_line ("rig error: env " ++# usage ())
         2i32
     |:
         := pins, refusal = ? count < 3i32 ?> config_pins (), "" |: pins_from 2i32 count [] ""
-        ? pins = [] && refusal = "" ?> env_refused "no pins given and no PathFirst rows in the kit config"
-        |? refusal <> "" ?> env_refused refusal
+        ? pins = [] && refusal = ""
+        ?> env_refused "no pins given and no PathFirst rows in the kit config"
+        |? refusal <> ""
+        ?> env_refused refusal
         |:
             := lines, drifted = checked (path_entries ()) pins "" 0u64
             console.write_line (sm'.trim_end_suffix "\n" lines)
             console.write_error_line (
-                "kit env check "
+                "rig env check "
                 ++# (? drifted = 0u64 ?> "ok" |: "drift")
                 ++# " pins="
                 ++# sm'.format (listm.length pins : i32)

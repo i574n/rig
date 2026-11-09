@@ -88,7 +88,7 @@ fn directory_listing_outcome_1() -> US0 {
                 let v28: Rc<str> = std::rc::Rc::<str>::from((v25).to_string());
                 let v31: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                 let v32: Rc<str> = std::rc::Rc::<str>::from((v31).to_string());
-                let v33: Rc<str> = string_concat(&["kit proxy fs-list ok path=", &*v12, " entries=", &*v28, " elapsed_ms=", &*v32]);
+                let v33: Rc<str> = string_concat(&["rig proxy fs-list ok path=", &*v12, " entries=", &*v28, " elapsed_ms=", &*v32]);
                 US0::US0_ListingShown(v33)
             } else {
                 let v35: Rc<str> = string_concat(&["fs-list failed: ", &*v17]);
@@ -144,7 +144,7 @@ fn directory_listing_outcome_1() -> US0 {
                     let v65: Rc<str> = std::rc::Rc::<str>::from((v62).to_string());
                     let v68: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                     let v69: Rc<str> = std::rc::Rc::<str>::from((v68).to_string());
-                    let v70: Rc<str> = string_concat(&["kit proxy fs-list ok path=", &*v49, " entries=", &*v65, " elapsed_ms=", &*v69]);
+                    let v70: Rc<str> = string_concat(&["rig proxy fs-list ok path=", &*v49, " entries=", &*v65, " elapsed_ms=", &*v69]);
                     US0::US0_ListingShown(v70)
                 } else {
                     let v72: Rc<str> = string_concat(&["fs-list failed: ", &*v54]);

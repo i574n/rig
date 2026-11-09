@@ -28,7 +28,7 @@ impl Drop for Fixture {
 #[cfg(windows)]
 fn directory_link(target: &Path, link: &Path) {
     let status = Command::new("pwsh").args(["-NoProfile", "-NonInteractive", "-Command", "New-Item -ItemType Junction -Path $env:KIT_TEST_LINK -Target $env:KIT_TEST_TARGET | Out-Null"])
-        .env("KIT_TEST_LINK", link).env("KIT_TEST_TARGET", target).status().unwrap();
+        .env("RIG_TEST_LINK", &link).env("KIT_TEST_LINK", link).env("RIG_TEST_TARGET", &target).env("KIT_TEST_TARGET", target).status().unwrap();
     assert!(status.success());
 }
 #[cfg(unix)]

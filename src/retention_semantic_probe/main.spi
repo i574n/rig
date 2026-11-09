@@ -30,12 +30,10 @@
             retention_receipt
 
         """ && write_text "/mnt/data/kit-retention-semantic-probe/bundle_kit_alpha1.zip" "one" && write_text "/mnt/data/kit-retention-semantic-probe/bundle_kit_alpha2.zip" "two" && write_text "/mnt/data/kit-retention-semantic-probe/bundle_kit_alpha3.zip" "three" && write_text "/mnt/data/kit-retention-semantic-probe/bundle_kit_alpha4.zip" "four" && write_text "/mnt/data/kit-retention-semantic-probe/bundle_kit_alpha5.zip" "five"
-    ? prepared
-    ?>
+    ? prepared ?>
         := _ : retention_semantic_transition retention_probe_fixture_ready retention_probe_planned = PlanRetentionWindow
         := plan_code = status_code5 kit "bundle" "retention-plan" base "bundle_kit_alpha5.zip" receipt
-        ? plan_code = 0i32
-        ?>
+        ? plan_code = 0i32 ?>
             := _ : retention_semantic_transition retention_probe_planned retention_probe_receipt_verified =
                 VerifyOpaqueReceipt
             := ok =
@@ -46,8 +44,7 @@
                 && text_contains "remaining=5" receipt
                 && text_contains "status=planned" receipt
                 && text_excludes "bundle_kit_alpha" receipt
-            ? ok
-            ?>
+            ? ok ?>
                 := invalid_code = status_code5 kit "bundle" "retention-plan" base "nested/current.zip" rejected_receipt
                 := _ = cleanup_tree base
                 ? invalid_code = 0i32

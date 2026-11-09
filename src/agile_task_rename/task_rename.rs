@@ -91,7 +91,7 @@ fn state_written_5(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US1 {
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".paused"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = concat5_2(v0.clone(), v3, v4.clone(), v4.clone(), v4.clone());
-    std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
+    std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
     let v6: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
     if v6 {
         let v7: Rc<str> = string_concat(&[&*v0, ".pending"]);
@@ -168,7 +168,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
             let v11: Rc<str> = v11;
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v15: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v12]);
-            let v16: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v15 + "
+            let v16: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v15 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v16
         }
@@ -188,7 +188,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
             if v28 {
                 let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("no task with this id"); } LIT.with(|lit| lit.clone()) };
                 let v32: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v29]);
-                let v33: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v32 + "
+                let v33: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v32 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v33
             } else {
@@ -199,7 +199,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
                 let v38: bool = v37 == false;
                 if v38 {
                     let v43: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: the id ", &*v2, " is already taken"]);
-                    let v44: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v43 + "
+                    let v44: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v43 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v44
                 } else {
@@ -212,7 +212,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
                         let mut v50: Rc<str> = Rc::<str>::from(v2.replace(&*v45, &*v46));
                         let v51: Rc<str> = std::rc::Rc::<str>::from(v50.to_ascii_lowercase());
                         let v56: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: the name inl ", &*v51, " is already declared"]);
-                        let v57: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v56 + "
+                        let v57: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v56 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                         v57
                     } else {
@@ -226,7 +226,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
                             let v64: Rc<str> = std::rc::Rc::<str>::from(v63.to_ascii_lowercase());
                             let v65: Rc<str> = concat5_2(v58, v64, v5.clone(), v5.clone(), v5.clone());
                             let v70: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: the name inl ", &*v65, " is already declared"]);
-                            let v71: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v70 + "
+                            let v71: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v70 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                             v71
                         } else {
@@ -237,7 +237,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
                                     let v79: u64 = v19.len() as u64;
                                     let v80: u64 = v72.len() as u64;
                                     let v81: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v3);
-                                    let v85: Rc<str> = string_concat(&["kit agile rename ok old=", &*v1, " new=", &*v2, " items="]);
+                                    let v85: Rc<str> = string_concat(&["rig agile rename ok old=", &*v1, " new=", &*v2, " items="]);
                                     let v86: Rc<str> = std::rc::Rc::<str>::from((v73).to_string());
                                     let v88: Rc<str> = std::rc::Rc::<str>::from((v74).to_string());
                                     let v90: Rc<str> = string_concat(&[&*v86, " deps_rewritten=", &*v88, " deps_in="]);
@@ -277,7 +277,7 @@ fn renamed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
                                         _ => unreachable!(),
                                     };
                                     let v118: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v115]);
-                                    let v119: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v118 + "
+                                    let v119: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v118 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                     v119
                                 }
@@ -347,7 +347,7 @@ fn rename_entry_0() -> i32 {
     if v6 {
         let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: agile rename <root> <old-id> <new-id>"); } LIT.with(|lit| lit.clone()) };
         let v10: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v7]);
-        let v11: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v10 + "
+        let v11: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v10 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v11
     } else {
@@ -363,7 +363,7 @@ fn rename_entry_0() -> i32 {
         if v17 {
             let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a task id is upper-case letters, digits and -"); } LIT.with(|lit| lit.clone()) };
             let v21: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v18]);
-            let v22: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v21 + "
+            let v22: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v21 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v22
         } else {
@@ -378,7 +378,7 @@ fn rename_entry_0() -> i32 {
             if v26 {
                 let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the new id must start with a letter, so its inl name is a valid identifier"); } LIT.with(|lit| lit.clone()) };
                 let v30: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v27]);
-                let v31: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v30 + "
+                let v31: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v30 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v31
             } else {
@@ -386,7 +386,7 @@ fn rename_entry_0() -> i32 {
                 if v32 {
                     let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the new id equals the old one"); } LIT.with(|lit| lit.clone()) };
                     let v36: Rc<str> = string_concat(&["agile rename ", &*v1, " rejected: ", &*v33]);
-                    let v37: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v36 + "
+                    let v37: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v36 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v37
                 } else {

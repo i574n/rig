@@ -25,11 +25,9 @@
     |: NoRules, index
 
 :~ ^ steps_decoded (~records : record_list) (~index : i32) : steps =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         := kind = field_at records index 0i32
-        ? kind = "edit"
-        ?>
+        ? kind = "edit" ?>
             := files = field_at records index 3i32
             := expectation =
                 ? files = "-" ?> Unchecked |: Expected (decimal_of files, decimal_of (field_at records index 4i32))

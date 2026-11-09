@@ -5,7 +5,7 @@ function Get-KitSpiralScript {
 
 function Resolve-KitSpiralBundle {
     param([string]$CompilerBundle)
-    if (-not $CompilerBundle) { $CompilerBundle = $env:KIT_SPIRAL_BUNDLE }
+    if (-not $CompilerBundle) { $CompilerBundle = ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE) }
     if (-not $CompilerBundle) { $CompilerBundle = Join-Path $PSScriptRoot '../../spiral/apps/compiler/tmp' }
     if (-not (Get-KitSpiralScript $CompilerBundle 'env.ps1')) {
         throw "Spiral compiler bundle not found at $CompilerBundle. Clone https://github.com/i574n/spiral beside this repository or set KIT_SPIRAL_BUNDLE to its apps/compiler/tmp."

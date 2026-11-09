@@ -99,30 +99,45 @@
     (baseline_match : i32) (owner_scope_match : i32) (exit_status : i32) (elapsed_ms : i32)
     : i32
     =
-    ? baseline_match < 1i32 ?> 0i32
-    |? 1i32 < baseline_match ?> 0i32
-    |? owner_scope_match < 1i32 ?> 0i32
-    |? 1i32 < owner_scope_match ?> 0i32
-    |? exit_status < 0i32 ?> 0i32
-    |? elapsed_ms < 0i32 ?> 0i32
+    ? baseline_match < 1i32
+    ?> 0i32
+    |? 1i32 < baseline_match
+    ?> 0i32
+    |? owner_scope_match < 1i32
+    ?> 0i32
+    |? 1i32 < owner_scope_match
+    ?> 0i32
+    |? exit_status < 0i32
+    ?> 0i32
+    |? elapsed_ms < 0i32
+    ?> 0i32
     |: 1i32
 
 :~ workstream_parallel_binding
     (requested_workers : i32) (available_workers : i32) (started : i32) (completed : i32)
     : i32
     =
-    ? requested_workers < 2i32 ?> 0i32
-    |? available_workers < requested_workers ?> 0i32
-    |? started < 1i32 ?> 0i32
-    |? completed < 0i32 ?> 0i32
-    |? started < completed ?> 0i32
+    ? requested_workers < 2i32
+    ?> 0i32
+    |? available_workers < requested_workers
+    ?> 0i32
+    |? started < 1i32
+    ?> 0i32
+    |? completed < 0i32
+    ?> 0i32
+    |? started < completed
+    ?> 0i32
     |: 1i32
 
 :~ workstream_concurrency_binding (owners : i32) (outer_ms : i32) (sum_owner_ms : i32) (max_owner_ms : i32) : i32 =
-    ? owners < 2i32 ?> 0i32
-    |? outer_ms < max_owner_ms ?> 0i32
-    |? sum_owner_ms < outer_ms ?> 0i32
-    |? sum_owner_ms = outer_ms ?> 0i32
+    ? owners < 2i32
+    ?> 0i32
+    |? outer_ms < max_owner_ms
+    ?> 0i32
+    |? sum_owner_ms < outer_ms
+    ?> 0i32
+    |? sum_owner_ms = outer_ms
+    ?> 0i32
     |: 1i32
 
 :~ workstream_completion_binding
@@ -131,32 +146,52 @@
     =
     := partial = passed + failed
     := total = partial + cancelled
-    ? expected < 1i32 ?> 0i32
-    |? started < 0i32 ?> 0i32
-    |? passed < 0i32 ?> 0i32
-    |? failed < 0i32 ?> 0i32
-    |? cancelled < 0i32 ?> 0i32
-    |? receipts < 0i32 ?> 0i32
-    |? started < expected ?> 0i32
-    |? expected < started ?> 0i32
-    |? receipts < expected ?> 0i32
-    |? expected < receipts ?> 0i32
-    |? total = expected ?> 1i32
+    ? expected < 1i32
+    ?> 0i32
+    |? started < 0i32
+    ?> 0i32
+    |? passed < 0i32
+    ?> 0i32
+    |? failed < 0i32
+    ?> 0i32
+    |? cancelled < 0i32
+    ?> 0i32
+    |? receipts < 0i32
+    ?> 0i32
+    |? started < expected
+    ?> 0i32
+    |? expected < started
+    ?> 0i32
+    |? receipts < expected
+    ?> 0i32
+    |? expected < receipts
+    ?> 0i32
+    |? total = expected
+    ?> 1i32
     |: 0i32
 
 :~ workstream_merge_binding
     (receipts : i32) (expected : i32) (baseline_match : i32) (owners_unique : i32) (outputs_verified : i32)
     : i32
     =
-    ? receipts < 1i32 ?> 0i32
-    |? receipts < expected ?> 0i32
-    |? expected < receipts ?> 0i32
-    |? baseline_match < 1i32 ?> 0i32
-    |? 1i32 < baseline_match ?> 0i32
-    |? owners_unique < 1i32 ?> 0i32
-    |? 1i32 < owners_unique ?> 0i32
-    |? outputs_verified < 1i32 ?> 0i32
-    |? 1i32 < outputs_verified ?> 0i32
+    ? receipts < 1i32
+    ?> 0i32
+    |? receipts < expected
+    ?> 0i32
+    |? expected < receipts
+    ?> 0i32
+    |? baseline_match < 1i32
+    ?> 0i32
+    |? 1i32 < baseline_match
+    ?> 0i32
+    |? owners_unique < 1i32
+    ?> 0i32
+    |? 1i32 < owners_unique
+    ?> 0i32
+    |? outputs_verified < 1i32
+    ?> 0i32
+    |? 1i32 < outputs_verified
+    ?> 0i32
     |: 1i32
 
 :~ workstream_merge_authorization_binding
@@ -165,25 +200,41 @@
     : i32
     =
     := completion = workstream_completion_binding expected expected passed failed cancelled receipts
-    ? completion < 1i32 ?> 0i32
-    |? 1i32 < completion ?> 0i32
-    |? passed < expected ?> 0i32
-    |? expected < passed ?> 0i32
-    |? failed < 0i32 ?> 0i32
-    |? 0i32 < failed ?> 0i32
-    |? cancelled < 0i32 ?> 0i32
-    |? 0i32 < cancelled ?> 0i32
+    ? completion < 1i32
+    ?> 0i32
+    |? 1i32 < completion
+    ?> 0i32
+    |? passed < expected
+    ?> 0i32
+    |? expected < passed
+    ?> 0i32
+    |? failed < 0i32
+    ?> 0i32
+    |? 0i32 < failed
+    ?> 0i32
+    |? cancelled < 0i32
+    ?> 0i32
+    |? 0i32 < cancelled
+    ?> 0i32
     |: workstream_merge_binding receipts expected baseline_match owners_unique outputs_verified
 
 :~ workstream_failure_binding (passed : i32) (failed : i32) (cancelled : i32) (merge_attempted : i32) : i32 =
-    ? passed < 0i32 ?> 0i32
-    |? failed < 0i32 ?> 0i32
-    |? cancelled < 0i32 ?> 0i32
-    |? merge_attempted < 0i32 ?> 0i32
-    |? 1i32 < merge_attempted ?> 0i32
-    |? 0i32 < failed ?> ? merge_attempted < 1i32 ?> 1i32 |: 0i32
-    |? 0i32 < cancelled ?> ? merge_attempted < 1i32 ?> 1i32 |: 0i32
-    |? passed < 1i32 ?> 0i32
+    ? passed < 0i32
+    ?> 0i32
+    |? failed < 0i32
+    ?> 0i32
+    |? cancelled < 0i32
+    ?> 0i32
+    |? merge_attempted < 0i32
+    ?> 0i32
+    |? 1i32 < merge_attempted
+    ?> 0i32
+    |? 0i32 < failed
+    ?> ? merge_attempted < 1i32 ?> 1i32 |: 0i32
+    |? 0i32 < cancelled
+    ?> ? merge_attempted < 1i32 ?> 1i32 |: 0i32
+    |? passed < 1i32
+    ?> 0i32
     |: 1i32
 
 :~ workstream_cancel_before_promotion_binding
@@ -191,18 +242,32 @@
     (promoted_after_cancel : i32) (canonical_changes : i32) (staging_discarded : i32)
     : i32
     =
-    ? failure_observed < 1i32 ?> 0i32
-    |? 1i32 < failure_observed ?> 0i32
-    |? siblings_in_flight < 1i32 ?> 0i32
-    |? cancel_requested < 1i32 ?> 0i32
-    |? 1i32 < cancel_requested ?> 0i32
-    |? staged_after_failure < 0i32 ?> 0i32
-    |? siblings_in_flight < staged_after_failure ?> 0i32
-    |? promoted_after_cancel < 0i32 ?> 0i32
-    |? 0i32 < promoted_after_cancel ?> 0i32
-    |? canonical_changes < 0i32 ?> 0i32
-    |? 0i32 < canonical_changes ?> 0i32
-    |? siblings_in_flight < staging_discarded ?> 0i32
-    |? staging_discarded < staged_after_failure ?> 0i32
-    |? staged_after_failure < staging_discarded ?> 0i32
+    ? failure_observed < 1i32
+    ?> 0i32
+    |? 1i32 < failure_observed
+    ?> 0i32
+    |? siblings_in_flight < 1i32
+    ?> 0i32
+    |? cancel_requested < 1i32
+    ?> 0i32
+    |? 1i32 < cancel_requested
+    ?> 0i32
+    |? staged_after_failure < 0i32
+    ?> 0i32
+    |? siblings_in_flight < staged_after_failure
+    ?> 0i32
+    |? promoted_after_cancel < 0i32
+    ?> 0i32
+    |? 0i32 < promoted_after_cancel
+    ?> 0i32
+    |? canonical_changes < 0i32
+    ?> 0i32
+    |? 0i32 < canonical_changes
+    ?> 0i32
+    |? siblings_in_flight < staging_discarded
+    ?> 0i32
+    |? staging_discarded < staged_after_failure
+    ?> 0i32
+    |? staged_after_failure < staging_discarded
+    ?> 0i32
     |: 1i32

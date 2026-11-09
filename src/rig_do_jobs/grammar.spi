@@ -126,7 +126,9 @@
     testing.expect
         (rejection_at records 2i32 = "job start: expected timeout <duration> such as 30s or 5m")
         "start without a timeout"
-    testing.expect (rejection_at records 3i32 = "job: unknown action kill; expected start, wait or stop") "unknown action"
+    testing.expect
+        (rejection_at records 3i32 = "job: unknown action kill; expected start, wait or stop")
+        "unknown action"
     := actions = union_reflection.cases.union_cases_joined action_word "|"
     testing.expect (actions = "start|wait|stop") actions
     testing.expect

@@ -48,8 +48,7 @@
             := child = decimal_u64 (text_or_empty (job_file id "pid"))
             := gone = child = 0u64 || process_alive child = !-
             := _ =
-                ? record.exit_text = "" && gone
-                ?>
+                ? record.exit_text = "" && gone ?>
                     text_written
                         (job_file id "exit")
                         (
@@ -85,10 +84,10 @@
 :~ gate_wait_of (~id : string) : gate_wait =
     ? file_exists (job_file id "after") && not (file_exists (job_file id "after-done"))
     ?> WaitingAfter (sm'.split "\t" (text_or_empty (job_file id "after")) |> array |> am'.index 0i32 |> sm'.trim)
-    |? file_exists (job_file id "window-class")
-    ?>
+    |? file_exists (job_file id "window-class") ?>
         := window = text_or_empty (job_file id "window")
-        ? sm'.starts_with "granted" window ?> NotWaiting
+        ? sm'.starts_with "granted" window
+        ?> NotWaiting
         |: WaitingWindow (sm'.trim (text_or_empty (job_file id "window-class")), window_reason window)
     |?
         file_exists (job_file id "heavy-wrapper.ps1") && not (sm'.contains "Invoke-Heavy: acquired slot" (
@@ -111,7 +110,7 @@
 
 :~ job_summary (~verb : string) (~id : string) : string =
     := state = job_state_now id
-    := head = concat5 "kit job " verb " ok id=" id " state="
+    := head = concat5 "rig job " verb " ok id=" id " state="
     := wait = ? state_settled state ?> NotWaiting |: gate_wait_of id
     := codes =
         state_shown state (wait <> NotWaiting)
@@ -147,20 +146,22 @@
     := word, code, detail = $'rig_job_state::rig_job_state_parts(&*!id)' : string * i32 * string
     state_of_parts word code detail
 
-:~ shared_summary (~verb : string) (~id : string) : string = $'rig_job_summary::rig_job_summary(&*!verb, &*!id)' : string
+:~ shared_summary (~verb : string) (~id : string) : string =
+    $'rig_job_summary::rig_job_summary(&*!verb, &*!id)' : string
 :~ rejected (~message : string) : i32 =
-    stderr_line (concat5 "kit error: job " message "" "" "")
+    stderr_line (concat5 "rig error: job " message "" "" "")
     2i32
 
 := known_job (~id : string) : bool = starts_with id "job-" && directory_exists (job_directory id)
 
 :~ ^ waited (~id : string) (deadline : u64) (~watch : u64) : job_state =
     := state = shared_state id
-    ? state_settled state || now_ms () > deadline || process_alive watch = !- ?> state
+    ? state_settled state || now_ms () > deadline || process_alive watch = !-
+    ?> state
     |:
         sleep_ms 250u64
         waited id deadline watch
 
 :~ watched_caller () : u64 =
-    := inherited = $'std::env::var("KIT_JOB_WATCH").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0)' : u64
+    := inherited = $'std::env::var("RIG_JOB_WATCH").or_else(|_| std::env::var("KIT_JOB_WATCH")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0)' : u64
     ? inherited = 0u64 ?> parent_pid () |: inherited

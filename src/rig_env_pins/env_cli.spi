@@ -25,16 +25,16 @@
     testing.expect (shadowed.code = 1i32) (run_text shadowed)
     shows shadowed.stdout "tool shadowed: "
     shows shadowed.stdout "comes first on PATH"
-    shows shadowed.stderr "kit env check drift pins=1 drifted=1"
+    shows shadowed.stderr "rig env check drift pins=1 drifted=1"
     := held = env_call root (Arg (pin root "tool" "a", NoArgs))
     testing.expect (held.code = 0i32) (run_text held)
     shows held.stdout "tool ok "
-    shows held.stderr "kit env check ok pins=1 drifted=0"
+    shows held.stderr "rig env check ok pins=1 drifted=0"
     := elsewhere = env_call root (Arg (pin root "tool" "c", NoArgs))
     shows elsewhere.stdout "tool unpinned: PATH finds "
     := missing = env_call root (Arg (pin root "nosuch" "a", Arg (pin root "tool" "a", NoArgs)))
     shows missing.stdout "nosuch missing: no nosuch on PATH"
-    shows missing.stderr "kit env check drift pins=2 drifted=1"
+    shows missing.stderr "rig env check drift pins=2 drifted=1"
     fixture_root_remove root
 
 ///> rust

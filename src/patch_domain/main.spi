@@ -1,4 +1,3 @@
-
 := main () : i32 =
     global "#![allow(dead_code)]"
     := probe = context.context "." "inl p () = PatchExact (\"a.txt\", \"old\", \"new\")\n"

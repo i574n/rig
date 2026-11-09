@@ -25,7 +25,7 @@
         task["progress"].as_u64().unwrap_or(0), task["last_note"].as_str().unwrap_or(""), \
         tab = char::from(9u8))).collect::<Vec<_>>().join("\n"))).unwrap_or_else(|| String::from("error: agile list \
         printed no tasks")), Ok(output) => format\!("error: {}", \
-        String::from_utf8_lossy(&output.stderr).trim().trim_start_matches("kit error: ")), \
+        String::from_utf8_lossy(&output.stderr).trim().trim_start_matches("rig error: ")), \
         Err(error) => format\!("error: agile list: {error}") }) }' : string
 
 :~ item_of (~items : string) (~id : string) : string =

@@ -50,10 +50,14 @@
     (policy : idle_policy) (live : u64) (idle_since : u64) (now : u64) (home : host_home) (owner_present : bool)
     : host_step
     =
-    ? owner_present = !- ?> (? live > 0u64 ?> HostDraining |: HostIdleExit)
-    |? live > 0u64 ?> KeepServing
-    |? home = HomeGone ?> HostIdleExit
-    |? idle_reached policy (now - idle_since) ?> HostIdleExit
+    ? owner_present = !-
+    ?> (? live > 0u64 ?> HostDraining |: HostIdleExit)
+    |? live > 0u64
+    ?> KeepServing
+    |? home = HomeGone
+    ?> HostIdleExit
+    |? idle_reached policy (now - idle_since)
+    ?> HostIdleExit
     |: KeepServing
 
 :~ host_claim_of (recorded : u64) (own : u64) (recorded_alive : bool) : host_claim =
@@ -103,8 +107,10 @@
 :~ request_id (~name : string) : string = sm'.trim_end_suffix (request_suffix ()) name
 
 :~ supervisor_wait_of (pid : u64) (now : u64) (deadline : u64) : option supervisor_wait =
-    ? pid <> 0u64 ?> Some (SupervisorUp pid)
-    |? now >= deadline ?> Some SupervisorLate
+    ? pid <> 0u64
+    ?> Some (SupervisorUp pid)
+    |? now >= deadline
+    ?> Some SupervisorLate
     |: None
 
 := unset () : idle_policy = idle_policy_of ""

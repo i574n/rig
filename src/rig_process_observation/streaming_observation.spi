@@ -34,12 +34,16 @@
 
 :~ process_receipt_policy_export (outcome_code : i32) (field_code : i32) : i32 =
     ? field_code = 0i32 ?>
-        ? outcome_code = 0i32 ?> 0i32
-        |? outcome_code = 3i32 ?> 2i32
-        |? outcome_code = 4i32 ?> 3i32
+        ? outcome_code = 0i32
+        ?> 0i32
+        |? outcome_code = 3i32
+        ?> 2i32
+        |? outcome_code = 4i32
+        ?> 3i32
         |: 1i32
     |? field_code = 1i32 ?>
-        ? outcome_code = 3i32 || outcome_code = 4i32 || outcome_code = 5i32 ?> 1i32
+        ? outcome_code = 3i32 || outcome_code = 4i32 || outcome_code = 5i32
+        ?> 1i32
         |: 0i32
     |: -1i32
 
@@ -158,7 +162,7 @@
             let signal = match observation.termination { ProcessTermination::Signaled(signal) => signal.to_string(), _ => "none".to_owned() };
             let timeout = i32::from(observation.termination == ProcessTermination::TimedOut);
             let (cwd, program, env_names) = process_receipt_command_fields(command);
-            println!("kit process-exit receipt label={label} wrapper_status={} child_exit={} signal={} timeout={} stderr_digest={} retryability={} cwd={:?} program={:?} env_names={} elapsed_ms={} stdout_bytes={} stderr_bytes={}", process_receipt_status_name(wrapper_status), child_exit, signal, timeout, process_receipt_digest(&observation.stderr), process_receipt_retry_name(retryability), cwd, program, env_names, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len());
+            println!("rig process-exit receipt label={label} wrapper_status={} child_exit={} signal={} timeout={} stderr_digest={} retryability={} cwd={:?} program={:?} env_names={} elapsed_ms={} stdout_bytes={} stderr_bytes={}", process_receipt_status_name(wrapper_status), child_exit, signal, timeout, process_receipt_digest(&observation.stderr), process_receipt_retry_name(retryability), cwd, program, env_names, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len());
         }
 
         fn emit_process_error_receipt(command: &std::process::Command, label: &str, elapsed_ms: u64, error: &str) {
@@ -166,7 +170,7 @@
             let wrapper_status = rig_process_receipt_policy_binding(outcome, 0);
             let retryability = rig_process_receipt_policy_binding(outcome, 1);
             let (cwd, program, env_names) = process_receipt_command_fields(command);
-            println!("kit process-exit receipt label={label} wrapper_status={} child_exit=none signal=none timeout=0 stderr_digest={} retryability={} cwd={:?} program={:?} env_names={} elapsed_ms={} stdout_bytes=0 stderr_bytes={}", process_receipt_status_name(wrapper_status), process_receipt_digest(error.as_bytes()), process_receipt_retry_name(retryability), cwd, program, env_names, elapsed_ms, error.len());
+            println!("rig process-exit receipt label={label} wrapper_status={} child_exit=none signal=none timeout=0 stderr_digest={} retryability={} cwd={:?} program={:?} env_names={} elapsed_ms={} stdout_bytes=0 stderr_bytes={}", process_receipt_status_name(wrapper_status), process_receipt_digest(error.as_bytes()), process_receipt_retry_name(retryability), cwd, program, env_names, elapsed_ms, error.len());
         }
 
         pub fn run_bounded_receipted_observed(
@@ -222,7 +226,7 @@
                 ));
             }
             println!(
-                "kit process plan={label} status=passed termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={} streamed=true input_bytes={}",
+                "rig process plan={label} status=passed termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={} streamed=true input_bytes={}",
                 observation.termination,
                 observation.elapsed_ms,
                 observation.stdout.len(),

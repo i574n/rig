@@ -11,8 +11,7 @@
 :~ ^ counted_names (words : list string) (found : list string) : list string =
     ?= words ?|
     | word :: value :: rest =>
-        ? word = flag_word FlagCount
-        ?>
+        ? word = flag_word FlagCount ?>
             := name, _ = split_pair value "="
             counted_names rest (name :: found)
         |: counted_names (value :: rest) found
@@ -21,8 +20,7 @@
 :~ ^ stray_name (names : list string) (words : list string) : string =
     ?= words ?|
     | word :: value :: rest =>
-        ? word = flag_word FlagCountIn || word = flag_word FlagInSet
-        ?>
+        ? word = flag_word FlagCountIn || word = flag_word FlagInSet ?>
             := name, _ = split_pair value "="
             ? listm'.exists' (\ (counted : string) => counted = name) names
             ?> stray_name names rest
@@ -49,7 +47,7 @@
     := header = $'rig_log_counts::rig_sequence_counts_header()' : string
     := table = header ++# "\n" ++# found.text
     := receipt =
-        "kit table sequences ok files="
+        "rig table sequences ok files="
         ++# sm'.format (listm.length files : i32)
         ++# " sections="
         ++# sm'.format found.sections

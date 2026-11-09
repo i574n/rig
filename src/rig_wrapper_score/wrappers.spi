@@ -3,8 +3,7 @@
 :~ listed_files (~root : string) : option (list string) =
     := listing = [ "-C"; root; "ls-files"; "--cached"; "--others"; "--exclude-standard"; "--"; "*.spi"; "*.spir" ]
     := run = process.captured_by "git" listing !-
-    ? run.ran && run.code = 0i32
-    ?>
+    ? run.ran && run.code = 0i32 ?>
         := lines = sm'.split_list "\n" (sm'.replace "\r" "" run.stdout) |> listm.map sm'.trim
         Some (lines |> listm'.filter (\ (l : string) => l <> ""))
     |: None
@@ -38,7 +37,7 @@
     := shown = \ (s : scored_row) => console.write_line s.line
     ranked |> listm'.take_ top |> listm.iter shown
     := summary =
-        "kit standards wrappers files="
+        "rig standards wrappers files="
         ++# sm'.show (listm.length files : i32)
         ++# " wrappers="
         ++# sm'.show (listm.length ranked : i32)
@@ -62,10 +61,10 @@
         ?= listed_files root ?|
         | Some files => wrappers_listed root files (top_flag rest 20i32)
         | None =>
-            console.write_error_line ("kit error: standards --wrappers: git could not list " ++# root)
+            console.write_error_line ("rig error: standards --wrappers: git could not list " ++# root)
             2i32
     | _ =>
-        console.write_error_line "kit error: usage: standards --wrappers <repo> [--top n]"
+        console.write_error_line "rig error: usage: standards --wrappers <repo> [--top n]"
         2i32
 
 := main () : i32 =

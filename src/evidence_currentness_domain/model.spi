@@ -69,8 +69,10 @@
     | WindowsPublicBinary => "kit.exe"
 
 :~ evidence_public_binary_binding (unix : i32) (windows : i32) : string =
-    ? unix = 1i32 && windows = 0i32 ?> public_binary_name UnixPublicBinary
-    |? unix = 0i32 && windows = 1i32 ?> public_binary_name WindowsPublicBinary
+    ? unix = 1i32 && windows = 0i32
+    ?> public_binary_name UnixPublicBinary
+    |? unix = 0i32 && windows = 1i32
+    ?> public_binary_name WindowsPublicBinary
     |: ""
 
 ///> rust

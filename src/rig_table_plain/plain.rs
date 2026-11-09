@@ -722,7 +722,7 @@ fn plain_query_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
             if v41 {
                 let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
                 let v45: Rc<str> = std::rc::Rc::<str>::from((v17).first().map(|header| header.iter().map(|item| &**item).collect::<Vec<_>>().join(&*v44)).unwrap_or_default().as_str());
-                let v48: Rc<str> = string_concat(&["kit error: table unknown columns: ", &*v40, " (header: ", &*v45, ")"]);
+                let v48: Rc<str> = string_concat(&["rig error: table unknown columns: ", &*v40, " (header: ", &*v45, ")"]);
                 eprintln!("{}", v48);
                 2i32
             } else {
@@ -756,7 +756,7 @@ fn plain_query_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
                         let v74: i32 = method16(v50, v53, v73);
                         let v75: Rc<str> = std::rc::Rc::<str>::from((v72).to_string().as_str());
                         let v78: Rc<str> = std::rc::Rc::<str>::from((v74).to_string().as_str());
-                        let v80: Rc<str> = string_concat(&["kit table query ok total=", &*v75, " matched=", &*v78, " groups=", &*v67, " shown=", &*v70]);
+                        let v80: Rc<str> = string_concat(&["rig table query ok total=", &*v75, " matched=", &*v78, " groups=", &*v67, " shown=", &*v70]);
                         println!("{}", v80);
                         ()
                     };
@@ -782,7 +782,7 @@ fn plain_query_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
                         let v98: Rc<str> = std::rc::Rc::<str>::from((v94).to_string().as_str());
                         let v101: Rc<str> = std::rc::Rc::<str>::from((v95).to_string().as_str());
                         let v104: Rc<str> = std::rc::Rc::<str>::from((v96).to_string().as_str());
-                        let v105: Rc<str> = string_concat(&["kit table query ok total=", &*v98, " matched=", &*v101, " shown=", &*v104]);
+                        let v105: Rc<str> = string_concat(&["rig table query ok total=", &*v98, " matched=", &*v101, " shown=", &*v104]);
                         println!("{}", v105);
                         ()
                     };
@@ -792,7 +792,7 @@ fn plain_query_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
         }
         US0::US0_TableUnreadable(v15) => {
             let v15: Rc<str> = v15;
-            let v16: Rc<str> = string_concat(&["kit error: table ", &*v15]);
+            let v16: Rc<str> = string_concat(&["rig error: table ", &*v15]);
             eprintln!("{}", v16);
             2i32
         }

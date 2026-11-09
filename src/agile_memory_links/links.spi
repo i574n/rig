@@ -81,7 +81,8 @@
             (tally_with counted (id_finding kind slug id (task_status state id)))
 
 :~ ^ links_checked (~names : string) (~slug : string) (~links : string) (tally : links_tally) : links_tally =
-    ? links = "" ?> tally
+    ? links = ""
+    ?> tally
     |: links_checked names slug (line_rest links) (tally_with tally (link_finding_of names slug (line_head links)))
 
 := slug_of (~text : string) (~file : string) : string =
@@ -89,7 +90,8 @@
     ? named = "" ?> $'std::rc::Rc::<str>::from((!file).trim_end_matches(".md"))' : string |: named
 
 :~ ^ names_from (~directory : string) (~files : string) (~names : string) : string =
-    ? files = "" ?> names
+    ? files = ""
+    ?> names
     |:
         := file = line_head files
         := slug = slug_of (text_of (joined directory file)) file
@@ -128,7 +130,8 @@
 
 :~ ^ cites_in (~names : string) (~id : string) (~line : string) (offset : i32) (tally : links_tally) : links_tally =
     := at = memory_word_at line offset
-    ? at < 0i32 ?> tally
+    ? at < 0i32
+    ?> tally
     |: cites_in names id line (at + 7i32) (tally_with tally (memory_cite_finding names id (slug_from line (at + 7i32))))
 
 :~ ^ notes_checked (~names : string) (~state : string) (offset : i32) (tally : links_tally) : links_tally =
@@ -179,9 +182,8 @@
 
 :~ links_checked (~root : string) (flags : links_flags) : i32 =
     := directory = flags.memory
-    ? directory = "" || directory_exists directory = !-
-    ?>
-        stderr_line "kit error: agile links rejected: --memory <dir> must name a memory directory"
+    ? directory = "" || directory_exists directory = !- ?>
+        stderr_line "rig error: agile links rejected: --memory <dir> must name a memory directory"
         2i32
     |:
         := state_dir = joined root "state"
@@ -213,8 +215,7 @@
             )
         := report = tally.report
         := _ =
-            ? flags.json
-            ?>
+            ? flags.json ?>
                 stdout_line (
                     "{\"findings\":["
                     ++# links_json report
@@ -224,7 +225,7 @@
                 )
             |:
                 := _ = ? report <> "" ?> stdout_line (sm'.trim_end [] report) |: ()
-                stdout_line ("kit agile links ok " ++# counts)
+                stdout_line ("rig agile links ok " ++# counts)
         ? tally.dangling = 0i32 ?> 0i32 |: 1i32
 
 :~ links_run () : i32 =

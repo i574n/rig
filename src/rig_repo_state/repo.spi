@@ -57,8 +57,7 @@
 := is_repository (~root : string) : bool = $'std::path::Path::new(&*!root).join(".git").exists()' : bool
 
 :~ repo_state_of (~root : string) (depth : u64) : i32 =
-    ? is_repository root
-    ?>
+    ? is_repository root ?>
         := status = git_output root "status\n--porcelain=v2\n--branch\n--untracked-files=all"
         := last = git_output root "log\n-1\n--format=%h %cI %s"
         := tally = new_tally ()
@@ -66,7 +65,7 @@
         := branch = header_value status "# branch.head "
         := ab = header_value status "# branch.ab "
         := head =
-            "kit repo state ok root=" ++# root ++# " branch=" ++# branch ++# (" ab=" ++# (? ab = "" ?> "none" |: ab))
+            "rig repo state ok root=" ++# root ++# " branch=" ++# branch ++# (" ab=" ++# (? ab = "" ?> "none" |: ab))
         := totals =
             " staged="
             ++# decimal_text (tally_total tally 0u64)
@@ -85,7 +84,7 @@
         ? areas <> "" ?> stdout_line areas
         0i32
     |:
-        stdout_line ("kit repo state rejected root=" ++# root ++# " reason=not-a-git-repository")
+        stdout_line ("rig repo state rejected root=" ++# root ++# " reason=not-a-git-repository")
         2i32
 
 :~ ^ states_from (index : i32) (count : i32) (depth : u64) (worst : i32) : i32 =
@@ -95,9 +94,10 @@
     |: worst
 
 :~ repo_run () : i32 =
-    ? argument 2i32 = "state" && argument_count () > 3i32 ?> states_from 3i32 (argument_count ()) 2u64 0i32
+    ? argument 2i32 = "state" && argument_count () > 3i32
+    ?> states_from 3i32 (argument_count ()) 2u64 0i32
     |:
-        stdout_line "kit error: repo usage: repo state <root> [<root>...]"
+        stdout_line "rig error: repo usage: repo state <root> [<root>...]"
         2i32
 
 := main () : i32 =

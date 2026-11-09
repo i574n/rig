@@ -113,24 +113,23 @@
     := baseline_path = ? given = "" || file_system.file_exists given ?> given |: root </> given
     ? root = "" || file_system.directory_exists root |> not ?>
         console.write_error_line (
-            "kit error: lint usage: lint macros <root> [<path>...] [--baseline <rows|file.spi>] [--tsv]"
+            "rig error: lint usage: lint macros <root> [<path>...] [--baseline <rows|file.spi>] [--tsv]"
             ++# " [--write-baseline <file.spi>]"
         )
         2i32
     |? baseline_path <> "" && file_system.file_exists baseline_path |> not ?>
-        console.write_error_line ("kit error: lint macros: no baseline file at " ++# given)
+        console.write_error_line ("rig error: lint macros: no baseline file at " ++# given)
         2i32
     |:
         := raw = ? baseline_path = "" ?> "" |: file_system.read_all_text baseline_path
         := typed = sm'.ends_with ".spi" baseline_path
         := baseline = ? typed ?> $'rig_lint_baseline::rig_lint_baseline_rows(&*!raw)' : string |: raw
         := write_to = args.write_baseline
-        ? write_to <> ""
-        ?>
+        ? write_to <> "" ?>
             := every = lint_report root (listed_paths args.paths) "" !-
             := rows = ? baseline <> "" ?> baseline |: sm'.concat_list "\n" every.rows
             := counted = $'rig_lint_baseline::rig_lint_baseline_write(&*!write_to, &*!rows)' : string
-            console.write_line ("kit lint baseline written " ++# write_to ++# "  rows " ++# counted)
+            console.write_line ("rig lint baseline written " ++# write_to ++# "  rows " ++# counted)
             0i32
         |:
             := report = lint_report root (listed_paths args.paths) baseline args.tsv

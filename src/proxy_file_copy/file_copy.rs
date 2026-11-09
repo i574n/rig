@@ -31,7 +31,7 @@ fn file_copy_outcome_1(mut v0: i32, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc
                 let v12: Rc<str> = std::rc::Rc::<str>::from(rig_rust_std_fs::copy_regular_atomic_preserve(std::path::Path::new(&*v10), std::path::Path::new(&*v11)).err().unwrap_or_default().as_str());
                 let v13: bool = &*v12 == "";
                 if v13 {
-                    let v17: Rc<str> = string_concat(&["kit proxy fs-copy ok source=", &*v10, " target=", &*v11, " bytes="]);
+                    let v17: Rc<str> = string_concat(&["rig proxy fs-copy ok source=", &*v10, " target=", &*v11, " bytes="]);
                     let v18: u64 = std::fs::symlink_metadata(&*v11).map(|meta| meta.len()).unwrap_or(0);
                     let v19: Rc<str> = std::rc::Rc::<str>::from((v18).to_string());
                     let v22: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v4);

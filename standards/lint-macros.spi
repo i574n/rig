@@ -768,14 +768,20 @@ inl lint_known_784 () = LintKnown ("product_diff_contract/terminal.spi", "global
 inl lint_known_785 () = LintKnown ("proxy_directory_listing/directory_listing.spi", "listing_problem", "block")
 inl lint_known_786 () = LintKnown ("proxy_directory_listing/directory_listing.spi", "listed_names", "block")
 inl lint_known_787 () = LintKnown ("proxy_directory_listing/directory_listing.spi", "line_breaks", "cast")
-inl lint_known_788 () = LintKnown ("proxy_directory_listing/directory_listing.spi", "directory_listing_outcome", "arith")
-inl lint_known_789 () = LintKnown ("proxy_directory_listing/directory_listing.spi", "directory_listing_outcome", "arith")
-inl lint_known_790 () = LintKnown ("proxy_failure_classification/failure_classification.spi", "child_exit_digits", "block")
-inl lint_known_791 () = LintKnown ("proxy_failure_classification/failure_classification.spi", "observed_match_digits", "block")
-inl lint_known_792 () = LintKnown ("proxy_failure_classification/failure_classification.spi", "proxy_flags_follow", "block")
+inl lint_known_788 () =
+    LintKnown ("proxy_directory_listing/directory_listing.spi", "directory_listing_outcome", "arith")
+inl lint_known_789 () =
+    LintKnown ("proxy_directory_listing/directory_listing.spi", "directory_listing_outcome", "arith")
+inl lint_known_790 () =
+    LintKnown ("proxy_failure_classification/failure_classification.spi", "child_exit_digits", "block")
+inl lint_known_791 () =
+    LintKnown ("proxy_failure_classification/failure_classification.spi", "observed_match_digits", "block")
+inl lint_known_792 () =
+    LintKnown ("proxy_failure_classification/failure_classification.spi", "proxy_flags_follow", "block")
 inl lint_known_793 () = LintKnown ("proxy_failure_classification/failure_classification.spi", "proxy_words", "block")
 inl lint_known_794 () = LintKnown ("proxy_failure_classification/failure_classification.spi", "joined", "block")
-inl lint_known_795 () = LintKnown ("proxy_failure_classification/failure_classification.spi", "proxy_corrected_command", "arith")
+inl lint_known_795 () =
+    LintKnown ("proxy_failure_classification/failure_classification.spi", "proxy_corrected_command", "arith")
 inl lint_known_796 () = LintKnown ("proxy_file_copy/file_copy.spi", "copy_problem", "block")
 inl lint_known_797 () = LintKnown ("proxy_file_reading/file_reading.spi", "open_problem", "block")
 inl lint_known_798 () = LintKnown ("proxy_file_reading/file_reading.spi", "regular_file_bytes", "block")
@@ -852,8 +858,10 @@ inl lint_known_868 () = LintKnown ("state_receipt_codec_model/operators.spi", "(
 inl lint_known_869 () = LintKnown ("state_receipt_codec_model/operators.spi", "(%.)", "arith")
 inl lint_known_870 () = LintKnown ("state_receipt_codec_model/operators.spi", "(=.)", "arith")
 inl lint_known_871 () = LintKnown ("state_receipt_fingerprint_agile_probe/main.spi", "rejected_exit", "flow")
-inl lint_known_872 () = LintKnown ("state_receipt_fingerprint_domain/bridge.spi", "fingerprint_low_step_binding", "flow")
-inl lint_known_873 () = LintKnown ("state_receipt_fingerprint_domain/bridge.spi", "fingerprint_high_step_binding", "block")
+inl lint_known_872 () =
+    LintKnown ("state_receipt_fingerprint_domain/bridge.spi", "fingerprint_low_step_binding", "flow")
+inl lint_known_873 () =
+    LintKnown ("state_receipt_fingerprint_domain/bridge.spi", "fingerprint_high_step_binding", "block")
 inl lint_known_874 () = LintKnown ("state_receipt_fingerprint_policy_probe/main.spi", "pair_exit", "flow")
 inl lint_known_875 () = LintKnown ("state_receipt_parser_probe/main.spi", "parse_exit", "block")
 inl lint_known_876 () = LintKnown ("state_receipt_serializer_probe/main.spi", "serialize_exit", "block")

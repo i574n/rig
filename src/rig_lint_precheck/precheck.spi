@@ -27,8 +27,10 @@
     ?= chars ?|
     | [] => count
     | c :: rest =>
-        ? escaped ?> quotes_from rest !- count
-        |? c = '\\' ?> quotes_from rest !+ count
+        ? escaped
+        ?> quotes_from rest !- count
+        |? c = '\\'
+        ?> quotes_from rest !+ count
         |? c = '"' ?> quotes_from rest !- (count + 1i32)
         |: quotes_from rest !- count
 
@@ -68,13 +70,12 @@
     findings |> listm.iter (\ (f : precheck_finding) => console.write_line (finding_line f))
     := count : i32 = listm.length findings
     := files_count : i32 = listm.length files
-    ? count = 0i32
-    ?>
-        console.write_line ("kit lint precheck ok files=" ++# sm'.show files_count ++# " findings=0")
+    ? count = 0i32 ?>
+        console.write_line ("rig lint precheck ok files=" ++# sm'.show files_count ++# " findings=0")
         0i32
     |:
         := totals = "files=" ++# sm'.show files_count ++# " findings=" ++# sm'.show count
-        console.write_line ("kit lint precheck refused: " ++# totals)
+        console.write_line ("rig lint precheck refused: " ++# totals)
         1i32
 
 ///> rust

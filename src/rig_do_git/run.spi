@@ -53,14 +53,16 @@
 :~ init_run (~root : string) (~repo : string) (~state : git_tally) : git_tally =
     := outcome = git_run root "" (concat5 "init\n-q\n-b\nmain\n" repo "" "" "") ""
     := head = concat5 "git init " repo "" "" ""
-    ? succeeded outcome ?> reported ({ state ?| initialized = state.initialized + 1u64 }) head !-
+    ? succeeded outcome
+    ?> reported ({ state ?| initialized = state.initialized + 1u64 }) head !-
     |: reported state (failure_row head outcome) !+
 
 :~ agent_session () : bool =
     env.get_environment_variable "AI_AGENT" <> "" || env.get_environment_variable "CLAUDECODE" <> ""
 
 :~ ^ created_before (~records : record_list) (~repo : string) (~index : i32) (~until : i32) : bool =
-    ? index >= until ?> !-
+    ? index >= until
+    ?> !-
     |:
         ?= git_parsed records index ?|
         | GitParsed (GitInit made) => made = repo || created_before records repo (index + 1i32) until
@@ -71,15 +73,15 @@
     : git_tally
     =
     := head = concat5 "git commit " repo "  " message ""
-    ? agent_session () && not created
-    ?>
+    ? agent_session () && not created ?>
         := refusal = "  refused: an agent session commits only to a repo this program created with git init; "
         reported state (concat5 head refusal "the user reviews, stages and commits their own repos" "" "") !+
     |:
         := added = git_run root repo "add\n-A" ""
         ? succeeded added ?>
             := outcome = git_run root repo (concat5 "commit\n-q\n-m\n" message "" "" "") date
-            ? succeeded outcome ?> reported ({ state ?| committed = state.committed + 1u64 }) head !-
+            ? succeeded outcome
+            ?> reported ({ state ?| committed = state.committed + 1u64 }) head !-
             |: reported state (failure_row head outcome) !+
         |: reported state (failure_row head added) !+
 
@@ -166,8 +168,7 @@
         ?> concat5 "commits " (decimal_text state.commits) "  matches " (decimal_text state.matches) ""
         |: ""
     := status =
-        ? state.statuses > 0u64
-        ?>
+        ? state.statuses > 0u64 ?>
             concat5
                 "repos "
                 (decimal_text state.repos)

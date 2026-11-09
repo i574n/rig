@@ -32,30 +32,40 @@
     | ResumeWhen v => v
 
 :~ kind_of (~word : string) (~value : string) : option wait_kind =
-    ? value = "" ?> None
-    |? word = "train" ?> Some (WaitsTrain value)
-    |? word = "item" ?> Some (WaitsItem value)
-    |? word = "lane" ?> Some (WaitsLane value)
-    |? word = "user" ?> Some (WaitsUser value)
-    |? word = "when" ?> Some (ResumeWhen value)
+    ? value = ""
+    ?> None
+    |? word = "train"
+    ?> Some (WaitsTrain value)
+    |? word = "item"
+    ?> Some (WaitsItem value)
+    |? word = "lane"
+    ?> Some (WaitsLane value)
+    |? word = "user"
+    ?> Some (WaitsUser value)
+    |? word = "when"
+    ?> Some (ResumeWhen value)
     |: None
 
 :~ kind_of_flag (~flag : string) : option wait_kind =
     := at = sm'.index_of ":" flag
-    ? at <= 0i32 ?> None
+    ? at <= 0i32
+    ?> None
     |: kind_of (sm'.substring 0i32 at flag) (sm'.substring (at + 1i32) (sm'.length flag - at - 1i32) flag)
 
 :~ ^ nth_quoted (~text : string) (n : i32) : string =
     := start_at = sm'.index_of "\"" text
     := after = ? start_at < 0i32 ?> "" |: sm'.substring (start_at + 1i32) (sm'.length text - start_at - 1i32) text
     := close = sm'.index_of "\"" after
-    ? start_at < 0i32 || close < 0i32 ?> ""
-    |? n = 0i32 ?> sm'.substring 0i32 close after
+    ? start_at < 0i32 || close < 0i32
+    ?> ""
+    |? n = 0i32
+    ?> sm'.substring 0i32 close after
     |: nth_quoted (sm'.substring (close + 1i32) (sm'.length after - close - 1i32) after) (n - 1i32)
 
 :~ wait_of_line (~line : string) : option task_wait =
     := at = sm'.index_of (row_marker ()) line
-    ? at < 0i32 ?> None
+    ? at < 0i32
+    ?> None
     |:
         := rest = sm'.substring (at + 3i32) (sm'.length line - at - 3i32) line
         := item = nth_quoted rest 0i32

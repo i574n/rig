@@ -14,7 +14,14 @@
                 | Waiting => "waited " ++# (number_text ((now - row.start_ms) / 60000u64)) ++# "m"
                 | Held => (number_text (minutes_left row.until_ms now)) ++# "m left"
             stdout_line (
-                row.id ++# "  " ++# (class_word row.kind) ++# "  " ++# (state_word row.state) ++# "  " ++# timing ++# "  "
+                row.id
+                ++# "  "
+                ++# class_word row.kind
+                ++# "  "
+                ++# state_word row.state
+                ++# "  "
+                ++# timing
+                ++# "  "
                 ++# row.label
             )
             shown_rows (other_rows rows) now (count + 1u64)
@@ -28,7 +35,7 @@
     := _ = ? holders = "" ?> () |: stdout_line holders
     := slots = $'(!holders).lines().count() as u64' : u64
     stdout_line (
-        "kit window list ok windows=" ++# (number_text count) ++# " free_mb=" ++# (number_text (free_mb ())) ++# (
+        "rig window list ok windows=" ++# (number_text count) ++# " free_mb=" ++# (number_text (free_mb ())) ++# (
         " heavy_slots=" ++# (number_text slots)))
     0i32
 
@@ -54,10 +61,10 @@
         ? terms = "" ?>
             := shared = shared_with rows ""
             := note = ? shared = "" ?> "" |: " (shares with " ++# shared ++# ")"
-            stdout_line ("kit window check ok class=" ++# (class_word wanted) ++# " free" ++# note)
+            stdout_line ("rig window check ok class=" ++# (class_word wanted) ++# " free" ++# note)
             0i32
         |:
-            stdout_line ("kit window check blocked class=" ++# (class_word wanted) ++# " " ++# terms)
+            stdout_line ("rig window check blocked class=" ++# (class_word wanted) ++# " " ++# terms)
             1i32
 
 :~ class_admitted (wanted : window_class) : bool =

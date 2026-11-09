@@ -310,7 +310,7 @@ fn requirements_8(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: bool, mut v3: u64) -
         } else {
             let v24: bool = v20 == -3i32 ;
             if v24 {
-                let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit test metadata must be a table\n"); } LIT.with(|lit| lit.clone()) };
+                let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig test metadata must be a table\n"); } LIT.with(|lit| lit.clone()) };
                 v25
             } else {
                 let v26: bool = v20 == -4i32 ;
@@ -413,7 +413,7 @@ fn spiral_main() -> i32 {
             let v27: Rc<str> = value_from_6(v24, v25, v26.clone(), v21.clone());
             let v28: bool = &*v27 == "";
             let v31: Rc<str> = if v28 {
-                let v29: Rc<str> = std::env::var("KIT_SPIRAL_COMPILE").map(std::rc::Rc::<str>::from).unwrap_or_default();
+                let v29: Rc<str> = std::env::var("RIG_SPIRAL_COMPILE").or_else(|_| std::env::var("KIT_SPIRAL_COMPILE")).map(std::rc::Rc::<str>::from).unwrap_or_default();
                 v29.clone()
             } else {
                 let v30: Rc<str> = std::fs::canonicalize(&*v27).ok().filter(|p| p.is_file()).and_then(|p| p.to_str().map(std::rc::Rc::<str>::from)).unwrap_or_default();
@@ -573,7 +573,7 @@ fn spiral_main() -> i32 {
                                                 std::io::Write::write_all(&mut std::io::stdout(),v120.as_bytes()).unwrap();
                                                 0i32
                                             } else {
-                                                let v121: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v43).join("src")); command.args(v112.split(char::from(0u8))); if v31.len() > 0 { command.env("KIT_SPIRAL_COMPILE", &*v31); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,v37) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
+                                                let v121: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v43).join("src")); command.args(v112.split(char::from(0u8))); if v31.len() > 0 { command.env("RIG_SPIRAL_COMPILE", &&*v31).env("KIT_SPIRAL_COMPILE", &*v31); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,v37) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
                                                 v121
                                             }
                                         } else {
@@ -612,7 +612,7 @@ fn spiral_main() -> i32 {
                                                     std::io::Write::write_all(&mut std::io::stdout(),v145.as_bytes()).unwrap();
                                                     0i32
                                                 } else {
-                                                    let v146: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v43).join("src")); command.args(v137.split(char::from(0u8))); if v31.len() > 0 { command.env("KIT_SPIRAL_COMPILE", &*v31); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,v37) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
+                                                    let v146: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v43).join("src")); command.args(v137.split(char::from(0u8))); if v31.len() > 0 { command.env("RIG_SPIRAL_COMPILE", &&*v31).env("KIT_SPIRAL_COMPILE", &*v31); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,v37) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
                                                     v146
                                                 };
                                                 let v148: bool = v147 == 0i32;
@@ -650,7 +650,7 @@ fn spiral_main() -> i32 {
                                                         std::io::Write::write_all(&mut std::io::stdout(),v168.as_bytes()).unwrap();
                                                         0i32
                                                     } else {
-                                                        let v169: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v43).join("src")); command.args(v160.split(char::from(0u8))); if v31.len() > 0 { command.env("KIT_SPIRAL_COMPILE", &*v31); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,v37) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
+                                                        let v169: i32 = { let mut command=std::process::Command::new("cargo"); command.current_dir(std::path::Path::new(&*v43).join("src")); command.args(v160.split(char::from(0u8))); if v31.len() > 0 { command.env("RIG_SPIRAL_COMPILE", &&*v31).env("KIT_SPIRAL_COMPILE", &*v31); } if std::env::var_os("CARGO_BUILD_JOBS").is_none() { command.env("CARGO_BUILD_JOBS", "2"); } if std::env::var_os("RUST_TEST_THREADS").is_none() { command.env("RUST_TEST_THREADS", "1"); } match rig_process::run_bounded(&mut command,v37) { Ok(status) => status.code().unwrap_or(1), Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); 2 } } };
                                                         v169
                                                     }
                                                 }

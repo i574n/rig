@@ -22,8 +22,8 @@
     hides out "MAIN-B"
     shows out "== recent jobs (job list)"
     shows out "== machine windows (window list)"
-    shows out "kit window list ok windows=0"
-    shows out "kit resume ok sections=3 team=kit"
+    shows out "rig window list ok windows=0"
+    shows out "rig resume ok sections=3 team=kit"
     shows (succeeded (resume_call root (Arg (fixture_text_of root, NoArgs)))) "MAIN-B"
     rejected_with (resume_call root NoArgs) 2i32 "usage: kit resume <backlog-root>"
     fixture_root_remove root
@@ -48,7 +48,7 @@
     same (line_starting out "2026-10-21T") "2026-10-21T10:00Z  MAIN-B  newer note second line"
     shows out "2026-10-21T09:00Z  KIT-A  older note"
     hides out "someone else"
-    shows out "kit resume ok sections=4 author=kit-lane"
+    shows out "rig resume ok sections=4 author=kit-lane"
     shows
         (succeeded (resume_call root (Arg (fixture_text_of root, Arg ("--as", Arg ("nobody", NoArgs))))))
         "no notes by nobody"

@@ -772,33 +772,33 @@ fn round_run_0() -> i32 {
                                     let v33: i32 = 0i32;
                                     let v34: i32 = method37(v15, v33);
                                     let v35: Rc<str> = format_real_30(v34);
-                                    let v40: Rc<str> = string_concat(&["kit standards round ok repo=", &*v6, " words=", &*v35, " file=", &*v16]);
+                                    let v40: Rc<str> = string_concat(&["rig standards round ok repo=", &*v6, " words=", &*v35, " file=", &*v16]);
                                     println!("{}", v40);
                                     0i32
                                 }
                                 _ => {
-                                    let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
+                                    let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
                                     eprintln!("{}", v41);
                                     2i32
                                 }
                             }
                         }
                         _ => {
-                            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
+                            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v43);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
+                    let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v45);
                     2i32
                 }
             }
         }
         _ => {
-            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
+            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: standards --round <repo-label> <dir>..."); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v47);
             2i32
         }

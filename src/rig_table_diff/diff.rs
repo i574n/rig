@@ -515,7 +515,7 @@ fn diff_tables_2(mut v0: std::rc::Rc<Vec<Vec<std::rc::Rc<str>>>>, mut v1: std::r
     let v33: bool = &*v5 == "";
     if v33 {
         let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("diff needs --key a,b"); } LIT.with(|lit| lit.clone()) };
-        let v35: Rc<str> = string_concat(&["kit error: table ", &*v34]);
+        let v35: Rc<str> = string_concat(&["rig error: table ", &*v34]);
         eprintln!("{}", v35);
         2i32
     } else {
@@ -546,7 +546,7 @@ fn diff_tables_2(mut v0: std::rc::Rc<Vec<Vec<std::rc::Rc<str>>>>, mut v1: std::r
                     concat5_4(v23, v45, v32, v46.clone(), v46.clone())
                 }
             };
-            let v51: Rc<str> = string_concat(&["kit error: table diff unknown columns: ", &*v49]);
+            let v51: Rc<str> = string_concat(&["rig error: table diff unknown columns: ", &*v49]);
             eprintln!("{}", v51);
             2i32
         } else {
@@ -598,7 +598,7 @@ fn diff_tables_2(mut v0: std::rc::Rc<Vec<Vec<std::rc::Rc<str>>>>, mut v1: std::r
             let v94: Rc<str> = std::rc::Rc::<str>::from((v75).to_string().as_str());
             let v96: Rc<str> = std::rc::Rc::<str>::from((v83).to_string().as_str());
             let v99: Rc<str> = std::rc::Rc::<str>::from((v85).to_string().as_str());
-            let v101: Rc<str> = string_concat(&["kit table diff ok left_rows=", &*v88, " right_rows=", &*v91, " only_left=", &*v94, " only_right=", &*v96, " differing_cells=", &*v99]);
+            let v101: Rc<str> = string_concat(&["rig table diff ok left_rows=", &*v88, " right_rows=", &*v91, " only_left=", &*v94, " only_right=", &*v96, " differing_cells=", &*v99]);
             let v103: Rc<str> = if v24 {
                 let v102: Rc<str> = string_concat(&[" latest_by=", &*v8]);
                 v102
@@ -631,7 +631,7 @@ fn diff_files_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
     match &v15 {
         US0::US0_TableUnreadable(v22) => {
             let v22: Rc<str> = v22.clone();
-            let v23: Rc<str> = string_concat(&["kit error: table ", &*v22]);
+            let v23: Rc<str> = string_concat(&["rig error: table ", &*v22]);
             eprintln!("{}", v23);
             2i32
         }
@@ -639,7 +639,7 @@ fn diff_files_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
             match &v21 {
                 US0::US0_TableUnreadable(v24) => {
                     let v24: Rc<str> = v24.clone();
-                    let v25: Rc<str> = string_concat(&["kit error: table ", &*v24]);
+                    let v25: Rc<str> = string_concat(&["rig error: table ", &*v24]);
                     eprintln!("{}", v25);
                     2i32
                 }

@@ -44,11 +44,11 @@
 :~ status_line (~machine : string) (status : remote_status) : string =
     ?= status ?|
     | RemoteReported report =>
-        "kit remote status ok machine=" ++# machine
+        "rig remote status ok machine=" ++# machine
         ++# " windows=" ++# sm'.show report.windows
         ++# " free_mb=" ++# sm'.show report.free_mb
         ++# " heavy_slots=" ++# sm'.show report.heavy_slots
-    | RemoteUnreachable reason => "kit remote status unreachable machine=" ++# machine ++# " reason=" ++# reason
+    | RemoteUnreachable reason => "rig remote status unreachable machine=" ++# machine ++# " reason=" ++# reason
 
 :~ ssh_arguments (~alias : string) (~binary : string) : list string =
     [ "-o"; "BatchMode=yes"; "-o"; "ConnectTimeout=10"; alias; binary ++# " window list" ]
@@ -69,7 +69,7 @@
     | DiskUnknown : string
 
 :~ disk_of (~output : string) : node_disk =
-    := at = byte_find_from output "kit machine health gate=" 0i32
+    := at = byte_find_from output "rig machine health gate=" 0i32
     := line = ? at < 0i32 ?> "" |: byte_slice output at (byte_len output)
     := word = sm'.replace "gb" "" (rig_remote_activity.activity.field_text (line, "disk"))
     ?= (convert.try_convert word : option u64) ?|
@@ -79,11 +79,11 @@
 :~ disk_line (~machine : string) (disk : node_disk) : string =
     := floor = " floor_gb=" ++# sm'.show (disk_floor_gb ())
     ?= disk ?|
-    | DiskAbove free => "kit remote status disk machine=" ++# machine ++# " free_gb=" ++# sm'.show free ++# floor
+    | DiskAbove free => "rig remote status disk machine=" ++# machine ++# " free_gb=" ++# sm'.show free ++# floor
     | DiskBelow free =>
-        "kit remote status DISK-LOW machine=" ++# machine ++# " free_gb=" ++# sm'.show free ++# floor
+        "rig remote status DISK-LOW machine=" ++# machine ++# " free_gb=" ++# sm'.show free ++# floor
         ++# " (prune finished staged workspaces before a heavy job)"
-    | DiskUnknown reason => "kit remote status disk unknown machine=" ++# machine ++# " reason=" ++# reason
+    | DiskUnknown reason => "rig remote status disk unknown machine=" ++# machine ++# " reason=" ++# reason
 
 :~ disk_arguments (~alias : string) (~binary : string) : list string =
     := gate = " machine health --gate --min-disk-gb 0 --max-busy-pct 1000"
@@ -94,7 +94,7 @@
     console.write_line (status_line alias status)
     ?= process.try_capture_combined_list "ssh" (jobs_arguments alias binary) ?|
     | Some output => console.write_line (rig_remote_activity.activity.activity_text (alias, output))
-    | None => console.write_line ("kit remote status jobs unknown machine=" ++# alias ++# " reason=ssh did not run")
+    | None => console.write_line ("rig remote status jobs unknown machine=" ++# alias ++# " reason=ssh did not run")
     ?= process.try_capture_combined_list "ssh" (disk_arguments alias binary) ?|
     | Some output => console.write_line (disk_line alias (disk_of output))
     | None => console.write_line (disk_line alias (DiskUnknown "ssh did not run"))
@@ -104,7 +104,7 @@
 
 ///> rust
 :# a_window_summary_becomes_typed_remote_status =
-    := summary = "kit window list ok windows=5 free_mb=3805 heavy_slots=0\n"
+    := summary = "rig window list ok windows=5 free_mb=3805 heavy_slots=0\n"
     := output = "win-1  compile  held  5m left  x\n" ++# summary
     ?= status_of output ?|
     | RemoteReported report =>
@@ -116,14 +116,14 @@
     ? field_value " windows=7 free_mb=9" "free_mb" = 9u64 ?> () |: failwith "a field at the line end"
     ? field_value " windows=7" "heavy_slots" = 0u64 ?> () |: failwith "a missing field is zero"
     := line = status_line "node" (RemoteReported { windows = 1u64; free_mb = 2u64; heavy_slots = 3u64 })
-    ? line = "kit remote status ok machine=node windows=1 free_mb=2 heavy_slots=3" ?> () |: failwith line
+    ? line = "rig remote status ok machine=node windows=1 free_mb=2 heavy_slots=3" ?> () |: failwith line
 
 ///> rust
 :# a_health_gate_line_becomes_a_disk_state_against_the_floor =
     := gate = \ (disk : string) =>
-        "kit machine health gate=ok reason=ok disk=" ++# disk ++# " ram=5058mb busy=95pct\n"
+        "rig machine health gate=ok reason=ok disk=" ++# disk ++# " ram=5058mb busy=95pct\n"
     testing.expect (disk_of (gate "10gb") = DiskAbove 10u64) "at the floor is enough"
     testing.expect (disk_of (gate "0gb") = DiskBelow 0u64) "TRAIN24's full disk"
     testing.expect (disk_of "unknown verb" = DiskUnknown "unknown verb") "an old kit without the gate"
     := low = disk_line "node" (DiskBelow 3u64)
-    testing.expect (sm'.starts_with "kit remote status DISK-LOW machine=node free_gb=3 floor_gb=10" low) low
+    testing.expect (sm'.starts_with "rig remote status DISK-LOW machine=node free_gb=3 floor_gb=10" low) low

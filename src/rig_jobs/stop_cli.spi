@@ -30,7 +30,7 @@ fn main() {
 := probe_printer_source () : string =
     """
 fn main() {
-    print!("{}", std::env::var("KIT_ENV_PROBE").unwrap_or_default());
+    print!("{}", std::env::var("RIG_ENV_PROBE").or_else(|_| std::env::var("KIT_ENV_PROBE")).unwrap_or_default());
 }
 """
 
@@ -117,7 +117,7 @@ fn main() {
     := quick = rustc_program root "three" "fn main() { std::process::exit(3); }"
     := ran = job_call root (Arg ("run", Arg ("attached", Arg ("60000", Arg (quick, NoArgs)))))
     expect (ran.code = 3i32) (run_text ran)
-    shows ran.stdout "kit job run started id=job-"
+    shows ran.stdout "rig job run started id=job-"
     shows ran.stdout "state=finished exit=3"
     := id = word_after ran.stdout "id="
     shows (succeeded (job_call root (Arg ("status", Arg (id, NoArgs))))) "state=finished exit=3"
@@ -341,7 +341,7 @@ fn main() {
     := chained =
         succeeded (job_call root (Arg ("chain", Arg ("--ok", Arg ("--", Arg ("one", Arg ("60000", Arg (exiter,
             Arg ("300", Arg ("0", second_link))))))))))
-    shows chained "kit job chain ok jobs=2"
+    shows chained "rig job chain ok jobs=2"
     shows chained "after_mode=ok"
     := second = word_after chained ","
     shows (succeeded (job_call root (Arg ("wait", Arg (second, Arg ("30000", NoArgs)))))) "state=finished exit=0"
@@ -357,8 +357,7 @@ fn main() {
 
 ///> rust
 :# a_job_over_its_memory_cap_stops_as_memory_capped =
-    ? on_windows ()
-    ?>
+    ? on_windows () ?>
         := root = fixture_root_create "job memory cap"
         := allocator = rustc_program root "allocator" (allocator_source ())
         := started =

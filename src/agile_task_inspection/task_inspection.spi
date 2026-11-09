@@ -29,16 +29,18 @@
 
 := escape_target (text : string) (escaped : i32) : string =
     := code = byte_at text escaped
-    ? code = ascii_n () ?> "\n"
-    |? code = ascii_r () ?> "\r"
-    |? code = ascii_t () ?> "\t"
+    ? code = ascii_n ()
+    ?> "\n"
+    |? code = ascii_r ()
+    ?> "\r"
+    |? code = ascii_t ()
+    ?> "\t"
     |: byte_slice text escaped (escaped + 1i32)
 
 :~ ^ unescaped_from (text : string) (offset : i32) (run_start : i32) (length : i32) (decoded : string) : string =
     ? length <= offset
     ?> decoded ++# (byte_slice text run_start length)
-    |? byte_at text offset = backslash_byte ()
-    ?>
+    |? byte_at text offset = backslash_byte () ?>
         := escaped = offset + 1i32
         := resumed = escaped + 1i32
         unescaped_from text resumed resumed length (
@@ -84,8 +86,10 @@
     ? user > 0i32 ?> user - 1i32 |: 0i32
 
 := show_format_of (~flag : string) (~value : string) : validation_result show_format =
-    ? flag = "--json" && value = "" ?> Valid ShowJson
-    |? (flag = "--last" || flag = "--grep") && value <> "" ?> Valid (ShowFiltered (sm'.replace "--" "" flag, value))
+    ? flag = "--json" && value = ""
+    ?> Valid ShowJson
+    |? (flag = "--last" || flag = "--grep") && value <> ""
+    ?> Valid (ShowFiltered (sm'.replace "--" "" flag, value))
     |: Invalid
 
 := json_string (~text : string) : string = json.quote text
@@ -157,7 +161,7 @@
 
 :~ show_receipt (record : task_record) (started : u64) : string =
     := head =
-        "kit agile show ok id="
+        "rig agile show ok id="
         ++# record.id
         ++# " title_bytes="
         ++# i32_text (byte_len record.title)
@@ -211,7 +215,8 @@
                 )
 
 :~ agile_show_entry () : i32 =
-    ? argument_count () = 3i32 ?> agile_show (argument_owned 1i32) (argument_owned 2i32) ShowText
+    ? argument_count () = 3i32
+    ?> agile_show (argument_owned 1i32) (argument_owned 2i32) ShowText
     |:
         := value = ? argument_count () = 5i32 ?> argument_owned 4i32 |: ""
         ?= (? argument_count () > 5i32 ?> Invalid |: show_format_of (argument_owned 3i32) value) ?|

@@ -13,7 +13,7 @@
 
 :~ command_output_receipt_text (status : i32) (elapsed : u64) (stdout_bytes : u64) (stderr_bytes : u64) : string =
     := head =
-        "kit proxy command-output "
+        "rig proxy command-output "
         ++# outcome_word (child_outcome_of status)
         ++# " status="
         ++# i32_text status

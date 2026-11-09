@@ -36,7 +36,8 @@
 
 :~ batch_output_directory (command : string) : string =
     := at = (sm'.index_of " --output-dir " command : i32)
-    ? at < 0i32 ?> ""
+    ? at < 0i32
+    ?> ""
     |:
         := start = at + 14i32
         flag_value_until_next_flag (sm'.substring start ((sm'.length command : i32) - start) command)
@@ -53,12 +54,14 @@
     report_name_of (flag_value_until_next_flag (am'.index at scan.chunks))
 
 :~ ^ names_matching (scan : batch_scan) (name : string) (at : i32) (found : i32) : i32 =
-    ? am'.length scan.chunks <= at ?> found
+    ? am'.length scan.chunks <= at
+    ?> found
     |: names_matching scan name (at + 1i32) (? chunk_name scan at = name ?> found + 1i32 |: found)
 
 
 :~ notebook_seen_of (scan : batch_scan) (name : string) : notebook_seen =
-    ? names_matching scan name 1i32 0i32 > 1i32 ?> SeenShared
+    ? names_matching scan name 1i32 0i32 > 1i32
+    ?> SeenShared
     |:
         := written = scan.written_of name
         ? written > 0u64 && scan.started_ms <= written ?> SeenWritten written |: SeenPending
@@ -72,7 +75,8 @@
     | SeenShared => { progress ?| shared = progress.shared + 1i32 }
 
 :~ ^ progress_from (scan : batch_scan) (at : i32) (progress : batch_progress) : batch_progress =
-    ? am'.length scan.chunks <= at ?> progress
+    ? am'.length scan.chunks <= at
+    ?> progress
     |:
         := name = chunk_name scan at
         progress_from scan (at + 1i32) (progress_counted progress name (notebook_seen_of scan name))
@@ -93,7 +97,8 @@
     := total = progress.written + progress.pending + progress.shared
     := counted = "notebook batch: " ++# sm'.format progress.written ++# " of " ++# sm'.format total ++# " written"
     := head = counted ++# shared_text progress
-    ? progress.written = 0i32 ?> head ++# ", none yet after " ++# minutes_text (now_ms - started_ms) ++# " min"
+    ? progress.written = 0i32
+    ?> head ++# ", none yet after " ++# minutes_text (now_ms - started_ms) ++# " min"
     |:
         := ago = minutes_text (now_ms - progress.last_ms)
         head ++# ", last " ++# progress.last_name ++# " " ++# ago ++# " min ago, ~" ++# pace_text progress started_ms
@@ -113,7 +118,8 @@
 
 :~ train_name_of (command : string) : string =
     := at = (sm'.index_of " -Name " command : i32)
-    ? not (sm'.contains "release-train.ps1" command) || at < 0i32 ?> ""
+    ? not (sm'.contains "release-train.ps1" command) || at < 0i32
+    ?> ""
     |:
         := rest = sm'.trim (sm'.substring (at + 7i32) ((sm'.length command : i32) - at - 7i32) command)
         := cut = (sm'.index_of " " rest : i32)
@@ -122,7 +128,8 @@
 :~ train_root_of (command : string) : string =
     := slashed = sm'.replace "\\" "/" (sm'.replace "\"" "" command)
     := at = (sm'.index_of "/scripts/release-train.ps1" slashed : i32)
-    ? at < 0i32 ?> ""
+    ? at < 0i32
+    ?> ""
     |:
         := head = sm'.substring 0i32 at slashed
         := space = sm'.last_index_of " " head
@@ -131,10 +138,12 @@
 :~ log_name_of (notebook : string) : string = sm'.replace "/" "_" (sm'.replace "\\" "_" notebook) ++# ".log"
 
 :~ train_verdict_of (log : string) : train_verdict =
-    ? sm'.contains "Spiral cell timed out" log ?> TrainTimedOut
+    ? sm'.contains "Spiral cell timed out" log
+    ?> TrainTimedOut
     |? sm'.contains "spiral-tests total" log
     ?> (? sm'.contains "\"failed\":0," log ?> TrainPassed |: TrainFailed)
-    |? sm'.contains "** (Mix)" log ?> TrainFailed
+    |? sm'.contains "** (Mix)" log
+    ?> TrainFailed
     |: TrainPending
 
 :~ train_counted (progress : train_progress) (verdict : train_verdict) : train_progress =
@@ -176,8 +185,10 @@
 
 ///> rust
 :# train_logs_sort_into_verdicts =
-    := passed = "spiral-tests total {\"accepted\":0,\"built\":0,\"discovered\":5,\"executed\":5,\"failed\":0,\"files\":1}"
-    := failed = "spiral-tests total {\"accepted\":0,\"built\":0,\"discovered\":5,\"executed\":5,\"failed\":2,\"files\":1}"
+    := passed =
+        "spiral-tests total {\"accepted\":0,\"built\":0,\"discovered\":5,\"executed\":5,\"failed\":0,\"files\":1}"
+    := failed =
+        "spiral-tests total {\"accepted\":0,\"built\":0,\"discovered\":5,\"executed\":5,\"failed\":2,\"files\":1}"
     := starved = failed ++# "\n** (Mix) x.spi: Spiral cell timed out after 300s; the process tree was killed."
     := broken = "** (Mix) x.spi: type error somewhere"
     := progress = train_progress_of [ passed; failed; starved; broken; ""; passed ]
@@ -211,10 +222,14 @@
         "pwsh run.ps1 --path C:\\r\\a\\one.spi --path C:\\r\\b\\two.spi --path C:\\r\\c\\model.spi --path "
         ^^ "C:\\r\\d\\model.spi --path C:\\r\\e\\three.spi --output-dir C:\\out --gate"
     := written_of name =
-        ? name = "one.spi.ipynb" ?> 1060000u64
-        |? name = "two.spi.ipynb" ?> 1180000u64
-        |? name = "three.spi.ipynb" ?> 900000u64
-        |? name = "model.spi.ipynb" ?> 1100000u64
+        ? name = "one.spi.ipynb"
+        ?> 1060000u64
+        |? name = "two.spi.ipynb"
+        ?> 1180000u64
+        |? name = "three.spi.ipynb"
+        ?> 900000u64
+        |? name = "model.spi.ipynb"
+        ?> 1100000u64
         |: 0u64
     := progress = batch_progress_of command written_of 1000000u64
     expect

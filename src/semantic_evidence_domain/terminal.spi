@@ -1,4 +1,3 @@
-
 inl emit_runtime () : () = global """
     use std::collections::BTreeSet;
     use std::path::Path;

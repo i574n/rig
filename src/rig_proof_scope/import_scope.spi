@@ -67,7 +67,8 @@
 
 :~ ^ closed_over (pkgs : list package) (dirty : list string) (fuel : i32) : list string =
     := next = grown pkgs dirty
-    ? fuel <= 0i32 || (listm.length next : i32) = (listm.length dirty : i32) ?> next
+    ? fuel <= 0i32 || (listm.length next : i32) = (listm.length dirty : i32)
+    ?> next
     |: closed_over pkgs next (fuel - 1i32)
 
 :~ ^ index_in (xs : list string) (x : string) (k : i32) : option i32 =
@@ -101,8 +102,10 @@
     ?= pkgs ?|
     | Package (d, deps, mods) :: rest =>
         := tail = scope_in rest closed dirty hits
-        ? any_among deps closed ?> (d, mods) :: tail
-        |? among dirty d ?> (d, reproved_from hits d mods) :: tail
+        ? any_among deps closed
+        ?> (d, mods) :: tail
+        |? among dirty d
+        ?> (d, reproved_from hits d mods) :: tail
         |: tail
     | [] => []
 

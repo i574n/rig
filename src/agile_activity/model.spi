@@ -99,8 +99,10 @@
     | AlreadyNoted
 
 := estimate_verdict_of (estimate : i32) (actual : i32) (noted : bool) : estimate_verdict =
-    ? estimate <= 0i32 || actual * 2i32 <= estimate * 3i32 ?> WithinEstimate
-    |? noted ?> AlreadyNoted
+    ? estimate <= 0i32 || actual * 2i32 <= estimate * 3i32
+    ?> WithinEstimate
+    |? noted
+    ?> AlreadyNoted
     |: EstimateExceeded (estimate, actual)
 
 :== board_item =
@@ -121,7 +123,8 @@
 
 := column_of (items : list board_item) (column : task_status) : column_total =
     := add (t : column_total) (i : board_item) =
-        ? i.status <> column ?> t
+        ? i.status <> column
+        ?> t
         |: { t ?| items = t.items + 1i32; estimate = t.estimate + i.estimate; actual = t.actual + i.actual }
     items |> listm.fold add { column = column; items = 0i32; estimate = 0i32; actual = 0i32 }
 

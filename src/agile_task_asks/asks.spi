@@ -18,7 +18,8 @@
 :~ ask_of_line (~line : string) : option user_ask =
     := row = sm'.trim line
     := at = sm'.index_of (row_marker ()) row
-    ? at < 0i32 ?> None
+    ? at < 0i32
+    ?> None
     |:
         := start = at + sm'.length (row_marker ())
         quoted_triple (sm'.slice start (sm'.length row - 1i32) row)
@@ -39,7 +40,8 @@
     ++# quote_text ask.quote ++# "\")"
 
 :~ ^ digits_from (~text : string) (at : i32) : bool =
-    ? at >= (sm'.length text : i32) ?> !+
+    ? at >= (sm'.length text : i32)
+    ?> !+
     |: sm'.index_of (sm'.substring at 1i32 text) "0123456789" >= 0i32 && digits_from text (at + 1i32)
 
 :~ day_shaped (~day : string) : bool =

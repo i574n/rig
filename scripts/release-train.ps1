@@ -14,7 +14,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $KitRoot = (Resolve-Path -LiteralPath $KitRoot).Path
 $liveRoot = $KitRoot
-$stateRoot = if ($env:KIT_RELEASE_HOME) { $env:KIT_RELEASE_HOME } else { Join-Path $liveRoot '.cache/release-train' }
+$stateRoot = if (($env:RIG_RELEASE_HOME ?? $env:KIT_RELEASE_HOME)) { ($env:RIG_RELEASE_HOME ?? $env:KIT_RELEASE_HOME) } else { Join-Path $liveRoot '.cache/release-train' }
 $out = Join-Path $stateRoot $Name
 New-Item -ItemType Directory -Force $out | Out-Null
 $log = Join-Path $out 'train.log'
@@ -29,7 +29,7 @@ function Get-GeneratedHashes([string]$root) {
 if ($Resume) {
     $snapshotRoot = Join-Path $liveRoot ".cache/release-tree/$Name"
     if (-not (Test-Path -LiteralPath (Join-Path $snapshotRoot 'src'))) { Stop-Train "-Resume needs the snapshot of an earlier -Snapshot run named $Name at $snapshotRoot" }
-    if (-not $env:KIT_SPIRAL_BUNDLE) { $env:KIT_SPIRAL_BUNDLE = (Resolve-Path -LiteralPath (Join-Path $liveRoot '../spiral/apps/compiler/tmp')).Path }
+    if (-not ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE)) { $env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = (Resolve-Path -LiteralPath (Join-Path $liveRoot '../spiral/apps/compiler/tmp')).Path }
     $KitRoot = (Resolve-Path -LiteralPath $snapshotRoot).Path
     $SkipRegen = $true
     Say "resume: reusing snapshot $KitRoot, its candidate and the notebooks that already passed on it"
@@ -38,7 +38,7 @@ if ($Resume) {
     & robocopy $liveRoot $snapshotRoot /MIR /XD target .cache .git /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) { Stop-Train "snapshot copy failed (robocopy exit $LASTEXITCODE)" }
     $snapshotHashes = Get-GeneratedHashes $snapshotRoot
-    if (-not $env:KIT_SPIRAL_BUNDLE) { $env:KIT_SPIRAL_BUNDLE = (Resolve-Path -LiteralPath (Join-Path $liveRoot '../spiral/apps/compiler/tmp')).Path }
+    if (-not ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE)) { $env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = (Resolve-Path -LiteralPath (Join-Path $liveRoot '../spiral/apps/compiler/tmp')).Path }
     $KitRoot = (Resolve-Path -LiteralPath $snapshotRoot).Path
     Say "snapshot: $liveRoot -> $KitRoot; the live tree stays writable during the train"
 }
@@ -66,7 +66,7 @@ Say "compiler pinned at $env:SPIRAL_COMPILER_DLL ($(Get-CompilerStamp))"
 
 if (-not $SkipRegen) {
     Say 'phase regen: every owner (3 compilers in parallel), cargo check, publish'
-    & pwsh -NoProfile -File (Join-Path $KitRoot 'compiler-contracts/test-regeneration.ps1') -KitRoot $KitRoot -IncludeAuxiliary -Incremental -Parallel 3 -FrozenLib $(if ($env:KIT_REGEN_FROZEN_LIB -eq '1' -and $Lib) { Split-Path (Resolve-Path -LiteralPath $Lib).Path } else { '' }) `
+    & pwsh -NoProfile -File (Join-Path $KitRoot 'compiler-contracts/test-regeneration.ps1') -KitRoot $KitRoot -IncludeAuxiliary -Incremental -Parallel 3 -FrozenLib $(if (($env:RIG_REGEN_FROZEN_LIB ?? $env:KIT_REGEN_FROZEN_LIB) -eq '1' -and $Lib) { Split-Path (Resolve-Path -LiteralPath $Lib).Path } else { '' }) `
         -CargoCheck -Publish -TimeoutSec 1800 *> (Join-Path $out 'regen.log')
     if ($LASTEXITCODE -ne 0) { Get-Content (Join-Path $out 'regen.log') -Tail 15 | ForEach-Object { Say "  regen: $_" }; Stop-Train 'regen failed' }
     Say "phase regen: ok ($((Select-String -Path (Join-Path $out 'regen.log') -Pattern '^Published .*').Line))"
@@ -163,7 +163,7 @@ if ($Lib -and $KitRoot -ne $liveRoot) {
 Say "notebooks read the lib at $spiralLib"
 $env:SPIRAL_LIB = $spiralLib
 $env:SPIRAL_CELLS_LIB = $spiralLib
-$env:KIT_BIN_UNDER_TEST = $candidate
+$env:RIG_BIN_UNDER_TEST = $env:KIT_BIN_UNDER_TEST = $candidate
 $env:SPIRAL_CELLS_WARM = '0'; $env:SPIRAL_CELLS_MEMO = '0'; $env:SPIRAL_CELLS_COMPILER = 'process'
 $env:MIX_BUILD_PATH = Join-Path $out 'mix-control'
 $control = 'src/rig_lcov/lcov.spi'
@@ -179,7 +179,7 @@ $runOne = {
     $notebook = $_
     $name = $notebook -replace '[\\/]', '_'
     $notebookLog = Join-Path $using:out "$name.log"
-    $env:KIT_BIN_UNDER_TEST = $using:candidate
+    $env:RIG_BIN_UNDER_TEST = $env:KIT_BIN_UNDER_TEST = $using:candidate
     $env:SPIRAL_LIB = $using:spiralLib
     $env:SPIRAL_CELLS_LIB = $using:spiralLib
     $env:SPIRAL_CELLS_WARM = '0'; $env:SPIRAL_CELLS_MEMO = '0'; $env:SPIRAL_CELLS_COMPILER = 'process'

@@ -152,7 +152,7 @@ fn method5(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
     }
 }
 fn windows_root_7() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_WINDOWS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
     v0
 }
 fn now_ms_8() -> u64 {
@@ -387,7 +387,7 @@ fn live_rows_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: u64, mut v3: Rc<str>) 
     }
 }
 fn free_mb_30() -> u64 {
-    let mut v0: u64 = { #[cfg(windows)] fn free() -> u64 { #[repr(C)] struct Status { length: u32, load: u32, total: u64, available: u64, total_page: u64, available_page: u64, total_virtual: u64, available_virtual: u64, extended: u64 } unsafe extern "system" { fn GlobalMemoryStatusEx(status: *mut Status) -> i32; } unsafe { let mut status: Status = std::mem::zeroed(); status.length = std::mem::size_of::<Status>() as u32; if GlobalMemoryStatusEx(&mut status) == 0 { u64::MAX } else { status.available / 1048576 } } } #[cfg(not(windows))] fn free() -> u64 { std::fs::read_to_string("/proc/meminfo").ok().and_then(|text| text.lines().find(|line| line.starts_with("MemAvailable:")).and_then(|line| line.split_whitespace().nth(1)).and_then(|kb| kb.parse::<u64>().ok())).map(|kb| kb / 1024).unwrap_or(u64::MAX) } std::env::var("KIT_WINDOWS_FREE_MB").ok().and_then(|text| text.trim().parse::<u64>().ok()).unwrap_or_else(free) };
+    let mut v0: u64 = { #[cfg(windows)] fn free() -> u64 { #[repr(C)] struct Status { length: u32, load: u32, total: u64, available: u64, total_page: u64, available_page: u64, total_virtual: u64, available_virtual: u64, extended: u64 } unsafe extern "system" { fn GlobalMemoryStatusEx(status: *mut Status) -> i32; } unsafe { let mut status: Status = std::mem::zeroed(); status.length = std::mem::size_of::<Status>() as u32; if GlobalMemoryStatusEx(&mut status) == 0 { u64::MAX } else { status.available / 1048576 } } } #[cfg(not(windows))] fn free() -> u64 { std::fs::read_to_string("/proc/meminfo").ok().and_then(|text| text.lines().find(|line| line.starts_with("MemAvailable:")).and_then(|line| line.split_whitespace().nth(1)).and_then(|kb| kb.parse::<u64>().ok())).map(|kb| kb / 1024).unwrap_or(u64::MAX) } std::env::var("RIG_WINDOWS_FREE_MB").or_else(|_| std::env::var("KIT_WINDOWS_FREE_MB")).ok().and_then(|text| text.trim().parse::<u64>().ok()).unwrap_or_else(free) };
     v0
 }
 fn class_word_32(mut v0: US0) -> Rc<str> {
@@ -688,7 +688,7 @@ fn window_listed_33() -> i32 {
     let mut v13: u64 = free_mb_30();
     let v14: Rc<str> = number_text_25(v13);
     let mut v16: Rc<str> = number_text_25(v9);
-    let v18: Rc<str> = string_concat(&["kit window list ok windows=", &*v10, " free_mb=", &*v14, " heavy_slots=", &*v16]);
+    let v18: Rc<str> = string_concat(&["rig window list ok windows=", &*v10, " free_mb=", &*v14, " heavy_slots=", &*v16]);
     stdout_line_38(v18);
     0i32
 }
@@ -702,7 +702,7 @@ fn stderr_line_42(mut v0: Rc<str>) -> () {
     ()
 }
 fn refused_41(mut v0: Rc<str>) -> i32 {
-    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: window "); } LIT.with(|lit| lit.clone()) };
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: window "); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<str> = concat5_22(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_42(v3);
@@ -788,12 +788,12 @@ fn window_checked_40(mut v0: Rc<str>) -> i32 {
                     v59
                 };
                 let v61: Rc<str> = class_word_32(v45);
-                let v64: Rc<str> = string_concat(&["kit window check ok class=", &*v61, " free", &*v60]);
+                let v64: Rc<str> = string_concat(&["rig window check ok class=", &*v61, " free", &*v60]);
                 stdout_line_38(v64);
                 0i32
             } else {
                 let v65: Rc<str> = class_word_32(v45);
-                let v68: Rc<str> = string_concat(&["kit window check blocked class=", &*v65, " ", &*v54]);
+                let v68: Rc<str> = string_concat(&["rig window check blocked class=", &*v65, " ", &*v54]);
                 stdout_line_38(v68);
                 1i32
             }

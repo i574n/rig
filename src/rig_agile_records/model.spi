@@ -7,17 +7,23 @@
 := expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail
 
 :~ ^ depth_after (line : string) (at : i32) (count : i32) (depth : i32) (quoted : bool) : i32 =
-    ? count <= at ?> depth
+    ? count <= at
+    ?> depth
     |:
         := c = xml.code_point_at line at
         := next = at + xml.code_point_width line at
         ? quoted ?>
-            ? c = 92u32 ?> depth_after line (next + 1i32) count depth !+
-            |? c = 34u32 ?> depth_after line next count depth !-
+            ? c = 92u32
+            ?> depth_after line (next + 1i32) count depth !+
+            |? c = 34u32
+            ?> depth_after line next count depth !-
             |: depth_after line next count depth !+
-        |? c = 34u32 ?> depth_after line next count depth !+
-        |? c = 40u32 ?> depth_after line next count (depth + 1i32) !-
-        |? c = 41u32 ?> depth_after line next count (depth - 1i32) !-
+        |? c = 34u32
+        ?> depth_after line next count depth !+
+        |? c = 40u32
+        ?> depth_after line next count (depth + 1i32) !-
+        |? c = 41u32
+        ?> depth_after line next count (depth - 1i32) !-
         |: depth_after line next count depth !-
 
 :~ paren_depth (line : string) : i32 = depth_after line 0i32 (sm'.length line : i32) 0i32 !-
@@ -29,20 +35,23 @@
 :~ literals_merged (record : string) : string = sm'.replace "\" ^^ \"" "" record
 
 :~ ^ records_into (lines : array string) (at : i32) (pending : string) (depth : i32) (out : array string) : () =
-    ? am'.length lines <= at ?> (? pending <> "" ?> am'.push_back (literals_merged pending) out)
+    ? am'.length lines <= at
+    ?> (? pending <> "" ?> am'.push_back (literals_merged pending) out)
     |:
         := line = am'.index at lines
         ? pending = "" ?>
             := opened = paren_depth line
             := binding_head = sm'.starts_with "inl " (sm'.trim line) && sm'.ends_with "=" (sm'.trim line)
-            ? opened > 0i32 || binding_head ?> records_into lines (at + 1i32) line opened out
+            ? opened > 0i32 || binding_head
+            ?> records_into lines (at + 1i32) line opened out
             |:
                 am'.push_back line out
                 records_into lines (at + 1i32) "" 0i32 out
         |:
             := merged = joined pending line
             := remaining = depth + paren_depth line
-            ? remaining > 0i32 ?> records_into lines (at + 1i32) merged remaining out
+            ? remaining > 0i32
+            ?> records_into lines (at + 1i32) merged remaining out
             |:
                 am'.push_back (literals_merged merged) out
                 records_into lines (at + 1i32) "" 0i32 out

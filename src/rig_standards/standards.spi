@@ -14,8 +14,7 @@
 := json_requested () : bool = rust_std_env.model.argument_flag_present 2i32 "--json"
 
 :~ sorted_names (~directory : string) : array string =
-    ? directory_exists directory
-    ?>
+    ? directory_exists directory ?>
         file_system.read_directory_names directory
         |> resultm.unwrap'
         |> am'.from_vec_base
@@ -25,7 +24,8 @@
     |: ;[]
 
 :~ ^ names_where (names : array string) (index : i32) (keep : string -> bool) (found : list string) : list string =
-    ? index < 0i32 ?> found
+    ? index < 0i32
+    ?> found
     |:
         := name = am'.index index names
         names_where names (index - 1i32) keep (? keep name ?> name :: found |: found)
@@ -140,8 +140,7 @@
         := directory = argument index
         ? directory = "--json"
         ?> packages_checked (index + 1i32) total tally
-        |? directory_exists directory = !-
-        ?>
+        |? directory_exists directory = !- ?>
             := missing =
                 { tally ?|
                     findings = tally.findings ++# directory ++# ":0  package  not a directory\n"
@@ -176,9 +175,8 @@
     { packages = 0i32; files = 0i32; findings = ""; count = 0i32; declared = 0i32; rules = "" }
 
 :~ rules_run () : i32 =
-    ? argument_count () < 3i32
-    ?>
-        stderr_line "kit error: standards <package-dir>... [--json]"
+    ? argument_count () < 3i32 ?>
+        stderr_line "rig error: standards <package-dir>... [--json]"
         2i32
     |:
         := tally = packages_checked 2i32 (argument_count ()) (tally_start ())
@@ -202,7 +200,7 @@
                 := findings = tally.findings
                 := _ =
                     ? findings <> "" ?> stdout_line ($'std::rc::Rc::<str>::from((!findings).trim_end())' : string) |: ()
-                stdout_line ("kit standards ok " ++# counts ++# " rules=" ++# tally.rules)
+                stdout_line ("rig standards ok " ++# counts ++# " rules=" ++# tally.rules)
         ? tally.count = 0i32 ?> 0i32 |: 1i32
 
 :~ census_requested () : bool = $'std::env::args().nth(2).is_some_and(|flag| matches\!(flag.as_str(), \

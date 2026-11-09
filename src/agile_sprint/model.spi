@@ -104,8 +104,10 @@
             ?= found ?|
             | Some _ => found
             | None =>
-                ? c.standing <> ItemOpen ?> Some (ItemNotOpen c.task)
-                |? c.minutes <= 0i32 ?> Some (ItemUnestimated c.task)
+                ? c.standing <> ItemOpen
+                ?> Some (ItemNotOpen c.task)
+                |? c.minutes <= 0i32
+                ?> Some (ItemUnestimated c.task)
                 |: None
         None
 

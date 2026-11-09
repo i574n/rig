@@ -36,11 +36,16 @@
     ? i < sm'.length s && ident_char (sm'.substring i 1i32 s) ?> ident_char_count s (i + 1i32) |: i
 
 := declared (line : string) : option (namespace * string) =
-    ? sm'.starts_with ":== " line ?> Some (TypeSpace, rest_after 4i32 line)
-    |? sm'.starts_with ":! " line ?> Some (TypeSpace, rest_after 3i32 line)
-    |? sm'.starts_with ":| " line ?> Some (TypeSpace, rest_after 3i32 line)
-    |? sm'.starts_with ":= " line ?> Some (TermSpace, rest_after 3i32 line)
-    |? sm'.starts_with ":~ " line ?> Some (TermSpace, rest_after 3i32 line)
+    ? sm'.starts_with ":== " line
+    ?> Some (TypeSpace, rest_after 4i32 line)
+    |? sm'.starts_with ":! " line
+    ?> Some (TypeSpace, rest_after 3i32 line)
+    |? sm'.starts_with ":| " line
+    ?> Some (TypeSpace, rest_after 3i32 line)
+    |? sm'.starts_with ":= " line
+    ?> Some (TermSpace, rest_after 3i32 line)
+    |? sm'.starts_with ":~ " line
+    ?> Some (TermSpace, rest_after 3i32 line)
     |: None
 
 := unhatted (s : string) : string = ? sm'.starts_with "^ " s ?> rest_after 2i32 s |: s
@@ -55,7 +60,8 @@
 
 :~ ^ word_count (name : string) (text : string) (before : string) (n : i32) : i32 =
     := at = sm'.index_of name text
-    ? at < 0i32 || name = "" ?> n
+    ? at < 0i32 || name = ""
+    ?> n
     |:
         := prev = ? at = 0i32 ?> before |: sm'.substring (at - 1i32) 1i32 text
         := after_at = at + sm'.length name
@@ -157,13 +163,15 @@
         []
     |> listm.rev
 
-:~ defined_in (defs : list definition) (d : definition) : bool = listm'.exists' (\ (x : definition) => same_binding d x) defs
+:~ defined_in (defs : list definition) (d : definition) : bool =
+    listm'.exists' (\ (x : definition) => same_binding d x) defs
 
 :~ open_clashes (defs : list definition) (opened : list (string * list definition)) : list open_clash =
     defs
     |> listm.fold
         \ acc (d : definition) =>
-            ? d.name = "main" ?> acc
+            ? d.name = "main"
+            ?> acc
             |:
                 opened
                 |> listm.fold

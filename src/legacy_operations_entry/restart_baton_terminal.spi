@@ -1,4 +1,3 @@
-
 inl emit_runtime () : () = global """
     fn restart_baton_observed_migration() -> Result<i32, String> {
         let executable = env::current_exe().map_err(|error| format!("current executable: {error}"))?;
@@ -54,7 +53,7 @@ inl emit_runtime () : () = global """
         let regular = metadata.is_file() && !metadata.file_type().is_symlink();
         let bytes_match = fs::read(&receipt).map_err(|error| format!("read {}: {error}", receipt.display()))? == body.as_bytes();
         if legacy_capability_domain::rig_restart_baton_complete_binding(i32::from(regular), i32::from(bytes_match)) != 1 { restart_baton_restore(&receipt, existing.as_deref())?; return Err("typed restart-baton completion rejected rollback=restored".to_owned()); }
-        println!("kit proxy restart-baton ok receipt={} migration={observed} bundle_bytes={bundle_bytes} bundle_sha256={bundle_hash} lease_sha256={lease_hash} workstream={workstream} next_gate={next_gate} receipt=spiral-typed-atomic", receipt.display());
+        println!("rig proxy restart-baton ok receipt={} migration={observed} bundle_bytes={bundle_bytes} bundle_sha256={bundle_hash} lease_sha256={lease_hash} workstream={workstream} next_gate={next_gate} receipt=spiral-typed-atomic", receipt.display());
         Ok(())
     }
     """

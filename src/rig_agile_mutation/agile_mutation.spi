@@ -151,7 +151,7 @@
                 state_lock_done writes root
                 code
             |? claim_queue_call subcommand ?>
-                := refused = "kit agile " ++# argument_owned 0i32 ++# " refused reason=contention"
+                := refused = "rig agile " ++# argument_owned 0i32 ++# " refused reason=contention"
                 := _ = workspace_primitives.console.stdout_line refused
                 4i32
             |: state_lock_refused ()

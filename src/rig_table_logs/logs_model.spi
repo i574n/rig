@@ -71,8 +71,7 @@
         $'std::rc::Rc::<str>::from((!value).split_once(char::from(61u8)).map(|(name, _)| name).unwrap_or(""))' : string
     := pattern = $'std::rc::Rc::<str>::from((!value).split_once(char::from(61u8)).map(|(_, \
         pattern)| pattern).unwrap_or(""))' : string
-    ? name_ok name = !- || pattern = ""
-    ?>
+    ? name_ok name = !- || pattern = "" ?>
         SpecRejected (
             (kind_flag kind) ++# " expects name=regex with a letters/digits/_/- name, received '" ++# value ++# "'"
         )

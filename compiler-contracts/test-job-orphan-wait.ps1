@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $Kit = (Resolve-Path $Kit).Path
 if ($IsWindows -and (-not $env:TEMP -or -not $env:TMP)) { throw 'TEMP and TMP must be set: without them the temp root resolves to the profile folder.' }
 $jobsHome = Join-Path ([IO.Path]::GetTempPath()) "kit-orphan-wait-$PID"
-$env:KIT_JOBS_HOME = $jobsHome
+$env:RIG_JOBS_HOME = $env:KIT_JOBS_HOME = $jobsHome
 $started = & $Kit job start orphan-wait 90000 pwsh -NoProfile -Command 'Start-Sleep 60'
 $id = [regex]::Match("$started", 'id=(\S+)').Groups[1].Value
 $shell = Start-Process pwsh -ArgumentList '-NoProfile', '-Command', "& '$Kit' job wait $id 120000" -WindowStyle Hidden -PassThru

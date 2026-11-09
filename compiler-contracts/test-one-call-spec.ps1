@@ -98,8 +98,8 @@ for ($index = 0; $index -lt $headings.Count; $index++) {
         Push-Location $root
         $callerEnvironment = @(Get-ChildItem env: | Where-Object { $_.Name -like 'KIT_*' -or $_.Name -like 'SPIRAL_*' } | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Value = $_.Value } })
         foreach ($saved in $callerEnvironment) { Remove-Item "env:$($saved.Name)" }
-        $env:KIT_JOBS_HOME = "$root-jobs"
-        $env:KIT_WINDOWS_HOME = "$root-windows"
+        $env:RIG_JOBS_HOME = $env:KIT_JOBS_HOME = "$root-jobs"
+        $env:RIG_WINDOWS_HOME = $env:KIT_WINDOWS_HOME = "$root-windows"
         $setupFailure = ''
         $setup = Get-Block $body 'setup'
         $setupArguments = if ($setup) { Get-CommandArguments $(if ($setup.Trim() -match '^kit\s') { $setup } else { "kit $($setup.Trim())" }) } else { $null }

@@ -20,10 +20,14 @@
         flat_bundle_plan from to
 
 :~ bool_pair_binding (left : i32) (right : i32) : i32 =
-    ? left < 1i32 ?> 0i32
-    |? 1i32 < left ?> 0i32
-    |? right < 1i32 ?> 0i32
-    |? 1i32 < right ?> 0i32
+    ? left < 1i32
+    ?> 0i32
+    |? 1i32 < left
+    ?> 0i32
+    |? right < 1i32
+    ?> 0i32
+    |? 1i32 < right
+    ?> 0i32
     |: 1i32
 
 :~ preflight_binding (root_directory : i32) (output_outside_root : i32) : i32 =
@@ -44,10 +48,14 @@
     | FlatDeflated => 1i32
 
 :~ compression_binding (deterministic : i32) (method_code : i32) : i32 =
-    ? deterministic < 1i32 ?> 0i32
-    |? 1i32 < deterministic ?> 0i32
-    |? method_code < 1i32 ?> 0i32
-    |? 1i32 < method_code ?> 0i32
+    ? deterministic < 1i32
+    ?> 0i32
+    |? 1i32 < deterministic
+    ?> 0i32
+    |? method_code < 1i32
+    ?> 0i32
+    |? 1i32 < method_code
+    ?> 0i32
     |: 1i32
 
 :~ complete_binding (manifest_valid : i32) (size_valid : i32) : i32 =

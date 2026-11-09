@@ -54,7 +54,7 @@ enum US2 {
 }
 pub struct Mut1 { pub l0: Rc<str> }
 fn env_refused_1(mut v0: Rc<str>) -> i32 {
-    let v3: Rc<str> = string_concat(&["kit error: env check ", &*v0, "; usage: env check [<tool>=<pinned-path>...] (each tool is looked up on PATH in order; the first copy found must be the pinned one; with no pins given, the PathFirst rows of <kit config>/path_first.spi are the pins)"]);
+    let v3: Rc<str> = string_concat(&["rig error: env check ", &*v0, "; usage: env check [<tool>=<pinned-path>...] (each tool is looked up on PATH in order; the first copy found must be the pinned one; with no pins given, the PathFirst rows of <kit config>/path_first.spi are the pins)"]);
     eprintln!("{}", v3);
     2i32
 }
@@ -729,7 +729,7 @@ fn env_run_0() -> i32 {
     };
     let v12: bool = &*v11 != "check";
     if v12 {
-        let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: env usage: env check [<tool>=<pinned-path>...] (each tool is looked up on PATH in order; the first copy found must be the pinned one; with no pins given, the PathFirst rows of <kit config>/path_first.spi are the pins)"); } LIT.with(|lit| lit.clone()) };
+        let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: env usage: env check [<tool>=<pinned-path>...] (each tool is looked up on PATH in order; the first copy found must be the pinned one; with no pins given, the PathFirst rows of <kit config>/path_first.spi are the pins)"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v13);
         2i32
     } else {
@@ -794,7 +794,7 @@ fn env_run_0() -> i32 {
                 let v50: i32 = method27(v22, v49);
                 let v51: Rc<str> = format_real_28(v50);
                 let v54: Rc<str> = format_real_30(v41);
-                let v55: Rc<str> = string_concat(&["kit env check ", &*v46, " pins=", &*v51, " drifted=", &*v54]);
+                let v55: Rc<str> = string_concat(&["rig env check ", &*v46, " pins=", &*v51, " drifted=", &*v54]);
                 eprintln!("{}", v55);
                 if v43 {
                     0i32

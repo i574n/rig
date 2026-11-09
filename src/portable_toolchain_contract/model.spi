@@ -29,7 +29,8 @@
     ))
 
 :~ portable_toolchain_resolution_binding (payload_present : i32) (payload_match : i32) (tools_match : i32) : i32 =
-    ? payload_present = 0i32 ?> 0i32
+    ? payload_present = 0i32
+    ?> 0i32
     |:
         ? payload_match = 1i32 ?>
             ? tools_match = 1i32 ?> 2i32 |: 1i32

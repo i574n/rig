@@ -8,7 +8,7 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn rig_binary() -> PathBuf {
-    if let Ok(path) = env::var("KIT_BIN_UNDER_TEST") { return PathBuf::from(path); }
+    if let Ok(path) = env::var("RIG_BIN_UNDER_TEST").or_else(|_| env::var("KIT_BIN_UNDER_TEST")) { return PathBuf::from(path); }
     let current = env::current_exe().expect("current test executable");
     let name = if cfg!(windows) { "kit.exe" } else { "kit" };
     let debug = current.parent().and_then(Path::parent).expect("target profile directory");
@@ -64,12 +64,12 @@ fn a_refused_overwrite_suggests_the_same_command_with_create_or_replace() {
     let path = root.to_str().expect("root");
     receipt(&fs_write(&root, "value.txt", &[], "first"));
     let refused = fs_write(&root, "value.txt", &[], "it's two words");
-    assert_eq!(corrected(&refused), format!("kit proxy fs-write {path} value.txt --create-or-replace -- 'it''s two words'"));
+    assert_eq!(corrected(&refused), format!("rig proxy fs-write {path} value.txt --create-or-replace -- 'it''s two words'"));
     assert_eq!(fs::read(root.join("value.txt")).expect("kept"), b"first");
     receipt(&proxy(&["fs-write", path, "value.txt", "--create-or-replace", "--", "it's two words"]));
     assert_eq!(fs::read(root.join("value.txt")).expect("replaced"), b"it's two words");
     let flagged = fs_write(&root, "value.txt", &["--expect-nonempty"], "next");
-    assert_eq!(corrected(&flagged), format!("kit proxy fs-write {path} value.txt --create-or-replace --expect-nonempty -- next"));
+    assert_eq!(corrected(&flagged), format!("rig proxy fs-write {path} value.txt --create-or-replace --expect-nonempty -- next"));
     fs::remove_dir_all(root).expect("cleanup");
 }
 
@@ -90,7 +90,7 @@ fn a_repeated_match_suggests_expecting_the_observed_count() {
     let path = root.to_str().expect("root");
     fs::write(root.join("value.txt"), "a a a").expect("fixture");
     let refused = proxy(&["text-replace", "apply", path, "value.txt", "a", "b"]);
-    assert_eq!(corrected(&refused), format!("kit proxy text-replace apply {path} value.txt a b --expect 3"));
+    assert_eq!(corrected(&refused), format!("rig proxy text-replace apply {path} value.txt a b --expect 3"));
     receipt(&proxy(&["text-replace", "apply", path, "value.txt", "a", "b", "--expect", "3"]));
     assert_eq!(fs::read_to_string(root.join("value.txt")).expect("replaced"), "b b b");
     fs::remove_dir_all(root).expect("cleanup");
@@ -102,7 +102,7 @@ fn a_single_match_against_a_wrong_expectation_suggests_dropping_it() {
     let path = root.to_str().expect("root");
     fs::write(root.join("value.txt"), "one").expect("fixture");
     let refused = proxy(&["text-replace", "check", path, "value.txt", "one", "two", "--expect", "2"]);
-    assert_eq!(corrected(&refused), format!("kit proxy text-replace check {path} value.txt one two"));
+    assert_eq!(corrected(&refused), format!("rig proxy text-replace check {path} value.txt one two"));
     fs::remove_dir_all(root).expect("cleanup");
 }
 
@@ -112,7 +112,7 @@ fn a_failure_without_a_known_repair_keeps_the_usage() {
     let path = root.to_str().expect("root");
     fs::write(root.join("value.txt"), "one").expect("fixture");
     let refused = proxy(&["text-replace", "check", path, "value.txt", "zero", "two"]);
-    assert!(corrected(&refused).starts_with("kit proxy text-replace <check|apply>"));
+    assert!(corrected(&refused).starts_with("rig proxy text-replace <check|apply>"));
     fs::remove_dir_all(root).expect("cleanup");
 }
 

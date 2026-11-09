@@ -38,7 +38,7 @@ enum US3 {
 }
 fn planning_edit_failure_2(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let v4: Rc<str> = string_concat(&["agile edit ", &*v1, " rejected: ", &*v0]);
-    let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v4 + "
+    let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v4 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
     v5
 }
@@ -94,7 +94,7 @@ fn planning_written_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3:
     let v6: US0 = replace_records_unchanged_5(v0, v3.clone(), v4.clone());
     match &v6 {
         US0::US0_Replaced => {
-            let v10: Rc<str> = string_concat(&["kit agile edit ok id=", &*v1, " field=", &*v2, " "]);
+            let v10: Rc<str> = string_concat(&["rig agile edit ok id=", &*v1, " field=", &*v2, " "]);
             let v11: Rc<str> = agile_planning_fields::rig_agile_planning_summary(&*v4, &*v1);
             let v13: u64 = v3.len() as u64;
             let v14: u64 = v4.len() as u64;
@@ -171,7 +171,7 @@ fn planning_revised_3(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3:
             planning_written_4(v0, v1, v2, v4, v37, v5)
         }
         US2::US2_PlanningUnchanged => {
-            let v21: Rc<str> = string_concat(&["kit agile edit ok id=", &*v1, " field=", &*v2, " unchanged "]);
+            let v21: Rc<str> = string_concat(&["rig agile edit ok id=", &*v1, " field=", &*v2, " unchanged "]);
             let v22: u64 = v4.len() as u64;
             let v23: u64 = v4.len() as u64;
             let v24: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v5);

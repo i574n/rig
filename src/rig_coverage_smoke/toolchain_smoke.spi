@@ -1,4 +1,3 @@
-
 inl emit_toolchain_smoke () : () = global """
     #[rustfmt::skip]
     fn coverage_toolchain_smoke(context: &CoverageSmokeContext<'_>, scratch: &Path, cargo_text: &str, compiler_text: &str) -> Result<(), String> {

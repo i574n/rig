@@ -473,7 +473,7 @@ fn handoff_render_owned_0(mut v0: Rc<str>) -> i32 {
     match v1 {
         US0::US0_Refused(v2) => {
             let v2: Rc<str> = v2;
-            eprintln!("kit error: {}", &*v2);
+            eprintln!("rig error: {}", &*v2);
             2i32
         }
         US0::US0_Rendered(v3) => {
@@ -483,7 +483,7 @@ fn handoff_render_owned_0(mut v0: Rc<str>) -> i32 {
             if v5 {
                 0i32
             } else {
-                eprintln!("kit error: {}", &*v4);
+                eprintln!("rig error: {}", &*v4);
                 2i32
             }
         }

@@ -18,7 +18,8 @@
 := projection_handoff_title (line : string) : string =
     := line_len = sm.length line : i32
     := quote0 = find_char line 0i32 (char_quote ())
-    ? (=.) quote0 line_len ?> codec_empty ()
+    ? (=.) quote0 line_len
+    ?> codec_empty ()
     |:
         := title, after_title, title_ok = parse_quoted line quote0
         ? title_ok && (<=) after_title line_len && projection_has_content title ?> title |: codec_empty ()
@@ -30,8 +31,7 @@
     ?> codec_empty ()
     |:
         := title, after_title, title_ok = parse_quoted line quote0
-        ? title_ok && projection_has_content title
-        ?>
+        ? title_ok && projection_has_content title ?>
             := quote1 = find_char line after_title (char_quote ())
             ? (=.) quote1 line_len
             ?> codec_empty ()
@@ -54,7 +54,8 @@
         := next_at = ? (=.) line_near_to source_count ?> source_count |: (+.) line_near_to 1i32
         ? (<) (find_text line 0i32 "HandoffSection (") line_len ?>
             := prior_title = projection_handoff_title line
-            ? (=.) prior_title title ?> !+
+            ? (=.) prior_title title
+            ?> !+
             |: projection_handoff_title_seen_loop source next_at stop_at source_count title
         |: projection_handoff_title_seen_loop source next_at stop_at source_count title
     |: !-
@@ -67,8 +68,10 @@
     : string
     =
     ? (=.) at source_count ?>
-        ? (<) count 4i32 ?> codec_empty ()
-        |? (<) 10i32 count ?> codec_empty ()
+        ? (<) count 4i32
+        ?> codec_empty ()
+        |? (<) 10i32 count
+        ?> codec_empty ()
         |: out
     |:
         := line_near_to = find_char source at (char_newline ())

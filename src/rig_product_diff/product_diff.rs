@@ -24,8 +24,8 @@ pub fn product_diff_run(args: &[String]) -> Result<(), String> {
     let left_root = Path::new(args.get(1).map(String::as_str).ok_or_else(|| "missing left-root".to_owned())?);
     let right_root = Path::new(args.get(2).map(String::as_str).ok_or_else(|| "missing right-root".to_owned())?);
     if rig_product_diff_request_binding(i32::from(left_root.is_dir()), i32::from(right_root.is_dir())) != 1 { return Err("typed product-diff request rejected".to_owned()); }
-    let limit = std::env::var("KIT_PRODUCT_DIFF_MAX_ENTRIES").ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(200_000);
-    let workers = std::env::var("KIT_PARALLEL_WORKERS").ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(56);
+    let limit = std::env::var("RIG_PRODUCT_DIFF_MAX_ENTRIES").or_else(|_| std::env::var("KIT_PRODUCT_DIFF_MAX_ENTRIES")).ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(200_000);
+    let workers = std::env::var("RIG_PARALLEL_WORKERS").or_else(|_| std::env::var("KIT_PARALLEL_WORKERS")).ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(56);
     if rig_product_diff_worker_binding(workers as i32, 56) != 1 { return Err("typed product-diff worker request rejected".to_owned()); }
     let pool = rayon::ThreadPoolBuilder::new().num_threads(workers).build().map_err(|error| format!("build Rayon pool: {error}"))?;
     let (left_manifest, right_manifest) = pool.install(|| rayon::join(|| manifest_collect(left_root, left_root, limit, true), || manifest_collect(right_root, right_root, limit, true)));
@@ -48,7 +48,7 @@ pub fn product_diff_run(args: &[String]) -> Result<(), String> {
     let changed_entries = added + removed + changed;
     let total = changed_entries + unchanged;
     if rig_product_diff_summary_binding(changed_entries as i32, total as i32) != 1 { return Err("typed product-diff summary rejected".to_owned()); }
-    println!("kit proxy product-diff ok left={} right={} workers={workers} added={added} removed={removed} changed={changed} unchanged={unchanged} total={total} exact={} left_sha256={left_hash} right_sha256={right_hash}", left_root.display(), right_root.display(), changed_entries == 0);
+    println!("rig proxy product-diff ok left={} right={} workers={workers} added={added} removed={removed} changed={changed} unchanged={unchanged} total={total} exact={} left_sha256={left_hash} right_sha256={right_hash}", left_root.display(), right_root.display(), changed_entries == 0);
     Ok(())
 }
 
@@ -144,7 +144,7 @@ pub fn source_recovery_run(args: &[String]) -> Result<(), String> {
     let current = source_recovery_collect(current_root)?;
     let exact = current.authored.iter().map(|file| file.fingerprint).collect::<std::collections::BTreeSet<_>>();
     let basenames = current.authored.iter().map(|file| file.name.clone()).collect::<std::collections::BTreeSet<_>>();
-    println!("kit proxy source-recovery-diff current={} authored={} generated={} sidecars={} fingerprints={} basenames={}", current_root.display(), current.authored.len(), current.generated, current.sidecars, exact.len(), basenames.len());
+    println!("rig proxy source-recovery-diff current={} authored={} generated={} sidecars={} fingerprints={} basenames={}", current_root.display(), current.authored.len(), current.generated, current.sidecars, exact.len(), basenames.len());
     let mut any_warning = false;
     for candidate_arg in &args[2..] {
         let candidate_root = std::path::Path::new(candidate_arg);
@@ -168,7 +168,7 @@ pub fn source_recovery_run(args: &[String]) -> Result<(), String> {
         any_warning |= missing_large > 0;
         println!("source-recovery candidate={} authored={} exact={} basename={} missing_by_name={} missing_large={} filtered_generated={} filtered_sidecars={} status={}", candidate_root.display(), candidate.authored.len(), exact_count, basename_count, missing_by_name, missing_large, candidate.generated, candidate.sidecars, if missing_large == 0 { "pass" } else { "warn" });
     }
-    println!("kit proxy source-recovery-diff ok status={}", if any_warning { "warn" } else { "pass" });
+    println!("rig proxy source-recovery-diff ok status={}", if any_warning { "warn" } else { "pass" });
     Ok(())
 }
 

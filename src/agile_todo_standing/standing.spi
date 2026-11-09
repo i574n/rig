@@ -15,8 +15,10 @@
 
 := standing_of (~text : string) (~id : string) : todo_standing =
     := status = $'agile_task_census::rig_agile_task_status(&*!text, &*!id)' : string
-    ? (status = "") ?> UnknownTodo
-    |? (status = "Done") ?> StaleTodo
+    ? (status = "")
+    ?> UnknownTodo
+    |? (status = "Done")
+    ?> StaleTodo
     |: OpenTodo
 
 := standing_label = \|

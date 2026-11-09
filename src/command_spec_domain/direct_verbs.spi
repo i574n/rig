@@ -133,14 +133,14 @@
             word = "ps"
             line =
                 "ps [regex] [--tree] [--mine] | kill <pid>... [--tree] [--mine [--theirs <job-id>]] (never this "
-                ^^ "kit or its calling shells)"
+                ^^ "rig or its calling shells)"
         }
     | VerbKill =>
         {
             word = "kill"
             line =
                 "ps [regex] [--tree] [--mine] | kill <pid>... [--tree] [--mine [--theirs <job-id>]] (never this "
-                ^^ "kit or its calling shells)"
+                ^^ "rig or its calling shells)"
         }
     | VerbStandards =>
         {
@@ -310,8 +310,10 @@
 
 := help_step (done : help_text) (verb : direct_verb) : help_text =
     := line = (verb_help_of verb).line
-    ? line = done.previous ?> done
-    |? done.text = "" ?> { text = line; previous = line }
+    ? line = done.previous
+    ?> done
+    |? done.text = ""
+    ?> { text = line; previous = line }
     |: { text = done.text ++# "\n" ++# line; previous = line }
 
 := help_lines () : string = (union_reflection.cases.union_cases_fold help_step { text = ""; previous = "" }).text

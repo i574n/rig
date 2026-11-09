@@ -68,7 +68,7 @@ inl emit_runtime () : () = global """
         let test_ratio = coverage_ratio(&test);
         let smoke_ratio = coverage_ratio(&smoke);
         let combined_ratio = coverage_ratio(&combined);
-        println!("kit coverage assess test={test_ratio}/1000 smoke={smoke_ratio}/1000 combined={combined_ratio}/1000 lines={}", combined.len());
+        println!("rig coverage assess test={test_ratio}/1000 smoke={smoke_ratio}/1000 combined={combined_ratio}/1000 lines={}", combined.len());
         if test_ratio < test_floor || smoke_ratio < smoke_floor || combined_ratio < combined_floor {
             return Err(format!("coverage floor failed test={test_ratio}/{test_floor} smoke={smoke_ratio}/{smoke_floor} combined={combined_ratio}/{combined_floor}"));
         }
@@ -99,7 +99,7 @@ inl emit_runtime () : () = global """
         let hash = inspection_file_sha256(&source)?;
         let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|error| error.to_string())?.as_nanos();
         let command_text = args[separator + 1..].join(" ");
-        let bundle_id = env::var("KIT_BUNDLE_ID").unwrap_or_else(|_| "external".to_owned());
+        let bundle_id = env::var("RIG_BUNDLE_ID").or_else(|_| env::var("KIT_BUNDLE_ID")).unwrap_or_else(|_| "external".to_owned());
         let entry = format!("inl receipt_{}_{stamp} () : prune_receipt = PruneReceipt (\"{}\", \"{}\", \"{}\", \"{}\")\n", std::process::id(), coverage_escape_spi(relative), coverage_escape_spi(&hash), coverage_escape_spi(&command_text), coverage_escape_spi(&bundle_id));
         let updated = original_receipts.replacen(marker, &format!("{entry}{marker}"), 1);
         let stage = source.parent().ok_or("prune source has no parent")?.join(format!(".kit-prune-{}-{stamp}", std::process::id()));
@@ -155,7 +155,7 @@ inl emit_runtime () : () = global """
             return Err(format!("{error}; rollback incomplete: {}", failures.join("; ")));
         }
         if let Err(error) = fs::remove_dir(&stage) { eprintln!("prune stage cleanup failed: {error}"); }
-        println!("kit proxy prune-uncovered ok relative={relative} sha256={hash}");
+        println!("rig proxy prune-uncovered ok relative={relative} sha256={hash}");
         Ok(())
     }
 

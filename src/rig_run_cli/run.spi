@@ -13,9 +13,12 @@
     | SetupMissing : string
 
 :~ setup_of (~lib : string) (~core : string) (~compiler : string) (~cache_root : string) : setup_read =
-    ? lib = "" ?> SetupMissing "SPIRAL_LIB (the lib/spiral package folder)"
-    |? core = "" ?> SetupMissing "SPIRAL_CORE (the core package folder)"
-    |? compiler = "" ?> SetupMissing "SPIRAL_COMPILER_DLL (SpiralCompiler.dll)"
+    ? lib = ""
+    ?> SetupMissing "SPIRAL_LIB (the lib/spiral package folder)"
+    |? core = ""
+    ?> SetupMissing "SPIRAL_CORE (the core package folder)"
+    |? compiler = ""
+    ?> SetupMissing "SPIRAL_COMPILER_DLL (SpiralCompiler.dll)"
     |: SetupReady { lib = lib; core = core; compiler = compiler; cache_root = cache_root }
 
 :~ test_names_in (~text : string) : list string =
@@ -43,27 +46,26 @@
     := words = ?= env.command_line_arguments () ?| | _ :: rest => rest | [] => []
     ?= setup, request_of words ?|
     | _, RunRefused reason =>
-        console.write_error_line ("kit error: " ++# reason)
+        console.write_error_line ("rig error: " ++# reason)
         2i32
     | SetupMissing what, _ =>
-        console.write_error_line ("kit error: kit run needs " ++# what)
+        console.write_error_line ("rig error: kit run needs " ++# what)
         2i32
     | SetupReady s, RunProgram (file, args) =>
         ?= rig_run_build.builder.built_exe (s.lib, s.core, s.compiler, s.cache_root, file) ?|
         | exe, "" => program_ran exe args
         | _, reason =>
-            console.write_error_line ("kit error: kit run " ++# reason)
+            console.write_error_line ("rig error: kit run " ++# reason)
             1i32
     | _, RunTests (file, ListTests) =>
         := names = test_names_in (file_system.read_text_or_empty file)
         names |> listm.iter console.write_line
-        console.write_line ("kit run list ok tests=" ++# sm'.show (listm.length names : i32))
+        console.write_line ("rig run list ok tests=" ++# sm'.show (listm.length names : i32))
         0i32
     | _, RunTests (file, selection) =>
         := runner = env.get_environment_variable "SPIRAL_CELLS_RUNNER"
-        ? runner = ""
-        ?>
-            console.write_error_line "kit error: kit run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"
+        ? runner = "" ?>
+            console.write_error_line "rig error: kit run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"
             2i32
         |:
             := names = ?= selection ?| | NamedTests picked => picked | _ => []

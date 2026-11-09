@@ -10,14 +10,16 @@
 := any_filter_text () : string = "all"
 
 :~ load_filter_of (~value : string) : planning_filter =
-    ? value = any_filter_text () ?> AnyPlanning
+    ? value = any_filter_text ()
+    ?> AnyPlanning
     |:
         ?= parse_planned_load value ?|
         | Valid load => ExactPlanning (planned_load_code load)
         | Invalid => RejectedPlanningFilter
 
 :~ assignee_filter_of (~value : string) : planning_filter =
-    ? value = any_filter_text () ?> AnyPlanning
+    ? value = any_filter_text ()
+    ?> AnyPlanning
     |:
         ?= parse_planned_assignee value ?|
         | Valid assignee => ExactPlanning (planned_assignee_code assignee)

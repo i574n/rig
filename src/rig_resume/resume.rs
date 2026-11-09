@@ -714,7 +714,7 @@ fn resume_run_0() -> i32 {
         v8
     };
     if v9 {
-        let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: kit resume <backlog-root> [--team <team>] [--as <author>]"); } LIT.with(|lit| lit.clone()) };
+        let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: kit resume <backlog-root> [--team <team>] [--as <author>]"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v10);
         2i32
     } else {
@@ -728,7 +728,7 @@ fn resume_run_0() -> i32 {
         let v18: US1 = US1::US1_AuthorNotes;
         let v19: i32 = section_shown_4(v1, v3.clone(), v5.clone(), v18, v17);
         let v20: Rc<str> = format_real_30(v19);
-        let v21: Rc<str> = string_concat(&["kit resume ok sections=", &*v20]);
+        let v21: Rc<str> = string_concat(&["rig resume ok sections=", &*v20]);
         let v22: bool = &*v3 == "";
         let v25: Rc<str> = if v22 {
             let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };

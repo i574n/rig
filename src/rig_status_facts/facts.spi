@@ -2,7 +2,8 @@
 :< model
 
 :~ release_home (~rig_root : string) : string =
-    := given = env.get_environment_variable "KIT_RELEASE_HOME"
+    := rig_given = env.get_environment_variable "RIG_RELEASE_HOME"
+    := given = ? rig_given <> "" ?> rig_given |: env.get_environment_variable "KIT_RELEASE_HOME"
     ? given <> "" ?> sm'.replace "\\" "/" given |: sm'.replace "\\" "/" rig_root ++# "/.cache/release-train"
 
 :~ age_hours (~path : string) : i64 =
@@ -22,10 +23,12 @@
         | _ => FactMissing ("gate", home ++# "/<train>/crate-gate.log")
     := state = sm'.replace "\\" "/" backlog ++# "/state/agile.spi"
     := counts =
-        ? backlog = "" ?> []
+        ? backlog = ""
+        ?> []
         |:
             := text = file_system.read_text_or_empty state
-            ? text = "" ?> [ FactMissing ("backlog", state) ]
+            ? text = ""
+            ?> [ FactMissing ("backlog", state) ]
             |: [ BacklogCounts (agile_task_census.task_census.census_text text, state) ]
     := facts = listm.append [ train; gate ] counts
     listm.append (facts |> listm.map fact_line) [ receipt_line facts ] |> listm'.box |> listm'.to_array'

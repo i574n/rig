@@ -60,7 +60,7 @@
     := header = $'rig_log_sections::rig_sequence_sections_header(&*!columns)' : string
     := table = header ++# "\n" ++# found.table.text
     := receipt =
-        "kit table sequences ok files="
+        "rig table sequences ok files="
         ++# sm'.format (listm.length files : i32)
         ++# " sections="
         ++# sm'.format found.sections

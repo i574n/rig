@@ -18,8 +18,10 @@
     | AnchorCount :: string * i32 -> fleet_problem
 
 :~ reach_of (~word : string) : reach =
-    ? word = "direct" ?> DirectReach
-    |? word = "reverse" ?> ReverseReach
+    ? word = "direct"
+    ?> DirectReach
+    |? word = "reverse"
+    ?> ReverseReach
     |: JumpReach
 
 := reverse_reach = \|

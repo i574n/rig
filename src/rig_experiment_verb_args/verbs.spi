@@ -29,9 +29,12 @@
     | AmendValue => { row ?| value = value }
 
 :~ placed (~word : string) (row : amend_row) : amend_row =
-    ? row.ledger = "" ?> { row ?| ledger = word }
-    |? row.id = "" ?> { row ?| id = word }
-    |? row.note = "" ?> { row ?| note = word }
+    ? row.ledger = ""
+    ?> { row ?| ledger = word }
+    |? row.id = ""
+    ?> { row ?| id = word }
+    |? row.note = ""
+    ?> { row ?| note = word }
     |: { row ?| rejected = "unexpected word " ++# word }
 
 :~ ^ amend_read (words : list string) (row : amend_row) : amend_row =
@@ -64,9 +67,12 @@
     | AnalyzeWhere => { row ?| wheres = ? row.wheres = "" ?> value |: row.wheres ++# "\n" ++# value }
 
 :~ analyze_placed (~word : string) (row : analyze_row) : analyze_row =
-    ? row.ledger = "" ?> { row ?| ledger = word }
-    |? row.id = "" ?> { row ?| id = word }
-    |? row.table = "" ?> { row ?| table = word }
+    ? row.ledger = ""
+    ?> { row ?| ledger = word }
+    |? row.id = ""
+    ?> { row ?| id = word }
+    |? row.table = ""
+    ?> { row ?| table = word }
     |: { row ?| rejected = "unexpected word " ++# word }
 
 :~ ^ analyze_read (words : list string) (row : analyze_row) : analyze_row =

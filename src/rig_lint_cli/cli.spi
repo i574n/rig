@@ -23,7 +23,7 @@
     ?= rest ?|
     | baseline_repo :: baseline :: scan_repo :: scan :: [] => growth_run (baseline_repo, baseline, scan_repo, scan)
     | _ =>
-        console.write_error_line "kit error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"
+        console.write_error_line "rig error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"
         2i32
 
 :~ lint_cli_run () : i32 =

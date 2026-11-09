@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         fn runtime_filename(path: &std::path::Path) -> bool {

@@ -57,8 +57,7 @@
 
 ///> rust
 :# sidecar_cleanup_rejects_linked_roots_scopes_and_nested_directories =
-    ? on_windows () || on_linux ()
-    ?>
+    ? on_windows () || on_linux () ?>
         := outside = hygiene_fixture ()
         fixture_write outside "keep.spiral-entry" "outside"
         fixture_write outside "src/keep.spiral-entry" "outside"

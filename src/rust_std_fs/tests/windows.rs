@@ -6,7 +6,7 @@ static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new
 fn scratch() -> PathBuf {
     let count = COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     let root = std::env::temp_dir().join(format!(
-        "kit windows ü {}-{}-{}",
+        "rig windows ü {}-{}-{}",
         std::process::id(),
         count,
         std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()

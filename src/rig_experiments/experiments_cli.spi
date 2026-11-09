@@ -19,7 +19,7 @@
 ///> rust
 :# a_welch_experiment_is_registered_once_guarded_then_analyzed_once =
     := root = fixture_root_create "experiment welch"
-    shows (succeeded (register_welch root)) "kit experiment register ok id=PR-1 test=welch runs=5 registered="
+    shows (succeeded (register_welch root)) "rig experiment register ok id=PR-1 test=welch runs=5 registered="
     rejected_with (register_welch root) 2i32 "register: PR-1 is already registered"
     fixture_write root "partial.tsv" (cat "variant\tretries\n" (cat (rows_of "fast" "1,2,3") (rows_of "base" "2,4,6")))
     := refused = analyze root "partial.tsv" NoArgs
@@ -39,7 +39,7 @@
     shows again.stdout "an experiment is analyzed once"
     := show = succeeded (experiment root (Arg ("show", Arg ("ledger", Arg ("PR-1", NoArgs)))))
     shows show "decision=fast differs if p < 0.05"
-    shows show "kit experiment show ok id=PR-1 verdict=recorded"
+    shows show "rig experiment show ok id=PR-1 verdict=recorded"
     fixture_root_remove root
 
 ///> rust
@@ -120,7 +120,7 @@
             succeeded (experiment root (Arg ("amend", Arg ("ledger", Arg ("PR-1", Arg ("--field", Arg ("runs",
                 Arg ("--value", Arg ("3", Arg ("--reason", Arg ("crash rule: chunks of 3", NoArgs)))))))))))
         )
-        "kit experiment amend ok id=PR-1 field=runs value=3"
+        "rig experiment amend ok id=PR-1 field=runs value=3"
     fixture_write root "three.tsv" (cat "variant\tretries\n" (cat (rows_of "fast" "1,2,3") (rows_of "base" "2,4,6")))
     shows (succeeded (analyze root "three.tsv" NoArgs)) "n=fast 3/3, base 3/3"
     rejected_with
@@ -186,18 +186,18 @@
         succeeded (imported_pr root (Arg ("--registered-at", Arg ("2026-10-02T09:00Z", Arg ("--evidence",
             Arg ("docs/BENCHMARK.md@120", NoArgs))))))
     shows done (
-        "kit experiment import ok id=PR-3a imported=yes registered=2026-10-02T09:00Z "
+        "rig experiment import ok id=PR-3a imported=yes registered=2026-10-02T09:00Z "
         ^^ "evidence=docs/BENCHMARK.md@120 imported_at="
     )
     := recorded =
         succeeded (experiment root (Arg ("record-verdict", Arg ("ledger", Arg ("PR-3a", Arg ("--verdict",
             Arg ("fast faster, p=0.01", Arg ("--at", Arg ("2026-10-05", NoArgs)))))))))
-    shows recorded "kit experiment record-verdict ok id=PR-3a at=2026-10-05 imported=yes"
+    shows recorded "rig experiment record-verdict ok id=PR-3a at=2026-10-05 imported=yes"
     := show = succeeded (experiment root (Arg ("show", Arg ("ledger", Arg ("PR-3a", NoArgs)))))
     shows show "imported=yes"
     shows show "evidence=docs/BENCHMARK.md@120"
     shows show "verdict=fast faster, p=0.01"
-    shows show "kit experiment show ok id=PR-3a verdict=recorded"
+    shows show "rig experiment show ok id=PR-3a verdict=recorded"
     rejected_with
         (
             experiment root (Arg ("record-verdict", Arg ("ledger", Arg ("PR-3a", Arg ("--verdict", Arg ("again",
@@ -205,7 +205,7 @@
         )
         2i32
         "record-verdict: PR-3a already has a verdict"
-    shows (succeeded (register_welch root)) "kit experiment register ok id=PR-1"
+    shows (succeeded (register_welch root)) "rig experiment register ok id=PR-1"
     rejected_with
         (
             experiment root (Arg ("record-verdict", Arg ("ledger", Arg ("PR-1", Arg ("--verdict", Arg ("made up",

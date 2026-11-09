@@ -68,23 +68,16 @@
 
 :~ plan_manifest_projection_witness () : i32 =
     := header = plan_manifest_header_projection "KIT-PLAN-IR\t1"
-    ? (header = "1")
-    ?>
+    ? (header = "1") ?>
         := invalid_header = plan_manifest_header_projection "KIT-PLAN-IR\t2"
-        ? (invalid_header = "")
-        ?>
+        ? (invalid_header = "") ?>
             := op_hex, target_hex, expected_hex, payload_hex, effect_hex =
                 plan_manifest_row_hex_tuple "op\t01\t02\t03\t04\t05"
-            ? (op_hex = "01")
-            ?>
-                ? (target_hex = "02")
-                ?>
-                    ? (expected_hex = "03")
-                    ?>
-                        ? (payload_hex = "04")
-                        ?>
-                            ? (effect_hex = "05")
-                            ?>
+            ? (op_hex = "01") ?>
+                ? (target_hex = "02") ?>
+                    ? (expected_hex = "03") ?>
+                        ? (payload_hex = "04") ?>
+                            ? (effect_hex = "05") ?>
                                 := invalid_op, invalid_target, invalid_expected, invalid_payload, invalid_effect =
                                     plan_manifest_row_hex_tuple "op\t01\t02\t03\t04\t05\t06"
                                 ? (invalid_op = "") ?>

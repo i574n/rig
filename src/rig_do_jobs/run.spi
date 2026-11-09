@@ -59,15 +59,13 @@
     := word = summary_field summary "state"
     := detail = summary_field summary "detail"
     := head = "job " ++# name ++# "  "
-    ? word = "finished"
-    ?>
+    ? word = "finished" ?>
         head
         ++# "finished after "
         ++# duration_text (decimal_of (summary_field summary "elapsed_ms"))
         ++# "  exit "
         ++# (summary_field summary "exit")
-    |? word = "timed-out"
-    ?>
+    |? word = "timed-out" ?>
         head
         ++# "timed out after "
         ++# duration_text (decimal_of (summary_field summary "timeout_ms"))
@@ -98,8 +96,7 @@
 :~ wait_run (~name : string) (~wait_ms : u64) (~state : job_tally) : job_tally =
     := id = labeled name
     := counted = ? name_listed state.started name ?> state.jobs |: state.jobs + 1u64
-    ? id = ""
-    ?>
+    ? id = "" ?>
         { state ?|
             report = lines_joined state.report ("job wait: no job named " ++# name)
             failed = !+

@@ -39,7 +39,9 @@
 :# diff_statements_name_two_tables_keys_and_columns =
     ?= table_parsed (records_from_bars "ok\nquery|diff|wa.tsv|wb.tsv|wby|wid,|wbackend|won|wcompile,|wexit") 1i32 ?|
     | TableParsed (TablesDiffed (left, right, keys, columns)) =>
-        testing.expect (left = "a.tsv" && right = "b.tsv" && keys = "id\nbackend" && columns = "compile\nexit") "diff parts"
+        testing.expect
+            (left = "a.tsv" && right = "b.tsv" && keys = "id\nbackend" && columns = "compile\nexit")
+            "diff parts"
     | TableRejected message => testing.expect !- message
     ?= table_parsed (records_from_bars "ok\nquery|diff|wa.tsv|wb.tsv") 1i32 ?|
     | TableRejected message => testing.expect (message = "diff: expected by <key,...>") "missing keys"

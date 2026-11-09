@@ -8,7 +8,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new(label: &str) -> Self {
         let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
-        let root = env::temp_dir().join(format!("kit evidence {label} ü {} {stamp}", std::process::id()));
+        let root = env::temp_dir().join(format!("rig evidence {label} ü {} {stamp}", std::process::id()));
         fs::create_dir_all(root.join("state")).unwrap();
         fs::create_dir_all(root.join("input")).unwrap();
         Self(root)

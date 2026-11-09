@@ -7,14 +7,20 @@
 := default_skipped () : list string = [ ".git"; "target"; "node_modules"; "_build"; ".cache"; "deps" ]
 
 :~ skipped_of (listed : string) : list string =
-    ? listed = "" ?> default_skipped ()
+    ? listed = ""
+    ?> default_skipped ()
     |: sm'.split_list "," listed |> listm.map sm'.trim |> listm'.filter (\ (name : string) => name <> "")
 
 :== listing = { text : string; fingerprint : string; files : i32 }
 
 :~ listing_of ((root, listed) : string * string) : array_base listing =
     := entries = file_manifest.file_manifest (sm'.replace "\\" "/" root) (skipped_of listed)
-    := found = { text = file_manifest.manifest_text entries; fingerprint = file_manifest.manifest_fingerprint entries; files = listm.length entries }
+    := found =
+        {
+            text = file_manifest.manifest_text entries
+            fingerprint = file_manifest.manifest_fingerprint entries
+            files = listm.length entries
+        }
     (;[ found ] : array listing) |> am'.base
 
 ///> rust

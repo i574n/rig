@@ -1,4 +1,3 @@
-
 inl emit_tests () : () = global """
     use rig_patch_compat_driver::test_support::{apply, apply_fault, bounded_read, plan, gated, gated_with_corruption, promotion_receipt_roundtrip, rehearse, restoration_receipt_paths, staged_write_mismatch, temporary};
     use std::fs;

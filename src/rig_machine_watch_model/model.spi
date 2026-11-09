@@ -180,11 +180,16 @@
 := lowercase (~text : string) : string = $'std::rc::Rc::<str>::from((&*!text).to_lowercase())' : string
 
 :~ quiet_verdict_of (limits : watch_limits) (job : quiet_job) : quiet_verdict =
-    ? job.quiet_minutes < limits.silent_minutes ?> Talking
-    |? job.tree_cores >= 0.1f64 ?> Buffered job.tree_cores
-    |? job.live_block ?> QuietInLiveBlock
-    |? contains (lowercase job.last_line) "waiting for" ?> WaitingByDesign job.last_line
-    |? job.cells_cores >= 0.5f64 ?> CellsBusy job.cells_cores
+    ? job.quiet_minutes < limits.silent_minutes
+    ?> Talking
+    |? job.tree_cores >= 0.1f64
+    ?> Buffered job.tree_cores
+    |? job.live_block
+    ?> QuietInLiveBlock
+    |? contains (lowercase job.last_line) "waiting for"
+    ?> WaitingByDesign job.last_line
+    |? job.cells_cores >= 0.5f64
+    ?> CellsBusy job.cells_cores
     |: Silent job.quiet_minutes
 
 := cores_text (cores : f64) : string = $'std::rc::Rc::<str>::from(format\!("{:.2}", !cores))' : string
@@ -211,7 +216,8 @@
     | WindowStale : string
 
 :~ window_health_of (~held : bool) (~job_state : string) : window_health =
-    ? held && job_state <> "" && job_state <> "running" && job_state <> "queued" ?> WindowStale job_state
+    ? held && job_state <> "" && job_state <> "running" && job_state <> "queued"
+    ?> WindowStale job_state
     |: WindowFine
 
 := window_text = \|

@@ -64,7 +64,7 @@ fn stderr_line_3(mut v0: Rc<str>) -> () {
     ()
 }
 fn failed_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: experiment "); } LIT.with(|lit| lit.clone()) };
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: experiment "); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = concat5_2(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_3(v3);
@@ -488,7 +488,7 @@ fn registered_as_6(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: US0, mut v3: Rc<str
                 let v32: Rc<str> = string_concat(&["register: ", &*v1, " is already registered or the ledger is unwritable (", &*v27, ")"]);
                 failed_1(v32)
             } else {
-                let v35: Rc<str> = string_concat(&["kit experiment register ok id=", &*v1, " test="]);
+                let v35: Rc<str> = string_concat(&["rig experiment register ok id=", &*v1, " test="]);
                 let v47: Rc<str> = match v2 {
                     US0::US0_BinomialAtMost => {
                         let v38: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("binomial"); } LIT.with(|lit| lit.clone()) };
@@ -655,7 +655,7 @@ fn shown_23(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v35: Rc<str> = concat5_2(v19, v23, v24, v28, v34);
         let v36: Rc<str> = concat5_2(v13, v7, v14, v18, v35);
         stdout_line_20(v36);
-        let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit experiment show ok id="); } LIT.with(|lit| lit.clone()) };
+        let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig experiment show ok id="); } LIT.with(|lit| lit.clone()) };
         let v38: Rc<str> = concat5_2(v1.clone(), v3, v25, v4.clone(), v4.clone());
         let v39: Rc<str> = joined_15(v0, v38);
         let v40: bool = path_exists_25(v39);

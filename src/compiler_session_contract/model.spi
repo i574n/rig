@@ -25,20 +25,28 @@
         compiler_session_plan from to
 
 :~ lane_binding (lanes : i32) (lane : i32) : i32 =
-    ? lanes < 1i32 ?> 0i32
-    |? lane < 0i32 ?> 0i32
-    |? lane < lanes ?> 1i32
+    ? lanes < 1i32
+    ?> 0i32
+    |? lane < 0i32
+    ?> 0i32
+    |? lane < lanes
+    ?> 1i32
     |: 0i32
 
 :~ revision_binding (seen_before : i32) (same_source : i32) (kind_code : i32) : i32 =
-    ? seen_before = 0i32 ?> ? kind_code = 0i32 ?> 1i32 |: 0i32
-    |? same_source = 1i32 ?> ? kind_code = 1i32 ?> 1i32 |: 0i32
-    |? kind_code = 2i32 ?> 1i32
+    ? seen_before = 0i32
+    ?> ? kind_code = 0i32 ?> 1i32 |: 0i32
+    |? same_source = 1i32
+    ?> ? kind_code = 1i32 ?> 1i32 |: 0i32
+    |? kind_code = 2i32
+    ?> 1i32
     |: 0i32
 
 :~ cache_binding (revision_code : i32) (cache_code : i32) : i32 =
-    ? cache_code = 0i32 ?> 1i32
-    |? cache_code = 1i32 ?> ? revision_code = 1i32 ?> 1i32 |: 0i32
+    ? cache_code = 0i32
+    ?> 1i32
+    |? cache_code = 1i32
+    ?> ? revision_code = 1i32 ?> 1i32 |: 0i32
     |: 0i32
 
 :~ request_binding (status : i32) : i32 = ? status = 0i32 ?> 1i32 |: 0i32

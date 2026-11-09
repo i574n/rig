@@ -131,7 +131,7 @@ pub fn cold_rebuild_owner_run(args: &[String]) -> Result<(), String> {
         if current_hash.as_deref() != owner[2].as_str() { return Err(format!("generated output changed since cold planning: {}", args[4])); }
         atomic_write(&output, generated.as_bytes())?;
     }
-    println!("kit proxy cold-rebuild-owner ok input={} output={} changed={} snapshot={}", args[3], args[4], i32::from(!unchanged), args[2]);
+    println!("rig proxy cold-rebuild-owner ok input={} output={} changed={} snapshot={}", args[3], args[4], i32::from(!unchanged), args[2]);
     Ok(())
 }
 
@@ -175,14 +175,14 @@ fn cold_matrix_write(root: &Path, relative: &str, kit: &str, compiler: &str, dot
         let arguments = vec!["proxy".to_owned(), "cold-rebuild-owner".to_owned(), root.to_string_lossy().into_owned(), snapshot.clone(),
             input_rel.clone(), cold_relative(&root, output)?, compiler.to_owned(), dotnet.to_owned(),
             if format_lane == 1 { rustfmt.to_owned() } else { String::new() }, timeout_ms.to_string(),
-            std::env::var("KIT_SPIRAL_BUNDLE").unwrap_or_default()];
+            std::env::var("RIG_SPIRAL_BUNDLE").or_else(|_| std::env::var("KIT_SPIRAL_BUNDLE")).unwrap_or_default()];
         let receipt = cold_relative(&root, &receipt_dir.join(format!("{compile_id}.txt")))?;
         out.push_str(&format!("{compile_id}\t{kit}\t{}\t.\t\tpass\tstop\t\t{receipt}\n", encode_matrix_arguments(&arguments)?));
         if format_lane == 1 { format_count += 1; }
     }
     fs::create_dir_all(matrix_dir).map_err(|e| format!("mkdir {}: {e}", matrix_dir.display()))?;
     atomic_write(&target, out.as_bytes())?;
-    println!("kit proxy cold-rebuild-matrix ok pairs={} rows={} single_flight_chains={} density_formats={} compiler_timeout_ms={} path={}",
+    println!("rig proxy cold-rebuild-matrix ok pairs={} rows={} single_flight_chains={} density_formats={} compiler_timeout_ms={} path={}",
         pairs.len(), pairs.len(), pairs.len(), format_count, timeout_ms, target.display());
     Ok(())
 }

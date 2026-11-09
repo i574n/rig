@@ -26,11 +26,16 @@
     }
 
 :~ tool_of (~name : string) : hook_tool =
-    ? name = "Edit" ?> ToolEdit
-    |? name = "Write" ?> ToolWrite
-    |? name = "MultiEdit" ?> ToolMultiEdit
-    |? name = "NotebookEdit" ?> ToolNotebookEdit
-    |? name = "Bash" || name = "PowerShell" ?> ToolShell
+    ? name = "Edit"
+    ?> ToolEdit
+    |? name = "Write"
+    ?> ToolWrite
+    |? name = "MultiEdit"
+    ?> ToolMultiEdit
+    |? name = "NotebookEdit"
+    ?> ToolNotebookEdit
+    |? name = "Bash" || name = "PowerShell"
+    ?> ToolShell
     |: ToolOther
 
 :~ edits_files (tool : hook_tool) : bool =
@@ -63,10 +68,12 @@
 
 :~ new_file_verdict (policy : hook_policy) (tool : hook_tool) (~path : string) (present : bool) : verdict =
     := ext = extension_of path
-    ? tool <> ToolWrite || present ?> Allow
+    ? tool <> ToolWrite || present
+    ?> Allow
     |? listm'.exists' (\ (root : string) => under root path) policy.closed_roots
     ?> Deny ("new files are not written under " ++# path ++# "'s folder; put them in the repo that owns the work")
-    |? under policy.repos_root path |> not ?> Allow
+    |? under policy.repos_root path |> not
+    ?> Allow
     |? listm'.contains ext policy.refused_extensions
     ?> Deny ("no new " ++# ext ++# " files in repos; write the tool in Spiral")
     |? listm'.contains ext policy.advised_extensions

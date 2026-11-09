@@ -48,7 +48,7 @@ enum US4 {
 }
 fn seal_failure_2(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = string_concat(&["agile seal rejected: ", &*v0]);
-    let mut v2: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v1 + "
+    let mut v2: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v1 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
     v2
 }
@@ -69,7 +69,7 @@ fn seal_receipt_3(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<RefCell<Vec<Rc<str>>>
     let v22: Rc<str> = std::rc::Rc::<str>::from((v7).to_string());
     let v25: Rc<str> = std::rc::Rc::<str>::from((v8).to_string());
     let v28: Rc<str> = std::rc::Rc::<str>::from((v21).to_string());
-    let v30: Rc<str> = string_concat(&["kit agile seal ", &*v13, " sealed=", &*v14, " new_in_archive=", &*v17, " bytes_before=", &*v22, " bytes_after=", &*v25, " elapsed_ms=", &*v28]);
+    let v30: Rc<str> = string_concat(&["rig agile seal ", &*v13, " sealed=", &*v14, " new_in_archive=", &*v17, " bytes_before=", &*v22, " bytes_after=", &*v25, " elapsed_ms=", &*v28]);
     let v31: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v30.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
     v31
@@ -363,7 +363,7 @@ fn state_written_26(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US3 {
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".paused"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v5: Rc<str> = concat5_4(v0.clone(), v3, v4.clone(), v4.clone(), v4.clone());
-    std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
+    std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
     let mut v6: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
     if v6 {
         let mut v7: Rc<str> = string_concat(&[&*v0, ".pending"]);

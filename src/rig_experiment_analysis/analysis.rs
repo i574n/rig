@@ -86,7 +86,7 @@ fn stderr_line_3(mut v0: Rc<str>) -> () {
     ()
 }
 fn failed_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: experiment "); } LIT.with(|lit| lit.clone()) };
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: experiment "); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = concat5_2(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_3(v3);
@@ -604,7 +604,7 @@ fn analyzed_plan_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc
         match &v112 {
             US7::US7_LookRefused(v113) => {
                 let v113: Rc<str> = v113.clone();
-                let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit experiment analyze refused id="); } LIT.with(|lit| lit.clone()) };
+                let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig experiment analyze refused id="); } LIT.with(|lit| lit.clone()) };
                 let v115: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
                 let v116: Rc<str> = concat5_2(v114, v7, v115, v113, v106);
                 stdout_line_21(v116);
@@ -687,7 +687,7 @@ fn analyzed_plan_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc
                     let v167: Rc<str> = concat5_2(v166, v164, v106.clone(), v106.clone(), v106.clone());
                     failed_1(v167)
                 } else {
-                    let v169: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit experiment analyze ok "); } LIT.with(|lit| lit.clone()) };
+                    let v169: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig experiment analyze ok "); } LIT.with(|lit| lit.clone()) };
                     let v173: Rc<str> = match v112 {
                         US7::US7_InterimLook(v170) => {
                             let v170: Rc<str> = v170;

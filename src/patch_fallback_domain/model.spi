@@ -89,37 +89,55 @@
     ))
 
 :~ patch_route_role_binding (expected_role : i32) (observed_role : i32) : i32 =
-    ? expected_role < 0i32 ?> -1i32
-    |? 2i32 < expected_role ?> -1i32
-    |? expected_role < observed_role ?> -1i32
-    |? observed_role < expected_role ?> -1i32
+    ? expected_role < 0i32
+    ?> -1i32
+    |? 2i32 < expected_role
+    ?> -1i32
+    |? expected_role < observed_role
+    ?> -1i32
+    |? observed_role < expected_role
+    ?> -1i32
     |: expected_role
 
 :~ patch_route_forward_binding (route_token : i32) (forward_outcome : i32) : i32 =
-    ? route_token < 0i32 ?> -1i32
-    |? 2i32 < route_token ?> -1i32
-    |? forward_outcome < 1i32 ?> -1i32
-    |? 1i32 < forward_outcome ?> -1i32
+    ? route_token < 0i32
+    ?> -1i32
+    |? 2i32 < route_token
+    ?> -1i32
+    |? forward_outcome < 1i32
+    ?> -1i32
+    |? 1i32 < forward_outcome
+    ?> -1i32
     |: route_token
 
 :~ patch_route_restore_binding (route_token : i32) (restore_outcome : i32) : i32 =
     patch_route_forward_binding route_token restore_outcome
 
 :~ patch_route_hash_binding (before_hash : i32) (after_hash : i32) : i32 =
-    ? before_hash < after_hash ?> 0i32
-    |? after_hash < before_hash ?> 0i32
+    ? before_hash < after_hash
+    ?> 0i32
+    |? after_hash < before_hash
+    ?> 0i32
     |: 1i32
 
 :~ patch_route_complete_binding (route_token : i32) (hash_agreed : i32) : i32 =
-    ? route_token < 0i32 ?> 0i32
-    |? 2i32 < route_token ?> 0i32
-    |? hash_agreed < 1i32 ?> 0i32
-    |? 1i32 < hash_agreed ?> 0i32
+    ? route_token < 0i32
+    ?> 0i32
+    |? 2i32 < route_token
+    ?> 0i32
+    |? hash_agreed < 1i32
+    ?> 0i32
+    |? 1i32 < hash_agreed
+    ?> 0i32
     |: 1i32
 
 :~ patch_route_agreement_binding (left_complete : i32) (right_complete : i32) : i32 =
-    ? left_complete < 1i32 ?> 0i32
-    |? 1i32 < left_complete ?> 0i32
-    |? right_complete < 1i32 ?> 0i32
-    |? 1i32 < right_complete ?> 0i32
+    ? left_complete < 1i32
+    ?> 0i32
+    |? 1i32 < left_complete
+    ?> 0i32
+    |? right_complete < 1i32
+    ?> 0i32
+    |? 1i32 < right_complete
+    ?> 0i32
     |: 1i32

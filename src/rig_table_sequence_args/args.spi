@@ -7,10 +7,12 @@
     }
 
 :~ ^ data_rows (lines : array string) (index : i32) (acc : file_table) : file_table =
-    ? index >= am'.length lines ?> acc
+    ? index >= am'.length lines
+    ?> acc
     |:
         := line = am'.index index lines
-        ? line = "" || sm'.starts_with "#" line ?> data_rows lines (index + 1i32) acc
+        ? line = "" || sm'.starts_with "#" line
+        ?> data_rows lines (index + 1i32) acc
         |: data_rows lines (index + 1i32) { text = acc.text ++# line ++# "\n"; rows = acc.rows + 1u64 }
 
 :~ split_pair (~text : string) (~separator : string) : string * string =
@@ -68,14 +70,17 @@
     ?= words ?|
     | [] => listm.rev acc, refusal
     | word :: rest =>
-        ? sm'.starts_with "--" word |> not ?> paths_from rest (word :: acc) refusal
-        |? known_flag word |> not ?> listm.rev acc, (? refusal = "" ?> "unknown option " ++# word |: refusal)
+        ? sm'.starts_with "--" word |> not
+        ?> paths_from rest (word :: acc) refusal
+        |? known_flag word |> not
+        ?> listm.rev acc, (? refusal = "" ?> "unknown option " ++# word |: refusal)
         |:
             ?= rest ?|
             | _ :: after => paths_from after acc refusal
             | [] => listm.rev acc, refusal
 :~ ^ named_files (~path : string) (names : array string) (index : i32) (acc : list string) : list string =
-    ? index < 0i32 ?> acc
+    ? index < 0i32
+    ?> acc
     |:
         := file = path ++# "/" ++# am'.index index names
         named_files path names (index - 1i32) (? file_system.file_exists file ?> (file :: acc) |: acc)
@@ -84,8 +89,7 @@
     ?= paths ?|
     | [] => listm.rev acc
     | (path :: rest) =>
-        ? file_system.directory_exists path
-        ?>
+        ? file_system.directory_exists path ?>
             := names =
                 file_system.read_directory_names path
                 |> resultm.unwrap'
@@ -111,5 +115,5 @@
     ^^ "(?<rest>)>] [--in-set name=<file>[:<regex with (?<value>)>]])) [--out file.tsv]"
 
 :~ refused (~reason : string) : i32 =
-    console.write_error_line ("kit error: table sequences " ++# reason ++# "; " ++# usage ())
+    console.write_error_line ("rig error: table sequences " ++# reason ++# "; " ++# usage ())
     2i32

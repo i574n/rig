@@ -764,7 +764,7 @@ fn todos_entry_0() -> i32 {
         let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile todos rejected: "); } LIT.with(|lit| lit.clone()) };
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let mut v6: Rc<str> = concat5_3(v4, v3, v5.clone(), v5.clone(), v5.clone());
-        let v7: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v6 + "
+        let v7: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v6 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v7
     } else {
@@ -867,7 +867,7 @@ fn todos_entry_0() -> i32 {
                     v165
                 } else {
                     let v166: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-                    let v167: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile todos ok roots="); } LIT.with(|lit| lit.clone()) };
+                    let v167: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile todos ok roots="); } LIT.with(|lit| lit.clone()) };
                     let v168: Rc<str> = std::rc::Rc::<str>::from((v118).to_string());
                     let v169: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" files="); } LIT.with(|lit| lit.clone()) };
                     let v170: Rc<str> = std::rc::Rc::<str>::from((v98).to_string());
@@ -922,7 +922,7 @@ fn todos_entry_0() -> i32 {
                 let v215: Rc<str> = concat5_3(v212, v9, v213, v214.clone(), v214.clone());
                 let v216: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile todos rejected: "); } LIT.with(|lit| lit.clone()) };
                 let v217: Rc<str> = concat5_3(v216, v215, v214.clone(), v214.clone(), v214.clone());
-                let v218: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v217 + "
+                let v218: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v217 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v218
             }

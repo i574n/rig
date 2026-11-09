@@ -28,11 +28,11 @@ if ($Node -and -not $NodeStage) {
             $chunk = $touched[$at..([Math]::Min($at + 149, $touched.Count - 1))]
             $part = (& $kit lint precheck @chunk 2>&1 | Out-String).Trim()
             $chunks++
-            if ($part -match 'kit lint precheck refused') { $refusedRows += @($part -split "`n" | Where-Object { $_ -match '^\S+\.spi:\d+: ' }) }
-            elseif ($part -notmatch 'kit lint precheck ok') { throw "precheck gave no verdict for files $at to $($at + $chunk.Count - 1), refusing the launch:`n$(($part -split "`n" | Select-Object -Last 3) -join "`n")" }
+            if ($part -match '(kit|rig) lint precheck refused') { $refusedRows += @($part -split "`n" | Where-Object { $_ -match '^\S+\.spi:\d+: ' }) }
+            elseif ($part -notmatch '(kit|rig) lint precheck ok') { throw "precheck gave no verdict for files $at to $($at + $chunk.Count - 1), refusing the launch:`n$(($part -split "`n" | Select-Object -Last 3) -join "`n")" }
         }
         $pre = if ($refusedRows.Count) { "kit lint precheck refused`n$($refusedRows -join "`n")" } else { "kit lint precheck ok ($chunks chunks)" }
-        if ($pre -match 'kit lint precheck refused') {
+        if ($pre -match '(kit|rig) lint precheck refused') {
             $rows = @($pre -split "`n" | Where-Object { $_ -match '^\S+\.spi:\d+: ' })
             $rawText = { param($row) if ($row -notmatch '^(\S+\.spi):(\d+): ') { return $false }; $line = [int]$Matches[2]; $inside = $false; $n = 0; foreach ($l in (Get-Content -LiteralPath (Join-Path $kitRoot $Matches[1]))) { $n++; $marks = ([regex]::Matches($l, '"""')).Count; if ($n -eq $line) { return ($inside -or $marks -gt 0) }; if ($marks % 2 -eq 1) { $inside = -not $inside } }; $false }
             $inRaw = @($rows | Where-Object { & $rawText $_ })
@@ -107,7 +107,7 @@ if ($Node -and -not $NodeStage) {
         Push-Location (Join-Path $kitRoot 'src')
         try { $null = & cargo metadata --offline --locked --format-version 1 2>$lockLog; $lockExit = $LASTEXITCODE } finally { Pop-Location }
         if ($lockExit -ne 0) { throw "lock precheck refused the snapshot: src/Cargo.lock does not match the manifests (the node regen runs --locked); run cargo update --workspace --offline in src:`n$((Get-Content -LiteralPath $lockLog -ErrorAction SilentlyContinue | Select-Object -First 3) -join "`n")" }
-        if ($pre -notmatch 'kit lint precheck ok') { throw "precheck gave no verdict, refusing the launch: $(($pre -split "`n")[-1])" }
+        if ($pre -notmatch '(kit|rig) lint precheck ok') { throw "precheck gave no verdict, refusing the launch: $(($pre -split "`n")[-1])" }
         $verdict = ($pre -split "`n")[-1]
         [Console]::WriteLine("$(Get-Date -Format HH:mm:ss) launch-train $Name $verdict ($($touched.Count) touched files)")
     }
@@ -221,7 +221,7 @@ if ($NodeStage) {
     $giveUp = (Get-Date).AddHours(11)
     while ($true) {
         $wait = try { & $kit job wait $jobId 43200000 2>&1 | Out-String } catch { "$_" }
-        if ($wait -match 'kit job wait ok') { break }
+        if ($wait -match '(kit|rig) job wait ok') { break }
         $misses++
         Say "node wait lost its route (miss $misses, exit $LASTEXITCODE, retrying until $($giveUp.ToString('HH:mm'))): $(($wait.Trim() -split "`n" | Select-Object -Last 1))"
         if ((Get-Date) -ge $giveUp) { throw "node half UNKNOWN: no route for the whole node job timeout ($misses misses); the job may still be on $Node. Resume with -NodeStage -ResumeNodeJob $jobId once it answers" }

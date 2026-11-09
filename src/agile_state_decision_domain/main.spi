@@ -74,8 +74,10 @@
     |: ""
 
 :~ agile_record_preflight_binding (observed_mask : i32) (reserved : i32) : i32 =
-    ? observed_mask < 0i32 || 15i32 < observed_mask || reserved < 0i32 || 0i32 < reserved ?> -1i32
-    |? observed_mask = 15i32 ?> 1i32
+    ? observed_mask < 0i32 || 15i32 < observed_mask || reserved < 0i32 || 0i32 < reserved
+    ?> -1i32
+    |? observed_mask = 15i32
+    ?> 1i32
     |: 0i32
 
 :| agile_attestation_decision =

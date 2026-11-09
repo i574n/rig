@@ -27,11 +27,11 @@
     := state = fixture_text_of root
     := repo_a = fixture_path root "repo-a"
     := repo_b = fixture_path root "repo-b"
-    shows (succeeded (agile_run root (Arg ("roots", Arg (state, NoArgs))))) "kit agile roots ok action=list roots=0"
+    shows (succeeded (agile_run root (Arg ("roots", Arg (state, NoArgs))))) "rig agile roots ok action=list roots=0"
     shows (succeeded (agile_run root (Arg ("todos", Arg (state, NoArgs))))) "roots=1"
     := added = succeeded (agile_run root (Arg ("roots", Arg (state, Arg ("add", Arg (repo_a, Arg (repo_b, NoArgs)))))))
     shows added (cat "root " (forward repo_a))
-    shows added "kit agile roots ok action=add roots=2 bytes_before="
+    shows added "rig agile roots ok action=add roots=2 bytes_before="
     shows
         (fixture_read root "state/agile.spi")
         "union harvest_root =\n    | HarvestRoot :: string -> harvest_root\n\ninl harvest_root_"

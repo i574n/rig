@@ -28,7 +28,8 @@
 :~ stamp_hour (~stamp : string) : i64 =
     := number = \ (from : i32) (size : i32) =>
         optionm'.default_value 0i64 (convert.try_convert (sm'.substring from size stamp))
-    ? (sm'.length stamp : i32) < 13i32 ?> 0i64
+    ? (sm'.length stamp : i32) < 13i32
+    ?> 0i64
     |: date_time.days_from_civil (number 0i32 4i32) (number 5i32 2i32) (number 8i32 2i32) * 24i64 + number 11i32 2i32
 
 :~ later_note (index : note_hour_index) (~line : string) : note_hour_index =
@@ -39,7 +40,8 @@
     | _ => index
 
 :~ ^ note_hours_from (lines : array string) (at : i32) (index : note_hour_index) : note_hour_index =
-    ? am'.length lines <= at ?> index
+    ? am'.length lines <= at
+    ?> index
     |:
         := line = am'.index at lines
         := next = ? sm'.starts_with (row_prefix NoteRow) line ?> later_note index line |: index
@@ -51,7 +53,8 @@
     | _ => index
 
 :~ ^ pairs_from (row : state_row) (lines : array string) (at : i32) (index : row_pairs) : row_pairs =
-    ? am'.length lines <= at ?> index
+    ? am'.length lines <= at
+    ?> index
     |:
         := line = am'.index at lines
         := next = ? sm'.starts_with (row_prefix row) line ?> pair_of_line index line |: index
@@ -80,7 +83,8 @@
     (now_hour : i64) (ids : array_base string) (at : i32)
     : ()
     =
-    ? am'.length_base ids <= at ?> ()
+    ? am'.length_base ids <= at
+    ?> ()
     |:
         am'.set_base out at (annotation_for hours parents asks now_hour (am'.index_base at ids))
         annotate_into out hours parents asks now_hour ids (at + 1i32)

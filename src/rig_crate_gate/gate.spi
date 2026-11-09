@@ -9,10 +9,12 @@
 :~ rows_listed (rows : array_base crate_measure) : list crate_measure = rows_from rows (am'.length_base rows - 1i32) []
 
 :~ ^ digits_value (text : string) (at : i32) (value : i32) : i32 =
-    ? (sm'.length text : i32) <= at ?> value
+    ? (sm'.length text : i32) <= at
+    ?> value
     |:
         := c = xml.code_point_at text at
-        ? 48u32 <= c && c <= 57u32 ?> digits_value text (at + 1i32) (value * 10i32 + convert.i32 (c - 48u32))
+        ? 48u32 <= c && c <= 57u32
+        ?> digits_value text (at + 1i32) (value * 10i32 + convert.i32 (c - 48u32))
         |: -1i32
 
 :| gate_flag =
@@ -40,9 +42,9 @@
         lines_printed limit rest
 
 :~ outcome_text (backend : target_backend) (outcome : gate_outcome) (~summary : string) : i32 * string =
-    := refused = "kit crate gate refused: "
+    := refused = "rig crate gate refused: "
     ?= outcome ?|
-    | GatePassed => 0i32, "kit crate gate ok" ++# summary
+    | GatePassed => 0i32, "rig crate gate ok" ++# summary
     | GateFailedOver n => 1i32, refused ++# sm'.format n ++# " crate(s) over the limit;" ++# summary
     | GateFailedMissing n =>
         := why = " crate(s) have no generated output, so generation did not run or failed;"
@@ -55,28 +57,29 @@
         1i32, refused ++# nothing ++# ", so nothing was measured;" ++# summary
 
 :~ target_limits_text () : string =
-    := home = env.get_environment_variable "KIT_CONFIG_HOME"
+    := rig_home = env.get_environment_variable "RIG_CONFIG_HOME"
+    := home = ? rig_home <> "" ?> rig_home |: env.get_environment_variable "KIT_CONFIG_HOME"
     := app_data = env.get_environment_variable "APPDATA"
     := dir =
-        ? home <> "" ?> home
-        |? app_data <> "" ?> app_data ++# "/kit"
+        ? home <> ""
+        ?> home
+        |? app_data <> ""
+        ?> app_data ++# "/kit"
         |: env.get_environment_variable "HOME" ++# "/.config/kit"
     file_system.read_text_or_empty (dir ++# "/target_limits.spi")
 
 :~ gate_checked (~root : string) (flags : gate_flags) (backend : target_backend) : i32 =
     := given = flags.limit
     := limit = ? given = "" ?> target_limit_of (target_limits_text ()) backend |: digits_value given 0i32 0i32
-    ? root = "" || file_system.directory_exists root |> not
-    ?>
+    ? root = "" || file_system.directory_exists root |> not ?>
         console.write_line (
-            "kit error: crate usage: crate gate <root> [--enforce] [--limit n] [--backend rust|gleam|zig] "
+            "rig error: crate usage: crate gate <root> [--enforce] [--limit n] [--backend rust|gleam|zig] "
             ^^ "(rust: generated output of every Cargo.toml with [package.metadata.spiral] under root; "
             ^^ "gleam and zig: every .gleam or .zig file under root)"
         )
         2i32
-    |? limit <= 0i32
-    ?>
-        console.write_line ("kit error: crate gate: --limit expects a positive whole number, got " ++# given)
+    |? limit <= 0i32 ?>
+        console.write_line ("rig error: crate gate: --limit expects a positive whole number, got " ++# given)
         2i32
     |:
         := measures =
@@ -104,7 +107,7 @@
     ?= backend_named (? flags.backend = "" ?> "rust" |: flags.backend) ?|
     | Some backend => gate_checked root flags backend
     | None =>
-        console.write_line ("kit error: crate gate: --backend expects rust, gleam or zig, got " ++# flags.backend)
+        console.write_line ("rig error: crate gate: --backend expects rust, gleam or zig, got " ++# flags.backend)
         2i32
 
 :~ gate_run () : i32 =

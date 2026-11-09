@@ -448,7 +448,7 @@ fn notebook_lines_19(mut v0: std::rc::Rc<Vec<(u64, u64, std::rc::Rc<str>, std::r
     }
 }
 fn windows_root_21() -> Rc<str> {
-    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_WINDOWS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
+    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("windows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref());
     v0
 }
 fn live_block_held_22(mut v0: Rc<str>) -> bool {
@@ -456,7 +456,7 @@ fn live_block_held_22(mut v0: Rc<str>) -> bool {
     v1
 }
 fn jobs_root_23() -> Rc<str> {
-    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_JOBS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
+    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
     v0
 }
 fn cells_cores_24(mut v0: std::rc::Rc<Vec<(u64, u64, std::rc::Rc<str>, std::rc::Rc<str>, f64, u64, u64, u64, u64)>>, mut v1: i32, mut v2: f64) -> f64 {
@@ -845,7 +845,7 @@ fn watch_run_1() -> i32 {
     let v56: u64 = 8192u64;
     let v57: Rc<str> = jobs_and_windows_20(v53, v54, v55, v56, v7.clone());
     stdout_line_18(v57);
-    let v58: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit machine watch ok processes="); } LIT.with(|lit| lit.clone()) };
+    let v58: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig machine watch ok processes="); } LIT.with(|lit| lit.clone()) };
     let v59: i32 = v7.len() as i32;
     let v60: u64 = v59 as u64;
     let v61: Rc<str> = std::rc::Rc::<str>::from((v60).to_string());
@@ -875,7 +875,7 @@ fn fleet_printed_38(mut v0: Rc<RefCell<Vec<(bool, Rc<str>)>>>, mut v1: i32, mut 
         } else {
             let (mut v5, mut v6): (bool, Rc<str>) = v0.borrow()[v1 as usize].clone();
             let v9: bool = if v5 {
-                let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error:"); } LIT.with(|lit| lit.clone()) };
+                let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error:"); } LIT.with(|lit| lit.clone()) };
                 let v8: bool = v6.starts_with(&*v7);
                 v8
             } else {
@@ -931,7 +931,7 @@ fn machine_run_0() -> i32 {
                 let v13: i32 = 0i32;
                 fleet_printed_38(v11, v12, v13)
             } else {
-                eprintln!("kit error: machine: usage: machine watch [--sample-seconds n] | machine health [--all] [--every s [--times n]] | machine fleet");
+                eprintln!("rig error: machine: usage: machine watch [--sample-seconds n] | machine health [--all] [--every s [--times n]] | machine fleet");
                 2i32
             }
         }

@@ -37,7 +37,7 @@
             succeeded (window_call root "8000" (Arg ("request", Arg ("compile", Arg ("5", Arg ("--label", Arg ("quick",
                 NoArgs)))))))
         )
-        "kit window request ok"
+        "rig window request ok"
     := long =
         window_call root "8000" (Arg ("request", Arg ("compile", Arg ("120", Arg ("--label", Arg ("long", NoArgs))))))
     testing.expect (long.code = 1i32) (run_text long)
@@ -50,23 +50,23 @@
 :# a_live_window_holds_compiles_back_until_it_is_released =
     := root = fixture_root_create "window live"
     := live = succeeded (requested root "live-gui" "gui PR-12" NoArgs)
-    shows live "kit window request ok id=win-"
+    shows live "rig window request ok id=win-"
     shows live "class=live-gui minutes=30 free_mb=8000"
     := id = word_after live "id="
-    := blocked = requested root "compile" "kit quick" NoArgs
+    := blocked = requested root "compile" "rig quick" NoArgs
     testing.expect (blocked.code = 1i32) (run_text blocked)
-    shows blocked.stdout "kit window request blocked"
+    shows blocked.stdout "rig window request blocked"
     shows blocked.stdout (cat "by=" id)
     shows blocked.stdout "holder=live-gui state=held left_min=30 label='gui PR-12'"
     := checked = window_call root "8000" (Arg ("check", Arg ("compile", NoArgs)))
     testing.expect (checked.code = 1i32) (run_text checked)
-    shows checked.stdout "kit window check blocked class=compile by="
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=1"
-    shows (succeeded (window_call root "8000" (Arg ("release", Arg (id, NoArgs))))) (cat "kit window release ok id=" id)
+    shows checked.stdout "rig window check blocked class=compile by="
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=1"
+    shows (succeeded (window_call root "8000" (Arg ("release", Arg (id, NoArgs))))) (cat "rig window release ok id=" id)
     shows
         (succeeded (window_call root "8000" (Arg ("check", Arg ("compile", NoArgs)))))
-        "kit window check ok class=compile free"
-    shows (succeeded (requested root "compile" "kit quick" NoArgs)) "kit window request ok"
+        "rig window check ok class=compile free"
+    shows (succeeded (requested root "compile" "rig quick" NoArgs)) "rig window request ok"
     fixture_root_remove root
 
 ///> rust
@@ -76,7 +76,7 @@
     shows (succeeded (requested root "test-suite" "suite gate" NoArgs)) "class=test-suite"
     shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "windows=2"
     := shared = succeeded (window_call root "8000" (Arg ("check", Arg ("test-suite", NoArgs))))
-    shows shared "kit window check ok class=test-suite free (shares with "
+    shows shared "rig window check ok class=test-suite free (shares with "
     shows shared "test-suite suite gate"
     shows shared "heavy-build release"
     := starved = window_call root "1000" (Arg ("request", Arg ("test-suite", Arg ("5", NoArgs))))
@@ -88,14 +88,14 @@
 :# a_waiting_request_is_granted_when_the_holder_releases =
     := root = fixture_root_create "window wait"
     fixture_write root "windows/win-1-install.window" (held_row (now_ms () + 3000u64))
-    := now_blocked = requested root "compile" "kit quick" NoArgs
+    := now_blocked = requested root "compile" "rig quick" NoArgs
     shows now_blocked.stdout "by=win-1-install holder=compiler-install state=held left_min=1 label='spiral install'"
     := waited =
         succeeded (
             window_call root "8000" (Arg ("request", Arg ("compile", Arg ("5", Arg ("--wait", Arg ("1", NoArgs))))))
         )
-    shows (line_starting waited "kit window request queued") "by=win-1-install holder=compiler-install"
-    shows (line_starting waited "kit window request ok") "class=compile minutes=5"
+    shows (line_starting waited "rig window request queued") "by=win-1-install holder=compiler-install"
+    shows (line_starting waited "rig window request ok") "class=compile minutes=5"
     testing.expect (path_exists (fixture_path root "windows/win-1-install.window") = !-) "the expired window was pruned"
     fixture_write root "windows/win-1-install.window" (held_row (now_ms () + 3000u64))
     shows
@@ -105,7 +105,7 @@
                     succeeded (window_call root "8000" (Arg ("request", Arg ("compile", Arg ("5", Arg ("--wait",
                         Arg ("until-granted", NoArgs)))))))
                 )
-                "kit window request ok"
+                "rig window request ok"
         )
         "class=compile minutes=5"
     fixture_root_remove root
@@ -152,7 +152,7 @@
     shows (fixture_read root (cat "jobs/" (cat job "/slot"))) "ready ticket="
     shows (fixture_read root (cat "jobs/" (cat job "/heavy-wrapper.ps1"))) "-MaxMinutes 1 {"
     shows (fixture_read root (cat "jobs/" (cat job "/stdout.log"))) "held at most 1 min"
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=0"
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=0"
     fixture_root_remove root
 
 ///> rust
@@ -167,13 +167,15 @@
                     NoArgs)))))))
             )
             "id="
-    testing.expect (path_appears (fixture_path root (cat "jobs/" (cat job "/stdout.log"))) 20000u64) "the job never started"
+    testing.expect
+        (path_appears (fixture_path root (cat "jobs/" (cat job "/stdout.log"))) 20000u64)
+        "the job never started"
     pause_ms 4000u64
     := listed = succeeded (window_call root "8000" (Arg ("list", NoArgs)))
     shows listed "windows=1"
     shows listed (cat "(kit job " (cat job ")"))
     shows (succeeded (heavy_call root (Arg ("stop", Arg (job, NoArgs))))) "state=stopped"
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=0"
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=0"
     fixture_root_remove root
 
 ///> rust
@@ -216,7 +218,7 @@
     := _ = succeeded (window_call root "8000" (Arg ("release", Arg (install, NoArgs))))
     shows (succeeded (heavy_call root (Arg ("wait", Arg (job, Arg ("60000", NoArgs)))))) "state=finished exit=0"
     shows (fixture_read root (cat "jobs/" (cat job "/window"))) "granted id=win-"
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=0"
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=0"
     fixture_root_remove root
 
 := orphan_row () : string =
@@ -227,11 +229,11 @@
 :# a_window_whose_job_supervisor_died_is_dropped =
     := root = fixture_root_create "window orphan"
     fixture_write root "windows/win-1-4294967290-heavy-build.window" (orphan_row ())
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=0"
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=0"
     testing.expect
         (path_exists (fixture_path root "windows/win-1-4294967290-heavy-build.window") = !-)
         "the orphaned row was removed"
-    shows (succeeded (requested root "live-gui" "next block" NoArgs)) "kit window request ok"
+    shows (succeeded (requested root "live-gui" "next block" NoArgs)) "rig window request ok"
     fixture_root_remove root
 
 := run_orphan_row () : string =
@@ -247,7 +249,7 @@
     := root = fixture_root_create "window run orphan"
     fixture_write root "windows/win-1-4294967290-compile-run.window" (run_orphan_row ())
     fixture_write root "windows/win-2-4294967291-compile.window" (lease_row ())
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=1"
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=1"
     testing.expect
         (path_exists (fixture_path root "windows/win-1-4294967290-compile-run.window") = !-)
         "the stopped run's row was removed"
@@ -272,7 +274,7 @@
     shows listed "heavy-slot-1  pid "
     shows listed "held 0m  sefaz gates"
     hides listed "stopped chain"
-    shows listed "kit window list ok windows=0 free_mb=8000 heavy_slots=1"
+    shows listed "rig window list ok windows=0 free_mb=8000 heavy_slots=1"
     testing.expect (path_exists (fixture_path root "queue/holder-2.h") = !-) "a holder whose pid is gone is removed"
     fixture_root_remove root
 
@@ -304,12 +306,12 @@
     shows (succeeded (requested root "tree-read" tree NoArgs)) "class=tree-read minutes=30"
     := inside = window_call root "8000" (Arg ("claim", Arg (cat tree "/src/a.spi", NoArgs)))
     testing.expect (inside.code = 1i32) (run_text inside)
-    shows inside.stdout "kit window claim refused path="
+    shows inside.stdout "rig window claim refused path="
     shows inside.stdout " is read by win-"
     shows
         (succeeded (window_call root "8000" (Arg ("claim", Arg (fixture_path root "elsewhere/a.spi", NoArgs)))))
         "edit allowed"
-    shows (succeeded (requested root "compile" "next build" NoArgs)) "kit window request ok"
+    shows (succeeded (requested root "compile" "next build" NoArgs)) "rig window request ok"
     fixture_root_remove root
 
 := dead_reader_row (~tree : string) : string =
@@ -341,7 +343,7 @@
     shows waited.stdout "state=expired-in-queue exit=75"
     shows waited.stdout "--slot-within"
     testing.expect (path_exists (fixture_path root (cat "jobs/" (cat job "/stdout.log"))) = !-) "the job never started"
-    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "kit window list ok windows=1"
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=1"
     := _ = succeeded (window_call root "8000" (Arg ("release", Arg (install, NoArgs))))
     rejected_with
         (
@@ -369,11 +371,11 @@
     shows blocked.stdout "holder=compile-hold"
     shows
         (succeeded (window_call root "8000" (Arg ("request", Arg ("heavy-build", Arg ("5", NoArgs))))))
-        "kit window request ok"
+        "rig window request ok"
     := _ = succeeded (window_call root "8000" (Arg ("release", Arg (hold, NoArgs))))
     shows
         (succeeded (window_call root "8000" (Arg ("request", Arg ("compile", Arg ("5", NoArgs))))))
-        "kit window request ok"
+        "rig window request ok"
     := quick = rustc_program root "quick" "fn main() {}"
     rejected_with
         (heavy_call root (Arg ("start", Arg ("--quiet", Arg ("plain", Arg ("3000", Arg (quick, NoArgs)))))))
@@ -401,7 +403,7 @@
             succeeded (window_call root "8000" (Arg ("request", Arg ("compile", Arg ("5", Arg ("--label", Arg ("small",
                 Arg ("--min-free-mb", Arg ("500", NoArgs)))))))))
         )
-        "kit window request ok"
+        "rig window request ok"
     fixture_root_remove root
 
 ///> rust
@@ -460,10 +462,15 @@
 ///> rust
 :# an_announced_block_is_listed_and_refuses_an_overlapping_request =
     := root = fixture_root_create "window announce"
-    := announced = succeeded (window_call root "8000" (Arg ("announce", Arg ("compiler-install", Arg ("+5", Arg ("30", Arg ("--label", Arg ("tester", NoArgs))))))))
-    shows announced "kit window announce ok class=compiler-install holder=tester starts_in_min=5 minutes=30"
+    := announced =
+        succeeded (window_call root "8000" (Arg ("announce", Arg ("compiler-install", Arg ("+5", Arg ("30",
+            Arg ("--label", Arg ("tester", NoArgs))))))))
+    shows announced "rig window announce ok class=compiler-install holder=tester starts_in_min=5 minutes=30"
     := listed = succeeded (window_call root "8000" (Arg ("list", NoArgs)))
     shows listed "announced  compiler-install  tester  starts_in=5m  minutes=30  work=30m\n"
-    shows listed "kit window list ok windows=0"
-    rejected_with (requested root "heavy-build" "late" NoArgs) 2i32 "would overlap a block announced by tester that starts in 5 min"
+    shows listed "rig window list ok windows=0"
+    rejected_with
+        (requested root "heavy-build" "late" NoArgs)
+        2i32
+        "would overlap a block announced by tester that starts in 5 min"
     fixture_root_remove root

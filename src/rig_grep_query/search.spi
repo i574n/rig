@@ -8,8 +8,10 @@
     | MissingRoot
 
 := root_kind (~root : string) : search_root =
-    ? file_system.directory_exists root ?> FolderRoot
-    |? file_system.file_exists root ?> FileRoot
+    ? file_system.directory_exists root
+    ?> FolderRoot
+    |? file_system.file_exists root
+    ?> FileRoot
     |: MissingRoot
 
 :| needle_kind =
@@ -77,11 +79,13 @@
     (hits : search_hits) (json : bool) (context : i32) (limit : i32) (file : i32) (counts : search_counts)
     : search_counts
     =
-    ? hit_files hits <= file ?> counts
+    ? hit_files hits <= file
+    ?> counts
     |:
         := found = found_count hits file
         := total = counts.total + found
-        ? limit <= counts.shown ?> files_rendered hits json context limit (file + 1i32) { counts ?| total = total }
+        ? limit <= counts.shown
+        ?> files_rendered hits json context limit (file + 1i32) { counts ?| total = total }
         |:
             := taken = smaller found (limit - counts.shown)
             := next =

@@ -34,7 +34,8 @@
 
 :~ milestones_text (~note : string) : string =
     := at = sm'.index_of "MILESTONES:" note
-    ? at < 0i32 ?> ""
+    ? at < 0i32
+    ?> ""
     |:
         := rest = sm'.slice (at + 11i32) (sm'.length note - 1i32) note
         := found = [ "NEXT STEP"; " = "; ". " ] |> listm.map (\ (stop : string) => sm'.index_of stop rest)
@@ -60,7 +61,8 @@
 
 :~ estimate_in (~line : string) : i32 =
     := at = sm'.index_of "estimate=" line
-    ? at < 0i32 ?> 0i32
+    ? at < 0i32
+    ?> 0i32
     |:
         := rest = sm'.slice (at + 9i32) (sm'.length line - 1i32) line
         := first_piece = \ (first : string) (p : string) => ? first = "" ?> p |: first

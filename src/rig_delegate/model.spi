@@ -1,0 +1,180 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| placement =
+    | Auto
+    | OnMachine : string
+
+:| backend =
+    | Direct
+    | K3sPod
+
+:== delegate_request =
+    {
+        repos : list string
+        placement : placement
+        backend : backend
+        keep : bool
+        timeout_ms : i32
+        command : list string
+    }
+
+:| request_read =
+    | Parsed :: delegate_request -> request_read
+    | Refused :: string -> request_read
+
+:| void_cause =
+    | TimedOut :: void_cause
+    | OutOfMemory :: void_cause
+    | NoRoute :: string -> void_cause
+    | NotRun :: void_cause
+
+:| verdict =
+    | Pass :: verdict
+    | Fail :: i32 -> verdict
+    | Void :: void_cause -> verdict
+
+:| delegate_step =
+    | PickTarget :: placement -> delegate_step
+    | SyncRepo :: string -> delegate_step
+    | StageScript :: delegate_step
+    | StartJob :: backend -> delegate_step
+    | WaitJob :: i32 -> delegate_step
+    | FetchBack :: bool -> delegate_step
+
+:~ plain (~text : string) : bool = sm'.contains "\"" text |> not && sm'.contains "'" text |> not
+
+:~ default_request (repos : list string) : delegate_request =
+    { repos = repos; placement = Auto; backend = Direct; keep = !-; timeout_ms = 3600000i32; command = [] }
+
+:~ placement_of (~word : string) : placement = ? word = "auto" ?> Auto |: OnMachine word
+
+:~ backend_of (~word : string) : option backend =
+    ? word = "direct" ?> Some Direct |? word = "k3s" ?> Some K3sPod |: None
+
+:~ ^ options_of (words : list string) (r : delegate_request) : request_read =
+    ?= words ?|
+    | flag :: command ?& flag = "--" =>
+        ? command = [] ?> Refused "delegate needs a command after --" |: Parsed { r ?| command = command }
+    | flag :: target :: rest ?& flag = "--on" && target <> "" =>
+        options_of rest { r ?| placement = placement_of target }
+    | flag :: rest ?& flag = "--keep" => options_of rest { r ?| keep = !+ }
+    | flag :: word :: rest ?& flag = "--backend" =>
+        ?= backend_of word ?|
+        | Some b => options_of rest { r ?| backend = b }
+        | None => Refused ("delegate --backend expects direct or k3s, got " ++# word)
+    | flag :: value :: rest ?& flag = "--timeout-ms" =>
+        := ms : option i32 = convert.try_convert value
+        ?= ms ?|
+        | Some n ?& n > 0i32 => options_of rest { r ?| timeout_ms = n }
+        | _ => Refused ("delegate --timeout-ms expects a positive number, got " ++# value)
+    | other :: _ => Refused ("delegate does not know " ++# other ++# "; the command goes after --")
+    | [] => Refused "delegate needs -- and a command"
+:~ request_of (words : list string) : request_read =
+    ?= words ?|
+    | repos :: rest =>
+        := listed = sm'.split_list "," repos |> listm.map sm'.trim |> listm'.filter (\ (s : string) => s <> "")
+        ? listed = [] || sm'.starts_with "-" repos ?> Refused "delegate needs <repos> first (comma separated)"
+        |? listm.fold (\ ok (w : string) => ok && plain w) !+ words |> not
+        ?> Refused "delegate forwards arguments without quote characters (the remote shell would re-split them)"
+        |: options_of rest (default_request listed)
+    | [] => Refused "delegate needs <repos> first (comma separated)"
+
+:~ steps_of (r : delegate_request) : list delegate_step =
+    := syncs = r.repos |> listm.map (\ (repo : string) => SyncRepo repo)
+    := tail = [ StageScript; StartJob r.backend; WaitJob r.timeout_ms; FetchBack r.keep ]
+    listm.append (PickTarget r.placement :: syncs) tail
+
+:~ verdict_of_exit (code : i32) (~cause : string) : verdict =
+    ? cause = "timed-out" ?> Void TimedOut
+    |? cause = "memory-capped" ?> Void OutOfMemory
+    |? cause = "not-run" ?> Void NotRun
+    |? code = 0i32 ?> Pass
+    |: Fail code
+
+:| exit_class =
+    | ClassOk :: exit_class
+    | ClassPolicy :: exit_class
+    | ClassIncomplete :: exit_class
+    | ClassBadInput :: exit_class
+    | ClassRunner :: exit_class
+    | ClassOutput :: exit_class
+    | ClassTimeout :: exit_class
+    | ClassCancelled :: exit_class
+
+:~ code_of_class (class : exit_class) : i32 =
+    ?= class ?|
+    | ClassOk => 0i32
+    | ClassPolicy => 2i32
+    | ClassIncomplete => 3i32
+    | ClassBadInput => 64i32
+    | ClassRunner => 70i32
+    | ClassOutput => 74i32
+    | ClassTimeout => 124i32
+    | ClassCancelled => 130i32
+
+:~ class_of_cause (cause : void_cause) : exit_class =
+    ?= cause ?|
+    | TimedOut => ClassTimeout
+    | NotRun => ClassIncomplete
+    | _ => ClassRunner
+
+:~ class_of_verdict (v : verdict) : exit_class =
+    ?= v ?|
+    | Pass => ClassOk
+    | Fail _ => ClassPolicy
+    | Void cause => class_of_cause cause
+
+:~ class_of_read (read : request_read) : option exit_class =
+    ?= read ?|
+    | Refused _ => Some ClassBadInput
+    | Parsed _ => None
+
+///> rust
+:# a_delegate_request_parses_placement_backend_and_command =
+    := words = [ "spiral,kit"; "--on"; "ganymede"; "--backend"; "k3s"; "--keep"; "--"; "pwsh"; "-File"; "x.ps1" ]
+    ?= request_of words ?|
+    | Parsed r =>
+        testing.expect (r.repos = [ "spiral"; "kit" ] && r.placement = OnMachine "ganymede") "repos and target"
+        testing.expect (r.backend = K3sPod && r.keep) "backend and keep"
+        testing.expect (r.command = [ "pwsh"; "-File"; "x.ps1" ]) "the command after --"
+    | Refused why => testing.expect !- why
+    ?= request_of [ "kit"; "--"; "cargo"; "test" ] ?|
+    | Parsed r => testing.expect (r.placement = Auto && r.backend = Direct && r.timeout_ms = 3600000i32) "defaults"
+    | Refused why => testing.expect !- why
+
+///> rust
+:# a_bad_request_is_refused_with_a_reason =
+    testing.expect (request_of [] = Refused "delegate needs <repos> first (comma separated)") "no repos"
+    testing.expect (request_of [ "kit" ] = Refused "delegate needs -- and a command") "no command"
+    testing.expect (request_of [ "kit"; "--" ] = Refused "delegate needs a command after --") "empty command"
+    testing.expect (request_of [ "kit"; "--"; "echo"; "\"q\"" ] <> Refused "") "quotes are refused"
+    ?= request_of [ "kit"; "--backend"; "vm"; "--"; "x" ] ?|
+    | Refused why => testing.expect (sm'.contains "direct or k3s" why) why
+    | Parsed _ => testing.expect !- "an unknown backend"
+
+///> rust
+:# the_plan_lists_every_step_and_exits_become_verdicts =
+    := base = default_request [ "a"; "b" ]
+    := r = { base ?| command = [ "x" ] }
+    := plan = steps_of r
+    := expected = [ PickTarget Auto; SyncRepo "a"; SyncRepo "b"; StageScript; StartJob Direct; WaitJob 3600000i32 ]
+    testing.expect (plan = listm.append expected [ FetchBack !- ]) "plan"
+    testing.expect (verdict_of_exit 0i32 "finished" = Pass && verdict_of_exit 3i32 "finished" = Fail 3i32) "exit codes"
+    testing.expect (verdict_of_exit 124i32 "timed-out" = Void TimedOut) "a timeout is void"
+    testing.expect (verdict_of_exit 137i32 "memory-capped" = Void OutOfMemory) "a memory cap is void"
+
+///> rust
+:# every_outcome_maps_to_one_code_of_the_exit_taxonomy =
+    := failing = [ ClassPolicy; ClassIncomplete; ClassBadInput; ClassRunner; ClassOutput; ClassTimeout; ClassCancelled ]
+    := codes = (ClassOk :: failing) |> listm.map code_of_class
+    testing.expect (codes = [ 0i32; 2i32; 3i32; 64i32; 70i32; 74i32; 124i32; 130i32 ]) "the taxonomy table"
+    testing.expect (class_of_verdict Pass = ClassOk && class_of_verdict (Fail 1i32) = ClassPolicy) "pass and fail"
+    testing.expect (class_of_verdict (Void TimedOut) = ClassTimeout) "a timeout is 124"
+    testing.expect (class_of_verdict (Void NotRun) = ClassIncomplete) "never run is incomplete"
+    testing.expect (class_of_verdict (Void (NoRoute "x")) = ClassRunner) "no route is a runner error"
+    testing.expect (class_of_read (request_of []) = Some ClassBadInput) "a refused request is bad input"
+    testing.expect (class_of_read (request_of [ "kit"; "--"; "x" ]) = None) "a parsed request has no exit class yet"

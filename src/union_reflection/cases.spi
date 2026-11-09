@@ -18,8 +18,11 @@
 
 := prefixed_at (name : string) (prefix : string) : i32 =
     := size = !!!!StringLength(`i32, prefix)
-    ? size <= !!!!StringLength(`i32, name) && !!!!EQ(!!!!StringSlice(name, 0i32, !!!!Sub(size, 1i32)), prefix) ?> size
-    |: !!!!ErrorType(!!!!StaticStringConcat("the case ", !!!!StaticStringConcat(name, !!!!StaticStringConcat(" does not start with the prefix ", prefix))))
+    ? size <= !!!!StringLength(`i32, name) && !!!!EQ(!!!!StringSlice(name, 0i32, !!!!Sub(size, 1i32)), prefix)
+    ?> size
+    |:
+        !!!!ErrorType(!!!!StaticStringConcat("the case ", !!!!StaticStringConcat(name,
+            !!!!StaticStringConcat(" does not start with the prefix ", prefix))))
 := union_case_suffix \* union_type. (prefix : string) (value : union_type) : string =
     ~>
         !!!!Unbox(value, \ (case_key, _) =>
@@ -70,17 +73,24 @@
         )
 
 := ^ upper_at (c : char) (at : i32) : i32 =
-    ? at >= 26i32 ?> -1i32
-    |? !!!!StringIndex("ABCDEFGHIJKLMNOPQRSTUVWXYZ", at) = c ?> at
+    ? at >= 26i32
+    ?> -1i32
+    |? !!!!StringIndex("ABCDEFGHIJKLMNOPQRSTUVWXYZ", at) = c
+    ?> at
     |: upper_at c (!!!!Add(at, 1i32))
 
 := ^ kebab_static (name : string) (at : i32) (size : i32) (first : i32) (out : string) : string =
-    ? at >= size ?> out
+    ? at >= size
+    ?> out
     |:
         := upper = upper_at (!!!!StringIndex(name, at)) 0i32
-        := letter = ? upper >= 0i32 ?> !!!!StringSlice("abcdefghijklmnopqrstuvwxyz", upper, upper) |: !!!!StringSlice(name, at, at)
+        := letter =
+            ? upper >= 0i32
+            ?> !!!!StringSlice("abcdefghijklmnopqrstuvwxyz", upper, upper)
+            |: !!!!StringSlice(name, at, at)
         := dash = ? at > first && upper >= 0i32 ?> "-" |: ""
-        kebab_static name (!!!!Add(at, 1i32)) size first (!!!!StaticStringConcat(out, !!!!StaticStringConcat(dash, letter)))
+        kebab_static name (!!!!Add(at, 1i32)) size first (!!!!StaticStringConcat(out, !!!!StaticStringConcat(dash,
+            letter)))
 
 := union_case_kebab \* union_type. (prefix : string) (value : union_type) : string =
     ~>

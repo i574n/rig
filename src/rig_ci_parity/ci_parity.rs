@@ -873,14 +873,14 @@ fn parity_run_0() -> i32 {
         v9
     };
     if v10 {
-        let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: ci usage: ci parity <repo> (setup-* pins in <repo>/.github/workflows and its rust-toolchain file against the local toolchain; one row per tool, a fix line per mismatch, exit 1 on a difference)"); } LIT.with(|lit| lit.clone()) };
+        let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: ci usage: ci parity <repo> (setup-* pins in <repo>/.github/workflows and its rust-toolchain file against the local toolchain; one row per tool, a fix line per mismatch, exit 1 on a difference)"); } LIT.with(|lit| lit.clone()) };
         println!("{}", v11);
         2i32
     } else {
         let v12: bool = directory_exists_6(v5.clone());
         let v13: bool = v12 == false;
         if v13 {
-            let mut v14: Rc<str> = string_concat(&["kit ci parity refused: no workflow folder at ", &*v5]);
+            let mut v14: Rc<str> = string_concat(&["rig ci parity refused: no workflow folder at ", &*v5]);
             println!("{}", v14);
             1i32
         } else {
@@ -895,18 +895,18 @@ fn parity_run_0() -> i32 {
             let v27: Rc<str> = string_concat(&[" tools=", &*v21, " differs=", &*v24, " repo=", &*v1]);
             let v28: bool = v20 == 0i32;
             if v28 {
-                let v29: Rc<str> = string_concat(&["kit ci parity refused: no setup-* or rust-toolchain pin found;", &*v27]);
+                let v29: Rc<str> = string_concat(&["rig ci parity refused: no setup-* or rust-toolchain pin found;", &*v27]);
                 println!("{}", v29);
                 1i32
             } else {
                 let v30: bool = v18 > 0i32;
                 if v30 {
                     let v31: Rc<str> = format_real_37(v18);
-                    let v34: Rc<str> = string_concat(&["kit ci parity refused: ", &*v31, " tool(s) differ from CI;", &*v27]);
+                    let v34: Rc<str> = string_concat(&["rig ci parity refused: ", &*v31, " tool(s) differ from CI;", &*v27]);
                     println!("{}", v34);
                     1i32
                 } else {
-                    let v35: Rc<str> = string_concat(&["kit ci parity ok", &*v27]);
+                    let v35: Rc<str> = string_concat(&["rig ci parity ok", &*v27]);
                     println!("{}", v35);
                     0i32
                 }

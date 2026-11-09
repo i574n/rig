@@ -52,7 +52,10 @@
 :~ outcome_of (~word : string) : outcome =
     union_reflection.cases.union_case_where (\ (o : outcome) => outcome_word o = word) (\ o => o) OutcomeUnknown
 
-:~ decliner (c : claim) : string = ? sm'.starts_with "~" c.owner ?> sm'.substring 1i32 ((sm'.length c.owner : i32) - 1i32) c.owner |: ""
+:~ decliner (c : claim) : string =
+    ? sm'.starts_with "~" c.owner
+    ?> sm'.substring 1i32 ((sm'.length c.owner : i32) - 1i32) c.owner
+    |: ""
 
 :~ ^ claim_of (claims : list claim) (~item : string) : option claim =
     ?= claims ?|
@@ -107,7 +110,10 @@
     | RecentEdit path => Some (RecentEditOn path)
     | Idle => None
 
-:~ lease_refusal (claims : list claim) (live : liveness) (~item : string) (~caller : string) (now_ms : u64) : option refusal =
+:~ lease_refusal
+    (claims : list claim) (live : liveness) (~item : string) (~caller : string) (now_ms : u64)
+    : option refusal
+    =
     ?= state_of claims item now_ms ?|
     | LeasedTo c => ? c.owner = caller ?> None |: Some (LeasedBy c)
     | _ =>
@@ -142,7 +148,8 @@
     | [] => NothingReady, seen
     | item :: rest =>
         := next = first_free rest (rank + 1i32) claims live caller now_ms finish_only
-        ? finish_only && finishing claims caller now_ms item = !- ?> next seen
+        ? finish_only && finishing claims caller now_ms item = !-
+        ?> next seen
         |:
             ?= lease_refusal claims (live item) item caller now_ms ?|
             | None => Claimed (item, rank), seen
@@ -160,8 +167,10 @@
         ?= first_free ranked 1i32 claims live caller now_ms !- empty ?|
         | (Claimed found), _ => Claimed found
         | _, seen =>
-            ? seen.leased > 0i32 && seen.leased >= seen.lived ?> AllLeased
-            |? seen.lived > 0i32 ?> AllLive
+            ? seen.leased > 0i32 && seen.leased >= seen.lived
+            ?> AllLeased
+            |? seen.lived > 0i32
+            ?> AllLive
             |: NothingReady
 
 :~ candidates
@@ -208,13 +217,20 @@
 
 :~ claim_of_row (~line : string) : option claim =
     := parts = sm'.split "\"" line |> array
-    ? am'.length parts < 5i32 || sm'.starts_with "inl claim_" line = !- ?> None
+    ? am'.length parts < 5i32 || sm'.starts_with "inl claim_" line = !-
+    ?> None
     |:
         := middle = am'.index 4i32 parts
         := stop = sm'.index_of "u64" middle
         := number = ? stop > 2i32 ?> sm'.substring 2i32 (stop - 2i32) middle |: ""
         ?= (convert.try_convert number : option u64) ?|
-        | Some expires_ms => Some { item = am'.index 1i32 parts; owner = am'.index 3i32 parts; expires_ms = expires_ms; paths = globs_from parts 5i32 }
+        | Some expires_ms =>
+            Some {
+                item = am'.index 1i32 parts
+                owner = am'.index 3i32 parts
+                expires_ms = expires_ms
+                paths = globs_from parts 5i32
+            }
         | None => None
 :~ claims_of_text (~text : string) : list claim =
     sm'.split_list "\n" (sm'.replace "\r" "" text)
@@ -223,8 +239,10 @@
 
 :~ upserted (claims : list claim) (c : claim) : list claim =
     := kept = \ (other : claim) =>
-        ? other.item <> c.item ?> !+
-        |? decliner c <> "" ?> other.owner <> c.owner && other.owner <> decliner c
+        ? other.item <> c.item
+        ?> !+
+        |? decliner c <> ""
+        ?> other.owner <> c.owner && other.owner <> decliner c
         |: decliner other <> ""
     listm.append (claims |> listm'.filter kept) [ c ]
 
@@ -293,7 +311,9 @@
 ///> rust
 :# a_claim_renders_as_one_typed_row =
     := row = claim_row (lease_a ())
-    testing.expect (row = "inl claim_a_1 () = Claim (\"A-1\", \"kit\", 2000u64, PathThen (\"src/agile/**\", NoPaths))") row
+    testing.expect
+        (row = "inl claim_a_1 () = Claim (\"A-1\", \"kit\", 2000u64, PathThen (\"src/agile/**\", NoPaths))")
+        row
     := b = lease_b ()
     := two = claim_row { b ?| paths = [ "a/**"; "b.spi" ] }
     testing.expect (sm'.ends_with "500u64, PathThen (\"a/**\", PathThen (\"b.spi\", NoPaths)))" two) two
@@ -310,7 +330,9 @@
     testing.expect (sm'.starts_with "///- --no-respell\nunion rec claim_paths =" text) text
     testing.expect (claims_of_text text = many) text
     testing.expect (claims_of_text (sm'.replace "\n" "\r\n" text) = many) "carriage returns are ignored"
-    testing.expect (claims_of_text "inl claim_x () = Claim (\"X\", \"k\", nope, NoPaths)" = []) "a bad number reads as no row"
+    testing.expect
+        (claims_of_text "inl claim_x () = Claim (\"X\", \"k\", nope, NoPaths)" = [])
+        "a bad number reads as no row"
     := renewed = upserted many { a ?| owner = "y" }
     testing.expect (listm.map (\ (c : claim) => c.item) renewed = [ "B-2"; "C-3"; "A-1" ]) "upsert replaces by item"
     testing.expect (listm.length (released many "B-2") = 2i32) "release drops the row"
@@ -329,5 +351,9 @@
     testing.expect (claims_of_text (claims_text x_declined) = x_declined) "decline rows round-trip"
     testing.expect (sm'.contains "inl claim_m_1__declined_x_b ()" (claims_text x_declined)) "one binding per decline"
     testing.expect (plain_text "src/agile/**" && plain_text "" = !- && plain_text "a,b" = !-) "plain words only"
-    testing.expect (outcome_word OutcomeReleaseRefused = "releaserefused" && outcome_of "granted" = OutcomeGranted) "outcome words"
-    testing.expect (change_word ChangeUpsert = "upsert" && change_of "remove" = ChangeRemove && change_of "x" = ChangeNone) "change words"
+    testing.expect
+        (outcome_word OutcomeReleaseRefused = "releaserefused" && outcome_of "granted" = OutcomeGranted)
+        "outcome words"
+    testing.expect
+        (change_word ChangeUpsert = "upsert" && change_of "remove" = ChangeRemove && change_of "x" = ChangeNone)
+        "change words"

@@ -773,7 +773,7 @@ fn lint_run_0() -> i32 {
         v15
     };
     if v16 {
-        let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: lint usage: lint macros <root> [<path>...] [--baseline <rows|file.spi>] [--tsv] [--write-baseline <file.spi>]"); } LIT.with(|lit| lit.clone()) };
+        let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: lint usage: lint macros <root> [<path>...] [--baseline <rows|file.spi>] [--tsv] [--write-baseline <file.spi>]"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v17);
         2i32
     } else {
@@ -786,7 +786,7 @@ fn lint_run_0() -> i32 {
             false
         };
         if v21 {
-            let v22: Rc<str> = string_concat(&["kit error: lint macros: no baseline file at ", &*v2]);
+            let v22: Rc<str> = string_concat(&["rig error: lint macros: no baseline file at ", &*v2]);
             eprintln!("{}", v22);
             2i32
         } else {
@@ -831,7 +831,7 @@ fn lint_run_0() -> i32 {
                     v57
                 };
                 let v59: Rc<str> = rig_lint_baseline::rig_lint_baseline_write(&*v3, &*v58);
-                let v62: Rc<str> = string_concat(&["kit lint baseline written ", &*v3, "  rows ", &*v59]);
+                let v62: Rc<str> = string_concat(&["rig lint baseline written ", &*v3, "  rows ", &*v59]);
                 println!("{}", v62);
                 0i32
             } else {

@@ -113,8 +113,10 @@
     | None => None
 
 :~ ^ settled_within (coordinator : erlang_process.subject coordinator_message) (job : job_id) (tries : i32) : bool =
-    ? status_in (otp_actor.call coordinator 10000i32 Read) job = Some Settled ?> !+
-    |? tries <= 0i32 ?> !-
+    ? status_in (otp_actor.call coordinator 10000i32 Read) job = Some Settled
+    ?> !+
+    |? tries <= 0i32
+    ?> !-
     |:
         paused 500i32
         settled_within coordinator job (tries - 1i32)
@@ -304,13 +306,14 @@
 ///> gleam
 :# the_coordinator_serves_the_spool_its_environment_names =
     := spool = spool_named ()
-    ? spool = "" ?> ()
+    ? spool = ""
+    ?> ()
     |:
         ?= system_started 4i32 (rig_launch (rig_named ())) ?|
         | Some (_, dispatcher) => served dispatcher spool
-        | None => erlang_file.put_error_text "kit coordinator: the system did not start\n"
+        | None => erlang_file.put_error_text "rig coordinator: the system did not start\n"
 
 ///> gleam
 :# an_unset_environment_reads_empty_and_the_kit_path_falls_back_to_the_path_lookup =
     testing.expect (environment_named "KIT_COORDINATOR_SURELY_UNSET_VARIABLE" = "") "unset reads empty"
-    testing.expect (environment_named "KIT_COORDINATOR_KIT" <> "" || rig_named () = "kit") "kit on PATH by default"
+    testing.expect (environment_named "KIT_COORDINATOR_KIT" <> "" || rig_named () = "kit") "rig on PATH by default"

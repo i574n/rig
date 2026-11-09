@@ -170,7 +170,7 @@ fn ceremony_admits_0(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let mut v2: US0 = ceremony_of_subcommand_2(v1.clone());
     match v2 {
         US0::US0_None => {
-            let v18: Rc<str> = string_concat(&["kit agile ", &*v1]);
+            let v18: Rc<str> = string_concat(&["rig agile ", &*v1]);
             refused_1(v1, v18)
         }
         US0::US0_Some(v3) => {
@@ -207,7 +207,7 @@ fn ceremony_admits_0(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
                         v10
                     }
                 };
-                let v15: Rc<str> = string_concat(&["kit ", &*v12, " ", &*v1]);
+                let v15: Rc<str> = string_concat(&["rig ", &*v12, " ", &*v1]);
                 refused_1(v1, v15)
             }
         }

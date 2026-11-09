@@ -545,7 +545,7 @@ fn run_run_0() -> i32 {
             let v25: bool = v22.ends_with(&*v24);
             let v26: bool = v25 == false;
             if v26 {
-                let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit run takes a .spi file first"); } LIT.with(|lit| lit.clone()) };
+                let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig run takes a .spi file first"); } LIT.with(|lit| lit.clone()) };
                 US2::US2_RunRefused(v27)
             } else {
                 match Rc::unwrap_or_clone(v23) {
@@ -658,7 +658,7 @@ fn run_run_0() -> i32 {
     match &v86 {
         US2::US2_RunRefused(v87) => {
             let v87: Rc<str> = v87.clone();
-            let v88: Rc<str> = string_concat(&["kit error: ", &*v87]);
+            let v88: Rc<str> = string_concat(&["rig error: ", &*v87]);
             eprintln!("{}", v88);
             2i32
         }
@@ -666,7 +666,7 @@ fn run_run_0() -> i32 {
             match v12 {
                 US0::US0_SetupMissing(v89) => {
                     let v89: Rc<str> = v89;
-                    let v90: Rc<str> = string_concat(&["kit error: kit run needs ", &*v89]);
+                    let v90: Rc<str> = string_concat(&["rig error: kit run needs ", &*v89]);
                     eprintln!("{}", v90);
                     2i32
                 }
@@ -684,7 +684,7 @@ fn run_run_0() -> i32 {
                             if v99 {
                                 program_ran_1(v97, v96)
                             } else {
-                                let v101: Rc<str> = string_concat(&["kit error: kit run ", &*v98]);
+                                let v101: Rc<str> = string_concat(&["rig error: kit run ", &*v98]);
                                 eprintln!("{}", v101);
                                 1i32
                             }
@@ -700,7 +700,7 @@ fn run_run_0() -> i32 {
                                     let v107: i32 = 0i32;
                                     let v108: i32 = method18(v106, v107);
                                     let v109: Rc<str> = format_real_19(v108);
-                                    let v110: Rc<str> = string_concat(&["kit run list ok tests=", &*v109]);
+                                    let v110: Rc<str> = string_concat(&["rig run list ok tests=", &*v109]);
                                     println!("{}", v110);
                                     0i32
                                 }
@@ -709,7 +709,7 @@ fn run_run_0() -> i32 {
                                     let v112: Rc<str> = get_environment_variable_4(v111);
                                     let v113: bool = &*v112 == "";
                                     if v113 {
-                                        let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: kit run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"); } LIT.with(|lit| lit.clone()) };
+                                        let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: kit run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"); } LIT.with(|lit| lit.clone()) };
                                         eprintln!("{}", v114);
                                         2i32
                                     } else {

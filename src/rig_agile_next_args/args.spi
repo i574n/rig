@@ -16,8 +16,10 @@
 :~ load_words (~loads : string) : array string = sm'.split "," loads |> array
 
 :~ ^ loads_valid (words : array string) (at : i32) : bool =
-    ? am'.length words <= at ?> !+
-    |? planned_load_valid (am'.index at words) ?> loads_valid words (at + 1i32)
+    ? am'.length words <= at
+    ?> !+
+    |? planned_load_valid (am'.index at words)
+    ?> loads_valid words (at + 1i32)
     |: !-
 
 := query_appended (~query : string) (~argument : string) (~value : string) : string =
@@ -47,23 +49,21 @@
     |:
         := argument = argument_owned index
         := value = argument_owned (index + 1i32)
-        ? argument = "--as"
-        ?>
-            ? value = "main" || value = "subagent" ?> next_request_from (index + 2i32) count { request ?| role = value }
+        ? argument = "--as" ?>
+            ? value = "main" || value = "subagent"
+            ?> next_request_from (index + 2i32) count { request ?| role = value }
             |: ArgsRejected ("--as expects main or subagent, got " ++# value)
         |? argument = "--json"
         ?> next_request_from (index + 1i32) count { request ?| json = !+ }
         |? argument = "--fits"
         ?> next_request_from (index + 1i32) count { request ?| load = fitting_loads () }
-        |? argument = "--load"
-        ?>
+        |? argument = "--load" ?>
             ? value <> "" && loads_valid (load_words value) 0i32
             ?> next_request_from (index + 2i32) count { request ?| load = value }
             |: ArgsRejected ("--load expects light, medium, heavy or none, or a comma list of them, got " ++# value)
         |:
             := width = query_flag_width argument value
-            ? width > 0i32
-            ?>
+            ? width > 0i32 ?>
                 next_request_from (index + width) count { request ?|
                     filters = query_appended request.filters argument (? width = 2i32 ?> value |: "")
                 }
@@ -71,7 +71,8 @@
             ?> ArgsRejected (query_flag_refusal argument value)
             |:
                 := parsed = $'(!argument).parse::<i32>().ok().filter(|value| *value > 0).unwrap_or(0)' : i32
-                ? 0i32 < parsed ?> next_request_from (index + 1i32) count { request ?| limit = parsed }
+                ? 0i32 < parsed
+                ?> next_request_from (index + 1i32) count { request ?| limit = parsed }
                 |: ArgsRejected ("unexpected argument " ++# argument ++# " (" ++# (next_usage ()) ++# ")")
 
 :~ next_request () : bool * string * string * i32 * string * string * bool =

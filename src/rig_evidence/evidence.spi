@@ -97,12 +97,12 @@
     ?> stderr_line "usage: kit evidence refresh <root> <relative path> [--as <new relative path>] [--dry-run]"
     |:
         ?= refresh (argument 3i32) (argument 4i32) (option_after "--as") (has_flag "--dry-run") ?|
-        | Refreshed row => stdout_line ("kit evidence refresh ok " ++# row)
-        | DryRun row => stdout_line ("kit evidence refresh dry-run (nothing written) " ++# row)
-        | NotListed => stderr_line "kit evidence refresh: that path has no EvidenceRef row in state/evidence.spi"
-        | OutsideRoot => stderr_line "kit evidence refresh: the path must be relative and stay inside the root"
-        | MissingFile => stderr_line "kit evidence refresh: the file to hash is missing or empty"
-        | WriteFailed reason => stderr_line ("kit evidence refresh: " ++# reason)
+        | Refreshed row => stdout_line ("rig evidence refresh ok " ++# row)
+        | DryRun row => stdout_line ("rig evidence refresh dry-run (nothing written) " ++# row)
+        | NotListed => stderr_line "rig evidence refresh: that path has no EvidenceRef row in state/evidence.spi"
+        | OutsideRoot => stderr_line "rig evidence refresh: the path must be relative and stay inside the root"
+        | MissingFile => stderr_line "rig evidence refresh: the file to hash is missing or empty"
+        | WriteFailed reason => stderr_line ("rig evidence refresh: " ++# reason)
 
 := expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail
 

@@ -218,14 +218,14 @@ fn lease_operand_args() -> Vec<String> {
 }
 
 fn find_lease_root() -> Result<Option<PathBuf>, String> {
-    if let Some(value) = std::env::var_os("KIT_LEASE_ROOT") {
+    if let Some(value) = std::env::var_os("RIG_LEASE_ROOT").or_else(|| std::env::var_os("KIT_LEASE_ROOT")) {
         let root = PathBuf::from(value);
         if !root.is_dir() || !root.join("state/prompt.spi").is_file() { return Err(format!("KIT_LEASE_ROOT is not a workspace lease root: {}", root.display())); }
         agile_prompt_lease_clock(&root)?;
         return Ok(Some(root));
     }
     let mut candidates = lease_operand_args().into_iter().map(PathBuf::from).filter(|path| path.is_dir() && path.join("state/prompt.spi").is_file()).collect::<Vec<_>>();
-    if std::env::var_os("KIT_CONTROL_READ_ONLY").is_none() {
+    if std::env::var_os("RIG_CONTROL_READ_ONLY").or_else(|| std::env::var_os("KIT_CONTROL_READ_ONLY")).is_none() {
         let current = std::env::current_dir().map_err(|error| format!("lease current_dir: {error}"))?;
         candidates.extend(current.ancestors().filter(|path| path.join("state/prompt.spi").is_file()).map(Path::to_path_buf));
     }
@@ -241,7 +241,7 @@ pub fn lease_wrap_code() -> i32 {
 #[must_use]
 pub fn lease_authority_code() -> i32 {
     let effect = lease_effect_code();
-    if std::env::var_os("KIT_CONTROL_READ_ONLY").is_some() && effect == 2 { eprintln!("kit error: control/baseline read-only mode rejects semantic mutation; write receipts to the active workspace instead"); return 2; }
+    if std::env::var_os("RIG_CONTROL_READ_ONLY").or_else(|| std::env::var_os("KIT_CONTROL_READ_ONLY")).is_some() && effect == 2 { eprintln!("rig error: control/baseline read-only mode rejects semantic mutation; write receipts to the active workspace instead"); return 2; }
     match effect {
         0 | 1 | 3 => 0,
         2 => match lease_wrap_code() { 0 => 0, 1 => lease_rejected(), _ => lease_guard_error() },
@@ -251,13 +251,13 @@ pub fn lease_authority_code() -> i32 {
 
 #[must_use]
 pub fn lease_rejected() -> i32 {
-    eprintln!("kit error: lease authority blocked mutating effect because should_wrap=1; semantic mutation stops at the guard boundary; should_yield becomes 1 only at the hard deadline; wrap remains available");
+    eprintln!("rig error: lease authority blocked mutating effect because should_wrap=1; semantic mutation stops at the guard boundary; should_yield becomes 1 only at the hard deadline; wrap remains available");
     2
 }
 
 #[must_use]
 pub fn lease_guard_error() -> i32 {
-    eprintln!("kit error: lease authority could not validate the active workspace lease");
+    eprintln!("rig error: lease authority could not validate the active workspace lease");
     2
 }
 

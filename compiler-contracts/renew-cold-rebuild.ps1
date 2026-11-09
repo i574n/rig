@@ -79,7 +79,7 @@ if ($productShaA -cne $productShaB) { throw "cold rebuild products differ: a=$pr
 . $PSScriptRoot/spiral-compiler.ps1
 $compiler = Get-SpiralCompilerDll 'single-flight'
 $dotnet = Resolve-SpiralDotnet
-$env:KIT_SPIRAL_BUNDLE = $compilerRoot
+$env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = $compilerRoot
 $owners = @(Get-KitOwners -Root $rootA -IncludeAuxiliary)
 $rustfmt = (Get-Command rustfmt).Source
 Copy-Item -LiteralPath $productA -Destination (Join-Path $rootA "kit$suffix")

@@ -58,26 +58,24 @@
         ++# sm'.show total
         ++# " baseline="
         ++# sm'.show baseline
-    ? total > baseline
-    ?>
-        console.write_line ("kit standards layers refused: violations grew past the HEAD baseline;" ++# summary)
+    ? total > baseline ?>
+        console.write_line ("rig standards layers refused: violations grew past the HEAD baseline;" ++# summary)
         1i32
     |:
-        console.write_line ("kit standards layers ok" ++# summary)
+        console.write_line ("rig standards layers ok" ++# summary)
         0i32
 
 :~ layers_checked (~root : string) (~table : string) : i32 =
     := table_text = file_system.read_text_or_empty table
-    ? rig_standards_layers_model.scan.table_count table_text = 0i32
-    ?>
-        console.write_error_line ("kit error: standards --layers: no LayerRow rows in " ++# table)
+    ? rig_standards_layers_model.scan.table_count table_text = 0i32 ?>
+        console.write_error_line ("rig error: standards --layers: no LayerRow rows in " ++# table)
         2i32
     |:
         ?= tree_of root ?|
         | Some tree => layers_measured root table table_text tree
         | None =>
             := why = "; the baseline needs HEAD"
-            console.write_error_line ("kit error: standards --layers: git could not list " ++# root ++# why)
+            console.write_error_line ("rig error: standards --layers: git could not list " ++# root ++# why)
             2i32
 
 :~ ^ table_flag (words : list string) (~found : string) : string =
@@ -92,7 +90,7 @@
         := given = table_flag rest ""
         layers_checked root (? given = "" ?> sm'.replace "\\" "/" root ++# "/layers.spi" |: given)
     | _ =>
-        console.write_error_line "kit error: usage: standards --layers <lib root> [--table <layers.spi>]"
+        console.write_error_line "rig error: usage: standards --layers <lib root> [--table <layers.spi>]"
         2i32
 
 := main () : i32 =

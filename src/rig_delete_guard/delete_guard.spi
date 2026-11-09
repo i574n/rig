@@ -10,10 +10,9 @@
 
 :~ delete_target_refusal (~path : string) : string =
     ? not (delete_path_absolute path)
-    ?> "kit refuses to remove a relative path, which resolves against the current folder: " ++# path
-    |? file_system.delete_target_is_protected path
-    ?>
-        "kit refuses to remove a protected folder (a drive or system root, a user profile, its AppData or temp, "
+    ?> "rig refuses to remove a relative path, which resolves against the current folder: " ++# path
+    |? file_system.delete_target_is_protected path ?>
+        "rig refuses to remove a protected folder (a drive or system root, a user profile, its AppData or temp, "
         ^^ "or an ancestor of one): "
         ++# path
     |: ""
@@ -25,4 +24,6 @@
     ? delete_target_refusal "C:\\Users" <> "" ?> () |: failwith "the users root"
     ? delete_target_refusal "C:\\" <> "" ?> () |: failwith "a drive root"
     ? delete_target_refusal "C:\\home\\git\\kit\\.cache\\x" = "" ?> () |: failwith "a cache folder under the tree"
-    ? delete_path_absolute "C:\\home\\git\\kit\\.cache\\x" && delete_path_absolute "/tmp/x" ?> () |: failwith "absolute forms"
+    ? delete_path_absolute "C:\\home\\git\\kit\\.cache\\x" && delete_path_absolute "/tmp/x"
+    ?> ()
+    |: failwith "absolute forms"

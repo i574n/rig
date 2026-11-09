@@ -5,7 +5,7 @@
 :< sm'_operators
 
 :~ refused (~reason : string) : i32 =
-    console.write_error_line ("kit error: mirror " ++# reason)
+    console.write_error_line ("rig error: mirror " ++# reason)
     2i32
 
 :~ listing_at (~root : string) (~listed : string) : rig_mirror_local.local.listing =
@@ -29,12 +29,14 @@
 
 :~ tar_path () : string = temp_named "rig-mirror" ++# ".tar"
 
-:~ lines_text (items : list string) : string = items |> listm.map (\ (item : string) => item ++# "\n") |> sm'.concat_list ""
+:~ lines_text (items : list string) : string =
+    items |> listm.map (\ (item : string) => item ++# "\n") |> sm'.concat_list ""
 
 :~ packed (~local : string) (ship : list string) (drop : list string) : bool =
     lines_text ship |> file_system.write_all_text (ship_list ())
     lines_text drop |> file_system.write_all_text (file_system.get_temp_path () ++# "/" ++# removal_name ())
-    := args = [ "-cf"; tar_path (); "-C"; local; "-T"; ship_list (); "-C"; file_system.get_temp_path (); removal_name () ]
+    := args =
+        [ "-cf"; tar_path (); "-C"; local; "-T"; ship_list (); "-C"; file_system.get_temp_path (); removal_name () ]
     process.succeeded (process.captured_by (tar_program ()) args !+)
 
 :~ cleaned () : () =
@@ -47,28 +49,37 @@
     process.succeeded (process.captured_by "scp" (listm.append (ssh_options ()) [ tar_path (); target ]) !+)
 
 :~ unpacked (~alias : string) (~remote : string) : bool =
-    process.succeeded (process.captured_by "ssh" (listm.append (ssh_options ()) [ alias; "kit mirror unpack " ++# remote ++# " " ++# removal_name () ]) !+)
+    process.succeeded (
+        process.captured_by
+            "ssh"
+            (listm.append (ssh_options ()) [ alias; "rig mirror unpack " ++# remote ++# " " ++# removal_name () ])
+            !+
+    )
 
 :~ sync_printed ((alias, local, remote, listed) : string * string * string * string) : i32 =
     := ours = listing_at local listed
     := planned = plan_at alias remote listed ours.text
     := ship = listm.append (listed_of planned.added) (listed_of planned.changed)
     := drop = listed_of planned.removed
-    := counts = " shipped=" ++# sm'.format (listm.length ship : i32) ++# " removed=" ++# sm'.format (listm.length drop : i32)
-    ? planned.refused <> "" ?> refused ("sync " ++# alias ++# ": " ++# planned.refused)
+    := counts =
+        " shipped=" ++# sm'.format (listm.length ship : i32) ++# " removed=" ++# sm'.format (listm.length drop : i32)
+    ? planned.refused <> ""
+    ?> refused ("sync " ++# alias ++# ": " ++# planned.refused)
     |? planned.found = ours.fingerprint ?>
-        console.write_error_line ("kit mirror sync in-step machine=" ++# alias ++# " fingerprint=" ++# ours.fingerprint)
+        console.write_error_line ("rig mirror sync in-step machine=" ++# alias ++# " fingerprint=" ++# ours.fingerprint)
         0i32
     |:
         := moved = packed local ship drop && shipped alias remote && unpacked alias remote
         cleaned ()
         := after = ? moved ?> (plan_at alias remote listed ours.text).found |: ""
         ? after = ours.fingerprint ?>
-            console.write_error_line ("kit mirror sync ok machine=" ++# alias ++# counts ++# " fingerprint=" ++# ours.fingerprint)
+            console.write_error_line (
+                "rig mirror sync ok machine=" ++# alias ++# counts ++# " fingerprint=" ++# ours.fingerprint
+            )
             0i32
         |:
             := stage = ? moved ?> "the remote fingerprint still differs" |: "pack, copy or unpack failed"
-            console.write_error_line ("kit error: mirror sync " ++# alias ++# ": " ++# stage ++# counts)
+            console.write_error_line ("rig error: mirror sync " ++# alias ++# ": " ++# stage ++# counts)
             1i32
 
 ///> rust

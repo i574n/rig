@@ -38,7 +38,7 @@ enum US3 {
 }
 fn agile_edit_failure_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     let v4: Rc<str> = string_concat(&["agile edit ", &*v1, " rejected: ", &*v0]);
-    let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v4 + "
+    let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v4 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
     v5
 }
@@ -260,7 +260,7 @@ fn agile_edit_entry_0() -> i32 {
                                     let v59: Rc<str> = std::rc::Rc::<str>::from((v53).to_string());
                                     let v62: Rc<str> = std::rc::Rc::<str>::from((v54).to_string());
                                     let v65: Rc<str> = std::rc::Rc::<str>::from((v55).to_string());
-                                    let v67: Rc<str> = string_concat(&["kit agile edit ok id=", &*v11, " field=", &*v1, " bytes_before=", &*v59, " bytes_after=", &*v62, " elapsed_ms=", &*v65]);
+                                    let v67: Rc<str> = string_concat(&["rig agile edit ok id=", &*v11, " field=", &*v1, " bytes_before=", &*v59, " bytes_after=", &*v62, " elapsed_ms=", &*v65]);
                                     let v68: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v67.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                                     v68

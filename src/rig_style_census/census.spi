@@ -30,7 +30,8 @@
     }
 
 :~ ^ counts_from (rows : array_base probe_row) (at : i32) (counts : list probe_reading) : list probe_reading =
-    ? at >= am'.length_base rows ?> counts
+    ? at >= am'.length_base rows
+    ?> counts
     |:
         := row = am'.index_base at rows
         := reading = { word = row.word; falls = probe_falls row.word; count = row.count }
@@ -55,7 +56,8 @@
     counts |> listm.fold added 0i32
 
 :~ ^ entry_from (baseline : array_base baseline_entry) (~name : string) (~word : string) (at : i32) : baseline_entry =
-    ? at >= am'.length_base baseline ?> { name = name; word = word; count = -1i32; lines = 0i32 }
+    ? at >= am'.length_base baseline
+    ?> { name = name; word = word; count = -1i32; lines = 0i32 }
     |:
         := entry = am'.index_base at baseline
         ? entry.name = name && entry.word = word ?> entry |: entry_from baseline name word (at + 1i32)
@@ -88,14 +90,12 @@
 :~ new_package_problem (counts : list probe_reading) : string =
     ? count_of counts "rust-global" > 0i32
     ?> "a new package carries rust_global"
-    |? count_of counts "wide-host-macro" + count_of counts "host-statement" > 0i32
-    ?>
+    |? count_of counts "wide-host-macro" + count_of counts "host-statement" > 0i32 ?>
         "a new package has host strings over 200 characters, multi-line or with statements; name one-expression "
         ^^ "primitives in a boundary package"
     |? count_of counts "encoded-row" > 0i32
     ?> "a new package encodes rows with tab or record separators"
-    |? count_of counts "type-decl" >= 2i32 && feature_total counts = 0i32
-    ?>
+    |? count_of counts "type-decl" >= 2i32 && feature_total counts = 0i32 ?>
         "a new package declares types but uses none of the typefeatureset (GADT cases, existentials, foralls, "
         ^^ "indexed unions, prototypes)"
     |: ""
@@ -166,19 +166,19 @@
 :~ baseline_saved (~path : string) (~rows : string) (~packages : string) : i32 =
     := header = "union census_row = CensusCount : string * string * i32 * i32\n\n"
     file_system.write_all_text path (header ++# rows ++# "\n")
-    stdout_line ("kit standards baseline ok packages=" ++# packages ++# " path=" ++# path)
+    stdout_line ("rig standards baseline ok packages=" ++# packages ++# " path=" ++# path)
     0i32
 
 :~ census_report (mode : census_mode) (tally : census_tally) : i32 =
     := packages = count_text tally.packages
     ?= mode ?|
     | PrintCensus =>
-        stdout_line ("kit standards census ok packages=" ++# packages)
+        stdout_line ("rig standards census ok packages=" ++# packages)
         0i32
     | WriteBaseline path => baseline_saved path tally.rows packages
     | MergeBaseline path ?& tally.regressions > 0i32 =>
         := counts = " packages=" ++# packages ++# " regressions=" ++# count_text tally.regressions
-        stderr_line ("kit error: standards merge refused; a baseline only shrinks" ++# counts ++# " baseline=" ++# path)
+        stderr_line ("rig error: standards merge refused; a baseline only shrinks" ++# counts ++# " baseline=" ++# path)
         1i32
     | MergeBaseline path =>
         := gather = \ (kept : array string) (name : string) => kept ++ ;[ name ]
@@ -187,7 +187,7 @@
     | CheckRatchet path =>
         := word = ? tally.regressions = 0i32 ?> "ok" |: "failed"
         := counts = " packages=" ++# packages ++# " regressions=" ++# count_text tally.regressions
-        stdout_line ("kit standards ratchet " ++# word ++# counts ++# " baseline=" ++# path)
+        stdout_line ("rig standards ratchet " ++# word ++# counts ++# " baseline=" ++# path)
         ? tally.regressions = 0i32 ?> 0i32 |: 1i32
 
 :~ census_started (mode : census_mode) (paths : list string) : i32 =
@@ -201,7 +201,7 @@
         | MergeBaseline path => baseline_entries (file_system.read_text_or_empty path)
         | _ => none
     ? dirs = [] ?>
-        stderr_line ("kit error: standards found no Spiral packages; " ++# census_usage ())
+        stderr_line ("rig error: standards found no Spiral packages; " ++# census_usage ())
         2i32
     |:
         := start = { packages = 0i32; regressions = 0i32; rows = ""; walked = [] }

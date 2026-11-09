@@ -9,12 +9,20 @@
     := mapped_files = model.source_map_files_binding 4i32 2i32
     := mapped_edges = model.source_map_edges_binding 1i32 3i32
     := diffed = model.source_diff_record_binding 3i32 10i32
-    ? limits < 1i32 ?> 1i32
-    |? classes < 1i32 ?> 1i32
-    |? own_surface <> 0i32 ?> 1i32
-    |? generated_surface <> 1i32 ?> 1i32
-    |? vendor_surface <> 2i32 ?> 1i32
-    |? mapped_files < 1i32 ?> 1i32
-    |? mapped_edges < 1i32 ?> 1i32
-    |? diffed < 1i32 ?> 1i32
+    ? limits < 1i32
+    ?> 1i32
+    |? classes < 1i32
+    ?> 1i32
+    |? own_surface <> 0i32
+    ?> 1i32
+    |? generated_surface <> 1i32
+    ?> 1i32
+    |? vendor_surface <> 2i32
+    ?> 1i32
+    |? mapped_files < 1i32
+    ?> 1i32
+    |? mapped_edges < 1i32
+    ?> 1i32
+    |? diffed < 1i32
+    ?> 1i32
     |: 0i32

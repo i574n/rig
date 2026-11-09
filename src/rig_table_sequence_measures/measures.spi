@@ -43,24 +43,21 @@
     := window = value_after (flag_word FlagWindow) words
     := order = value_after (flag_word FlagOrder) words
     := latency = value_after (flag_word FlagLatency) words
-    ? interval <> ""
-    ?>
+    ? interval <> "" ?>
         := name, pattern = split_pair interval "="
         name,
-        Some (IntervalOf (pattern, value_after (flag_word FlagBetween) words, decimal (value_after (flag_word FlagModulo) words)))
-    |? window <> ""
-    ?>
+        Some (IntervalOf (pattern, value_after (flag_word FlagBetween) words, decimal (
+            value_after (flag_word FlagModulo) words)))
+    |? window <> "" ?>
         := name, pattern = split_pair window "="
         := marker = value_after (flag_word FlagFrom) words
         := low, high = split_pair (value_after (flag_word FlagMs) words) ".."
         name, (? marker = "" ?> None |: Some (WindowOf (pattern, marker, decimal low, decimal high)))
-    |? order <> ""
-    ?>
+    |? order <> "" ?>
         := name, pattern = split_pair order "="
         := first, second = split_pair pattern ","
         name, (? second = "" ?> None |: Some (OrderOf (first, second)))
-    |? latency <> ""
-    ?>
+    |? latency <> "" ?>
         := name, pattern = split_pair latency "="
         := ending = value_after (flag_word FlagTo) words
         name, (? ending = "" ?> None |: Some (LatencyOf (pattern, ending)))
@@ -76,7 +73,7 @@
 :~ table_written (~name : string) (~out : string) (files : list string) (found : file_table) : i32 =
     := table = "file\tline\t" ++# name ++# "\n" ++# found.text
     := receipt =
-        "kit table sequences ok files=" ++# sm'.format (listm.length files : i32) ++# " rows=" ++# sm'.format found.rows
+        "rig table sequences ok files=" ++# sm'.format (listm.length files : i32) ++# " rows=" ++# sm'.format found.rows
     ? out = "" ?>
         console.write_line (sm'.trim_end_suffix "\n" table)
         console.write_error_line receipt

@@ -59,15 +59,20 @@
     run_end line (run_end line fraction count is_letter) count is_digit
 
 :~ ^ tokens_from (line : string) (at : i32) (count : i32) (found : list token) : list token =
-    ? count <= at ?> listm.rev found
+    ? count <= at
+    ?> listm.rev found
     |:
         := c = code_at line at
-        ? is_space c ?> tokens_from line (at + 1i32) count found
+        ? is_space c
+        ?> tokens_from line (at + 1i32) count found
         |:
             := kind, stop =
-                ? is_digit c ?> NumberToken, number_end line at count
-                |? is_letter c ?> WordToken, run_end line at count is_word_char
-                |? is_operator_char c ?> OperatorToken, run_end line at count is_operator_char
+                ? is_digit c
+                ?> NumberToken, number_end line at count
+                |? is_letter c
+                ?> WordToken, run_end line at count is_word_char
+                |? is_operator_char c
+                ?> OperatorToken, run_end line at count is_operator_char
                 |: MarkToken, at + width_at line at
             tokens_from line stop count ({ kind = kind; text = sm'.substring at (stop - at) line } :: found)
 
@@ -105,11 +110,13 @@
     (before : array string) (after : array string) (at : i32) (passed : bool) (report : string)
     : review
     =
-    ? am'.length before <= at ?> { passed = passed; report = report }
+    ? am'.length before <= at
+    ?> { passed = passed; report = report }
     |:
         := b = am'.index at before
         := a = am'.index at after
-        ? b = a ?> reviewed_lines before after (at + 1i32) passed report
+        ? b = a
+        ?> reviewed_lines before after (at + 1i32) passed report
         |:
             := kind = line_change b a
             := line = "line " ++# sm'.format (at + 1i32) ++# " " ++# change_word kind ++# ": " ++# sm'.trim a
@@ -142,7 +149,9 @@
     testing.expect
         (line_change "expect (cost = 120i32) \"pin\"" "expect (cost = 118i32) \"pin\"" = LiteralChange)
         "a pinned number"
-    testing.expect (line_change "expect (ok = true) \"p\"" "expect (ok = false) \"p\"" = BooleanChange) "a flipped boolean"
+    testing.expect
+        (line_change "expect (ok = true) \"p\"" "expect (ok = false) \"p\"" = BooleanChange)
+        "a flipped boolean"
     testing.expect
         (line_change "expect (n <= 3i32) \"p\"" "expect (n < 4i32) \"p\"" = ComparisonChange)
         "a touched comparison outranks the literal"

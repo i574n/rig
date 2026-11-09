@@ -12,7 +12,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $targetRoot = if ($TargetDirectory) { [IO.Path]::GetFullPath($TargetDirectory, $PWD.Path) } else { Join-Path $PSScriptRoot 'src/target' }
 $suffix = if ($IsWindows) { '.exe' } else { '' }
-$driver = $env:KIT_DEV_BINARY
+$driver = ($env:RIG_DEV_BINARY ?? $env:KIT_DEV_BINARY)
 if (-not $driver) {
     $driverTarget = Join-Path $targetRoot 'workflow-driver'
     $driver = Join-Path $driverTarget "debug/kit-dev$suffix"

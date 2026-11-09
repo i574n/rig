@@ -17,7 +17,8 @@
     | SettledPass => state_settled state
 
 :~ ^ listed (~names : string) (pass : list_pass) (left : u64) : u64 =
-    ? names = "" || left = 0u64 ?> left
+    ? names = "" || left = 0u64
+    ?> left
     |:
         := first = $'std::rc::Rc::<str>::from(!names.lines().next().unwrap_or(""))' : string
         := rest = $'std::rc::Rc::<str>::from(!names.lines().skip(1).collect::<Vec<_>>().join("\n"))' : string
@@ -40,15 +41,17 @@
     ? text <> "" && decimal_text value = text ?> Some value |: None
 
 :~ tail_count (~given : string) (~next : string) : option u64 =
-    ? given = "" ?> Some 20u64
-    |? given = "--all" ?> Some 4294967295u64
-    |? given = "--lines" ?> count_of next
+    ? given = ""
+    ?> Some 20u64
+    |? given = "--all"
+    ?> Some 4294967295u64
+    |? given = "--lines"
+    ?> count_of next
     |: count_of given
 
 
 :~ tail_shown (~id : string) (lines : u64) : i32 =
-    ? known_job id
-    ?>
+    ? known_job id ?>
         stdout_line (shared_summary "tail" id)
         stdout_line (
             "--- stdout (last "
@@ -74,19 +77,22 @@
     | Some lines => tail_shown id lines
 
 :~ stop_text (~id : string) : string =
-    ? known_job id = !- ?> "error: stop: unknown job id " ++# id
+    ? known_job id = !-
+    ?> "error: stop: unknown job id " ++# id
     |:
         ?= stop_verdict_of (shared_state id) ?|
         | StopRefused reason => "error: stop: job " ++# id ++# " " ++# reason
         | StopRequested =>
             := _ = text_written (job_file id "stop") (decimal_text (now_ms ()))
             := state = waited id (now_ms () + 15000u64) 0u64
-            ? state_settled state ?> shared_summary "stop" id
+            ? state_settled state
+            ?> shared_summary "stop" id
             |: "error: stop: job " ++# id ++# " did not settle within 15 s; its supervisor may predate job stop"
 
 :~ job_stopped () : i32 =
     := text = stop_text (argument 3i32)
-    ? sm'.starts_with "error: " text ?> rejected ($'std::rc::Rc::<str>::from(&(!text)[7..])' : string)
+    ? sm'.starts_with "error: " text
+    ?> rejected ($'std::rc::Rc::<str>::from(&(!text)[7..])' : string)
     |:
         stdout_line text
         0i32
@@ -119,14 +125,13 @@
         := _ = text_written (job_file id "timeout_ms") (decimal_text timeout)
         := wrapper = job_file id "heavy-wrapper.ps1"
         := _ =
-            ? file_exists wrapper
-            ?>
+            ? file_exists wrapper ?>
                 text_written wrapper (
                     sm'.replace (wrapper_minutes before) (wrapper_minutes timeout) (text_or_empty wrapper)
                 )
             |: ""
         stdout_line (
-            "kit job amend ok id="
+            "rig job amend ok id="
             ++# id
             ++# " timeout_ms="
             ++# decimal_text timeout

@@ -18,7 +18,7 @@
         unsafe { let handle = OpenMutexW(0x0010_0001, 0, name.as_ptr()); if handle.is_null() { return true; } let \
         state = WaitForSingleObject(handle, 0); let taken = state == 0 || state == 0x80; if taken { \
         ReleaseMutex(handle); } CloseHandle(handle); taken } } \#[cfg(not(windows))] fn probe(_name: &str) -> bool { \
-        true } let base = std::env::var("KIT_HEAVY_MUTEX").unwrap_or_else(|_| format\!("Global{}spiral-heavy-job", \
+        true } let base = std::env::var("RIG_HEAVY_MUTEX").or_else(|_| std::env::var("KIT_HEAVY_MUTEX")).unwrap_or_else(|_| format\!("Global{}spiral-heavy-job", \
         char::from(92u8))); probe(&base) || (!free > 3072 && probe(&format\!("{base}-2"))) }' : bool
 
 
@@ -67,17 +67,21 @@
     := queue = rig_job_ticket.ticket.heavy_queue ()
     := handed = ? queue = "" ?> "" |: handed_ticket id queue
     := ticket =
-        ? queue = "" || handed <> "" ?> handed
-        |? file_exists (job_file id "front") ?> rig_job_ticket.ticket.front_ticket queue
+        ? queue = "" || handed <> ""
+        ?> handed
+        |? file_exists (job_file id "front")
+        ?> rig_job_ticket.ticket.front_ticket queue
         |: rig_job_ticket.ticket.ticket_created queue
     ? ticket = "" ?> 0i32 |: slot_loop id queue ticket (now_ms ())
 
 :~ held_ticket (~id : string) (~queue : string) : string =
     := recorded = text_or_empty (job_file id "slot_ticket")
-    ? recorded <> "" && file_exists (joined queue recorded) ?> recorded
+    ? recorded <> "" && file_exists (joined queue recorded)
+    ?> recorded
     |:
         := name =
-            ? file_exists (job_file id "front") ?> rig_job_ticket.ticket.front_ticket queue
+            ? file_exists (job_file id "front")
+            ?> rig_job_ticket.ticket.front_ticket queue
             |: rig_job_ticket.ticket.ticket_created queue
         := _ = text_written (job_file id "slot_ticket") name
         := _ = text_written (joined queue name) id
@@ -89,20 +93,23 @@
     := handed = decimal_u64 (other_rows text)
     := held = file_exists (joined (joined (jobs_root ()) "held") owner)
     := recent = handed <> 0u64 && now - handed < 60000u64
-    ? first = "" || rig_job_ticket.ticket.ticket_mine first = !- || held || recent ?> ()
+    ? first = "" || rig_job_ticket.ticket.ticket_mine first = !- || held || recent
+    ?> ()
     |:
         := _ = file_removed (joined queue first)
         ()
 
 :~ slot_held_step (~id : string) : i32 =
     := queue = rig_job_ticket.ticket.heavy_queue ()
-    ? queue = "" || file_exists (job_file id "heavy-wrapper.ps1") = !- ?> 0i32
+    ? queue = "" || file_exists (job_file id "heavy-wrapper.ps1") = !-
+    ?> 0i32
     |:
         := now = now_ms ()
         := ticket = held_ticket id queue
         abandoned_swept queue (rig_job_ticket.ticket.first_live_ticket queue) now
         := first = rig_job_ticket.ticket.first_live_ticket queue
-        ? ticket = "" ?> 0i32
+        ? ticket = ""
+        ?> 0i32
         |? slot_deadline_passed id now ?>
             := _ = file_removed (joined queue ticket)
             := _ =
@@ -121,7 +128,8 @@
 
 :~ slot_ticket_dropped (~id : string) : () =
     := name = text_or_empty (job_file id "slot_ticket")
-    ? name = "" ?> ()
+    ? name = ""
+    ?> ()
     |:
         := _ = file_removed (joined (rig_job_ticket.ticket.heavy_queue ()) name)
         := _ = text_written (job_file id "slot") ("settled ticket=" ++# name ++# " state=stopped")

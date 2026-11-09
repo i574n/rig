@@ -26,11 +26,16 @@
 
 :~ classify_archive_name (~file_name : string) : archive_classification =
     := name = ascii_lowercase file_name
-    ? sm'.ends_with ".zip" name ?> Recognized ZipArchive
-    |? ends_with_any2 name ".tar.gz" ".tgz" ?> Recognized GzipTarArchive
-    |? ends_with_any2 name ".tar.xz" ".txz" ?> Recognized XzTarArchive
-    |? ends_with_any3 name ".tar.bz2" ".tbz2" ".tbz" ?> Recognized Bzip2TarArchive
-    |? sm'.ends_with ".tar" name ?> Recognized TarArchive
+    ? sm'.ends_with ".zip" name
+    ?> Recognized ZipArchive
+    |? ends_with_any2 name ".tar.gz" ".tgz"
+    ?> Recognized GzipTarArchive
+    |? ends_with_any2 name ".tar.xz" ".txz"
+    ?> Recognized XzTarArchive
+    |? ends_with_any3 name ".tar.bz2" ".tbz2" ".tbz"
+    ?> Recognized Bzip2TarArchive
+    |? sm'.ends_with ".tar" name
+    ?> Recognized TarArchive
     |: Unsupported
 
 := archive_format_code = \|
@@ -72,8 +77,10 @@
 
 :~ read_octal_field (~field_text : string) : octal_field =
     := text = sm'.trim field_text
-    ? (text = "") ?> EmptyField
-    |? octal_parse_error text ?> InvalidOctal text
+    ? (text = "")
+    ?> EmptyField
+    |? octal_parse_error text
+    ?> InvalidOctal text
     |: OctalValue (octal_parse text)
 
 :~ octal_field_value (~field_text : string) : u64 =

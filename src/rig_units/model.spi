@@ -33,10 +33,14 @@
     | DuplicateModule :: string * string -> units_finding
 
 :~ kind_of_word (~word : string) : unit_kind =
-    ? word = "model" ?> Model
-    |? word = "boundary" ?> Boundary
-    |? word = "feature" ?> Feature
-    |? word = "bin" ?> Bin
+    ? word = "model"
+    ?> Model
+    |? word = "boundary"
+    ?> Boundary
+    |? word = "feature"
+    ?> Feature
+    |? word = "bin"
+    ?> Bin
     |: Plain
 
 :~ entry_name (~raw : string) : string =
@@ -51,9 +55,12 @@
 
 :~ spiproj_section (~text : string) (~section : string) : list string =
     := step = \ ((found, inside) : list string * bool) (line : string) =>
-        ? sm'.starts_with (section ++# ":") line ?> found, !+
-        |? inside && sm'.starts_with "    " line && sm'.trim line <> "" ?> listm.append found [ entry_name line ], !+
-        |? sm'.trim line = "" ?> found, inside
+        ? sm'.starts_with (section ++# ":") line
+        ?> found, !+
+        |? inside && sm'.starts_with "    " line && sm'.trim line <> ""
+        ?> listm.append found [ entry_name line ], !+
+        |? sm'.trim line = ""
+        ?> found, inside
         |: found, !-
     := found, _ = lines_of text |> listm.fold step ([], !-)
     found
@@ -75,16 +82,20 @@
 :~ toml_block (~text : string) (~key : string) : list string =
     := step = \ ((found, inside) : list string * bool) (line : string) =>
         := plain = sm'.trim line
-        ? sm'.starts_with (key ++# " = '''") plain ?> found, !+
-        |? inside && plain = "'''" ?> found, !-
-        |? inside && plain <> "" ?> listm.append found [ plain ], !+
+        ? sm'.starts_with (key ++# " = '''") plain
+        ?> found, !+
+        |? inside && plain = "'''"
+        ?> found, !-
+        |? inside && plain <> ""
+        ?> listm.append found [ plain ], !+
         |: found, inside
     := found, _ = lines_of text |> listm.fold step ([], !-)
     found
 
 :~ quoted_after (~key : string) (~line : string) : string =
     := plain = sm'.trim line
-    ? sm'.starts_with (key ++# " = \"") plain |> not ?> ""
+    ? sm'.starts_with (key ++# " = \"") plain |> not
+    ?> ""
     |:
         := rest = sm'.substring (sm'.length key + 4i32) (sm'.length plain - sm'.length key - 4i32) plain
         := close_at = sm'.index_of "\"" rest
@@ -121,9 +132,12 @@
     := step = \ ((found, inside) : list string * bool) (line : string) =>
         := plain = sm'.trim line
         := closed = sm'.ends_with "]" plain
-        ? sm'.starts_with head plain ?> listm.append found (quoted_items (sm'.replace head "" plain)), (closed |> not)
-        |? inside && sm'.starts_with "]" plain ?> found, !-
-        |? inside ?> listm.append found (quoted_items plain), !+
+        ? sm'.starts_with head plain
+        ?> listm.append found (quoted_items (sm'.replace head "" plain)), (closed |> not)
+        |? inside && sm'.starts_with "]" plain
+        ?> found, !-
+        |? inside
+        ?> listm.append found (quoted_items plain), !+
         |: found, !-
     := found, _ = lines_of workspace |> listm.fold step ([], !-)
     found

@@ -1,4 +1,3 @@
-
 := emit_presence () : () =
     global """
         #[cfg(target_os = "linux")] pub fn rooted_entry_exists(path: &Path) -> Result<bool, String> {

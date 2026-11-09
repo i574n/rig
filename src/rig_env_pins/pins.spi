@@ -27,8 +27,10 @@
     ?= found ?|
     | [] => Missing
     | (first :: _) =>
-        ? path_key first = path_key pin.path ?> Matches
-        |? listed found pin.path ?> Shadowed first
+        ? path_key first = path_key pin.path
+        ?> Matches
+        |? listed found pin.path
+        ?> Shadowed first
         |: Elsewhere first
 
 := drift_text (pin : tool_pin) (drift : pin_drift) : string =

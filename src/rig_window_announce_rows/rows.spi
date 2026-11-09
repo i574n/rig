@@ -24,7 +24,8 @@
 
 := announced_line_of (line : string) : announced_line =
     := parts = sm'.split "\"" line |> array
-    ? sm'.starts_with "inl announced_" line |> not || am'.length parts < 5i32 ?> OtherAnnouncedLine
+    ? sm'.starts_with "inl announced_" line |> not || am'.length parts < 5i32
+    ?> OtherAnnouncedLine
     |:
         := numbers = sm'.split_list "," (am'.index 4i32 parts) |> listm'.filter (\ (t : string) => sm'.trim t <> "")
         ?= class_of (am'.index 3i32 parts) ?|

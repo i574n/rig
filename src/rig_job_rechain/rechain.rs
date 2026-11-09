@@ -93,7 +93,7 @@ fn joined_7(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     v2
 }
 fn jobs_root_9() -> Rc<str> {
-    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("KIT_JOBS_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
+    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
     v0
 }
 fn job_directory_8(mut v0: Rc<str>) -> Rc<str> {
@@ -796,7 +796,7 @@ fn rechain_run_0() -> i32 {
     };
     match v46 {
         US1::US1_None => {
-            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job usage: job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept)"); } LIT.with(|lit| lit.clone()) };
+            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job usage: job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept)"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v47);
             2i32
         }
@@ -868,7 +868,7 @@ fn rechain_run_0() -> i32 {
                             v91
                         }
                     };
-                    let v98: Rc<str> = string_concat(&["kit error: job after refused: ", &*v97]);
+                    let v98: Rc<str> = string_concat(&["rig error: job after refused: ", &*v97]);
                     eprintln!("{}", v98);
                     2i32
                 }
@@ -889,7 +889,7 @@ fn rechain_run_0() -> i32 {
                     };
                     let v107: Rc<str> = string_concat(&[&*v102, &*v106]);
                     std::fs::write(&*v101, &*v107).unwrap();
-                    let v112: Rc<str> = string_concat(&["kit job after ok id=", &*v10, " after=", &*v21, " after_mode="]);
+                    let v112: Rc<str> = string_concat(&["rig job after ok id=", &*v10, " after=", &*v21, " after_mode="]);
                     let v116: Rc<str> = match v48 {
                         US2::US2_AfterAny => {
                             let v113: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("any"); } LIT.with(|lit| lit.clone()) };

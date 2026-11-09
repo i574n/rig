@@ -109,10 +109,12 @@
     := mode = after_mode_of word
     := shape = start_shape_of word
     ? mode <> "" ?>
-        ? lead.after_mode <> "" ?> at, { lead ?| repeated = word }, options
+        ? lead.after_mode <> ""
+        ?> at, { lead ?| repeated = word }, options
         |: flags_read (at + 2i32) { lead ?| after_mode = mode; after_job = argument (at + 1i32) } options
     |? shape <> StartPlain ?>
-        ? lead.shape <> StartPlain ?> at, { lead ?| repeated = word }, options
+        ? lead.shape <> StartPlain
+        ?> at, { lead ?| repeated = word }, options
         |: flags_read (at + shape_offset shape) { lead ?| shape = shape } options
     |:
         ?= start_flag_of word ?|
@@ -180,8 +182,7 @@
     ?> refusal "--min-free-mb applies to --heavy or --compile jobs, which wait for a window"
     |? sm'.starts_with "--" (argument first)
     ?> refusal ("unknown option " ++# argument first ++# "; " ++# job_usage ())
-    |? sm'.starts_with "--" (argument (first + 2i32))
-    ?>
+    |? sm'.starts_with "--" (argument (first + 2i32)) ?>
         refusal (
             "the program cannot start with --, got " ++# argument (first + 2i32) ++# "; options go before the label"
         )

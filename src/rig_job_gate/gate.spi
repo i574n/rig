@@ -17,8 +17,7 @@
                 (free_mb ())
                 now
                 ask.min_free
-        ? terms = ""
-        ?>
+        ? terms = "" ?>
             := _ =
                 text_written
                     (window_file root ask.id)
@@ -32,8 +31,7 @@
             terms
 
 :~ gate_step (~id : string) (ask : request) (limit : u64) (now : u64) : i32 =
-    ? now > limit
-    ?>
+    ? now > limit ?>
         := _ = file_removed (window_file (windows_root ()) ask.id)
         := _ =
             text_written
@@ -49,8 +47,7 @@
                     )
                 )
         75i32
-    |? file_exists (released_mark (windows_root ()) ask.id)
-    ?>
+    |? file_exists (released_mark (windows_root ()) ask.id) ?>
         := root = windows_root ()
         := _ = file_removed (released_mark root ask.id)
         := _ = file_removed (window_file root ask.id)
@@ -70,8 +67,7 @@
         75i32
     |:
         := blocker = window_blocker ask
-        ? blocker = ""
-        ?>
+        ? blocker = "" ?>
             := _ =
                 text_written
                     (job_file id "window")
@@ -84,15 +80,13 @@
 :~ ^ gate_loop (~id : string) (ask : request) (limit : u64) : i32 =
     := now = now_ms ()
     := _ = text_written (job_file id "heartbeat_ms") (decimal_text now)
-    ? file_exists (job_file id "stop")
-    ?>
+    ? file_exists (job_file id "stop") ?>
         := _ = file_removed (window_file (windows_root ()) ask.id)
         := _ = text_written (job_file id "exit") (halt_line HaltOnRequest now (tree_stop_of 0u64))
         143i32
     |:
         := step = gate_step id ask limit now
-        ? step = 1i32
-        ?>
+        ? step = 1i32 ?>
             sleep_ms 500u64
             gate_loop id ask limit
         |: step
@@ -131,14 +125,12 @@
     := row = text_or_empty (window_file root held)
     ? row = "" || owned = held
     ?> held
-    |? lock_taken root
-    ?>
+    |? lock_taken root ?>
         := _ = text_written (window_file root owned) (concat5 owned (row_rest row held) "" "" "")
         := _ = file_removed (window_file root held)
         lock_released root
         owned
-    |? tries > 0i32
-    ?>
+    |? tries > 0i32 ?>
         sleep_ms 100u64
         window_adopted held (tries - 1i32)
     |: held
@@ -149,8 +141,7 @@
 
 :~ windowed_gate (~id : string) (wanted : window_class) : i32 =
     := held = text_or_empty (job_file id "window_request")
-    ? held <> "" && granted_by_host id
-    ?>
+    ? held <> "" && granted_by_host id ?>
         := owned = window_adopted held 50i32
         := _ = text_written (job_file id "window") (concat5 "granted id=" owned " adopted from the job host" "" "")
         0i32
@@ -168,8 +159,10 @@
     ? step = 75i32 ?> 2i32 |: step
 
 :~ held_window_step (~id : string) : i32 =
-    ? file_exists (job_file id "heavy-wrapper.ps1") ?> held_window_of id HeavyBuild
-    |? file_exists (job_file id "window-class") ?> held_window_of id Compile
+    ? file_exists (job_file id "heavy-wrapper.ps1")
+    ?> held_window_of id HeavyBuild
+    |? file_exists (job_file id "window-class")
+    ?> held_window_of id Compile
     |: 0i32
 
 :~ held_window_dropped (~id : string) : () =
@@ -184,8 +177,7 @@
     := now = now_ms ()
     ? file_exists (job_file id "stop")
     ?> ()
-    |? now > limit
-    ?>
+    |? now > limit ?>
         := _ = file_removed (window_file (windows_root ()) ask.id)
         := _ =
             text_written
@@ -201,8 +193,7 @@
         ()
     |:
         := blocker = window_blocker ask
-        ? blocker = ""
-        ?>
+        ? blocker = "" ?>
             := _ =
                 text_written
                     (job_file id "quiet")
@@ -237,7 +228,8 @@
 
 :~ job_window_gate (~id : string) : i32 =
     := slotted = rig_job_slot.slot.slot_gate id
-    ? slotted <> 0i32 ?> slotted
+    ? slotted <> 0i32
+    ?> slotted
     |:
         := windowed = windowed_gate id HeavyBuild
         ? windowed <> 0i32 ?> windowed |: compile_hold_taken id

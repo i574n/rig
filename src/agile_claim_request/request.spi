@@ -59,10 +59,12 @@
             ?= flag ?|
             | FlagAny => flags_read rest request
             | FlagClaim =>
-                ? request.verb = VerbNext ?> flags_read rest { request ?| grab = !+ }
+                ? request.verb = VerbNext
+                ?> flags_read rest { request ?| grab = !+ }
                 |: RequestRefused "--claim belongs to next; claim takes an item ID"
             | FlagAs =>
-                ? plain_text value ?> flags_read after { request ?| lane = value }
+                ? plain_text value
+                ?> flags_read after { request ?| lane = value }
                 |: RequestRefused ("--as expects a lane name, got '" ++# value ++# "'")
             | FlagTtl =>
                 ?= ttl_read value ?|
@@ -70,7 +72,8 @@
                 | None => RequestRefused ("--ttl expects positive minutes, got '" ++# value ++# "'")
             | FlagPaths =>
                 := plain = listm.fold (\ ok (g : string) => ok && plain_text g) !+ globs
-                ? request.verb = VerbClaim && globs <> [] && plain ?> flags_read after { request ?| paths = globs }
+                ? request.verb = VerbClaim && globs <> [] && plain
+                ?> flags_read after { request ?| paths = globs }
                 |: RequestRefused (paths_refusal value)
 
 
@@ -175,7 +178,8 @@
     := nothing = (;[] : array string) |> am'.base
     := unknown = am'.index_base 0i32 (request_parsed ("nope", nothing))
     testing.expect (unknown.refusal = "not a claim verb") "unknown verb"
-    := release = am'.index_base 0i32 (request_parsed ("release", (;[ "KIT-A"; "--as"; "kit" ] : array string) |> am'.base))
+    := release =
+        am'.index_base 0i32 (request_parsed ("release", (;[ "KIT-A"; "--as"; "kit" ] : array string) |> am'.base))
     testing.expect (release.release && (release.next |> not) && release.refusal = "") release.refusal
 := main () : i32 =
     export "agile_claim_request_parsed" request_parsed

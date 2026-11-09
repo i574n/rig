@@ -29,30 +29,45 @@
     ))
 
 :~ patch_witness_authorized (validated : i32) (parsed : i32) : i32 =
-    ? validated < 1i32 ?> 0i32
-    |? parsed < 1i32 ?> 0i32
-    |? validated < parsed ?> 0i32
-    |? parsed < validated ?> 0i32
+    ? validated < 1i32
+    ?> 0i32
+    |? parsed < 1i32
+    ?> 0i32
+    |? validated < parsed
+    ?> 0i32
+    |? parsed < validated
+    ?> 0i32
     |: 1i32
 
 :~ patch_operation_authorized (expected : i32) (observed : i32) : i32 =
-    ? expected < 0i32 ?> 0i32
-    |? observed < 0i32 ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 0i32
+    ?> 0i32
+    |? observed < 0i32
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 
 :~ patch_operation_next (cursor : i32) (total : i32) : i32 =
-    ? cursor < 0i32 ?> -1i32
-    |? total < 1i32 ?> -1i32
-    |? cursor < total ?> cursor + 1i32
+    ? cursor < 0i32
+    ?> -1i32
+    |? total < 1i32
+    ?> -1i32
+    |? cursor < total
+    ?> cursor + 1i32
     |: -1i32
 
 :~ patch_match_authorized (count : i32) (operation_authorized : i32) : i32 =
-    ? operation_authorized < 1i32 ?> 0i32
-    |? 1i32 < operation_authorized ?> 0i32
-    |? count < 1i32 ?> 0i32
-    |? 1i32 < count ?> 0i32
+    ? operation_authorized < 1i32
+    ?> 0i32
+    |? 1i32 < operation_authorized
+    ?> 0i32
+    |? count < 1i32
+    ?> 0i32
+    |? 1i32 < count
+    ?> 0i32
     |: 1i32
 
 :~ patch_commit_authorized (expected : i32) (committed : i32) : i32 =
@@ -78,22 +93,32 @@
     | RestorationFailed => RecordRestorationFailure
 
 :~ restoration_payload_identity (selected : i32) (observed_stage : i32) : i32 =
-    ? selected < 0i32 ?> -1i32
-    |? observed_stage < 0i32 ?> -1i32
-    |? selected < observed_stage ?> -1i32
-    |? observed_stage < selected ?> -1i32
+    ? selected < 0i32
+    ?> -1i32
+    |? observed_stage < 0i32
+    ?> -1i32
+    |? selected < observed_stage
+    ?> -1i32
+    |? observed_stage < selected
+    ?> -1i32
     |: selected
 
 :~ restoration_payload_slot_binding (identity : i32) (slot_authorized : i32) : i32 =
-    ? identity < 0i32 ?> -1i32
-    |? slot_authorized < 1i32 ?> -1i32
-    |? 1i32 < slot_authorized ?> -1i32
+    ? identity < 0i32
+    ?> -1i32
+    |? slot_authorized < 1i32
+    ?> -1i32
+    |? 1i32 < slot_authorized
+    ?> -1i32
     |: identity
 
 :~ restoration_payload_outcome_binding (identity : i32) (outcome : i32) : i32 =
-    ? identity < 0i32 ?> -1i32
-    |? outcome < 1i32 ?> -1i32
-    |? 2i32 < outcome ?> -1i32
+    ? identity < 0i32
+    ?> -1i32
+    |? outcome < 1i32
+    ?> -1i32
+    |? 2i32 < outcome
+    ?> -1i32
     |: identity
 
 :| patch_plan_failure =
@@ -112,8 +137,12 @@
 
 :~ patch_plan_failure_binding (code : i32) : string =
     := malformed, oversized, unavailable = -1i32, -2i32, -3i32
-    ? code = 0i32 ?> patch_plan_failure_message PatchPlanEmpty
-    |? code = malformed ?> patch_plan_failure_message PatchPlanMalformed
-    |? code = oversized ?> patch_plan_failure_message PatchPlanOversized
-    |? code = unavailable ?> patch_plan_failure_message PatchPlanUnavailable
+    ? code = 0i32
+    ?> patch_plan_failure_message PatchPlanEmpty
+    |? code = malformed
+    ?> patch_plan_failure_message PatchPlanMalformed
+    |? code = oversized
+    ?> patch_plan_failure_message PatchPlanOversized
+    |? code = unavailable
+    ?> patch_plan_failure_message PatchPlanUnavailable
     |: patch_plan_failure_message PatchPlanInvalidWitness

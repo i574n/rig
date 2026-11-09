@@ -125,18 +125,15 @@
     |: patch_rehearse_usage_error ()
 
 :~ patch_gated_entry () : i32 =
-    ? argument_count_is 4i32
-    ?>
+    ? argument_count_is 4i32 ?>
         := root = argument_owned 1i32
         := plan = argument_owned 2i32
         := gate_program = argument_owned 3i32
         := source = patch_prepare_context root plan
-        ? patch_source_ready source
-        ?>
+        ? patch_source_ready source ?>
             := context = patch_domain.context.context root source
             := count = patch_model.model.validation_witness (patch_domain.context.validate_context context)
-            ? patch_is_gated ()
-            ?>
+            ? patch_is_gated () ?>
                 ? i32_positive count
                 ?> patch_gated_context context count gate_program (patch_gate_timeout_ms ())
                 |: patch_plan_error count

@@ -344,24 +344,24 @@ fn scoreboard_run_0() -> i32 {
                         let v8: i32 = 0i32;
                         let v9: i32 = method13(v5, v8);
                         let v10: Rc<str> = format_real_14(v9);
-                        let v11: Rc<str> = string_concat(&["kit standards scoreboard ok roots=", &*v10]);
+                        let v11: Rc<str> = string_concat(&["rig standards scoreboard ok roots=", &*v10]);
                         println!("{}", v11);
                         0i32
                     } else {
-                        let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: standards --scoreboard needs at least one root directory"); } LIT.with(|lit| lit.clone()) };
+                        let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: standards --scoreboard needs at least one root directory"); } LIT.with(|lit| lit.clone()) };
                         eprintln!("{}", v12);
                         2i32
                     }
                 }
                 _ => {
-                    let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: standards --scoreboard needs at least one root directory"); } LIT.with(|lit| lit.clone()) };
+                    let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: standards --scoreboard needs at least one root directory"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v14);
                     2i32
                 }
             }
         }
         _ => {
-            let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: standards --scoreboard needs at least one root directory"); } LIT.with(|lit| lit.clone()) };
+            let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: standards --scoreboard needs at least one root directory"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v16);
             2i32
         }

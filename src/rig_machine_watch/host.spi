@@ -39,17 +39,20 @@ inl supervised_job (~command : string) : string = $'std::rc::Rc::<str>::from((!c
     ? job = "" ?> Orphan |: JobLeftover job
 
 :~ ^ owner_walk (~rows : process_rows) (at : i32) (hops : i32) : process_owner =
-    ? at < 0i32 || hops >= 40i32 ?> Orphan
+    ? at < 0i32 || hops >= 40i32
+    ?> Orphan
     |:
         := name = row_name rows at
         := job = supervised_job (row_command rows at)
-        ? name = "claude" ?> ClaudeSession (row_pid rows at)
-        |? job <> "" ?> KitJob job
+        ? name = "claude"
+        ?> ClaudeSession (row_pid rows at)
+        |? job <> ""
+        ?> KitJob job
         |:
             := parent = row_of_pid rows (row_parent rows at)
-            ? parent < 0i32
-            ?>
-                ? name = "erl" && cells_vm_at (row_command rows at) ?> CellsVm (row_pid rows at)
+            ? parent < 0i32 ?>
+                ? name = "erl" && cells_vm_at (row_command rows at)
+                ?> CellsVm (row_pid rows at)
                 |: left_or_orphan (row_parent rows at) (row_age rows at)
             |: owner_walk rows parent (hops + 1i32)
 

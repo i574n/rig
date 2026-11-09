@@ -39,10 +39,14 @@
     ))
 
 :~ bundle_root_binding (expected_roots : i32) (observed_roots : i32) : i32 =
-    ? expected_roots < 1i32 ?> 0i32
-    |? observed_roots < 1i32 ?> 0i32
-    |? expected_roots < observed_roots ?> 0i32
-    |? observed_roots < expected_roots ?> 0i32
+    ? expected_roots < 1i32
+    ?> 0i32
+    |? observed_roots < 1i32
+    ?> 0i32
+    |? expected_roots < observed_roots
+    ?> 0i32
+    |? observed_roots < expected_roots
+    ?> 0i32
     |: 1i32
 
 :! coverage_checkpoint_missing = ()
@@ -53,37 +57,53 @@
     | CoverageCheckpointClaimDurable :: u32 * string -> coverage_checkpoint_claim coverage_checkpoint_durable
 
 :~ coverage_checkpoint_binding (declared_durable : i32) (evidence_code : i32) : i32 =
-    ? declared_durable < 0i32 ?> 0i32
-    |? 1i32 < declared_durable ?> 0i32
-    |? evidence_code < 0i32 ?> 0i32
-    |? 2i32 < evidence_code ?> 0i32
-    |? declared_durable < 1i32 ?> 1i32
-    |? evidence_code < 2i32 ?> 0i32
+    ? declared_durable < 0i32
+    ?> 0i32
+    |? 1i32 < declared_durable
+    ?> 0i32
+    |? evidence_code < 0i32
+    ?> 0i32
+    |? 2i32 < evidence_code
+    ?> 0i32
+    |? declared_durable < 1i32
+    ?> 1i32
+    |? evidence_code < 2i32
+    ?> 0i32
     |: 1i32
 
 :~ bundle_entry_binding (expected_entries : i32) (observed_entries : i32) : i32 =
     bundle_root_binding expected_entries observed_entries
 
 :~ bundle_size_binding (limit_bytes : i32) (observed_bytes : i32) : i32 =
-    ? limit_bytes < 1i32 ?> 0i32
-    |? observed_bytes < 1i32 ?> 0i32
-    |? limit_bytes < observed_bytes ?> 0i32
+    ? limit_bytes < 1i32
+    ?> 0i32
+    |? observed_bytes < 1i32
+    ?> 0i32
+    |? limit_bytes < observed_bytes
+    ?> 0i32
     |: 1i32
 
 :~ bundle_extract_binding (expected_entries : i32) (extracted_entries : i32) : i32 =
     bundle_entry_binding expected_entries extracted_entries
 
 :~ bundle_payload_count_binding (archive_entries : i32) (explicit_directories : i32) : i32 =
-    ? archive_entries < 1i32 ?> 0i32
-    |? explicit_directories < 0i32 ?> 0i32
-    |? archive_entries < explicit_directories ?> 0i32
+    ? archive_entries < 1i32
+    ?> 0i32
+    |? explicit_directories < 0i32
+    ?> 0i32
+    |? archive_entries < explicit_directories
+    ?> 0i32
     |: archive_entries - explicit_directories
 
 :~ bundle_rehydration_binding (structure_ok : i32) (state_ok : i32) : i32 =
-    ? structure_ok < 1i32 ?> 0i32
-    |? 1i32 < structure_ok ?> 0i32
-    |? state_ok < 1i32 ?> 0i32
-    |? 1i32 < state_ok ?> 0i32
+    ? structure_ok < 1i32
+    ?> 0i32
+    |? 1i32 < structure_ok
+    ?> 0i32
+    |? state_ok < 1i32
+    ?> 0i32
+    |? 1i32 < state_ok
+    ?> 0i32
     |: 1i32
 
 :~ bundle_complete_binding (archive_ok : i32) (rehydration_ok : i32) : i32 =

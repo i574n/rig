@@ -62,7 +62,7 @@ fn stdout_line_4(mut v0: Rc<str>) -> () {
 fn baseline_saved_3(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
     let v4: Rc<str> = string_concat(&["union census_row = CensusCount : string * string * i32 * i32\n\n", &*v1, "\n"]);
     std::fs::write(&*v0, &*v4).unwrap();
-    let mut v8: Rc<str> = string_concat(&["kit standards baseline ok packages=", &*v2, " path=", &*v0]);
+    let mut v8: Rc<str> = string_concat(&["rig standards baseline ok packages=", &*v2, " path=", &*v0]);
     stdout_line_4(v8);
     0i32
 }
@@ -143,7 +143,7 @@ fn census_report_2(mut v0: US0, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v
                 v27
             };
             let v31: Rc<str> = count_text_5(v2);
-            let v36: Rc<str> = string_concat(&["kit standards ratchet ", &*v28, " packages=", &*v5, " regressions=", &*v31, " baseline=", &*v24]);
+            let v36: Rc<str> = string_concat(&["rig standards ratchet ", &*v28, " packages=", &*v5, " regressions=", &*v31, " baseline=", &*v24]);
             stdout_line_4(v36);
             if v25 {
                 0i32
@@ -156,7 +156,7 @@ fn census_report_2(mut v0: US0, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v
             let mut v10: bool = v2 > 0i32;
             if v10 {
                 let v13: Rc<str> = count_text_5(v2);
-                let v17: Rc<str> = string_concat(&["kit error: standards merge refused; a baseline only shrinks packages=", &*v5, " regressions=", &*v13, " baseline=", &*v9]);
+                let v17: Rc<str> = string_concat(&["rig error: standards merge refused; a baseline only shrinks packages=", &*v5, " regressions=", &*v13, " baseline=", &*v9]);
                 stderr_line_8(v17);
                 1i32
             } else {
@@ -168,7 +168,7 @@ fn census_report_2(mut v0: US0, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v
             }
         }
         US0::US0_PrintCensus => {
-            let v6: Rc<str> = string_concat(&["kit standards census ok packages=", &*v5]);
+            let v6: Rc<str> = string_concat(&["rig standards census ok packages=", &*v5]);
             stdout_line_4(v6);
             0i32
         }
@@ -665,7 +665,7 @@ fn census_started_1(mut v0: US0, mut v1: Rc<UH0>) -> i32 {
         }
     };
     if v18 {
-        let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: standards found no Spiral packages; usage: standards --census <dir>... | standards --baseline <file.spi> <dir>... | standards --baseline-merge <file.spi> <dir>... (replaces only the walked packages' rows) | standards --ratchet <file.spi> <dir>... | standards --scoreboard <root>... (one line per root: lines, then each probe's count and count per 1000 lines) (a directory without .spi files stands for its package subdirectories)"); } LIT.with(|lit| lit.clone()) };
+        let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: standards found no Spiral packages; usage: standards --census <dir>... | standards --baseline <file.spi> <dir>... | standards --baseline-merge <file.spi> <dir>... (replaces only the walked packages' rows) | standards --ratchet <file.spi> <dir>... | standards --scoreboard <root>... (one line per root: lines, then each probe's count and count per 1000 lines) (a directory without .spi files stands for its package subdirectories)"); } LIT.with(|lit| lit.clone()) };
         stderr_line_8(v19);
         2i32
     } else {

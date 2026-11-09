@@ -33,14 +33,17 @@
     | FileMissing _ => !-, "", "", "", ""
     | FileReadable file =>
         := records = records_text (loaded_string (read_text file))
-        := wsjf, active, known = ranking_of records (agile_task_next.task_next.tasks_from records 0i32 (byte_len records) NoTasks)
+        := wsjf, active, known =
+            ranking_of records (agile_task_next.task_next.tasks_from records 0i32 (byte_len records) NoTasks)
         !+, wsjf, active, known, rig_job_names.names.live_items wsjf
 
 ///> rust
 :# active_items_are_listed_in_wsjf_order_beside_the_open_set =
     := tasks = sample_backlog ()
     testing.expect (ranked_words (ranking MainAgent tasks) = [ "GATE"; "SMALL-P2"; "KIT-SIDE"; "BIG-P0" ]) "wsjf"
-    testing.expect (open_words tasks = [ "BIG-P0"; "SMALL-P2"; "WAITS"; "GATE"; "KIT-SIDE"; "PARKED" ]) "Done is not open"
+    testing.expect
+        (open_words tasks = [ "BIG-P0"; "SMALL-P2"; "WAITS"; "GATE"; "KIT-SIDE"; "PARKED" ])
+        "Done is not open"
 
 := main () : i32 =
     export "rig_claim_ranking" ((\ root => claim_ranking root) : string -> bool * string * string * string * string)

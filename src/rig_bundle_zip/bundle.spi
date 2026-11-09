@@ -17,8 +17,10 @@
 :~ bundle_profile_resolve_binding (requested : i32) (rig_signature : i32) : i32 =
     ? requested = 0i32 ?>
         ? rig_signature = 1i32 ?> 2i32 |: 1i32
-    |? requested = 1i32 ?> 1i32
-    |? requested = 2i32 ?> 2i32
+    |? requested = 1i32
+    ?> 1i32
+    |? requested = 2i32
+    ?> 2i32
     |: -1i32
 
 :| bundle_op from to =
@@ -84,21 +86,26 @@
 
 :~ ^ bundle_workspace_members_loop
     (body : string) (at : i32) (body_len : i32) (seen : string) (out : string) : string =
-    ? (=.) at body_len ?> out
+    ? (=.) at body_len
+    ?> out
     |:
         := quote_at = find_char body at '"'
-        ? (=.) quote_at body_len ?> out
+        ? (=.) quote_at body_len
+        ?> out
         |:
             := value_from = (+.) quote_at 1i32
             := value_near_to = find_char body value_from '"'
-            ? (=.) value_near_to body_len ?> codec_empty ()
+            ? (=.) value_near_to body_len
+            ?> codec_empty ()
             |:
                 := member = slice_exclusive body value_from value_near_to
-                ? (=.) member "" ?> codec_empty ()
+                ? (=.) member ""
+                ?> codec_empty ()
                 |:
                     := marker = sm.concat "\n" (sm.concat member "\n")
                     := seen_len = sm.length seen : i32
-                    ? (<) (find_text seen 0i32 marker) seen_len ?> codec_empty ()
+                    ? (<) (find_text seen 0i32 marker) seen_len
+                    ?> codec_empty ()
                     |:
                         bundle_workspace_members_loop
                             body
@@ -110,14 +117,17 @@
 :~ bundle_workspace_members_parse (source : string) : string =
     := source_count = sm.length source : i32
     := members_at = find_text source 0i32 "members"
-    ? (=.) members_at source_count ?> codec_empty ()
+    ? (=.) members_at source_count
+    ?> codec_empty ()
     |:
         := open_at = find_char source members_at '['
-        ? (=.) open_at source_count ?> codec_empty ()
+        ? (=.) open_at source_count
+        ?> codec_empty ()
         |:
             := body_from = (+.) open_at 1i32
             := body_near_to = find_char source body_from ']'
-            ? (=.) body_near_to source_count ?> codec_empty ()
+            ? (=.) body_near_to source_count
+            ?> codec_empty ()
             |:
                 := body = slice_exclusive source body_from body_near_to
                 bundle_workspace_members_loop body 0i32 (sm.length body : i32) "\n" ""

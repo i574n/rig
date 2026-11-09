@@ -29,14 +29,14 @@
     | ActionableDiagnostic :: string * string * string * string -> cli_diagnostic actionable
 
 := status_arity_diagnostic () : cli_diagnostic actionable =
-    ActionableDiagnostic ("status [root]", "status", "zero arguments|one bundle root", "kit status")
+    ActionableDiagnostic ("status [root]", "status", "zero arguments|one bundle root", "rig status")
 
 := help_arity_diagnostic () : cli_diagnostic actionable =
     ActionableDiagnostic (
         "help [verb|--completion|--json|--schema]",
         "help",
         "verb|proxy <capability>|--completion|--json|--schema",
-        "kit help"
+        "rig help"
     )
 
 := unknown_verb_diagnostic () : cli_diagnostic actionable =
@@ -44,7 +44,7 @@
         "<status|patch|agile|bundle|proxy|help> ...",
         "public command",
         "status|patch|agile|bundle|proxy|help",
-        "kit help"
+        "rig help"
     )
 
 := diagnostic_catalog_witness () : i32 =
@@ -101,7 +101,8 @@
 := lease_denied_code () : i32 = 7i32
 
 := handler_from_code (code : i32) : command_handler =
-    ? code = lease_denied_code () ?> LeaseDeniedHandler
+    ? code = lease_denied_code ()
+    ?> LeaseDeniedHandler
     |: handler_value (union_reflection.cases.union_case_at (code + 1i32) UnknownSpec)
 
 := command_catalog_witness () : i32 =
@@ -117,7 +118,8 @@
 := help_flag (~text : string) : bool = rust_std_string.model.pipe_member "--help|-h" text
 
 :~ command_code (~input : string) : u64 =
-    ? help_flag input ?> command_code_value HelpSpec
+    ? help_flag input
+    ?> command_code_value HelpSpec
     |: union_reflection.cases.union_case_where (public_spec_named input) command_code_value (missing_code ())
 
 :~ command_effect_code (~input : string) : u64 =
@@ -360,8 +362,10 @@
     ? (name = "") ?> !- |: ? ((proxy_usage name) = "") ?> !- |: !+
 
 :~ ^ help_flag_from (index : i32) (count : i32) : bool =
-    ? (index >= count) ?> !-
-    |? help_flag (process_argument index) ?> !+
+    ? (index >= count)
+    ?> !-
+    |? help_flag (process_argument index)
+    ?> !+
     |: help_flag_from ((index + 1i32)) count
 
 := help_request () : help_request =
@@ -457,8 +461,10 @@
 
 :~ ^ proxy_usages_aligned (~catalog : string) (index : i32) (checked : i32) : i32 =
     := name = catalog_name catalog index
-    ? name = "" ?> checked
-    |? usage_starts_with_name (proxy_usage name) name ?> proxy_usages_aligned catalog (index + 1i32) (checked + 1i32)
+    ? name = ""
+    ?> checked
+    |? usage_starts_with_name (proxy_usage name) name
+    ?> proxy_usages_aligned catalog (index + 1i32) (checked + 1i32)
     |: -1i32 - index
 
 ///> rust

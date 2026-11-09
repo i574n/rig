@@ -625,7 +625,7 @@ fn affected_run_0() -> i32 {
     let v14: Rc<UH0> = arguments_from_3(v12, v0, v13);
     match &*v14 {
         UH0::UH0_Nil => {
-            let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: repo usage: repo affected <src> <package>... (crates whose package graph reaches a changed package)"); } LIT.with(|lit| lit.clone()) };
+            let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: repo usage: repo affected <src> <package>... (crates whose package graph reaches a changed package)"); } LIT.with(|lit| lit.clone()) };
             println!("{}", v15);
             2i32
         }
@@ -641,7 +641,7 @@ fn affected_run_0() -> i32 {
             let v26: i32 = 0i32;
             let v27: i32 = method26(v18, v26);
             let v28: Rc<str> = format_real_24(v27);
-            let v31: Rc<str> = string_concat(&["kit repo affected ok crates=", &*v23, " packages=", &*v28, " src=", &*v11]);
+            let v31: Rc<str> = string_concat(&["rig repo affected ok crates=", &*v23, " packages=", &*v28, " src=", &*v11]);
             println!("{}", v31);
             0i32
         }

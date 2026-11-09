@@ -43,28 +43,52 @@
     := class_cold = classify ".cold-rebuild-a"
     := class_cargo = classify ".cargo"
     := class_keep = classify "keep.txt"
-    ? spiral_entry < 1i32 ?> 1i32
-    |? typecheck_rs < 1i32 ?> 1i32
-    |? 0i32 < primary_keep ?> 1i32
-    |? typecheck_tmp < 1i32 ?> 1i32
-    |? c_sidecar < 1i32 ?> 1i32
-    |? 0i32 < secondary_keep ?> 1i32
-    |? root_receipt < 1i32 ?> 1i32
-    |? root_candidate < 1i32 ?> 1i32
-    |? 0i32 < root_file_keep ?> 1i32
-    |? root_probe < 1i32 ?> 1i32
-    |? root_cold < 1i32 ?> 1i32
-    |? 0i32 < root_aux_keep ?> 1i32
-    |? root_directory_cold < 1i32 ?> 1i32
-    |? root_directory_cargo < 1i32 ?> 1i32
-    |? 0i32 < root_directory_keep ?> 1i32
-    |? class_spiral_entry <> 1u64 ?> 1i32
-    |? class_typecheck <> 1u64 ?> 1i32
-    |? class_typecheck_tmp <> 1u64 ?> 1i32
-    |? class_receipt <> 2u64 ?> 1i32
-    |? class_candidate <> 2u64 ?> 1i32
-    |? class_probe <> 2u64 ?> 1i32
-    |? class_cold <> 3u64 ?> 1i32
-    |? class_cargo <> 3u64 ?> 1i32
-    |? class_keep <> 0u64 ?> 1i32
+    ? spiral_entry < 1i32
+    ?> 1i32
+    |? typecheck_rs < 1i32
+    ?> 1i32
+    |? 0i32 < primary_keep
+    ?> 1i32
+    |? typecheck_tmp < 1i32
+    ?> 1i32
+    |? c_sidecar < 1i32
+    ?> 1i32
+    |? 0i32 < secondary_keep
+    ?> 1i32
+    |? root_receipt < 1i32
+    ?> 1i32
+    |? root_candidate < 1i32
+    ?> 1i32
+    |? 0i32 < root_file_keep
+    ?> 1i32
+    |? root_probe < 1i32
+    ?> 1i32
+    |? root_cold < 1i32
+    ?> 1i32
+    |? 0i32 < root_aux_keep
+    ?> 1i32
+    |? root_directory_cold < 1i32
+    ?> 1i32
+    |? root_directory_cargo < 1i32
+    ?> 1i32
+    |? 0i32 < root_directory_keep
+    ?> 1i32
+    |? class_spiral_entry <> 1u64
+    ?> 1i32
+    |? class_typecheck <> 1u64
+    ?> 1i32
+    |? class_typecheck_tmp <> 1u64
+    ?> 1i32
+    |? class_receipt <> 2u64
+    ?> 1i32
+    |? class_candidate <> 2u64
+    ?> 1i32
+    |? class_probe <> 2u64
+    ?> 1i32
+    |? class_cold <> 3u64
+    ?> 1i32
+    |? class_cargo <> 3u64
+    ?> 1i32
+    |? class_keep <> 0u64
+    ?> 1i32
     |: 0i32

@@ -6,7 +6,7 @@
 :< rig_experiment_analysis.analysis
 
 :~ refused (~message : string) : i32 =
-    stderr_line ("kit error: table test " ++# message)
+    stderr_line ("rig error: table test " ++# message)
     2i32
 
 := test_usage () : string =
@@ -67,7 +67,7 @@
                 ++# numeric_note kind left
                 ++# (", " ++# second_arm ++# " " ++# (i32_text right.rows) ++# (numeric_note kind right))
             |: first_arm ++# " " ++# (i32_text left.rows) ++# (numeric_note kind left)
-        stdout_line ("kit table test ok test=" ++# word ++# (" n=" ++# counts ++# " " ++# terms) ++# " post_hoc=yes")
+        stdout_line ("rig table test ok test=" ++# word ++# (" n=" ++# counts ++# " " ++# terms) ++# " post_hoc=yes")
         0i32
 
 :~ table_planned (row : rig_experiment_args.args.table_test_row) : i32 =

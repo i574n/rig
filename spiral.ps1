@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory)][string]$InputPath,
     [Parameter(Mandatory)][string]$OutputPath,
     [ValidateSet('Rust', 'C', 'Fsharp', 'Delphi')][string]$Backend = 'Rust',
-    [string]$CompilerBundle = $env:KIT_SPIRAL_BUNDLE,
+    [string]$CompilerBundle = ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE),
     [string]$SourceRoot = $PSScriptRoot,
     [ValidateRange(1, 600)][int]$TimeoutSec = 60
 )

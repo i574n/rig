@@ -70,7 +70,8 @@
 :~ lambda_names (body : string) : list string =
     := at = sm'.index_of "\\" body
     := arrow = sm'.index_of "=>" body
-    ? at < 0i32 || arrow < at ?> []
+    ? at < 0i32 || arrow < at
+    ?> []
     |:
         := head = unparen (sm'.substring (at + 1i32) (arrow - at - 1i32) body)
         ? head = "" ?> [] |: split_top "," head
@@ -87,7 +88,8 @@
     | None => None
     | Some (head, ty) =>
         := domain, range = arrow_split ty
-        ? range = "" ?> None
+        ? range = ""
+        ?> None
         |:
             := types = ? unparen domain = "" ?> [] |: split_top "*" (unparen domain)
             Some { export_name = export_name; params = named (lambda_names head) types; range = range }
@@ -95,8 +97,10 @@
 :~ body_after (whole : string) (start : i32) : string =
     := text = sm'.substring start ((sm'.length whole : i32) - start) whole
     := step (opened, closed) (m : mark) =
-        ? opened < 0i32 && m.ch = "(" && m.depth = 0i32 ?> m.at, closed
-        |? opened >= 0i32 && closed < 0i32 && m.ch = ")" && m.depth = 1i32 ?> opened, m.at
+        ? opened < 0i32 && m.ch = "(" && m.depth = 0i32
+        ?> m.at, closed
+        |? opened >= 0i32 && closed < 0i32 && m.ch = ")" && m.depth = 1i32
+        ?> opened, m.at
         |: opened, closed
     := opened, closed = marks text |> listm.fold step (-1i32, -1i32)
     ? opened < 0i32 || closed < 0i32 ?> "" |: sm'.substring (opened + 1i32) (closed - opened - 1i32) text
@@ -118,8 +122,10 @@
     := plain = sm'.index_of "export \"" rest
     := bang = sm'.index_of "!!!!Export(" rest
     := at = ? plain < 0i32 ?> bang |? bang < 0i32 ?> plain |? plain < bang ?> plain |: bang
-    ? at < 0i32 ?> listm.rev acc
-    |? in_string_line text (from + at) ?> decls_from text (from + at + 1i32) acc
+    ? at < 0i32
+    ?> listm.rev acc
+    |? in_string_line text (from + at)
+    ?> decls_from text (from + at + 1i32) acc
     |:
         := name, after = quoted_after text (from + at)
         := body = sm'.trim (unparen (sm'.trim (body_after text after)))

@@ -558,13 +558,13 @@ fn precheck_run_0(mut v0: Rc<RefCell<Vec<Rc<str>>>>) -> i32 {
     let v13: bool = v10 == 0i32;
     if v13 {
         let v14: Rc<str> = format_real_21(v12);
-        let v16: Rc<str> = string_concat(&["kit lint precheck ok files=", &*v14, " findings=0"]);
+        let v16: Rc<str> = string_concat(&["rig lint precheck ok files=", &*v14, " findings=0"]);
         println!("{}", v16);
         0i32
     } else {
         let v17: Rc<str> = format_real_21(v12);
         let v20: Rc<str> = format_real_21(v10);
-        let v22: Rc<str> = string_concat(&["kit lint precheck refused: files=", &*v17, " findings=", &*v20]);
+        let v22: Rc<str> = string_concat(&["rig lint precheck refused: files=", &*v17, " findings=", &*v20]);
         println!("{}", v22);
         1i32
     }

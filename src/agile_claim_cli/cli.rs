@@ -169,7 +169,7 @@ fn listed_next_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
     let v14: i32 = 0i32;
     let v15: i32 = method7(v13.clone(), v14);
     let v16: Rc<str> = format_real_8(v15);
-    let v20: Rc<str> = string_concat(&["kit agile next ok listed=", &*v16, " lane=", &*v1, " claimed=none"]);
+    let v20: Rc<str> = string_concat(&["rig agile next ok listed=", &*v16, " lane=", &*v1, " claimed=none"]);
     let v24: Rc<str> = string_concat(&["take one: kit agile claim ", &*v0, " <ID> --as ", &*v1, " (or next --claim takes the first)"]);
     let v25: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
     let v26: Rc<UH0> = method10(v0, v13, v25);
@@ -365,7 +365,7 @@ fn utc_stamp_16(mut v0: u64) -> Rc<str> {
     concat5_17(v24, v45, v44, v43.clone(), v43)
 }
 fn receipt_15(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: u64, mut v4: i32, mut v5: i32, mut v6: i32) -> Rc<str> {
-    let v11: Rc<str> = string_concat(&["kit agile ", &*v0, " ok claimed=", &*v1, " owner=", &*v2]);
+    let v11: Rc<str> = string_concat(&["rig agile ", &*v0, " ok claimed=", &*v1, " owner=", &*v2]);
     let v12: Rc<str> = utc_stamp_16(v3);
     let v13: Rc<str> = string_concat(&[" expires=", &*v12]);
     let v14: bool = v6 > 0i32;
@@ -408,7 +408,7 @@ fn claim_answered_12(mut v0: bool, mut v1: bool, mut v2: bool, mut v3: Rc<str>, 
     let v65: bool = &*v64 != "";
     if v65 {
         let v68: Rc<str> = string_concat(&["agile ", &*v3, " rejected: ", &*v64]);
-        let v69: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v68 + "
+        let v69: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v68 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v69
     } else {
@@ -416,7 +416,7 @@ fn claim_answered_12(mut v0: bool, mut v1: bool, mut v2: bool, mut v3: Rc<str>, 
         match v70 {
             US0::US0_OutcomeDropped => {
                 let v104: Rc<str> = format_real_8(v60);
-                let v105: Rc<str> = string_concat(&["kit agile release ok id=", &*v4, " owner=", &*v5, " released=", &*v61, " wip=", &*v104]);
+                let v105: Rc<str> = string_concat(&["rig agile release ok id=", &*v4, " owner=", &*v5, " released=", &*v61, " wip=", &*v104]);
                 let v106: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
                 let v107: Rc<UH0> = Rc::new(UH0::UH0_Cons(v105, v106));
                 let v108: i32 = 0i32;
@@ -442,21 +442,21 @@ fn claim_answered_12(mut v0: bool, mut v1: bool, mut v2: bool, mut v3: Rc<str>, 
             }
             US0::US0_OutcomeNone => {
                 let v92: Rc<str> = format_real_8(v60);
-                let v93: Rc<str> = string_concat(&["kit agile next ok claimed=none reason=", &*v61, " wip=", &*v92]);
+                let v93: Rc<str> = string_concat(&["rig agile next ok claimed=none reason=", &*v61, " wip=", &*v92]);
                 let v94: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
                 let v95: Rc<UH0> = Rc::new(UH0::UH0_Cons(v93, v94));
                 let v96: i32 = 3i32;
                 printed_3(v95, v96)
             }
             US0::US0_OutcomeRefused => {
-                let v85: Rc<str> = string_concat(&["kit agile claim refused id=", &*v4, " reason=", &*v61]);
+                let v85: Rc<str> = string_concat(&["rig agile claim refused id=", &*v4, " reason=", &*v61]);
                 let v86: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
                 let v87: Rc<UH0> = Rc::new(UH0::UH0_Cons(v85, v86));
                 let v88: i32 = 5i32;
                 printed_3(v87, v88)
             }
             US0::US0_OutcomeReleaseRefused => {
-                let v112: Rc<str> = string_concat(&["kit agile release refused id=", &*v4, " reason=", &*v61]);
+                let v112: Rc<str> = string_concat(&["rig agile release refused id=", &*v4, " reason=", &*v61]);
                 let v113: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
                 let v114: Rc<UH0> = Rc::new(UH0::UH0_Cons(v112, v113));
                 let v115: i32 = 5i32;
@@ -464,7 +464,7 @@ fn claim_answered_12(mut v0: bool, mut v1: bool, mut v2: bool, mut v3: Rc<str>, 
             }
             US0::US0_OutcomeUnknown => {
                 let v120: Rc<str> = string_concat(&["agile ", &*v3, " rejected: no open task with id ", &*v4]);
-                let v121: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v120 + "
+                let v121: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v120 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v121
             }
@@ -566,7 +566,7 @@ fn claim_requested_1(mut v0: Rc<str>, mut v1: bool, mut v2: bool, mut v3: bool, 
     let v24: bool = v12 == false;
     if v24 {
         let v26: Rc<str> = string_concat(&["agile ", &*v4, ": state/agile.spi is missing"]);
-        let v27: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v26 + "
+        let v27: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v26 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v27
     } else {
@@ -708,7 +708,7 @@ fn claim_run_0() -> i32 {
                             let v20: bool = &*v11 != "";
                             if v20 {
                                 let v23: Rc<str> = string_concat(&["agile ", &*v4, ": ", &*v11]);
-                                let v24: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v23 + "
+                                let v24: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v23 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                 v24
                             } else {
@@ -718,7 +718,7 @@ fn claim_run_0() -> i32 {
                         }
                         _ => {
                             let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile: usage: next|claim|release <root> ..."); } LIT.with(|lit| lit.clone()) };
-                            let v36: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v35 + "
+                            let v36: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v35 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                             v36
                         }
@@ -726,7 +726,7 @@ fn claim_run_0() -> i32 {
                 }
                 _ => {
                     let v38: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile: usage: next|claim|release <root> ..."); } LIT.with(|lit| lit.clone()) };
-                    let v39: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v38 + "
+                    let v39: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v38 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v39
                 }
@@ -734,7 +734,7 @@ fn claim_run_0() -> i32 {
         }
         _ => {
             let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile: usage: next|claim|release <root> ..."); } LIT.with(|lit| lit.clone()) };
-            let v42: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v41 + "
+            let v42: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v41 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v42
         }

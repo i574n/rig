@@ -106,8 +106,7 @@
     ?= events ?|
     | [] => listm.rev rows
     | (event :: rest) =>
-        ? event.role = terms.marked
-        ?>
+        ? event.role = terms.marked ?>
             := counts = ?= terms.between ?| Some _ => seen_between | None => !+
             := rows =
                 ?= previous ?|
@@ -133,8 +132,7 @@
     ?= events ?|
     | [] => listm.rev rows
     | (event :: rest) =>
-        ? event.role = terms.marker
-        ?>
+        ? event.role = terms.marker ?>
             := count =
                 count_within terms.counted (event.at_ms + terms.range.low) (event.at_ms + terms.range.high) all 0u64
             window_rows terms all rest (row_of event.line (CountIn count) :: rows)
@@ -169,8 +167,10 @@
     ?= events ?|
     | [] => { rows = listm.rev rows; unpaired = pending_count pending 0u64 }
     | (event :: rest) =>
-        ? event.role = terms.starting ?> latency_rows terms rest (event :: pending) rows
-        |? event.role = terms.ending ?> latency_rows terms rest [] (paired event (listm.rev pending) rows)
+        ? event.role = terms.starting
+        ?> latency_rows terms rest (event :: pending) rows
+        |? event.role = terms.ending
+        ?> latency_rows terms rest [] (paired event (listm.rev pending) rows)
         |: latency_rows terms rest pending rows
 
 := whole (rows : list measure_row) : measure_outcome = { rows = rows; unpaired = 0u64 }
@@ -200,7 +200,8 @@
 := at (role : string) (line : u64) (at_ms : u64) : event = { role = role; line = line; at_ms = at_ms }
 
 := request_log () : list event =
-    (at "request" 1u64 1000u64 :: (at "reply" 2u64 1250u64 :: (at "request" 3u64 2000u64 :: (at "flush" 4u64 2100u64 :: (at "request" 5u64 3500u64 :: (at "reply" 6u64 3900u64 :: (at "request" 7u64 4000u64 :: [])))))))
+    at "request" 1u64 1000u64 :: (at "reply" 2u64 1250u64 :: (at "request" 3u64 2000u64 :: (at "flush" 4u64 2100u64 :: (
+        at "request" 5u64 3500u64 :: (at "reply" 6u64 3900u64 :: (at "request" 7u64 4000u64 :: []))))))
 
 := outcome_text (outcome : measure_outcome) : string =
     rows_text "a.log" outcome.rows "" ++# "unpaired=" ++# sm'.format outcome.unpaired
@@ -208,7 +209,9 @@
 ///> rust
 :# intervals_measure_gaps_between_consecutive_matches =
     := plain = measured (Interval { marked = "request"; between = None; fold = AsRows }) (request_log ())
-    testing.expect (outcome_text plain = "a.log\t3\t1000\na.log\t5\t1500\na.log\t7\t500\nunpaired=0") (outcome_text plain)
+    testing.expect
+        (outcome_text plain = "a.log\t3\t1000\na.log\t5\t1500\na.log\t7\t500\nunpaired=0")
+        (outcome_text plain)
     := flushed = measured (Interval { marked = "request"; between = Some "flush"; fold = AsRows }) (request_log ())
     testing.expect (outcome_text flushed = "a.log\t5\t1500\nunpaired=0") (outcome_text flushed)
     := grid = measured (Interval { marked = "request"; between = None; fold = Modulo 400u64 }) (request_log ())
@@ -227,7 +230,9 @@
         measured
             (Window { counted = "reply"; marker = "request"; range = { low = 100u64; high = 500u64 } })
             (request_log ())
-    testing.expect (outcome_text wide = "a.log\t1\t1\na.log\t3\t0\na.log\t5\t1\na.log\t7\t0\nunpaired=0") (outcome_text wide)
+    testing.expect
+        (outcome_text wide = "a.log\t1\t1\na.log\t3\t0\na.log\t5\t1\na.log\t7\t0\nunpaired=0")
+        (outcome_text wide)
 
 ///> rust
 :# order_compares_first_occurrences =
@@ -259,6 +264,8 @@
 ///> rust
 :# latency_pairs_each_start_with_the_next_end =
     := latency = measured (Latency { starting = "request"; ending = "reply" }) (request_log ())
-    testing.expect (outcome_text latency = "a.log\t1\t250\na.log\t3\t1900\na.log\t5\t400\nunpaired=1") (outcome_text latency)
+    testing.expect
+        (outcome_text latency = "a.log\t1\t250\na.log\t3\t1900\na.log\t5\t400\nunpaired=1")
+        (outcome_text latency)
     := none = measured (Latency { starting = "request"; ending = "timeout" }) (request_log ())
     testing.expect (outcome_text none = "unpaired=4") (outcome_text none)

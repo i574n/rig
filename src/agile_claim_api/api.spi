@@ -1,7 +1,9 @@
 := claim_ranking (~root : string) : bool * string * string * string * string =
     $'agile_claim_rank::rig_claim_ranking(&*!root)' : bool * string * string * string * string
-:= claim_item_lines (~root : string) (~id : string) : string = $'agile_claim_item::rig_claim_item_lines(&*!root, &*!id)' : string
-:= claim_next (~lane : string) (ttl : i32) (~wsjf : string) (~active : string) (~live : string) (~rows : string) (now : u64)
+:= claim_item_lines (~root : string) (~id : string) : string =
+    $'agile_claim_item::rig_claim_item_lines(&*!root, &*!id)' : string
+:= claim_next
+    (~lane : string) (ttl : i32) (~wsjf : string) (~active : string) (~live : string) (~rows : string) (now : u64)
     : string * string * string * u64 * i32 * i32 * string * string
     =
     $'agile_claim_queue::rig_claim_next(&*!lane, !ttl, &*!wsjf, &*!active, &*!live, &*!rows, !now)'

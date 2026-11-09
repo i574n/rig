@@ -19,7 +19,8 @@
 
 :~ spi_known (~part : string) : option known_violation =
     := parts = sm'.split "\"" part |> array
-    ? am'.length parts < 7i32 ?> None
+    ? am'.length parts < 7i32
+    ?> None
     |: Some { file = am'.index 1i32 parts; name = am'.index 3i32 parts; class = am'.index 5i32 parts }
 
 :~ knowns_of (~spi : string) : list known_violation =
@@ -41,8 +42,10 @@
 
 :~ change_of (present : bool) (head : list known_violation) (row : known_violation) : baseline_change =
     := kind =
-        ? present |> not ?> RowForNewFile
-        |? listm'.try_find_ (same_row row) head <> None ?> RowForOldCode
+        ? present |> not
+        ?> RowForNewFile
+        |? listm'.try_find_ (same_row row) head <> None
+        ?> RowForOldCode
         |: RowForNewCode
     { kind = kind; row = row }
 
@@ -65,7 +68,8 @@
     (~root : string) (~scan_repo : string) (~scan : string) (present : list string) (row : known_violation)
     : list string
     =
-    ? listm'.contains row.file present ?> present
+    ? listm'.contains row.file present
+    ?> present
     |:
         ?= head_text scan_repo (scan ++# "/" ++# row.file) ?|
         | Some text =>
@@ -93,7 +97,7 @@
     := tally = \ (count : i32) (change : baseline_change) => ? refused change ?> count + 1i32 |: count
     := bad : i32 = changes |> listm.fold tally 0i32
     := counts = sm'.concat_list "" [ " added="; sm'.show (listm.length added : i32); " refused="; sm'.show bad ]
-    console.write_line ("kit lint growth " ++# (? bad = 0i32 ?> "ok" |: "refused") ++# counts)
+    console.write_line ("rig lint growth " ++# (? bad = 0i32 ?> "ok" |: "refused") ++# counts)
     ? bad = 0i32 ?> 0i32 |: 1i32
 
 ///> rust

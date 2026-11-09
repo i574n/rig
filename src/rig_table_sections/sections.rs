@@ -49,7 +49,7 @@ enum US3 {
     US3_None,
 }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let mut v3: Rc<str> = string_concat(&["kit error: table sequences ", &*v0, "; usage: table sequences <file|dir>... --time <regex with (?<ms>digits)> (--interval name=A [--between B] [--modulo ms] | --window name=A --from M --ms lo..hi | --order name=A,B | --latency name=A --to B | [--section-on <regex with (?<section>)>] [--carry <regex>] (--first|--last) name=<regex with (?<id>) and (?<value>)>... | [--section-on <regex>] (--count name=<regex [(?<value>)]>... [--count-in name=<regex with (?<rest>)>] [--in-set name=<file>[:<regex with (?<value>)>]])) [--out file.tsv]"]);
+    let mut v3: Rc<str> = string_concat(&["rig error: table sequences ", &*v0, "; usage: table sequences <file|dir>... --time <regex with (?<ms>digits)> (--interval name=A [--between B] [--modulo ms] | --window name=A --from M --ms lo..hi | --order name=A,B | --latency name=A --to B | [--section-on <regex with (?<section>)>] [--carry <regex>] (--first|--last) name=<regex with (?<id>) and (?<value>)>... | [--section-on <regex>] (--count name=<regex [(?<value>)]>... [--count-in name=<regex with (?<rest>)>] [--in-set name=<file>[:<regex with (?<value>)>]])) [--out file.tsv]"]);
     eprintln!("{}", v3);
     2i32
 }
@@ -115,7 +115,7 @@ fn sections_written_2(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>, mut v3:
     let v11: Rc<str> = format_real_4(v10);
     let mut v14: Rc<str> = format_real_6(v5);
     let v17: Rc<str> = format_real_6(v4);
-    let v18: Rc<str> = string_concat(&["kit table sequences ok files=", &*v11, " sections=", &*v14, " rows=", &*v17]);
+    let v18: Rc<str> = string_concat(&["rig table sequences ok files=", &*v11, " sections=", &*v14, " rows=", &*v17]);
     let v19: bool = &*v1 == "";
     if v19 {
         let v20: Rc<str> = loop_7(v8);

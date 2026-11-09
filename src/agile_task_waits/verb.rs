@@ -902,7 +902,7 @@ fn wait_run_12() -> i32 {
     };
     match v42 {
         US4::US4_None => {
-            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"); } LIT.with(|lit| lit.clone()) };
+            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v43);
             2i32
         }
@@ -913,7 +913,7 @@ fn wait_run_12() -> i32 {
             match v46 {
                 US6::US6_WaitsRefused(v53) => {
                     let v53: Rc<str> = v53;
-                    let v54: Rc<str> = string_concat(&["kit error: agile edit --wait: ", &*v53]);
+                    let v54: Rc<str> = string_concat(&["rig error: agile edit --wait: ", &*v53]);
                     eprintln!("{}", v54);
                     2i32
                 }
@@ -921,7 +921,7 @@ fn wait_run_12() -> i32 {
                     let v47: i32 = v47;
                     let v48: Rc<str> = change_item_21(v45);
                     let v51: Rc<str> = format_real_36(v47);
-                    let v52: Rc<str> = string_concat(&["kit agile edit ok id=", &*v48, " waits=", &*v51]);
+                    let v52: Rc<str> = string_concat(&["rig agile edit ok id=", &*v48, " waits=", &*v51]);
                     println!("{}", v52);
                     0i32
                 }

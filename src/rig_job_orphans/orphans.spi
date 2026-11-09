@@ -20,14 +20,12 @@
         := held = joined (joined (jobs_root ()) "held") id
         := stop_ms = decimal_u64 (text_or_empty (job_file id "stop"))
         := unattended = supervisor = 0u64 || process_alive supervisor = !-
-        ? stop_ms > 0u64 && stop_ms + 60000u64 < record.now_ms && unattended
-        ?>
+        ? stop_ms > 0u64 && stop_ms + 60000u64 < record.now_ms && unattended ?>
             := detail = "stop requested and no live supervisor or host acted on it within 60 s"
             := _ = text_written (job_file id "exit") (exit_line 143i32 stop_ms JobStopped detail)
             ? file_exists held ?> file_system.file_delete held |: ()
             !+
-        |? file_exists held && hold_orphaned id
-        ?>
+        |? file_exists held && hold_orphaned id ?>
             := detail = "held by a host whose owner session and host process are gone; it never started"
             := _ = text_written (job_file id "exit") (exit_line 125i32 record.started_ms JobLost detail)
             file_system.file_delete held

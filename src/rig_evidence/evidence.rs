@@ -412,29 +412,29 @@ fn evidence_run_0() -> i32 {
         match v21 {
             US0::US0_DryRun(v25) => {
                 let v25: Rc<str> = v25;
-                let v26: Rc<str> = string_concat(&["kit evidence refresh dry-run (nothing written) ", &*v25]);
+                let v26: Rc<str> = string_concat(&["rig evidence refresh dry-run (nothing written) ", &*v25]);
                 stdout_line_2(v26)
             }
             US0::US0_MissingFile => {
-                let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit evidence refresh: the file to hash is missing or empty"); } LIT.with(|lit| lit.clone()) };
+                let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig evidence refresh: the file to hash is missing or empty"); } LIT.with(|lit| lit.clone()) };
                 stderr_line_1(v32)
             }
             US0::US0_NotListed => {
-                let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit evidence refresh: that path has no EvidenceRef row in state/evidence.spi"); } LIT.with(|lit| lit.clone()) };
+                let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig evidence refresh: that path has no EvidenceRef row in state/evidence.spi"); } LIT.with(|lit| lit.clone()) };
                 stderr_line_1(v28)
             }
             US0::US0_OutsideRoot => {
-                let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit evidence refresh: the path must be relative and stay inside the root"); } LIT.with(|lit| lit.clone()) };
+                let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig evidence refresh: the path must be relative and stay inside the root"); } LIT.with(|lit| lit.clone()) };
                 stderr_line_1(v30)
             }
             US0::US0_Refreshed(v22) => {
                 let v22: Rc<str> = v22;
-                let v23: Rc<str> = string_concat(&["kit evidence refresh ok ", &*v22]);
+                let v23: Rc<str> = string_concat(&["rig evidence refresh ok ", &*v22]);
                 stdout_line_2(v23)
             }
             US0::US0_WriteFailed(v34) => {
                 let v34: Rc<str> = v34;
-                let v35: Rc<str> = string_concat(&["kit evidence refresh: ", &*v34]);
+                let v35: Rc<str> = string_concat(&["rig evidence refresh: ", &*v34]);
                 stderr_line_1(v35)
             }
         }

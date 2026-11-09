@@ -52,7 +52,7 @@ fn stderr_line_2(mut v0: Rc<str>) -> () {
     ()
 }
 fn failed_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = string_concat(&["kit error: table logs ", &*v0]);
+    let v1: Rc<str> = string_concat(&["rig error: table logs ", &*v0]);
     stderr_line_2(v1);
     2i32
 }
@@ -258,7 +258,7 @@ fn values_run_8(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
         let v20: Rc<str> = string_concat(&["file\t", &*v5, "\n", &*v11]);
         let v21: Rc<str> = count_text_19(v12);
         let v24: Rc<str> = count_text_19(v13);
-        let v26: Rc<str> = string_concat(&["kit table logs ok files=", &*v21, " rows=", &*v24, " columns=1"]);
+        let v26: Rc<str> = string_concat(&["rig table logs ok files=", &*v21, " rows=", &*v24, " columns=1"]);
         table_written_3(v3, v4, v20, v26)
     }
 }
@@ -737,7 +737,7 @@ fn logs_run_0() -> i32 {
                                         let v62: i32 = 0i32;
                                         let v63: i32 = measure_count_28(v46, v62);
                                         let v64: Rc<str> = count_text_19(v63);
-                                        let v65: Rc<str> = string_concat(&["kit table logs ok files=", &*v59, " columns=", &*v64]);
+                                        let v65: Rc<str> = string_concat(&["rig table logs ok files=", &*v59, " columns=", &*v64]);
                                         table_written_3(v16, v18, v58, v65)
                                     }
                                 }

@@ -10,7 +10,8 @@
     ?= relatives ?|
     | [] => ? current = "" ?> chunks |: current :: chunks
     | relative :: rest =>
-        ? count >= size ?> chunks_from size rest relative 1i32 (current :: chunks)
+        ? count >= size
+        ?> chunks_from size rest relative 1i32 (current :: chunks)
         |: chunks_from size rest (? current = "" ?> relative |: current ++# "\n" ++# relative) (count + 1i32) chunks
 
 ///> rust

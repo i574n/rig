@@ -1,8 +1,10 @@
 :< ingest_frontier_contract.model
 
 := is_zero (value : i32) : bool =
-    ? value < 0i32 ?> !-
-    |? 0i32 < value ?> !-
+    ? value < 0i32
+    ?> !-
+    |? 0i32 < value
+    ?> !-
     |: !+
 
 := main () : i32 =

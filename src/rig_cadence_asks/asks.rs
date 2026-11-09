@@ -520,7 +520,7 @@ fn format_real_22(mut v0: i64) -> Rc<str> {
     v4
 }
 fn ask_line_21(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<str>, mut v3: i64) -> Rc<str> {
-    let v5: Rc<str> = string_concat(&["kit agile cadence neglected-ask id=", &*v0, " priority="]);
+    let v5: Rc<str> = string_concat(&["rig agile cadence neglected-ask id=", &*v0, " priority="]);
     let v11: Rc<str> = match v1 {
         US0::US0_HighAsk => {
             let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("P1"); } LIT.with(|lit| lit.clone()) };

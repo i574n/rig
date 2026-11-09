@@ -28,23 +28,35 @@
     ))
 
 :~ shim_decision_binding (mode : i32) (native_equivalent : i32) (allow_real : i32) (gap_present : i32) : i32 =
-    ? mode < 0i32 ?> -1i32
-    |? 2i32 < mode ?> -1i32
-    |? native_equivalent < 0i32 ?> -1i32
-    |? 1i32 < native_equivalent ?> -1i32
-    |? allow_real < 0i32 ?> -1i32
-    |? 1i32 < allow_real ?> -1i32
-    |? gap_present < 0i32 ?> -1i32
-    |? 1i32 < gap_present ?> -1i32
-    |? mode = 2i32 ?> 2i32
-    |? native_equivalent = 1i32 ?> 0i32
+    ? mode < 0i32
+    ?> -1i32
+    |? 2i32 < mode
+    ?> -1i32
+    |? native_equivalent < 0i32
+    ?> -1i32
+    |? 1i32 < native_equivalent
+    ?> -1i32
+    |? allow_real < 0i32
+    ?> -1i32
+    |? 1i32 < allow_real
+    ?> -1i32
+    |? gap_present < 0i32
+    ?> -1i32
+    |? 1i32 < gap_present
+    ?> -1i32
+    |? mode = 2i32
+    ?> 2i32
+    |? native_equivalent = 1i32
+    ?> 0i32
     |? allow_real = 1i32 ?>
         ? gap_present = 1i32 ?> 1i32 |: 0i32
     |: 0i32
 
 :~ shim_decision_packed_binding (mode : i32) (flags : i32) : i32 =
-    ? flags < 0i32 ?> -1i32
-    |? 7i32 < flags ?> -1i32
+    ? flags < 0i32
+    ?> -1i32
+    |? 7i32 < flags
+    ?> -1i32
     |:
         := native_equivalent = flags % 2i32
         := allow_real = (flags / 2i32) % 2i32
@@ -52,12 +64,17 @@
         shim_decision_binding mode native_equivalent allow_real gap_present
 
 :~ shim_install_packed_binding (shape : i32) (mode : i32) : i32 =
-    ? shape <> 9i32 ?> 0i32
-    |? mode < 0i32 ?> 0i32
-    |? 2i32 < mode ?> 0i32
+    ? shape <> 9i32
+    ?> 0i32
+    |? mode < 0i32
+    ?> 0i32
+    |? 2i32 < mode
+    ?> 0i32
     |: 1i32
 
 :~ shim_uninstall_binding (manifest_present : i32) (wrapper_count : i32) : i32 =
-    ? manifest_present <> 1i32 ?> 0i32
-    |? wrapper_count <> 4i32 ?> 0i32
+    ? manifest_present <> 1i32
+    ?> 0i32
+    |? wrapper_count <> 4i32
+    ?> 0i32
     |: 1i32

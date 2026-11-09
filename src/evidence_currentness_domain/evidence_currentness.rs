@@ -69,7 +69,7 @@ pub fn evidence_state_tree_sha256(root: &Path) -> Result<String, String> {
     let path = root.join("state");
     let excluded_evidence = root.join("state/evidence.spi");
     let excluded_attestation = root.join("state/typecheck_receipts.spi");
-    let limit = env::var("KIT_TREE_HASH_LIMIT_BYTES").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(1024 * 1024 * 1024);
+    let limit = env::var("RIG_TREE_HASH_LIMIT_BYTES").or_else(|_| env::var("KIT_TREE_HASH_LIMIT_BYTES")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(1024 * 1024 * 1024);
     let mut manifest = Vec::new();
     let mut total = 0u64;
     evidence_tree_collect_filtered(root, &path, &excluded_evidence, &excluded_attestation, &mut manifest, &mut total, limit)?;
@@ -350,7 +350,7 @@ pub fn register_coverage_evidence(root: &Path, current: &Path, seed: &Path) -> R
         }
         return Err(format!("coverage evidence registration rolled back: {error}"));
     }
-    Ok(format!("kit proxy coverage-register ok current_sha256={current_sha256} current_permille={current_permille} current_lines={current_lines} seed_sha256={seed_sha256} seed_permille={seed_permille} seed_lines={seed_lines} mutation=true"))
+    Ok(format!("rig proxy coverage-register ok current_sha256={current_sha256} current_permille={current_permille} current_lines={current_lines} seed_sha256={seed_sha256} seed_permille={seed_permille} seed_lines={seed_lines} mutation=true"))
 }
 
 pub fn evidence_status(root: &Path) -> Result<EvidenceCurrentnessSummary, String> { check_evidence_tree(root) }

@@ -129,7 +129,7 @@
                 if current_hash.as_deref() != owner[2].as_str() { return Err(format!("generated output changed since cold planning: {}", args[4])); }
                 atomic_write(&output, generated.as_bytes())?;
             }
-            println!("kit proxy cold-rebuild-owner ok input={} output={} changed={} snapshot={}", args[3], args[4], i32::from(!unchanged), args[2]);
+            println!("rig proxy cold-rebuild-owner ok input={} output={} changed={} snapshot={}", args[3], args[4], i32::from(!unchanged), args[2]);
             Ok(())
         }
 

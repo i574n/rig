@@ -15,8 +15,10 @@
     { task = task; minutes = minutes; standing = standing_of status }
 
 :~ ^ sprint_has (items : array_base rig_agile_sprint_state.state.item_shown) (~task : string) (at : i32) : bool =
-    ? at >= am'.length_base items ?> !-
-    |? (am'.index_base at items).task = task ?> !+
+    ? at >= am'.length_base items
+    ?> !-
+    |? (am'.index_base at items).task = task
+    ?> !+
     |: sprint_has items task (at + 1i32)
 
 :~ sprint_changed (~root : string) (~id : string) (~task : string) (dropping : bool) : i32 =
@@ -26,27 +28,31 @@
     := heads = rig_agile_sprint_state.state.sprint_head_of (existing, id)
     := word = ? dropping ?> "drop" |: "add"
     := refuse = \ (why : string) =>
-        console.write_error_line ("kit error: agile sprint " ++# word ++# " refused: " ++# why)
+        console.write_error_line ("rig error: agile sprint " ++# word ++# " refused: " ++# why)
         1i32
-    ? am'.length_base heads = 0i32 ?> refuse ("no sprint " ++# id)
-    |? (am'.index_base 0i32 heads).running |> not ?> refuse ("sprint " ++# id ++# " is closed")
+    ? am'.length_base heads = 0i32
+    ?> refuse ("no sprint " ++# id)
+    |? (am'.index_base 0i32 heads).running |> not
+    ?> refuse ("sprint " ++# id ++# " is closed")
     |:
         := items = rig_agile_sprint_state.state.sprint_items_of (existing, id)
         := present = sprint_has items task 0i32
         := agile_text = file_system.read_text_or_empty (state ++# "/agile.spi")
         := candidate = candidate_of agile_text task
         := problem =
-            ? dropping ?> (? present ?> "" |: "item " ++# task ++# " is not in sprint " ++# id)
+            ? dropping
+            ?> (? present ?> "" |: "item " ++# task ++# " is not in sprint " ++# id)
             |:
                 ?= first_refusal [ candidate ] ?|
                 | Some (ItemNotOpen _) => "item " ++# task ++# " is unknown or Done"
                 | Some (ItemUnestimated _) => "item " ++# task ++# " has no estimate"
                 | _ => ""
-        ? problem <> "" ?> refuse problem
+        ? problem <> ""
+        ?> refuse problem
         |:
             := args = existing, id, task, candidate.minutes, dropping
             file_system.write_all_text sprints_path (rig_agile_sprint_append.append.sprint_item_appended args)
-            console.write_line ("kit agile sprint " ++# word ++# " ok id=" ++# id ++# " item=" ++# task)
+            console.write_line ("rig agile sprint " ++# word ++# " ok id=" ++# id ++# " item=" ++# task)
             0i32
 
 :~ ^ finished_from
@@ -54,7 +60,8 @@
     (kept : array rig_agile_sprint_review.review.task_row)
     : array rig_agile_sprint_review.review.task_row
     =
-    ? at >= am'.length_base items ?> kept
+    ? at >= am'.length_base items
+    ?> kept
     |:
         := task = (am'.index_base at items).task
         := done = agile_task_census.task_census.status_pair (agile_text, task) = "Done"
@@ -64,7 +71,8 @@
     (~agile_text : string) (items : array_base rig_agile_sprint_state.state.item_shown) (at : i32) (kept : list string)
     : list string
     =
-    ? at >= am'.length_base items ?> listm.rev kept
+    ? at >= am'.length_base items
+    ?> listm.rev kept
     |:
         := item = am'.index_base at items
         := done = agile_task_census.task_census.status_pair (agile_text, item.task) = "Done"
@@ -85,9 +93,8 @@
     := sprints_path = state ++# "/sprints.spi"
     := existing = file_system.read_text_or_empty sprints_path
     := heads = rig_agile_sprint_state.state.sprint_head_of (existing, id)
-    ? am'.length_base heads = 0i32 || (am'.index_base 0i32 heads).running |> not
-    ?>
-        console.write_error_line ("kit error: agile sprint close refused: no open sprint " ++# id)
+    ? am'.length_base heads = 0i32 || (am'.index_base 0i32 heads).running |> not ?>
+        console.write_error_line ("rig error: agile sprint close refused: no open sprint " ++# id)
         1i32
     |:
         := items = rig_agile_sprint_state.state.sprint_items_of (existing, id)
@@ -103,13 +110,13 @@
         := met = ? r.carried = 0i32 ?> "yes" |: "no"
         := noted = carried_noted root id (carried_from agile_text items 0i32 [])
         := carried = " carried_notes=" ++# sm'.show noted
-        console.write_line ("kit agile sprint close ok id=" ++# id ++# minutes ++# " goal_met=" ++# met ++# carried)
+        console.write_line ("rig agile sprint close ok id=" ++# id ++# minutes ++# " goal_met=" ++# met ++# carried)
         0i32
 
 :~ sprint_velocity (~root : string) (last : i32) : i32 =
     := text = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/sprints.spi")
     := minutes = rig_agile_sprint_state.state.velocity_of (text, last)
-    console.write_line ("kit agile sprint velocity ok last=" ++# sm'.show last ++# " minutes=" ++# sm'.show minutes)
+    console.write_line ("rig agile sprint velocity ok last=" ++# sm'.show last ++# " minutes=" ++# sm'.show minutes)
     0i32
 
 :~ changed ((root, id, task, dropping) : string * string * string * bool) : i32 = sprint_changed root id task dropping

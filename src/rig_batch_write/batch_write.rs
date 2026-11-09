@@ -105,7 +105,7 @@ pub fn filesystem_batch_write_run(args: &[String]) -> Result<(), String> {
     }
     if rig_patch_driver_batch_write_shape_binding(items.len() as i32, 0) != 1 { return Err("typed batch shape rejected".to_owned()); }
     if mode == "preview" {
-        println!("kit proxy fs-batch-write preview ok rows={} mutation=false", items.len());
+        println!("rig proxy fs-batch-write preview ok rows={} mutation=false", items.len());
         for (item, target) in items.iter().zip(&targets) {
             println!("path={} bytes={} sha256={}", target.display(), item.payload.len(), rig_proxy_search::inspection_sha256(item.payload.as_bytes().to_vec()));
         }
@@ -160,7 +160,7 @@ pub fn filesystem_batch_write_run(args: &[String]) -> Result<(), String> {
             }
         }
     }
-    println!("kit proxy fs-batch-write apply ok rows={} verified={} mutation=true", items.len(), verified);
+    println!("rig proxy fs-batch-write apply ok rows={} verified={} mutation=true", items.len(), verified);
     Ok(())
 }
 

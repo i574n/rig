@@ -434,7 +434,7 @@ fn memory_render_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("render needs a readable data file: "); } LIT.with(|lit| lit.clone()) };
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let mut v6: Rc<str> = concat5_3(v4, v0, v5.clone(), v5.clone(), v5.clone());
-        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
         let v8: Rc<str> = concat5_3(v7, v6, v5.clone(), v5.clone(), v5);
         eprintln!("{}", v8);
         2i32
@@ -453,7 +453,7 @@ fn memory_render_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v23: bool = v19 == v15;
         let v24: bool = v23 && v22;
         if v24 {
-            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit memory render ok memories="); } LIT.with(|lit| lit.clone()) };
+            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig memory render ok memories="); } LIT.with(|lit| lit.clone()) };
             let v26: Rc<str> = format_real_12(v19);
             let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" out="); } LIT.with(|lit| lit.clone()) };
             let v28: Rc<str> = concat5_3(v25, v26, v27, v1, v13);
@@ -466,7 +466,7 @@ fn memory_render_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
             let v32: Rc<str> = format_real_12(v15);
             let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" memories"); } LIT.with(|lit| lit.clone()) };
             let v34: Rc<str> = concat5_3(v29, v30, v31, v32, v33);
-            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
             let v36: Rc<str> = concat5_3(v35, v34, v13.clone(), v13.clone(), v13);
             eprintln!("{}", v36);
             2i32
@@ -594,7 +594,7 @@ fn memory_run_0() -> i32 {
                     let v82: bool = &*v81 == "";
                     if v82 {
                         let v83: Rc<str> = memory_usage_17();
-                        let v84: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v84: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v85: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v86: Rc<str> = concat5_3(v84, v83, v85.clone(), v85.clone(), v85.clone());
                         eprintln!("{}", v86);
@@ -616,7 +616,7 @@ fn memory_run_0() -> i32 {
                     let v152: bool = &*v151 == "";
                     if v152 {
                         let v153: Rc<str> = memory_usage_17();
-                        let v154: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v154: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v155: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v156: Rc<str> = concat5_3(v154, v153, v155.clone(), v155.clone(), v155.clone());
                         eprintln!("{}", v156);
@@ -634,7 +634,7 @@ fn memory_run_0() -> i32 {
                     let v137: bool = &*v136 == "";
                     if v137 {
                         let v138: Rc<str> = memory_usage_17();
-                        let v139: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v139: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v140: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v141: Rc<str> = concat5_3(v139, v138, v140.clone(), v140.clone(), v140.clone());
                         eprintln!("{}", v141);
@@ -652,7 +652,7 @@ fn memory_run_0() -> i32 {
                     let v60: bool = &*v59 == "";
                     if v60 {
                         let v61: Rc<str> = memory_usage_17();
-                        let v62: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v62: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v63: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v64: Rc<str> = concat5_3(v62, v61, v63.clone(), v63.clone(), v63.clone());
                         eprintln!("{}", v64);
@@ -670,7 +670,7 @@ fn memory_run_0() -> i32 {
                     let v93: bool = &*v90 == "";
                     if v93 {
                         let v94: Rc<str> = memory_usage_17();
-                        let v95: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v95: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v96: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v97: Rc<str> = concat5_3(v95, v94, v96.clone(), v96.clone(), v96.clone());
                         eprintln!("{}", v97);
@@ -691,7 +691,7 @@ fn memory_run_0() -> i32 {
                     let v107: bool = &*v103 == "";
                     if v107 {
                         let v108: Rc<str> = memory_usage_17();
-                        let v109: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v109: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v110: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v111: Rc<str> = concat5_3(v109, v108, v110.clone(), v110.clone(), v110.clone());
                         eprintln!("{}", v111);
@@ -707,7 +707,7 @@ fn memory_run_0() -> i32 {
                     let v69: bool = &*v68 == "";
                     if v69 {
                         let v70: Rc<str> = memory_usage_17();
-                        let v71: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v71: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v72: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v73: Rc<str> = concat5_3(v71, v70, v72.clone(), v72.clone(), v72.clone());
                         eprintln!("{}", v73);
@@ -726,7 +726,7 @@ fn memory_run_0() -> i32 {
                     let v116: bool = &*v115 == "";
                     if v116 {
                         let v117: Rc<str> = memory_usage_17();
-                        let v118: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                        let v118: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                         let v119: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                         let v120: Rc<str> = concat5_3(v118, v117, v119.clone(), v119.clone(), v119.clone());
                         eprintln!("{}", v120);
@@ -750,7 +750,7 @@ fn memory_run_0() -> i32 {
         }
         US4::US4_VerbUnknown => {
             let v51: Rc<str> = memory_usage_17();
-            let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+            let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
             let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
             let v54: Rc<str> = concat5_3(v52, v51, v53.clone(), v53.clone(), v53.clone());
             eprintln!("{}", v54);

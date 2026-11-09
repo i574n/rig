@@ -17,7 +17,7 @@
     ?= links ?|
     | [] =>
         console.write_line (
-            "kit job chain ok jobs="
+            "rig job chain ok jobs="
             ++# sm'.format (listm.length ids : i32)
             ++# " ids="
             ++# sm'.concat_list "," (listm.rev ids)
@@ -28,7 +28,7 @@
         := id = started_id output
         ? id = "" ?>
             console.write_error_line (
-                "kit error: job chain stopped: link "
+                "rig error: job chain stopped: link "
                 ++# sm'.format ((listm.length ids : i32) + 1i32)
                 ++# " did not start ("
                 ++# sm'.trim output
@@ -43,7 +43,7 @@
 :~ serial_started (~program : string) (plan : chain_plan) : i32 =
     ?= links_timeout plan.links 0u64 ?|
     | None =>
-        console.write_error_line "kit error: job chain refused: every --serial link needs a positive <timeout-ms>"
+        console.write_error_line "rig error: job chain refused: every --serial link needs a positive <timeout-ms>"
         2i32
     | Some total =>
         := arguments = serial_start_arguments plan.head program total plan.links
@@ -52,15 +52,16 @@
             printed_trimmed output
             0i32
         | None =>
-            console.write_error_line "kit error: job chain could not start its serial job"
+            console.write_error_line "rig error: job chain could not start its serial job"
             2i32
 
 :~ chain_run () : i32 =
     ?= chain_of (arguments_from 2i32 (env.command_line_argument_count ()) []) ?|
     | ChainRefused reason =>
-        console.write_error_line ("kit error: job chain refused: " ++# reason)
+        console.write_error_line ("rig error: job chain refused: " ++# reason)
         2i32
     | ChainPlanned plan =>
         := program = env.current_executable ()
-        ? plan.head.serial ?> serial_started program plan
+        ? plan.head.serial
+        ?> serial_started program plan
         |: chain_started program plan.head.mode plan.head.first plan.links []

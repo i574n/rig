@@ -36,12 +36,12 @@ fn rig_authority_summary() -> Result<(i32, i32, i32, String), String> {
 fn KitStatusOk(migration: i32) -> i32 {
     let (mask, state, operational_minus_fallback, reasons) = match rig_authority_summary() {
         Ok(value) => value,
-        Err(error) => { eprintln!("kit error: authority state: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: authority state: {error}"); return 2; }
     };
     let authority = if state == 1 { "exclusive" } else { "blocked" };
     let operational = i32::from(operational_minus_fallback == 1);
     println!(
-        "kit status ok migration={migration}/1000 public_verbs=5/5 spiral_state=true spiral_first=true authority_formal={authority} authority_blocker_mask={mask} authority_blockers={reasons} operational_replacement={operational} legacy_fallback_execution=false"
+        "rig status ok migration={migration}/1000 public_verbs=5/5 spiral_state=true spiral_first=true authority_formal={authority} authority_blocker_mask={mask} authority_blockers={reasons} operational_replacement={operational} legacy_fallback_execution=false"
     );
     0
 }
@@ -52,49 +52,49 @@ fn KitStatusLive(_unused: i32) -> i32 {
     let root = std::path::Path::new(&root_text);
     let migration = match semantic_evidence_domain::observed_migration_from_state(root) {
         Ok(value) => value,
-        Err(error) => { eprintln!("kit error: live status migration: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: live status migration: {error}"); return 2; }
     };
     let evidence = match evidence_currentness_domain::evidence_status(root) {
         Ok(value) => value,
-        Err(error) => { eprintln!("kit error: live status evidence: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: live status evidence: {error}"); return 2; }
     };
     let semantic_current = match semantic_evidence_domain::verify_closeout_registry(root, migration) {
         Ok(_) => 1i32,
-        Err(error) => { eprintln!("kit error: live status semantic closeout: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: live status semantic closeout: {error}"); return 2; }
     };
     let cold_current = match cold_proof_domain::verify_formal_authority(root) {
         Ok(_) => 30i32,
-        Err(error) => { eprintln!("kit error: live status ColdProofV4, differential catalog or family contracts: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: live status ColdProofV4, differential catalog or family contracts: {error}"); return 2; }
     };
     let proof_mask = authority_state_domain::rig_authority_live_mask(semantic_current + cold_current, 0); let declared_mask = authority_state_domain::rig_authority_declared_mask(0, 0); let live_mask = if proof_mask < 0 || declared_mask < 0 { -1 } else { proof_mask | declared_mask };
     let (authority_mask, authority_state, operational_minus_fallback, authority_reasons) = match rig_authority_summary_for_mask(live_mask) {
         Ok(value) => value,
-        Err(error) => { eprintln!("kit error: live status authority: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: live status authority: {error}"); return 2; }
     };
     let authority_mode = if authority_state == 1 { "exclusive" } else { "blocked" };
     let operational_replacement = i32::from(operational_minus_fallback == 1);
     let toolchain_text = match evidence_currentness_domain::toolchain_status(root) {
         Ok(Some(value)) => format!("toolchain=current toolchain_declared={} toolchain_observed={} toolchain_verified={}", value.declared, value.observed, value.verified),
         Ok(None) => "toolchain=absent".to_owned(),
-        Err(error) => { eprintln!("kit error: live status Rust toolchain: {error}"); return 2; }
+        Err(error) => { eprintln!("rig error: live status Rust toolchain: {error}"); return 2; }
     };
     match rig_compiler_discovery::resolve_spiral_compiler(None) {
-        Ok(Some(compiler)) => println!("kit status live migration={migration}/1000 spiral_state=true spiral_first=true evidence_declared={} evidence_observed={} evidence_verified={} evidence_current=true {} compiler=available compiler_source={} compiler_sha256={} compiler_entry_sha256={} compiler_facade_sha256={} authority_formal={} authority_blocker_mask={} authority_blockers={} operational_replacement={} legacy_fallback_execution=false", evidence.declared, evidence.observed, evidence.verified, toolchain_text, compiler.source, compiler.sha256, compiler.entry_sha256, compiler.facade_sha256.as_deref().unwrap_or("absent"), authority_mode, authority_mask, authority_reasons, operational_replacement),
-        Ok(None) => println!("kit status live migration={migration}/1000 spiral_state=true spiral_first=true evidence_declared={} evidence_observed={} evidence_verified={} evidence_current=true {} compiler=absent authority_formal={} authority_blocker_mask={} authority_blockers={} operational_replacement={} legacy_fallback_execution=false", evidence.declared, evidence.observed, evidence.verified, toolchain_text, authority_mode, authority_mask, authority_reasons, operational_replacement),
-        Err(error) => { eprintln!("kit error: live status compiler discovery: {error}"); return 2; }
+        Ok(Some(compiler)) => println!("rig status live migration={migration}/1000 spiral_state=true spiral_first=true evidence_declared={} evidence_observed={} evidence_verified={} evidence_current=true {} compiler=available compiler_source={} compiler_sha256={} compiler_entry_sha256={} compiler_facade_sha256={} authority_formal={} authority_blocker_mask={} authority_blockers={} operational_replacement={} legacy_fallback_execution=false", evidence.declared, evidence.observed, evidence.verified, toolchain_text, compiler.source, compiler.sha256, compiler.entry_sha256, compiler.facade_sha256.as_deref().unwrap_or("absent"), authority_mode, authority_mask, authority_reasons, operational_replacement),
+        Ok(None) => println!("rig status live migration={migration}/1000 spiral_state=true spiral_first=true evidence_declared={} evidence_observed={} evidence_verified={} evidence_current=true {} compiler=absent authority_formal={} authority_blocker_mask={} authority_blockers={} operational_replacement={} legacy_fallback_execution=false", evidence.declared, evidence.observed, evidence.verified, toolchain_text, authority_mode, authority_mask, authority_reasons, operational_replacement),
+        Err(error) => { eprintln!("rig error: live status compiler discovery: {error}"); return 2; }
     }
     0
 }
 
 fn rig_public_valid_values() -> String { (0..rig_command_count()).map(|index| rig_command_descriptor(&index.to_string()).0.to_string()).collect::<Vec<_>>().join("|") }
-fn rig_actionable_error(reason: &str, intent: &str, usage: &str, valid: &str, corrected: &str) -> i32 { eprintln!("kit error: {reason}\nintent: {intent}\nusage: kit {usage}\nvalid: {valid}\ncorrected: {corrected}"); 2 }
+fn rig_actionable_error(reason: &str, intent: &str, usage: &str, valid: &str, corrected: &str) -> i32 { eprintln!("rig error: {reason}\nintent: {intent}\nusage: kit {usage}\nvalid: {valid}\ncorrected: {corrected}"); 2 }
 
 #[must_use]
-fn KitStatusArityError() -> i32 { let descriptor = rig_command_descriptor_named("status"); rig_actionable_error("status accepts zero arguments or one bundle root", "status", descriptor.2.as_ref(), "zero arguments|one bundle root", "kit status") }
+fn KitStatusArityError() -> i32 { let descriptor = rig_command_descriptor_named("status"); rig_actionable_error("status accepts zero arguments or one bundle root", "status", descriptor.2.as_ref(), "zero arguments|one bundle root", "rig status") }
 
 #[must_use]
 fn KitStatusAuthorityError() -> i32 {
-    eprintln!("kit error: workspace-state authority rejected");
+    eprintln!("rig error: workspace-state authority rejected");
     2
 }
 
@@ -102,17 +102,17 @@ fn KitStatusAuthorityError() -> i32 {
 fn rig_reenter_with_compiler(verb: &str, forwarded: &[&str], compiler: &str) -> i32 {
     let compiler = std::path::Path::new(compiler);
     if !compiler.is_absolute() || !compiler.is_file() {
-        eprintln!("kit error: Spiral compiler must be an absolute regular file: {}", compiler.display());
+        eprintln!("rig error: Spiral compiler must be an absolute regular file: {}", compiler.display());
         return 2;
     }
     let executable = match std::env::current_exe() {
         Ok(value) => value,
         Err(error) => {
-            eprintln!("kit error: locate current executable: {error}");
+            eprintln!("rig error: locate current executable: {error}");
             return 2;
         }
     };
-    let fallback_timeout_ms = std::env::var("KIT_REENTER_TIMEOUT_MS").ok().and_then(|value| value.parse::<u64>().ok()).filter(|value| *value > 0).unwrap_or(300_000);
+    let fallback_timeout_ms = std::env::var("RIG_REENTER_TIMEOUT_MS").or_else(|_| std::env::var("KIT_REENTER_TIMEOUT_MS")).ok().and_then(|value| value.parse::<u64>().ok()).filter(|value| *value > 0).unwrap_or(300_000);
     let timeout_ms = forwarded.get(1).and_then(|root| {
         let root = std::path::Path::new(root);
         let (_, _, wrap_at_unix_ms, _, should_wrap, _) = rig_agile_lease::agile_prompt_lease_clock(root).ok()?;
@@ -123,12 +123,12 @@ fn rig_reenter_with_compiler(verb: &str, forwarded: &[&str], compiler: &str) -> 
     let mut command = std::process::Command::new(executable);
     command.arg(verb)
         .args(forwarded)
-        .env("KIT_SPIRAL_COMPILE", compiler)
-        .env("KIT_PATCH_COMPILE_REQUIRED", "1");
+        .env("RIG_SPIRAL_COMPILE", &compiler).env("KIT_SPIRAL_COMPILE", compiler)
+        .env("RIG_PATCH_COMPILE_REQUIRED", "1").env("KIT_PATCH_COMPILE_REQUIRED", "1");
     match rig_process_observation::run_bounded_streaming_receipted_observed(&mut command, timeout_ms, "cli-reenter-with-compiler", None) {
         Ok(observation) => observation.status.code().unwrap_or(2),
         Err(error) => {
-            eprintln!("kit error: reenter {verb}: {error}");
+            eprintln!("rig error: reenter {verb}: {error}");
             2
         }
     }
@@ -137,7 +137,7 @@ fn rig_reenter_with_compiler(verb: &str, forwarded: &[&str], compiler: &str) -> 
 #[must_use]
 fn KitPatchAdapter() -> i32 {
     let args = std::env::args().skip(2).collect::<Vec<_>>();
-    let subcommand = args.first().map(String::as_str); if !matches!(subcommand, Some("apply" | "check" | "rehearse" | "gated")) { let descriptor = rig_command_descriptor_named("patch"); let reason = subcommand.map(|value| format!("unknown patch subcommand: {value}")).unwrap_or_else(|| "patch subcommand required".to_owned()); return rig_actionable_error(&reason, "patch", descriptor.2.as_ref(), descriptor.2.as_ref(), "kit help patch"); }
+    let subcommand = args.first().map(String::as_str); if !matches!(subcommand, Some("apply" | "check" | "rehearse" | "gated")) { let descriptor = rig_command_descriptor_named("patch"); let reason = subcommand.map(|value| format!("unknown patch subcommand: {value}")).unwrap_or_else(|| "patch subcommand required".to_owned()); return rig_actionable_error(&reason, "patch", descriptor.2.as_ref(), descriptor.2.as_ref(), "rig help patch"); }
     if args.len() == 5 && args[0] == "apply" && args[3] == "--compiler" {
         return rig_reenter_with_compiler(
             "patch",
@@ -157,7 +157,7 @@ fn KitPatchAdapter() -> i32 {
 #[must_use]
 fn KitAgileAdapter() -> i32 {
     let args = std::env::args().skip(2).collect::<Vec<_>>();
-    let subcommand = args.first().map(String::as_str); if subcommand.map(|value| rig_agile_subcommand_known(value) == 0).unwrap_or(true) { let descriptor = rig_command_descriptor_named("agile"); let reason = subcommand.map(|value| format!("unknown agile subcommand: {value}")).unwrap_or_else(|| "agile subcommand required".to_owned()); return rig_actionable_error(&reason, "agile", descriptor.2.as_ref(), descriptor.2.as_ref(), "kit help agile"); }
+    let subcommand = args.first().map(String::as_str); if subcommand.map(|value| rig_agile_subcommand_known(value) == 0).unwrap_or(true) { let descriptor = rig_command_descriptor_named("agile"); let reason = subcommand.map(|value| format!("unknown agile subcommand: {value}")).unwrap_or_else(|| "agile subcommand required".to_owned()); return rig_actionable_error(&reason, "agile", descriptor.2.as_ref(), descriptor.2.as_ref(), "rig help agile"); }
     if args.len() == 4 && args[0] == "check" && args[2] == "--compiler" {
         return rig_agile_state::agile_check_with_compiler_owned(args[1].as_str(), args[3].as_str());
     }
@@ -167,7 +167,7 @@ fn KitAgileAdapter() -> i32 {
 #[must_use]
 fn KitBundleAdapter() -> i32 {
     let args = std::env::args().skip(2).collect::<Vec<_>>();
-    let subcommand = args.first().map(String::as_str); if !matches!(subcommand, Some("growth-baseline" | "growth-receipt" | "check" | "create" | "create-flat" | "verify" | "verify-flat" | "rehydrate" | "retention-plan" | "retention-apply")) { let descriptor = rig_command_descriptor_named("bundle"); let reason = subcommand.map(|value| format!("unknown bundle subcommand: {value}")).unwrap_or_else(|| "bundle subcommand required".to_owned()); return rig_actionable_error(&reason, "bundle", descriptor.2.as_ref(), descriptor.2.as_ref(), "kit help bundle"); }
+    let subcommand = args.first().map(String::as_str); if !matches!(subcommand, Some("growth-baseline" | "growth-receipt" | "check" | "create" | "create-flat" | "verify" | "verify-flat" | "rehydrate" | "retention-plan" | "retention-apply")) { let descriptor = rig_command_descriptor_named("bundle"); let reason = subcommand.map(|value| format!("unknown bundle subcommand: {value}")).unwrap_or_else(|| "bundle subcommand required".to_owned()); return rig_actionable_error(&reason, "bundle", descriptor.2.as_ref(), descriptor.2.as_ref(), "rig help bundle"); }
     match subcommand {
         Some("retention-plan") => rig_proxy_result(rig_bundle_retention::retention_plan_command(&args)),
         Some("retention-apply") => rig_proxy_result(rig_bundle_retention::retention_apply_command(&args)),
@@ -177,7 +177,7 @@ fn KitBundleAdapter() -> i32 {
 
 fn rig_proxy_result(result: Result<(), String>) -> i32 {
     if let Err(error) = result {
-        eprintln!("kit error: {error}");
+        eprintln!("rig error: {error}");
         2
     } else {
         0
@@ -208,15 +208,15 @@ fn rig_plan_ir_check(args: &[String]) -> Result<(), String> {
         let descriptor = rig_plan_ir_descriptor(&key);
         if rig_plan_ir_decode_code(descriptor.0.as_ref(), descriptor.1.as_ref(), descriptor.2.as_ref(), descriptor.3.as_ref(), descriptor.4.as_ref()) != index as u64 { return Err(format!("canonical Plan IR descriptor rejected: {key}")); }
     }
-    println!("kit plan-ir check ok schema={} count={} stage_witness=1 projection_witness=1", rig_plan_ir_schema("schema"), count);
+    println!("rig plan-ir check ok schema={} count={} stage_witness=1 projection_witness=1", rig_plan_ir_schema("schema"), count);
     Ok(())
 }
 
 #[must_use]
 fn KitProxyAdapter() -> i32 {
     let args = std::env::args().skip(2).collect::<Vec<_>>();
-    if args.is_empty() { let descriptor = rig_command_descriptor_named("proxy"); return rig_actionable_error("proxy capability required", "proxy capability", descriptor.2.as_ref(), descriptor.2.as_ref(), "kit help proxy"); }
-    if rig_proxy_route_witness() != 1 { return rig_actionable_error("typed proxy route witness rejected", "proxy capability", "proxy <capability>", "typed proxy route catalog", "kit help proxy"); }
+    if args.is_empty() { let descriptor = rig_command_descriptor_named("proxy"); return rig_actionable_error("proxy capability required", "proxy capability", descriptor.2.as_ref(), descriptor.2.as_ref(), "rig help proxy"); }
+    if rig_proxy_route_witness() != 1 { return rig_actionable_error("typed proxy route witness rejected", "proxy capability", "proxy <capability>", "typed proxy route catalog", "rig help proxy"); }
     let route = rig_proxy_route_code(args[0].as_str());
     match route {
         0 => rig_proxy_result(rig_plan_ir_inspect(&args)),
@@ -261,35 +261,35 @@ fn KitHelpRejected() -> i32 {
     if !request.is_empty() { println!("{request}"); return 0; }
     let args = std::env::args().skip(2).collect::<Vec<_>>();
     let count = rig_command_count();
-    if count <= 0 { eprintln!("kit error: typed command catalog is empty"); return 2; }
+    if count <= 0 { eprintln!("rig error: typed command catalog is empty"); return 2; }
     if args.len() == 2 && rig_command_code(&args[0]) == 4 {
         let usage = rig_command_proxy_usage(&args[1]);
-        if usage.is_empty() { let valid = rig_command_descriptor_named("proxy").2; return rig_actionable_error(&format!("unknown proxy help target: {}", args[1]), "proxy help", "help proxy <capability>", valid.as_ref(), "kit help"); }
+        if usage.is_empty() { let valid = rig_command_descriptor_named("proxy").2; return rig_actionable_error(&format!("unknown proxy help target: {}", args[1]), "proxy help", "help proxy <capability>", valid.as_ref(), "rig help"); }
         println!("usage: kit {}", usage);
         return 0;
     }
-    if args.len() > 1 { let descriptor = rig_command_descriptor_named("help"); let valid = format!("{}|proxy <capability>|--completion|--json|--schema", rig_public_valid_values()); return rig_actionable_error("help accepts zero arguments, one verb, proxy <capability>, --completion, --json, or --schema", "help", descriptor.2.as_ref(), &valid, "kit help"); }
+    if args.len() > 1 { let descriptor = rig_command_descriptor_named("help"); let valid = format!("{}|proxy <capability>|--completion|--json|--schema", rig_public_valid_values()); return rig_actionable_error("help accepts zero arguments, one verb, proxy <capability>, --completion, --json, or --schema", "help", descriptor.2.as_ref(), &valid, "rig help"); }
     if let Some(target) = args.first() {
-        if rig_help_flag_witness() != 1 { eprintln!("kit error: typed help flag witness rejected"); return 2; }
+        if rig_help_flag_witness() != 1 { eprintln!("rig error: typed help flag witness rejected"); return 2; }
         let help_flag = rig_help_flag_code(target);
         if help_flag == 0 {
             for index in 0..count { let descriptor = rig_command_descriptor(&index.to_string()); println!("{}", descriptor.0); }
             return 0;
         }
         if help_flag == 1 {
-            if rig_command_schema_witness() != 1 { eprintln!("kit error: typed command schema witness rejected"); return 2; }
+            if rig_command_schema_witness() != 1 { eprintln!("rig error: typed command schema witness rejected"); return 2; }
             print!("[");
             for index in 0..count { if index > 0 { print!(","); } print!("{}", rig_command_descriptor_json(&index.to_string())); }
             println!("]");
             return 0;
         }
         if help_flag == 2 {
-            if rig_command_schema_witness() != 1 { eprintln!("kit error: typed command schema witness rejected"); return 2; }
+            if rig_command_schema_witness() != 1 { eprintln!("rig error: typed command schema witness rejected"); return 2; }
             println!("command-spec");
             return 0;
         }
         let code = rig_command_code(target);
-        if code >= count as u64 { let proxy_usage = rig_command_proxy_usage(target); if !proxy_usage.is_empty() { let corrected = format!("kit help proxy {target}"); return rig_actionable_error(&format!("help target is a proxy capability: {target}"), "proxy help", "help proxy <capability>", proxy_usage.as_ref(), &corrected); } let valid = rig_public_valid_values(); return rig_actionable_error(&format!("unknown help target: {target}"), "help", "help [verb|--completion|--json|--schema]", &valid, "kit help"); }
+        if code >= count as u64 { let proxy_usage = rig_command_proxy_usage(target); if !proxy_usage.is_empty() { let corrected = format!("rig help proxy {target}"); return rig_actionable_error(&format!("help target is a proxy capability: {target}"), "proxy help", "help proxy <capability>", proxy_usage.as_ref(), &corrected); } let valid = rig_public_valid_values(); return rig_actionable_error(&format!("unknown help target: {target}"), "help", "help [verb|--completion|--json|--schema]", &valid, "rig help"); }
         let descriptor = rig_command_descriptor(&code.to_string());
         println!("name={} effect={} handler={}", descriptor.0, descriptor.1, descriptor.4);
         println!("summary={}", descriptor.3);
@@ -304,7 +304,7 @@ fn KitHelpRejected() -> i32 {
 }
 
 #[must_use]
-fn KitUnknownRejected() -> i32 { let verb = std::env::args().nth(1).unwrap_or_default(); let proxy_usage = rig_command_proxy_usage(&verb); if !proxy_usage.is_empty() { let corrected = format!("kit {proxy_usage}"); return rig_actionable_error(&format!("proxy capability used as public verb: {verb}"), "proxy capability", proxy_usage.as_ref(), "proxy <capability>", &corrected); } let valid = rig_public_valid_values(); rig_actionable_error(&format!("unknown verb: {verb}"), "public command", "<status|patch|agile|bundle|proxy|help> ...", &valid, "kit help") }
+fn KitUnknownRejected() -> i32 { let verb = std::env::args().nth(1).unwrap_or_default(); let proxy_usage = rig_command_proxy_usage(&verb); if !proxy_usage.is_empty() { let corrected = format!("kit {proxy_usage}"); return rig_actionable_error(&format!("proxy capability used as public verb: {verb}"), "proxy capability", proxy_usage.as_ref(), "proxy <capability>", &corrected); } let valid = rig_public_valid_values(); rig_actionable_error(&format!("unknown verb: {verb}"), "public command", "<status|patch|agile|bundle|proxy|help> ...", &valid, "rig help") }
 
 #[derive(Clone)]
 enum US0 {
@@ -887,11 +887,11 @@ fn run_from_4(mut v0: US0, mut v1: Rc<dyn Fn() -> i32>) -> i32 {
             let v5: bool = v4.is_ok();
             if v5 {
                 let v6: Rc<str> = v4.clone().unwrap_or_else(|error| error);
-                let v7: i32 = { let arguments = v6.lines().map(|line| line.trim_end_matches(char::from(13u8)).to_owned()).chain(std::env::args().skip(3)).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).args(&arguments).status()) { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("kit error: --args-from relaunch: {error}"); 2 } } };
+                let v7: i32 = { let arguments = v6.lines().map(|line| line.trim_end_matches(char::from(13u8)).to_owned()).chain(std::env::args().skip(3)).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).args(&arguments).status()) { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("rig error: --args-from relaunch: {error}"); 2 } } };
                 v7
             } else {
                 let v8: Rc<str> = v4.clone().unwrap_or_else(|error| error);
-                let v9: i32 = { eprintln!("kit error: {}", &*v8); 2 };
+                let v9: i32 = { eprintln!("rig error: {}", &*v8); 2 };
                 v9
             }
         }
@@ -900,11 +900,11 @@ fn run_from_4(mut v0: US0, mut v1: Rc<dyn Fn() -> i32>) -> i32 {
             let v12: bool = v11.is_ok();
             if v12 {
                 let v13: Rc<str> = v11.clone().unwrap_or_else(|error| error);
-                let v14: i32 = { let arguments = v13.lines().map(|line| line.trim_end_matches(char::from(13u8)).to_owned()).chain(std::env::args().skip(3)).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).args(&arguments).status()) { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("kit error: --args-from relaunch: {error}"); 2 } } };
+                let v14: i32 = { let arguments = v13.lines().map(|line| line.trim_end_matches(char::from(13u8)).to_owned()).chain(std::env::args().skip(3)).collect::<Vec<_>>(); match std::env::current_exe().and_then(|exe| std::process::Command::new(exe).args(&arguments).status()) { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("rig error: --args-from relaunch: {error}"); 2 } } };
                 v14
             } else {
                 let v15: Rc<str> = v11.clone().unwrap_or_else(|error| error);
-                let v16: i32 = { eprintln!("kit error: {}", &*v15); 2 };
+                let v16: i32 = { eprintln!("rig error: {}", &*v15); 2 };
                 v16
             }
         }

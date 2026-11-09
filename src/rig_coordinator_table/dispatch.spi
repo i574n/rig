@@ -44,8 +44,7 @@
 
 :~ launch_failed (state : dispatch_state) (job : job_id) : dispatch_state * list dispatch_effect =
     := failed = failures_of state job + 1i32
-    ? failed < launch_attempts ()
-    ?>
+    ? failed < launch_attempts () ?>
         := others = state.failures |> listm'.filter (\ (id, _) => id <> job)
         { state ?| failures = (job, failed) :: others }, [ TableInput (Moved (job, Expiring)) ]
     |:
@@ -138,7 +137,7 @@
     := a, b = JobId "job-a", JobId "job-b"
     := spec = { label = "kit-a"; machine = "node"; timeout_ms = 60000u64; command = [ "pwsh"; "-File"; "a.ps1" ] }
     := args = [ "job"; "start"; "--on"; "node"; "kit-a"; "60000"; "pwsh"; "-File"; "a.ps1" ]
-    testing.expect (launch_args spec = args) "kit job start --on <machine> <label> <timeout> <command>"
+    testing.expect (launch_args spec = args) "rig job start --on <machine> <label> <timeout> <command>"
     := step = \ ((state, table, effects) : dispatch_state * coord_table * list dispatch_effect) (message) =>
         := next, made = dispatch_step state message
         next, table_inputs made |> listm.fold table_after table, listm.append effects made

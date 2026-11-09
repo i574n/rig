@@ -5,7 +5,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new() -> Self {
         let stamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-        let root = std::env::temp_dir().join(format!("kit cold counts ü {} {stamp}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("rig cold counts ü {} {stamp}", std::process::id()));
         let owner = root.join("src/owner");
         fs::create_dir_all(&owner).unwrap();
         fs::create_dir(root.join("state")).unwrap();

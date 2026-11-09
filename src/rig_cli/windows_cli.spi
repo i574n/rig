@@ -20,8 +20,7 @@
 
 ///> rust
 :# public_filesystem_roundtrip_and_guards =
-    ? on_windows ()
-    ?>
+    ? on_windows () ?>
         := root = cli_fixture ()
         := _ = succeeded (proxy root "fs-write" (Arg ("value.txt", Arg ("first", NoArgs))))
         := _ =
@@ -40,8 +39,7 @@
 
 ///> rust
 :# public_process_capture_timeout_and_failure =
-    ? on_windows ()
-    ?>
+    ? on_windows () ?>
         := root = cli_fixture ()
         shows (succeeded (cmd_run root "10000" "echo windows")) "windows"
         expect ((cmd_run root "10000" "exit /b 7").code <> 0i32) "a failing child was accepted"
@@ -57,8 +55,7 @@
 
 ///> rust
 :# generic_bundle_roundtrip =
-    ? on_windows ()
-    ?>
+    ? on_windows () ?>
         := root = cli_fixture ()
         fixture_write root "source/value.txt" "roundtrip"
         := archive = fixture_path root "bundle.zip"
@@ -75,8 +72,7 @@
 
 ///> rust
 :# handoff_tolerates_a_reader_that_closes_stdout_early =
-    ? on_windows ()
-    ?>
+    ? on_windows () ?>
         := run =
             rig_run_closing_stdout (rig_checkout ()) (Arg ("agile", Arg ("handoff", Arg (rig_checkout (), NoArgs))))
         expect (run.code = 0i32) (cat "handoff failed: " run.stderr)

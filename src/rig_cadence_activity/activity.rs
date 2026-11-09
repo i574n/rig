@@ -314,7 +314,7 @@ fn activity_line_15(mut v0: i64, mut v1: Rc<str>, mut v2: i64, mut v3: i32, mut 
     let v10: Rc<str> = format_real_17(v9);
     let v13: Rc<str> = format_real_19(v3);
     let v16: Rc<str> = format_real_19(v6);
-    let v17: Rc<str> = string_concat(&["kit agile cadence activity team=", &*v1, " days_ago=", &*v10, " notes=", &*v13, " touched=", &*v16]);
+    let v17: Rc<str> = string_concat(&["rig agile cadence activity team=", &*v1, " days_ago=", &*v10, " notes=", &*v13, " touched=", &*v16]);
     v17
 }
 fn method14(mut v0: i64, mut v1: Rc<UH3>, mut v2: Rc<UH1>) -> Rc<UH1> {
@@ -793,7 +793,7 @@ fn method36(mut v0: Rc<UH2>, mut v1: i64, mut v2: i64, mut v3: Rc<UH1>, mut v4: 
             let v15: i32 = method16(v11, v14);
             let v18: Rc<str> = format_real_19(v13);
             let v21: Rc<str> = format_real_19(v15);
-            let v22: Rc<str> = string_concat(&["kit agile cadence round author=", &*v5, " notes=", &*v18, " items=", &*v21]);
+            let v22: Rc<str> = string_concat(&["rig agile cadence round author=", &*v5, " notes=", &*v18, " items=", &*v21]);
             Rc::new(UH1::UH1_Cons(v22, v7))
         }
         UH1::UH1_Nil => {
@@ -812,7 +812,7 @@ fn round_lines_33(mut v0: Rc<UH2>, mut v1: i64, mut v2: i64) -> Rc<UH1> {
     let v10: i32 = method16(v8.clone(), v9);
     let v11: Rc<str> = format_real_19(v10);
     let v14: Rc<str> = format_real_17(v2);
-    let v15: Rc<str> = string_concat(&["kit agile cadence round ok authors=", &*v11, " window_hours=", &*v14]);
+    let v15: Rc<str> = string_concat(&["rig agile cadence round ok authors=", &*v11, " window_hours=", &*v14]);
     let v16: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
     let v17: Rc<UH1> = method36(v0, v4, v3, v8, v16);
     let v18: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };

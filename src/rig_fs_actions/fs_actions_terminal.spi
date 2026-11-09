@@ -1,4 +1,3 @@
-
 := emit_fs_actions_runtime () : () =
     global """
         #[derive(Clone)]
@@ -350,11 +349,11 @@
             let prepared = fs_action_prepare(root, &items)?;
             if rig_fs_actions_shape_binding(items.len() as i32, 0) != 1 { return Err("typed fs action shape rejected".to_owned()); }
             if mode == "preview" {
-                println!("kit proxy fs-actions preview ok rows={} mutation=false", items.len());
+                println!("rig proxy fs-actions preview ok rows={} mutation=false", items.len());
                 for item in &items { println!("path={} kind={}", item.relative, match item.kind { FsActionKind::Mkdir => "mkdir", FsActionKind::Copy { .. } => "copy", FsActionKind::Chmod { .. } => "chmod", FsActionKind::Symlink { .. } => "symlink" }); }
                 return Ok(());
             }
-            let fault_after = std::env::var("KIT_FS_ACTIONS_FAULT_AFTER").ok().map(|value| value.parse::<usize>().map_err(|_| "KIT_FS_ACTIONS_FAULT_AFTER must be an integer".to_owned())).transpose()?;
+            let fault_after = std::env::var("RIG_FS_ACTIONS_FAULT_AFTER").or_else(|_| std::env::var("KIT_FS_ACTIONS_FAULT_AFTER")).ok().map(|value| value.parse::<usize>().map_err(|_| "KIT_FS_ACTIONS_FAULT_AFTER must be an integer".to_owned())).transpose()?;
             let mut undos = Vec::with_capacity(prepared.len());
             for action in &prepared {
                 match fs_action_apply_one(action) {
@@ -370,7 +369,7 @@
                 verified += 1;
             }
             if rig_fs_actions_verify_binding(items.len() as i32, verified as i32) != 1 { let rollback = fs_action_rollback(&undos); return Err(format!("typed fs action verification rejected; rollback={rollback:?}")); }
-            println!("kit proxy fs-actions apply ok rows={} verified={} mutation=true", items.len(), verified);
+            println!("rig proxy fs-actions apply ok rows={} verified={} mutation=true", items.len(), verified);
             Ok(())
         }
 

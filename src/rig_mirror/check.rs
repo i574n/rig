@@ -675,7 +675,7 @@ fn mirror_checked_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
         }
     };
     if v3 {
-        let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: mirror usage: mirror check <left-root> <right-root> <path>... (paths relative to both roots; a directory stands for every file under it)"); } LIT.with(|lit| lit.clone()) };
+        let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: mirror usage: mirror check <left-root> <right-root> <path>... (paths relative to both roots; a directory stands for every file under it)"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v4);
         2i32
     } else {
@@ -689,7 +689,7 @@ fn mirror_checked_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
             v8
         };
         if v9 {
-            let v12: Rc<str> = string_concat(&["kit error: mirror check needs two existing roots, received ", &*v0, " and ", &*v1]);
+            let v12: Rc<str> = string_concat(&["rig error: mirror check needs two existing roots, received ", &*v0, " and ", &*v1]);
             eprintln!("{}", v12);
             2i32
         } else {
@@ -734,7 +734,7 @@ fn mirror_checked_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>) -> i32 {
             let v40: i32 = method24(v18, v39);
             let v41: Rc<str> = format_real_25(v40);
             let v44: Rc<str> = format_real_27(v22);
-            let v45: Rc<str> = string_concat(&["kit mirror check ", &*v36, " files=", &*v41, " differing=", &*v44]);
+            let v45: Rc<str> = string_concat(&["rig mirror check ", &*v36, " files=", &*v41, " differing=", &*v44]);
             eprintln!("{}", v45);
             let v46: bool = match v23 {
                 US3::US3_InStep => {

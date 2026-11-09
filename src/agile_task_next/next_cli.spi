@@ -50,7 +50,7 @@
     shows (line_starting out "  4") "600m "
     hides out "WAITS"
     hides out "SHIPPED"
-    shows out "kit agile next ok role=main ready=4 shown=4 elapsed_ms="
+    shows out "rig agile next ok role=main ready=4 shown=4 elapsed_ms="
     fixture_root_remove root
 
 ///> rust
@@ -100,10 +100,10 @@
     same (ranked_word out "2") "SMALL"
     hides out "OPS-SIDE"
     hides out "wsjf="
-    shows out "kit agile next ok role=subagent ready=4 shown=2 elapsed_ms="
+    shows out "rig agile next ok role=subagent ready=4 shown=2 elapsed_ms="
     := team = succeeded (next_run root (Arg ("--as", Arg ("subagent", Arg ("--team", Arg ("ops", NoArgs))))))
     same (ranked_word team "1") "OPS-SIDE"
-    shows team "kit agile next ok role=subagent ready=1 shown=1 elapsed_ms="
+    shows team "rig agile next ok role=subagent ready=1 shown=1 elapsed_ms="
     rejected_with
         (next_run root (Arg ("--as", Arg ("boss", NoArgs))))
         2i32

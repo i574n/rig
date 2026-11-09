@@ -1,4 +1,3 @@
-
 := emit_word_banks () : () =
     global """
         const PATH_TAG_A:&str="amber|ashen|austere|brisk|calm|candid|cobalt|crisp|dapper|deep|dry|eager|ember|faint|feral|firm|frost|gentle|gloss|granite|hollow|honest|humid|ivory|jade|jovial|keen|lunar|mellow|mirth|muted|nimble|noble|noisy|oaken|open|pale|plain|polar|proud|quick|quiet|rapid|rare|raw|rich|sacred|salty|sandy|sharp|silken|sober|solar|solid|stark|steel|subtle|swift|tender|tidal|urban|vivid|warm|wild";

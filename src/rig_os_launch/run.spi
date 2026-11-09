@@ -12,17 +12,17 @@
     := program = argument 2i32
     ? argument 1i32 <> "start-under-shell" || program = "" ?>
         console.write_line (
-            "kit error: process usage: process start-under-shell <program> [args...] (the caller's session as "
+            "rig error: process usage: process start-under-shell <program> [args...] (the caller's session as "
             ^^ "its live parent, inside the caller's kit job, no inherited handles)"
         )
         2i32
     |:
         := started = shell_parented_started program (joined_args 3i32 count "")
         ? sm'.starts_with "pid=0 " started ?>
-            console.write_line ("kit error: process start-under-shell: could not start " ++# program)
+            console.write_line ("rig error: process start-under-shell: could not start " ++# program)
             1i32
         |:
-            console.write_line ("kit process start-under-shell ok " ++# started ++# " program=" ++# program)
+            console.write_line ("rig process start-under-shell ok " ++# started ++# " program=" ++# program)
             0i32
 
 := main () : i32 =

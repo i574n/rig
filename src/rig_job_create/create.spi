@@ -19,7 +19,8 @@
         inner
     | StartHeavy =>
         := gate = heavy_gate_script ()
-        ? gate = "" ?> ""
+        ? gate = ""
+        ?> ""
         |:
             := _ = text_written (job_file id "argv.inner") inner
             := wrapper = job_file id "heavy-wrapper.ps1"
@@ -42,8 +43,7 @@
     ?> LaunchRefused problem
     |:
         := argv = job_argv shape id label inner timeout
-        ? argv = ""
-        ?>
+        ? argv = "" ?>
             LaunchRefused (
                 "--heavy needs spiral's scripts/heavy.ps1: set KIT_HEAVY_GATE or run from inside a tree that has a "
                 ^^ "spiral checkout"
@@ -82,7 +82,8 @@
             := floor_written =
                 ? min_free = 0u64 ?> "" |: text_written (job_file id "min_free_mb") (decimal_text min_free)
             := front_written = ? front ?> text_written (job_file id "front") "1" |: ""
-            := author = env.get_environment_variable "KIT_AUTHOR"
+            := rig_author = env.get_environment_variable "RIG_AUTHOR"
+            := author = ? rig_author <> "" ?> rig_author |: env.get_environment_variable "KIT_AUTHOR"
             := author_written = ? author = "" ?> "" |: text_written (job_file id "author") author
             ?
                 writes <> ""

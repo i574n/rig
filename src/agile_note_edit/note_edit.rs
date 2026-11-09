@@ -307,7 +307,7 @@ fn state_written_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> US4 {
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".paused"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v5: Rc<str> = concat5_2(v0.clone(), v3, v4.clone(), v4.clone(), v4.clone());
-    std::env::var("KIT_AGILE_TEST_PAUSE_MS").ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
+    std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*v5, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*v5); }).unwrap_or(());
     let v6: bool = std::fs::read_to_string(&*v0).is_ok_and(|value| value == *v1);
     if v6 {
         let v7: Rc<str> = string_concat(&[&*v0, ".pending"]);
@@ -384,7 +384,7 @@ fn note_edited_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>,
             let v15: Rc<str> = v15;
             let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/agile.spi is missing"); } LIT.with(|lit| lit.clone()) };
             let v19: Rc<str> = string_concat(&["agile note-edit ", &*v1, " rejected: ", &*v16]);
-            let mut v20: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v19 + "
+            let mut v20: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v19 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v20
         }
@@ -405,7 +405,7 @@ fn note_edited_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>,
             if v34 {
                 let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("no note with this number"); } LIT.with(|lit| lit.clone()) };
                 let v38: Rc<str> = string_concat(&["agile note-edit ", &*v1, " rejected: ", &*v35]);
-                let v39: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v38 + "
+                let v39: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v38 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v39
             } else {
@@ -447,7 +447,7 @@ fn note_edited_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>,
                 let v69: bool = &*v68 != "";
                 if v69 {
                     let v72: Rc<str> = string_concat(&["agile note-edit ", &*v1, " rejected: ", &*v68]);
-                    let v73: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v72 + "
+                    let v73: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v72 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v73
                 } else {
@@ -518,7 +518,7 @@ fn note_edited_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>,
                                 let v135: Rc<str> = std::rc::Rc::<str>::from((v92).to_string());
                                 let v138: Rc<str> = std::rc::Rc::<str>::from((v93).to_string());
                                 let v141: Rc<str> = std::rc::Rc::<str>::from((v94).to_string());
-                                let v143: Rc<str> = string_concat(&["kit agile note-edit ok id=", &*v1, " note=", &*v97, " at=", &*v48, " author=", &*v115, " text_bytes=", &*v119, "->", &*v124, " replaced=", &*v133, " bytes_before=", &*v135, " bytes_after=", &*v138, " elapsed_ms=", &*v141]);
+                                let v143: Rc<str> = string_concat(&["rig agile note-edit ok id=", &*v1, " note=", &*v97, " at=", &*v48, " author=", &*v115, " text_bytes=", &*v119, "->", &*v124, " replaced=", &*v133, " bytes_before=", &*v135, " bytes_after=", &*v138, " elapsed_ms=", &*v141]);
                                 let v144: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v143.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                                 v144
@@ -536,7 +536,7 @@ fn note_edited_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>,
                                     _ => unreachable!(),
                                 };
                                 let v151: Rc<str> = string_concat(&["agile note-edit ", &*v1, " rejected: ", &*v148]);
-                                let v152: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v151 + "
+                                let v152: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v151 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                 v152
                             }
@@ -544,7 +544,7 @@ fn note_edited_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: Rc<str>,
                     } else {
                         let v154: Rc<str> = std::rc::Rc::<str>::from((v2).to_string());
                         let v161: Rc<str> = string_concat(&["agile note-edit ", &*v1, " rejected: note ", &*v154, " was written by ", &*v49, "; only its author edits it"]);
-                        let v162: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v161 + "
+                        let v162: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v161 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                         v162
                     }
@@ -713,7 +713,7 @@ fn note_edit_entry_0() -> i32 {
     if v30 {
         let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the note number must be a positive integer"); } LIT.with(|lit| lit.clone()) };
         let v34: Rc<str> = string_concat(&["agile note-edit ", &*v2, " rejected: ", &*v31]);
-        let v35: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v34 + "
+        let v35: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v34 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v35
     } else {
@@ -721,7 +721,7 @@ fn note_edit_entry_0() -> i32 {
         if v36 {
             let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the note text is empty"); } LIT.with(|lit| lit.clone()) };
             let mut v40: Rc<str> = string_concat(&["agile note-edit ", &*v2, " rejected: ", &*v37]);
-            let v41: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v40 + "
+            let v41: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v40 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
             v41
         } else {
@@ -731,7 +731,7 @@ fn note_edit_entry_0() -> i32 {
             } else {
                 let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: agile note-edit <root> <id> <note-number> <text> [--as <author>] [--append] [--expect-at <iso> | --expect-prefix <text>]"); } LIT.with(|lit| lit.clone()) };
                 let v50: Rc<str> = string_concat(&["agile note-edit ", &*v2, " rejected: ", &*v47]);
-                let v51: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v50 + "
+                let v51: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v50 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                 v51
             }

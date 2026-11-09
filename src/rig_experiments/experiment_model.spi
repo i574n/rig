@@ -69,8 +69,7 @@
     ?> PlanRejected "--decision states the decision rule before any data"
     |? runs < 2i32
     ?> PlanRejected "--runs is the planned count per arm, at least 2"
-    |? arms = "" && arms_needed kind = 1i32 && group <> ""
-    ?>
+    |? arms = "" && arms_needed kind = 1i32 && group <> "" ?>
         PlanRejected (
             concat5
                 (test_word kind)
@@ -79,8 +78,7 @@
                 ""
                 ""
         )
-    |? comma_count arms <> arms_needed kind && (arms <> "" || arms_needed kind = 2i32)
-    ?>
+    |? comma_count arms <> arms_needed kind && (arms <> "" || arms_needed kind = 2i32) ?>
         PlanRejected (
             concat5
                 (test_word kind)
@@ -91,8 +89,7 @@
         )
     |? kind = MedianBand && comma_count prediction <> 2i32
     ?> PlanRejected "median needs --prediction low,high (the band the median must fall in)"
-    |? needs_prediction kind && prediction = ""
-    ?>
+    |? needs_prediction kind && prediction = "" ?>
         PlanRejected (
             concat5 (test_word kind) " needs --prediction (the model value or rate it is tested against)" "" "" ""
         )
@@ -123,8 +120,7 @@
     | AmendRefused : string
 
 :~ amend_checked (~field : string) (~reason : string) (looked : bool) : amendment =
-    ? looked
-    ?>
+    ? looked ?>
         AmendRefused (
             "the metric was already read (an interim look or the verdict); an amendment must precede the runs it "
             ^^ "changes, so record an addendum instead"
@@ -141,8 +137,7 @@
     | LookRefused : string
 
 :~ look_of (~counts : string) (shortfall : bool) (~interim : string) (~verdict_at : string) : look =
-    ? verdict_at <> ""
-    ?>
+    ? verdict_at <> "" ?>
         LookRefused (
             concat5
                 "the verdict was already recorded at "
@@ -153,8 +148,7 @@
         )
     |? shortfall = !-
     ?> FullLook
-    |? interim = ""
-    ?>
+    |? interim = "" ?>
         LookRefused (
             concat5
                 "interim look refused: "
@@ -223,7 +217,9 @@
             = "median needs --prediction low,high (the band the median must fall in)"
         )
         "band"
-    testing.expect (plan_reason (plan_checked MedianBand "fast" "" 9i32 "28,32" "seconds" "d") = "") "a complete median plan"
+    testing.expect
+        (plan_reason (plan_checked MedianBand "fast" "" 9i32 "28,32" "seconds" "d") = "")
+        "a complete median plan"
     testing.expect
         (plan_reason (plan_checked OneSampleT "" "" 10i32 "3" "misses" "d") = "")
         "one population without arms or group is the whole table"

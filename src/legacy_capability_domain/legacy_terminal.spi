@@ -1,4 +1,3 @@
-
 inl emit_runtime () : () = global """
     use rig_process_observation::run_bounded_receipted_observed;
     use rig_rust_std_fs::{atomic_write as legacy_atomic_write, safe_relative_path as legacy_safe_relative};
@@ -17,7 +16,7 @@ inl emit_runtime () : () = global """
         for family in 0..=8 { if rig_legacy_surface_status_binding(family, 2) != 1 { return Err(format!("typed legacy-surface rejected equivalent family {family}")); } }
         if rig_legacy_surface_status_binding(9, 0) != 1 { return Err("typed legacy-surface rejected quarantined planning governance".to_owned()); }
         for family in [5, 7, 8] { if rig_legacy_surface_status_binding(family, 1) != 0 { return Err(format!("typed legacy-surface accepted stale partial family {family}")); } }
-        println!("kit proxy legacy-surface ok sources=834,9252 model=spiral typed=verified");
+        println!("rig proxy legacy-surface ok sources=834,9252 model=spiral typed=verified");
         println!("summary cataloged=36/36 decided=36/36 absorbed=34/36 pruned=2 deferred=0 needs_evidence=0 executable_absorption=100/100 resolved=100/100");
         println!("dogfood candidate_common_path=usable fallback_required=none recovery_fallbacks=optional");
         println!("family=patch-batching status=equivalent current=patch-apply");
@@ -39,7 +38,7 @@ inl emit_runtime () : () = global """
         let metadata = fs::symlink_metadata(&target).map_err(|error| format!("metadata {}: {error}", target.display()))?;
         if metadata.file_type().is_symlink() { return Err(format!("fs-chmod rejects symlink: {}", target.display())); }
         rig_rust_std_fs::portable_set_mode(&target, mode).map_err(|error| format!("chmod {}: {error}", target.display()))?;
-        println!("kit proxy fs-chmod ok path={} mode={mode:04o}", target.display());
+        println!("rig proxy fs-chmod ok path={} mode={mode:04o}", target.display());
         Ok(())
     }
 
@@ -55,7 +54,7 @@ inl emit_runtime () : () = global """
         for _ in link_relative.parent().into_iter().flat_map(|parent| parent.components()) { payload.push(".."); }
         for component in target.components() { payload.push(component.as_os_str()); }
         rig_rust_std_fs_mutation::rooted_create_symlink_within(&root, &link, &payload)?;
-        println!("kit proxy fs-symlink ok link={} target={}", link.display(), target.display());
+        println!("rig proxy fs-symlink ok link={} target={}", link.display(), target.display());
         Ok(())
     }
 
@@ -75,14 +74,14 @@ inl emit_runtime () : () = global """
         let program = legacy_arg(args, 4, "program")?;
         let mut command = Command::new(program);
         command.current_dir(root).args(&args[5..]);
-        for key in ["PATH", "LD_LIBRARY_PATH", "DOTNET_ROOT", "SPIRAL_DOTNET", "KIT_SPIRAL_COMPILE", "KIT_SPIRAL_TIMEOUT_MS", "KIT_SPIRAL_SEGMENTED_TIMEOUT_MS", "CARGO_HOME", "CARGO_TARGET_DIR", "RUSTC", "RUSTDOC", "RUSTFMT"] {
+        for key in ["PATH", "LD_LIBRARY_PATH", "DOTNET_ROOT", "SPIRAL_DOTNET", "RIG_SPIRAL_COMPILE", "KIT_SPIRAL_COMPILE", "RIG_SPIRAL_TIMEOUT_MS", "KIT_SPIRAL_TIMEOUT_MS", "RIG_SPIRAL_SEGMENTED_TIMEOUT_MS", "KIT_SPIRAL_SEGMENTED_TIMEOUT_MS", "CARGO_HOME", "CARGO_TARGET_DIR", "RUSTC", "RUSTDOC", "RUSTFMT"] {
             if let Some(value) = env::var_os(key) { command.env(key, value); }
         }
         let observation = run_bounded_receipted_observed(&mut command, timeout_ms, "command-capture")?;
         let status = observation.status.code().unwrap_or(-1);
         let body = format!("schema=1\nprogram={}\nstatus={}\ntermination={:?}\nelapsed_ms={}\nstdout_bytes={}\nstderr_bytes={}\n--- stdout ---\n{}\n--- stderr ---\n{}\n", program, status, observation.termination, observation.elapsed_ms, observation.stdout.len(), observation.stderr.len(), String::from_utf8_lossy(&observation.stdout), String::from_utf8_lossy(&observation.stderr));
         legacy_atomic_write(&receipt, body.as_bytes())?;
-        println!("kit proxy command-capture ok receipt={} status={status} elapsed_ms={}", receipt.display(), observation.elapsed_ms);
+        println!("rig proxy command-capture ok receipt={} status={status} elapsed_ms={}", receipt.display(), observation.elapsed_ms);
         Ok(())
     }
 
@@ -91,7 +90,7 @@ inl emit_runtime () : () = global """
 
 inl emit_self_install_runtime () : () = global """
     fn self_install_fault_code() -> Result<i32, String> {
-        match env::var("KIT_SELF_INSTALL_FAULT").ok().as_deref() {
+        match env::var("RIG_SELF_INSTALL_FAULT").or_else(|_| env::var("KIT_SELF_INSTALL_FAULT")).ok().as_deref() {
             None | Some("") | Some("none") => Ok(0),
             Some("after-binary-commit") => Ok(1),
             Some("before-link-commit") => Ok(2),
@@ -134,7 +133,7 @@ inl emit_self_install_runtime () : () = global """
         use rig_rust_std_fs::portable_mode;
         if !source.is_absolute() || !destination.is_absolute() || !link.is_absolute() { return Err("install-self requires absolute source, destination, and link paths".to_owned()); }
         if source == destination || destination == link || source == link { return Err("install-self paths must be distinct".to_owned()); }
-        let managed_workspace = env::var_os("KIT_LEASE_ROOT").map(std::path::PathBuf::from).or_else(|| source.ancestors().find(|root| root.join("state/prompt.spi").is_file() && root.join("src/Cargo.toml").is_file()).map(Path::to_path_buf));
+        let managed_workspace = env::var_os("RIG_LEASE_ROOT").or_else(|| env::var_os("KIT_LEASE_ROOT")).map(std::path::PathBuf::from).or_else(|| source.ancestors().find(|root| root.join("state/prompt.spi").is_file() && root.join("src/Cargo.toml").is_file()).map(Path::to_path_buf));
         if let Some(workspace) = managed_workspace.as_deref() && (destination.starts_with(workspace) || link.starts_with(workspace)) { return Err(format!("install-self canonical destination/link must live outside managed workspace {}", workspace.display())); }
         let source_metadata = fs::symlink_metadata(source).map_err(|error| format!("metadata {}: {error}", source.display()))?;
         let source_regular = source_metadata.is_file() && !source_metadata.file_type().is_symlink();
@@ -209,7 +208,7 @@ inl emit_self_install_runtime () : () = global """
         for arguments in checks {
             let mut command = Command::new(binary);
             command.args(&arguments);
-            command.env("KIT_CONTROL_READ_ONLY", "1");
+            command.env("RIG_CONTROL_READ_ONLY", "1").env("KIT_CONTROL_READ_ONLY", "1");
             let observation = run_bounded_receipted_observed(&mut command, 15000, label)?;
             if !observation.status.success() {
                 return Err(format!("self-upgrade {label} gate failed binary={} args={:?} status={} stderr={}", binary.display(), arguments, observation.status, String::from_utf8_lossy(&observation.stderr).trim()));
@@ -239,7 +238,7 @@ inl emit_self_install_runtime () : () = global """
         self_upgrade_gate(&current, &current_root, "current-baseline")?;
         self_upgrade_gate(&current, &candidate_root, "current-verifier-on-candidate")?;
         self_upgrade_gate(&candidate, &candidate_root, "candidate-self-verifier")?;
-        println!("kit proxy self-upgrade-check ok current_root={} candidate_root={} gates=6 compatibility=strict", current_root.display(), candidate_root.display());
+        println!("rig proxy self-upgrade-check ok current_root={} candidate_root={} gates=6 compatibility=strict", current_root.display(), candidate_root.display());
         Ok(())
     }
 
@@ -249,7 +248,7 @@ inl emit_self_install_runtime () : () = global """
         let destination = Path::new(legacy_arg(args, 2, "installed-binary")?);
         let link = Path::new(legacy_arg(args, 3, "canonical-link")?);
         legacy_install_self_with_fault(source, destination, link, self_install_fault_code()?)?;
-        println!("kit proxy install-self ok source={} destination={} link={} receipt=typed-atomic", source.display(), destination.display(), link.display());
+        println!("rig proxy install-self ok source={} destination={} link={} receipt=typed-atomic", source.display(), destination.display(), link.display());
         Ok(())
     }
     """

@@ -526,7 +526,7 @@ fn memory_check_0(mut v0: Rc<str>) -> i32 {
         let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("check needs a readable data file: "); } LIT.with(|lit| lit.clone()) };
         let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let v5: Rc<str> = concat5_2(v3, v0, v4.clone(), v4.clone(), v4.clone());
-        let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+        let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
         let v7: Rc<str> = concat5_2(v6, v5, v4.clone(), v4.clone(), v4);
         eprintln!("{}", v7);
         2i32
@@ -558,10 +558,10 @@ fn memory_check_0(mut v0: Rc<str>) -> i32 {
         let v38: Rc<str> = concat5_2(v33, v34, v35, v36, v37);
         let v39: bool = v31 == 0i32;
         let v42: Rc<str> = if v39 {
-            let v40: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit memory check ok"); } LIT.with(|lit| lit.clone()) };
+            let v40: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig memory check ok"); } LIT.with(|lit| lit.clone()) };
             v40
         } else {
-            let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit memory check failed"); } LIT.with(|lit| lit.clone()) };
+            let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig memory check failed"); } LIT.with(|lit| lit.clone()) };
             v41
         };
         let v43: Rc<str> = format_real_13(v25);
@@ -703,7 +703,7 @@ fn memory_list_run_15(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("list needs a readable data file: "); } LIT.with(|lit| lit.clone()) };
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let mut v6: Rc<str> = concat5_2(v4, v1, v5.clone(), v5.clone(), v5.clone());
-        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
         let v8: Rc<str> = concat5_2(v7, v6, v5.clone(), v5.clone(), v5);
         eprintln!("{}", v8);
         2i32
@@ -726,7 +726,7 @@ fn memory_list_run_15(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
                 let (mut v42, mut v43, mut v44, mut v45): (Rc<UH0>, i32, Rc<str>, Rc<str>) = store_from_3(v37, v38, v39, v40, v41.clone(), v41.clone());
                 let v46: i32 = 0i32;
                 let v47: i32 = listed_17(v42, v0.clone(), v46);
-                let v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit memory list ok shown="); } LIT.with(|lit| lit.clone()) };
+                let v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig memory list ok shown="); } LIT.with(|lit| lit.clone()) };
                 let v49: Rc<str> = format_real_13(v47);
                 let v52: Rc<str> = if v9 {
                     v41.clone()
@@ -752,7 +752,7 @@ fn memory_list_run_15(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
                 let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", got "); } LIT.with(|lit| lit.clone()) };
                 let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 let v33: Rc<str> = concat5_2(v14, v30, v31, v0, v32.clone());
-                let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+                let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
                 let v35: Rc<str> = concat5_2(v34, v33, v32.clone(), v32.clone(), v32);
                 eprintln!("{}", v35);
                 2i32
@@ -919,7 +919,7 @@ fn memory_recall_18(mut v0: i32, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
         let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("recall needs a readable data file: "); } LIT.with(|lit| lit.clone()) };
         let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         let v7: Rc<str> = concat5_2(v5, v2, v6.clone(), v6.clone(), v6.clone());
-        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
         let v9: Rc<str> = concat5_2(v8, v7, v6.clone(), v6.clone(), v6);
         eprintln!("{}", v9);
         2i32
@@ -929,7 +929,7 @@ fn memory_recall_18(mut v0: i32, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
         let v11: bool = &*v10 == "";
         if v11 {
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("recall needs query words"); } LIT.with(|lit| lit.clone()) };
-            let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: memory "); } LIT.with(|lit| lit.clone()) };
+            let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: memory "); } LIT.with(|lit| lit.clone()) };
             let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
             let v15: Rc<str> = concat5_2(v13, v12, v14.clone(), v14.clone(), v14);
             eprintln!("{}", v15);
@@ -947,7 +947,7 @@ fn memory_recall_18(mut v0: i32, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
             let v27: Rc<UH1> = ranked_from_19(v21, v25, v26);
             let v28: i32 = 0i32;
             let v29: i32 = ranked_printed_22(v27, v0, v28);
-            let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit memory recall ok shown="); } LIT.with(|lit| lit.clone()) };
+            let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig memory recall ok shown="); } LIT.with(|lit| lit.clone()) };
             let v31: Rc<str> = format_real_13(v29);
             let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" of="); } LIT.with(|lit| lit.clone()) };
             let v33: Rc<str> = format_real_13(v22);

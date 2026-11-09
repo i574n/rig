@@ -49,13 +49,15 @@
     head ++# level ++# sizes ++# rank_part ++# named
 
 :~ ^ json_items (rows : array_base next_row) (at : i32) (~items : string) : string =
-    ? at >= am'.length_base rows ?> items
+    ? at >= am'.length_base rows
+    ?> items
     |:
         := item = row_json (at + 1i32) (am'.index_base at rows)
         json_items rows (at + 1i32) (? items = "" ?> item |: items ++# "," ++# item)
 
 :~ ^ lines_printed (main_agent : bool) (rows : array_base next_row) (at : i32) : () =
-    ? at >= am'.length_base rows ?> ()
+    ? at >= am'.length_base rows
+    ?> ()
     |:
         console.write_line (row_line main_agent (at + 1i32) (am'.index_base at rows))
         lines_printed main_agent rows (at + 1i32)
@@ -75,7 +77,7 @@
         := load = ? load = "all" ?> "" |: " load=" ++# load
         := counts = " ready=" ++# sm'.show ready ++# " shown=" ++# shown ++# load
         := elapsed = " elapsed_ms=" ++# sm'.show elapsed_ms
-        console.write_line ("kit agile next ok role=" ++# role_word ++# counts ++# elapsed)
+        console.write_line ("rig agile next ok role=" ++# role_word ++# counts ++# elapsed)
     0i32
 
 ///> rust

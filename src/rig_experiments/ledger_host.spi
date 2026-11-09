@@ -41,7 +41,7 @@
     "0" | "false" | "no" | "-") }' : bool
 
 :~ failed (~message : string) : i32 =
-    stderr_line (concat5 "kit error: experiment " message "" "" "")
+    stderr_line (concat5 "rig error: experiment " message "" "" "")
     2i32
 
 := experiment_usage () : string =

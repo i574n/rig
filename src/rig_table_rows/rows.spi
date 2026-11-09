@@ -74,8 +74,10 @@
     ?= mode ?|
     | Outside => ? ch = "\"" ?> InCell "", cells |: Outside, cells
     | InCell text =>
-        ? ch = "\\" ?> AfterEscape text, cells
-        |? ch = "\"" ?> Outside, text :: cells
+        ? ch = "\\"
+        ?> AfterEscape text, cells
+        |? ch = "\""
+        ?> Outside, text :: cells
         |: InCell (text ++# ch), cells
     | AfterEscape text => InCell (text ++# ch), cells
 
@@ -84,7 +86,8 @@
 
 := cells_of (line : string) : list string =
     := open_at = sm'.index_of "[" line
-    ? open_at < 0i32 ?> []
+    ? open_at < 0i32
+    ?> []
     |:
         := body = sm'.substring open_at ((sm'.length line : i32) - open_at) line
         := _, cells = chars_from body ((sm'.length body : i32) - 1i32) [] |> listm.fold scanned (Outside, [])
@@ -93,8 +96,10 @@
 := unescaped (body : string) : string =
     := step (state : bool * list string) (ch : string) =
         := escaping, pieces = state
-        ? escaping ?> !-, (? ch = "n" ?> "\n" |? ch = "t" ?> tab () |? ch = "r" ?> "\r" |: ch) :: pieces
-        |? ch = "\\" ?> !+, pieces
+        ? escaping
+        ?> !-, (? ch = "n" ?> "\n" |? ch = "t" ?> tab () |? ch = "r" ?> "\r" |: ch) :: pieces
+        |? ch = "\\"
+        ?> !+, pieces
         |: !-, ch :: pieces
     := _, pieces = chars_from body ((sm'.length body : i32) - 1i32) [] |> listm.fold step (!-, [])
     sm'.concat_list "" (listm.rev pieces)
@@ -109,9 +114,12 @@
 := table_of_rows_spi (spi : string) : table =
     := lines = sm'.split_list "\n" (sm'.replace "\r" "" spi)
     := pick (acc : table) (line : string) =
-        ? sm'.starts_with "inl columns () = Columns [" line ?> { acc ?| columns = cells_of line }
-        |? sm'.starts_with "inl row_" line ?> { acc ?| rows = cells_of line :: acc.rows }
-        |? sm'.starts_with "inl table () = Table \"" line ?> table_of_whole_line line
+        ? sm'.starts_with "inl columns () = Columns [" line
+        ?> { acc ?| columns = cells_of line }
+        |? sm'.starts_with "inl row_" line
+        ?> { acc ?| rows = cells_of line :: acc.rows }
+        |? sm'.starts_with "inl table () = Table \"" line
+        ?> table_of_whole_line line
         |: acc
     := found = lines |> listm.fold pick { columns = []; rows = [] }
     { found ?| rows = listm.rev found.rows }
@@ -119,7 +127,11 @@
 :~ table_of_tsv (~text : string) : table =
     := lines = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm'.filter (\ (line : string) => line <> "")
     ?= lines ?|
-    | header :: rest => { columns = sm'.split_list (tab ()) header; rows = rest |> listm.map (\ (line : string) => sm'.split_list (tab ()) line) }
+    | header :: rest =>
+        {
+            columns = sm'.split_list (tab ()) header
+            rows = rest |> listm.map \ (line : string) => sm'.split_list (tab ()) line
+        }
     | [] => { columns = []; rows = [] }
 
 :~ spi_of_tsv (~text : string) : string = spi_of_layout WholeTable (OpenedFrom "table_rows") (table_of_tsv text)

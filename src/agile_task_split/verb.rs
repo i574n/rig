@@ -736,7 +736,7 @@ fn split_run_0() -> i32 {
         v14
     };
     if v15 {
-        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: agile edit <root> <id> --split milestones (needs MILESTONES:)"); } LIT.with(|lit| lit.clone()) };
+        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <id> --split milestones (needs MILESTONES:)"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v16);
         2i32
     } else {
@@ -747,7 +747,7 @@ fn split_run_0() -> i32 {
             US3::US3_AlreadySmall(v23) => {
                 let v23: i32 = v23;
                 let v24: Rc<str> = format_real_28(v23);
-                let v27: Rc<str> = string_concat(&["kit agile split ok id=", &*v3, " children=0 reason=already-small estimate=", &*v24]);
+                let v27: Rc<str> = string_concat(&["rig agile split ok id=", &*v3, " children=0 reason=already-small estimate=", &*v24]);
                 println!("{}", v27);
                 0i32
             }
@@ -755,12 +755,12 @@ fn split_run_0() -> i32 {
                 let v30: Rc<str> = v30;
                 let v31: i32 = v31;
                 let v32: Rc<str> = format_real_28(v31);
-                let v36: Rc<str> = string_concat(&["kit error: agile split refused: milestone ", &*v30, " is ", &*v32, " m; split it to 120 m or less first"]);
+                let v36: Rc<str> = string_concat(&["rig error: agile split refused: milestone ", &*v30, " is ", &*v32, " m; split it to 120 m or less first"]);
                 eprintln!("{}", v36);
                 1i32
             }
             US3::US3_NoMilestones => {
-                let v29: Rc<str> = string_concat(&["kit error: agile split refused: ", &*v3, " has no note with MILESTONES:"]);
+                let v29: Rc<str> = string_concat(&["rig error: agile split refused: ", &*v3, " has no note with MILESTONES:"]);
                 eprintln!("{}", v29);
                 1i32
             }
@@ -784,7 +784,7 @@ fn split_run_0() -> i32 {
                 let v54: Rc<UH0> = Rc::new(UH0::UH0_Cons(v4, v53));
                 let (mut v55, mut v56): (bool, Rc<str>) = rig_said_1(v54);
                 let v59: Rc<str> = format_real_28(v40);
-                let v60: Rc<str> = string_concat(&["kit agile split ok id=", &*v3, " children=", &*v59]);
+                let v60: Rc<str> = string_concat(&["rig agile split ok id=", &*v3, " children=", &*v59]);
                 println!("{}", v60);
                 let v61: i32 = 0i32;
                 let v62: i32 = method34(v37, v61);

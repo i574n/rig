@@ -279,7 +279,7 @@ fn method16(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
             let v4: Rc<UH0> = method16(v3, v1);
-            let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile cadence done "); } LIT.with(|lit| lit.clone()) };
+            let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile cadence done "); } LIT.with(|lit| lit.clone()) };
             let mut v6: bool = v2.starts_with(&*v5);
             if v6 {
                 Rc::new(UH0::UH0_Cons(v2, v4))
@@ -298,7 +298,7 @@ fn method17(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
             let v4: Rc<UH0> = method17(v3, v1);
-            let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit agile cadence silent "); } LIT.with(|lit| lit.clone()) };
+            let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile cadence silent "); } LIT.with(|lit| lit.clone()) };
             let mut v6: bool = v2.starts_with(&*v5);
             if v6 {
                 Rc::new(UH0::UH0_Cons(v2, v4))
@@ -346,7 +346,7 @@ fn summary_of_15(mut v0: Rc<UH0>, mut v1: Rc<UH0>, mut v2: i64, mut v3: Rc<str>)
     let v20: Rc<str> = format_real_13(v19);
     let v23: Rc<str> = format_real_18(v2);
     let v25: Rc<str> = dating_text_19(v3);
-    let v26: Rc<str> = string_concat(&["kit agile cadence ok done_rows=", &*v10, " activity_rows=", &*v13, " silent_active=", &*v20, " window_hours=", &*v23, &*v25]);
+    let v26: Rc<str> = string_concat(&["rig agile cadence ok done_rows=", &*v10, " activity_rows=", &*v13, " silent_active=", &*v20, " window_hours=", &*v23, &*v25]);
     v26
 }
 fn method20(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {

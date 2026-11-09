@@ -92,7 +92,7 @@
             let signal = match observation.termination { ProcessTermination::Signaled(signal) => signal.to_string(), _ => "none".to_owned() };
             let timeout = i32::from(observation.termination == ProcessTermination::TimedOut);
             let (cwd, program, env_names) = process_receipt_command_fields(command);
-            println!("kit process-exit receipt label={label} wrapper_status={} child_exit={} signal={} timeout={} stderr_digest={} retryability={} cwd={:?} program={:?} env_names={} elapsed_ms={} stdout_bytes={} stderr_bytes={} stdout_digest={} stdout_mode=consumed", process_receipt_status_name(wrapper_status), child_exit, signal, timeout, process_receipt_digest(&observation.stderr), process_receipt_retry_name(retryability), cwd, program, env_names, observation.elapsed_ms, observation.stdout_bytes, observation.stderr.len(), observation.stdout_digest);
+            println!("rig process-exit receipt label={label} wrapper_status={} child_exit={} signal={} timeout={} stderr_digest={} retryability={} cwd={:?} program={:?} env_names={} elapsed_ms={} stdout_bytes={} stderr_bytes={} stdout_digest={} stdout_mode=consumed", process_receipt_status_name(wrapper_status), child_exit, signal, timeout, process_receipt_digest(&observation.stderr), process_receipt_retry_name(retryability), cwd, program, env_names, observation.elapsed_ms, observation.stdout_bytes, observation.stderr.len(), observation.stdout_digest);
         }
 
         pub fn run_bounded_stdout_receipted<T, F>(

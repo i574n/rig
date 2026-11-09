@@ -245,7 +245,7 @@ fn text_replace_outcome_1() -> US0 {
                                                                         US5::US5_Replaced => {
                                                                             let v117: u64 = v59.len() as u64;
                                                                             let v118: u64 = v70.len() as u64;
-                                                                            let v120: Rc<str> = string_concat(&["kit proxy text-replace ok mode=apply path=", &*v48, " matches="]);
+                                                                            let v120: Rc<str> = string_concat(&["rig proxy text-replace ok mode=apply path=", &*v48, " matches="]);
                                                                             let v121: Rc<str> = std::rc::Rc::<str>::from((v60).to_string());
                                                                             let v122: Rc<str> = string_concat(&[&*v121, " expected="]);
                                                                             let v129: Rc<str> = match v43 {
@@ -302,7 +302,7 @@ fn text_replace_outcome_1() -> US0 {
                                                             US2::US2_CheckReplacement => {
                                                                 let v71: u64 = v59.len() as u64;
                                                                 let v72: u64 = v70.len() as u64;
-                                                                let v74: Rc<str> = string_concat(&["kit proxy text-replace ok mode=check path=", &*v48, " matches="]);
+                                                                let v74: Rc<str> = string_concat(&["rig proxy text-replace ok mode=check path=", &*v48, " matches="]);
                                                                 let v75: Rc<str> = std::rc::Rc::<str>::from((v60).to_string());
                                                                 let v76: Rc<str> = string_concat(&[&*v75, " expected="]);
                                                                 let v83: Rc<str> = match v43 {

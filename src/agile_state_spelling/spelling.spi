@@ -37,8 +37,10 @@
         \ found (word : head_word) =>
             ?= found ?|
             | OtherLine =>
-                ? sm'.starts_with (keyword_of word) line ?> KeywordHead word
-                |? sm'.starts_with (symbol_of word) line ?> SymbolHead word
+                ? sm'.starts_with (keyword_of word) line
+                ?> KeywordHead word
+                |? sm'.starts_with (symbol_of word) line
+                ?> SymbolHead word
                 |: OtherLine
             | _ => found
         OtherLine

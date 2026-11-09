@@ -1,4 +1,3 @@
-
 :! process_idle = ()
 :! process_running = ()
 :! process_done = ()
@@ -114,7 +113,7 @@
                 return Err(format!("{label} failed: {} termination={:?} stderr={}", observation.status, observation.termination, process_output_preview(&observation.stderr)));
             }
             println!(
-                "kit process plan={label} status=passed termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={}",
+                "rig process plan={label} status=passed termination={:?} elapsed_ms={} stdout_bytes={} stderr_bytes={}",
                 observation.termination,
                 observation.elapsed_ms,
                 observation.stdout.len(),

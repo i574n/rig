@@ -279,7 +279,7 @@ pub fn source_stats_run(args: &[String]) -> Result<(), String> {
     let own_lines = surfaces.own_spiral_lines + surfaces.own_rust_lines;
     let product_lines = own_lines + surfaces.generated_rust_lines;
     let vendor_lines = surfaces.vendor_spiral_lines + surfaces.vendor_rust_lines;
-    println!("kit proxy source-stats ok root={} scope=classified-source package_discovery=recursive classification_policy=vendor-segment+spiral-owner-metadata+generated-marker build_target_policy=cachedir-tag", root.display());
+    println!("rig proxy source-stats ok root={} scope=classified-source package_discovery=recursive classification_policy=vendor-segment+spiral-owner-metadata+generated-marker build_target_policy=cachedir-tag", root.display());
     println!("own_lines={} generated_lines={} vendor_lines={} product_lines={} all_source_lines={} total_growth_policy=report-only", own_lines, surfaces.generated_rust_lines, vendor_lines, product_lines, product_lines + vendor_lines);
     println!("own_spiral_lines={} own_rust_lines={} generated_rust_lines={} vendor_spiral_lines={} vendor_rust_lines={}", surfaces.own_spiral_lines, surfaces.own_rust_lines, surfaces.generated_rust_lines, surfaces.vendor_spiral_lines, surfaces.vendor_rust_lines);
     println!("own_spiral_files={} own_rust_files={} generated_rust_files={} vendor_spiral_files={} vendor_rust_files={} rust_global_site_count={} census_authority=source-stats", surfaces.own_spiral_files, surfaces.own_rust_files, surfaces.generated_rust_files, surfaces.vendor_spiral_files, surfaces.vendor_rust_files, stats.rust_global_sites);
@@ -306,7 +306,7 @@ pub fn source_topology_run(args: &[String]) -> Result<(), String> {
         topology_write_census(root, topology_arg(args, 2, "census-relative")?, &stats)?;
         println!("census_written=true path={}", root.join(topology_arg(args, 2, "census-relative")?).display());
     }
-    println!("kit proxy source-topology ok root={}", root.display());
+    println!("rig proxy source-topology ok root={}", root.display());
     println!("spiral_lines={} rust_lines={} combined_lines={} total_growth_policy=unbounded", stats.spiral_lines, stats.rust_lines, stats.spiral_lines + stats.rust_lines);
     println!("spiral_source_file_count={} rust_source_file_count={} rust_global_site_count={} census_authority=source-topology", stats.spiral_source_files, stats.rust_source_files, stats.rust_global_sites);
     println!("cargo_crate_count={} cargo_crate_count_policy=unbounded cargo_crate_max_lines={} cargo_crate_max={} cargo_crate_loc_limit=1000", stats.cargo_crates, stats.crate_max_lines, stats.crate_max);

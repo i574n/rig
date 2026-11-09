@@ -19,8 +19,10 @@
     ? ascii_zero () <= code ?> code <= ascii_nine () |: !-
 
 :~ ^ digits_in (text : string) (start : i32) (stop : i32) : bool =
-    ? stop <= start ?> !+
-    |? digit_at text start ?> digits_in text (start + 1i32) stop
+    ? stop <= start
+    ?> !+
+    |? digit_at text start
+    ?> digits_in text (start + 1i32) stop
     |: !-
 
 := byte_is (text : string) (offset : i32) (code : i32) : bool = byte_at text offset = code
@@ -72,20 +74,24 @@
     |: !-
 
 := starts_with_stamp (text : string) : bool =
-    ? dated_clock text ?> !+
-    |? dated_day text ?> !+
+    ? dated_clock text
+    ?> !+
+    |? dated_day text
+    ?> !+
     |: bare_clock text
 
 := stamp_window () : i32 = 17i32
 
 :~ ^ stamped_separator_from (~title : string) (~offset : i32) : i32 =
     := found = byte_find_from title (tail_separator ()) offset
-    ? found < 0i32 ?> found
+    ? found < 0i32
+    ?> found
     |:
         := start = (found + 2i32)
         := window_end = (start + (stamp_window ()))
         := stop = ? byte_len title <= window_end ?> byte_len title |: window_end
-        ? starts_with_stamp (byte_slice title start stop) ?> found
+        ? starts_with_stamp (byte_slice title start stop)
+        ?> found
         |: stamped_separator_from title start
 
 :== stamped_piece =
@@ -102,8 +108,7 @@
     ?> { at = byte_slice piece 0i32 16i32; day = byte_slice piece 0i32 10i32; body = rest_from piece 16i32 }
     |? dated_day piece
     ?> { at = byte_slice piece 0i32 10i32; day = byte_slice piece 0i32 10i32; body = rest_from piece 10i32 }
-    |? bare_clock piece
-    ?>
+    |? bare_clock piece ?>
         := clock = byte_slice piece 0i32 5i32
         := at = ? (day = "") ?> clock |: day ++# " " ++# clock
         { at = at; day = day; body = rest_from piece 5i32 }

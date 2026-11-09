@@ -20,11 +20,11 @@
         window_call root (Arg ("run", Arg ("compile", Arg ("5", Arg ("--label", Arg ("quick compile", Arg ("--",
             Arg (program, Arg (fixture_path root "ran.txt", NoArgs)))))))))
     testing.expect (ran.code = 3i32) (run_text ran)
-    shows ran.stdout "kit window request ok id=win-"
+    shows ran.stdout "rig window request ok id=win-"
     shows ran.stdout "class=compile minutes=5"
     shows ran.stdout "exit=3 released=yes"
     same (fixture_read root "ran.txt") "ran"
-    shows (succeeded (window_call root (Arg ("list", NoArgs)))) "kit window list ok windows=0"
+    shows (succeeded (window_call root (Arg ("list", NoArgs)))) "rig window list ok windows=0"
     fixture_root_remove root
 
 ///> rust
@@ -38,7 +38,7 @@
         window_call root (Arg ("run", Arg ("compile", Arg ("5", Arg ("--", Arg (program,
             Arg (fixture_path root "ran.txt", NoArgs)))))))
     testing.expect (blocked.code = 1i32) (run_text blocked)
-    shows blocked.stdout "kit window request blocked"
+    shows blocked.stdout "rig window request blocked"
     testing.expect (path_exists (fixture_path root "ran.txt") = !-) "the command must not run without its window"
     rejected_with
         (window_call root (Arg ("run", Arg ("compile", Arg ("5", NoArgs)))))

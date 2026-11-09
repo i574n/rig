@@ -20,8 +20,10 @@
     |: 0i32
 
 :~ process_session_match_export (field_count : i32) (packed_flags : i32) : i32 =
-    ? field_count < 3i32 ?> 0i32
-    |? packed_flags = 7i32 ?> 1i32
+    ? field_count < 3i32
+    ?> 0i32
+    |? packed_flags = 7i32
+    ?> 1i32
     |: 0i32
 
 :| process_op from to result =
@@ -273,7 +275,7 @@
 := emit_typecheck_spiral_file () =
     global """
         pub fn typecheck_spiral_file(compiler: &SpiralCompilerDiscovery, path: &std::path::Path) -> Result<(), String> {
-            let timeout_ms = std::env::var("KIT_SPIRAL_TIMEOUT_MS").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(30000);
+            let timeout_ms = std::env::var("RIG_SPIRAL_TIMEOUT_MS").or_else(|_| std::env::var("KIT_SPIRAL_TIMEOUT_MS")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(30000);
             let check_compiler = if compiler.path.file_name().and_then(|value| value.to_str()) == Some("spiral-compile-session") {
                 let candidate = compiler.path.with_file_name("spiral-compile");
                 if candidate.is_file() { candidate } else { compiler.path.clone() }

@@ -40,16 +40,30 @@
 
 ///> rust
 :# an_announced_block_refuses_an_overlapping_request_and_admits_after =
-    testing.expect (refusal_of_blocks HeavyBuild 30u64 [ install () ] 1000000u64 = "would overlap a block announced by compiler that starts in 17 min") "overlap"
+    testing.expect
+        (
+            refusal_of_blocks HeavyBuild 30u64 [ install () ] 1000000u64
+            = "would overlap a block announced by compiler that starts in 17 min"
+        )
+        "overlap"
     testing.expect (refusal_of_blocks HeavyBuild 30u64 [ install () ] 2700000u64 = "") "after the block ends"
-    testing.expect (refusal_of_blocks HeavyBuild 5u64 [ install () ] 1000000u64 = "") "short work that ends before the block"
+    testing.expect
+        (refusal_of_blocks HeavyBuild 5u64 [ install () ] 1000000u64 = "")
+        "short work that ends before the block"
 
 ///> rust
 :# window_list_shows_blocks_until_they_end =
-    testing.expect (upcoming_lines [ install () ] 1000000u64 = "announced  compiler-install  compiler  starts_in=17m  minutes=10  work=10m") (upcoming_lines [ install () ] 1000000u64)
+    testing.expect
+        (
+            upcoming_lines [ install () ] 1000000u64
+            = "announced  compiler-install  compiler  starts_in=17m  minutes=10  work=10m"
+        )
+        (upcoming_lines [ install () ] 1000000u64)
     testing.expect (upcoming_lines [ install () ] 2600000u64 = "") "an ended block is not listed"
 
 := main () : i32 =
-    export "rig_window_announced_refusal" ((\ (root, class_text, minutes) => announced_refusal root class_text minutes) : string * string * u64 -> string)
+    export
+        "rig_window_announced_refusal"
+        ((\ (root, class_text, minutes) => announced_refusal root class_text minutes) : string * string * u64 -> string)
     export "rig_window_announced_lines" ((\ root => announced_lines root) : string -> string)
     0i32

@@ -35,10 +35,14 @@
 :~ state_line_of (~line : string) : state_line =
     := parts = sm'.split "\"" line |> array
     := count = am'.length parts
-    ? count < 3i32 ?> OtherLine
-    |? sm'.starts_with "inl note_of_" line ?> NoteLine (part parts 1i32, line)
-    |? sm'.starts_with "inl planning_of_" line ?> planning_line parts
-    |? sm'.starts_with "inl " line && sm'.contains "() = Task (" line && count >= 10i32 ?> task_line parts
+    ? count < 3i32
+    ?> OtherLine
+    |? sm'.starts_with "inl note_of_" line
+    ?> NoteLine (part parts 1i32, line)
+    |? sm'.starts_with "inl planning_of_" line
+    ?> planning_line parts
+    |? sm'.starts_with "inl " line && sm'.contains "() = Task (" line && count >= 10i32
+    ?> task_line parts
     |: OtherLine
 
 := blank () : item_facts = { status = ""; tags = ""; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "" }

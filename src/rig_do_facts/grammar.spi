@@ -27,7 +27,8 @@
     | FactRejected : string
 
 :~ listed_fact (step : fact_verb) (~items : string) : fact_parse =
-    ? items = "" ?> FactRejected (concat5 (rig_do_verbs.verbs.fact_word_shown step) ": expected a list of names" "" "" "")
+    ? items = ""
+    ?> FactRejected (concat5 (rig_do_verbs.verbs.fact_word_shown step) ": expected a list of names" "" "" "")
     |:
         ?= step ?|
         | FactHash => FactParsed (HashFiles items)
@@ -38,19 +39,25 @@
     := pattern = first_of_kind records record 113u8
     := lines_at = field_index records record "lines"
     := in_at = field_index records record "in"
-    ? pattern = "" ?> FactRejected "nearest: expected a quoted pattern"
-    |? lines_at < 0i32 ?> FactRejected "nearest: expected before lines <n,...>"
-    |? in_at < lines_at ?> FactRejected "nearest: expected in <file> after the lines"
+    ? pattern = ""
+    ?> FactRejected "nearest: expected a quoted pattern"
+    |? lines_at < 0i32
+    ?> FactRejected "nearest: expected before lines <n,...>"
+    |? in_at < lines_at
+    ?> FactRejected "nearest: expected in <file> after the lines"
     |:
         := path = body_at records record (in_at + 1i32)
-        ? path = "" ?> FactRejected "in: expected a value after it"
+        ? path = ""
+        ?> FactRejected "in: expected a value after it"
         |: FactParsed (NearestMarker (pattern, items_span records record (lines_at + 1i32) in_at, path))
 
 :~ json_fact (~records : record_list) (~record : i32) : fact_parse =
     := path = first_of_kind records record 119u8
     := get_at = field_index records record "get"
-    ? path = "" || path = "get" ?> FactRejected "json: expected a file"
-    |? get_at < 0i32 ?> FactRejected "json: expected get <field,...>"
+    ? path = "" || path = "get"
+    ?> FactRejected "json: expected a file"
+    |? get_at < 0i32
+    ?> FactRejected "json: expected get <field,...>"
     |:
         := fields = items_span records record (get_at + 1i32) (-1i32)
         ? fields = "" ?> FactRejected "get: expected a value after it" |: FactParsed (JsonFields (path, fields))
@@ -62,9 +69,9 @@
     ?> FactRejected (concat5 verb ": expected a path" "" "" "")
     |? field_index records record "count" < 0i32 || by_at < 0i32
     ?> FactRejected (concat5 verb ": expected count by ..." "" "" "")
-    |? files
-    ?>
-        ? body_at records record (by_at + 1i32) = "extension" ?> FactParsed (FilesCounted target)
+    |? files ?>
+        ? body_at records record (by_at + 1i32) = "extension"
+        ?> FactParsed (FilesCounted target)
         |: FactRejected "files count by: only extension is supported"
     |:
         := pattern = first_of_kind records record 113u8
@@ -91,7 +98,8 @@
         |: FactParsed (TableCounted (path, column, operator = "=", body_at records record (where_at + 3i32), groups))
 
 :~ ^ dirs_above (~records : record_list) (~record : i32) : bool =
-    ? record < 1i32 ?> !-
+    ? record < 1i32
+    ?> !-
     |:
         ?= fact_named (field_at records record 1i32) ?|
         | Some step =>
@@ -104,8 +112,10 @@
 
 :~ dirs_fact (~records : record_list) (~record : i32) : fact_parse =
     := target = first_of_kind records record 119u8
-    ? target = "" || target = "having" ?> FactRejected "dirs: expected a folder or folder/*"
-    |? field_index records record "having" < 0i32 ?> FactRejected "dirs: expected having <file> [and <file>...]"
+    ? target = "" || target = "having"
+    ?> FactRejected "dirs: expected a folder or folder/*"
+    |? field_index records record "having" < 0i32
+    ?> FactRejected "dirs: expected having <file> [and <file>...]"
     |: FactParsed (DirsClassified record)
 
 :~ unshared (~verb : string) : fact_parse =

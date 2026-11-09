@@ -59,9 +59,10 @@
     := home = fixture_text_of root
     $'{ let children = (0..!count).map(|k| { let mut command = std::process::Command::new(&*!binary); \
         command.current_dir(std::env::temp_dir()).args(["agile", "note", &*!path, "ID-A", &format\!("race note {k}"), \
-        "--as", "racer"]).env("KIT_LEASE_POLICY", "renewing").env("KIT_CONFIG_HOME", \
-        &*!home).stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null()); \
-        for name in ["KIT_LEASE_ROOT", "KIT_CONTROL_READ_ONLY", "KIT_AGILE_TEST_PAUSE_MS", "AI_AGENT", \
+        "--as", "racer"]).env("RIG_LEASE_POLICY", "renewing").env("KIT_LEASE_POLICY", "renewing").env("RIG_CONFIG_HOME", \
+        &*!home).env("KIT_CONFIG_HOME", &*!home).stdout(std::process::Stdio::null()) \
+        .stderr(std::process::Stdio::null()); for name in ["KIT_LEASE_ROOT", "RIG_LEASE_ROOT", \
+        "KIT_CONTROL_READ_ONLY", "RIG_CONTROL_READ_ONLY", "KIT_AGILE_TEST_PAUSE_MS", "RIG_AGILE_TEST_PAUSE_MS", "AI_AGENT", \
         "CLAUDECODE"] { command.env_remove(name); } command.spawn().unwrap() }).collect::<Vec<_>>(); \
         children.into_iter().map(|mut child| child.wait().map(|status| \
         status.success()).unwrap_or(false)).filter(|ok| *ok).count() as i32 }' : i32
@@ -97,14 +98,14 @@
             Arg ("agent", Arg ("--deps", Arg ("ID-A,ID-B", Arg ("--note", Arg ("groomed at intake", Arg ("--as",
             Arg ("ops", NoArgs))))))))))))))
     shows added (
-        "kit agile add ok id=PR-17 binding=pr_17 status=Planned progress=0 deps=ID-A,ID-B "
+        "rig agile add ok id=PR-17 binding=pr_17 status=Planned progress=0 deps=ID-A,ID-B "
         ^^ "planned=estimate,load,assignee notes=1 bytes_before="
     )
     := shown = accepted root "show" (Arg ("PR-17", NoArgs))
     shows shown "deps: ID-A,ID-B"
     shows shown "planning: estimate=120m load=light assignee=agent"
     shows shown "ops  groomed at intake"
-    shows (accepted root "check" NoArgs) "kit agile check ok"
+    shows (accepted root "check" NoArgs) "rig agile check ok"
     fixture_root_remove root
 
 ///> rust
@@ -122,17 +123,17 @@
     := root = backlog_new "note"
     := first = accepted root "note" (Arg ("ID-A", Arg ("first finding", Arg ("--as", Arg ("lane 2", NoArgs)))))
     same
-        (receipt_shape first "kit agile note " (volatile ()))
+        (receipt_shape first "rig agile note " (volatile ()))
         (
-            "kit agile note ok id=ID-A note=1 at=N author=\"lane 2\" text_bytes=13 bytes_before=N bytes_after=N "
+            "rig agile note ok id=ID-A note=1 at=N author=\"lane 2\" text_bytes=13 bytes_before=N bytes_after=N "
             ^^ "elapsed_ms=N"
         )
     := stamp = word_after first " at="
     expect (utc_minute stamp) (cat "not a UTC minute stamp: " stamp)
     := second = accepted root "note" (Arg ("ID-A", Arg ("a \"quoted\" path C:\\x", NoArgs)))
     same
-        (receipt_shape second "kit agile note " (volatile ()))
-        "kit agile note ok id=ID-A note=2 at=N author=\"user\" text_bytes=20 bytes_before=N bytes_after=N elapsed_ms=N"
+        (receipt_shape second "rig agile note " (volatile ()))
+        "rig agile note ok id=ID-A note=2 at=N author=\"user\" text_bytes=20 bytes_before=N bytes_after=N elapsed_ms=N"
     := show = accepted root "show" (Arg ("ID-A", NoArgs))
     same (line_after show "Title of ID-A" 1i32) "notes (2)"
     := noted = line_after show "Title of ID-A" 2i32
@@ -163,10 +164,10 @@
     := _ = accepted root "edit" (Arg ("ID-A", Arg ("title", Arg (title, NoArgs))))
     := moved = succeeded (from_title root "ID-A")
     same
-        (receipt_shape moved "kit agile notes " (volatile ()))
+        (receipt_shape moved "rig agile notes " (volatile ()))
         (
             cat
-                (cat "kit agile notes ok id=ID-A moved=3 title_bytes_before=" (decimal (byte_count title)))
+                (cat "rig agile notes ok id=ID-A moved=3 title_bytes_before=" (decimal (byte_count title)))
                 " title_bytes_after=16 bytes_before=N bytes_after=N elapsed_ms=N"
         )
     := show = accepted root "show" (Arg ("ID-A", NoArgs))
@@ -196,9 +197,9 @@
     := _ = accepted root "edit" (Arg ("ID-A", Arg ("estimate", Arg ("2h", NoArgs))))
     := renamed = accepted root "rename" (Arg ("ID-A", Arg ("ID-Z", NoArgs)))
     same
-        (receipt_shape renamed "kit agile rename " (volatile ()))
+        (receipt_shape renamed "rig agile rename " (volatile ()))
         (
-            "kit agile rename ok old=ID-A new=ID-Z items=3 deps_rewritten=1 deps_in=ID-B titles_mentioning_old=1 "
+            "rig agile rename ok old=ID-A new=ID-Z items=3 deps_rewritten=1 deps_in=ID-B titles_mentioning_old=1 "
             ^^ "titles_in=ID-C bytes_before=N bytes_after=N elapsed_ms=N"
         )
     := state = state_text root
@@ -295,7 +296,7 @@
                     accepted root "add" (Arg ("FA2-LOGIN", Arg ("TaskKind", Arg ("P1", Arg ("D3", Arg ("Two factor",
                         Arg ("kit", NoArgs)))))))
                 )
-                "kit agile add ok id=FA2-LOGIN binding=fa2_login "
+                "rig agile add ok id=FA2-LOGIN binding=fa2_login "
         )
         "FA2-LOGIN add receipt"
     fixture_root_remove root
@@ -310,7 +311,7 @@
             accepted root "add" (Arg ("PR-1", Arg ("TaskKind", Arg ("P1", Arg ("D2", Arg ("First item", Arg ("ops",
                 Arg ("--estimate", Arg ("1h", NoArgs)))))))))
         )
-        "kit agile add ok id=PR-1"
+        "rig agile add ok id=PR-1"
     failed_with (agile root "init" NoArgs) "already exists"
     fixture_root_remove root
 

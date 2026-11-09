@@ -1,4 +1,3 @@
-
 := emit_coverage_export () : () =
     global """
         fn coverage_profraw_files(path: &Path) -> Result<Vec<PathBuf>, String> {
@@ -65,7 +64,7 @@
                 let receipt_text = format!("route=grcov-lcov\nprofiles={}\nlines={}\ncovered_permille={ratio}\nsha256={hash}\n", profiles.len(), lines.len());
                 coverage_atomic_write(output, payload.as_bytes())?;
                 coverage_atomic_write(&receipt, receipt_text.as_bytes())?;
-                println!("kit proxy coverage-export ok profiles={} lines={} covered={ratio}/1000 sha256={hash}", profiles.len(), lines.len());
+                println!("rig proxy coverage-export ok profiles={} lines={} covered={ratio}/1000 sha256={hash}", profiles.len(), lines.len());
                 Ok(())
             })();
             if let Err(error) = fs::remove_dir_all(&stage) { eprintln!("coverage stage cleanup failed: {error}"); }

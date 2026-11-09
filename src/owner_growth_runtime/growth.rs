@@ -85,7 +85,7 @@ pub fn owner_growth_seed(predecessor_archive: &std::path::Path, previous: &std::
     let predecessor_sha256 = owner_growth_predecessor_proof(predecessor_archive, previous)?;
     let baseline = owner_growth_current(previous)?;
     owner_growth_write(root, &owner_growth_render(&predecessor_sha256, &baseline, &std::collections::BTreeSet::new(), "seed", "OWNER-GROWTH-TELEMETRY"))?;
-    println!("kit bundle growth-baseline ok owners={} predecessor_sha256={} previous={} root={}", baseline.len(), predecessor_sha256, previous.display(), root.display());
+    println!("rig bundle growth-baseline ok owners={} predecessor_sha256={} previous={} root={}", baseline.len(), predecessor_sha256, previous.display(), root.display());
     Ok(())
 }
 
@@ -95,7 +95,7 @@ pub fn owner_growth_author(root: &std::path::Path, reason: &str, reference: &str
     let current = owner_growth_current(root)?;
     let changed = owner_growth_changed(&baseline, &current);
     owner_growth_write(root, &owner_growth_render(&predecessor_sha256, &baseline, &changed, reason, reference))?;
-    println!("kit bundle growth-receipt ok changed={} reason={} reference={}", changed.len(), reason, reference);
+    println!("rig bundle growth-receipt ok changed={} reason={} reference={}", changed.len(), reason, reference);
     Ok(())
 }
 

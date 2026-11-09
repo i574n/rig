@@ -8,7 +8,8 @@
     shows every "mem_mb  cores  command"
     shows every "ok  processes "
     := mine = rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("ps", Arg ("--mine", NoArgs)))
-    ? mine.code = 0i32 ?> shows mine.stdout "  session "
+    ? mine.code = 0i32
+    ?> shows mine.stdout "  session "
     |:
         expect (mine.code = 2i32) (run_text mine)
         shows mine.stdout "ps --mine: no claude or codex process above this kit"

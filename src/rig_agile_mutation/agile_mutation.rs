@@ -65,7 +65,7 @@ enum US3 {
 }
 fn state_lock_refused_1() -> i32 {
     let v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile state/agile.spi stayed locked by a live writer for 5 min; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
-    let v1: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v0 + "
+    let v1: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v0 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
     v1
 }
@@ -427,7 +427,7 @@ fn agile_entry_0() -> i32 {
                     let v22: i32 = 0i32;
                     let v23: Rc<str> = usize::try_from(v22).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
                     let v24: Rc<str> = rig_command_help::rig_agile_root_flag_refusal(&*v23, &*v21);
-                    let v25: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v24 + "
+                    let v25: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v24 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                     v25
                 }
@@ -838,7 +838,7 @@ fn agile_entry_0() -> i32 {
                                     let v91: i32 = 2i32;
                                     let v92: Rc<str> = usize::try_from(v91).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
                                     let v93: Rc<str> = string_concat(&["agile set records no author (only agile note does); drop --as ", &*v88, ", or add a note with --as to say who moved ", &*v92]);
-                                    let v94: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v93 + "
+                                    let v94: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v93 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
                                     v94
                                 } else {
@@ -966,7 +966,7 @@ fn agile_entry_0() -> i32 {
                         if v322 {
                             let v323: i32 = 0i32;
                             let v324: Rc<str> = usize::try_from(v323).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
-                            let v326: Rc<str> = string_concat(&["kit agile ", &*v324, " refused reason=contention"]);
+                            let v326: Rc<str> = string_concat(&["rig agile ", &*v324, " refused reason=contention"]);
                             let v327: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v326.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                             4i32

@@ -41,10 +41,12 @@
 := line_guided (place : guide_place) (~line : string) (tally : guide_tally) : guide_place * guide_tally =
     ?= place ?|
     | InHabit =>
-        ? line = "" ?> BetweenBlocks, { tally ?| text = tally.text ++# "\n" }
+        ? line = ""
+        ?> BetweenBlocks, { tally ?| text = tally.text ++# "\n" }
         |: InHabit, { tally ?| text = tally.text ++# " " ++# line }
     | InCommand =>
-        ? line = "```" ?> BetweenBlocks, { tally ?| text = tally.text ++# "```\n" }
+        ? line = "```"
+        ?> BetweenBlocks, { tally ?| text = tally.text ++# "```\n" }
         |: InCommand, { tally ?| text = tally.text ++# line ++# "\n" }
     | BetweenBlocks =>
         ? sm'.starts_with "## " line
@@ -56,7 +58,8 @@
         |: BetweenBlocks, tally
 
 :~ ^ guided (~spec : string) (offset : i32) (place : guide_place) (tally : guide_tally) : guide_tally =
-    ? offset >= text_count spec ?> tally
+    ? offset >= text_count spec
+    ?> tally
     |:
         := stop = line_end_from spec offset
         := next_place, next_tally = line_guided place (text_between spec offset stop) tally
@@ -70,7 +73,7 @@
     := spec_path = argument 2i32
     := spec = text_of spec_path
     ? spec = "" ?>
-        stderr_line "kit error: guide needs a readable spec file; usage: guide <spec/one-call.md> [--out <file.md>]"
+        stderr_line "rig error: guide needs a readable spec file; usage: guide <spec/one-call.md> [--out <file.md>]"
         2i32
     |:
         := tally = guided spec 0i32 BetweenBlocks { intents = 0i32; text = guide_heading () }
@@ -81,10 +84,10 @@
         |:
             ?= text_written out tally.text ?|
             | Written =>
-                stdout_line ("kit guide ok intents=" ++# (count_text tally.intents) ++# " out=" ++# out)
+                stdout_line ("rig guide ok intents=" ++# (count_text tally.intents) ++# " out=" ++# out)
                 0i32
             | WriteFailed problem =>
-                stderr_line ("kit error: guide could not write " ++# out ++# ": " ++# problem)
+                stderr_line ("rig error: guide could not write " ++# out ++# ": " ++# problem)
                 2i32
 
 := main () : i32 =

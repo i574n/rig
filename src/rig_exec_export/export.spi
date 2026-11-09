@@ -11,7 +11,8 @@
     | [] => ""
 
 :~ notebooks_in (~directory : string) : list string =
-    ? file_system.directory_exists directory |> not ?> []
+    ? file_system.directory_exists directory |> not
+    ?> []
     |:
         file_system.read_directory_names directory
         |> resultm.unwrap'
@@ -35,7 +36,7 @@
         := texts = listm.append cells (? jobs ?> [ rig_exec_jobs.jobs.jobs_prom (machine, since) ] |: [])
         := lines = texts |> listm'.filter (\ (text : string) => text <> "")
         lines |> listm.iter console.write_line
-        console.write_error_line ("kit metrics export ok parts=" ++# sm'.show (listm.length lines : i32))
+        console.write_error_line ("rig metrics export ok parts=" ++# sm'.show (listm.length lines : i32))
         0i32
     | _ =>
         console.write_error_line (export_usage ())

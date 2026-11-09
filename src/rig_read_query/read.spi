@@ -18,7 +18,7 @@
 := unsigned_of (~value : i64) : u64 = (conv value : u64)
 
 := rejected (~message : string) : i32 =
-    stderr_line ("kit error: " ++# message)
+    stderr_line ("rig error: " ++# message)
     2i32
 
 :== read_tally =
@@ -33,7 +33,8 @@
     := view = file_slice path range limit json
     := files = tally.files + 1u64
     := items = ? tally.json = "" ?> view.json |: tally.json ++# "," ++# view.json
-    ? view.shown < 0i64 ?> { tally ?| files = files; unreadable = (tally.unreadable + 1u64); json = items }
+    ? view.shown < 0i64
+    ?> { tally ?| files = files; unreadable = (tally.unreadable + 1u64); json = items }
     |: { tally ?| files = files; lines = (tally.lines + unsigned_of view.shown); json = items }
 
 :~ ^ globbed_from
@@ -41,12 +42,14 @@
     : read_tally
     =
     := path = nth_path paths index
-    ? path = "" ?> tally
+    ? path = ""
+    ?> tally
     |: globbed_from paths (index + 1i32) range limit json (slice_tallied path range limit json tally)
 
 :~ spec_tallied (spec : read_spec) (limit : u64) (json : bool) (tally : read_tally) : read_tally =
     := paths = glob_paths spec.path
-    ? paths = "" ?> slice_tallied spec.path spec.range limit json tally
+    ? paths = ""
+    ?> slice_tallied spec.path spec.range limit json tally
     |: globbed_from paths 0i32 spec.range limit json tally
 
 :| read_switch =
@@ -92,8 +95,7 @@
     := files = decimal_text tally.files
     := unreadable = tally.unreadable
     := lines = decimal_text tally.lines
-    ? json
-    ?>
+    ? json ?>
         stdout_text (
             "{\"files\":["
             ++# tally.json
@@ -102,8 +104,7 @@
             ++# (",\"unreadable\":" ++# (decimal_text unreadable) ++# "}")
         )
         ? unreadable = 0u64 ?> 0i32 |: 2i32
-    |? unreadable = 0u64
-    ?>
+    |? unreadable = 0u64 ?>
         receipt_line Succeeded ("files " ++# files ++# "  lines " ++# lines) started
         0i32
     |:
@@ -142,8 +143,10 @@
 
 :~ ^ expanded_from (~patterns : string) (index : i32) (~acc : string) : string =
     := pattern = nth_path patterns index
-    ? path_count patterns <= index ?> acc
-    |? pattern = "" ?> expanded_from patterns (index + 1i32) acc
+    ? path_count patterns <= index
+    ?> acc
+    |? pattern = ""
+    ?> expanded_from patterns (index + 1i32) acc
     |:
         := paths = glob_paths pattern
         expanded_from patterns (index + 1i32) (? paths = "" ?> acc |? acc = "" ?> paths |: acc ++# "\n" ++# paths)

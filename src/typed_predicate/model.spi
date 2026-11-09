@@ -25,8 +25,10 @@
     | EveryByte inner =>
         := length = byte_count value
         :~ ^ loop (index : u64) : bool =
-            ? index = length ?> !+
-            |? evaluate inner (byte_at value index) ?> loop (index + 1u64)
+            ? index = length
+            ?> !+
+            |? evaluate inner (byte_at value index)
+            ?> loop (index + 1u64)
             |: !-
         loop 0u64
 

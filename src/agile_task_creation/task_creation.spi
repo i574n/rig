@@ -15,12 +15,16 @@
 := i32_digit value : bool = ? 48i32 <= value ?> value <= 57i32 |: !-
 := i32_upper_letter value : bool = ? 65i32 <= value ?> value <= 90i32 |: !-
 := task_id_byte_allowed value : bool =
-    ? i32_upper_letter value ?> !+
-    |? i32_digit value ?> !+
+    ? i32_upper_letter value
+    ?> !+
+    |? i32_digit value
+    ?> !+
     |: value = 45i32
 :~ ^ task_id_bytes_allowed (offset : i32) (length : i32) : bool =
-    ? offset = length ?> !+
-    |? task_id_byte_allowed (argument_byte 2i32 offset) ?> task_id_bytes_allowed (offset + 1i32) length
+    ? offset = length
+    ?> !+
+    |? task_id_byte_allowed (argument_byte 2i32 offset)
+    ?> task_id_bytes_allowed (offset + 1i32) length
     |: !-
 := validate_task_id () : validation_result string =
     := length = argument_byte_count 2i32
@@ -84,7 +88,8 @@
         := word = argument_owned index
         ?= flag_of_word word ?|
         | FlagKnown flag =>
-            ? count <= index + 1i32 ?> ExtrasRefused (rust_std_string.model.concat5 word " needs a value" "" "" "")
+            ? count <= index + 1i32
+            ?> ExtrasRefused (rust_std_string.model.concat5 word " needs a value" "" "" "")
             |: extras_from (index + 2i32) count (extras_with flag (argument_owned (index + 1i32)) extras)
         | FlagUnknown =>
             ExtrasRefused (rust_std_string.model.concat5 "unknown option " word " (expected " (flag_words ()) ")")
@@ -101,7 +106,8 @@
         := extras = author_settled given
         ? extras.note = "" ?>
             ? given.author = "" ?> ExtrasRead extras |: ExtrasRefused "--as names the author of --note; give --note too"
-        |? extras.author = "" ?> ExtrasRefused "a note needs its author: --as <author> (or set KIT_AUTHOR)"
+        |? extras.author = ""
+        ?> ExtrasRefused "a note needs its author: --as <author> (or set KIT_AUTHOR)"
         |: ExtrasRead extras
 
 := task_line (~id : string) kind priority difficulty (~title : string) (~tags : string) (~deps : string) : string =
@@ -161,7 +167,7 @@
     =
     := head =
         rust_std_string.model.concat5
-            "kit agile add ok id="
+            "rig agile add ok id="
             id
             " binding="
             binding

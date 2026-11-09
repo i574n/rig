@@ -42,35 +42,35 @@ fn growth_routed_1(mut v0: Rc<UH0>) -> i32 {
                                             v9
                                         }
                                         _ => {
-                                            let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
+                                            let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
                                             eprintln!("{}", v10);
                                             2i32
                                         }
                                     }
                                 }
                                 _ => {
-                                    let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
+                                    let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
                                     eprintln!("{}", v12);
                                     2i32
                                 }
                             }
                         }
                         _ => {
-                            let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
+                            let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v14);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
+                    let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v16);
                     2i32
                 }
             }
         }
         _ => {
-            let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
+            let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: lint growth <baseline-repo> <baseline.spi> <scan-repo> <scan-dir>"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v18);
             2i32
         }

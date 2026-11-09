@@ -62,8 +62,10 @@
     := a = digit_value 3i32 0i32
     := b = digit_value 3i32 1i32
     := c = digit_value 3i32 2i32
-    ? all2 (length = 1i32) (i32_nonnegative a) ?> Valid (agile_progress a)
-    |? all3 (length = 2i32) (i32_nonnegative a) (i32_nonnegative b) ?> Valid (agile_progress (i32_pair_value a b))
+    ? all2 (length = 1i32) (i32_nonnegative a)
+    ?> Valid (agile_progress a)
+    |? all3 (length = 2i32) (i32_nonnegative a) (i32_nonnegative b)
+    ?> Valid (agile_progress (i32_pair_value a b))
     |? all4 (length = 3i32) (i32_nonnegative a) (i32_nonnegative b) (i32_nonnegative c) ?>
         := value = i32_triple_value a b c
         ? value <= 100i32 ?> Valid (agile_progress value) |: Invalid
@@ -84,11 +86,16 @@
         \ _ => !+
         !-
 := agile_edit_route () : i32 =
-    ? argument_owned 3i32 = "--parent" ?> agile_task_parents.verb.parent_edit_run ()
-    |? argument_owned 3i32 = "--asked" ?> agile_task_asks.verb.ask_edit_run ()
-    |? argument_owned 3i32 = "--split" ?> agile_task_split.verb.split_run ()
-    |? argument_owned 3i32 = "--wait" ?> agile_task_waits.verb.wait_run ()
-    |? planning_field_named (argument_owned 3i32) ?> $"agile_planning_revision::rig_agile_planning_edit_run()"
+    ? argument_owned 3i32 = "--parent"
+    ?> agile_task_parents.verb.parent_edit_run ()
+    |? argument_owned 3i32 = "--asked"
+    ?> agile_task_asks.verb.ask_edit_run ()
+    |? argument_owned 3i32 = "--split"
+    ?> agile_task_split.verb.split_run ()
+    |? argument_owned 3i32 = "--wait"
+    ?> agile_task_waits.verb.wait_run ()
+    |? planning_field_named (argument_owned 3i32)
+    ?> $"agile_planning_revision::rig_agile_planning_edit_run()"
     |: $"agile_task_revision::rig_agile_edit_run()"
 := agile_begin_route () : i32 =
     := root = argument_owned 1i32
@@ -107,7 +114,8 @@
                 ++# sites
         agile_mutation_error message
 :~ ^ checks_joined (rows : array_base agile_quality_lint.lint.failure_row) (at : i32) (~text : string) : string =
-    ? at >= am'.length_base rows ?> text
+    ? at >= am'.length_base rows
+    ?> text
     |:
         := check = (am'.index_base at rows).check
         checks_joined rows (at + 1i32) (? text = "" ?> check |: text ++# "," ++# check)
@@ -118,7 +126,7 @@
     ? checks = ""
     ?> ()
     |:
-        := head = "kit agile lint warning id=" ++# id ++# " status=" ++# status ++# " failing=" ++# checks
+        := head = "rig agile lint warning id=" ++# id ++# " status=" ++# status ++# " failing=" ++# checks
         console.write_error_line (head ++# " (add the marker lines; a later train refuses the change)")
 
 := agile_set_route () : i32 =

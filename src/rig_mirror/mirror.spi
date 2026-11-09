@@ -49,9 +49,12 @@
 :~ ^ mirror_state_of (files : list mirrored_file) (~left : string) (~right : string) : mirror_state =
     ?= files ?|
     | [] =>
-        ? left = "" && right = "" ?> InStep
-        |? right = "" ?> LeftAhead left
-        |? left = "" ?> RightAhead right
+        ? left = "" && right = ""
+        ?> InStep
+        |? right = ""
+        ?> LeftAhead left
+        |? left = ""
+        ?> RightAhead right
         |: Diverged (left ++# " | " ++# right)
     | (file :: rest) =>
         ?= drift_of file ?|

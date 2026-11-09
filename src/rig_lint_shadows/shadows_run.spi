@@ -16,7 +16,8 @@
     := names, firsts, seconds, kinds = scan_of text
     := count = am'.length names : i32
     :~ ^ walk (index : i32) (found : list shadow) : list shadow =
-        ? index < 0i32 ?> found
+        ? index < 0i32
+        ?> found
         |:
             := kind = rig_lint_shadows_core.shadows.kind_of_code (am'.index index kinds)
             := name, first, second = am'.index index names, am'.index index firsts, am'.index index seconds
@@ -84,11 +85,11 @@
     := baseline_path = ? given = "" || file_system.file_exists given ?> given |: root </> given
     ? root = "" || file_system.directory_exists root |> not ?>
         console.write_error_line (
-            "kit error: lint usage: lint shadows <root> [<path>...] [--baseline <rows>]" ++# " [--opens [--lib <dir>]]"
+            "rig error: lint usage: lint shadows <root> [<path>...] [--baseline <rows>]" ++# " [--opens [--lib <dir>]]"
         )
         2i32
     |? baseline_path <> "" && file_system.file_exists baseline_path |> not ?>
-        console.write_error_line ("kit error: lint shadows: no baseline file at " ++# given)
+        console.write_error_line ("rig error: lint shadows: no baseline file at " ++# given)
         2i32
     |:
         := baseline = ? baseline_path = "" ?> "" |: file_system.read_all_text baseline_path

@@ -23,7 +23,8 @@
     (x + 0.5f64) * ln (x + 5.5f64) - (x + 5.5f64) + ln (2.5066282746310005f64 * series / x)
 
 :~ ^ fraction_step (a : f64) (b : f64) (x : f64) (m : i32) (c : f64) (d : f64) (h : f64) : f64 =
-    ? m > 300i32 ?> h
+    ? m > 300i32
+    ?> h
     |:
         := step = as_f64 m
         := even = step * (b - step) * x / ((a - 1.0f64 + 2.0f64 * step) * (a + 2.0f64 * step))
@@ -34,7 +35,8 @@
         := d_odd = 1.0f64 / away_from_zero (1.0f64 + odd * d_even)
         := c_odd = away_from_zero (1.0f64 + odd / c_even)
         := delta = d_odd * c_odd
-        ? abs_of (delta - 1.0f64) < 0.00000000000003f64 ?> h_even * delta
+        ? abs_of (delta - 1.0f64) < 0.00000000000003f64
+        ?> h_even * delta
         |: fraction_step a b x (m + 1i32) c_odd d_odd (h_even * delta)
 
 :~ beta_fraction (a : f64) (b : f64) (x : f64) : f64 =
@@ -42,11 +44,14 @@
     fraction_step a b x 1i32 1.0f64 d d
 
 :~ regularized_beta (a : f64) (b : f64) (x : f64) : f64 =
-    ? x <= 0.0f64 ?> 0.0f64
-    |? x >= 1.0f64 ?> 1.0f64
+    ? x <= 0.0f64
+    ?> 0.0f64
+    |? x >= 1.0f64
+    ?> 1.0f64
     |:
         := front = exp_of (ln_gamma (a + b) - ln_gamma a - ln_gamma b + a * ln x + b * ln (1.0f64 - x))
-        ? x < (a + 1.0f64) / (a + b + 2.0f64) ?> front * beta_fraction a b x / a
+        ? x < (a + 1.0f64) / (a + b + 2.0f64)
+        ?> front * beta_fraction a b x / a
         |: 1.0f64 - front * beta_fraction b a (1.0f64 - x) / b
 
 :~ two_sided_p (t : f64) (df : f64) : f64 = regularized_beta (df / 2.0f64) 0.5f64 (df / (df + t * t))
@@ -57,12 +62,15 @@
 
 :~ ^ quantile_search (p : f64) (df : f64) (low : f64) (high : f64) (rounds : i32) : f64 =
     := middle = (low + high) / 2.0f64
-    ? rounds = 0i32 ?> middle
-    |? student_cdf middle df < p ?> quantile_search p df middle high (rounds - 1i32)
+    ? rounds = 0i32
+    ?> middle
+    |? student_cdf middle df < p
+    ?> quantile_search p df middle high (rounds - 1i32)
     |: quantile_search p df low middle (rounds - 1i32)
 
 :~ student_quantile (p : f64) (df : f64) : f64 =
-    ? p >= 0.5f64 ?> quantile_search p df 0.0f64 10000.0f64 120i32
+    ? p >= 0.5f64
+    ?> quantile_search p df 0.0f64 10000.0f64 120i32
     |: 0.0f64 - quantile_search (1.0f64 - p) df 0.0f64 10000.0f64 120i32
 
 :~ erfc_of (x : f64) : f64 =
@@ -81,8 +89,10 @@
 
 :~ ^ normal_search (p : f64) (low : f64) (high : f64) (rounds : i32) : f64 =
     := middle = (low + high) / 2.0f64
-    ? rounds = 0i32 ?> middle
-    |? normal_cdf middle < p ?> normal_search p middle high (rounds - 1i32)
+    ? rounds = 0i32
+    ?> middle
+    |? normal_cdf middle < p
+    ?> normal_search p middle high (rounds - 1i32)
     |: normal_search p low middle (rounds - 1i32)
 
 :~ normal_quantile (p : f64) : f64 = normal_search p (0.0f64 - 40.0f64) 40.0f64 100i32
@@ -140,16 +150,21 @@
     }
 
 :~ ^ binomial_terms (n : i32) (k : i32) (i : i32) (p : f64) (sum : f64) : f64 =
-    ? i > k ?> sum
+    ? i > k
+    ?> sum
     |:
         := ways = ln_gamma (as_f64 n + 1.0f64) - ln_gamma (as_f64 i + 1.0f64) - ln_gamma (as_f64 (n - i) + 1.0f64)
         binomial_terms n k (i + 1i32) p (sum + exp_of (ways + as_f64 i * ln p + as_f64 (n - i) * ln (1.0f64 - p)))
 
 :~ binomial_at_most (k : i32) (n : i32) (p : f64) : f64 =
-    ? k >= n ?> 1.0f64
-    |? k < 0i32 ?> 0.0f64
-    |? p <= 0.0f64 ?> 1.0f64
-    |? p >= 1.0f64 ?> 0.0f64
+    ? k >= n
+    ?> 1.0f64
+    |? k < 0i32
+    ?> 0.0f64
+    |? p <= 0.0f64
+    ?> 1.0f64
+    |? p >= 1.0f64
+    ?> 0.0f64
     |: binomial_terms n k 0i32 p 0.0f64
 
 :~ wilson (successes : i32) (n : i32) (z : f64) : f64 * f64 =
@@ -193,7 +208,9 @@
     testing.expect
         (near (student_quantile 0.975f64 30.0f64) 2.042272456f64 0.000001f64)
         (shown (student_quantile 0.975f64 30.0f64))
-    testing.expect (near (student_quantile 0.025f64 30.0f64) (0.0f64 - 2.042272456f64) 0.000001f64) "lower tail is symmetric"
+    testing.expect
+        (near (student_quantile 0.025f64 30.0f64) (0.0f64 - 2.042272456f64) 0.000001f64)
+        "lower tail is symmetric"
     testing.expect (near (normal_quantile 0.975f64) 1.959963985f64 0.000001f64) (shown (normal_quantile 0.975f64))
 
 ///> rust

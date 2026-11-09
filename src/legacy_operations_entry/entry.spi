@@ -95,11 +95,14 @@
 :~ proxy_write_action (existed : bool) (flags : proxy_write_flags) : proxy_write_action =
     ? existed ?>
         ? flags.replace_existing || flags.create_or_replace ?>
-            ? flags.expect_nonempty && flags.original_empty ?> RejectEmptyTarget
-            |? flags.payload_empty && flags.original_empty = !- && flags.expect_hash = !- ?> RejectEmptyPayload
+            ? flags.expect_nonempty && flags.original_empty
+            ?> RejectEmptyTarget
+            |? flags.payload_empty && flags.original_empty = !- && flags.expect_hash = !-
+            ?> RejectEmptyPayload
             |: ReplaceExistingFile
         |: RejectOverwriteWithoutFlag
-    |? flags.replace_existing || flags.expect_hash || flags.expect_nonempty ?> RejectPreconditionsOnMissingFile
+    |? flags.replace_existing || flags.expect_hash || flags.expect_nonempty
+    ?> RejectPreconditionsOnMissingFile
     |: CreateMissingFile
 
 := proxy_write_action_code (action : proxy_write_action) : i32 =
@@ -112,10 +115,14 @@
     | RejectEmptyPayload => 5i32
 
 :~ proxy_write_action_binding (existed : i32) (packed : i32) : i32 =
-    ? packed < 0i32 ?> -1i32
-    |? 63i32 < packed ?> -1i32
-    |? existed < 0i32 ?> -1i32
-    |? 1i32 < existed ?> -1i32
+    ? packed < 0i32
+    ?> -1i32
+    |? 63i32 < packed
+    ?> -1i32
+    |? existed < 0i32
+    ?> -1i32
+    |? 1i32 < existed
+    ?> -1i32
     |: proxy_write_action_code (proxy_write_action (existed = 1i32) (proxy_write_flags_of packed))
 :~ proxy_usage_bridge (~input : string) : string =
     command_spec_domain.model.proxy_usage input

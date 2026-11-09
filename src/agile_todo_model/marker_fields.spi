@@ -22,9 +22,12 @@
 := one_of (~choices : string) (~value : string) : bool = sm'.contains ("|" ++# value ++# "|") ("|" ++# choices ++# "|")
 
 :~ load_of (~value : string) : option planning_load =
-    ? value = "light" ?> Some LightLoad
-    |? value = "medium" ?> Some MediumLoad
-    |? value = "heavy" ?> Some HeavyLoad
+    ? value = "light"
+    ?> Some LightLoad
+    |? value = "medium"
+    ?> Some MediumLoad
+    |? value = "heavy"
+    ?> Some HeavyLoad
     |: None
 
 :~ minutes_of (~value : string) : option i32 =
@@ -32,16 +35,17 @@
     ? length > 1i32 && sm'.ends_with "m" value ?> convert.try_convert (sm'.substring 0i32 (length - 1i32) value) |: None
 
 :~ typed_field (~key : string) (~value : string) (~word : string) : marker_field =
-    ? key = "kind" && one_of "Epic|Feature|Story|TaskKind" value ?> KindField value
-    |? key = "who" && one_of "agent|pair|user" value ?> AssigneeField value
-    |? key = "prio" && one_of "P0|P1|P2|P3|P4|P5" value ?> PriorityField value
-    |? key = "load"
-    ?>
+    ? key = "kind" && one_of "Epic|Feature|Story|TaskKind" value
+    ?> KindField value
+    |? key = "who" && one_of "agent|pair|user" value
+    ?> AssigneeField value
+    |? key = "prio" && one_of "P0|P1|P2|P3|P4|P5" value
+    ?> PriorityField value
+    |? key = "load" ?>
         ?= load_of value ?|
         | Some load => LoadField load
         | None => UnknownField word
-    |? key = "est"
-    ?>
+    |? key = "est" ?>
         ?= minutes_of value ?|
         | Some minutes => EstimateMinutes minutes
         | None => UnknownField word

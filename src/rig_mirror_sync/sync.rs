@@ -17,7 +17,7 @@ enum UH0 {
     UH0_Cons(Rc<str>, Rc<UH0>),
 }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let mut v1: Rc<str> = string_concat(&["kit error: mirror ", &*v0]);
+    let mut v1: Rc<str> = string_concat(&["rig error: mirror ", &*v0]);
     eprintln!("{}", v1);
     2i32
 }
@@ -405,7 +405,7 @@ fn shipped_25(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
 fn unpacked_28(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let mut v2: Rc<UH0> = ssh_options_26();
     let v5: Rc<str> = removal_name_19();
-    let v6: Rc<str> = string_concat(&["kit mirror unpack ", &*v1, " ", &*v5]);
+    let v6: Rc<str> = string_concat(&["rig mirror unpack ", &*v1, " ", &*v5]);
     let v7: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
     let v8: Rc<UH0> = Rc::new(UH0::UH0_Cons(v6, v7));
     let v9: Rc<UH0> = Rc::new(UH0::UH0_Cons(v0, v8));
@@ -468,7 +468,7 @@ fn sync_printed_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<
     } else {
         let v30: bool = &*v11 == &*v5;
         if v30 {
-            let v33: Rc<str> = string_concat(&["kit mirror sync in-step machine=", &*v3, " fingerprint=", &*v5]);
+            let v33: Rc<str> = string_concat(&["rig mirror sync in-step machine=", &*v3, " fingerprint=", &*v5]);
             eprintln!("{}", v33);
             0i32
         } else {
@@ -493,7 +493,7 @@ fn sync_printed_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<
             };
             let v46: bool = &*v45 == &*v5;
             if v46 {
-                let v50: Rc<str> = string_concat(&["kit mirror sync ok machine=", &*v3, &*v24, " fingerprint=", &*v5]);
+                let v50: Rc<str> = string_concat(&["rig mirror sync ok machine=", &*v3, &*v24, " fingerprint=", &*v5]);
                 eprintln!("{}", v50);
                 0i32
             } else {
@@ -504,7 +504,7 @@ fn sync_printed_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<
                     let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("pack, copy or unpack failed"); } LIT.with(|lit| lit.clone()) };
                     v52
                 };
-                let v57: Rc<str> = string_concat(&["kit error: mirror sync ", &*v3, ": ", &*v53, &*v24]);
+                let v57: Rc<str> = string_concat(&["rig error: mirror sync ", &*v3, ": ", &*v53, &*v24]);
                 eprintln!("{}", v57);
                 1i32
             }

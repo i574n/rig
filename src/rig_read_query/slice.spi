@@ -49,8 +49,7 @@
 
 :~ file_slice (~path : string) (range : line_range) (limit : u64) (json : bool) : slice_view =
     := file = file_loaded path
-    ? load_failed file
-    ?>
+    ? load_failed file ?>
         := error = load_error file
         ? json
         ?> { shown = (-1i64); json = "{\"path\":" ++# (json_text path) ++# ",\"error\":" ++# (json_text error) ++# "}" }
@@ -65,8 +64,7 @@
         := shown_last = u64_lower last (u64_less (u64_sum first limit) 1u64)
         := count = ? first <= shown_last ?> shown_last - first + 1u64 |: 0u64
         := shown = (conv count : i64)
-        ? json
-        ?>
+        ? json ?>
             := head =
                 "{\"path\":"
                 ++# json_text path
@@ -99,8 +97,7 @@
             )
             slice_printed file first shown_last (u64_digits shown_last)
             := _ =
-                ? shown_last < last
-                ?>
+                ? shown_last < last ?>
                     stdout_text (
                         "... "
                         ++# u64_string (last - shown_last)

@@ -23,13 +23,17 @@
     ))
 
 :~ series_sequence_binding (previous : i32) (next : i32) : i32 =
-    ? previous < 0i32 ?> 0i32
-    |? previous + 1i32 = next ?> 1i32
+    ? previous < 0i32
+    ?> 0i32
+    |? previous + 1i32 = next
+    ?> 1i32
     |: 0i32
 
 :~ series_source_binding (path_length : i32) (packed_shape : i32) : i32 =
-    ? path_length < 1i32 ?> 0i32
-    |? packed_shape = 32i32 ?> 1i32
+    ? path_length < 1i32
+    ?> 0i32
+    |? packed_shape = 32i32
+    ?> 1i32
     |: 0i32
 
 :~ series_pair_binding (ratings_present : i32) (bench_present : i32) : i32 =
@@ -38,8 +42,10 @@
     |: 0i32
 
 :~ series_monotonic_binding (previous : i32) (next : i32) : i32 =
-    ? previous < 0i32 ?> 0i32
-    |? next < previous ?> 0i32
+    ? previous < 0i32
+    ?> 0i32
+    |? next < previous
+    ?> 0i32
     |: 1i32
 
 :~ series_fingerprint_binding (ratings_nonzero : i32) (bench_nonzero : i32) : i32 =

@@ -70,7 +70,7 @@ pub fn coverage_assess(args: &[String]) -> Result<(), String> {
     let test_ratio = coverage_ratio(&test);
     let smoke_ratio = coverage_ratio(&smoke);
     let combined_ratio = coverage_ratio(&combined);
-    println!("kit coverage assess test={test_ratio}/1000 smoke={smoke_ratio}/1000 combined={combined_ratio}/1000 lines={}", combined.len());
+    println!("rig coverage assess test={test_ratio}/1000 smoke={smoke_ratio}/1000 combined={combined_ratio}/1000 lines={}", combined.len());
     if test_ratio < test_floor || smoke_ratio < smoke_floor || combined_ratio < combined_floor {
         return Err(format!("coverage floor failed test={test_ratio}/{test_floor} smoke={smoke_ratio}/{smoke_floor} combined={combined_ratio}/{combined_floor}"));
     }
@@ -101,7 +101,7 @@ pub fn prune_uncovered(args: &[String]) -> Result<(), String> {
     let hash = inspection_file_sha256(&source)?;
     let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|error| error.to_string())?.as_nanos();
     let command_text = args[separator + 1..].join(" ");
-    let bundle_id = env::var("KIT_BUNDLE_ID").unwrap_or_else(|_| "external".to_owned());
+    let bundle_id = env::var("RIG_BUNDLE_ID").or_else(|_| env::var("KIT_BUNDLE_ID")).unwrap_or_else(|_| "external".to_owned());
     let entry = format!("inl receipt_{}_{stamp} () : prune_receipt = PruneReceipt (\"{}\", \"{}\", \"{}\", \"{}\")\n", std::process::id(), coverage_escape_spi(relative), coverage_escape_spi(&hash), coverage_escape_spi(&command_text), coverage_escape_spi(&bundle_id));
     let updated = original_receipts.replacen(marker, &format!("{entry}{marker}"), 1);
     let stage = source.parent().ok_or("prune source has no parent")?.join(format!(".kit-prune-{}-{stamp}", std::process::id()));
@@ -157,7 +157,7 @@ pub fn prune_uncovered(args: &[String]) -> Result<(), String> {
         return Err(format!("{error}; rollback incomplete: {}", failures.join("; ")));
     }
     if let Err(error) = fs::remove_dir(&stage) { eprintln!("prune stage cleanup failed: {error}"); }
-    println!("kit proxy prune-uncovered ok relative={relative} sha256={hash}");
+    println!("rig proxy prune-uncovered ok relative={relative} sha256={hash}");
     Ok(())
 }
 
@@ -166,7 +166,7 @@ pub fn coverage_finish(code: i32) -> i32 {
     {
         unsafe extern "C" { fn __llvm_profile_write_file() -> i32; }
         if unsafe { __llvm_profile_write_file() } != 0 {
-            eprintln!("kit error: coverage profile flush failed");
+            eprintln!("rig error: coverage profile flush failed");
             return if code == 0 { 1 } else { code };
         }
     }
@@ -178,7 +178,7 @@ fn coverage_absolute(args: &[String], index: usize, name: &str) -> Result<PathBu
 }
 
 fn coverage_jobs() -> Result<String, String> {
-    let requested = env::var("KIT_COVERAGE_JOBS").or_else(|_| env::var("CARGO_BUILD_JOBS")).ok();
+    let requested = env::var("RIG_COVERAGE_JOBS").or_else(|_| env::var("KIT_COVERAGE_JOBS")).or_else(|_| env::var("CARGO_BUILD_JOBS")).ok();
     let requested = match requested {
         Some(value) => value.parse::<i32>().ok().filter(|value| *value > 0).unwrap_or(-1),
         None => 0,
@@ -229,9 +229,9 @@ struct CoverageRunContext<'a> { cargo: &'a Path, source: &'a Path, target: &'a P
 fn coverage_run_phase(context: &CoverageRunContext<'_>, command_args: &[String], phase: &str) -> Result<(), String> {
     let started = std::time::Instant::now();
     let mut command = Command::new(context.cargo);
-    command.current_dir(context.source).args(command_args).env("CARGO_TARGET_DIR", context.target).env("CARGO_BUILD_JOBS", context.jobs).env("RUST_TEST_THREADS", env::var("RUST_TEST_THREADS").unwrap_or_else(|_| context.jobs.to_owned())).env("CARGO_INCREMENTAL", "1").env_remove("CARGO_ENCODED_RUSTFLAGS").env("RUSTFLAGS", "-C instrument-coverage --cfg rig_coverage").env("LLVM_PROFILE_FILE", context.profile_pattern).env("KIT_SPIRAL_COMPILE", context.compiler).env("KIT_BIN_UNDER_TEST", context.binary).env("RAYON_NUM_THREADS", context.jobs);
+    command.current_dir(context.source).args(command_args).env("CARGO_TARGET_DIR", context.target).env("CARGO_BUILD_JOBS", context.jobs).env("RUST_TEST_THREADS", env::var("RUST_TEST_THREADS").unwrap_or_else(|_| context.jobs.to_owned())).env("CARGO_INCREMENTAL", "1").env_remove("CARGO_ENCODED_RUSTFLAGS").env("RUSTFLAGS", "-C instrument-coverage --cfg rig_coverage").env("LLVM_PROFILE_FILE", context.profile_pattern).env("RIG_SPIRAL_COMPILE", &context.compiler).env("KIT_SPIRAL_COMPILE", context.compiler).env("RIG_BIN_UNDER_TEST", &context.binary).env("KIT_BIN_UNDER_TEST", context.binary).env("RAYON_NUM_THREADS", context.jobs);
     let _observation = coverage_run_bounded_streaming_checked(&mut command, context.timeout_ms, phase, None)?;
-    println!("kit coverage phase={phase} status=passed elapsed_ms={}", started.elapsed().as_millis());
+    println!("rig coverage phase={phase} status=passed elapsed_ms={}", started.elapsed().as_millis());
     Ok(())
 }
 
@@ -259,13 +259,13 @@ pub fn coverage_run(args: &[String]) -> Result<(), String> {
     fs::create_dir_all(target).map_err(|error| format!("create {}: {error}", target.display()))?;
     let profile_pattern = profraw.join("%p-%m.profraw").to_string_lossy().into_owned();
     let binary = target.join("release").join(if cfg!(windows) { "kit.exe" } else { "kit" });
-    let smoke_child = env::var("KIT_COVERAGE_SMOKE_CHILD").ok().as_deref() == Some("1");
+    let smoke_child = env::var("RIG_COVERAGE_SMOKE_CHILD").or_else(|_| env::var("KIT_COVERAGE_SMOKE_CHILD")).ok().as_deref() == Some("1");
     if smoke_child {
         if scope != "smoke" { return Err("coverage smoke child requires smoke scope".to_owned()); }
         if !binary.is_file() { return Err(format!("instrumented KIT binary missing: {}", binary.display())); }
         let smoke_context = CoverageSmokeContext { root, cargo, compiler, binary: &binary, target, profile_pattern: &profile_pattern, timeout_ms, jobs: &jobs };
         coverage_smoke_run(&smoke_context)?;
-        println!("kit coverage smoke child ok target={}", target.display());
+        println!("rig coverage smoke child ok target={}", target.display());
         return Ok(());
     }
     let removed = coverage_clear_profraw(profraw)?;
@@ -282,7 +282,7 @@ pub fn coverage_run(args: &[String]) -> Result<(), String> {
 
     if scope == "smoke" {
         let mut command = Command::new(&binary);
-        command.current_dir(root).arg("proxy").args(args).env("KIT_COVERAGE_SMOKE_CHILD", "1").env("LLVM_PROFILE_FILE", &profile_pattern).env("KIT_SPIRAL_COMPILE", compiler).env("KIT_BIN_UNDER_TEST", &binary).env("CARGO_TARGET_DIR", target).env("RAYON_NUM_THREADS", &jobs);
+        command.current_dir(root).arg("proxy").args(args).env("RIG_COVERAGE_SMOKE_CHILD", "1").env("KIT_COVERAGE_SMOKE_CHILD", "1").env("LLVM_PROFILE_FILE", &profile_pattern).env("RIG_SPIRAL_COMPILE", &compiler).env("KIT_SPIRAL_COMPILE", compiler).env("RIG_BIN_UNDER_TEST", &&binary).env("KIT_BIN_UNDER_TEST", &binary).env("CARGO_TARGET_DIR", target).env("RAYON_NUM_THREADS", &jobs);
         let _observation = coverage_run_bounded_streaming_checked(&mut command, timeout_ms, "smoke-reentry", None)?;
     } else {
         let tests = coverage_run_test_args(scope, &jobs)?;
@@ -290,7 +290,7 @@ pub fn coverage_run(args: &[String]) -> Result<(), String> {
     }
     let profiles = coverage_profile_count(profraw)?;
     if profiles == 0 { return Err("coverage run produced no profraw files".to_owned()); }
-    println!("kit proxy coverage-run ok scope={scope} profiles={profiles} cleared={removed} target={}", target.display());
+    println!("rig proxy coverage-run ok scope={scope} profiles={profiles} cleared={removed} target={}", target.display());
     Ok(())
 }
 
@@ -367,7 +367,7 @@ pub fn coverage_export(args: &[String]) -> Result<(), String> {
         let receipt_text = format!("route=grcov-lcov\nprofiles={}\nlines={}\ncovered_permille={ratio}\nsha256={hash}\n", profiles.len(), lines.len());
         coverage_atomic_write(output, payload.as_bytes())?;
         coverage_atomic_write(&receipt, receipt_text.as_bytes())?;
-        println!("kit proxy coverage-export ok profiles={} lines={} covered={ratio}/1000 sha256={hash}", profiles.len(), lines.len());
+        println!("rig proxy coverage-export ok profiles={} lines={} covered={ratio}/1000 sha256={hash}", profiles.len(), lines.len());
         Ok(())
     })();
     if let Err(error) = fs::remove_dir_all(&stage) { eprintln!("coverage stage cleanup failed: {error}"); }
@@ -418,7 +418,7 @@ pub fn coverage_union(args: &[String]) -> Result<(), String> {
     let receipt = PathBuf::from(format!("{}.receipt", output.display()));
     let receipt_text = format!("route=lcov-union\ninputs={}\nlines={}\ncovered_permille={ratio}\nsha256={hash}\n", args.len() - 2, flat.len());
     coverage_atomic_write(&receipt, receipt_text.as_bytes())?;
-    println!("kit proxy coverage-union ok inputs={} lines={} covered={ratio}/1000 sha256={hash}", args.len() - 2, flat.len());
+    println!("rig proxy coverage-union ok inputs={} lines={} covered={ratio}/1000 sha256={hash}", args.len() - 2, flat.len());
     Ok(())
 }
 

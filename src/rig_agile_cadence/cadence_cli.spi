@@ -5,7 +5,7 @@
     rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", Arg ("cadence", Arg (fixture_text_of root, args))))
 
 := cadence_backlog () : string =
-    "inl task_kit_a () = Task (\"KIT-A\", \"kit item\", Story, P1, D2, 0u32, Active, \"\", \"team:kit\", \"current\", "
+    "inl task_kit_a () = Task (\"KIT-A\", \"rig item\", Story, P1, D2, 0u32, Active, \"\", \"team:kit\", \"current\", "
     ^^ "\"current\")\ninl task_x_b () = Task (\"X-B\", \"x item\", Story, P1, D2, 0u32, Active, \"\", \"team:x\", "
     ^^ "\"current\", \"current\")\ninl note_of_kit_a_1 () = Note (\"KIT-A\", 1u32, \"2026-11-02T10:00Z\", \"kit\", "
     ^^ "\"first\")\ninl note_of_kit_a_2 () = Note (\"KIT-A\", 2u32, \"2026-11-02T11:00Z\", \"kit\", \"second\")\n"
@@ -18,10 +18,10 @@
     fixture_write root "state/agile.spi" (cadence_backlog ())
     fixture_write root "state/package.spiproj" "modules:\n    agile\n"
     := all = succeeded (cadence_call root (Arg ("--since", Arg ("2026-11-01", NoArgs))))
-    shows all "kit agile cadence activity team=kit days_ago="
+    shows all "rig agile cadence activity team=kit days_ago="
     shows all " notes=2 touched=1"
-    shows all "kit agile cadence activity team=x days_ago="
-    shows all "kit agile cadence ok done_rows=0 activity_rows=2"
+    shows all "rig agile cadence activity team=x days_ago="
+    shows all "rig agile cadence ok done_rows=0 activity_rows=2"
     := team_kit = Arg ("--team", Arg ("kit", NoArgs))
     := rig_only = succeeded (cadence_call root (Arg ("--since", Arg ("2026-11-01", team_kit))))
     shows rig_only "activity_rows=1"
@@ -35,10 +35,10 @@
     fixture_write root "state/package.spiproj" "modules:\n    agile\n"
     := here = fixture_text_of root
     := set = Arg ("set", Arg (here, Arg ("KIT-A", Arg ("100", Arg ("Done", NoArgs)))))
-    shows (succeeded (rig_run here NoArgs NoArgs (Arg ("agile", set)))) "kit agile set"
+    shows (succeeded (rig_run here NoArgs NoArgs (Arg ("agile", set)))) "rig agile set"
     shows (fixture_read root "history/status_changes.spi") "StatusChanged (\"KIT-A\", \"Done\", "
     expect (fixture_read root "state/package.spiproj" = "modules:\n    agile\n") "the state package is untouched"
     := dated = succeeded (cadence_call root (Arg ("--since", Arg ("2026-11-01", NoArgs))))
-    shows dated "kit agile cadence done team=kit days_ago=0 done=1"
+    shows dated "rig agile cadence done team=kit days_ago=0 done=1"
     shows dated "(done dated by status change, else last note)"
     fixture_root_remove root

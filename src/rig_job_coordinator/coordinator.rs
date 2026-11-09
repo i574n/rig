@@ -499,14 +499,14 @@ fn built_15(mut v0: Rc<str>, mut v1: bool, mut v2: bool, mut v3: Rc<str>, mut v4
             let v40: i32 = 0i32;
             let v41: i32 = method21(v36, v40);
             let v42: Rc<str> = format_real_22(v41);
-            let v45: Rc<str> = string_concat(&["kit job coordinator build ok ebins=", &*v42, " package=", &*v35]);
+            let v45: Rc<str> = string_concat(&["rig job coordinator build ok ebins=", &*v42, " package=", &*v35]);
             println!("{}", v45);
             0i32
         }
         US0::US0_ReceiptRefused(v29) => {
             let v29: Rc<str> = v29;
             let v30: Rc<str> = format_real_22(v26);
-            let v34: Rc<str> = string_concat(&["kit error: job coordinator build: ", &*v29, " (exit ", &*v30, ")"]);
+            let v34: Rc<str> = string_concat(&["rig error: job coordinator build: ", &*v29, " (exit ", &*v30, ")"]);
             eprintln!("{}", v34);
             1i32
         }
@@ -681,13 +681,13 @@ fn started_24(mut v0: Rc<str>, mut v1: bool, mut v2: bool, mut v3: Rc<str>, mut 
             };
             let v31: bool = v30 != true;
             if v31 {
-                let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job coordinator start: a built ebin is gone; run kit job coordinator build"); } LIT.with(|lit| lit.clone()) };
+                let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job coordinator start: a built ebin is gone; run kit job coordinator build"); } LIT.with(|lit| lit.clone()) };
                 eprintln!("{}", v32);
                 2i32
             } else {
                 let v33: bool = &*v5 == "";
                 if v33 {
-                    let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: job coordinator start: --spool <dir> is required"); } LIT.with(|lit| lit.clone()) };
+                    let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: job coordinator start: --spool <dir> is required"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v34);
                     2i32
                 } else {
@@ -762,7 +762,7 @@ fn started_24(mut v0: Rc<str>, mut v1: bool, mut v2: bool, mut v3: Rc<str>, mut 
         }
         US0::US0_ReceiptRefused(v23) => {
             let v23: Rc<str> = v23;
-            let v25: Rc<str> = string_concat(&["kit error: job coordinator start: ", &*v23, "; run kit job coordinator build"]);
+            let v25: Rc<str> = string_concat(&["rig error: job coordinator start: ", &*v23, "; run kit job coordinator build"]);
             eprintln!("{}", v25);
             2i32
         }
@@ -773,7 +773,7 @@ fn coordinator_run_14(mut v0: Rc<str>) -> i32 {
     let (mut v2, mut v3, mut v4, mut v5, mut v6, mut v7): (bool, bool, Rc<str>, Rc<str>, Rc<str>, Rc<str>) = v1.borrow()[0i32 as usize].clone();
     let mut v8: bool = &*v7 != "";
     if v8 {
-        let mut v9: Rc<str> = string_concat(&["kit error: job coordinator: ", &*v7]);
+        let mut v9: Rc<str> = string_concat(&["rig error: job coordinator: ", &*v7]);
         eprintln!("{}", v9);
         2i32
     } else {

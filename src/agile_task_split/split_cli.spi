@@ -21,7 +21,7 @@
     := here = fixture_text_of root
     := split_args = Arg ("edit", Arg (here, Arg ("KIT-A", Arg ("--split", Arg ("milestones", NoArgs)))))
     := split = succeeded (agile_call root split_args)
-    shows split "kit agile split ok id=KIT-A children=2"
+    shows split "rig agile split ok id=KIT-A children=2"
     := second = succeeded (agile_call root (Arg ("show", Arg (here, Arg ("KIT-A-M2", NoArgs)))))
     shows second "deps: KIT-A-M1"
     shows (fixture_read root "state/parents.spi") "Parent (\"KIT-A-M2\", \"KIT-A\")"

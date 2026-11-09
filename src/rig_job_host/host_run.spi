@@ -69,8 +69,7 @@
     |:
         := id = am'.index index names
         := _ =
-            ? held_owned_by id home
-            ?>
+            ? held_owned_by id home ?>
                 settled_in_queue id (SettleStopped (owner_ended_detail ()))
                 held_released id
             |: ()
@@ -109,15 +108,19 @@
             sleep_ms 500u64
             host_served kids terms (? live > 0u64 ?> now |: idle_since)
 
+:~ variable_of (~name : string) : string =
+    := renamed = env.get_environment_variable ("RIG_" ++# name)
+    ? renamed <> "" ?> renamed |: env.get_environment_variable ("KIT_" ++# name)
+
 :~ host_terms_of (owner_pid : u64) (owner_start : u64) : host_terms =
     {
         home = owner_home_of owner_pid owner_start
         owner_pid = owner_pid
         owner_start = owner_start
-        policy = idle_policy_of (env.get_environment_variable "KIT_JOB_HOST_IDLE_EXIT_SECONDS")
+        policy = idle_policy_of (variable_of "JOB_HOST_IDLE_EXIT_SECONDS")
         cap =
             := machine_cap = text_or_empty (machine_slots_file ())
-            slot_cap_of (cap_text_of (env.get_environment_variable "KIT_JOB_SLOTS") machine_cap)
+            slot_cap_of (cap_text_of (variable_of "JOB_SLOTS") machine_cap)
     }
 
 :~ host_run () : i32 =

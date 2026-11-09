@@ -26,7 +26,8 @@
 
 := placement_of_text (text : string) : option placement =
     := t = sm'.trim text
-    ? t = "" || t = "local" ?> Some Local
+    ? t = "" || t = "local"
+    ?> Some Local
     |? sm'.starts_with "on " t ?>
         ?= machine_of (sm'.substring 3i32 ((sm'.length t : i32) - 3i32) t) ?|
         | Some m => Some (OnMachine m)

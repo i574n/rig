@@ -95,8 +95,7 @@
     ?= stats, cells ?|
     | MeasureStatsThen (count, filled, sum, squares, low, high, values, rest), CellThen (cell, more) =>
         := filled = ? blank cell ?> filled |: filled + 1i32
-        ? numeric cell
-        ?>
+        ? numeric cell ?>
             := value = number_of cell
             := low = ? count = 0i32 || value < low ?> value |: low
             := high = ? count = 0i32 || value > high ?> value |: high
@@ -117,7 +116,8 @@
     ?= list ?|
     | NoGroups => GroupThen (key, 1i32, stats_added empty cells, NoGroups)
     | GroupThen (name, rows, stats, rest) =>
-        ? name = key ?> GroupThen (name, rows + 1i32, stats_added stats cells, rest)
+        ? name = key
+        ?> GroupThen (name, rows + 1i32, stats_added stats cells, rest)
         |: GroupThen (name, rows, stats, group_added rest key empty cells)
 
 := ranks_before (rows : i32) (~name : string) (other_rows : i32) (~other_name : string) : bool =
@@ -127,7 +127,8 @@
     ?= list ?|
     | NoGroups => GroupThen (name, rows, stats, NoGroups)
     | GroupThen (other, other_rows, other_stats, rest) =>
-        ? ranks_before rows name other_rows other ?> GroupThen (name, rows, stats, list)
+        ? ranks_before rows name other_rows other
+        ?> GroupThen (name, rows, stats, list)
         |: GroupThen (other, other_rows, other_stats, group_inserted name rows stats rest)
 
 :~ ^ groups_sorted (list : groups) (sorted : groups) : groups =
@@ -153,7 +154,8 @@
     | SumOf => decimal_text sum
     | MeanOf => ? count = 0i32 ?> "" |: decimal_text (sum / as_f64 count)
     | SdOf =>
-        ? count < 2i32 ?> (? count = 0i32 ?> "" |: "0")
+        ? count < 2i32
+        ?> (? count = 0i32 ?> "" |: "0")
         |: decimal_text (square_root ((squares - sum * sum / as_f64 count) / as_f64 (count - 1i32)))
 
 :~ ^ measure_cells (list : measures) (stats : measure_stats) : string =

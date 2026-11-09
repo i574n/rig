@@ -44,26 +44,39 @@
     | CompletionEvent => 4i32
 
 := checkpoint_from_code code : batch_checkpoint =
-    ? code = 0i32 ?> BatchNotStarted
-    |? code = 1i32 ?> BatchSpawnCommitted
-    |? code = 2i32 ?> BatchRunCommitted
-    |? code = 3i32 ?> BatchLinkCommitted
-    |? code = 4i32 ?> BatchTimeoutCommitted
+    ? code = 0i32
+    ?> BatchNotStarted
+    |? code = 1i32
+    ?> BatchSpawnCommitted
+    |? code = 2i32
+    ?> BatchRunCommitted
+    |? code = 3i32
+    ?> BatchLinkCommitted
+    |? code = 4i32
+    ?> BatchTimeoutCommitted
     |: BatchCompletionCommitted
 
 := event_from_code code : batch_event =
-    ? code = 0i32 ?> SpawnEvent
-    |? code = 1i32 ?> RunEvent
-    |? code = 2i32 ?> LinkEvent
-    |? code = 3i32 ?> TimeoutEvent
+    ? code = 0i32
+    ?> SpawnEvent
+    |? code = 1i32
+    ?> RunEvent
+    |? code = 2i32
+    ?> LinkEvent
+    |? code = 3i32
+    ?> TimeoutEvent
     |: CompletionEvent
 
 := valid_checkpoint_code code : bool =
-    ? code < 0i32 ?> !-
-    |? 5i32 < code ?> !-
+    ? code < 0i32
+    ?> !-
+    |? 5i32 < code
+    ?> !-
     |: !+
 
 := valid_event_code code : bool =
-    ? code < 0i32 ?> !-
-    |? 4i32 < code ?> !-
+    ? code < 0i32
+    ?> !-
+    |? 4i32 < code
+    ?> !-
     |: !+

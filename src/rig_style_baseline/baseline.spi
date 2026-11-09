@@ -16,7 +16,8 @@
 
 :~ entry_in (~line : string) : option baseline_entry =
     := quoted = sm'.split "\"" line |> array
-    ? sm'.starts_with "inl census_" line |> not || am'.length quoted < 5i32 ?> None
+    ? sm'.starts_with "inl census_" line |> not || am'.length quoted < 5i32
+    ?> None
     |:
         ?= sm'.split_list "," (am'.index 4i32 quoted) ?|
         | _ :: count :: lines :: _ =>
@@ -42,7 +43,8 @@
     (~name : string) (lines : i32) (readings : array_base reading_row) (at : i32) (~rows : string)
     : string
     =
-    ? at >= am'.length_base readings ?> rows
+    ? at >= am'.length_base readings
+    ?> rows
     |: rendered_from name lines readings (at + 1i32) (appended rows (row_of name lines (am'.index_base at readings)))
 
 :~ baseline_rendered ((name, lines, readings, rows) : string * i32 * array_base reading_row * string) : string =

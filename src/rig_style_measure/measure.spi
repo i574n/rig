@@ -61,7 +61,8 @@
     ? unix = "" ?> (;[] : array string) |: sm'.split "\n" body |> array
 
 :~ ^ matches_from (found : sm'.regex) (lines : array string) (at : i32) (count : i32) : i32 =
-    ? at < 0i32 ?> count
+    ? at < 0i32
+    ?> count
     |: matches_from found lines (at - 1i32) (? regex_matches found (am'.index at lines) ?> count + 1i32 |: count)
 
 :~ matching_lines (lines : array string) (~pattern : string) : i32 =
@@ -76,7 +77,8 @@
     ? at < 0i32 ?> trimmed |: sm'.substring (at + 1i32) ((sm'.length trimmed : i32) - at - 1i32) trimmed
 
 :~ ^ tests_from (lines : array string) (at : i32) (inside : bool) (count : i32) : i32 =
-    ? at >= am'.length lines ?> count
+    ? at >= am'.length lines
+    ?> count
     |:
         := line = am'.index at lines
         := marker = sm'.starts_with "///> " line
@@ -88,7 +90,8 @@
     (kept : array probe_row)
     : array probe_row
     =
-    ? at >= am'.length_base specs ?> kept
+    ? at >= am'.length_base specs
+    ?> kept
     |:
         := spec = am'.index_base at specs
         := count = matching_lines lines spec.pattern

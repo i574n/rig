@@ -14,8 +14,10 @@
     := archived = path_joined (path_joined dir "archive") file
     := index_path = path_joined dir "MEMORY.md"
     := marker = concat5 "](" file ")" "" ""
-    ? not (file_present path) ?> failed (concat5 "forget: no " file " in " dir "")
-    |? file_present archived ?> failed (concat5 "forget: archive/" file " already exists" "" "")
+    ? not (file_present path)
+    ?> failed (concat5 "forget: no " file " in " dir "")
+    |? file_present archived
+    ?> failed (concat5 "forget: archive/" file " already exists" "" "")
     |:
         := text = exact_text path
         := index = exact_text index_path
@@ -23,12 +25,11 @@
         := kept = lines |> listm'.filter (\ (line : string) => not (contains line marker))
         := removed = (listm.length lines : i32) - (listm.length kept : i32)
         := moved = text_written archived text && exact_text archived = text
-        ? moved && text_written index_path (sm'.concat_list "\n" kept)
-        ?>
+        ? moved && text_written index_path (sm'.concat_list "\n" kept) ?>
             file_system.file_delete path
             := counted = sm'.show removed
             := tail = concat5 " index_lines=" counted "" "" ""
-            stdout_line (concat5 "kit memory forget ok file=" file " archived=archive/" file tail)
+            stdout_line (concat5 "rig memory forget ok file=" file " archived=archive/" file tail)
             0i32
         |: failed (concat5 "forget: could not archive " file "" "" "")
 
@@ -41,9 +42,12 @@
 :~ memory_edited (~dir : string) (~slug : string) (~field : string) (~given : string) : i32 =
     := file = concat5 slug ".md" "" "" ""
     := text = trim (? given = "-" ?> console.read_to_end () |: given)
-    ? file_present (path_joined dir file) = !- ?> failed (concat5 "edit: no " file " in " dir "")
-    |? text = "" ?> failed "edit: the new text is empty"
-    |? field <> "description" && field <> "body" ?> failed "edit: the field is description or body"
+    ? file_present (path_joined dir file) = !-
+    ?> failed (concat5 "edit: no " file " in " dir "")
+    |? text = ""
+    ?> failed "edit: the new text is empty"
+    |? field <> "description" && field <> "body"
+    ?> failed "edit: the field is description or body"
     |:
         ?= entry_of_file dir file ?|
         | EntryRefused reason => failed (concat5 "edit: " reason "" "" "")
@@ -51,8 +55,7 @@
             := revised =
                 ? field = "body" ?> { entry ?| body = concat5 "\n" text "\n" "" "" } |: { entry ?| description = text }
             := reasoned = contains revised.body "**Why:**" && contains revised.body "**How to apply:**"
-            ? needs_reasons entry.kind && not reasoned
-            ?>
+            ? needs_reasons entry.kind && not reasoned ?>
                 := kind = kind_word entry.kind
                 failed (concat5 "edit: a " kind " memory keeps **Why:** and **How to apply:** lines" "" "")
             |:
@@ -61,9 +64,8 @@
                 := relink (line : string) = hook_replaced line file entry.description revised.description
                 := relinked = lines |> listm.map relink
                 := index_ok = field = "body" || text_written index_path (sm'.concat_list "\n" relinked)
-                ? text_written (path_joined dir file) (rendered revised) && index_ok
-                ?>
-                    stdout_line (concat5 "kit memory edit ok file=" file " field=" field "")
+                ? text_written (path_joined dir file) (rendered revised) && index_ok ?>
+                    stdout_line (concat5 "rig memory edit ok file=" file " field=" field "")
                     0i32
                 |: failed (concat5 "edit: could not write " file "" "" "")
 
@@ -77,12 +79,16 @@
     | KindUnknown => failed (concat5 "save: unknown kind '" word "'; use user, feedback, project or reference" "" "")
     | KindKnown kind =>
         := reasoned = contains body "**Why:**" && contains body "**How to apply:**"
-        ? not (slug_valid slug) ?> failed (concat5 "save: a slug is lowercase words joined by dashes: " slug "" "" "")
-        |? description = "" || body = "" ?> failed "save: needs a description and a body"
-        |? file_present path ?> failed (concat5 "save: " file " already exists; edit it instead" "" "")
+        ? not (slug_valid slug)
+        ?> failed (concat5 "save: a slug is lowercase words joined by dashes: " slug "" "" "")
+        |? description = "" || body = ""
+        ?> failed "save: needs a description and a body"
+        |? file_present path
+        ?> failed (concat5 "save: " file " already exists; edit it instead" "" "")
         |? needs_reasons kind && not reasoned
         ?> failed (concat5 "save: a " word " memory needs **Why:** and **How to apply:** lines" "" "")
-        |? not (file_present index_path) ?> failed (concat5 "save: no MEMORY.md in " dir "" "" "")
+        |? not (file_present index_path)
+        ?> failed (concat5 "save: no MEMORY.md in " dir "" "" "")
         |:
             := entry =
                 {
@@ -92,8 +98,7 @@
             := index = exact_text index_path
             := spacer = ? index = "" || ends_with index "\n" ?> "" |: "\n"
             := line = index_line (? title = "" ?> slug |: title) file description
-            ? text_written path (rendered entry) && text_written index_path (concat5 index spacer line "\n" "")
-            ?>
-                stdout_line (concat5 "kit memory save ok file=" file " kind=" word "")
+            ? text_written path (rendered entry) && text_written index_path (concat5 index spacer line "\n" "") ?>
+                stdout_line (concat5 "rig memory save ok file=" file " kind=" word "")
                 0i32
             |: failed (concat5 "save: could not write " path "" "" "")

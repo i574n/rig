@@ -39,7 +39,7 @@ fn stderr_line_3(mut v0: Rc<str>) -> () {
     ()
 }
 fn failed_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: experiment "); } LIT.with(|lit| lit.clone()) };
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: experiment "); } LIT.with(|lit| lit.clone()) };
     let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = concat5_2(v1, v0, v2.clone(), v2.clone(), v2);
     stderr_line_3(v3);
@@ -530,7 +530,7 @@ fn imported_0() -> i32 {
                                         let v111: Rc<str> = string_concat(&["import: ", &*v2, " is already in the ledger or the ledger is unwritable (", &*v106, ")"]);
                                         failed_1(v111)
                                     } else {
-                                        let v119: Rc<str> = string_concat(&["kit experiment import ok id=", &*v2, " imported=yes registered=", &*v3, " evidence=", &*v4, " imported_at=", &*v43]);
+                                        let v119: Rc<str> = string_concat(&["rig experiment import ok id=", &*v2, " imported=yes registered=", &*v3, " evidence=", &*v4, " imported_at=", &*v43]);
                                         stdout_line_17(v119);
                                         0i32
                                     }
@@ -640,7 +640,7 @@ fn verdict_recorded_18() -> i32 {
                             let v57: Rc<str> = string_concat(&["record-verdict: ", &*v2, " already has a verdict (", &*v52, ")"]);
                             failed_1(v57)
                         } else {
-                            let v62: Rc<str> = string_concat(&["kit experiment record-verdict ok id=", &*v2, " at=", &*v4, " imported=yes"]);
+                            let v62: Rc<str> = string_concat(&["rig experiment record-verdict ok id=", &*v2, " at=", &*v4, " imported=yes"]);
                             stdout_line_17(v62);
                             0i32
                         }

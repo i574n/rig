@@ -9,7 +9,7 @@ pub fn patch_safe_relative(value: &str) -> Result<PathBuf, String> { rig_rust_st
 pub fn patch_rooted(root: &Path, relative: &str) -> Result<PathBuf, String> { rig_rust_std_fs::rooted_path(root, relative) }
 
 pub fn patch_target_max_bytes() -> Result<usize, String> {
-    let value = env::var("KIT_PATCH_TARGET_MAX_BYTES")
+    let value = env::var("RIG_PATCH_TARGET_MAX_BYTES").or_else(|_| env::var("KIT_PATCH_TARGET_MAX_BYTES"))
         .unwrap_or_else(|_| "1048576".to_owned());
     let limit = value
         .parse::<usize>()
@@ -77,7 +77,7 @@ pub fn patch_occurrence_count(text: &str, needle: &str) -> usize {
 }
 #[must_use]
 pub fn patch_plan_error(code: i32) -> i32 {
-    eprintln!("kit error: {}", rig_patch_plan_failure_message(code));
+    eprintln!("rig error: {}", rig_patch_plan_failure_message(code));
     2
 }
 

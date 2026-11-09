@@ -192,25 +192,35 @@
     | RequireSuccessfulExit => 0i32
 
 :~ valid_action_code (action_code : i32) : i32 =
-    ? action_code < 0i32 ?> 0i32
-    |? 7i32 < action_code ?> 0i32
+    ? action_code < 0i32
+    ?> 0i32
+    |? 7i32 < action_code
+    ?> 0i32
     |: 1i32
 
 :~ program_profile_binding (action_code : i32) (unused : i32) : i32 =
-    ? valid_action_code action_code < 1i32 ?> -1i32
-    |? action_code = 1i32 ?> program_profile_code CargoFmtSibling
-    |? action_code = 4i32 ?> program_profile_code CargoClippySibling
+    ? valid_action_code action_code < 1i32
+    ?> -1i32
+    |? action_code = 1i32
+    ?> program_profile_code CargoFmtSibling
+    |? action_code = 4i32
+    ?> program_profile_code CargoClippySibling
     |: program_profile_code SelectedTool
 
 :~ argument_profile_binding (action_code : i32) (unused : i32) : i32 =
-    ? valid_action_code action_code < 1i32 ?> -1i32
-    |? action_code = 7i32 ?> argument_profile_code VersionOnly
+    ? valid_action_code action_code < 1i32
+    ?> -1i32
+    |? action_code = 7i32
+    ?> argument_profile_code VersionOnly
     |: action_code
 
 :~ environment_profile_binding (action_code : i32) (unused : i32) : i32 =
-    ? valid_action_code action_code < 1i32 ?> -1i32
-    |? action_code = 3i32 ?> environment_profile_code CargoEnvironmentWithSpiralAuthorities
-    |? action_code = 7i32 ?> environment_profile_code CleanEnvironment
+    ? valid_action_code action_code < 1i32
+    ?> -1i32
+    |? action_code = 3i32
+    ?> environment_profile_code CargoEnvironmentWithSpiralAuthorities
+    |? action_code = 7i32
+    ?> environment_profile_code CleanEnvironment
     |: environment_profile_code CargoEnvironment
 
 :~ timeout_profile_binding (action_code : i32) (unused : i32) : i32 =

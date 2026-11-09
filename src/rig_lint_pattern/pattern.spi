@@ -50,7 +50,8 @@
     | AnyOf marks => code_in (sm'.utf8_get_bytes marks) code 0i32
 
 :~ ^ run_length (~text : array u8) (set : letters) (at : i32) (count : i32) : i32 =
-    ? at + count < am'.length text && fits set (code_at text (at + count)) ?> run_length text set at (count + 1i32)
+    ? at + count < am'.length text && fits set (code_at text (at + count))
+    ?> run_length text set at (count + 1i32)
     |: count
 
 :~ ^ bytes_from (~text : array u8) (~mark : array u8) (at : i32) (index : i32) : bool =
@@ -64,8 +65,10 @@
     word_code (code_at text (at - 1i32)) <> word_code (code_at text at)
 
 :~ ^ word_from (~text : array u8) (~mark : string) (at : i32) : bool =
-    ? at > am'.length text ?> !-
-    |? edge_at text at && text_at text at mark && edge_at text (at + (sm'.length mark : i32)) ?> !+
+    ? at > am'.length text
+    ?> !-
+    |? edge_at text at && text_at text at mark && edge_at text (at + (sm'.length mark : i32))
+    ?> !+
     |: word_from text mark (at + 1i32)
 
 :~ has_word (~line : string) (marks : list string) : bool =
@@ -87,14 +90,18 @@
     | End :: rest => at = am'.length text && matches_at text rest at
     | Run (set, least) :: rest =>
         :~ ^ attempt (count : i32) : bool =
-            ? count < least ?> !-
-            |? matches_at text rest (at + count) ?> !+
+            ? count < least
+            ?> !-
+            |? matches_at text rest (at + count)
+            ?> !+
             |: attempt (count - 1i32)
         attempt (run_length text set at 0i32)
 
 :~ ^ found_from (~text : array u8) (pieces : list piece) (at : i32) : bool =
-    ? at > am'.length text ?> !-
-    |? matches_at text pieces at ?> !+
+    ? at > am'.length text
+    ?> !-
+    |? matches_at text pieces at
+    ?> !+
     |: found_from text pieces (at + 1i32)
 
 :~ found (~line : string) (alternatives : list (list piece)) : bool =

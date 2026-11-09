@@ -68,7 +68,7 @@
 :# a_report_renders_typed_sections_and_escapes_text =
     := a = { id = "KIT-A"; title = "fix <b> & co"; status = "Active"; progress = 40i32; age_hours = 3i32 }
     := site = { file = "src/x.spi"; line = 12i32; id = "KIT-A"; standing = "open" }
-    := page = { title = "kit board"; from_state = [ NextPerTeam ("kit", [ a ]) ]; from_todos = [ TodoSites [ site ] ] }
+    := page = { title = "rig board"; from_state = [ NextPerTeam ("kit", [ a ]) ]; from_todos = [ TodoSites [ site ] ] }
     := html = report_html page
     testing.expect (sm'.contains "<h2>Next for kit</h2>" html) html
     testing.expect (sm'.contains "<td>fix &lt;b&gt; &amp; co</td>" html) "titles are escaped"

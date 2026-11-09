@@ -511,7 +511,7 @@ fn adoption_reported_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3
     };
     let v44: bool = &*v43 != "";
     if v44 {
-        let v45: Rc<str> = string_concat(&["kit error: adoption: ", &*v43]);
+        let v45: Rc<str> = string_concat(&["rig error: adoption: ", &*v43]);
         eprintln!("{}", v45);
         2i32
     } else {
@@ -528,7 +528,7 @@ fn adoption_reported_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3
                 let v54: f64 = rig_share_19(v29, v30, v31);
                 let v55: Rc<str> = std::rc::Rc::<str>::from(format!("{:.3}", v54));
                 let v58: Rc<str> = format_real_17(v5);
-                let v60: Rc<str> = string_concat(&["kit adoption ok days_back=", &*v58, " shell_calls=", &*v46, " rig_calls=", &*v49, " habit_calls=", &*v51, " rig_share=", &*v55]);
+                let v60: Rc<str> = string_concat(&["rig adoption ok days_back=", &*v58, " shell_calls=", &*v46, " rig_calls=", &*v49, " habit_calls=", &*v51, " rig_share=", &*v55]);
                 let v62: Rc<str> = if v41 {
                     v24
                 } else {
@@ -541,7 +541,7 @@ fn adoption_reported_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3
             US1::US1_ByHabit => {
                 let v65: Rc<str> = format_real_17(v5);
                 let v68: Rc<str> = format_real_17(v34);
-                let v69: Rc<str> = string_concat(&["kit adoption ok mode=habits days=", &*v65, " habits=", &*v68]);
+                let v69: Rc<str> = string_concat(&["rig adoption ok mode=habits days=", &*v65, " habits=", &*v68]);
                 let v71: Rc<str> = if v41 {
                     v24
                 } else {
@@ -740,7 +740,7 @@ fn adoption_run_0() -> i32 {
     let (mut v0, mut v1, mut v2, mut v3, mut v4): (Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>) = adoption_args_read_23();
     let v5: bool = &*v4 != "";
     if v5 {
-        let v6: Rc<str> = string_concat(&["kit error: adoption: ", &*v4]);
+        let v6: Rc<str> = string_concat(&["rig error: adoption: ", &*v4]);
         eprintln!("{}", v6);
         2i32
     } else {

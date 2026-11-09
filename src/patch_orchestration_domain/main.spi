@@ -50,7 +50,8 @@
 
 :~ orchestration_operation_binding (cursor : i32) (observed : i32) : i32 =
     := authorized = patch_control_domain.patch_operation_authorized cursor observed
-    ? authorized < 1i32 ?> -1i32
+    ? authorized < 1i32
+    ?> -1i32
     |: patch_driver_domain.patch_driver_operation_binding cursor observed
 
 :~ orchestration_guard_identity (operation : i32) (path_slot : i32) : i32 =
@@ -74,8 +75,10 @@
 :~ orchestration_complete_binding (expected : i32) (observed : i32) : i32 =
     := driver = patch_driver_domain.patch_driver_complete_binding expected observed
     := control = patch_control_domain.patch_commit_authorized expected observed
-    ? driver < 1i32 ?> 0i32
-    |? control < 1i32 ?> 0i32
+    ? driver < 1i32
+    ?> 0i32
+    |? control < 1i32
+    ?> 0i32
     |: 1i32
 
 

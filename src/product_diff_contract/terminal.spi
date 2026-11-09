@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         use rig_proxy_search::{inspection_sha256, manifest_collect};
@@ -28,8 +27,8 @@
             let left_root = Path::new(args.get(1).map(String::as_str).ok_or_else(|| "missing left-root".to_owned())?);
             let right_root = Path::new(args.get(2).map(String::as_str).ok_or_else(|| "missing right-root".to_owned())?);
             if rig_product_diff_request_binding(i32::from(left_root.is_dir()), i32::from(right_root.is_dir())) != 1 { return Err("typed product-diff request rejected".to_owned()); }
-            let limit = std::env::var("KIT_PRODUCT_DIFF_MAX_ENTRIES").ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(200_000);
-            let workers = std::env::var("KIT_PARALLEL_WORKERS").ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(56);
+            let limit = std::env::var("RIG_PRODUCT_DIFF_MAX_ENTRIES").or_else(|_| std::env::var("KIT_PRODUCT_DIFF_MAX_ENTRIES")).ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(200_000);
+            let workers = std::env::var("RIG_PARALLEL_WORKERS").or_else(|_| std::env::var("KIT_PARALLEL_WORKERS")).ok().and_then(|value| value.parse::<usize>().ok()).unwrap_or(56);
             if rig_product_diff_worker_binding(workers as i32, 56) != 1 { return Err("typed product-diff worker request rejected".to_owned()); }
             let pool = rayon::ThreadPoolBuilder::new().num_threads(workers).build().map_err(|error| format!("build Rayon pool: {error}"))?;
             let (left_manifest, right_manifest) = pool.install(|| rayon::join(|| manifest_collect(left_root, left_root, limit, true), || manifest_collect(right_root, right_root, limit, true)));
@@ -52,7 +51,7 @@
             let changed_entries = added + removed + changed;
             let total = changed_entries + unchanged;
             if rig_product_diff_summary_binding(changed_entries as i32, total as i32) != 1 { return Err("typed product-diff summary rejected".to_owned()); }
-            println!("kit proxy product-diff ok left={} right={} workers={workers} added={added} removed={removed} changed={changed} unchanged={unchanged} total={total} exact={} left_sha256={left_hash} right_sha256={right_hash}", left_root.display(), right_root.display(), changed_entries == 0);
+            println!("rig proxy product-diff ok left={} right={} workers={workers} added={added} removed={removed} changed={changed} unchanged={unchanged} total={total} exact={} left_sha256={left_hash} right_sha256={right_hash}", left_root.display(), right_root.display(), changed_entries == 0);
             Ok(())
         }
 

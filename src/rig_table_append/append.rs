@@ -51,7 +51,7 @@ enum US4 {
 }
 pub struct Mut1 { pub l0: Rc<str> }
 fn refused_1(mut v0: Rc<str>) -> i32 {
-    let v1: Rc<str> = string_concat(&["kit error: table append: ", &*v0]);
+    let v1: Rc<str> = string_concat(&["rig error: table append: ", &*v0]);
     eprintln!("{}", v1);
     2i32
 }
@@ -925,7 +925,7 @@ fn append_run_0() -> i32 {
                         let v74: i32 = 0i32;
                         let v75: i32 = method26(v57, v74);
                         let mut v76: Rc<str> = format_real_27(v75);
-                        let v79: Rc<str> = string_concat(&["kit table append ok rows=", &*v71, " columns=", &*v76, " out=", &*v1]);
+                        let v79: Rc<str> = string_concat(&["rig table append ok rows=", &*v71, " columns=", &*v76, " out=", &*v1]);
                         println!("{}", v79);
                         0i32
                     }

@@ -16,7 +16,8 @@
 := roots_failure (~reason : string) : i32 = stderr_failure ("agile roots rejected: " ++# reason)
 
 :~ ^ roots_printed (~listing : string) (offset : i32) (counted : i32) : i32 =
-    ? byte_len listing <= offset ?> counted
+    ? byte_len listing <= offset
+    ?> counted
     |:
         := newline = byte_find_from listing "\n" offset
         := stop = ? newline < 0i32 ?> byte_len listing |: newline
@@ -24,7 +25,8 @@
         roots_printed listing (stop + 1i32) (counted + 1i32)
 
 :~ ^ edits_applied (~text : string) (adding : bool) (index : i32) (count : i32) : roots_edit =
-    ? count <= index ?> RootsEdited text
+    ? count <= index
+    ?> RootsEdited text
     |:
         := path = argument_owned index
         ?= (? adding ?> root_added text path |: root_dropped text path) ?|
@@ -33,7 +35,7 @@
 
 :~ roots_receipt (~action : string) (~text : string) (~sizes : string) : i32 =
     := counted = roots_printed (harvest_roots text) 0i32 0i32
-    stdout_line ("kit agile roots ok action=" ++# action ++# " roots=" ++# (i32_text counted) ++# sizes)
+    stdout_line ("rig agile roots ok action=" ++# action ++# " roots=" ++# (i32_text counted) ++# sizes)
 
 :~ roots_written (~state : string) (~action : string) (~original : string) (~updated : string) (started : u64) : i32 =
     ?= replace_records_unchanged state original updated ?|
@@ -42,7 +44,8 @@
     | problem => roots_failure (file_replacement_problem problem)
 
 :~ roots_edited (~state : string) (~action : string) (~text : string) (started : u64) : i32 =
-    ? argument_count () <= 3i32 ?> roots_failure "add and drop need at least one path"
+    ? argument_count () <= 3i32
+    ?> roots_failure "add and drop need at least one path"
     |:
         ?= edits_applied text (action = "add") 3i32 (argument_count ()) ?|
         | RootsRefused reason => roots_failure reason
@@ -56,8 +59,10 @@
     | FileReadable file =>
         := text = records_text (loaded_string (read_text file))
         := action = argument_owned 2i32
-        ? action = "" ?> roots_receipt "list" text (" elapsed_ms=" ++# (u64_text (ms_since started)))
-        |? action = "add" || action = "drop" ?> roots_edited state action text started
+        ? action = ""
+        ?> roots_receipt "list" text (" elapsed_ms=" ++# (u64_text (ms_since started)))
+        |? action = "add" || action = "drop"
+        ?> roots_edited state action text started
         |: roots_failure ("unknown action " ++# action ++# " (expected add or drop)")
 
 := main () : i32 =

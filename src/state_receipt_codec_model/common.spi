@@ -14,7 +14,8 @@
 :~ codec_empty () : string = ~~ ""
 
 := slice_exclusive (text : string) (from : i32) (near_to : i32) : string =
-    ? (=.) from near_to ?> codec_empty ()
+    ? (=.) from near_to
+    ?> codec_empty ()
     |: sm.slice text { from; to = (-.) near_to 1i32 }
 
 := char_text (text : string) (index : i32) : string =
@@ -28,7 +29,8 @@
 := char_tab () : char = codec_runtime_char "\t"
 
 :~ ^ starts_with_loop (text : string) (pattern : string) (text_at : i32) (pattern_at : i32) (pattern_len : i32) : bool =
-    ? (=.) pattern_at pattern_len ?> !+
+    ? (=.) pattern_at pattern_len
+    ?> !+
     |? (=.) (sm.index text text_at) (sm.index pattern pattern_at) ?>
         starts_with_loop text pattern ((+.) text_at 1i32) ((+.) pattern_at 1i32) pattern_len
     |: !-
@@ -36,37 +38,46 @@
 := starts_with_at (text : string) (at : i32) (pattern : string) : bool =
     := text_len = sm.length text : i32
     := pattern_len = sm.length pattern : i32
-    ? (<) text_len ((+.) at pattern_len) ?> !-
+    ? (<) text_len ((+.) at pattern_len)
+    ?> !-
     |: starts_with_loop text pattern at 0i32 pattern_len
 
 := starts_with (text : string) (pattern : string) : bool =
     := text_len = sm.length text : i32
     := pattern_len = sm.length pattern : i32
-    ? (<) text_len pattern_len ?> !-
+    ? (<) text_len pattern_len
+    ?> !-
     |: starts_with_loop text pattern 0i32 0i32 pattern_len
 
 :~ ^ find_text_loop (text : string) (pattern : string) (at : i32) (text_len : i32) (pattern_len : i32) : i32 =
-    ? (<) text_len ((+.) at pattern_len) ?> text_len
-    |? starts_with_at text at pattern ?> at
+    ? (<) text_len ((+.) at pattern_len)
+    ?> text_len
+    |? starts_with_at text at pattern
+    ?> at
     |: find_text_loop text pattern ((+.) at 1i32) text_len pattern_len
 
 := find_text (text : string) (at : i32) (pattern : string) : i32 =
     find_text_loop text pattern at (sm.length text : i32) (sm.length pattern : i32)
 
 :~ ^ find_char_loop (text : string) (at : i32) (text_len : i32) (target : char) : i32 =
-    ? (=.) at text_len ?> text_len
-    |? (=.) (sm.index text at) target ?> at
+    ? (=.) at text_len
+    ?> text_len
+    |? (=.) (sm.index text at) target
+    ?> at
     |: find_char_loop text ((+.) at 1i32) text_len target
 
 := find_char (text : string) (at : i32) (target : char) : i32 =
     find_char_loop text at (sm.length text : i32) target
 
 :~ ^ skip_spaces_loop (text : string) (at : i32) (text_len : i32) : i32 =
-    ? (=.) at text_len ?> text_len
+    ? (=.) at text_len
+    ?> text_len
     |:
         := current = sm.index text at
-        ? (=.) current ' ' ?> skip_spaces_loop text ((+.) at 1i32) text_len
-        |? (=.) current (char_tab ()) ?> skip_spaces_loop text ((+.) at 1i32) text_len
+        ? (=.) current ' '
+        ?> skip_spaces_loop text ((+.) at 1i32) text_len
+        |? (=.) current (char_tab ())
+        ?> skip_spaces_loop text ((+.) at 1i32) text_len
         |: at
 
 := skip_spaces (text : string) (at : i32) : i32 =
@@ -76,18 +87,25 @@
     (text : string) (at : i32) (text_len : i32) (out : string) (escaped : bool)
     : string * i32 * bool
     =
-    ? (=.) at text_len ?> out, at, !-
+    ? (=.) at text_len
+    ?> out, at, !-
     |:
         := current = sm.index text at
         ? escaped ?>
             := decoded =
-                ? (=.) current 'n' ?> "\n"
-                |? (=.) current 'r' ?> "\r"
-                |? (=.) current 't' ?> "\t"
-                |? (=.) current (char_backslash ()) ?> "\\"
-                |? (=.) current (char_quote ()) ?> "\""
+                ? (=.) current 'n'
+                ?> "\n"
+                |? (=.) current 'r'
+                ?> "\r"
+                |? (=.) current 't'
+                ?> "\t"
+                |? (=.) current (char_backslash ())
+                ?> "\\"
+                |? (=.) current (char_quote ())
+                ?> "\""
                 |: codec_empty ()
-            ? (=.) decoded "" ?> out, at, !-
+            ? (=.) decoded ""
+            ?> out, at, !-
             |: parse_quoted_loop text ((+.) at 1i32) text_len (sm.concat out decoded) !-
         |? (=.) current (char_backslash ()) ?>
             parse_quoted_loop text ((+.) at 1i32) text_len out !+
@@ -98,54 +116,75 @@
 
 := parse_quoted (text : string) (at : i32) : string * i32 * bool =
     := text_len = sm.length text : i32
-    ? (=.) at text_len ?> codec_empty (), at, !-
-    |? (=.) (sm.index text at) (char_quote ()) ?> parse_quoted_loop text ((+.) at 1i32) text_len "" !-
+    ? (=.) at text_len
+    ?> codec_empty (), at, !-
+    |? (=.) (sm.index text at) (char_quote ())
+    ?> parse_quoted_loop text ((+.) at 1i32) text_len "" !-
     |: codec_empty (), at, !-
 
 := codec_decimal_digit_value (value : char) : u64 =
-    ? (=.) value '0' ?> 0u64
-    |? (=.) value '1' ?> 1u64
-    |? (=.) value '2' ?> 2u64
-    |? (=.) value '3' ?> 3u64
-    |? (=.) value '4' ?> 4u64
-    |? (=.) value '5' ?> 5u64
-    |? (=.) value '6' ?> 6u64
-    |? (=.) value '7' ?> 7u64
-    |? (=.) value '8' ?> 8u64
-    |? (=.) value '9' ?> 9u64
+    ? (=.) value '0'
+    ?> 0u64
+    |? (=.) value '1'
+    ?> 1u64
+    |? (=.) value '2'
+    ?> 2u64
+    |? (=.) value '3'
+    ?> 3u64
+    |? (=.) value '4'
+    ?> 4u64
+    |? (=.) value '5'
+    ?> 5u64
+    |? (=.) value '6'
+    ?> 6u64
+    |? (=.) value '7'
+    ?> 7u64
+    |? (=.) value '8'
+    ?> 8u64
+    |? (=.) value '9'
+    ?> 9u64
     |: 10u64
 
 :~ ^ codec_u64_decimal_value_loop (text : string) (at : i32) (text_len : i32) (acc : u64) : u64 =
-    ? (=.) at text_len ?> acc
+    ? (=.) at text_len
+    ?> acc
     |:
         := digit = codec_decimal_digit_value (sm.index text at)
         codec_u64_decimal_value_loop text ((+.) at 1i32) text_len ((+.) ((*.) acc 10u64) digit)
 
 :~ ^ codec_u64_decimal_valid_loop (text : string) (at : i32) (text_len : i32) (acc : u64) : bool =
-    ? (=.) at text_len ?> !+
+    ? (=.) at text_len
+    ?> !+
     |:
         := digit = codec_decimal_digit_value (sm.index text at)
-        ? (=.) digit 10u64 ?> !-
-        |? (>) acc 1844674407370955161u64 ?> !-
+        ? (=.) digit 10u64
+        ?> !-
+        |? (>) acc 1844674407370955161u64
+        ?> !-
         |? (=.) acc 1844674407370955161u64 ?>
-            ? (>) digit 5u64 ?> !-
+            ? (>) digit 5u64
+            ?> !-
             |: codec_u64_decimal_valid_loop text ((+.) at 1i32) text_len ((+.) ((*.) acc 10u64) digit)
         |: codec_u64_decimal_valid_loop text ((+.) at 1i32) text_len ((+.) ((*.) acc 10u64) digit)
 
 :~ codec_u64_decimal_normalize (text : string) : string =
     := text_len = sm.length text : i32
-    ? (=.) text_len 0i32 ?> codec_empty ()
-    |? codec_u64_decimal_valid_loop text 0i32 text_len 0u64 ?> text
+    ? (=.) text_len 0i32
+    ?> codec_empty ()
+    |? codec_u64_decimal_valid_loop text 0i32 text_len 0u64
+    ?> text
     |: codec_empty ()
 
 :~ codec_u64_decimal_value (text : string) : u64 =
     := normalized = codec_u64_decimal_normalize text
     := text_len = sm.length normalized : i32
-    ? (=.) text_len 0i32 ?> 0u64
+    ? (=.) text_len 0i32
+    ?> 0u64
     |: codec_u64_decimal_value_loop normalized 0i32 text_len 0u64
 
 :~ ^ state_receipt_dash_count_loop (input : string) (at : i32) (input_len : i32) (count : u64) : u64 =
-    ? (=.) at input_len ?> count
+    ? (=.) at input_len
+    ?> count
     |:
         := count = ? (=.) (sm.index input at) '-' ?> (+.) count 1u64 |: count
         state_receipt_dash_count_loop input ((+.) at 1i32) input_len count
@@ -155,18 +194,22 @@
     (+.) ((*.) ((+.) separators 1u64) 10u64) separators
 
 :~ ^ state_receipt_find_last_char_loop (text : string) (at : i32) (near_to : i32) (target : char) (last : i32) : i32 =
-    ? (=.) at near_to ?> last
+    ? (=.) at near_to
+    ?> last
     |:
         := last = ? (=.) (sm.index text at) target ?> at |: last
         state_receipt_find_last_char_loop text ((+.) at 1i32) near_to target last
 
 :~ ^ state_receipt_trim_right_loop (text : string) (near_to : i32) : i32 =
-    ? (=.) near_to 0i32 ?> 0i32
+    ? (=.) near_to 0i32
+    ?> 0i32
     |:
         := before = (-.) near_to 1i32
         := current = sm.index text before
-        ? (=.) current ' ' ?> state_receipt_trim_right_loop text before
-        |? (=.) current (char_tab ()) ?> state_receipt_trim_right_loop text before
+        ? (=.) current ' '
+        ?> state_receipt_trim_right_loop text before
+        |? (=.) current (char_tab ())
+        ?> state_receipt_trim_right_loop text before
         |: near_to
 
 :~ state_receipt_trim (text : string) : string =
@@ -177,36 +220,42 @@
 :~ state_receipt_constructor_payload_from (source : string) (marker : string) (search_from : i32) : string * i32 * i32 =
     := source_count = sm.length source : i32
     := marker_at = find_text source search_from marker
-    ? (=.) marker_at source_count ?> codec_empty (), source_count, 0i32
+    ? (=.) marker_at source_count
+    ?> codec_empty (), source_count, 0i32
     |:
         := payload_from = (+.) marker_at (sm.length marker : i32)
         := line_end = find_char source payload_from (char_newline ())
         := next_at = ? (<) line_end source_count ?> (+.) line_end 1i32 |: source_count
         := close_at = state_receipt_find_last_char_loop source payload_from line_end ')' -1i32
-        ? (<) close_at payload_from ?> codec_empty (), next_at, 2i32
+        ? (<) close_at payload_from
+        ?> codec_empty (), next_at, 2i32
         |: slice_exclusive source payload_from close_at, next_at, 1i32
 
 :~ state_receipt_constructor_payload (source : string) (marker : string) : string =
     := source_count = sm.length source : i32
     := marker_at = find_text source 0i32 marker
-    ? (=.) marker_at source_count ?> codec_empty ()
+    ? (=.) marker_at source_count
+    ?> codec_empty ()
     |:
         := payload_from = (+.) marker_at (sm.length marker : i32)
         := line_end = find_char source payload_from (char_newline ())
         := close_at = state_receipt_find_last_char_loop source payload_from line_end ')' -1i32
-        ? (<) close_at payload_from ?> codec_empty ()
+        ? (<) close_at payload_from
+        ?> codec_empty ()
         |: slice_exclusive source payload_from close_at
 
 :~ state_receipt_u32_literal_value_checked (input : string) : u64 * bool =
     := input = state_receipt_trim input
     := input_len = sm.length input : i32
-    ? (<) input_len 4i32 ?> 0u64, !-
+    ? (<) input_len 4i32
+    ?> 0u64, !-
     |:
         := suffix_from = (-.) input_len 3i32
         ? starts_with_at input suffix_from "u32" ?>
             := digits = slice_exclusive input 0i32 suffix_from
             := normalized = codec_u64_decimal_normalize digits
-            ? (=.) normalized "" ?> 0u64, !-
+            ? (=.) normalized ""
+            ?> 0u64, !-
             |:
                 := value = codec_u64_decimal_value normalized
                 ? (<=) value 4294967295u64 ?> value, !+ |: 0u64, !-
@@ -217,17 +266,21 @@
     : bool * string
     =
     := payload, next_at, status = state_receipt_constructor_payload_from source "SeriesRecord (" search_from
-    ? (=.) status 0i32 ?> !+, last_payload
-    |? (=.) status 2i32 ?> !-, codec_empty ()
+    ? (=.) status 0i32
+    ?> !+, last_payload
+    |? (=.) status 2i32
+    ?> !-, codec_empty ()
     |:
         := payload_len = sm.length payload : i32
         := comma_at = find_char payload 0i32 ','
-        ? (=.) comma_at payload_len ?> !-, codec_empty ()
+        ? (=.) comma_at payload_len
+        ?> !-, codec_empty ()
         |:
             := sequence_raw, valid = state_receipt_u32_literal_value_checked (slice_exclusive payload 0i32 comma_at)
             := sequence : u64 = sequence_raw
             ? valid ?>
-                ? seen && (<=) sequence previous ?> !-, codec_empty ()
+                ? seen && (<=) sequence previous
+                ?> !-, codec_empty ()
                 |: state_receipt_series_records_loop source next_at sequence !+ payload
             |: !-, codec_empty ()
 
@@ -238,7 +291,8 @@
 :~ state_receipt_series_records_valid (source : string) : bool =
     := source_count = sm.length source : i32
     := marker_at = find_text source 0i32 "SeriesRecord ("
-    ? (=.) marker_at source_count ?> !+
+    ? (=.) marker_at source_count
+    ?> !+
     |:
         := payload = state_receipt_last_series_record_payload source
         ? (=.) payload "" ?> !- |: !+
@@ -252,7 +306,8 @@
 
 :~ state_receipt_u32_decimal_valid (input : string) : u64 =
     := normalized = codec_u64_decimal_normalize input
-    ? (=.) normalized "" ?> 0u64
+    ? (=.) normalized ""
+    ?> 0u64
     |:
         := value = codec_u64_decimal_value normalized
         ? (<=) value 4294967295u64 ?> 1u64 |: 0u64
@@ -272,10 +327,12 @@
 :~ state_receipt_named_u32_assignment_or_max (source : string) (name : string) : u64 =
     := source_count = sm.length source : i32
     := marker_at = find_text source 0i32 name
-    ? (=.) marker_at source_count ?> 18446744073709551615u64
+    ? (=.) marker_at source_count
+    ?> 18446744073709551615u64
     |:
         := equals_at = find_char source ((+.) marker_at (sm.length name : i32)) '='
-        ? (=.) equals_at source_count ?> 18446744073709551615u64
+        ? (=.) equals_at source_count
+        ?> 18446744073709551615u64
         |:
             := value_from = (+.) equals_at 1i32
             := line_end = find_char source value_from (char_newline ())
@@ -285,7 +342,8 @@
 
 :~ state_receipt_recovered_topology_count_or_max (source : string) : u64 =
     := fixture = state_receipt_named_u32_assignment_or_max source "inl recovered_capability_fixture_count"
-    ? (<) fixture 18446744073709551615u64 ?> fixture
+    ? (<) fixture 18446744073709551615u64
+    ?> fixture
     |: state_receipt_named_u32_assignment_or_max source "inl dogfood_recovered_topology_count"
 
 :~ state_receipt_migration_denominator_payload (input : string) : string =
@@ -307,13 +365,16 @@
 :~ state_receipt_coverage_checkpoint_sha (input : string) : string =
     := payload = state_receipt_constructor_payload input "CoverageCheckpointDurable ("
     := payload_len = sm.length payload : i32
-    ? (=.) payload_len 0i32 ?> codec_empty ()
+    ? (=.) payload_len 0i32
+    ?> codec_empty ()
     |:
         := first_quote = find_char payload 0i32 (char_quote ())
-        ? (=.) first_quote payload_len ?> codec_empty ()
+        ? (=.) first_quote payload_len
+        ?> codec_empty ()
         |:
             := second_quote = find_char payload ((+.) first_quote 1i32) (char_quote ())
-            ? (=.) second_quote payload_len ?> codec_empty ()
+            ? (=.) second_quote payload_len
+            ?> codec_empty ()
             |: slice_exclusive payload ((+.) first_quote 1i32) second_quote
 
 :~ ^ state_receipt_recovered_fixture_scan_loop
@@ -329,8 +390,7 @@
         := line = state_receipt_trim (slice_exclusive source search_from line_end)
         := prefix = "// recovered-fixture|"
         := line_len = sm.length line : i32
-        ? (>=) line_len 21i32 && (=.) (find_text line 0i32 prefix) 0i32
-        ?>
+        ? (>=) line_len 21i32 && (=.) (find_text line 0i32 prefix) 0i32 ?>
             := first = find_char line 0i32 '|'
             := second = find_char line ((+.) first 1i32) '|'
             := third = find_char line ((+.) second 1i32) '|'

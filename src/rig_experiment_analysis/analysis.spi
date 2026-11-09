@@ -44,8 +44,7 @@
     =
     ? row > total
     ?> acc
-    |? in_scope cells chosen arm row
-    ?>
+    |? in_scope cells chosen arm row ?>
         := cell = cell_at cells row metric
         := value = number_parsed cell
         := numeric = (value = value)
@@ -68,7 +67,8 @@
     (cells : table_cells) (chosen : scope) (~arm : string) (metric : i32) (row : i32) (total : i32) (~acc : string)
     : string
     =
-    ? row > total ?> acc
+    ? row > total
+    ?> acc
     |? in_scope cells chosen arm row ?>
         := cell = cell_at cells row metric
         := next = ? number_parsed cell = number_parsed cell ?> (? acc = "" ?> cell |: concat5 acc "," cell "" "") |: acc
@@ -127,7 +127,8 @@
         concat5 first ", " arm " " (concat5 (i32_text right.rows) "/" planned (numeric_note study.kind right) "")
     | OneArm => first
 
-:~ analyzed_plan (~ledger : string) (row : rig_experiment_verb_args.verbs.analyze_row) (study : plan) (cells : table_cells)
+:~ analyzed_plan
+    (~ledger : string) (row : rig_experiment_verb_args.verbs.analyze_row) (study : plan) (cells : table_cells)
     : i32
     =
     := wheres = row.wheres
@@ -159,7 +160,7 @@
         := verdict_at = field_of (file_text (record_path ledger study.id "verdict")) "analyzed"
         ?= look_of counts shortfall row.interim verdict_at ?|
         | LookRefused reason =>
-            stdout_line (concat5 "kit experiment analyze refused id=" study.id " " reason "")
+            stdout_line (concat5 "rig experiment analyze refused id=" study.id " " reason "")
             1i32
         | look =>
             := stamped = now_ms ()
@@ -198,14 +199,16 @@
                         )
             ? problem <> "" ?> failed (concat5 "analyze: " problem "" "" "")
             |:
-                stdout_line (concat5 "kit experiment analyze ok " line (look_suffix look) "" "")
+                stdout_line (concat5 "rig experiment analyze ok " line (look_suffix look) "" "")
                 0i32
 
 :~ analyzed () : i32 =
     := row = am'.index_base 0i32 (rig_experiment_verb_args.verbs.analyze_args_read 2i32)
     := text = plan_text row.ledger row.id
-    ? row.rejected <> "" ?> failed ("analyze: " ++# row.rejected)
-    |? text = "" ?> failed ("analyze: no registration for " ++# row.id ++# " in " ++# row.ledger)
+    ? row.rejected <> ""
+    ?> failed ("analyze: " ++# row.rejected)
+    |? text = ""
+    ?> failed ("analyze: no registration for " ++# row.id ++# " in " ++# row.ledger)
     |:
         ?= plan_trusted text ?|
         | PlanBroken reason => failed ("analyze: the registration of " ++# row.id ++# " is unusable: " ++# reason)

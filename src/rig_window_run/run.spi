@@ -18,9 +18,9 @@
 
 :~ child_status (~argv : string) (~held : string) : i32 =
     $'{ let mut parts = (!argv).split(char::from(31u8)); let program = parts.next().unwrap_or_default().to_owned(); \
-        match std::process::Command::new(&program).args(parts).env("KIT_WINDOW_HELD", \
-        &*!held).status() { Ok(status) => status.code().unwrap_or(1), \
-        Err(error) => { eprintln\!("kit error: window run: cannot start {program}: {error}"); 127 } } }' : i32
+        match std::process::Command::new(&program).args(parts).env("RIG_WINDOW_HELD", \
+        &*!held).env("KIT_WINDOW_HELD", &*!held).status() { Ok(status) => status.code().unwrap_or(1), \
+        Err(error) => { eprintln\!("rig error: window run: cannot start {program}: {error}"); 127 } } }' : i32
 
 :~ exit_text (code : i32) : string = (sm'.show code)
 
@@ -31,8 +31,7 @@
         := minutes = decimal_of (argument 4i32)
         := argv = command_after_separator ()
         := label_problem = tree_label_problem wanted (own_option "--label")
-        ? minutes = 0u64
-        ?>
+        ? minutes = 0u64 ?>
             refused (
                 "run: minutes must be a whole number above 0, received '"
                 ++# argument 4i32
@@ -64,15 +63,16 @@
                         min_free = decimal_of (own_option "--min-free-mb")
                     }
                     !-
-            ? granted <> 0i32 ?> granted
+            ? granted <> 0i32
+            ?> granted
             |:
                 := code = child_status argv ((class_word wanted) ++# ":" ++# id)
                 := _ = file_removed (window_file (windows_root ()) id)
-                stdout_line ("kit window run ok id=" ++# id ++# " exit=" ++# (exit_text code) ++# " released=yes")
+                stdout_line ("rig window run ok id=" ++# id ++# " exit=" ++# (exit_text code) ++# " released=yes")
                 code
 
 :~ heavy_queue_directory () : string =
-    $'std::rc::Rc::<str>::from(std::env::var_os("KIT_HEAVY_QUEUE").or_else(|| \
+    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_QUEUE").or_else(|| std::env::var_os("KIT_HEAVY_QUEUE")).or_else(|| \
         std::env::var_os("LOCALAPPDATA").or_else(|| std::env::var_os("HOME")).map(|base| \
         std::path::PathBuf::from(base).join("spiral-bin").join("heavy-queue").into_os_string())).map(|path| \
         path.to_string_lossy().into_owned()).unwrap_or_default().as_str())' : string
@@ -95,8 +95,7 @@
     |:
         := path = first_row paths
         := row = text_or_empty path
-        ? process_alive (decimal_u64 (tab_field row 1i32)) = !-
-        ?>
+        ? process_alive (decimal_u64 (tab_field row 1i32)) = !- ?>
             := _ = file_removed path
             holder_lines (other_rows paths) shown
         |:

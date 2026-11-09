@@ -19,10 +19,14 @@
         exact_replace_plan from to
 
 :~ bool_pair_binding (left : i32) (right : i32) : i32 =
-    ? left < 1i32 ?> 0i32
-    |? 1i32 < left ?> 0i32
-    |? right < 1i32 ?> 0i32
-    |? 1i32 < right ?> 0i32
+    ? left < 1i32
+    ?> 0i32
+    |? 1i32 < left
+    ?> 0i32
+    |? right < 1i32
+    ?> 0i32
+    |? 1i32 < right
+    ?> 0i32
     |: 1i32
 
 :~ preflight_binding (regular_file : i32) (old_nonempty : i32) (distinct_payloads : i32) : i32 =
@@ -30,16 +34,20 @@
     bool_pair_binding first distinct_payloads
 
 :~ unique_match_binding (match_count : i32) : i32 =
-    ? match_count < 1i32 ?> 0i32
-    |? 1i32 < match_count ?> 0i32
+    ? match_count < 1i32
+    ?> 0i32
+    |? 1i32 < match_count
+    ?> 0i32
     |: 1i32
 
 :~ mode_binding (known_mode : i32) (side_effect_policy_valid : i32) : i32 =
     bool_pair_binding known_mode side_effect_policy_valid
 
 :~ zero_binding (value : i32) : i32 =
-    ? value < 0i32 ?> 0i32
-    |? 0i32 < value ?> 0i32
+    ? value < 0i32
+    ?> 0i32
+    |? 0i32 < value
+    ?> 0i32
     |: 1i32
 
 :~ verification_binding (candidate_exact : i32) (old_remaining : i32) (rollback_available : i32) : i32 =

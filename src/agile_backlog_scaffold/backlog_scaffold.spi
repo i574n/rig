@@ -93,13 +93,15 @@
     stderr_failure ("agile init " ++# root ++# " rejected: " ++# reason)
 
 := agile_init_success (~root : string) (written : u64) (elapsed : u64) : i32 =
-    := head = "kit agile init ok root=" ++# root ++# " files=3 bytes=" ++# (u64_text written) ++# " elapsed_ms="
+    := head = "rig agile init ok root=" ++# root ++# " files=3 bytes=" ++# (u64_text written) ++# " elapsed_ms="
     stdout_line (head ++# (u64_text elapsed) ++# " next=kit agile begin <root> <title>")
 
 := agile_init (~root : string) : i32 =
     := started = unix_ms ()
-    ? file_present (scaffold_path root BacklogSchema) ?> agile_init_failure "state/agile.spi already exists" root
-    |? file_present (scaffold_path root StatePackage) ?> agile_init_failure "state/package.spiproj already exists" root
+    ? file_present (scaffold_path root BacklogSchema)
+    ?> agile_init_failure "state/agile.spi already exists" root
+    |? file_present (scaffold_path root StatePackage)
+    ?> agile_init_failure "state/package.spiproj already exists" root
     |? file_present (scaffold_path root LeasePrompt) ?> agile_init_failure "state/prompt.spi already exists" root
     |? directory_ready (state_directory root) ?>
         ? write_text (scaffold_path root StatePackage) (scaffold_text started StatePackage) ?>

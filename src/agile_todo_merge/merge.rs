@@ -803,7 +803,7 @@ fn wip_run_0(mut v0: Rc<str>) -> i32 {
     let mut v6: bool = v5 == false;
     if v6 {
         let v7: Rc<str> = string_concat(&["agile wip rejected: no backlog state at ", &*v4]);
-        let v8: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("kit error: ".to_string() + &*v7 + "
+        let v8: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v7 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v8
     } else {
@@ -904,7 +904,7 @@ fn wip_run_0(mut v0: Rc<str>) -> i32 {
         let v121: Rc<str> = format_real_34(v48);
         let v124: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v1);
         let v125: Rc<str> = format_real_37(v124);
-        let v126: Rc<str> = string_concat(&["kit agile wip ok items=", &*v109, " markers=", &*v112, " untracked=", &*v115, " scanned=", &*v118, " cached=", &*v121, " elapsed_ms=", &*v125]);
+        let v126: Rc<str> = string_concat(&["rig agile wip ok items=", &*v109, " markers=", &*v112, " untracked=", &*v115, " scanned=", &*v118, " cached=", &*v121, " elapsed_ms=", &*v125]);
         let v127: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v126.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
         v127

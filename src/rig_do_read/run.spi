@@ -99,8 +99,7 @@
     (~root : string) (~touched : touched_files) (~records : record_list) (~index : i32) (~state : query_tally)
     : query_tally
     =
-    ? index < record_count records
-    ?>
+    ? index < record_count records ?>
         ?= query_parsed records index ?|
         | QueryParsed q =>
             queries_run root touched records (index + 1i32) (outcome_merged state q.verb (query_step root touched q (
@@ -121,8 +120,7 @@
 
 :~ receipt_counts (~state : query_tally) (~touched : u64) : string =
     := head =
-        ? state.searches > 0u64
-        ?>
+        ? state.searches > 0u64 ?>
             "files "
             ++# decimal_text state.searched
             ++# " searched  "
@@ -136,8 +134,10 @@
     := with_lines = ? state.arounds > 0u64 ?> with_matches ++# "  lines " ++# (decimal_text state.lines) |: with_matches
     := with_bytes = ? state.listings > 0u64 ?> with_lines ++# "  bytes " ++# (decimal_text state.bytes) |: with_lines
     := waits = "waits " ++# (decimal_text state.waits)
-    ? state.waits = 0u64 ?> with_bytes
-    |? state.timed_out = 0u64 ?> waits
+    ? state.waits = 0u64
+    ?> with_bytes
+    |? state.timed_out = 0u64
+    ?> waits
     |: waits ++# "  timed out " ++# (decimal_text state.timed_out) ++# "  exit 3"
 
 :~ read_run (~root : string) (~encoded : string) : i32 =

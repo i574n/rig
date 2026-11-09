@@ -881,7 +881,7 @@ fn fleet_report_0() -> Rc<RefCell<Vec<(bool, Rc<str>)>>> {
     let v2: bool = file_exists_3(v1.clone());
     let v3: bool = v2 == false;
     let v65: Rc<UH0> = if v3 {
-        let v4: Rc<str> = string_concat(&["kit error: machine fleet: no fleet file at ", &*v1]);
+        let v4: Rc<str> = string_concat(&["rig error: machine fleet: no fleet file at ", &*v1]);
         let v5: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
         Rc::new(UH0::UH0_Cons(true, v4, v5))
     } else {
@@ -913,7 +913,7 @@ fn fleet_report_0() -> Rc<RefCell<Vec<(bool, Rc<str>)>>> {
         let v42: i32 = 0i32;
         let v43: i32 = method34(v24, v42);
         let v44: Rc<str> = format_real_31(v43);
-        let v51: Rc<str> = string_concat(&["kit machine fleet ok networks=", &*v32, " machines=", &*v36, " problems=", &*v40, " unread=", &*v44, " file=", &*v1]);
+        let v51: Rc<str> = string_concat(&["rig machine fleet ok networks=", &*v32, " machines=", &*v36, " problems=", &*v40, " unread=", &*v44, " file=", &*v1]);
         let v52: bool = false;
         let v53: Rc<UH2> = fleet_lines_35(v22, v23);
         let v54: Rc<UH0> = report_of_44(v52, v53);

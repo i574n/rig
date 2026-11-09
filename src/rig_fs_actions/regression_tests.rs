@@ -74,7 +74,7 @@ fn chmod_apply_and_rollback_reject_parent_substitution() {
         use std::os::windows::process::CommandExt as _;
         let output = std::process::Command::new("pwsh").creation_flags(0x08000000)
             .args(["-NoProfile", "-NonInteractive", "-Command", "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:KIT_TEST_LINK -Target $env:KIT_TEST_TARGET | Out-Null"])
-            .env("KIT_TEST_LINK", fixture.0.join("nested")).env("KIT_TEST_TARGET", &outside).output().unwrap();
+            .env("RIG_TEST_LINK", &fixture.0.join("nested")).env("KIT_TEST_LINK", fixture.0.join("nested")).env("RIG_TEST_TARGET", &&outside).env("KIT_TEST_TARGET", &outside).output().unwrap();
         assert!(output.status.success(), "{output:?}");
     }
     #[cfg(unix)] std::os::unix::fs::symlink(&outside, fixture.0.join("nested")).unwrap();

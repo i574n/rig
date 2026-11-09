@@ -33,11 +33,16 @@
     | BadPattern
 
 := run_end_of (~kind : u8) (~value : i64) : run_end =
-    ? kind = 1u8 ?> Exited value
-    |? kind = 2u8 ?> TimedOut
-    |? kind = 3u8 ?> Matched
-    |? kind = 4u8 ?> NoMatch
-    |? kind = 5u8 ?> ExitedBeforeMatch value
+    ? kind = 1u8
+    ?> Exited value
+    |? kind = 2u8
+    ?> TimedOut
+    |? kind = 3u8
+    ?> Matched
+    |? kind = 4u8
+    ?> NoMatch
+    |? kind = 5u8
+    ?> ExitedBeforeMatch value
     |: BadPattern
 
 := run_end_failed = \|
@@ -84,12 +89,10 @@
     ?> StepRejected "run: expected a command"
     |? timeout = 0u64
     ?> StepRejected "timeout: expected a duration like 20s"
-    |? background_at >= 0i32
-    ?>
+    |? background_at >= 0i32 ?>
         := name = body_at records record (field_index records record "as" + 1i32)
         ? name = "" ?> StepRejected "background: expected as <name>" |: StepParsed (RunBackground (command, name))
-    |? field_index records record "until" >= 0i32
-    ?>
+    |? field_index records record "until" >= 0i32 ?>
         := needle = first_of_kind records record 113u8
         ? needle = ""
         ?> StepRejected "until: expected output ~ \"<regex>\""
@@ -117,8 +120,10 @@
             := count = decimal_of (body_at records record 3i32)
             StepParsed (TailOutput (? count = 0u64 ?> 10u64 |: count))
     | StepSearch =>
-        ? needle = "" ?> StepRejected "search: expected a quoted pattern"
-        |? in_output records record ?> StepParsed (SearchOutput needle)
+        ? needle = ""
+        ?> StepRejected "search: expected a quoted pattern"
+        |? in_output records record
+        ?> StepParsed (SearchOutput needle)
         |: StepRejected "search: a run program searches its own output: search \"<regex>\" in output"
     | StepErrors =>
         ? needle = "" || field_index records record "by" < 0i32

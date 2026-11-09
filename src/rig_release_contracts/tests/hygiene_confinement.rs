@@ -6,7 +6,7 @@ struct Fixture(PathBuf);
 impl Fixture {
     fn new() -> Self {
         let stamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-        let root = std::env::temp_dir().join(format!("kit hygiene ü {} {stamp}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("rig hygiene ü {} {stamp}", std::process::id()));
         fs::create_dir(&root).unwrap();
         Self(root)
     }
@@ -27,7 +27,7 @@ impl Drop for Fixture { fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0)
 fn link_directory(source: &Path, link: &Path) {
     let created = std::process::Command::new("pwsh").args(["-NoProfile", "-NonInteractive", "-Command",
         "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path $env:KIT_TEST_LINK -Target $env:KIT_TEST_SOURCE | Out-Null"])
-        .env("KIT_TEST_LINK", link).env("KIT_TEST_SOURCE", source).output().unwrap();
+        .env("RIG_TEST_LINK", &link).env("KIT_TEST_LINK", link).env("RIG_TEST_SOURCE", &source).env("KIT_TEST_SOURCE", source).output().unwrap();
     assert!(created.status.success(), "{created:?}");
 }
 #[cfg(target_os = "linux")]

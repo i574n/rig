@@ -538,17 +538,17 @@ fn outcome_text_24(mut v0: US2) -> (i32, Rc<str>) {
     match v0 {
         US2::US2_AnotherSprintOpen(v15) => {
             let v15: Rc<str> = v15;
-            let v17: Rc<str> = string_concat(&["kit error: agile sprint start refused: sprint ", &*v15, " is still open"]);
+            let v17: Rc<str> = string_concat(&["rig error: agile sprint start refused: sprint ", &*v15, " is still open"]);
             (1i32, v17)
         }
         US2::US2_ItemNotOpen(v18) => {
             let v18: Rc<str> = v18;
-            let v20: Rc<str> = string_concat(&["kit error: agile sprint start refused: item ", &*v18, " is unknown or Done"]);
+            let v20: Rc<str> = string_concat(&["rig error: agile sprint start refused: item ", &*v18, " is unknown or Done"]);
             (1i32, v20)
         }
         US2::US2_ItemUnestimated(v21) => {
             let v21: Rc<str> = v21;
-            let v23: Rc<str> = string_concat(&["kit error: agile sprint start refused: item ", &*v21, " has no estimate"]);
+            let v23: Rc<str> = string_concat(&["rig error: agile sprint start refused: item ", &*v21, " has no estimate"]);
             (1i32, v23)
         }
         US2::US2_Started(v1, v2, v3, v4, v5, v6) => {
@@ -561,7 +561,7 @@ fn outcome_text_24(mut v0: US2) -> (i32, Rc<str>) {
             let mut v7: i32 = 0i32;
             let mut v8: i32 = method25(v6, v7);
             let mut v11: Rc<str> = format_real_26(v8);
-            let v14: Rc<str> = string_concat(&["kit agile sprint start ok id=", &*v1, " items=", &*v11, " finish=", &*v4]);
+            let v14: Rc<str> = string_concat(&["rig agile sprint start ok id=", &*v1, " items=", &*v11, " finish=", &*v4]);
             (0i32, v14)
         }
     }
@@ -591,7 +591,7 @@ fn sprint_started_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: R
         v17
     };
     if v18 {
-        let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B]"); } LIT.with(|lit| lit.clone()) };
+        let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: agile usage: sprint start <root> <id> <days> <goal> [--items A,B]"); } LIT.with(|lit| lit.clone()) };
         eprintln!("{}", v19);
         2i32
     } else {

@@ -44,15 +44,21 @@
 
 := caller_punctuated (~value : string) : bool =
     := first = byte_at value 0i32
-    ? first = ascii_semicolon () ?> !+
-    |? first = ascii_comma () ?> !+
-    |? first = ascii_period () ?> !+
-    |? first = ascii_space () ?> !+
+    ? first = ascii_semicolon ()
+    ?> !+
+    |? first = ascii_comma ()
+    ?> !+
+    |? first = ascii_period ()
+    ?> !+
+    |? first = ascii_space ()
+    ?> !+
     |: !-
 
 := title_continuation_of (~open_title : string) (~value : string) : title_continuation =
-    ? byte_len open_title <= 1i32 ?> OpeningSentence
-    |? caller_punctuated value ?> CallerPunctuated
+    ? byte_len open_title <= 1i32
+    ?> OpeningSentence
+    |? caller_punctuated value
+    ?> CallerPunctuated
     |: FollowingSentence
 
 := title_joint (continuation : title_continuation) : string =

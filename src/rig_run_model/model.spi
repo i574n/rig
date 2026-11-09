@@ -22,7 +22,8 @@
     | RunRefused : string
 
 :~ ^ fnv_bytes (bytes : array u8) (i : i32) (h : u64) : u64 =
-    ? i >= am'.length bytes ?> h
+    ? i >= am'.length bytes
+    ?> h
     |: fnv_bytes bytes (i + 1i32) (((h ^^^ (conv (am'.index i bytes) : u64)) * 16777619u64) &&& 4294967295u64)
 
 := fnv (text : string) : u64 = fnv_bytes (sm'.utf8_get_bytes text) 0i32 2166136261u64
@@ -39,7 +40,8 @@
     ?= args ?|
     | [] => RunRefused "usage: kit run <file.spi> [--test a,b | --list] [-- args]"
     | file :: rest =>
-        ? sm'.ends_with ".spi" file |> not ?> RunRefused "kit run takes a .spi file first"
+        ? sm'.ends_with ".spi" file |> not
+        ?> RunRefused "rig run takes a .spi file first"
         |:
             ?= rest ?|
             | [] => RunProgram (file, [])
@@ -73,5 +75,5 @@
     testing.expect (request_of [ "a.spi"; "--test"; "t1,t2" ] = RunTests ("a.spi", NamedTests [ "t1"; "t2" ])) "named"
     testing.expect (request_of [ "a.spi"; "--list" ] = RunTests ("a.spi", ListTests)) "list the tests"
     testing.expect (request_of [ "a.spi"; "--test" ] = RunTests ("a.spi", AllTests)) "--test alone runs them all"
-    testing.expect (request_of [ "a.ps1" ] = RunRefused "kit run takes a .spi file first") "only Spiral files run"
+    testing.expect (request_of [ "a.ps1" ] = RunRefused "rig run takes a .spi file first") "only Spiral files run"
     testing.expect (selected (NamedTests [ "t1" ]) "t1" && not (selected (NamedTests [ "t1" ]) "t2")) "selection"

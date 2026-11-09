@@ -26,7 +26,7 @@
     := data = fixture_path root "state/memory.spi"
     shows
         (succeeded (memory_run root (Arg ("import", Arg (fixture_path root "mem", Arg (data, NoArgs))))))
-        "kit memory import ok memories=3 identical=3 index_identical=yes data="
+        "rig memory import ok memories=3 identical=3 index_identical=yes data="
     data
 
 := save_with
@@ -46,7 +46,7 @@
     := body = "Do it.\n\n**Why:** because.\n\n**How to apply:** always."
     := titled = Arg ("--title", Arg ("Delta rule", NoArgs))
     := saved = succeeded (memory_run root (save_with dir "feedback" "delta" "a rule" body titled))
-    shows saved "kit memory save ok file=delta.md kind=feedback"
+    shows saved "rig memory save ok file=delta.md kind=feedback"
     := expected = "---\nname: delta\ndescription: a rule\nmetadata:\n  node_type: memory\n  type: feedback\n---\n\n"
     same (fixture_read root "mem/delta.md") (cat expected (cat body "\n"))
     same (fixture_read root "mem/MEMORY.md") (cat (index ()) "- [Delta rule](delta.md) — a rule\n")
@@ -56,11 +56,11 @@
     := data = fixture_path root "state/saved.spi"
     shows
         (succeeded (memory_run root (Arg ("import", Arg (dir, Arg (data, NoArgs))))))
-        "kit memory import ok memories=4 identical=4 index_identical=yes data="
+        "rig memory import ok memories=4 identical=4 index_identical=yes data="
     := edit_args (~field : string) (~text : string) =
         Arg ("edit", Arg (dir, Arg ("delta", Arg (field, Arg (text, NoArgs)))))
     := renamed = memory_run root (edit_args "description" "a better rule")
-    shows (succeeded renamed) "kit memory edit ok file=delta.md field=description"
+    shows (succeeded renamed) "rig memory edit ok file=delta.md field=description"
     shows (fixture_read root "mem/delta.md") "description: a better rule\n"
     shows (fixture_read root "mem/MEMORY.md") "- [Delta rule](delta.md) — a better rule\n"
     := stripped = memory_run root (edit_args "body" "No reasons.")
@@ -82,7 +82,7 @@
     shows stored "inl memory_alpha () = Memory (Feedback, \"alpha.md\", \"alpha\", \"\\\"quoted: desc\\\"\""
     shows
         (succeeded (memory_run root (Arg ("render", Arg (data, Arg (fixture_path root "out", NoArgs))))))
-        "kit memory render ok memories=3 out="
+        "rig memory render ok memories=3 out="
     same (fixture_read root "out/alpha.md") (alpha ())
     same (fixture_read root "out/beta.md") (beta ())
     same (fixture_read root "out/gamma.md") (gamma ())
@@ -90,7 +90,7 @@
     := listed = succeeded (memory_run root (Arg ("list", Arg (data, Arg ("--kind", Arg ("feedback", NoArgs))))))
     shows listed "feedback  alpha  \"quoted: desc\""
     hides listed "beta"
-    shows listed "kit memory list ok shown=1 kind=feedback"
+    shows listed "rig memory list ok shown=1 kind=feedback"
     rejected_with
         (memory_run root (Arg ("list", Arg (data, Arg ("--kind", Arg ("habit", NoArgs))))))
         2i32
@@ -109,7 +109,7 @@
     shows checked.stdout "gamma.md: missing from MEMORY.md"
     shows checked.stdout "MEMORY.md: entry for missing gone.md"
     shows checked.stdout
-        "kit memory check failed memories=3 dangling_links=1 missing_reasons=1 unindexed=1 index_missing=1"
+        "rig memory check failed memories=3 dangling_links=1 missing_reasons=1 unindexed=1 index_missing=1"
     fixture_root_remove root
 
 ///> rust
@@ -119,14 +119,14 @@
     := user = succeeded (memory_run root (Arg ("recall", Arg (data, Arg ("user", NoArgs)))))
     shows user "4  user  beta  who the user is"
     hides user "alpha"
-    shows user "kit memory recall ok shown=1 of=3 query=user"
+    shows user "rig memory recall ok shown=1 of=3 query=user"
     := both =
         succeeded (
             memory_run root (Arg ("recall", Arg (data, Arg ("Alpha project", Arg ("--limit", Arg ("1", NoArgs))))))
         )
     shows both "5  feedback  alpha"
     hides both "gamma"
-    shows both "kit memory recall ok shown=1 of=3"
+    shows both "rig memory recall ok shown=1 of=3"
     rejected_with (memory_run root (Arg ("recall", Arg (data, Arg ("  ", NoArgs))))) 2i32 "recall needs query words"
     fixture_root_remove root
 

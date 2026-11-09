@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         use std::fs;
@@ -43,7 +42,7 @@
                 for path in &files { rooted_remove_regular(path)?; }
                 for path in &directories { rooted_remove_tree_within(root, path)?; }
             }
-            println!("kit proxy prune-release-transients ok files={} directories={} removed={} dry_run={}", files.len(), directories.len(), if dry_run { 0 } else { files.len() + directories.len() }, i32::from(dry_run));
+            println!("rig proxy prune-release-transients ok files={} directories={} removed={} dry_run={}", files.len(), directories.len(), if dry_run { 0 } else { files.len() + directories.len() }, i32::from(dry_run));
             Ok(())
         }
 
@@ -91,7 +90,7 @@
                     rooted_remove_regular(path)?;
                 }
             }
-            println!("kit proxy prune-compiler-sidecars ok candidates={} removed={} dry_run={}", candidates.len(), if dry_run { 0 } else { candidates.len() }, i32::from(dry_run));
+            println!("rig proxy prune-compiler-sidecars ok candidates={} removed={} dry_run={}", candidates.len(), if dry_run { 0 } else { candidates.len() }, i32::from(dry_run));
             Ok(())
         }
 

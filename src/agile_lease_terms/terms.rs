@@ -194,7 +194,7 @@ fn format_real_7(mut v0: u64) -> Rc<str> {
 }
 fn lease_status_entry_6(mut v0: Rc<str>, mut v1: u64, mut v2: u64, mut v3: u64, mut v4: u64, mut v5: bool, mut v6: bool) -> Rc<str> {
     let mut v7: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
-    let v9: Rc<str> = string_concat(&["kit agile lease status root=", &*v0, " phase="]);
+    let v9: Rc<str> = string_concat(&["rig agile lease status root=", &*v0, " phase="]);
     let v14: US1 = if v6 {
         US1::US1_LeaseExpired
     } else {

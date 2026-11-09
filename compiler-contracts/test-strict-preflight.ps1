@@ -34,13 +34,13 @@ foreach ($file in $releaseFiles) {
 [void][IO.Directory]::CreateDirectory((Join-Path $release 'evidence/coverage'))
 Copy-Item -LiteralPath $KitBinary -Destination (Join-Path $release "kit$suffix")
 
-$leaseRoot = $env:KIT_LEASE_ROOT
+$leaseRoot = ($env:RIG_LEASE_ROOT ?? $env:KIT_LEASE_ROOT)
 Push-Location -LiteralPath ([IO.Path]::GetTempPath())
 try {
-    $env:KIT_LEASE_ROOT = $null
+    $env:RIG_LEASE_ROOT = $env:KIT_LEASE_ROOT = $null
     & $KitBinary proxy command-capture $work 'strict-check.txt' 120000 $KitBinary bundle check $release kit | ForEach-Object { Write-Host $_ }
     $captureExit = $LASTEXITCODE
-} finally { Pop-Location; $env:KIT_LEASE_ROOT = $leaseRoot }
+} finally { Pop-Location; $env:RIG_LEASE_ROOT = $env:KIT_LEASE_ROOT = $leaseRoot }
 if ($captureExit -ne 0) { throw 'Strict preflight supervision failed.' }
 $receiptPath = Join-Path $work 'strict-check.txt'
 $receipt = [IO.File]::ReadAllText($receiptPath)

@@ -165,14 +165,14 @@ fn sprint_changed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: b
     let v14: i32 = (v10.clone().borrow().len() as i32);
     let v15: bool = v14 == 0i32;
     if v15 {
-        let v19: Rc<str> = string_concat(&["kit error: agile sprint ", &*v13, " refused: no sprint ", &*v1]);
+        let v19: Rc<str> = string_concat(&["rig error: agile sprint ", &*v13, " refused: no sprint ", &*v1]);
         eprintln!("{}", v19);
         1i32
     } else {
         let (mut v20, mut v21, mut v22, mut v23, mut v24): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool) = v10.borrow()[0i32 as usize].clone();
         let v25: bool = v24 == false;
         if v25 {
-            let v30: Rc<str> = string_concat(&["kit error: agile sprint ", &*v13, " refused: sprint ", &*v1, " is closed"]);
+            let v30: Rc<str> = string_concat(&["rig error: agile sprint ", &*v13, " refused: sprint ", &*v1, " is closed"]);
             eprintln!("{}", v30);
             1i32
         } else {
@@ -222,13 +222,13 @@ fn sprint_changed_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: b
             };
             let v60: bool = &*v59 != "";
             if v60 {
-                let v63: Rc<str> = string_concat(&["kit error: agile sprint ", &*v13, " refused: ", &*v59]);
+                let v63: Rc<str> = string_concat(&["rig error: agile sprint ", &*v13, " refused: ", &*v59]);
                 eprintln!("{}", v63);
                 1i32
             } else {
                 let v64: Rc<str> = rig_agile_sprint_append::rig_agile_sprint_item_appended(&v9, &v1, &v2, v37, v3);
                 std::fs::write(&*v8, &*v64).unwrap();
-                let v70: Rc<str> = string_concat(&["kit agile sprint ", &*v13, " ok id=", &*v1, " item=", &*v2]);
+                let v70: Rc<str> = string_concat(&["rig agile sprint ", &*v13, " ok id=", &*v1, " item=", &*v2]);
                 println!("{}", v70);
                 0i32
             }
@@ -497,7 +497,7 @@ fn sprint_closed_8(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         v16
     };
     if v17 {
-        let v18: Rc<str> = string_concat(&["kit error: agile sprint close refused: no open sprint ", &*v1]);
+        let v18: Rc<str> = string_concat(&["rig error: agile sprint close refused: no open sprint ", &*v1]);
         eprintln!("{}", v18);
         1i32
     } else {
@@ -528,7 +528,7 @@ fn sprint_closed_8(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         let v46: Rc<UH2> = carried_from_13(v21, &v19, v44, v45);
         let v47: i32 = carried_noted_15(v0, v1.clone(), v46);
         let v48: Rc<str> = format_real_11(v47);
-        let v54: Rc<str> = string_concat(&["kit agile sprint close ok id=", &*v1, &*v39, " goal_met=", &*v43, " carried_notes=", &*v48]);
+        let v54: Rc<str> = string_concat(&["rig agile sprint close ok id=", &*v1, &*v39, " goal_met=", &*v43, " carried_notes=", &*v48]);
         println!("{}", v54);
         0i32
     }
@@ -550,7 +550,7 @@ fn sprint_velocity_21(mut v0: Rc<str>, mut v1: i32) -> i32 {
     let v7: i32 = rig_agile_sprint_state::rig_agile_sprint_velocity(&v6, v1);
     let v8: Rc<str> = format_real_11(v1);
     let mut v11: Rc<str> = format_real_11(v7);
-    let mut v12: Rc<str> = string_concat(&["kit agile sprint velocity ok last=", &*v8, " minutes=", &*v11]);
+    let mut v12: Rc<str> = string_concat(&["rig agile sprint velocity ok last=", &*v8, " minutes=", &*v11]);
     println!("{}", v12);
     0i32
 }

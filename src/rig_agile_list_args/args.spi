@@ -51,9 +51,9 @@
     "invalid planning filter (expected --load light|medium|heavy|none and --assignee agent|pair|user|none)"
 
 :~ ^ list_args_from (index : i32) (count : i32) (request : list_args) : list_parse =
-    ? count <= index
-    ?>
-        ? planning_filters_valid request.load request.assignee ?> ListParsed request
+    ? count <= index ?>
+        ? planning_filters_valid request.load request.assignee
+        ?> ListParsed request
         |: ListRejected (planning_filter_reason ())
     |:
         := argument = argument_owned index
@@ -63,8 +63,7 @@
         ?> list_args_from (index + 2i32) count { request ?| load = argument_owned (index + 1i32) }
         |? argument = "--assignee"
         ?> list_args_from (index + 2i32) count { request ?| assignee = argument_owned (index + 1i32) }
-        |? argument = "--sort"
-        ?>
+        |? argument = "--sort" ?>
             := word = argument_owned (index + 1i32)
             ? sort_known word
             ?> list_args_from (index + 2i32) count { request ?| sort = word }
@@ -75,8 +74,7 @@
         |:
             := value = argument_owned (index + 1i32)
             := width = query_flag_width argument value
-            ? width > 0i32
-            ?>
+            ? width > 0i32 ?>
                 list_args_from (index + width) count { request ?|
                     query = query_appended request.query argument (? width = 2i32 ?> value |: "")
                 }

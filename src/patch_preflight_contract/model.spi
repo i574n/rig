@@ -33,25 +33,37 @@
     ))
 
 :~ patch_preflight_witness_binding (expected : i32) (observed : i32) : i32 =
-    ? expected < 1i32 ?> 0i32
-    |? observed < 1i32 ?> 0i32
-    |? expected < observed ?> 0i32
-    |? observed < expected ?> 0i32
+    ? expected < 1i32
+    ?> 0i32
+    |? observed < 1i32
+    ?> 0i32
+    |? expected < observed
+    ?> 0i32
+    |? observed < expected
+    ?> 0i32
     |: 1i32
 
 :~ patch_preflight_mode_binding (apply_mode : i32) (check_mode : i32) : i32 =
-    ? apply_mode < 0i32 ?> 0i32
-    |? check_mode < 0i32 ?> 0i32
-    |? 1i32 < apply_mode ?> 0i32
-    |? 1i32 < check_mode ?> 0i32
+    ? apply_mode < 0i32
+    ?> 0i32
+    |? check_mode < 0i32
+    ?> 0i32
+    |? 1i32 < apply_mode
+    ?> 0i32
+    |? 1i32 < check_mode
+    ?> 0i32
     |? apply_mode < 1i32 ?>
         ? check_mode < 1i32 ?> 0i32 |: 1i32
     |:
         ? check_mode < 1i32 ?> 1i32 |: 0i32
 
 :~ patch_preflight_check_binding (unsafe_paths : i32) (mutations : i32) : i32 =
-    ? unsafe_paths < 0i32 ?> 0i32
-    |? mutations < 0i32 ?> 0i32
-    |? 0i32 < unsafe_paths ?> 0i32
-    |? 0i32 < mutations ?> 0i32
+    ? unsafe_paths < 0i32
+    ?> 0i32
+    |? mutations < 0i32
+    ?> 0i32
+    |? 0i32 < unsafe_paths
+    ?> 0i32
+    |? 0i32 < mutations
+    ?> 0i32
     |: 1i32

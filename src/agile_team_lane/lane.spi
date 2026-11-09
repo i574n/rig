@@ -58,7 +58,8 @@
 :~ resume_noted (~records : string) (ids : list string) : list string =
     := markers = [ "resume when"; "resume:"; "resumes on"; "resume from" ]
     := resumed = \ (found : list string) (line : string) =>
-        ? sm'.contains " = Note (\"" line |> not ?> found
+        ? sm'.contains " = Note (\"" line |> not
+        ?> found
         |:
             := low = sm'.to_lower line
             := named = \ (id : string) => sm'.contains ("note (\"" ++# sm'.to_lower id ++# "\",") low

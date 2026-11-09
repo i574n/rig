@@ -25,19 +25,27 @@
     | ToolPython => "python"
 
 :~ tool_of_name (~name : string) : option ci_tool =
-    ? name = "rust" ?> Some ToolRust
-    |? name = "zig" ?> Some ToolZig
-    |? name = "otp" ?> Some ToolOtp
-    |? name = "elixir" ?> Some ToolElixir
-    |? name = "gleam" ?> Some ToolGleam
-    |? name = "rebar3" ?> Some ToolRebar
-    |? name = "python" ?> Some ToolPython
+    ? name = "rust"
+    ?> Some ToolRust
+    |? name = "zig"
+    ?> Some ToolZig
+    |? name = "otp"
+    ?> Some ToolOtp
+    |? name = "elixir"
+    ?> Some ToolElixir
+    |? name = "gleam"
+    ?> Some ToolGleam
+    |? name = "rebar3"
+    ?> Some ToolRebar
+    |? name = "python"
+    ?> Some ToolPython
     |: None
 
 :~ unquoted (~text : string) : string = sm'.trim text |> sm'.replace "\"" "" |> sm'.replace "'" ""
 
 :~ ^ channel_line (lines : array string) (at : i32) : option string =
-    ? at >= (am'.length lines : i32) ?> None
+    ? at >= (am'.length lines : i32)
+    ?> None
     |:
         := line = sm'.trim (am'.index at lines)
         ? sm'.starts_with "channel" line && sm'.contains "=" line ?>
@@ -47,8 +55,10 @@
 
 :~ toolchain_file_channel (~text : string) : option string =
     := plain = sm'.trim (sm'.replace "\r" "" text)
-    ? sm'.contains "[toolchain]" plain ?> channel_line (sm'.split "\n" plain |> array) 0i32
-    |? plain = "" || sm'.contains "\n" plain ?> None
+    ? sm'.contains "[toolchain]" plain
+    ?> channel_line (sm'.split "\n" plain |> array) 0i32
+    |? plain = "" || sm'.contains "\n" plain
+    ?> None
     |: Some plain
 
 :~ text_at (path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""

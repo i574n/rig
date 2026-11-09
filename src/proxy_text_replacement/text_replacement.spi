@@ -36,8 +36,10 @@
     sm'.replace needle replacement text
 
 := parse_mode (~text : string) : validation_result replace_mode =
-    ? (text = "check") ?> Valid CheckReplacement
-    |? (text = "apply") ?> Valid ApplyReplacement
+    ? (text = "check")
+    ?> Valid CheckReplacement
+    |? (text = "apply")
+    ?> Valid ApplyReplacement
     |: Invalid
 
 := parse_expectation () : validation_result match_expectation =
@@ -73,7 +75,7 @@
     (after : u64) (started : u64)
     : replacement_outcome
     =
-    := head = "kit proxy text-replace ok mode=" ++# (mode_text mode) ++# " path=" ++# path ++# " matches="
+    := head = "rig proxy text-replace ok mode=" ++# (mode_text mode) ++# " path=" ++# path ++# " matches="
     := middle = (u64_text matches) ++# " expected=" ++# (expectation_text expectation)
     ReplacementReceipt (head ++# middle ++# (measured_sizes before after (ms_since started)))
 
@@ -84,8 +86,7 @@
     =
     := original = file_text path
     := matches = match_count original needle
-    ? expectation_met expectation matches
-    ?>
+    ? expectation_met expectation matches ?>
         := updated =
             ?= expectation ?|
             | EveryMatch => replaced_everywhere original needle replacement
@@ -116,10 +117,14 @@
         := needle = proxy_argument 4i32
         := replacement = proxy_argument 5i32
         := path = rooted_path (proxy_argument 2i32) (proxy_argument 3i32)
-        ? (path = "") ?> rejected "text-replace target escapes the root"
-        |? (needle = "") ?> rejected "text-replace old text is empty"
-        |? (needle = replacement) ?> rejected "text-replace old and new text are identical"
-        |? regular_file path ?> replace_in mode expectation path needle replacement started
+        ? (path = "")
+        ?> rejected "text-replace target escapes the root"
+        |? (needle = "")
+        ?> rejected "text-replace old text is empty"
+        |? (needle = replacement)
+        ?> rejected "text-replace old and new text are identical"
+        |? regular_file path
+        ?> replace_in mode expectation path needle replacement started
         |: rejected "text-replace target is not a regular file"
 
 :~ text_replace_report () : i32 * string =

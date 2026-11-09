@@ -11,7 +11,8 @@
 :== item_row = { task : string; minutes : i32 }
 
 :~ ^ items_from (rows : array_base item_row) (at : i32) (kept : list sprint_item) : list sprint_item =
-    ? at < 0i32 ?> kept
+    ? at < 0i32
+    ?> kept
     |:
         := row = am'.index_base at rows
         items_from rows (at - 1i32) ({ task = row.task; minutes = row.minutes; fate = Committed } :: kept)

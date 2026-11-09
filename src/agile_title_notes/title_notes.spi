@@ -26,7 +26,7 @@
     (~id : string) (moved : i32) (title_before : i32) (title_after : i32) (before : u64) (after : u64) (elapsed : u64)
     : i32
     =
-    := head = "kit agile notes ok id=" ++# id ++# " moved=" ++# (i32_text moved) ++# " title_bytes_before="
+    := head = "rig agile notes ok id=" ++# id ++# " moved=" ++# (i32_text moved) ++# " title_bytes_before="
     := middle = (i32_text title_before) ++# " title_bytes_after=" ++# (i32_text title_after)
     stdout_line (head ++# middle ++# (measured_sizes before after elapsed))
 
@@ -69,7 +69,8 @@
             | FileReadable file =>
                 := raw = loaded_string (read_text file)
                 := original = records_text raw
-                ? task_declared original id ?> title_moved state id raw original started
+                ? task_declared original id
+                ?> title_moved state id raw original started
                 |: from_title_failure "no task with this id" id
         |: from_title_failure "usage: agile notes from-title <root> <id>" id
     |: from_title_failure "usage: agile notes from-title <root> <id>" id

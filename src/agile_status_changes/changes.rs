@@ -585,7 +585,7 @@ fn change_recorded_13(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 
         }
         US2::US2_ChangeRefused(v5) => {
             let v5: Rc<str> = v5;
-            let v8: Rc<str> = string_concat(&["kit agile status change not recorded id=", &*v1, ": ", &*v5]);
+            let v8: Rc<str> = string_concat(&["rig agile status change not recorded id=", &*v1, ": ", &*v5]);
             eprintln!("{}", v8);
             1i32
         }

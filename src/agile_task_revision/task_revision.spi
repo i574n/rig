@@ -28,7 +28,7 @@
     stderr_failure ("agile edit " ++# id ++# " rejected: " ++# reason)
 
 := agile_edit_success (~id : string) (~field : string) (before : u64) (after : u64) (elapsed : u64) : i32 =
-    := head = "kit agile edit ok id=" ++# id ++# " field=" ++# field
+    := head = "rig agile edit ok id=" ++# id ++# " field=" ++# field
     stdout_line (head ++# (measured_sizes before after elapsed))
 
 := task_anchor (~id : string) : string = "Task (\"" ++# id ++# "\","
@@ -59,7 +59,8 @@
 :~ agile_edit_entry () : i32 =
     := field_name = argument_owned 3i32
     := position = edit_field_position field_name
-    ? position < 0i32 ?> agile_edit_failure (edit_field_rule field_name) (argument_owned 2i32)
+    ? position < 0i32
+    ?> agile_edit_failure (edit_field_rule field_name) (argument_owned 2i32)
     |: agile_edit (argument_owned 1i32) (argument_owned 2i32) position field_name (argument_owned 4i32)
 
 := main () : i32 =

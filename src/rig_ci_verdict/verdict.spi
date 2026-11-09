@@ -44,7 +44,8 @@
     | _ => "candidate: " ++# path
 
 :~ names_in (directory : string) : list string =
-    ? file_system.directory_exists directory |> not ?> []
+    ? file_system.directory_exists directory |> not
+    ?> []
     |:
         file_system.read_directory_names directory
         |> resultm.unwrap'
@@ -111,9 +112,15 @@
     := rust_row =
         "rust ci=nightly-2026-10-18 local=nightly-2025-05-09 differs"
         ^^ "\n  fix: rustup toolchain install nightly-2026-10-18"
-    testing.expect (row_of stub_host installed "rust" "nightly-2026-10-18" "C:/repo" = (rust_row, !+)) "rust names its install"
-    testing.expect (row_of stub_host installed "otp" "29" "C:/repo" = ("otp ci=29 local=29.1.2 same", !-)) "otp patch release"
-    testing.expect (row_of stub_host installed "cobol" "1" "C:/repo" = ("cobol ci=1 local=- unknown", !+)) "an unknown tool"
+    testing.expect
+        (row_of stub_host installed "rust" "nightly-2026-10-18" "C:/repo" = (rust_row, !+))
+        "rust names its install"
+    testing.expect
+        (row_of stub_host installed "otp" "29" "C:/repo" = ("otp ci=29 local=29.1.2 same", !-))
+        "otp patch release"
+    testing.expect
+        (row_of stub_host installed "cobol" "1" "C:/repo" = ("cobol ci=1 local=- unknown", !+))
+        "an unknown tool"
 
 ///> rust
 :# fix_lines_and_matching_versions =

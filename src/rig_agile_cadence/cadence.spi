@@ -27,8 +27,8 @@
 :~ summary_of (done : list string) (activity : list string) (~hours : i64) (~changes_text : string) : string =
     := count = \ (prefix : string) => (done |> listm'.filter (sm'.starts_with prefix) |> listm.length : i32)
     := activity_rows : i32 = listm.length activity
-    "kit agile cadence ok done_rows=" ++# sm'.show (count "kit agile cadence done ") ++# " activity_rows="
-    ++# sm'.show activity_rows ++# " silent_active=" ++# sm'.show (count "kit agile cadence silent ")
+    "rig agile cadence ok done_rows=" ++# sm'.show (count "rig agile cadence done ") ++# " activity_rows="
+    ++# sm'.show activity_rows ++# " silent_active=" ++# sm'.show (count "rig agile cadence silent ")
     ++# " window_hours=" ++# sm'.show hours ++# dating_text changes_text
 
 :~ cadence_run () : i32 =
@@ -48,7 +48,8 @@
         := round = number_after words "--round" 0i64
         := team = text_after words "--team"
         := lines =
-            ? round > 0i64 ?> listed (rig_cadence_activity.activity.round_report (text, now_hour, round))
+            ? round > 0i64
+            ?> listed (rig_cadence_activity.activity.round_report (text, now_hour, round))
             |:
                 := done = listed (rig_cadence_done.done.done_report (text, changes_text, now_hour, hours, days, team))
                 := now_day = now_hour / 24i64
@@ -69,10 +70,10 @@
     testing.expect (number_after [ "--hours"; "12" ] "--hours" 48i64 = 12i64) "a flag value"
     testing.expect (number_after [] "--days" 7i64 = 7i64) "the fallback"
     testing.expect (day_of_date "2026-11-04" = Some 20761i64 && day_of_date "nov 4" = None) "--since dates"
-    := silent = "kit agile cadence silent id=A teams=kit hours=50"
-    := done = [ "kit agile cadence done team=kit days_ago=0 done=1"; silent ]
+    := silent = "rig agile cadence silent id=A teams=kit hours=50"
+    := done = [ "rig agile cadence done team=kit days_ago=0 done=1"; silent ]
     := line = summary_of done [ "a" ] 48i64 ""
-    testing.expect (sm'.starts_with "kit agile cadence ok done_rows=1 activity_rows=1 silent_active=1" line) line
+    testing.expect (sm'.starts_with "rig agile cadence ok done_rows=1 activity_rows=1 silent_active=1" line) line
     testing.expect (sm'.ends_with "(done dated by last note)" line) "no changes file"
     := changed = summary_of done [] 48i64 "inl x () = StatusChanged (\"A\", \"Done\", 1u64)"
     testing.expect (sm'.ends_with "(done dated by status change, else last note)" changed) changed

@@ -38,8 +38,10 @@
 :~ state_read_of (~root : string) (~relative : string) : state_read =
     := read = state_host_of root relative
     := kind = host_kind read
-    ? kind = 1i32 ?> StateText (host_text read)
-    |? kind = 0i32 ?> StateMissing
+    ? kind = 1i32
+    ?> StateText (host_text read)
+    |? kind = 0i32
+    ?> StateMissing
     |: StateUnreadable (host_text read)
 
 := projected (~label : string) (~value : string) : rendered =
@@ -113,7 +115,8 @@
                 | Rendered census_line => recorded_lines root ratings_line census_line
 
 :~ ^ bulleted (~items : string) (index : i32) (~acc : string) : string =
-    ? index < line_count items ?> bulleted items (index + 1i32) (acc ++# "\n- " ++# (line_at items index) ++# "\n")
+    ? index < line_count items
+    ?> bulleted items (index + 1i32) (acc ++# "\n- " ++# (line_at items index) ++# "\n")
     |: acc
 
 := active_items (~items : string) : string = ? items = "" ?> "" |: bulleted items 0i32 "\n## Active work\n"
@@ -139,7 +142,8 @@
     ?|
     | Refused problem => Refused problem
     | Rendered sections =>
-        ? sm'.starts_with "ok" sections ?> Rendered ((without_prefix sections 2i32) ++# "\n")
+        ? sm'.starts_with "ok" sections
+        ?> Rendered ((without_prefix sections 2i32) ++# "\n")
         |: Refused "handoff sections projection returned invalid envelope"
 
 :~ handoff_text (~root : string) : rendered =
@@ -164,7 +168,7 @@
         _ => std::rc::Rc::<str>::from("") } }' : string
 
 := handoff_failed (~problem : string) : i32 =
-    := _ = $'eprintln\!("kit error: {}", &*!problem)' : ()
+    := _ = $'eprintln\!("rig error: {}", &*!problem)' : ()
     2i32
 
 :~ handoff_render_owned (~root : string) : i32 =

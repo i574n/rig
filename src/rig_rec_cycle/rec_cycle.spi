@@ -55,7 +55,12 @@
     | line :: rest =>
         := head = header_rest line
         := started = Some { rest = head; line = number; body = ""; opens = !- }
-        := grouped = ? sm'.starts_with ":& " line ?> (?= pending ?| | Some o => Some { o ?| opens = !+ } | None => None) |: pending
+        := grouped =
+            ? sm'.starts_with ":& " line ?>
+                ?= pending ?|
+                | Some o => Some { o ?| opens = !+ }
+                | None => None
+            |: pending
         ? head <> "" ?> sites_from rest (number + 1i32) started (closed grouped done)
         |? line <> "" && sm'.starts_with " " line = !- ?> sites_from rest (number + 1i32) None (closed pending done)
         |:
@@ -71,8 +76,10 @@
     ?= frontier ?|
     | [] => !-
     | next :: rest =>
-        ? next = target ?> !+
-        |? listm'.contains next seen ?> reaches target rest seen defs
+        ? next = target
+        ?> !+
+        |? listm'.contains next seen
+        ?> reaches target rest seen defs
         |: reaches target (listm.append (edges_of next defs) rest) (next :: seen) defs
 
 :~ cycle_of (d : definition) (defs : list definition) : cycle_verdict =
@@ -83,7 +90,8 @@
 :~ finding_of (~path : string) (defs : list definition) (s : site) : string =
     ?= s ?|
     | RecSite d =>
-        ? d.opens_group ?> ""
+        ? d.opens_group
+        ?> ""
         |:
             ?= cycle_of d defs ?|
             | InCycle => ""

@@ -35,21 +35,27 @@
     ?> ? entry <> "" && output <> "" ?> SpiralCrate { entry = entry; output = output } |: NotSpiralCrate
     |:
         := line = sm'.trim (am'.index at lines)
-        ? sm'.starts_with "[" line ?> section_fields lines (am'.length lines) entry output
-        |? sm'.starts_with "entry" line ?> section_fields lines (at + 1i32) (quoted_value line) output
-        |? sm'.starts_with "output" line ?> section_fields lines (at + 1i32) entry (quoted_value line)
+        ? sm'.starts_with "[" line
+        ?> section_fields lines (am'.length lines) entry output
+        |? sm'.starts_with "entry" line
+        ?> section_fields lines (at + 1i32) (quoted_value line) output
+        |? sm'.starts_with "output" line
+        ?> section_fields lines (at + 1i32) entry (quoted_value line)
         |: section_fields lines (at + 1i32) entry output
 
 :~ ^ manifest_from (lines : array string) (at : i32) : manifest_read =
-    ? am'.length lines <= at ?> NotSpiralCrate
-    |? sm'.trim (am'.index at lines) = "[package.metadata.spiral]" ?> section_fields lines (at + 1i32) "" ""
+    ? am'.length lines <= at
+    ?> NotSpiralCrate
+    |? sm'.trim (am'.index at lines) = "[package.metadata.spiral]"
+    ?> section_fields lines (at + 1i32) "" ""
     |: manifest_from lines (at + 1i32)
 
 :~ manifest_of (text : string) : manifest_read =
     manifest_from (sm'.split "\n" (sm'.replace "\r" "" text) |> array) 0i32
 
 :~ line_count (text : string) : i32 =
-    ? text = "" ?> 0i32
+    ? text = ""
+    ?> 0i32
     |:
         := pieces = am'.length (sm'.split "\n" text |> array)
         ? sm'.ends_with "\n" text ?> pieces - 1i32 |: pieces
@@ -79,7 +85,8 @@
 
 :~ measured (dir : string) : option crate_measure =
     := manifest = dir </> "Cargo.toml"
-    ? file_system.file_exists manifest |> not ?> None
+    ? file_system.file_exists manifest |> not
+    ?> None
     |:
         ?= manifest_of (file_system.read_all_text manifest) ?|
         | NotSpiralCrate => None

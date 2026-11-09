@@ -364,7 +364,7 @@ fn repo_state_of_5(mut v0: Rc<str>, mut v1: u64) -> i32 {
         let v21: Rc<str> = std::rc::Rc::<str>::from(v4.lines().find_map(|line| line.strip_prefix(&*v20)).unwrap_or("").trim());
         let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("# branch.ab "); } LIT.with(|lit| lit.clone()) };
         let v23: Rc<str> = std::rc::Rc::<str>::from(v4.lines().find_map(|line| line.strip_prefix(&*v22)).unwrap_or("").trim());
-        let v26: Rc<str> = string_concat(&["kit repo state ok root=", &*v0, " branch=", &*v21]);
+        let v26: Rc<str> = string_concat(&["rig repo state ok root=", &*v0, " branch=", &*v21]);
         let v27: bool = &*v23 == "";
         let v29: Rc<str> = if v27 {
             let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("none"); } LIT.with(|lit| lit.clone()) };
@@ -450,7 +450,7 @@ fn repo_state_of_5(mut v0: Rc<str>, mut v1: u64) -> i32 {
         };
         0i32
     } else {
-        let v90: Rc<str> = string_concat(&["kit repo state rejected root=", &*v0, " reason=not-a-git-repository"]);
+        let v90: Rc<str> = string_concat(&["rig repo state rejected root=", &*v0, " reason=not-a-git-repository"]);
         println!("{}", v90);
         2i32
     }
@@ -498,7 +498,7 @@ fn repo_run_0() -> i32 {
         let v9: i32 = 0i32;
         states_from_1(v6, v7, v8, v9)
     } else {
-        let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error: repo usage: repo state <root> [<root>...]"); } LIT.with(|lit| lit.clone()) };
+        let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: repo usage: repo state <root> [<root>...]"); } LIT.with(|lit| lit.clone()) };
         println!("{}", v11);
         2i32
     }

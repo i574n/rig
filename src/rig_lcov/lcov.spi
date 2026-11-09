@@ -39,10 +39,14 @@
     $'std::rc::Rc::<str>::from(!text.strip_prefix(&*!prefix).unwrap_or(""))' : string
 
 := lcov_line_of (~raw : string) : lcov_line =
-    ? sm'.starts_with "SF:" raw ?> SourceLine (after_prefix raw "SF:")
-    |? sm'.starts_with "DA:" raw ?> HitLine (after_prefix raw "DA:")
-    |? raw = "end_of_record" ?> EndLine
-    |? sm'.starts_with "DA" raw || sm'.starts_with "SF" raw ?> MalformedLine
+    ? sm'.starts_with "SF:" raw
+    ?> SourceLine (after_prefix raw "SF:")
+    |? sm'.starts_with "DA:" raw
+    ?> HitLine (after_prefix raw "DA:")
+    |? raw = "end_of_record"
+    ?> EndLine
+    |? sm'.starts_with "DA" raw || sm'.starts_with "SF" raw
+    ?> MalformedLine
     |: OtherLine
 
 :| hit_reading =
@@ -68,8 +72,10 @@
 :~ hit_reading_of (~value : string) : hit_reading =
     ? fields_valid value ?>
         := line = hit_line_number value
-        ? line = 0u64 ?> HitRejected InvalidHitLine
-        |? hit_count_valid value ?> HitRead ((decimal_text line) ++# "\t" ++# (hit_count_text value))
+        ? line = 0u64
+        ?> HitRejected InvalidHitLine
+        |? hit_count_valid value
+        ?> HitRead ((decimal_text line) ++# "\t" ++# (hit_count_text value))
         |: HitRejected InvalidHitCount
     |: HitRejected InvalidHitFields
 
@@ -93,7 +99,8 @@
         ?= lcov_line_of (line_at text index), state ?|
         | SourceLine _, InSource _ => LcovRejected SourceBeforeEnd
         | SourceLine source, BetweenSources =>
-            ? sm'.trim source = "" ?> LcovRejected EmptySource
+            ? sm'.trim source = ""
+            ?> LcovRejected EmptySource
             |:
                 := normalized = slashes_normalized source
                 lcov_from text next count (InSource normalized) (appended rows normalized)
@@ -142,6 +149,8 @@
     testing.expect (lcov_error "SF:a\nDA:1\nend_of_record\n" = "coverage has invalid DA fields") "one field"
     testing.expect (lcov_error "SF:a\nDA:0,1\nend_of_record\n" = "coverage has invalid DA line") "line zero"
     testing.expect (lcov_error "end_of_record\n" = "coverage has end_of_record before SF") "end first"
-    testing.expect (lcov_error "SF:a\nDAX\nend_of_record\n" = "coverage has a malformed source or line record") "malformed"
+    testing.expect
+        (lcov_error "SF:a\nDAX\nend_of_record\n" = "coverage has a malformed source or line record")
+        "malformed"
     testing.expect (lcov_error "SF:a\nDA:1,1\n" = "coverage has an unterminated source record") "unterminated"
     testing.expect (lcov_error "SF:a\nend_of_record\n" = "coverage input has no line records") "no lines"

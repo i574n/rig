@@ -8,14 +8,16 @@
 := utf8_multibyte_lead_min () : char = runtime_byte "©" 0i32
 
 := is_continuation_byte (lower : char) (upper : char) (value : char) : bool =
-    ? !!!!LT(value, lower) ?> !-
+    ? !!!!LT(value, lower)
+    ?> !-
     |: !!!!LT(value, upper)
 
 :~ ^ codepoint_count_loop
     (str : string) (lower : char) (upper : char) (byte_index : i32) (count : i32) (byte_length : i32)
     : i32
     =
-    ? (=.) byte_index byte_length ?> count
+    ? (=.) byte_index byte_length
+    ?> count
     |:
         := value = index str byte_index
         := count = ? is_continuation_byte lower upper value ?> count |: (+.) count 1i32
@@ -56,7 +58,8 @@
     slice str { from; to = (-.) near_to 1i32 }
 
 := codepoint_slice (str : string) { from = (from_codepoint : i32) to = (to_codepoint : i32) } : string =
-    ? to_codepoint < from_codepoint ?> ""
+    ? to_codepoint < from_codepoint
+    ?> ""
     |:
         := from = codepoint_byte_offset str from_codepoint
         := near_to = codepoint_byte_offset str ((+.) to_codepoint 1i32)

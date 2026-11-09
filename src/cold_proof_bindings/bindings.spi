@@ -2,8 +2,10 @@
     ? expected = observed ?> 1i32 |: 0i32
 
 :~ cold_proof_binary_binding (presence : i32) : i32 =
-    ? presence = 1i32 ?> 1i32
-    |? presence = 2i32 ?> 2i32
+    ? presence = 1i32
+    ?> 1i32
+    |? presence = 2i32
+    ?> 2i32
     |: 0i32
 
 := cold_proof_header_binding (schema : i32) (status : i32) : i32 =

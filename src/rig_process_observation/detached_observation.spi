@@ -35,7 +35,7 @@
             };
             let pid = child.id();
             let (cwd, program, env_names) = process_receipt_command_fields(command);
-            println!("kit process-handoff receipt label={label} stage=spawned pid={pid} child_exit=pending signal=pending timeout=0 retryability=unknown cwd={cwd:?} program={program:?} env_names={env_names}");
+            println!("rig process-handoff receipt label={label} stage=spawned pid={pid} child_exit=pending signal=pending timeout=0 retryability=unknown cwd={cwd:?} program={program:?} env_names={env_names}");
             Ok(DetachedProcessHandoff { pid, cwd, program, env_names })
         }
 

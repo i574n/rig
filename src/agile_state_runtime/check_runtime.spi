@@ -1,4 +1,3 @@
-
 := emit_runtime () : () =
     global """
         fn agile_transient_receipt(path: &Path) -> bool {
@@ -76,7 +75,7 @@
             if graph_before != rig_agile_lease::agile_package_input_fingerprint(&state_dir, true) || paths != agile_state_paths(&state_dir)? || paths.iter().zip(&identities).any(|(path, identity)| agile_module_identity(path).ok().as_ref() != Some(identity)) { return Err("state or package inputs changed during attestation; retry agile check".to_owned()); }
             agile_write_receipts(&receipt_path, snapshot, &receipts)?;
             let (started_unix_ms, deadline_unix_ms, wrap_at_unix_ms, remaining_ms, should_wrap, should_yield) = agile_prompt_lease_clock(root)?;
-            println!("kit agile lease started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} wrap_at_unix_ms={wrap_at_unix_ms} remaining_ms={remaining_ms} should_wrap={} should_yield={}", i32::from(should_wrap), i32::from(should_yield));
+            println!("rig agile lease started_unix_ms={started_unix_ms} deadline_unix_ms={deadline_unix_ms} wrap_at_unix_ms={wrap_at_unix_ms} remaining_ms={remaining_ms} should_wrap={} should_yield={}", i32::from(should_wrap), i32::from(should_yield));
             let record_catalog = rig_agile_state_record_required_catalog("v1");
             let record_required = record_catalog.as_ref().split('|').filter(|name| !name.is_empty()).collect::<Vec<_>>();
             let record_missing = record_required.iter().filter(|name| !state_dir.join(name).is_file()).copied().collect::<Vec<_>>();
@@ -88,7 +87,7 @@
             let gaps = agile_planning_gaps::rig_agile_planning_gaps_text(&std::fs::read_to_string(state_dir.join("agile.spi")).unwrap_or_default());
             if !gaps.is_empty() { print!("{gaps}"); }
             let compiler_status = compiler.as_ref().map(|value| format!("available source={} fingerprint={} sha256={} path={}", value.source, value.fingerprint, value.sha256, value.path.display())).unwrap_or_else(|| "absent".to_owned());
-            println!("kit agile check ok files={} skipped={skipped} transient={transient} runtime_attested={runtime_attested} build_attested={build_attested} build_batches={build_batches} validation=receipt-first compiler={compiler_status}", paths.len() + 1);
+            println!("rig agile check ok files={} skipped={skipped} transient={transient} runtime_attested={runtime_attested} build_attested={build_attested} build_batches={build_batches} validation=receipt-first compiler={compiler_status}", paths.len() + 1);
             Ok(())
         }
 

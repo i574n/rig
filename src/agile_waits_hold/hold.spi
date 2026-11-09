@@ -69,7 +69,8 @@
 :~ lane_waits_printed ((root, filters, agile_text) : string * string * string) : i32 =
     := team = team_after (sm'.split_list " " filters)
     := waits = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/waits.spi")
-    ? team = "" || waits = "" ?> 0i32
+    ? team = "" || waits = ""
+    ?> 0i32
     |:
         := lines = unblock_lines (waits_of_text waits) (done_ids agile_text) team
         lines |> listm.iter console.write_line
