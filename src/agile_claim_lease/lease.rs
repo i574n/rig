@@ -556,35 +556,41 @@ fn first_overlap_23(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> US8 {
         }
     }
 }
-fn overlapping_claim_22(mut v0: Rc<UH0>, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: u64) -> US7 {
+fn overlapping_claim_22(mut v0: Rc<UH0>, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: u64) -> US7 {
     loop {
         match Rc::unwrap_or_clone(v1) {
-            UH1::UH1_Cons(v5, v6, v7, v8, v9) => {
-                let mut v5: Rc<str> = v5;
+            UH1::UH1_Cons(v6, v7, v8, v9, v10) => {
                 let v6: Rc<str> = v6;
-                let v7: u64 = v7;
-                let v8: Rc<UH0> = v8;
-                let mut v9: Rc<UH1> = v9;
-                let v10: bool = v3 < v7;
-                let mut v12: bool = if v10 {
-                    let v11: bool = &*v5 != &*v2;
-                    v11
+                let v7: Rc<str> = v7;
+                let v8: u64 = v8;
+                let mut v9: Rc<UH0> = v9;
+                let v10: Rc<UH1> = v10;
+                let v11: bool = v4 < v8;
+                let v13: bool = if v11 {
+                    let mut v12: bool = &*v6 != &*v2;
+                    v12
                 } else {
                     false
                 };
-                let mut v15: US8 = if v12 {
-                    first_overlap_23(v0.clone(), v8)
+                let mut v15: bool = if v13 {
+                    let mut v14: bool = &*v7 != &*v3;
+                    v14
+                } else {
+                    false
+                };
+                let mut v18: US8 = if v15 {
+                    first_overlap_23(v0.clone(), v9)
                 } else {
                     US8::US8_None
                 };
-                match v15 {
+                match v18 {
                     US8::US8_None => {
-                        v1 = v9;
+                        v1 = v10;
                         continue;
                     }
-                    US8::US8_Some(v16) => {
-                        let v16: Rc<str> = v16;
-                        return US7::US7_Some(v5, v16);
+                    US8::US8_Some(v19) => {
+                        let v19: Rc<str> = v19;
+                        return US7::US7_Some(v6, v19);
                     }
                 }
             }
@@ -595,10 +601,10 @@ fn overlapping_claim_22(mut v0: Rc<UH0>, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v
     }
 }
 fn refusal_of_14(mut v0: Rc<UH1>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<UH0>, mut v5: u64) -> US4 {
-    let v6: US4 = lease_refusal_15(v0.clone(), v1, v2.clone(), v3, v5);
+    let v6: US4 = lease_refusal_15(v0.clone(), v1, v2.clone(), v3.clone(), v5);
     match v6 {
         US4::US4_None => {
-            let mut v9: US7 = overlapping_claim_22(v4, v0, v2, v5);
+            let mut v9: US7 = overlapping_claim_22(v4, v0, v2, v3, v5);
             match v9 {
                 US7::US7_None => {
                     US4::US4_None

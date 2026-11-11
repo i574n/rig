@@ -45,12 +45,35 @@
     := size : i32 = sm'.length slashed
     := local = ? sm'.starts_with "./" slashed ?> sm'.substring 2i32 (size - 2i32) slashed |: slashed
     ? rooted ?> slashed |: sm'.replace "\\" "/" cwd ++# "/" ++# local
+
+:~ ^ repository_of (~directory : string) : string =
+    := marker = directory ++# "/.git"
+    ? file_system.directory_exists marker || file_system.file_exists marker
+    ?> directory
+    |:
+        := cut = sm'.last_index_of "/" directory
+        ? cut <= 0i32 ?> "" |: repository_of (sm'.substring 0i32 cut directory)
+
+:~ claims_base (~cwd : string) (~root : string) : string =
+    := absolute = sm'.trim_end_suffix "/" (anchored cwd root)
+    := repository = repository_of absolute
+    ? repository = "" ?> sm'.replace "\\" "/" cwd |: repository
+:~ live_claims (~lane : string) (now_ms : u64) (claims : list claim) : list claim =
+    claims |> listm'.filter (\ (c : claim) => now_ms < c.expires_ms && decliner c = "" && (lane = "" || c.owner = lane))
+
+:~ local_clock (unix_ms : u64) : string =
+    sm'.replace " " "" (sm'.replace ")" "" (sm'.replace " (" "" (local_stamp (utc_stamp unix_ms))))
+
+:~ lane_wip (~root : string) (~lane : string) : i32 =
+    := _, rows = claims_loaded root
+    listm.length (live_claims lane (unix_ms ()) (claims_of_text rows))
+
 :~ receipt
     (~verb : string) (~item : string) (~owner : string) (expires_ms : u64) (ttl_min : i32) (wip : i32) (rank : i32)
     : string
     =
     := head = "rig agile " ++# verb ++# " ok claimed=" ++# item ++# " owner=" ++# owner
-    := expiry = " expires=" ++# utc_stamp expires_ms
+    := expiry = " expires=" ++# utc_stamp expires_ms ++# " expires_local=" ++# local_clock expires_ms
     := ranked = ? rank > 0i32 ?> " rank=" ++# sm'.show rank |: ""
     head ++# expiry ++# " ttl_min=" ++# sm'.show ttl_min ++# " wip=" ++# sm'.show wip ++# ranked
 
@@ -93,7 +116,7 @@
         ?= outcome_of kind ?|
         | OutcomeGranted =>
             := where = ? detail = "" ?> "paths none" |: "paths " ++# detail
-            := line = receipt r.verb item owner expires r.ttl_min wip rank
+            := line = receipt r.verb item owner expires r.ttl_min wip rank ++# " lane_wip=" ++# sm'.show (lane_wip root owner)
             printed [ line; claim_item_lines root item; where ] 0i32
         | OutcomeRefused => printed [ "rig agile claim refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
         | OutcomeNone =>
@@ -101,7 +124,8 @@
             printed [ text ] 3i32
         | OutcomeDropped =>
             := head = "rig agile release ok id=" ++# r.item ++# " owner=" ++# r.lane
-            printed [ head ++# " released=" ++# detail ++# " wip=" ++# sm'.show wip ] 0i32
+            := mine = " lane_wip=" ++# sm'.show (lane_wip root r.lane)
+            printed [ head ++# " released=" ++# detail ++# " wip=" ++# sm'.show wip ++# mine ] 0i32
         | OutcomeReleaseRefused => printed [ "rig agile release refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
         | OutcomeUnknown => failed ("no open task with id " ++# r.item)
 :~ listed_next (~root : string) (~lane : string) (~wsjf : string) (~active : string) : i32 =
@@ -110,12 +134,32 @@
     := picks = am'.to_list_base' picked |> listm'.unbox
     := count : i32 = listm.length picks
     := head = "rig agile next ok listed=" ++# sm'.show count ++# " lane=" ++# lane ++# " claimed=none"
-    := hint = "take one: kit agile claim " ++# root ++# " <ID> --as " ++# lane ++# " (or next --claim takes the first)"
+    := hint = "take one: rig agile claim " ++# root ++# " <ID> --as " ++# lane ++# " (or next --claim takes the first)"
     printed (head :: listm.append (picks |> listm.map (claim_item_lines root)) [ ? count > 0i32 ?> hint |: "" ]) 0i32
 
+:~ claim_line (now_ms : u64) (c : claim) : string =
+    := left = (c.expires_ms - now_ms) / 60000u64
+    := where = ? c.paths = [] ?> "none" |: sm'.concat_list "," c.paths
+    := head = "  " ++# c.item ++# "  " ++# c.owner ++# "  expires=" ++# utc_stamp c.expires_ms ++# " local=" ++# local_clock c.expires_ms
+    head ++# " left_min=" ++# sm'.show left ++# "  paths=" ++# where
+
+:~ claims_listed (~root : string) (~lane : string) : i32 =
+    := _, rows = claims_loaded root
+    := now_ms = unix_ms ()
+    := live = live_claims lane now_ms (claims_of_text rows)
+    := count : i32 = listm.length live
+    := head = "rig agile claims ok live=" ++# sm'.show count ++# (? lane = "" ?> "" |: " lane=" ++# lane)
+    printed (listm.append (live |> listm.map (claim_line now_ms)) [ head ]) 0i32
+
+:~ claims_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: [] => claims_listed root ""
+    | _ :: _ :: root :: flag :: lane :: [] ?& flag = "--as" => claims_listed root lane
+    | _ => stderr_failure "agile claims: usage: claims <root> [--as <lane>]"
+
 :~ claim_requested (~root : string) (asked : claim_order) : i32 =
-    := here = file_system.get_current_directory ()
-    := r = { asked ?| paths = asked.paths |> listm.map (anchored here) }
+    := base = claims_base (file_system.get_current_directory ()) root
+    := r = { asked ?| paths = asked.paths |> listm.map (anchored base) }
     := found, ranked, started, known, live = claim_ranking root
     := mine = ? asked.next ?> agile_team_lane.lane.lane_items (root, asked.lane) |: ""
     := wsjf, active = ? asked.next ?> agile_claim_listing.listing.lane_order (ranked, started, mine) |: ranked, started
@@ -143,6 +187,33 @@
     testing.expect (anchored "/home/x" "./lib/a.spi" = "/home/x/lib/a.spi") (anchored "/home/x" "./lib/a.spi")
     testing.expect (anchored "/home/x" "/etc/y" = "/etc/y" && anchored "/home/x" "D:/z/**" = "D:/z/**") "absolute"
 
+///> rust
+:# claims_lists_live_leases_by_lane =
+    := a = { item = "A-1"; owner = "kit"; expires_ms = 120000u64; paths = [ "src/a/**" ] }
+    := b = { item = "B-2"; owner = "x"; expires_ms = 500u64; paths = [] }
+    := d = { item = "C-3"; owner = "~kit"; expires_ms = 120000u64; paths = [] }
+    testing.expect (live_claims "" 1000u64 [ a; b; d ] = [ a ]) "expired leases and declines are not live claims"
+    testing.expect (live_claims "x" 1000u64 [ a; b; d ] = []) "a lane filter keeps only that lane's leases"
+    testing.expect (live_claims "kit" 1000u64 [ a; b; d ] = [ a ]) "the lane's own lease"
+    := line = claim_line 0u64 a
+    testing.expect (sm'.starts_with "  A-1  kit  expires=" line && sm'.ends_with " left_min=2  paths=src/a/**" line) line
+    testing.expect (sm'.ends_with "paths=none" (claim_line 0u64 d)) "a lease without paths says none"
+
+///> rust
+:# relative_globs_are_anchored_at_the_backlog_repository =
+    := temp = sm'.trim_end_suffix "/" (sm'.replace "\\" "/" (file_system.get_temp_path ()))
+    := repository = temp ++# "/rig-claims-base-" ++# sm'.show (unix_ms ())
+    := _ = file_system.directory_create_all (repository ++# "/.git")
+    := _ = file_system.directory_create_all (repository ++# "/team/backlog")
+    := elsewhere = claims_base "C:/elsewhere" (repository ++# "/team/backlog")
+    := relative = claims_base (repository ++# "/team") "backlog"
+    file_system.directory_delete true repository
+    testing.expect (elsewhere = repository) "an absolute root anchors at its repository, not the shell"
+    testing.expect (relative = repository) "a relative root resolves against the shell first"
+    testing.expect (repository_of "/rig-claims-no-repository/a" = "") "no repository above"
+    testing.expect (claims_base "/shell" "/rig-claims-no-repository/a" = "/shell") "without a repository the shell anchors"
+
 := main () : i32 =
     export "rig_agile_claim_run" ((\ () => claim_run ()) : () -> i32)
+    export "rig_agile_claims_run" ((\ () => claims_run ()) : () -> i32)
     0i32

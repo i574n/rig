@@ -73,13 +73,13 @@
     same (line_starting out "1\t") "1\tbase\t1\t4\t4"
     shows
         (succeeded (rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("help", Arg ("table", NoArgs)))))
-        "usage: kit table: query <file>"
+        "usage: rig table: query <file>"
     shows
         (succeeded (rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("help", Arg ("window", NoArgs)))))
-        "usage: kit window: request <class> <minutes>"
+        "usage: rig window: request <class> <minutes>"
     shows
         (succeeded (rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("help", Arg ("kill", NoArgs)))))
-        "usage: kit ps [regex] [--tree] [--mine] | kill <pid>"
+        "usage: rig ps [regex] [--tree] [--mine] | kill <pid>"
     fixture_root_remove root
 
 ///> rust

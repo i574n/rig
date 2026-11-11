@@ -417,6 +417,19 @@ second run changes nothing.
 `agile note <root> <id> <text> [--as <author>]` appends a dated note (`Note` items with id,
 sequence, UTC instant, author and text, kept after the task's lines; the `task_note` union is added
 on first use), and `agile show` prints the notes under the title (`--json`: a `notes` array).
+
+Typed facts belong in their own state files, not in note prose, so `next`, `cadence` and the lint can read them:
+
+- `agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>` records what the item waits for in
+  `state/waits.spi` (`item:<OTHER-ID>`, `when:<condition>`, `lane:<lane>`, `user:<what is missing from the user>`,
+  `train:<name>`); `--wait --clear` removes it. Prefer it to writing "blocked on" or "waits on" in a note.
+- `agile edit <root> <ID> --asked <yyyy-mm-dd> --quote "<the user's exact words>"` records a user request in
+  `state/asks.spi`, so `cadence` reports asks left unanswered; `--asked --clear` removes it.
+- `agile edit <root> <child-ID> --parent <epic-ID>` links a child to its epic in `state/parents.spi`;
+  `--parent --clear` unlinks it.
+- `agile edit <root> <ID> --split milestones` splits an item whose notes carry a `MILESTONES:` list into children.
+
+Quote `--paths` globs in Git Bash (`--paths 'src/a/**'`): unquoted, the shell expands them before rig sees them.
 `agile notes from-title <root> <id>` splits the title only at a `"; "` followed by a stamp
 (`yyyy-MM-dd HH:mm`, `yyyy-MM-dd` or `HH:mm`): it keeps the title up to the first such split and moves
 each stamped tail, undated clauses included, into one note dated from its stamp (author `migrated`).

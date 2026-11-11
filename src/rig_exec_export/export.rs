@@ -395,20 +395,20 @@ fn export_run_0() -> i32 {
                         eprintln!("{}", v58);
                         0i32
                     } else {
-                        let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"); } LIT.with(|lit| lit.clone()) };
+                        let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"); } LIT.with(|lit| lit.clone()) };
                         eprintln!("{}", v59);
                         2i32
                     }
                 }
                 _ => {
-                    let v61: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"); } LIT.with(|lit| lit.clone()) };
+                    let v61: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v61);
                     2i32
                 }
             }
         }
         _ => {
-            let v63: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"); } LIT.with(|lit| lit.clone()) };
+            let v63: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v63);
             2i32
         }

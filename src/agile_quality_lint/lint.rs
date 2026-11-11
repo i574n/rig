@@ -247,70 +247,94 @@ fn method13(mut v0: Rc<UH2>, mut v1: Rc<UH2>) -> Rc<UH2> {
 fn markers_of_16(mut v0: US0) -> Rc<UH2> {
     match v0 {
         US0::US0_BlockerNamed => {
-            let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("blocked on"); } LIT.with(|lit| lit.clone()) };
-            let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("blocker:"); } LIT.with(|lit| lit.clone()) };
-            let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("waits on"); } LIT.with(|lit| lit.clone()) };
-            let v30: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let v31: Rc<UH2> = Rc::new(UH2::UH2_Cons(v29, v30));
-            let v32: Rc<UH2> = Rc::new(UH2::UH2_Cons(v28, v31));
-            Rc::new(UH2::UH2_Cons(v27, v32))
+            let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("blocked on"); } LIT.with(|lit| lit.clone()) };
+            let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("blocker:"); } LIT.with(|lit| lit.clone()) };
+            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("waits on"); } LIT.with(|lit| lit.clone()) };
+            let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("bloqueado por"); } LIT.with(|lit| lit.clone()) };
+            let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("bloqueio:"); } LIT.with(|lit| lit.clone()) };
+            let v46: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("espera por"); } LIT.with(|lit| lit.clone()) };
+            let v47: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v48: Rc<UH2> = Rc::new(UH2::UH2_Cons(v46, v47));
+            let v49: Rc<UH2> = Rc::new(UH2::UH2_Cons(v45, v48));
+            let v50: Rc<UH2> = Rc::new(UH2::UH2_Cons(v44, v49));
+            let v51: Rc<UH2> = Rc::new(UH2::UH2_Cons(v43, v50));
+            let v52: Rc<UH2> = Rc::new(UH2::UH2_Cons(v42, v51));
+            Rc::new(UH2::UH2_Cons(v41, v52))
         }
         US0::US0_DoneDefinition => {
             let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("dod:"); } LIT.with(|lit| lit.clone()) };
             let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("definition of done"); } LIT.with(|lit| lit.clone()) };
-            let v3: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let mut v4: Rc<UH2> = Rc::new(UH2::UH2_Cons(v2, v3));
-            Rc::new(UH2::UH2_Cons(v1, v4))
+            let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("pronto quando"); } LIT.with(|lit| lit.clone()) };
+            let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("definição de pronto"); } LIT.with(|lit| lit.clone()) };
+            let mut v5: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v6: Rc<UH2> = Rc::new(UH2::UH2_Cons(v4, v5));
+            let v7: Rc<UH2> = Rc::new(UH2::UH2_Cons(v3, v6));
+            let v8: Rc<UH2> = Rc::new(UH2::UH2_Cons(v2, v7));
+            Rc::new(UH2::UH2_Cons(v1, v8))
         }
         US0::US0_DoneEvidence => {
-            let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("exit 0"); } LIT.with(|lit| lit.clone()) };
-            let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" pass"); } LIT.with(|lit| lit.clone()) };
-            let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("green"); } LIT.with(|lit| lit.clone()) };
-            let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("proof:"); } LIT.with(|lit| lit.clone()) };
-            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("proven"); } LIT.with(|lit| lit.clone()) };
-            let v21: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let v22: Rc<UH2> = Rc::new(UH2::UH2_Cons(v20, v21));
-            let v23: Rc<UH2> = Rc::new(UH2::UH2_Cons(v19, v22));
-            let v24: Rc<UH2> = Rc::new(UH2::UH2_Cons(v18, v23));
-            let v25: Rc<UH2> = Rc::new(UH2::UH2_Cons(v17, v24));
-            Rc::new(UH2::UH2_Cons(v16, v25))
+            let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("exit 0"); } LIT.with(|lit| lit.clone()) };
+            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" pass"); } LIT.with(|lit| lit.clone()) };
+            let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("green"); } LIT.with(|lit| lit.clone()) };
+            let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("proof:"); } LIT.with(|lit| lit.clone()) };
+            let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("proven"); } LIT.with(|lit| lit.clone()) };
+            let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("prova:"); } LIT.with(|lit| lit.clone()) };
+            let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("provado"); } LIT.with(|lit| lit.clone()) };
+            let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("verde"); } LIT.with(|lit| lit.clone()) };
+            let v32: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v33: Rc<UH2> = Rc::new(UH2::UH2_Cons(v31, v32));
+            let v34: Rc<UH2> = Rc::new(UH2::UH2_Cons(v30, v33));
+            let v35: Rc<UH2> = Rc::new(UH2::UH2_Cons(v29, v34));
+            let v36: Rc<UH2> = Rc::new(UH2::UH2_Cons(v28, v35));
+            let v37: Rc<UH2> = Rc::new(UH2::UH2_Cons(v27, v36));
+            let v38: Rc<UH2> = Rc::new(UH2::UH2_Cons(v26, v37));
+            let v39: Rc<UH2> = Rc::new(UH2::UH2_Cons(v25, v38));
+            Rc::new(UH2::UH2_Cons(v24, v39))
         }
         US0::US0_NextStep => {
-            let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("next:"); } LIT.with(|lit| lit.clone()) };
-            let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("next step"); } LIT.with(|lit| lit.clone()) };
-            let v8: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let mut v9: Rc<UH2> = Rc::new(UH2::UH2_Cons(v7, v8));
-            Rc::new(UH2::UH2_Cons(v6, v9))
+            let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("next:"); } LIT.with(|lit| lit.clone()) };
+            let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("next step"); } LIT.with(|lit| lit.clone()) };
+            let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("próximo:"); } LIT.with(|lit| lit.clone()) };
+            let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("próximo passo"); } LIT.with(|lit| lit.clone()) };
+            let v14: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v15: Rc<UH2> = Rc::new(UH2::UH2_Cons(v13, v14));
+            let v16: Rc<UH2> = Rc::new(UH2::UH2_Cons(v12, v15));
+            let v17: Rc<UH2> = Rc::new(UH2::UH2_Cons(v11, v16));
+            Rc::new(UH2::UH2_Cons(v10, v17))
         }
         US0::US0_PauseResume => {
-            let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume when"); } LIT.with(|lit| lit.clone()) };
-            let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume:"); } LIT.with(|lit| lit.clone()) };
-            let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resumes on"); } LIT.with(|lit| lit.clone()) };
-            let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume from"); } LIT.with(|lit| lit.clone()) };
-            let v38: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let v39: Rc<UH2> = Rc::new(UH2::UH2_Cons(v37, v38));
-            let v40: Rc<UH2> = Rc::new(UH2::UH2_Cons(v36, v39));
-            let v41: Rc<UH2> = Rc::new(UH2::UH2_Cons(v35, v40));
-            Rc::new(UH2::UH2_Cons(v34, v41))
+            let v54: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume when"); } LIT.with(|lit| lit.clone()) };
+            let v55: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume:"); } LIT.with(|lit| lit.clone()) };
+            let v56: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resumes on"); } LIT.with(|lit| lit.clone()) };
+            let v57: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume from"); } LIT.with(|lit| lit.clone()) };
+            let v58: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("retomar quando"); } LIT.with(|lit| lit.clone()) };
+            let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("retoma quando"); } LIT.with(|lit| lit.clone()) };
+            let v60: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v61: Rc<UH2> = Rc::new(UH2::UH2_Cons(v59, v60));
+            let v62: Rc<UH2> = Rc::new(UH2::UH2_Cons(v58, v61));
+            let v63: Rc<UH2> = Rc::new(UH2::UH2_Cons(v57, v62));
+            let v64: Rc<UH2> = Rc::new(UH2::UH2_Cons(v56, v63));
+            let v65: Rc<UH2> = Rc::new(UH2::UH2_Cons(v55, v64));
+            Rc::new(UH2::UH2_Cons(v54, v65))
         }
         US0::US0_PlanningFields => {
             { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) }
         }
         US0::US0_ProseWait => {
-            let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("waits on"); } LIT.with(|lit| lit.clone()) };
-            let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume when"); } LIT.with(|lit| lit.clone()) };
-            let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("blocked on"); } LIT.with(|lit| lit.clone()) };
-            let v46: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let v47: Rc<UH2> = Rc::new(UH2::UH2_Cons(v45, v46));
-            let v48: Rc<UH2> = Rc::new(UH2::UH2_Cons(v44, v47));
-            Rc::new(UH2::UH2_Cons(v43, v48))
+            let v67: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("waits on"); } LIT.with(|lit| lit.clone()) };
+            let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("resume when"); } LIT.with(|lit| lit.clone()) };
+            let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("blocked on"); } LIT.with(|lit| lit.clone()) };
+            let v70: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v71: Rc<UH2> = Rc::new(UH2::UH2_Cons(v69, v70));
+            let v72: Rc<UH2> = Rc::new(UH2::UH2_Cons(v68, v71));
+            Rc::new(UH2::UH2_Cons(v67, v72))
         }
         US0::US0_TypeFeatures => {
-            let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("typefeatures:"); } LIT.with(|lit| lit.clone()) };
-            let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("typefeatureset plan"); } LIT.with(|lit| lit.clone()) };
-            let v13: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-            let v14: Rc<UH2> = Rc::new(UH2::UH2_Cons(v12, v13));
-            Rc::new(UH2::UH2_Cons(v11, v14))
+            let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("typefeatures:"); } LIT.with(|lit| lit.clone()) };
+            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("typefeatureset plan"); } LIT.with(|lit| lit.clone()) };
+            let v21: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+            let v22: Rc<UH2> = Rc::new(UH2::UH2_Cons(v20, v21));
+            Rc::new(UH2::UH2_Cons(v19, v22))
         }
     }
 }

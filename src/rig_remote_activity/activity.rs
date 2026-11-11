@@ -420,7 +420,7 @@ fn activity_lines_12(mut v0: Rc<str>, mut v1: US0) -> Rc<UH1> {
         US0::US0_NodeIdle(v2) => {
             let v2: i32 = v2;
             let v5: Rc<str> = format_real_16(v2);
-            let mut v7: Rc<str> = string_concat(&["rig remote status IDLE machine=", &*v0, " running=0 queued=", &*v5, " (start the top node-runnable item: kit agile next <backlog root> --tag node --open 3)"]);
+            let mut v7: Rc<str> = string_concat(&["rig remote status IDLE machine=", &*v0, " running=0 queued=", &*v5, " (start the top node-runnable item: rig agile next <backlog root> --tag node --open 3)"]);
             let v8: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
             Rc::new(UH1::UH1_Cons(v7, v8))
         }

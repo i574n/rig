@@ -382,14 +382,14 @@
 := verb_help_text (~verb : string) : string =
     := name, effect, usage, summary, handler = command_descriptor_by_index (u64_text (command_code verb))
     := head = rust_std_string.model.concat5 "name=" name " effect=" effect " handler="
-    := body = rust_std_string.model.concat5 handler "\nsummary=" summary "\nusage: kit " usage
+    := body = rust_std_string.model.concat5 handler "\nsummary=" summary "\nusage: rig " usage
     rust_std_string.model.concat5 head body "" "" ""
 
 :~ help_request_text () : string =
     ?= help_request () ?|
     | NoHelpRequested => ""
     | VerbHelp verb => verb_help_text verb
-    | CapabilityHelp capability => rust_std_string.model.concat5 "usage: kit " (proxy_usage capability) "" "" ""
+    | CapabilityHelp capability => rust_std_string.model.concat5 "usage: rig " (proxy_usage capability) "" "" ""
 :| help_flag =
     | CompletionHelp
     | JsonHelp

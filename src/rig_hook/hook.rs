@@ -73,7 +73,7 @@ enum US3 {
     US3_None,
 }
 fn hook_usage_1() -> i32 {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit hook pre [--repos-root d] [--closed-root d,..] [--refuse .x,..] [--advise .x]"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig hook pre [--repos-root d] [--closed-root d,..] [--refuse .x,..] [--advise .x]"); } LIT.with(|lit| lit.clone()) };
     eprintln!("{}", v0);
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("       kit hook writes   (reads a Bash/PowerShell hook payload; prints writes=yes|no)"); } LIT.with(|lit| lit.clone()) };
     eprintln!("{}", v1);

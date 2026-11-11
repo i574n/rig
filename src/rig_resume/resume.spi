@@ -28,6 +28,7 @@
     | RecentJobs
     | MachineWindows
     | AuthorNotes
+    | AuthorClaims
 
 :== resume_scope =
     {
@@ -42,6 +43,7 @@
     | RecentJobs => "== recent jobs (job list)"
     | MachineWindows => "== machine windows (window list)"
     | AuthorNotes => "== recent notes by author (agile notes --as)"
+    | AuthorClaims => "== live claims by author (agile claims --as)"
 
 := spawned_arguments (scope : resume_scope) (section : resume_section) : string =
     ?= section ?|
@@ -49,6 +51,7 @@
     | RecentJobs => "job\nlist\n12"
     | MachineWindows => "window\nlist"
     | AuthorNotes => ""
+    | AuthorClaims => "agile\nclaims\n" ++# scope.root ++# "\n--as\n" ++# scope.author
 
 := note_needle () : string = (item_constructor NoteItem) ++# "\""
 
@@ -80,7 +83,7 @@
 
 := section_wanted (scope : resume_scope) (section : resume_section) : bool =
     ?= section ?|
-    | AuthorNotes => ? scope.author = "" ?> !- |: !+
+    | AuthorNotes | AuthorClaims => ? scope.author = "" ?> !- |: !+
     | _ => !+
 
 := section_body (scope : resume_scope) (section : resume_section) : string =
@@ -101,7 +104,7 @@
 :~ resume_run () : i32 =
     := scope = { root = argument 2i32; team = option_value "--team"; author = option_value "--as" }
     ? scope.root = "" || sm'.starts_with "--" scope.root ?>
-        stderr_line "rig error: usage: kit resume <backlog-root> [--team <team>] [--as <author>]"
+        stderr_line "rig error: usage: rig resume <backlog-root> [--team <team>] [--as <author>]"
         2i32
     |:
         := shown =

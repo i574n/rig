@@ -140,5 +140,5 @@
         2i32
         "plain.md: no frontmatter"
     expect (path_exists data = !-) "nothing written"
-    rejected_with (memory_run root (Arg ("sync", NoArgs))) 2i32 "usage: kit memory import <memory-dir> <data.spi>"
+    rejected_with (memory_run root (Arg ("sync", NoArgs))) 2i32 "usage: rig memory import <memory-dir> <data.spi>"
     fixture_root_remove root

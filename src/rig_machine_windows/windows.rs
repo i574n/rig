@@ -477,30 +477,70 @@ fn window_run_0() -> i32 {
                     };
                     match v42 {
                         US3::US3_None => {
-                            let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
-                            let v48: US4 = US4::US4_LiveGui;
-                            let v49: Rc<str> = class_word_29(v48);
-                            let v52: US4 = US4::US4_TestSuite;
-                            let v53: Rc<str> = class_word_29(v52);
-                            let v56: US4 = US4::US4_HeavyBuild;
-                            let v57: Rc<str> = class_word_29(v56);
-                            let v60: US4 = US4::US4_Compile;
-                            let v61: Rc<str> = class_word_29(v60);
-                            let v64: US4 = US4::US4_CompilerInstall;
-                            let v65: Rc<str> = class_word_29(v64);
-                            let v68: US4 = US4::US4_TreeRead;
-                            let v69: Rc<str> = class_word_29(v68);
-                            let v72: US4 = US4::US4_Bench;
-                            let v73: Rc<str> = class_word_29(v72);
-                            let v76: US4 = US4::US4_CompileHold;
-                            let v77: Rc<str> = class_word_29(v76);
-                            let v80: US4 = US4::US4_TreeWrite;
-                            let v81: Rc<str> = class_word_29(v80);
-                            let v83: Rc<str> = string_concat(&["", &*v49, "|", &*v53, "|", &*v57, "|", &*v61, "|", &*v65, "|", &*v69, "|", &*v73, "|", &*v77, "|", &*v81]);
-                            let v84: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                            let v85: Rc<str> = concat5_2(v47, v83, v84.clone(), v84.clone(), v84.clone());
-                            let v86: Rc<str> = string_concat(&["unknown verb '", &*v4, "'; ", &*v85]);
-                            refused_1(v86)
+                            let v45: bool = &*v4 == "--help";
+                            let v47: bool = if v45 {
+                                true
+                            } else {
+                                let v46: bool = &*v4 == "-h";
+                                v46
+                            };
+                            let v49: bool = if v47 {
+                                true
+                            } else {
+                                let v48: bool = &*v4 == "help";
+                                v48
+                            };
+                            if v49 {
+                                let v50: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
+                                let v51: US4 = US4::US4_LiveGui;
+                                let v52: Rc<str> = class_word_29(v51);
+                                let v55: US4 = US4::US4_TestSuite;
+                                let v56: Rc<str> = class_word_29(v55);
+                                let v59: US4 = US4::US4_HeavyBuild;
+                                let v60: Rc<str> = class_word_29(v59);
+                                let v63: US4 = US4::US4_Compile;
+                                let v64: Rc<str> = class_word_29(v63);
+                                let v67: US4 = US4::US4_CompilerInstall;
+                                let v68: Rc<str> = class_word_29(v67);
+                                let v71: US4 = US4::US4_TreeRead;
+                                let v72: Rc<str> = class_word_29(v71);
+                                let v75: US4 = US4::US4_Bench;
+                                let v76: Rc<str> = class_word_29(v75);
+                                let v79: US4 = US4::US4_CompileHold;
+                                let v80: Rc<str> = class_word_29(v79);
+                                let v83: US4 = US4::US4_TreeWrite;
+                                let v84: Rc<str> = class_word_29(v83);
+                                let v86: Rc<str> = string_concat(&["", &*v52, "|", &*v56, "|", &*v60, "|", &*v64, "|", &*v68, "|", &*v72, "|", &*v76, "|", &*v80, "|", &*v84]);
+                                let v87: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                let v88: Rc<str> = concat5_2(v50, v86, v87.clone(), v87.clone(), v87.clone());
+                                stdout_line_8(v88);
+                                0i32
+                            } else {
+                                let v91: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
+                                let v92: US4 = US4::US4_LiveGui;
+                                let v93: Rc<str> = class_word_29(v92);
+                                let v96: US4 = US4::US4_TestSuite;
+                                let v97: Rc<str> = class_word_29(v96);
+                                let v100: US4 = US4::US4_HeavyBuild;
+                                let v101: Rc<str> = class_word_29(v100);
+                                let v104: US4 = US4::US4_Compile;
+                                let v105: Rc<str> = class_word_29(v104);
+                                let v108: US4 = US4::US4_CompilerInstall;
+                                let v109: Rc<str> = class_word_29(v108);
+                                let v112: US4 = US4::US4_TreeRead;
+                                let v113: Rc<str> = class_word_29(v112);
+                                let v116: US4 = US4::US4_Bench;
+                                let v117: Rc<str> = class_word_29(v116);
+                                let v120: US4 = US4::US4_CompileHold;
+                                let v121: Rc<str> = class_word_29(v120);
+                                let v124: US4 = US4::US4_TreeWrite;
+                                let v125: Rc<str> = class_word_29(v124);
+                                let v127: Rc<str> = string_concat(&["", &*v93, "|", &*v97, "|", &*v101, "|", &*v105, "|", &*v109, "|", &*v113, "|", &*v117, "|", &*v121, "|", &*v125]);
+                                let v128: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                let v129: Rc<str> = concat5_2(v91, v127, v128.clone(), v128.clone(), v128.clone());
+                                let v130: Rc<str> = string_concat(&["unknown verb '", &*v4, "'; ", &*v129]);
+                                refused_1(v130)
+                            }
                         }
                         US3::US3_Some(v43) => {
                             let v43: US1 = v43;
@@ -509,58 +549,58 @@ fn window_run_0() -> i32 {
                     }
                 }
                 _ => {
-                    let v90: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
-                    let v91: US4 = US4::US4_LiveGui;
-                    let v92: Rc<str> = class_word_29(v91);
-                    let v95: US4 = US4::US4_TestSuite;
-                    let v96: Rc<str> = class_word_29(v95);
-                    let v99: US4 = US4::US4_HeavyBuild;
-                    let v100: Rc<str> = class_word_29(v99);
-                    let v103: US4 = US4::US4_Compile;
-                    let v104: Rc<str> = class_word_29(v103);
-                    let v107: US4 = US4::US4_CompilerInstall;
-                    let v108: Rc<str> = class_word_29(v107);
-                    let v111: US4 = US4::US4_TreeRead;
-                    let v112: Rc<str> = class_word_29(v111);
-                    let v115: US4 = US4::US4_Bench;
-                    let v116: Rc<str> = class_word_29(v115);
-                    let v119: US4 = US4::US4_CompileHold;
-                    let v120: Rc<str> = class_word_29(v119);
-                    let v123: US4 = US4::US4_TreeWrite;
-                    let v124: Rc<str> = class_word_29(v123);
-                    let v126: Rc<str> = string_concat(&["", &*v92, "|", &*v96, "|", &*v100, "|", &*v104, "|", &*v108, "|", &*v112, "|", &*v116, "|", &*v120, "|", &*v124]);
-                    let v127: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                    let v128: Rc<str> = concat5_2(v90, v126, v127.clone(), v127.clone(), v127.clone());
-                    let v129: Rc<str> = string_concat(&["unknown verb ''; ", &*v128]);
-                    refused_1(v129)
+                    let v135: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
+                    let v136: US4 = US4::US4_LiveGui;
+                    let v137: Rc<str> = class_word_29(v136);
+                    let v140: US4 = US4::US4_TestSuite;
+                    let v141: Rc<str> = class_word_29(v140);
+                    let v144: US4 = US4::US4_HeavyBuild;
+                    let v145: Rc<str> = class_word_29(v144);
+                    let v148: US4 = US4::US4_Compile;
+                    let v149: Rc<str> = class_word_29(v148);
+                    let v152: US4 = US4::US4_CompilerInstall;
+                    let v153: Rc<str> = class_word_29(v152);
+                    let v156: US4 = US4::US4_TreeRead;
+                    let v157: Rc<str> = class_word_29(v156);
+                    let v160: US4 = US4::US4_Bench;
+                    let v161: Rc<str> = class_word_29(v160);
+                    let v164: US4 = US4::US4_CompileHold;
+                    let v165: Rc<str> = class_word_29(v164);
+                    let v168: US4 = US4::US4_TreeWrite;
+                    let v169: Rc<str> = class_word_29(v168);
+                    let v171: Rc<str> = string_concat(&["", &*v137, "|", &*v141, "|", &*v145, "|", &*v149, "|", &*v153, "|", &*v157, "|", &*v161, "|", &*v165, "|", &*v169]);
+                    let v172: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                    let v173: Rc<str> = concat5_2(v135, v171, v172.clone(), v172.clone(), v172.clone());
+                    let v174: Rc<str> = string_concat(&["unknown verb ''; ", &*v173]);
+                    refused_1(v174)
                 }
             }
         }
         _ => {
-            let v132: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
-            let v133: US4 = US4::US4_LiveGui;
-            let v134: Rc<str> = class_word_29(v133);
-            let v137: US4 = US4::US4_TestSuite;
-            let v138: Rc<str> = class_word_29(v137);
-            let v141: US4 = US4::US4_HeavyBuild;
-            let v142: Rc<str> = class_word_29(v141);
-            let v145: US4 = US4::US4_Compile;
-            let v146: Rc<str> = class_word_29(v145);
-            let v149: US4 = US4::US4_CompilerInstall;
-            let v150: Rc<str> = class_word_29(v149);
-            let v153: US4 = US4::US4_TreeRead;
-            let v154: Rc<str> = class_word_29(v153);
-            let v157: US4 = US4::US4_Bench;
-            let v158: Rc<str> = class_word_29(v157);
-            let v161: US4 = US4::US4_CompileHold;
-            let v162: Rc<str> = class_word_29(v161);
-            let v165: US4 = US4::US4_TreeWrite;
-            let v166: Rc<str> = class_word_29(v165);
-            let v168: Rc<str> = string_concat(&["", &*v134, "|", &*v138, "|", &*v142, "|", &*v146, "|", &*v150, "|", &*v154, "|", &*v158, "|", &*v162, "|", &*v166]);
-            let v169: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-            let v170: Rc<str> = concat5_2(v132, v168, v169.clone(), v169.clone(), v169.clone());
-            let v171: Rc<str> = string_concat(&["unknown verb ''; ", &*v170]);
-            refused_1(v171)
+            let v177: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: window request <class> <minutes> [--label <text>] [--wait <minutes>|until-granted] [--min-free-mb <n>] | window release <id> | window list | window check <class> | window claim <path> | window wait-clear <class,...> [--settle <n>] [--every <seconds>] [--max <minutes>] | window run <class> <minutes> [--label <text>] [--wait <minutes>] [--min-free-mb <n>] -- <command> [args...] | window remote <ssh-alias> [--bin <remote kit path>]; classes "); } LIT.with(|lit| lit.clone()) };
+            let v178: US4 = US4::US4_LiveGui;
+            let v179: Rc<str> = class_word_29(v178);
+            let v182: US4 = US4::US4_TestSuite;
+            let v183: Rc<str> = class_word_29(v182);
+            let v186: US4 = US4::US4_HeavyBuild;
+            let v187: Rc<str> = class_word_29(v186);
+            let v190: US4 = US4::US4_Compile;
+            let v191: Rc<str> = class_word_29(v190);
+            let v194: US4 = US4::US4_CompilerInstall;
+            let v195: Rc<str> = class_word_29(v194);
+            let v198: US4 = US4::US4_TreeRead;
+            let v199: Rc<str> = class_word_29(v198);
+            let v202: US4 = US4::US4_Bench;
+            let v203: Rc<str> = class_word_29(v202);
+            let v206: US4 = US4::US4_CompileHold;
+            let v207: Rc<str> = class_word_29(v206);
+            let v210: US4 = US4::US4_TreeWrite;
+            let v211: Rc<str> = class_word_29(v210);
+            let v213: Rc<str> = string_concat(&["", &*v179, "|", &*v183, "|", &*v187, "|", &*v191, "|", &*v195, "|", &*v199, "|", &*v203, "|", &*v207, "|", &*v211]);
+            let v214: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+            let v215: Rc<str> = concat5_2(v177, v213, v214.clone(), v214.clone(), v214.clone());
+            let v216: Rc<str> = string_concat(&["unknown verb ''; ", &*v215]);
+            refused_1(v216)
         }
     }
 }

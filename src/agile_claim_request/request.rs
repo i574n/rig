@@ -380,9 +380,13 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                 }
                             }
                             US4::US4_FlagPaths => {
-                                let v48: bool = true;
-                                let v49: bool = method13(v22.clone(), v48);
-                                let v50: bool = match &v1 {
+                                let v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+                                let v49: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
+                                let v50: Rc<str> = Rc::<str>::from(v20.replace(&*v48, &*v49));
+                                let v51: Rc<UH0> = globs_of_flag_6(v50);
+                                let v52: bool = true;
+                                let v53: bool = method13(v51.clone(), v52);
+                                let v54: bool = match &v1 {
                                     US1::US1_VerbClaim => {
                                         true
                                     }
@@ -390,8 +394,8 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                         false
                                     }
                                 };
-                                let v53: bool = if v50 {
-                                    let v51: bool = match &*v22 {
+                                let v57: bool = if v54 {
+                                    let v55: bool = match &*v51 {
                                         UH0::UH0_Nil => {
                                             true
                                         }
@@ -399,18 +403,18 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                             false
                                         }
                                     };
-                                    let v52: bool = v51 != true;
-                                    v52
+                                    let v56: bool = v55 != true;
+                                    v56
                                 } else {
                                     false
                                 };
-                                let v54: bool = v53 && v49;
-                                if v54 {
-                                    (v0, v5) = (v21, v22);
+                                let v58: bool = v57 && v53;
+                                if v58 {
+                                    (v0, v5) = (v21, v51);
                                     continue;
                                 } else {
-                                    let v56: Rc<str> = paths_refusal_14(v20);
-                                    return US2::US2_RequestRefused(v56);
+                                    let v60: Rc<str> = paths_refusal_14(v20);
+                                    return US2::US2_RequestRefused(v60);
                                 }
                             }
                             US4::US4_FlagTtl => {

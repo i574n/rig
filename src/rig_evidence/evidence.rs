@@ -915,7 +915,7 @@ fn evidence_run_0() -> i32 {
         v9
     };
     if v10 {
-        let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit evidence refresh <root> <relative path> [--as <new relative path>] [--dry-run]"); } LIT.with(|lit| lit.clone()) };
+        let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig evidence refresh <root> <relative path> [--as <new relative path>] [--dry-run]"); } LIT.with(|lit| lit.clone()) };
         stderr_line_1(v11)
     } else {
         let v13: i32 = 3i32;

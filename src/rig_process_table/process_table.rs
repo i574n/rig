@@ -473,7 +473,7 @@ fn list_run_1(mut v0: u64, mut v1: Rc<str>, mut v2: bool, mut v3: bool, mut v4: 
     let v5: Rc<str> = pattern_problem_2(v1.clone());
     let v6: bool = &*v4 != "";
     if v6 {
-        let v9: Rc<str> = string_concat(&["ps: ", &*v4, "; usage: kit ps [regex] [--tree] [--mine] | kill <pid>... [--tree] [--mine [--theirs <job-id>]]"]);
+        let v9: Rc<str> = string_concat(&["ps: ", &*v4, "; usage: rig ps [regex] [--tree] [--mine] | kill <pid>... [--tree] [--mine [--theirs <job-id>]]"]);
         println!("{}", v9);
         2i32
     } else {
@@ -703,7 +703,7 @@ fn process_run_0() -> i32 {
             list_run_1(v0, v21, v22, v23, v24)
         }
         US3::US3_ProcessUnknown => {
-            let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit ps [regex] [--tree] [--mine] | kill <pid>... [--tree] [--mine [--theirs <job-id>]]"); } LIT.with(|lit| lit.clone()) };
+            let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig ps [regex] [--tree] [--mine] | kill <pid>... [--tree] [--mine [--theirs <job-id>]]"); } LIT.with(|lit| lit.clone()) };
             println!("{}", v27);
             2i32
         }

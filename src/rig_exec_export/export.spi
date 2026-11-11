@@ -24,7 +24,7 @@
     notebooks_in directory |> listm.map (\ (name : string) => rig_exec_cells.cells.notebook_prom (machine, read name))
 
 := export_usage () : string =
-    "usage: kit metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"
+    "usage: rig metrics export [--notebooks <dir>] [--jobs [--since <unix ms>]] [--machine box|node]"
 
 :~ export_run () : i32 =
     ?= env.command_line_arguments () ?|

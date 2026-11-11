@@ -133,6 +133,7 @@
         agile_with_root \ () =>
             ? next_claims () ?> $"agile_claim_cli::rig_agile_claim_run()" |: $"agile_task_next::rig_agile_next_run()"
     | AgileClaim | AgileRelease => agile_with_root \ () => $"agile_claim_cli::rig_agile_claim_run()"
+    | AgileClaims => agile_with_root \ () => $"agile_claim_cli::rig_agile_claims_run()"
     | AgileRoots => agile_with_root \ () => $"agile_todo_roots::rig_agile_roots_run()"
     | AgileLinks => agile_with_root \ () => $"agile_memory_links::rig_agile_links_run()"
     | AgileWip => agile_with_root \ () => $"agile_todo_merge::rig_agile_wip_run()"

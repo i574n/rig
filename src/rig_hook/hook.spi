@@ -47,7 +47,7 @@
     "rig hook " ++# rig_hook_verbs.lease_verbs.sign_line command
 
 :~ hook_usage () : i32 =
-    console.write_error_line "usage: kit hook pre [--repos-root d] [--closed-root d,..] [--refuse .x,..] [--advise .x]"
+    console.write_error_line "usage: rig hook pre [--repos-root d] [--closed-root d,..] [--refuse .x,..] [--advise .x]"
     console.write_error_line "       kit hook writes   (reads a Bash/PowerShell hook payload; prints writes=yes|no)"
     2i32
 

@@ -283,7 +283,12 @@
     | _ :: word :: words =>
         ?= verb_of word ?|
         | Some verb => verb_ran verb words
-        | None => refused ("unknown verb '" ++# word ++# "'; " ++# window_usage ())
+        | None =>
+            ? word = "--help" || word = "-h" || word = "help"
+            ?>
+                stdout_line (window_usage ())
+                0i32
+            |: refused ("unknown verb '" ++# word ++# "'; " ++# window_usage ())
     | _ => refused ("unknown verb ''; " ++# window_usage ())
 :~ ^ dropped_tagged (~root : string) (~rows : string) (~tag : string) (count : u64) : u64 =
     ? rows = ""

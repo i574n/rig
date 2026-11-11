@@ -13,12 +13,12 @@
 := ends (~text : string) (~part : string) : bool = $'!text.ends_with(&*!part)' : bool
 := unit_mark () : string = sm'.char_text 31u8
 
-:= ^ joined (args : cli_args) : string =
+:~ ^ joined (args : cli_args) : string =
     ?= args ?|
     | NoArgs => ""
     | Arg (head, rest) => cat (cat head (unit_mark ())) (joined rest)
 
-:= ^ twinned (args : cli_args) : cli_args =
+:~ ^ twinned (args : cli_args) : cli_args =
     ?= args ?|
     | NoArgs => NoArgs
     | Arg (head, rest) =>

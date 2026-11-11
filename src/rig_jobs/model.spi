@@ -298,7 +298,7 @@
 
 ///> rust
 :# labels_become_safe_directory_names =
-    expect (label_safe "rig regen: batch 1/7" = "kit_regen__batch_1_7") "unsafe characters"
+    expect (label_safe "rig regen: batch 1/7" = "rig_regen__batch_1_7") "unsafe characters"
     expect (job_command_of "wait" <> JobUnknown) "known verb"
     expect (job_command_of "stop" = JobStop) "stop verb"
     expect (job_command_of "amend" = JobAmend) "amend verb"

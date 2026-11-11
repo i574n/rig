@@ -62,7 +62,7 @@
         0i32
     | _ =>
         := flags = "[--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"
-        console.write_error_line ("usage: kit agile cadence <root> " ++# flags)
+        console.write_error_line ("usage: rig agile cadence <root> " ++# flags)
         2i32
 
 ///> rust

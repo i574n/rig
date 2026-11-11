@@ -892,7 +892,7 @@ fn gate_run_0() -> i32 {
                                     v15
                                 };
                                 if v16 {
-                                    let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
+                                    let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
                                     eprintln!("{}", v17);
                                     2i32
                                 } else {
@@ -1083,27 +1083,27 @@ fn gate_run_0() -> i32 {
                                     0i32
                                 }
                             } else {
-                                let v158: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
+                                let v158: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
                                 eprintln!("{}", v158);
                                 2i32
                             }
                         }
                         _ => {
-                            let v160: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
+                            let v160: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v160);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v162: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
+                    let v162: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v162);
                     2i32
                 }
             }
         }
         _ => {
-            let v164: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
+            let v164: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile gate <root> --team <team> --as <lane>"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v164);
             2i32
         }

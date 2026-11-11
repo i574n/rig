@@ -31,6 +31,7 @@ enum US1 {
     US1_AgileNext,
     US1_AgileClaim,
     US1_AgileRelease,
+    US1_AgileClaims,
     US1_AgileRoots,
     US1_AgileLinks,
     US1_AgileWip,
@@ -246,54 +247,61 @@ fn agile_subcommand_of_1(mut v0: Rc<str>) -> US0 {
     } else {
         v109
     };
-    let v114: bool = &*v0 == "roots";
+    let v114: bool = &*v0 == "claims";
     let v117: US0 = if v114 {
-        let v115: US1 = US1::US1_AgileRoots;
+        let v115: US1 = US1::US1_AgileClaims;
         US0::US0_AgileKnown(v115)
     } else {
         v113
     };
-    let v118: bool = &*v0 == "links";
+    let v118: bool = &*v0 == "roots";
     let v121: US0 = if v118 {
-        let v119: US1 = US1::US1_AgileLinks;
+        let v119: US1 = US1::US1_AgileRoots;
         US0::US0_AgileKnown(v119)
     } else {
         v117
     };
-    let v122: bool = &*v0 == "wip";
+    let v122: bool = &*v0 == "links";
     let v125: US0 = if v122 {
-        let v123: US1 = US1::US1_AgileWip;
+        let v123: US1 = US1::US1_AgileLinks;
         US0::US0_AgileKnown(v123)
     } else {
         v121
     };
-    let v126: bool = &*v0 == "views";
+    let v126: bool = &*v0 == "wip";
     let v129: US0 = if v126 {
-        let v127: US1 = US1::US1_AgileViews;
+        let v127: US1 = US1::US1_AgileWip;
         US0::US0_AgileKnown(v127)
     } else {
         v125
     };
-    let v130: bool = &*v0 == "view";
+    let v130: bool = &*v0 == "views";
     let v133: US0 = if v130 {
-        let v131: US1 = US1::US1_AgileView;
+        let v131: US1 = US1::US1_AgileViews;
         US0::US0_AgileKnown(v131)
     } else {
         v129
     };
-    let v134: bool = &*v0 == "view-add";
+    let v134: bool = &*v0 == "view";
     let v137: US0 = if v134 {
-        let v135: US1 = US1::US1_AgileViewAdd;
+        let v135: US1 = US1::US1_AgileView;
         US0::US0_AgileKnown(v135)
     } else {
         v133
     };
-    let v138: bool = &*v0 == "dialect";
-    if v138 {
-        let v139: US1 = US1::US1_AgileDialect;
+    let v138: bool = &*v0 == "view-add";
+    let v141: US0 = if v138 {
+        let v139: US1 = US1::US1_AgileViewAdd;
         US0::US0_AgileKnown(v139)
     } else {
         v137
+    };
+    let v142: bool = &*v0 == "dialect";
+    if v142 {
+        let v143: US1 = US1::US1_AgileDialect;
+        US0::US0_AgileKnown(v143)
+    } else {
+        v141
     }
 }
 fn writes_named_0(mut v0: Rc<str>) -> bool {
@@ -301,7 +309,7 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
     match v1 {
         US0::US0_AgileKnown(v2) => {
             let v2: US1 = v2;
-            let v72: US2 = match v2 {
+            let v74: US2 = match v2 {
                 US1::US1_AgileAdd => {
                     US2::US2_WritesState
                 }
@@ -316,6 +324,9 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                 }
                 US1::US1_AgileClaim => {
                     US2::US2_WritesState
+                }
+                US1::US1_AgileClaims => {
+                    US2::US2_ReadsState
                 }
                 US1::US1_AgileDialect => {
                     US2::US2_WritesState
@@ -408,7 +419,7 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                     US2::US2_ReadsState
                 }
             };
-            match v72 {
+            match v74 {
                 US2::US2_WritesState => {
                     true
                 }

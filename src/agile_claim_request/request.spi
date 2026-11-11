@@ -71,9 +71,10 @@
                 | Some minutes => flags_read after { request ?| ttl_min = minutes }
                 | None => RequestRefused ("--ttl expects positive minutes, got '" ++# value ++# "'")
             | FlagPaths =>
-                := plain = listm.fold (\ ok (g : string) => ok && plain_text g) !+ globs
-                ? request.verb = VerbClaim && globs <> [] && plain
-                ?> flags_read after { request ?| paths = globs }
+                := slashed = globs_of_flag (sm'.replace "\\" "/" value)
+                := plain = listm.fold (\ ok (g : string) => ok && plain_text g) !+ slashed
+                ? request.verb = VerbClaim && slashed <> [] && plain
+                ?> flags_read after { request ?| paths = slashed }
                 |: RequestRefused (paths_refusal value)
 
 
@@ -157,6 +158,9 @@
     | RequestRead r =>
         testing.expect (r.item = "KIT-A" && r.lane = "kit" && r.ttl_min = 30i32) r.item
         testing.expect (r.paths = [ "src/a/**"; "lib/b.spi" ]) "paths"
+    | RequestRefused reason => testing.expect !- reason
+    ?= request_of VerbClaim [ "KIT-A"; "--as"; "kit"; "--paths"; "C:\\work\\job.ps1,D:\\tree\\**" ] ?|
+    | RequestRead r => testing.expect (r.paths = [ "C:/work/job.ps1"; "D:/tree/**" ]) "backslashed paths read as forward slashes"
     | RequestRefused reason => testing.expect !- reason
     ?= request_of VerbNext [ "--any"; "--as"; "kit" ] ?|
     | RequestRead r => testing.expect (r.lane = "kit" && r.ttl_min = 90i32 && r.grab |> not) "next lists by default"

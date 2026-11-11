@@ -196,8 +196,15 @@
     | Subagent => task.kind <> "Epic"
     | MainAgent => !+
 
+:~ ^ open_child_of (tasks : task_list) (~id : string) : bool =
+    ?= tasks ?|
+    | NoTasks => !-
+    | TaskThen (task, rest) => ? task.parent = id && task.status <> "Done" ?> !+ |: open_child_of rest id
+
+:= aggregates (tasks : task_list) (task : backlog_task) : bool = task.kind = "Epic" && open_child_of tasks task.id
+
 := candidate (role : rank_role) (passes : backlog_task -> bool) (tasks : task_list) (task : backlog_task) : bool =
-    task_open task && role_takes role task && not (listed_in task.tags "user-batch")
+    task_open task && role_takes role task && not (aggregates tasks task) && not (listed_in task.tags "user-batch")
     && deps_settled tasks task.deps 0i32 && passes task
 
 :~ ^ inserted (item : ranked_task) (list : ranked_list) : ranked_list =
@@ -714,6 +721,16 @@
         (ranked_ids (ranking_where Subagent elsewhere tasks))
     testing.expect (role_takes MainAgent { epic ?| kind = "Epic" }) "the main agent still sees epics"
     testing.expect (role_takes Subagent epic) "a story is leaf work"
+
+///> rust
+:# an_epic_with_open_children_yields_to_them =
+    := epic = { (task_at "EPIC-AGG" 0i32 2i32 "Active" "" "" 30i32) ?| kind = "Epic" }
+    := child = { (task_at "CHILD-OPEN" 1i32 5i32 "Blocked" "" "" 600i32) ?| parent = "EPIC-AGG" }
+    := unfinished = TaskThen (epic, TaskThen (child, sample_backlog ()))
+    := ranked = ranked_ids (ranking MainAgent unfinished)
+    testing.expect (sm'.contains "EPIC-AGG" ranked = !-) ranked
+    := finished = TaskThen (epic, TaskThen ({ child ?| status = "Done" }, sample_backlog ()))
+    testing.expect (sm'.starts_with "EPIC-AGG" (ranked_ids (ranking MainAgent finished))) "an epic whose children are done is next"
 
 ///> rust
 :# teams_filter_the_ranking_and_progress_shrinks_the_fallback_estimate =

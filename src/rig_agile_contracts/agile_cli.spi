@@ -383,7 +383,7 @@
     Arg (id, Arg (kind, Arg (priority, Arg ("D2", Arg (title, Arg ("team:parity", NoArgs))))))
 
 := dialect_backlog (root : fixture_root) : () =
-    := _ = dialect_ok root "begin" (Arg ("parity", NoArgs))
+    := _ = dialect_ok root "begin" (Arg ("dialect parity fixture run", NoArgs))
     := _ = dialect_ok root "add" (dialect_item "PAR-EPIC" "Epic" "P1" "Paridade")
     := _ = dialect_ok root "add" (dialect_item "PAR-ONE" "Story" "P0" "Primeira")
     := _ = dialect_ok root "edit" (Arg ("PAR-ONE", Arg ("--parent", Arg ("PAR-EPIC", NoArgs))))
@@ -435,5 +435,5 @@
     dialect_backlog root
     shows (dialect_ok root "list" NoArgs) "PAR-EPIC"
     hides (fixture_read root "state/agile.spi") "\ninl "
-    rejected_with (dialect_agile root "init" (Arg ("--dialect", Arg ("x", NoArgs)))) 1i32 "--dialect takes symbols or words"
+    rejected_with (dialect_agile root "init" (Arg ("--dialect", Arg ("x", NoArgs)))) 2i32 "--dialect takes symbols or words"
     fixture_root_remove root

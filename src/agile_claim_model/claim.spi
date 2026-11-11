@@ -93,16 +93,16 @@
         | None => first_overlap rest others
 
 :~ ^ overlapping_claim
-    (paths : list string) (claims : list claim) (~item : string) (now_ms : u64)
+    (paths : list string) (claims : list claim) (~item : string) (~caller : string) (now_ms : u64)
     : option (string * string)
     =
     ?= claims ?|
     | [] => None
     | c :: rest =>
-        := hit = ? now_ms < c.expires_ms && c.item <> item ?> first_overlap paths c.paths |: None
+        := hit = ? now_ms < c.expires_ms && c.item <> item && c.owner <> caller ?> first_overlap paths c.paths |: None
         ?= hit ?|
         | Some glob => Some (c.item, glob)
-        | None => overlapping_claim paths rest item now_ms
+        | None => overlapping_claim paths rest item caller now_ms
 
 :~ lease_refusal_idle (live : liveness) : option refusal =
     ?= live ?|
@@ -128,7 +128,7 @@
     ?= lease_refusal claims live item caller now_ms ?|
     | Some refused => Some refused
     | None =>
-        ?= overlapping_claim paths claims item now_ms ?|
+        ?= overlapping_claim paths claims item caller now_ms ?|
         | Some (other, glob) => Some (PathOverlap (other, glob))
         | None => None
 :~ finishing (claims : list claim) (~caller : string) (now_ms : u64) (~item : string) : bool =
@@ -287,6 +287,8 @@
     testing.expect (globs_overlap "src/agile/**" "src/rig_jobs/**" = !-) "disjoint stems"
     := refused = refusal_of (fixture_claims ()) Idle "C-3" "y" [ "src/agile/x.spi" ] 1000u64
     testing.expect (refused = Some (PathOverlap ("A-1", "src/agile/x.spi"))) "a live lease's paths refuse a claim"
+    := own = refusal_of (fixture_claims ()) Idle "C-3" "kit" [ "src/agile/x.spi" ] 1000u64
+    testing.expect (own = None) "a lane's own live lease never refuses its next claim on the same paths"
     := job = refusal_of (fixture_claims ()) (LiveJob "job-7") "C-3" "y" [] 1000u64
     testing.expect (job = Some (JobRunning "job-7")) "a running job refuses a claim"
 

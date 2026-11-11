@@ -105,6 +105,9 @@
         { package = "rig-lint-growth"; relative = "src/rig_lint_growth/growth.spi" }
         { package = "rig-lint-cli"; relative = "src/rig_lint_cli/cli.spi" }
         { package = "agile-claim-request"; relative = "src/agile_claim_request/request.spi" }
+        { package = "agile-claim-cli"; relative = "src/agile_claim_cli/cli.spi" }
+        { package = "agile-claim-lease"; relative = "src/agile_claim_model/claim.spi" }
+        { package = "agile-quality-lint"; relative = "src/agile_quality_lint/lint.spi" }
         { package = "rig-style-census"; relative = "src/rig_style_census/census_cli.spi" }
         { package = "rig-window-run"; relative = "src/rig_window_run/run_cli.spi" }
         { package = "rig-table-test"; relative = "src/rig_table_test/table_test_cli.spi" }

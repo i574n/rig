@@ -49,13 +49,13 @@
         console.write_error_line ("rig error: " ++# reason)
         2i32
     | SetupMissing what, _ =>
-        console.write_error_line ("rig error: kit run needs " ++# what)
+        console.write_error_line ("rig error: rig run needs " ++# what)
         2i32
     | SetupReady s, RunProgram (file, args) =>
         ?= rig_run_build.builder.built_exe (s.lib, s.core, s.compiler, s.cache_root, file) ?|
         | exe, "" => program_ran exe args
         | _, reason =>
-            console.write_error_line ("rig error: kit run " ++# reason)
+            console.write_error_line ("rig error: rig run " ++# reason)
             1i32
     | _, RunTests (file, ListTests) =>
         := names = test_names_in (file_system.read_text_or_empty file)
@@ -65,7 +65,7 @@
     | _, RunTests (file, selection) =>
         := runner = env.get_environment_variable "SPIRAL_CELLS_RUNNER"
         ? runner = "" ?>
-            console.write_error_line "rig error: kit run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"
+            console.write_error_line "rig error: rig run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"
             2i32
         |:
             := names = ?= selection ?| | NamedTests picked => picked | _ => []

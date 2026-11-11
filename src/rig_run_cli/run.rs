@@ -651,7 +651,7 @@ fn run_run_0() -> i32 {
             }
         }
         UH0::UH0_Nil => {
-            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit run <file.spi> [--test a,b | --list] [-- args]"); } LIT.with(|lit| lit.clone()) };
+            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig run <file.spi> [--test a,b | --list] [-- args]"); } LIT.with(|lit| lit.clone()) };
             US2::US2_RunRefused(v20)
         }
     };
@@ -666,7 +666,7 @@ fn run_run_0() -> i32 {
             match v12 {
                 US0::US0_SetupMissing(v89) => {
                     let v89: Rc<str> = v89;
-                    let v90: Rc<str> = string_concat(&["rig error: kit run needs ", &*v89]);
+                    let v90: Rc<str> = string_concat(&["rig error: rig run needs ", &*v89]);
                     eprintln!("{}", v90);
                     2i32
                 }
@@ -684,7 +684,7 @@ fn run_run_0() -> i32 {
                             if v99 {
                                 program_ran_1(v97, v96)
                             } else {
-                                let v101: Rc<str> = string_concat(&["rig error: kit run ", &*v98]);
+                                let v101: Rc<str> = string_concat(&["rig error: rig run ", &*v98]);
                                 eprintln!("{}", v101);
                                 1i32
                             }
@@ -709,7 +709,7 @@ fn run_run_0() -> i32 {
                                     let v112: Rc<str> = get_environment_variable_4(v111);
                                     let v113: bool = &*v112 == "";
                                     if v113 {
-                                        let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: kit run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"); } LIT.with(|lit| lit.clone()) };
+                                        let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: rig run --test needs SPIRAL_CELLS_RUNNER (the Cells run_notebook.ps1)"); } LIT.with(|lit| lit.clone()) };
                                         eprintln!("{}", v114);
                                         2i32
                                     } else {

@@ -52,7 +52,7 @@
         console.write_line (summary_line (am'.length_base rows) (distinct_ids rows 0i32 "" 0i32) elapsed)
         0i32
     | _ =>
-        console.write_error_line ("usage: kit agile lint <root> [--census | --team <team>] elapsed_ms=" ++# sm'.show (workspace_primitives.clock.ms_since started))
+        console.write_error_line ("usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=" ++# sm'.show (workspace_primitives.clock.ms_since started))
         2i32
 
 ///> rust

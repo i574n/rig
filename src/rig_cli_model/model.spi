@@ -70,7 +70,7 @@
 := schedule_run () : i32 = $"rig_schedule::rig_schedule_run()" : i32
 
 :~ direct_help (~usage : string) : i32 =
-    $'println\!("usage: kit {}", &*!usage)' : ()
+    $'println\!("usage: rig {}", &*!usage)' : ()
     0i32
 
 :< command_spec_domain.direct_verbs

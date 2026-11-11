@@ -513,7 +513,7 @@ fn argument_14(mut v0: i32) -> Rc<str> {
     }
 }
 fn memory_usage_17() -> Rc<str> {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit memory import <memory-dir> <data.spi> | render <data.spi> <out-dir> | check <data.spi> | list <data.spi> [--kind user|feedback|project|reference] | recall <data.spi> \"<words>\" [--limit n] | save <memory-dir> <user|feedback|project|reference> <slug> \"<description>\" \"<body>\"|- [--title <text>] | forget <memory-dir> <slug> (moves it to archive/ and drops its index line) | edit <memory-dir> <slug> description|body \"<text>\"|-"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig memory import <memory-dir> <data.spi> | render <data.spi> <out-dir> | check <data.spi> | list <data.spi> [--kind user|feedback|project|reference] | recall <data.spi> \"<words>\" [--limit n] | save <memory-dir> <user|feedback|project|reference> <slug> \"<description>\" \"<body>\"|- [--title <text>] | forget <memory-dir> <slug> (moves it to archive/ and drops its index line) | edit <memory-dir> <slug> description|body \"<text>\"|-"); } LIT.with(|lit| lit.clone()) };
     v0
 }
 fn memory_run_0() -> i32 {

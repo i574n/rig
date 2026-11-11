@@ -297,6 +297,7 @@
         (window_call root "8000" (Arg ("open", NoArgs)))
         2i32
         "classes live-gui|test-suite|heavy-build|compile|compiler-install"
+    shows (succeeded (window_call root "8000" (Arg ("--help", NoArgs)))) "usage: window request <class> <minutes>"
     fixture_root_remove root
 
 ///> rust

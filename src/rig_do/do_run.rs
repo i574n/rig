@@ -430,7 +430,7 @@ fn do_run_0() -> i32 {
     };
     let v11: bool = v0 <= v10;
     if v11 {
-        let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit do <root> [--dry-run] <program>... | do <root> [--dry-run] - (program on stdin; --dry-run chains every edit in memory and writes nothing); statements: edit <path|glob> [dry-run] [expect files <n> replacements <n>], replace [pattern] once|all|<n> times \"<old>\" with \"<new>\" (pattern: a regex, $1 groups in the replacement; either takes raw lines between <<< and a >>> line), patch <<< apply_patch hunks (@@, then lines starting with space, - or +) >>>, show <path>"); } LIT.with(|lit| lit.clone()) };
+        let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig do <root> [--dry-run] <program>... | do <root> [--dry-run] - (program on stdin; --dry-run chains every edit in memory and writes nothing); statements: edit <path|glob> [dry-run] [expect files <n> replacements <n>], replace [pattern] once|all|<n> times \"<old>\" with \"<new>\" (pattern: a regex, $1 groups in the replacement; either takes raw lines between <<< and a >>> line), patch <<< apply_patch hunks (@@, then lines starting with space, - or +) >>>, show <path>"); } LIT.with(|lit| lit.clone()) };
         println!("{}", v12);
         2i32
     } else {

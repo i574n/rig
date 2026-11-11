@@ -39,7 +39,7 @@
 := verb_word (verb : memory_verb) : string = ascii_lowercase (union_reflection.cases.union_case_suffix "Verb" verb)
 
 :~ memory_usage () : string =
-    "usage: kit memory import <memory-dir> <data.spi> | render <data.spi> <out-dir> | check <data.spi> | list "
+    "usage: rig memory import <memory-dir> <data.spi> | render <data.spi> <out-dir> | check <data.spi> | list "
     ^^ "<data.spi> [--kind user|feedback|project|reference] | recall <data.spi> \"<words>\" [--limit n] | save "
     ^^ "<memory-dir> <user|feedback|project|reference> <slug> \"<description>\" \"<body>\"|- [--title <text>] | "
     ^^ "forget <memory-dir> <slug> (moves it to archive/ and drops its index line) | edit <memory-dir> <slug> "

@@ -38,12 +38,12 @@
 
 :~ markers_of (check : lint_check) : list string =
     ?= check ?|
-    | DoneDefinition => [ "dod:"; "definition of done" ]
-    | NextStep => [ "next:"; "next step" ]
+    | DoneDefinition => [ "dod:"; "definition of done"; "pronto quando"; "definição de pronto" ]
+    | NextStep => [ "next:"; "next step"; "próximo:"; "próximo passo" ]
     | TypeFeatures => [ "typefeatures:"; "typefeatureset plan" ]
-    | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven" ]
-    | BlockerNamed => [ "blocked on"; "blocker:"; "waits on" ]
-    | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from" ]
+    | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven"; "prova:"; "provado"; "verde" ]
+    | BlockerNamed => [ "blocked on"; "blocker:"; "waits on"; "bloqueado por"; "bloqueio:"; "espera por" ]
+    | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from"; "retomar quando"; "retoma quando" ]
     | ProseWait => [ "waits on"; "resume when"; "blocked on" ]
     | PlanningFields => []
 
@@ -117,6 +117,8 @@
         { bare ?| tags = "kit,team:kit"; estimate_minutes = 60i32; load = "light"; assignee = "agent"; notes = notes }
     testing.expect (failing full = []) (failing_words full)
     testing.expect (failing { full ?| tags = "docs,team:x" } = []) "a non-code item skips the type plan"
+    := portuguese = "Pronto quando: três testes da CLI passam. Próximo: rota no rig_agile_mutation."
+    testing.expect (failing { full ?| tags = "docs,team:x"; notes = portuguese } = []) "pt-BR marker lines count"
 
 ///> rust
 :# phrase_style_notes_count_like_marker_lines =

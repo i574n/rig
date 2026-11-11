@@ -94,7 +94,7 @@
 
 :~ evidence_run () : i32 =
     ? argument 2i32 <> "refresh" || argument 3i32 = "" || argument 4i32 = ""
-    ?> stderr_line "usage: kit evidence refresh <root> <relative path> [--as <new relative path>] [--dry-run]"
+    ?> stderr_line "usage: rig evidence refresh <root> <relative path> [--as <new relative path>] [--dry-run]"
     |:
         ?= refresh (argument 3i32) (argument 4i32) (option_after "--as") (has_flag "--dry-run") ?|
         | Refreshed row => stdout_line ("rig evidence refresh ok " ++# row)

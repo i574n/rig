@@ -77,7 +77,7 @@
     := words = kill_words ()
     := flags = kill_flags_read words { tree = !-; mine = !-; theirs = ""; targets = [] }
     ? words = [] ?>
-        stdout_line ("usage: kit " ++# (process_usage ()))
+        stdout_line ("usage: rig " ++# (process_usage ()))
         2i32
     |:
         := own = own_pid ()

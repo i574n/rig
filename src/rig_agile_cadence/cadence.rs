@@ -992,27 +992,27 @@ fn cadence_run_0() -> i32 {
                                 method31(v224);
                                 0i32
                             } else {
-                                let v225: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
+                                let v225: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
                                 eprintln!("{}", v225);
                                 2i32
                             }
                         }
                         _ => {
-                            let v227: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
+                            let v227: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
                             eprintln!("{}", v227);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v229: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
+                    let v229: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
                     eprintln!("{}", v229);
                     2i32
                 }
             }
         }
         _ => {
-            let v231: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: kit agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
+            let v231: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("usage: rig agile cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h] [--ask-days n]"); } LIT.with(|lit| lit.clone()) };
             eprintln!("{}", v231);
             2i32
         }

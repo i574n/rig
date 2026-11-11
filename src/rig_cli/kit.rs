@@ -87,7 +87,7 @@ fn KitStatusLive(_unused: i32) -> i32 {
 }
 
 fn rig_public_valid_values() -> String { (0..rig_command_count()).map(|index| rig_command_descriptor(&index.to_string()).0.to_string()).collect::<Vec<_>>().join("|") }
-fn rig_actionable_error(reason: &str, intent: &str, usage: &str, valid: &str, corrected: &str) -> i32 { eprintln!("rig error: {reason}\nintent: {intent}\nusage: kit {usage}\nvalid: {valid}\ncorrected: {corrected}"); 2 }
+fn rig_actionable_error(reason: &str, intent: &str, usage: &str, valid: &str, corrected: &str) -> i32 { eprintln!("rig error: {reason}\nintent: {intent}\nusage: rig {usage}\nvalid: {valid}\ncorrected: {corrected}"); 2 }
 
 #[must_use]
 fn KitStatusArityError() -> i32 { let descriptor = rig_command_descriptor_named("status"); rig_actionable_error("status accepts zero arguments or one bundle root", "status", descriptor.2.as_ref(), "zero arguments|one bundle root", "rig status") }
@@ -265,7 +265,7 @@ fn KitHelpRejected() -> i32 {
     if args.len() == 2 && rig_command_code(&args[0]) == 4 {
         let usage = rig_command_proxy_usage(&args[1]);
         if usage.is_empty() { let valid = rig_command_descriptor_named("proxy").2; return rig_actionable_error(&format!("unknown proxy help target: {}", args[1]), "proxy help", "help proxy <capability>", valid.as_ref(), "rig help"); }
-        println!("usage: kit {}", usage);
+        println!("usage: rig {}", usage);
         return 0;
     }
     if args.len() > 1 { let descriptor = rig_command_descriptor_named("help"); let valid = format!("{}|proxy <capability>|--completion|--json|--schema", rig_public_valid_values()); return rig_actionable_error("help accepts zero arguments, one verb, proxy <capability>, --completion, --json, or --schema", "help", descriptor.2.as_ref(), &valid, "rig help"); }
@@ -293,10 +293,10 @@ fn KitHelpRejected() -> i32 {
         let descriptor = rig_command_descriptor(&code.to_string());
         println!("name={} effect={} handler={}", descriptor.0, descriptor.1, descriptor.4);
         println!("summary={}", descriptor.3);
-        println!("usage: kit {}", descriptor.2);
+        println!("usage: rig {}", descriptor.2);
         return 0;
     }
-    println!("usage: kit <status|patch|agile|bundle|proxy|help> ...");
+    println!("usage: rig <status|patch|agile|bundle|proxy|help> ...");
     for index in 0..count { let descriptor = rig_command_descriptor(&index.to_string()); println!("{}", descriptor.2); }
     println!("{}", rig_command_more_usages());
     println!("deployment: runtime operations are compilerless; source-author and prune-uncovered are build-authoring operations requiring KIT_SPIRAL_COMPILE");
@@ -391,7 +391,7 @@ fn argument_source_0() -> US0 {
     }
 }
 fn direct_help_1(mut v0: Rc<str>) -> i32 {
-    println!("usage: kit {}", &*v0);
+    println!("usage: rig {}", &*v0);
     0i32
 }
 fn direct_of_2(mut v0: Rc<str>) -> US1 {

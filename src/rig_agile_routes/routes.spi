@@ -127,7 +127,8 @@
     ?> ()
     |:
         := head = "rig agile lint warning id=" ++# id ++# " status=" ++# status ++# " failing=" ++# checks
-        console.write_error_line (head ++# " (add the marker lines; a later train refuses the change)")
+        := markers = " (add a note with the marker lines, e.g. 'dod:' or 'pronto quando:', 'next:' or 'próximo:'"
+        console.write_error_line (head ++# markers ++# "; a later train refuses the change)")
 
 := agile_set_route () : i32 =
     := root = argument_owned 1i32

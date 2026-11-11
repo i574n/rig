@@ -47,7 +47,7 @@
     | NodeIdle queued =>
         [
             "rig remote status IDLE machine=" ++# machine ++# " running=0 queued=" ++# sm'.show queued
-            ++# " (start the top node-runnable item: kit agile next <backlog root> --tag node --open 3)"
+            ++# " (start the top node-runnable item: rig agile next <backlog root> --tag node --open 3)"
         ]
     | NodeBusy jobs =>
         := lanes = jobs |> listm.fold (\ (seen : list string) (job : lane_job) =>

@@ -614,7 +614,7 @@ fn lint_run_0() -> i32 {
                                         } else {
                                             let v47: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                                             let v48: Rc<str> = format_real_18(v47);
-                                            let v49: Rc<str> = string_concat(&["usage: kit agile lint <root> [--census | --team <team>] elapsed_ms=", &*v48]);
+                                            let v49: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v48]);
                                             eprintln!("{}", v49);
                                             2i32
                                         }
@@ -656,7 +656,7 @@ fn lint_run_0() -> i32 {
                                     } else {
                                         let v74: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                                         let v75: Rc<str> = format_real_18(v74);
-                                        let v76: Rc<str> = string_concat(&["usage: kit agile lint <root> [--census | --team <team>] elapsed_ms=", &*v75]);
+                                        let v76: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v75]);
                                         eprintln!("{}", v76);
                                         2i32
                                     }
@@ -666,7 +666,7 @@ fn lint_run_0() -> i32 {
                         _ => {
                             let v79: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                             let v80: Rc<str> = format_real_18(v79);
-                            let v81: Rc<str> = string_concat(&["usage: kit agile lint <root> [--census | --team <team>] elapsed_ms=", &*v80]);
+                            let v81: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v80]);
                             eprintln!("{}", v81);
                             2i32
                         }
@@ -675,7 +675,7 @@ fn lint_run_0() -> i32 {
                 _ => {
                     let v83: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
                     let v84: Rc<str> = format_real_18(v83);
-                    let v85: Rc<str> = string_concat(&["usage: kit agile lint <root> [--census | --team <team>] elapsed_ms=", &*v84]);
+                    let v85: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v84]);
                     eprintln!("{}", v85);
                     2i32
                 }
@@ -684,7 +684,7 @@ fn lint_run_0() -> i32 {
         _ => {
             let v87: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
             let v88: Rc<str> = format_real_18(v87);
-            let v89: Rc<str> = string_concat(&["usage: kit agile lint <root> [--census | --team <team>] elapsed_ms=", &*v88]);
+            let v89: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v88]);
             eprintln!("{}", v89);
             2i32
         }

@@ -66,7 +66,7 @@
     := mode = ? argument 3i32 = "--dry-run" ?> Preview |: Apply
     := first = ?= mode ?| | Preview => 4i32 | Apply => 3i32
     ? count <= first ?>
-        stdout_line ("usage: kit " ++# (usage ()))
+        stdout_line ("usage: rig " ++# (usage ()))
         2i32
     |? directory_exists root = !- ?>
         stdout_line ("rig error: root is not a directory: " ++# root)

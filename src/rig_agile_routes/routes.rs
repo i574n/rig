@@ -426,46 +426,46 @@ fn agile_subcommand_shape_1(mut v0: Rc<str>) -> Rc<str> {
     };
     let v140: bool = &*v139 == "";
     let v142: bool = if v140 {
-        let v141: bool = &*v0 == "roots";
+        let v141: bool = &*v0 == "claims";
         v141
     } else {
         false
     };
     let v144: Rc<str> = if v142 {
-        let v143: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> [add|drop <path>...]"); } LIT.with(|lit| lit.clone()) };
+        let v143: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> [--as <lane>]"); } LIT.with(|lit| lit.clone()) };
         v143
     } else {
         v139
     };
     let v145: bool = &*v144 == "";
     let v147: bool = if v145 {
-        let v146: bool = &*v0 == "links";
+        let v146: bool = &*v0 == "roots";
         v146
     } else {
         false
     };
     let v149: Rc<str> = if v147 {
-        let v148: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> --memory <dir> [--json]"); } LIT.with(|lit| lit.clone()) };
+        let v148: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> [add|drop <path>...]"); } LIT.with(|lit| lit.clone()) };
         v148
     } else {
         v144
     };
     let v150: bool = &*v149 == "";
     let v152: bool = if v150 {
-        let v151: bool = &*v0 == "wip";
+        let v151: bool = &*v0 == "links";
         v151
     } else {
         false
     };
     let v154: Rc<str> = if v152 {
-        let v153: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root>"); } LIT.with(|lit| lit.clone()) };
+        let v153: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> --memory <dir> [--json]"); } LIT.with(|lit| lit.clone()) };
         v153
     } else {
         v149
     };
     let v155: bool = &*v154 == "";
     let v157: bool = if v155 {
-        let v156: bool = &*v0 == "views";
+        let v156: bool = &*v0 == "wip";
         v156
     } else {
         false
@@ -478,42 +478,55 @@ fn agile_subcommand_shape_1(mut v0: Rc<str>) -> Rc<str> {
     };
     let v160: bool = &*v159 == "";
     let v162: bool = if v160 {
-        let v161: bool = &*v0 == "view";
+        let v161: bool = &*v0 == "views";
         v161
     } else {
         false
     };
     let v164: Rc<str> = if v162 {
-        let v163: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> <name> [extra flags...]"); } LIT.with(|lit| lit.clone()) };
+        let v163: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root>"); } LIT.with(|lit| lit.clone()) };
         v163
     } else {
         v159
     };
     let v165: bool = &*v164 == "";
     let v167: bool = if v165 {
-        let v166: bool = &*v0 == "view-add";
+        let v166: bool = &*v0 == "view";
         v166
     } else {
         false
     };
     let v169: Rc<str> = if v167 {
-        let v168: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> <name> <list|next> [flags...]"); } LIT.with(|lit| lit.clone()) };
+        let v168: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> <name> [extra flags...]"); } LIT.with(|lit| lit.clone()) };
         v168
     } else {
         v164
     };
     let v170: bool = &*v169 == "";
     let v172: bool = if v170 {
-        let v171: bool = &*v0 == "dialect";
+        let v171: bool = &*v0 == "view-add";
         v171
     } else {
         false
     };
-    if v172 {
-        let v173: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> <symbols|words>"); } LIT.with(|lit| lit.clone()) };
+    let v174: Rc<str> = if v172 {
+        let v173: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> <name> <list|next> [flags...]"); } LIT.with(|lit| lit.clone()) };
         v173
     } else {
         v169
+    };
+    let v175: bool = &*v174 == "";
+    let v177: bool = if v175 {
+        let v176: bool = &*v0 == "dialect";
+        v176
+    } else {
+        false
+    };
+    if v177 {
+        let v178: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("<root> <symbols|words>"); } LIT.with(|lit| lit.clone()) };
+        v178
+    } else {
+        v174
     }
 }
 fn method3(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
@@ -536,7 +549,7 @@ fn agile_usage_error_0() -> i32 {
     let v2: Rc<str> = agile_subcommand_shape_1(v1.clone());
     let v3: bool = &*v2 == "";
     if v3 {
-        let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile supports init <root> [--dialect symbols|words], begin <root> <title>, lease <root>, status <root>, handoff <root>, list <root> [all|Planned|Active|Blocked|Paused|Done] [--team <team>] [--tag <tag>] [--prefix <ID prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--sort priority|difficulty|progress] [--load light|medium|heavy|none] [--assignee agent|pair|user|none] [--json], check <root> [--compiler <absolute>], record <root>, set <root> <id> <progress> <Planned|Active|Blocked|Paused|Done>, add <root> <ID> <Epic|Feature|Story|TaskKind> <P0..P5> <D0..D8> <title> <tags> [--estimate <m>] [--load <l>] [--assignee <a>] [--deps <A,B>] [--note <text> --as <author>], edit <root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value>, show <root> <id> [--json], plan <root> [--json], migrate-tags preview|apply <root>, migrate-activity preview|apply <root>, sprint start <root> <id> <days> <goal> [--items A,B] | show <root> [<id>] | add|drop <root> <id> <item> | close <root> <id> | velocity <root> [--last n], lint <root> [--census | --team <team>], gate <root> --team <team> --as <lane>, cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h], note <root> <id> <text> [--as <author>], note-edit <root> <id> <note-number> <text> [--as <author>] [--append] [--expect-at <iso> | --expect-prefix <text>], notes from-title <root> <id>, rename <root> <old-id> <new-id>, seal <root> [--dry-run], todos <root> [<path>...] [--json] [--tagged | --id <ID>] | <root> --record, next <root> [--as main|subagent] [--team <team>] [--tag <tag>] [--prefix <ID prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--load <loads>] [--fits] [count] | <root> --any --as <lane> [--ttl <minutes>] (claims the top free item), claim <root> <ID> --as <lane> [--paths <glob,glob>] [--ttl <minutes>], release <root> <ID> --as <lane>, roots <root> [add|drop <path>...], links <root> --memory <dir> [--json], wip <root>, views <root>, view <root> <name> [extra flags...], view-add <root> <name> <list|next> [flags...], dialect <root> <symbols|words>"); } LIT.with(|lit| lit.clone()) };
+        let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile supports init <root> [--dialect symbols|words], begin <root> <title>, lease <root>, status <root>, handoff <root>, list <root> [all|Planned|Active|Blocked|Paused|Done] [--team <team>] [--tag <tag>] [--prefix <ID prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--sort priority|difficulty|progress] [--load light|medium|heavy|none] [--assignee agent|pair|user|none] [--json], check <root> [--compiler <absolute>], record <root>, set <root> <id> <progress> <Planned|Active|Blocked|Paused|Done>, add <root> <ID> <Epic|Feature|Story|TaskKind> <P0..P5> <D0..D8> <title> <tags> [--estimate <m>] [--load <l>] [--assignee <a>] [--deps <A,B>] [--note <text> --as <author>], edit <root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value>, show <root> <id> [--json], plan <root> [--json], migrate-tags preview|apply <root>, migrate-activity preview|apply <root>, sprint start <root> <id> <days> <goal> [--items A,B] | show <root> [<id>] | add|drop <root> <id> <item> | close <root> <id> | velocity <root> [--last n], lint <root> [--census | --team <team>], gate <root> --team <team> --as <lane>, cadence <root> [--hours n] [--days n | --since yyyy-mm-dd] [--team t] [--round h], note <root> <id> <text> [--as <author>], note-edit <root> <id> <note-number> <text> [--as <author>] [--append] [--expect-at <iso> | --expect-prefix <text>], notes from-title <root> <id>, rename <root> <old-id> <new-id>, seal <root> [--dry-run], todos <root> [<path>...] [--json] [--tagged | --id <ID>] | <root> --record, next <root> [--as main|subagent] [--team <team>] [--tag <tag>] [--prefix <ID prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--load <loads>] [--fits] [count] | <root> --any --as <lane> [--ttl <minutes>] (claims the top free item), claim <root> <ID> --as <lane> [--paths <glob,glob>] [--ttl <minutes>], release <root> <ID> --as <lane>, claims <root> [--as <lane>], roots <root> [add|drop <path>...], links <root> --memory <dir> [--json], wip <root>, views <root>, view <root> <name> [extra flags...], view-add <root> <name> <list|next> [flags...], dialect <root> <symbols|words>"); } LIT.with(|lit| lit.clone()) };
         let v5: i32 = std::io::Write::write_all(&mut std::io::stderr(), ("rig error: ".to_string() + &*v4 + "
 ").as_bytes()).map(|_| 2i32).unwrap_or(2i32);
         v5
@@ -966,8 +979,8 @@ fn lint_warned_4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> () {
     if v64 {
         ()
     } else {
-        let v70: Rc<str> = string_concat(&["rig agile lint warning id=", &*v1, " status=", &*v2, " failing=", &*v63, " (add the marker lines; a later train refuses the change)"]);
-        eprintln!("{}", v70);
+        let v71: Rc<str> = string_concat(&["rig agile lint warning id=", &*v1, " status=", &*v2, " failing=", &*v63, " (add a note with the marker lines, e.g. 'dod:' or 'pronto quando:', 'next:' or 'próximo:'; a later train refuses the change)"]);
+        eprintln!("{}", v71);
         ()
     }
 }

@@ -73,7 +73,7 @@
     | _ :: _ :: root :: words ?& sm'.starts_with "-" root |> not =>
         := t = terms_of root words
         ? t.team = "" || t.lane = "" ?>
-            console.write_error_line "usage: kit agile gate <root> --team <team> --as <lane>"
+            console.write_error_line "usage: rig agile gate <root> --team <team> --as <lane>"
             2i32
         |:
             := rows = agile_team_work.work.gate_rows (root, t.team)
@@ -91,7 +91,7 @@
             gate_lines t ready parked_ids held |> listm.iter console.write_line
             0i32
     | _ =>
-        console.write_error_line "usage: kit agile gate <root> --team <team> --as <lane>"
+        console.write_error_line "usage: rig agile gate <root> --team <team> --as <lane>"
         2i32
 
 ///> rust

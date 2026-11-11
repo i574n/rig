@@ -34,6 +34,7 @@
     | AgileNext
     | AgileClaim
     | AgileRelease
+    | AgileClaims
     | AgileRoots
     | AgileLinks
     | AgileWip
@@ -108,6 +109,7 @@
         }
     | AgileClaim => { name = "claim"; shape = "<root> <ID> --as <lane> [--paths <glob,glob>] [--ttl <minutes>]" }
     | AgileRelease => { name = "release"; shape = "<root> <ID> --as <lane>" }
+    | AgileClaims => { name = "claims"; shape = "<root> [--as <lane>]" }
     | AgileRoots => { name = "roots"; shape = "<root> [add|drop <path>...]" }
     | AgileLinks => { name = "links"; shape = "<root> --memory <dir> [--json]" }
     | AgileWip => { name = "wip"; shape = "<root>" }
@@ -154,7 +156,7 @@
 := state_access_of = \|
     | AgileInit | AgileLease | AgileStatus | AgileHandoff | AgileList | AgileCheck | AgileShow => ReadsState
     | AgilePlan | AgileNext | AgileLinks | AgileWip | AgileViews | AgileView | AgileLint => ReadsState
-    | AgileGate | AgileCadence => ReadsState
+    | AgileGate | AgileCadence | AgileClaims => ReadsState
     | AgileClaim | AgileRelease | AgileBegin | AgileRecord | AgileSet | AgileAdd | AgileEdit => WritesState
     | AgileMigrateTags | AgileMigrateActivity | AgileNote | AgileNoteEdit | AgileNotes | AgileRename => WritesState
     | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint | AgileDialect => WritesState
