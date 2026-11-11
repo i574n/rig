@@ -1,6 +1,10 @@
 packages:
     |core-
     spiral-
+    rust_std_fs
+    agile_state_spelling
+    agile_state_fs
+    agile_task_text
     agile_quality_lint
     agile_quality_facts
     agile_task_listing

@@ -1,6 +1,7 @@
 ///- --package .
 :# model static =
     :< rust_std_fs.model
+    :< agile_state_fs.model
     :< agile_task_text.model
     :< workspace_primitives.outcome
     :< workspace_primitives.numbers
@@ -8,6 +9,8 @@
     :< workspace_primitives.files
 
 :< rust_std_fs.model
+
+:< agile_state_fs.model
 :< agile_task_text.model
 :< workspace_primitives.outcome
 :< workspace_primitives.numbers
@@ -271,23 +274,13 @@
     | StateChangedSinceRead => "state/agile.spi changed since it was read; nothing written, run the call again"
     | StateWriteFailed reason => reason
 
-:~ ^ segment_modules (lines : list string) (in_modules : bool) (found : list string) : list string =
-    ?= lines ?|
-    | [] => listm.rev found
-    | line :: rest =>
-        := trimmed = sm'.trim line
-        ? sm'.ends_with ":" trimmed
-        ?> segment_modules rest (trimmed = "modules:") found
-        |? in_modules && sm'.starts_with "notes_" trimmed
-        ?> segment_modules rest !+ (trimmed :: found)
-        |: segment_modules rest in_modules found
-
 :~ state_file_text (~state_dir : string) (~name : string) : string =
     := path = sm'.concat_list "/" [ state_dir; name ]
-    ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+    agile_state_fs.model.read_state path
 
 :~ state_segments_text (~state_dir : string) : string =
-    := modules = segment_modules (sm'.split_list "\n" (state_file_text state_dir "package.spiproj")) !- []
+    := project = agile_state_fs.model.read_state (agile_state_fs.project.project_path_in state_dir)
+    := modules = agile_state_fs.project.project_segments (agile_state_fs.project.project_format_in state_dir) project
     := segment_text (name : string) =
         sm'.concat_list "" [ "\n"; state_file_text state_dir (sm'.concat_list "" [ name; ".spi" ]) ]
     := segments = modules |> listm.map (\ (name : string) => segment_text name)
@@ -296,30 +289,8 @@
 :~ segment_name (~stamp : string) : string =
     sm'.concat_list "" [ "notes_"; byte_slice stamp 0i32 4i32; byte_slice stamp 5i32 7i32 ]
 
-:= entry_of (~segment : string) : string = sm'.concat_list "" [ "    "; segment ]
-
-:~ ^ manifest_lines_with
-    (lines : list string) (~segment : string) (in_modules : bool) (placed : bool) (found : list string)
-    : list string
-    =
-    ?= lines ?|
-    | [] =>
-        listm.rev (? placed || not in_modules ?> found |: entry_of segment :: found)
-    | line :: rest =>
-        := trimmed = sm'.trim line
-        ? trimmed = segment
-        ?> listm.append (listm.rev found) lines
-        |? sm'.ends_with ":" trimmed && in_modules && not placed
-        ?> manifest_lines_with rest segment (trimmed = "modules:") !+ (line :: entry_of segment :: found)
-        |? sm'.ends_with ":" trimmed
-        ?> manifest_lines_with rest segment (trimmed = "modules:") placed (line :: found)
-        |? in_modules && not placed && trimmed <> "agile" && not (sm'.starts_with "notes_" trimmed)
-        ?> manifest_lines_with rest segment in_modules !+ (line :: entry_of segment :: found)
-        |: manifest_lines_with rest segment in_modules placed (line :: found)
-
-:~ manifest_with_segment (~manifest : string) (~segment : string) : string =
-    := lines = sm'.split_list "\n" manifest |> listm'.filter (\ (line : string) => line <> "")
-    sm'.concat_list "" [ sm'.concat_list "\n" (manifest_lines_with lines segment !- !- []); "\n" ]
+:~ manifest_with_segment (format : agile_state_fs.project.project_format) (~manifest : string) (~segment : string) : string =
+    agile_state_fs.project.project_with_segment format manifest segment
 
 :~ state_text_with_notes (~state_dir : string) : string =
     sm'.concat_list "" [ state_file_text state_dir "agile.spi"; state_segments_text state_dir ]
@@ -348,18 +319,22 @@
     := text = state_text_with_notes root
     file_system.remove_dir_all root |> ignore
     expect (note_count text "X" = 2i32) "a note in a segment module counts with the state's own"
-    := listed = segment_modules [ "packages:"; "    notes_fake"; "modules:"; "    agile"; "    notes_b" ] !- []
+    := project = "packages:\n    notes_fake\nmodules:\n    agile\n    notes_b\n"
+    := listed = agile_state_fs.project.project_segments agile_state_fs.project.SpiprojProject project
     expect (listed = [ "notes_b" ]) "only listed modules"
 
 ///> rust
 :# a_segment_is_registered_once_after_agile_and_earlier_segments =
     expect (segment_name "2026-10-31T19:54Z" = "notes_202610") "a segment per month"
+    := words = agile_state_fs.project.SpiprojProject
     := plain = "modules:\n    agile\n    prompt\n    views\n"
     := after = "modules:\n    agile\n    notes_202610\n    prompt\n    views\n"
-    expect (manifest_with_segment plain "notes_202610" = after) "after agile"
+    expect (manifest_with_segment words plain "notes_202610" = after) "after agile"
     := older = "modules:\n    agile\n    notes_202609\n    prompt\n"
     := ordered = "modules:\n    agile\n    notes_202609\n    notes_202610\n    prompt\n"
-    expect (manifest_with_segment older "notes_202610" = ordered) "after the earlier segments"
-    expect (manifest_with_segment ordered "notes_202610" = ordered) "registered once"
-    := last = manifest_with_segment "modules:\n    agile\n" "notes_202610"
+    expect (manifest_with_segment words older "notes_202610" = ordered) "after the earlier segments"
+    expect (manifest_with_segment words ordered "notes_202610" = ordered) "registered once"
+    := last = manifest_with_segment words "modules:\n    agile\n" "notes_202610"
     expect (last = "modules:\n    agile\n    notes_202610\n") "agile last"
+    := toml = manifest_with_segment agile_state_fs.project.TomlProject "modules = '''\nagile\nprompt\n'''\n" "notes_202610"
+    expect (toml = "modules = '''\nagile\nnotes_202610\nprompt\n'''\n") "after agile in spiral.toml"

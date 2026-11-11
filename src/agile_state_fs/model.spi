@@ -1,0 +1,101 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+    :< rust_std_fs.model
+    :< agile_state_spelling.spelling
+
+:< sm'_operators
+:< rust_std_fs.model
+:< agile_state_spelling.spelling
+
+:| state_location =
+    | StateFile : string
+    | HistoryFile : string
+    | ArchiveFile : string
+    | OtherFile
+
+:| root_spelling =
+    | WordsRoot
+    | SymbolsRoot
+
+:= location_of (~path : string) : state_location =
+    := normal = sm'.trim_end_suffix ".pending" (sm'.replace "\\" "/" path)
+    := slash = sm'.last_index_of "/" normal
+    ? slash < 0i32 || sm'.ends_with ".spi" normal = !-
+    ?> OtherFile
+    |:
+        := parent = sm'.substring 0i32 slash normal
+        ? sm'.ends_with "/state" parent
+        ?> StateFile (sm'.trim_end_suffix "/state" parent)
+        |? sm'.ends_with "/history" parent
+        ?> HistoryFile (sm'.trim_end_suffix "/history" parent)
+        |? sm'.ends_with "/archive" parent
+        ?> ArchiveFile (sm'.trim_end_suffix "/archive" parent)
+        |: OtherFile
+
+:= spelling_of_root (~root : string) : root_spelling =
+    ? rust_std_fs.model.file_exists (root ++# "/state/spiral.toml") ?> SymbolsRoot |: WordsRoot
+
+:= spelling_at (~path : string) : root_spelling =
+    ?= location_of path ?|
+    | StateFile root => spelling_of_root root
+    | HistoryFile root => spelling_of_root root
+    | ArchiveFile root => spelling_of_root root
+    | OtherFile => WordsRoot
+
+:= from_disk (~path : string) (~text : string) : string =
+    ?= location_of path ?|
+    | OtherFile => text
+    | _ => unspelled_keeping_endings text
+
+:= on_disk (~path : string) (~text : string) : string =
+    ?= spelling_at path ?|
+    | SymbolsRoot => respelled text
+    | WordsRoot => text
+
+:= loaded_string_of (text : loaded_text) : string =
+    ?= text ?|
+    | loaded_text value => value
+
+:= read_text (readable_file path) : loaded_text =
+    loaded_text (from_disk path (loaded_string_of (rust_std_fs.model.read_text (readable_file path))))
+
+:= text_equals (expected : string) (path : string) : bool = rust_std_fs.model.text_equals (on_disk path expected) path
+
+:= text_contains (needle : string) (path : string) : bool =
+    rust_std_fs.model.text_contains needle path || rust_std_fs.model.text_contains (on_disk path needle) path
+
+:= text_excludes (needle : string) (path : string) : bool =
+    rust_std_fs.model.text_excludes needle path && rust_std_fs.model.text_excludes (on_disk path needle) path
+
+:= write_text (path : string) (text : string) : bool = rust_std_fs.model.write_text path (on_disk path text)
+
+:= write_problem (path : string) (text : string) : string = rust_std_fs.model.write_problem path (on_disk path text)
+
+:= stage (target_path target) (patch_text text) : staged_path =
+    rust_std_fs.model.stage (target_path target) (patch_text (on_disk target text))
+
+:= read_state (~path : string) : string =
+    ? rust_std_fs.model.file_exists path
+    ?>
+        := unreadable, text = rust_std_fs.model.scan_text_of path
+        ? unreadable ?> failwith ("rig state read failed: " ++# path) |: from_disk path text
+    |: ""
+
+:= write_state (~path : string) (~text : string) : bool = write_text path text
+
+:= write_state_or_fail (~path : string) (~text : string) : () =
+    ? write_text path text ?> () |: failwith ("rig state write failed: " ++# path)
+
+///> rust
+:# only_files_directly_in_state_or_history_are_respelled =
+    testing.expect (location_of "C:\\b\\state\\agile.spi" = StateFile "C:/b") "state file"
+    testing.expect (location_of "C:/b/history/status_changes.spi" = HistoryFile "C:/b") "history sidecar"
+    testing.expect (location_of "C:/data/state/backlog/history/x.spi" = HistoryFile "C:/data/state/backlog") "nearest parent wins"
+    testing.expect (location_of "C:/b/archive/done-notes.spi" = ArchiveFile "C:/b") "archived note rows"
+    testing.expect (location_of "C:/x/state/src/a.spi" = OtherFile && location_of "C:/b/state/notes.txt" = OtherFile) "others"
+    testing.expect (location_of "C:/b/state/agile.spi.pending" = StateFile "C:/b") "a pending copy is spelled like the state file it replaces"
+    testing.expect (location_of "C:/b/state/package.spiproj.pending" = OtherFile) "a pending project file stays plain"
+    testing.expect (from_disk "C:/b/state/agile.spi" ":= a () = Task (\"A\")\r\n" = "inl a () = Task (\"A\")\r\n") "read keeps CRLF"
+    testing.expect (from_disk "C:/x/state/src/a.spi" ":= a () = 1" = ":= a () = 1") "source files untouched"
+    testing.expect (on_disk "C:/nowhere/state/agile.spi" "inl a () = 1" = "inl a () = 1") "a words root writes words"

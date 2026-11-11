@@ -11,6 +11,15 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
+fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
+    let bytes = value.as_bytes();
+    let length = bytes.len() as i64;
+    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
+    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
+    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
+    let slice = &bytes[from as usize..(to + 1) as usize];
+    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
+}
 #[derive(Clone)]
 enum US0 {
     US0_Refreshed(Rc<str>),
@@ -28,12 +37,43 @@ enum US1 {
 pub struct Mut0 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US2 {
-    US2_Replaced,
-    US2_TemporaryWriteFailed,
-    US2_RenameFailed,
-    US2_RenameFailedTemporaryKept,
-    US2_ReadbackMismatch,
-    US2_ChangedSinceRead,
+    US2_StateFile(Rc<str>),
+    US2_HistoryFile(Rc<str>),
+    US2_ArchiveFile(Rc<str>),
+    US2_OtherFile,
+}
+#[derive(Clone)]
+enum US3 {
+    US3_WordsRoot,
+    US3_SymbolsRoot,
+}
+#[derive(Clone)]
+enum UH0 {
+    UH0_Nil,
+    UH0_Cons(Rc<str>, Rc<UH0>),
+}
+pub struct Mut1 { pub l0: i32, pub l1: Rc<UH0> }
+#[derive(Clone)]
+enum US5 {
+    US5_HeadInl,
+    US5_HeadUnion,
+    US5_HeadOpen,
+    US5_HeadType,
+}
+#[derive(Clone)]
+enum US4 {
+    US4_KeywordHead(US5),
+    US4_SymbolHead(US5),
+    US4_OtherLine,
+}
+#[derive(Clone)]
+enum US6 {
+    US6_Replaced,
+    US6_TemporaryWriteFailed,
+    US6_RenameFailed,
+    US6_RenameFailedTemporaryKept,
+    US6_ReadbackMismatch,
+    US6_ChangedSinceRead,
 }
 fn stderr_line_1(mut v0: Rc<str>) -> i32 {
     eprintln!("{}", v0);
@@ -141,7 +181,7 @@ fn rewritten_row_12(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: u
 }
 fn joined_11(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: u64, mut v3: Rc<RefCell<Vec<Rc<str>>>>, mut v4: i32, mut v5: Rc<str>, mut v6: i32, mut v7: Rc<str>, mut v8: bool) -> US1 {
     loop {
-        let v9: bool = v6 >= v4;
+        let mut v9: bool = v6 >= v4;
         if v9 {
             if v8 {
                 return US1::US1_Some(v7);
@@ -182,13 +222,294 @@ fn refreshed_text_10(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
     let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
     let v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v0.split(&*v5).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
     let mut v7: i32 = (v6.clone().borrow().len() as i32);
-    let v9: Rc<str> = string_concat(&["core.EvidenceRef (\"", &*v1, "\", "]);
+    let mut v9: Rc<str> = string_concat(&["core.EvidenceRef (\"", &*v1, "\", "]);
     let v10: i32 = 0i32;
     let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v12: bool = false;
     joined_11(v2, v3, v4, v6, v7, v9, v10, v11, v12)
 }
-fn renamed_within_16(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
+fn loop_16(mut v0: Rc<str>) -> Rc<str> {
+    loop {
+        let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) };
+        let mut v2: bool = v0.ends_with(&*v1);
+        if v2 {
+            let v3: i32 = (v0.clone().len() as i32);
+            let v4: i32 = v3.wrapping_sub(8i32);
+            let v5: i32 = v4.wrapping_sub(1i32);
+            let v6: Rc<str> = string_slice(&v0, 0i32 as i64, v5 as i64);
+            v0 = v6;
+            continue;
+        } else {
+            return v0;
+        }
+    }
+}
+fn closure2() -> Rc<dyn Fn((usize)) -> i32> {
+    thread_local!{ static CLOSURE: Rc<dyn Fn((usize)) -> i32> = Rc::new(move |mut v0: (usize)| -> i32 {
+        let mut v1: usize = (v0);
+        let mut v2: i32 = ((v1) as i32);
+        v2
+    }); } CLOSURE.with(|closure| closure.clone())
+}
+fn loop_17(mut v0: Rc<str>) -> Rc<str> {
+    loop {
+        let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
+        let mut v2: bool = v0.ends_with(&*v1);
+        if v2 {
+            let v3: i32 = (v0.clone().len() as i32);
+            let v4: i32 = v3.wrapping_sub(6i32);
+            let v5: i32 = v4.wrapping_sub(1i32);
+            let v6: Rc<str> = string_slice(&v0, 0i32 as i64, v5 as i64);
+            v0 = v6;
+            continue;
+        } else {
+            return v0;
+        }
+    }
+}
+fn loop_18(mut v0: Rc<str>) -> Rc<str> {
+    loop {
+        let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
+        let mut v2: bool = v0.ends_with(&*v1);
+        if v2 {
+            let v3: i32 = (v0.clone().len() as i32);
+            let v4: i32 = v3.wrapping_sub(8i32);
+            let v5: i32 = v4.wrapping_sub(1i32);
+            let v6: Rc<str> = string_slice(&v0, 0i32 as i64, v5 as i64);
+            v0 = v6;
+            continue;
+        } else {
+            return v0;
+        }
+    }
+}
+fn loop_19(mut v0: Rc<str>) -> Rc<str> {
+    loop {
+        let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
+        let mut v2: bool = v0.ends_with(&*v1);
+        if v2 {
+            let v3: i32 = (v0.clone().len() as i32);
+            let v4: i32 = v3.wrapping_sub(8i32);
+            let v5: i32 = v4.wrapping_sub(1i32);
+            let v6: Rc<str> = string_slice(&v0, 0i32 as i64, v5 as i64);
+            v0 = v6;
+            continue;
+        } else {
+            return v0;
+        }
+    }
+}
+fn method21(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH0::UH0_Cons(v2, v3) => {
+                let mut v2: Rc<str> = v2;
+                let v3: Rc<UH0> = v3;
+                let v4: Rc<UH0> = Rc::new(UH0::UH0_Cons(v2, v1));
+                (v0, v1) = (v3, v4);
+                continue;
+            }
+            UH0::UH0_Nil => {
+                return v1;
+            }
+        }
+    }
+}
+fn method22(mut v0: i32, mut v1: &Rc<RefCell<Mut1>>) -> bool {
+    let mut v2: i32 = v1.borrow().l0;
+    let v3: bool = v2 < v0;
+    v3
+}
+fn split_list_20(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<UH0> {
+    let mut v2: i32 = (v0.clone().len() as i32);
+    let v3: bool = v2 == 0i32;
+    if v3 {
+        let v4: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+        Rc::new(UH0::UH0_Cons(v1, v4))
+    } else {
+        let v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v1.split(&*v0).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
+        let mut v7: i32 = (v6.clone().borrow().len() as i32);
+        let mut v8: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+        let mut v9: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: 0i32, l1: v8 }));
+        while method22(v7, &v9) {
+            let v11: i32 = v9.borrow().l0;
+            let v12: Rc<UH0> = v9.borrow().l1.clone();
+            let v13: Rc<str> = v6.borrow()[v11 as usize].clone();
+            let mut v14: i32 = v11.wrapping_add(1i32);
+            let v15: Rc<UH0> = Rc::new(UH0::UH0_Cons(v13, v12));
+            v9.borrow_mut().l0 = v14;
+            v9.borrow_mut().l1 = v15;
+            ()
+        };
+        let v16: Rc<UH0> = v9.borrow().l1.clone();
+        let v17: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+        method21(v16, v17)
+    }
+}
+fn method23(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+    match Rc::unwrap_or_clone(v0) {
+        UH0::UH0_Cons(v2, v3) => {
+            let mut v2: Rc<str> = v2;
+            let v3: Rc<UH0> = v3;
+            let v4: Rc<UH0> = method23(v3, v1);
+            let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("type "); } LIT.with(|lit| lit.clone()) };
+            let v6: bool = v2.starts_with(&*v5);
+            let v15: US4 = if v6 {
+                let mut v7: US5 = US5::US5_HeadType;
+                US4::US4_KeywordHead(v7)
+            } else {
+                let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":== "); } LIT.with(|lit| lit.clone()) };
+                let v10: bool = v2.starts_with(&*v9);
+                if v10 {
+                    let v11: US5 = US5::US5_HeadType;
+                    US4::US4_SymbolHead(v11)
+                } else {
+                    US4::US4_OtherLine
+                }
+            };
+            let v27: US4 = match &v15 {
+                US4::US4_OtherLine => {
+                    let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
+                    let v17: bool = v2.starts_with(&*v16);
+                    if v17 {
+                        let v18: US5 = US5::US5_HeadInl;
+                        US4::US4_KeywordHead(v18)
+                    } else {
+                        let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":= "); } LIT.with(|lit| lit.clone()) };
+                        let v21: bool = v2.starts_with(&*v20);
+                        if v21 {
+                            let v22: US5 = US5::US5_HeadInl;
+                            US4::US4_SymbolHead(v22)
+                        } else {
+                            US4::US4_OtherLine
+                        }
+                    }
+                }
+                _ => {
+                    v15
+                }
+            };
+            let v39: US4 = match &v27 {
+                US4::US4_OtherLine => {
+                    let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("union "); } LIT.with(|lit| lit.clone()) };
+                    let v29: bool = v2.starts_with(&*v28);
+                    if v29 {
+                        let v30: US5 = US5::US5_HeadUnion;
+                        US4::US4_KeywordHead(v30)
+                    } else {
+                        let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":| "); } LIT.with(|lit| lit.clone()) };
+                        let v33: bool = v2.starts_with(&*v32);
+                        if v33 {
+                            let v34: US5 = US5::US5_HeadUnion;
+                            US4::US4_SymbolHead(v34)
+                        } else {
+                            US4::US4_OtherLine
+                        }
+                    }
+                }
+                _ => {
+                    v27
+                }
+            };
+            let v51: US4 = match &v39 {
+                US4::US4_OtherLine => {
+                    let v40: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("open "); } LIT.with(|lit| lit.clone()) };
+                    let v41: bool = v2.starts_with(&*v40);
+                    if v41 {
+                        let v42: US5 = US5::US5_HeadOpen;
+                        US4::US4_KeywordHead(v42)
+                    } else {
+                        let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":< "); } LIT.with(|lit| lit.clone()) };
+                        let v45: bool = v2.starts_with(&*v44);
+                        if v45 {
+                            let v46: US5 = US5::US5_HeadOpen;
+                            US4::US4_SymbolHead(v46)
+                        } else {
+                            US4::US4_OtherLine
+                        }
+                    }
+                }
+                _ => {
+                    v39
+                }
+            };
+            let v76: Rc<str> = match v51 {
+                US4::US4_KeywordHead(v52) => {
+                    let v52: US5 = v52;
+                    let v59: Rc<str> = match &v52 {
+                        US5::US5_HeadInl => {
+                            let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
+                            v53
+                        }
+                        US5::US5_HeadOpen => {
+                            let v55: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("open "); } LIT.with(|lit| lit.clone()) };
+                            v55
+                        }
+                        US5::US5_HeadType => {
+                            v5
+                        }
+                        US5::US5_HeadUnion => {
+                            let v54: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("union "); } LIT.with(|lit| lit.clone()) };
+                            v54
+                        }
+                    };
+                    let v60: i32 = (v59.len() as i32);
+                    let v68: Rc<str> = match v52 {
+                        US5::US5_HeadInl => {
+                            let v61: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":= "); } LIT.with(|lit| lit.clone()) };
+                            v61
+                        }
+                        US5::US5_HeadOpen => {
+                            let v63: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":< "); } LIT.with(|lit| lit.clone()) };
+                            v63
+                        }
+                        US5::US5_HeadType => {
+                            let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":== "); } LIT.with(|lit| lit.clone()) };
+                            v64
+                        }
+                        US5::US5_HeadUnion => {
+                            let v62: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":| "); } LIT.with(|lit| lit.clone()) };
+                            v62
+                        }
+                    };
+                    let v69: i32 = (v2.clone().len() as i32);
+                    let v70: i32 = v69.wrapping_sub(v60);
+                    let v71: usize = ((v60) as usize);
+                    let v72: i32 = v60.wrapping_add(v70);
+                    let v73: usize = ((v72) as usize);
+                    let v74: Rc<str> = Rc::<str>::from(&(v2)[v71..v73]);
+                    let v75: Rc<str> = string_concat(&[&*v68, &*v74]);
+                    v75
+                }
+                _ => {
+                    v2
+                }
+            };
+            Rc::new(UH0::UH0_Cons(v76, v4))
+        }
+        UH0::UH0_Nil => {
+            v1
+        }
+    }
+}
+fn method24(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<UH0>, mut v2: i32) -> i32 {
+    loop {
+        match Rc::unwrap_or_clone(v1) {
+            UH0::UH0_Cons(v3, v4) => {
+                let v3: Rc<str> = v3;
+                let v4: Rc<UH0> = v4;
+                v0.borrow_mut().push(v3);
+                let v5: i32 = v2.wrapping_add(1i32);
+                (v1, v2) = (v4, v5);
+                continue;
+            }
+            UH0::UH0_Nil => {
+                return v2;
+            }
+        }
+    }
+}
+fn renamed_within_25(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
     loop {
         let v3: bool = std::fs::rename(&*v1, &*v0).is_ok();
         if v3 {
@@ -215,7 +536,7 @@ fn refresh_6(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: bool) ->
     };
     let v6: Rc<str> = string_concat(&[&*v0, "/state/evidence.spi"]);
     let mut v8: Rc<str> = string_concat(&[&*v0, "/", &*v5]);
-    let v9: bool = &*v1 != "";
+    let mut v9: bool = &*v1 != "";
     let v13: bool = if v9 {
         let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".."); } LIT.with(|lit| lit.clone()) };
         let v11: bool = v1.contains(&*v10);
@@ -317,57 +638,254 @@ fn refresh_6(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: bool) ->
                         US0::US0_DryRun(v73)
                     } else {
                         let v75: Rc<str> = string_concat(&[&*v6, ".pending"]);
-                        let v76: bool = std::fs::write(&*v75, &*v65).is_ok();
-                        let v89: US2 = if v76 {
-                            let v77: i32 = 40i32;
-                            let v78: bool = renamed_within_16(v6.clone(), v75.clone(), v77);
-                            if v78 {
-                                let v79: bool = std::fs::read_to_string(&*v6).is_ok_and(|value| value == *v65);
-                                if v79 {
-                                    US2::US2_Replaced
+                        let v76: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+                        let v77: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
+                        let v78: Rc<str> = Rc::<str>::from(v75.replace(&*v76, &*v77));
+                        let mut v79: Rc<str> = loop_16(v78);
+                        let v80: Option<usize> = v79.rfind(&*v77);
+                        let v81: Option<usize> = method13(v80);
+                        let mut v82: Rc<dyn Fn((usize)) -> i32> = closure2();
+                        let mut v83: Option<i32> = v81.map(|x| v82(x));
+                        let v85: i32 = v83.unwrap_or(-1i32);
+                        let v86: bool = v85 < 0i32;
+                        let v90: bool = if v86 {
+                            true
+                        } else {
+                            let v87: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".spi"); } LIT.with(|lit| lit.clone()) };
+                            let v88: bool = v79.ends_with(&*v87);
+                            let v89: bool = v88 == false;
+                            v89
+                        };
+                        let v111: US2 = if v90 {
+                            US2::US2_OtherFile
+                        } else {
+                            let v92: usize = ((0i32) as usize);
+                            let v93: usize = ((v85) as usize);
+                            let v94: Rc<str> = Rc::<str>::from(&(v79)[v92..v93]);
+                            let v95: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
+                            let v96: bool = v94.ends_with(&*v95);
+                            if v96 {
+                                let v97: Rc<str> = loop_17(v94);
+                                US2::US2_StateFile(v97)
+                            } else {
+                                let v99: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
+                                let v100: bool = v94.ends_with(&*v99);
+                                if v100 {
+                                    let v101: Rc<str> = loop_18(v94);
+                                    US2::US2_HistoryFile(v101)
                                 } else {
-                                    US2::US2_ReadbackMismatch
+                                    let v103: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
+                                    let v104: bool = v94.ends_with(&*v103);
+                                    if v104 {
+                                        let v105: Rc<str> = loop_19(v94);
+                                        US2::US2_ArchiveFile(v105)
+                                    } else {
+                                        US2::US2_OtherFile
+                                    }
+                                }
+                            }
+                        };
+                        let v134: US3 = match v111 {
+                            US2::US2_ArchiveFile(v124) => {
+                                let v124: Rc<str> = v124;
+                                let v125: Rc<str> = string_concat(&[&*v124, "/state/spiral.toml"]);
+                                let v126: bool = std::path::Path::new(&*v125).is_file();
+                                if v126 {
+                                    US3::US3_SymbolsRoot
+                                } else {
+                                    US3::US3_WordsRoot
+                                }
+                            }
+                            US2::US2_HistoryFile(v118) => {
+                                let v118: Rc<str> = v118;
+                                let v119: Rc<str> = string_concat(&[&*v118, "/state/spiral.toml"]);
+                                let v120: bool = std::path::Path::new(&*v119).is_file();
+                                if v120 {
+                                    US3::US3_SymbolsRoot
+                                } else {
+                                    US3::US3_WordsRoot
+                                }
+                            }
+                            US2::US2_OtherFile => {
+                                US3::US3_WordsRoot
+                            }
+                            US2::US2_StateFile(v112) => {
+                                let v112: Rc<str> = v112;
+                                let v113: Rc<str> = string_concat(&[&*v112, "/state/spiral.toml"]);
+                                let v114: bool = std::path::Path::new(&*v113).is_file();
+                                if v114 {
+                                    US3::US3_SymbolsRoot
+                                } else {
+                                    US3::US3_WordsRoot
+                                }
+                            }
+                        };
+                        let v146: Rc<str> = match v134 {
+                            US3::US3_SymbolsRoot => {
+                                let v135: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+                                let v136: Rc<UH0> = split_list_20(v135.clone(), v65.clone());
+                                let v137: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+                                let v138: Rc<UH0> = method23(v136, v137);
+                                let v139: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
+                                let v140: i32 = 0i32;
+                                let v141: i32 = method24(v139.clone(), v138, v140);
+                                let v142: Rc<Vec<Rc<str>>> = Rc::new(v139.borrow().clone());
+                                let v143: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v142).as_ref().clone()));
+                                let v144: Rc<str> = Rc::<str>::from((*v143.borrow()).join(&*v135));
+                                v144
+                            }
+                            US3::US3_WordsRoot => {
+                                v65.clone()
+                            }
+                        };
+                        let v147: bool = std::fs::write(&*v75, &*v146).is_ok();
+                        let v228: US6 = if v147 {
+                            let v148: i32 = 40i32;
+                            let v149: bool = renamed_within_25(v6.clone(), v75.clone(), v148);
+                            if v149 {
+                                let v150: Rc<str> = Rc::<str>::from(v6.replace(&*v76, &*v77));
+                                let mut v151: Rc<str> = loop_16(v150);
+                                let v152: Option<usize> = v151.rfind(&*v77);
+                                let v153: Option<usize> = method13(v152);
+                                let mut v154: Option<i32> = v153.map(|x| v82(x));
+                                let v156: i32 = v154.unwrap_or(-1i32);
+                                let v157: bool = v156 < 0i32;
+                                let v161: bool = if v157 {
+                                    true
+                                } else {
+                                    let v158: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".spi"); } LIT.with(|lit| lit.clone()) };
+                                    let v159: bool = v151.ends_with(&*v158);
+                                    let v160: bool = v159 == false;
+                                    v160
+                                };
+                                let v182: US2 = if v161 {
+                                    US2::US2_OtherFile
+                                } else {
+                                    let v163: usize = ((0i32) as usize);
+                                    let v164: usize = ((v156) as usize);
+                                    let v165: Rc<str> = Rc::<str>::from(&(v151)[v163..v164]);
+                                    let v166: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
+                                    let v167: bool = v165.ends_with(&*v166);
+                                    if v167 {
+                                        let v168: Rc<str> = loop_17(v165);
+                                        US2::US2_StateFile(v168)
+                                    } else {
+                                        let v170: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
+                                        let v171: bool = v165.ends_with(&*v170);
+                                        if v171 {
+                                            let v172: Rc<str> = loop_18(v165);
+                                            US2::US2_HistoryFile(v172)
+                                        } else {
+                                            let v174: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
+                                            let v175: bool = v165.ends_with(&*v174);
+                                            if v175 {
+                                                let v176: Rc<str> = loop_19(v165);
+                                                US2::US2_ArchiveFile(v176)
+                                            } else {
+                                                US2::US2_OtherFile
+                                            }
+                                        }
+                                    }
+                                };
+                                let v205: US3 = match v182 {
+                                    US2::US2_ArchiveFile(v195) => {
+                                        let v195: Rc<str> = v195;
+                                        let v196: Rc<str> = string_concat(&[&*v195, "/state/spiral.toml"]);
+                                        let v197: bool = std::path::Path::new(&*v196).is_file();
+                                        if v197 {
+                                            US3::US3_SymbolsRoot
+                                        } else {
+                                            US3::US3_WordsRoot
+                                        }
+                                    }
+                                    US2::US2_HistoryFile(v189) => {
+                                        let v189: Rc<str> = v189;
+                                        let v190: Rc<str> = string_concat(&[&*v189, "/state/spiral.toml"]);
+                                        let v191: bool = std::path::Path::new(&*v190).is_file();
+                                        if v191 {
+                                            US3::US3_SymbolsRoot
+                                        } else {
+                                            US3::US3_WordsRoot
+                                        }
+                                    }
+                                    US2::US2_OtherFile => {
+                                        US3::US3_WordsRoot
+                                    }
+                                    US2::US2_StateFile(v183) => {
+                                        let v183: Rc<str> = v183;
+                                        let v184: Rc<str> = string_concat(&[&*v183, "/state/spiral.toml"]);
+                                        let v185: bool = std::path::Path::new(&*v184).is_file();
+                                        if v185 {
+                                            US3::US3_SymbolsRoot
+                                        } else {
+                                            US3::US3_WordsRoot
+                                        }
+                                    }
+                                };
+                                let v217: Rc<str> = match v205 {
+                                    US3::US3_SymbolsRoot => {
+                                        let v206: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+                                        let v207: Rc<UH0> = split_list_20(v206.clone(), v65);
+                                        let v208: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+                                        let v209: Rc<UH0> = method23(v207, v208);
+                                        let v210: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
+                                        let v211: i32 = 0i32;
+                                        let v212: i32 = method24(v210.clone(), v209, v211);
+                                        let v213: Rc<Vec<Rc<str>>> = Rc::new(v210.borrow().clone());
+                                        let v214: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v213).as_ref().clone()));
+                                        let v215: Rc<str> = Rc::<str>::from((*v214.borrow()).join(&*v206));
+                                        v215
+                                    }
+                                    US3::US3_WordsRoot => {
+                                        v65
+                                    }
+                                };
+                                let v218: bool = std::fs::read_to_string(&*v6).is_ok_and(|value| value == *v217);
+                                if v218 {
+                                    US6::US6_Replaced
+                                } else {
+                                    US6::US6_ReadbackMismatch
                                 }
                             } else {
-                                let v83: bool = std::fs::remove_file(&*v75).is_ok() || !std::path::Path::new(&*v75).exists();
-                                if v83 {
-                                    US2::US2_RenameFailed
+                                let v222: bool = std::fs::remove_file(&*v75).is_ok() || !std::path::Path::new(&*v75).exists();
+                                if v222 {
+                                    US6::US6_RenameFailed
                                 } else {
-                                    US2::US2_RenameFailedTemporaryKept
+                                    US6::US6_RenameFailedTemporaryKept
                                 }
                             }
                         } else {
-                            US2::US2_TemporaryWriteFailed
+                            US6::US6_TemporaryWriteFailed
                         };
-                        match &v89 {
-                            US2::US2_Replaced => {
+                        match &v228 {
+                            US6::US6_Replaced => {
                                 US0::US0_Refreshed(v73)
                             }
                             _ => {
-                                let v100: Rc<str> = match v89 {
-                                    US2::US2_ChangedSinceRead => {
-                                        let v95: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the file changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
-                                        v95
+                                let v239: Rc<str> = match v228 {
+                                    US6::US6_ChangedSinceRead => {
+                                        let v234: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the file changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
+                                        v234
                                     }
-                                    US2::US2_ReadbackMismatch => {
-                                        let v94: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("readback did not match the written file"); } LIT.with(|lit| lit.clone()) };
-                                        v94
+                                    US6::US6_ReadbackMismatch => {
+                                        let v233: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("readback did not match the written file"); } LIT.with(|lit| lit.clone()) };
+                                        v233
                                     }
-                                    US2::US2_RenameFailed => {
-                                        let v92: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place"); } LIT.with(|lit| lit.clone()) };
-                                        v92
+                                    US6::US6_RenameFailed => {
+                                        let v231: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place"); } LIT.with(|lit| lit.clone()) };
+                                        v231
                                     }
-                                    US2::US2_RenameFailedTemporaryKept => {
-                                        let v93: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place or remove its .pending copy"); } LIT.with(|lit| lit.clone()) };
-                                        v93
+                                    US6::US6_RenameFailedTemporaryKept => {
+                                        let v232: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place or remove its .pending copy"); } LIT.with(|lit| lit.clone()) };
+                                        v232
                                     }
-                                    US2::US2_TemporaryWriteFailed => {
-                                        let v91: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write the replacement file"); } LIT.with(|lit| lit.clone()) };
-                                        v91
+                                    US6::US6_TemporaryWriteFailed => {
+                                        let v230: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write the replacement file"); } LIT.with(|lit| lit.clone()) };
+                                        v230
                                     }
                                     _ => unreachable!(),
                                 };
-                                US0::US0_WriteFailed(v100)
+                                US0::US0_WriteFailed(v239)
                             }
                         }
                     }
@@ -393,7 +911,7 @@ fn evidence_run_0() -> i32 {
     } else {
         let mut v7: i32 = 4i32;
         let mut v8: Rc<str> = argument_3(v7);
-        let v9: bool = &*v8 == "";
+        let mut v9: bool = &*v8 == "";
         v9
     };
     if v10 {
@@ -449,3 +967,4 @@ pub fn rig_evidence_run() -> i32 {
     closure0()()
 }
 pub type SpiralShape_97df63ebabc3 = Mut0;
+pub type SpiralShape_652accfc6a8d = Mut1;

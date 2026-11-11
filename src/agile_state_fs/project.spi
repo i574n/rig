@@ -1,0 +1,174 @@
+///- --package .
+:# project static =
+    :< sm'_operators
+    :< rust_std_fs.model
+
+:< sm'_operators
+:< rust_std_fs.model
+
+:| project_format =
+    | SpiprojProject
+    | TomlProject
+
+:| module_listing =
+    | ModuleListed
+    | ModuleAdded : string
+    | NoModulesSection
+
+:| project_split =
+    | SplitProject : list string * list string * list string
+    | NoModules
+
+:= file_name_of (format : project_format) : string =
+    ?= format ?|
+    | SpiprojProject => "package.spiproj"
+    | TomlProject => "spiral.toml"
+
+:= project_format_in (~state_dir : string) : project_format =
+    ? rust_std_fs.model.file_exists (sm'.concat_list "/" [ state_dir; "spiral.toml" ]) ?> TomlProject |: SpiprojProject
+
+:= project_path_in (~state_dir : string) : string =
+    sm'.concat_list "/" [ state_dir; file_name_of (project_format_in state_dir) ]
+
+:= header_of (format : project_format) : string =
+    ?= format ?|
+    | SpiprojProject => "modules:"
+    | TomlProject => "modules = '''"
+
+:= closer_of (format : project_format) : list string =
+    ?= format ?|
+    | SpiprojProject => []
+    | TomlProject => [ "'''" ]
+
+:= entry_of (format : project_format) (~module : string) : string =
+    ?= format ?|
+    | SpiprojProject => sm'.concat_list "" [ "    "; module ]
+    | TomlProject => module
+
+:= closes_section (format : project_format) (~line : string) : bool =
+    ?= format ?|
+    | SpiprojProject => not (sm'.starts_with " " line || sm'.starts_with "\t" line)
+    | TomlProject => sm'.trim line = "'''"
+
+:= project_lines (~text : string) : list string =
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm'.filter (\ (line : string) => sm'.trim line <> "")
+
+:~ ^ section_lines (format : project_format) (lines : list string) (before : list string) (modules : list string) : project_split =
+    ?= lines ?|
+    | [] => SplitProject (before, listm.rev modules, [])
+    | line :: rest =>
+        ? closes_section format line
+        ?> SplitProject (before, listm.rev modules, lines)
+        |: section_lines format rest before (sm'.trim line :: modules)
+
+:~ ^ split_lines (format : project_format) (lines : list string) (before : list string) : project_split =
+    ?= lines ?|
+    | [] => NoModules
+    | line :: rest =>
+        ? sm'.trim line = header_of format
+        ?> section_lines format rest (listm.rev (line :: before)) []
+        |: split_lines format rest (line :: before)
+
+:= split_of (format : project_format) (~text : string) : project_split = split_lines format (project_lines text) []
+
+:= rendered (format : project_format) (before : list string) (modules : list string) (after : list string) : string =
+    := entries = modules |> listm.map (\ (module : string) => entry_of format module)
+    sm'.concat_list "" [ sm'.concat_list "\n" (listm.append before (listm.append entries after)); "\n" ]
+
+:= project_modules (format : project_format) (~text : string) : list string =
+    ?= split_of format text ?|
+    | SplitProject (_, modules, _) => modules
+    | NoModules => []
+
+:= project_with_module (format : project_format) (~text : string) (~module : string) : module_listing =
+    ?= split_of format text ?|
+    | NoModules => NoModulesSection
+    | SplitProject (before, modules, after) =>
+        ? listm'.contains module modules
+        ?> ModuleListed
+        |: ModuleAdded (rendered format before (module :: modules) after)
+
+:= project_with_module_last (format : project_format) (~text : string) (~module : string) : module_listing =
+    ?= split_of format text ?|
+    | NoModules => NoModulesSection
+    | SplitProject (before, modules, after) =>
+        ? listm'.contains module modules
+        ?> ModuleListed
+        |: ModuleAdded (rendered format before (listm.append modules [ module ]) after)
+
+:= project_with_section_module (format : project_format) (~text : string) (~module : string) : string =
+    ?= project_with_module format text module ?|
+    | ModuleListed => text
+    | ModuleAdded listed => listed
+    | NoModulesSection =>
+        := lines = listm.append (project_lines text) (header_of format :: entry_of format module :: closer_of format)
+        sm'.concat_list "" [ sm'.concat_list "\n" lines; "\n" ]
+
+:~ ^ segment_after_agile (anchored : bool) (modules : list string) (~segment : string) : list string =
+    ?= modules ?|
+    | [] => [ segment ]
+    | head :: rest =>
+        ? head = "agile" || (anchored && sm'.starts_with "notes_" head)
+        ?> head :: segment_after_agile !+ rest segment
+        |? anchored
+        ?> segment :: modules
+        |: head :: segment_after_agile !- rest segment
+
+:= modules_with_segment (modules : list string) (~segment : string) : list string = segment_after_agile !- modules segment
+
+:= project_with_segment (format : project_format) (~text : string) (~segment : string) : string =
+    ?= split_of format text ?|
+    | NoModules => text
+    | SplitProject (before, modules, after) =>
+        ? listm'.contains segment modules
+        ?> text
+        |: rendered format before (modules_with_segment modules segment) after
+
+:= project_segments (format : project_format) (~text : string) : list string =
+    project_modules format text |> listm'.filter (\ (module : string) => sm'.starts_with "notes_" module)
+
+:| project_conversion =
+    | ProjectConverted : string
+    | ProjectNotConvertible : string
+
+:= converted_project (from : project_format) (into : project_format) (~text : string) : project_conversion =
+    ?= split_of from text ?|
+    | NoModules => ProjectNotConvertible "the state project has no modules section"
+    | SplitProject (before, modules, after) =>
+        ? before = [ header_of from ] && after = closer_of from
+        ?> ProjectConverted (rendered into [ header_of into ] modules (closer_of into))
+        |: ProjectNotConvertible "the state project holds keys besides modules; convert it by hand"
+
+///> rust
+:# a_project_lists_and_adds_modules_in_both_formats =
+    := words = "packages:\n    |core-\nmodules:\n    agile\n    prompt\n"
+    := symbols = "modules = '''\nagile\nprompt\n'''\n"
+    testing.expect (project_modules SpiprojProject words = [ "agile"; "prompt" ]) "spiproj modules"
+    testing.expect (project_modules TomlProject symbols = [ "agile"; "prompt" ]) "toml modules"
+    testing.expect (project_with_module SpiprojProject words "claims" = ModuleAdded "packages:\n    |core-\nmodules:\n    claims\n    agile\n    prompt\n") "spiproj add first"
+    testing.expect (project_with_module TomlProject symbols "claims" = ModuleAdded "modules = '''\nclaims\nagile\nprompt\n'''\n") "toml add first"
+    testing.expect (project_with_module TomlProject symbols "agile" = ModuleListed) "toml listed"
+    testing.expect (project_with_module SpiprojProject "packages:\n" "claims" = NoModulesSection) "no section"
+    testing.expect (project_with_module_last TomlProject symbols "sprints" = ModuleAdded "modules = '''\nagile\nprompt\nsprints\n'''\n") "toml add last"
+    testing.expect (project_with_module_last SpiprojProject words "sprints" = ModuleAdded "packages:\n    |core-\nmodules:\n    agile\n    prompt\n    sprints\n") "spiproj add last"
+    testing.expect (project_with_section_module TomlProject "" "activity_schema" = "modules = '''\nactivity_schema\n'''\n") "a bare toml gains the section"
+    testing.expect (project_with_section_module SpiprojProject "" "activity_schema" = "modules:\n    activity_schema\n") "a bare spiproj gains the section"
+
+///> rust
+:# a_segment_goes_after_agile_and_earlier_segments_in_both_formats =
+    testing.expect (project_with_segment SpiprojProject "modules:\n    agile\n    prompt\n" "notes_202610" = "modules:\n    agile\n    notes_202610\n    prompt\n") "spiproj after agile"
+    testing.expect (project_with_segment TomlProject "modules = '''\nagile\nnotes_202609\nprompt\n'''\n" "notes_202610" = "modules = '''\nagile\nnotes_202609\nnotes_202610\nprompt\n'''\n") "toml after the earlier segment"
+    testing.expect (project_with_segment TomlProject "modules = '''\nagile\n'''\n" "notes_202610" = "modules = '''\nagile\nnotes_202610\n'''\n") "toml agile last"
+    testing.expect (project_with_segment TomlProject "modules = '''\nviews\nparents\nagile\nprompt\n'''\n" "notes_202611" = "modules = '''\nviews\nparents\nagile\nnotes_202611\nprompt\n'''\n") "modules before agile stay before the segment"
+    testing.expect (project_with_segment SpiprojProject "modules:\n    parents\n    agile\n    notes_202610\n    prompt\n" "notes_202611" = "modules:\n    parents\n    agile\n    notes_202610\n    notes_202611\n    prompt\n") "spiproj after agile and its segments when agile is not first"
+    testing.expect (project_segments TomlProject "modules = '''\nagile\nnotes_a\n'''\n" = [ "notes_a" ]) "segments"
+
+///> rust
+:# a_modules_only_project_converts_both_ways_and_others_are_refused =
+    := words = "modules:\n    parents\n    agile\n    prompt\n"
+    := symbols = "modules = '''\nparents\nagile\nprompt\n'''\n"
+    testing.expect (converted_project SpiprojProject TomlProject words = ProjectConverted symbols) "to toml keeps module order"
+    testing.expect (converted_project TomlProject SpiprojProject symbols = ProjectConverted words) "back to spiproj"
+    := extra = "packageDir: ../src\npackages:\n    dep\nmodules:\n    prompt\n"
+    testing.expect (converted_project SpiprojProject TomlProject extra = ProjectNotConvertible "the state project holds keys besides modules; convert it by hand") "other keys refused"
+    testing.expect (converted_project SpiprojProject TomlProject "packages:\n" = ProjectNotConvertible "the state project has no modules section") "no section refused"

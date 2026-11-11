@@ -35,12 +35,10 @@
     | _ :: rest => items_given rest
     | [] => []
 
-:~ modules_with_sprints (~text : string) : string =
-    ? sm'.contains "\n    sprints\n" ("\n" ++# text)
-    ?> text
-    |? sm'.ends_with "\n" text
-    ?> text ++# "    sprints\n"
-    |: text ++# "\n    sprints\n"
+:~ modules_with_sprints (format : agile_state_fs.project.project_format) (~text : string) : string =
+    ?= agile_state_fs.project.project_with_module_last format text "sprints" ?|
+    | agile_state_fs.project.ModuleAdded listed => listed
+    | _ => text
 
 :~ outcome_text (outcome : start_outcome) : i32 * string =
     := refused = "rig error: agile sprint start refused: "
@@ -60,9 +58,9 @@
         2i32
     |:
         := state = sm'.replace "\\" "/" root ++# "/state"
-        := agile_text = file_system.read_text_or_empty (state ++# "/agile.spi")
+        := agile_text = agile_state_fs.model.read_state (state ++# "/agile.spi")
         := sprints_path = state ++# "/sprints.spi"
-        := existing = file_system.read_text_or_empty sprints_path
+        := existing = agile_state_fs.model.read_state sprints_path
         := today = (conv (workspace_primitives.clock.unix_ms ()) : i64) / 86400000i64
         := terms = { id = id; goal = goal; start = civil_date today; finish = civil_date (today + count) }
         := candidates = items_given rest |> listm.map (\ (task : string) => candidate_of agile_text task)
@@ -84,10 +82,10 @@
                 := rows = candidates |> listm.fold gather ;[] |> am'.base
                 := args = existing, id, goal, terms.start, terms.finish, rows
                 := text = rig_agile_sprint_append.append.sprint_appended_text args
-                file_system.write_all_text sprints_path text
-                := project_path = state ++# "/package.spiproj"
+                agile_state_fs.model.write_state_or_fail sprints_path text
+                := project_path = agile_state_fs.project.project_path_in state
                 := project = file_system.read_text_or_empty project_path
-                := updated = modules_with_sprints project
+                := updated = modules_with_sprints (agile_state_fs.project.project_format_in state) project
                 ? updated <> project ?> file_system.write_all_text project_path updated |: ()
             | _ => ()
         := code, text = outcome_text outcome
@@ -106,9 +104,12 @@
     testing.expect (items_given [] = []) "no items"
     testing.expect (standing_of "" = ItemUnknown && standing_of "Done" = ItemDone) "unknown and done"
     testing.expect (standing_of "Active" = ItemOpen) "any other status is open"
+    := words = agile_state_fs.project.SpiprojProject
     := project = "modules:\n    claims\n    agile\n"
-    testing.expect (modules_with_sprints project = project ++# "    sprints\n") "the sprints module is appended"
-    testing.expect (modules_with_sprints (project ++# "    sprints\n") = project ++# "    sprints\n") "only once"
+    testing.expect (modules_with_sprints words project = project ++# "    sprints\n") "the sprints module is appended"
+    testing.expect (modules_with_sprints words (project ++# "    sprints\n") = project ++# "    sprints\n") "only once"
+    := toml = modules_with_sprints agile_state_fs.project.TomlProject "modules = '''\nclaims\nagile\n'''\n"
+    testing.expect (toml = "modules = '''\nclaims\nagile\nsprints\n'''\n") "appended inside the spiral.toml list"
 := main () : i32 =
     export "rig_agile_sprint_started" started
     0i32

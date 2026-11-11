@@ -17,6 +17,37 @@ inl emit_runtime () : () = global """
             chars.next().is_some_and(|c| c.is_ascii_lowercase() || c == '_')
                 && chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '\'')
         }
+        fn resolved_dir(directory: &Path, value: &str) -> Option<PathBuf> {
+            let path = Path::new(value);
+            if path.is_absolute() || value.contains(':') || value.contains('\\') { return None; }
+            let resolved = absolute(&directory.join(path))?;
+            let mut cursor = directory.to_path_buf();
+            for part in path.components() {
+                match part {
+                    std::path::Component::Normal(p) => cursor.push(p),
+                    std::path::Component::ParentDir => { cursor.pop(); },
+                    std::path::Component::CurDir => {},
+                    _ => return None,
+                }
+                rig_rust_std_fs::rooted_canonical_directory(&cursor).ok()?;
+            }
+            Some(resolved)
+        }
+        fn module_file(value: &str) -> Option<String> {
+            let stem = value.strip_suffix('-').unwrap_or(value);
+            let (stem, extension) = match stem.strip_suffix('*') { Some(stem) => (stem, "spir"), None => (stem, "spi") };
+            if !name(stem) { return None; }
+            Some(format!("{stem}.{extension}"))
+        }
+        fn package_stem(value: &str) -> Option<String> {
+            let stem = value.strip_suffix('-').unwrap_or(value);
+            if !name(stem) { return None; }
+            Some(stem.to_owned())
+        }
+        fn unquoted(value: &str) -> Option<&str> {
+            value.strip_prefix('\'').and_then(|inner| inner.strip_suffix('\''))
+                .or_else(|| value.strip_prefix('"').and_then(|inner| inner.strip_suffix('"')))
+        }
         struct Graph {
             root: PathBuf,
             active: std::collections::BTreeSet<PathBuf>,
@@ -37,56 +68,68 @@ inl emit_runtime () : () = global """
                 if self.visited.contains(&directory) { return Some(()); }
                 if self.visited.len() + self.active.len() >= 256 { return None; }
                 self.active.insert(directory.clone());
-                let source = String::from_utf8(self.file(&directory.join("package.spiproj"))?).ok()?;
+                let toml = directory.join("spiral.toml");
+                let is_toml = std::fs::symlink_metadata(&toml).is_ok();
+                let project = if is_toml { toml } else { directory.join("package.spiproj") };
+                let source = String::from_utf8(self.file(&project)?).ok()?;
                 let mut module_dir = directory.clone();
                 let mut package_dir = directory.parent()?.to_owned();
-                let mut section = "";
                 let mut fields = std::collections::BTreeSet::new();
                 let mut modules = Vec::new();
                 let mut packages = Vec::new();
-                for raw in source.lines() {
-                    if raw.trim().is_empty() { continue; }
-                    if raw.starts_with(' ') {
-                        let value = raw.strip_prefix("    ")?;
-                        if value.starts_with(char::is_whitespace) || value.trim_end() != value { return None; }
-                        match section {
-                            "modules" => {
-                                let stem = value.strip_suffix('-').unwrap_or(value);
-                                let (stem, extension) = match stem.strip_suffix('*') { Some(stem) => (stem, "spir"), None => (stem, "spi") };
-                                if !name(stem) { return None; }
-                                modules.push(format!("{stem}.{extension}"));
-                            },
+                if is_toml {
+                    let mut in_modules = false;
+                    for raw in source.lines() {
+                        let line = raw.trim();
+                        if in_modules {
+                            if line == "'''" { in_modules = false; continue; }
+                            if line.is_empty() { continue; }
+                            if raw.starts_with(char::is_whitespace) || raw.trim_end() != raw { return None; }
+                            modules.push(module_file(raw)?);
+                            continue;
+                        }
+                        if line.is_empty() || line.starts_with('#') { continue; }
+                        let (key, value) = line.split_once('=')?;
+                        let (key, value) = (key.trim(), value.trim());
+                        if !fields.insert(key.to_owned()) { return None; }
+                        match key {
+                            "modules" if value == "'''" => in_modules = true,
                             "packages" => {
-                                let stem = value.strip_suffix('-').unwrap_or(value);
-                                if !name(stem) { return None; }
-                                packages.push(stem.to_owned());
+                                let inner = value.strip_prefix('[')?.strip_suffix(']')?;
+                                for item in inner.split(',') {
+                                    let item = item.trim();
+                                    if item.is_empty() { continue; }
+                                    packages.push(package_stem(unquoted(item)?)?);
+                                }
                             },
+                            "moduleDir" => module_dir = resolved_dir(&directory, unquoted(value)?)?,
+                            "packageDir" => package_dir = resolved_dir(&directory, unquoted(value)?)?,
                             _ => return None,
                         }
-                    } else {
-                        let (key, value) = raw.split_once(':')?;
-                        if !fields.insert(key) { return None; }
-                        let value = value.trim();
-                        match key {
-                            "modules" | "packages" if value.is_empty() => section = key,
-                            "moduleDir" | "packageDir" if !value.is_empty() => {
-                                let path = Path::new(value);
-                                if path.is_absolute() || value.contains(':') || value.contains('\\') { return None; }
-                                let resolved = absolute(&directory.join(path))?;
-                                let mut cursor = directory.clone();
-                                for part in path.components() {
-                                    match part {
-                                        std::path::Component::Normal(p) => cursor.push(p),
-                                        std::path::Component::ParentDir => { cursor.pop(); },
-                                        std::path::Component::CurDir => {},
-                                        _ => return None,
-                                    }
-                                    rig_rust_std_fs::rooted_canonical_directory(&cursor).ok()?;
-                                }
-                                if key == "moduleDir" { module_dir = resolved; } else { package_dir = resolved; }
-                                section = "";
-                            },
-                            _ => return None,
+                    }
+                    if in_modules { return None; }
+                } else {
+                    let mut section = "";
+                    for raw in source.lines() {
+                        if raw.trim().is_empty() { continue; }
+                        if raw.starts_with(' ') {
+                            let value = raw.strip_prefix("    ")?;
+                            if value.starts_with(char::is_whitespace) || value.trim_end() != value { return None; }
+                            match section {
+                                "modules" => modules.push(module_file(value)?),
+                                "packages" => packages.push(package_stem(value)?),
+                                _ => return None,
+                            }
+                        } else {
+                            let (key, value) = raw.split_once(':')?;
+                            if !fields.insert(key.to_owned()) { return None; }
+                            let value = value.trim();
+                            match key {
+                                "modules" | "packages" if value.is_empty() => section = key,
+                                "moduleDir" if !value.is_empty() => { module_dir = resolved_dir(&directory, value)?; section = ""; },
+                                "packageDir" if !value.is_empty() => { package_dir = resolved_dir(&directory, value)?; section = ""; },
+                                _ => return None,
+                            }
                         }
                     }
                 }

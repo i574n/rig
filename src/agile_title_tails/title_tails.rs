@@ -213,27 +213,20 @@ fn stamped_separator_from_1(mut v0: Rc<str>, mut v1: i32) -> i32 {
             return v3;
         } else {
             let v5: i32 = v3.wrapping_add(2i32);
-            let v6: i32 = v5.wrapping_add(17i32);
-            let v7: i32 = (v0.clone().len() as i32);
-            let v8: bool = v7 <= v6;
-            let mut v9: i32 = if v8 {
-                v7
-            } else {
-                v6
-            };
-            let v10: Rc<str> = std::rc::Rc::<str>::from(v0.get(v5 as usize..v9 as usize).unwrap_or(""));
-            let v11: bool = dated_clock_2(v10.clone());
-            let v15: bool = if v11 {
+            let v6: i32 = (v0.clone().len() as i32);
+            let v7: Rc<str> = std::rc::Rc::<str>::from(v0.get(v5 as usize..v6 as usize).unwrap_or(""));
+            let v8: bool = dated_clock_2(v7.clone());
+            let v12: bool = if v8 {
                 true
             } else {
-                let v12: bool = dated_day_4(v10.clone());
-                if v12 {
+                let mut v9: bool = dated_day_4(v7.clone());
+                if v9 {
                     true
                 } else {
-                    bare_clock_5(v10)
+                    bare_clock_5(v7)
                 }
             };
-            if v15 {
+            if v12 {
                 return v3;
             } else {
                 v1 = v5;

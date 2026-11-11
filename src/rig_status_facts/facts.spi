@@ -26,7 +26,7 @@
         ? backlog = ""
         ?> []
         |:
-            := text = file_system.read_text_or_empty state
+            := text = agile_state_fs.model.read_state state
             ? text = ""
             ?> [ FactMissing ("backlog", state) ]
             |: [ BacklogCounts (agile_task_census.task_census.census_text text, state) ]

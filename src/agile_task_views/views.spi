@@ -1,4 +1,5 @@
 :< rust_std_fs.model
+:< agile_state_fs.model
 :< sm'_operators
 :< agile_task_text.model
 :< agile_note_model.model
@@ -43,11 +44,7 @@
     }
 
 := views_path (~root : string) : string = concat5 root "/state/views.spi" "" "" ""
-:= package_path (~root : string) : string = concat5 root "/state/package.spiproj" "" "" ""
-:= modules_header () : string = "modules:\n"
-:= views_module () : string = "    views\n"
-:= views_module_listed (~text : string) : bool =
-    sm'.contains (concat5 "\n" (views_module ()) "" "" "") text || sm'.ends_with "\n    views" text
+:= state_dir_of (~root : string) : string = concat5 root "/state" "" "" ""
 := view_schema () : string =
     "///- --no-respell\nunion agile_view =\n    | View :: string * string * string -> agile_view\n"
 := view_constructor () : string = "View ("
@@ -79,22 +76,18 @@
     |: StateChangedSinceRead
 
 :~ views_module_registered (~root : string) : state_write =
-    := path = package_path root
+    := path = agile_state_fs.project.project_path_in (state_dir_of root)
     ?= probe (unchecked path) ?|
     | FileMissing _ => StateWritten
     | FileReadable file =>
-        := text = loaded_string (read_text file)
-        ? views_module_listed text
-        ?> StateWritten
-        |? sm'.contains (modules_header ()) text ?>
-            ?=
-                replace_file_checked path (
-                    sm'.replace (modules_header ()) (concat5 (modules_header ()) (views_module ()) "" "" "") text
-                )
-            ?|
+        := format = agile_state_fs.project.project_format_in (state_dir_of root)
+        ?= agile_state_fs.project.project_with_module format (loaded_string (read_text file)) "views" ?|
+        | agile_state_fs.project.ModuleListed => StateWritten
+        | agile_state_fs.project.NoModulesSection => StateWriteFailed "the state project has no modules section to list views in"
+        | agile_state_fs.project.ModuleAdded listed =>
+            ?= replace_file_checked path listed ?|
             | Replaced => StateWritten
             | problem => StateWriteFailed (file_replacement_problem problem)
-        |: StateWriteFailed "state/package.spiproj has no modules section to list views in"
 
 := view_name_valid (~name : string) : bool =
     $'\!(!name).is_empty() && (!name).bytes().all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte \
@@ -122,6 +115,7 @@
         views_listed text (found + 1i32) (count + 1i32)
 
 :~ views_run () : i32 =
+    := started = workspace_primitives.clock.unix_ms ()
     := root = argument_owned 1i32
     := loaded = views_loaded root
     := count = views_listed loaded.text 0i32 0i32
@@ -131,7 +125,7 @@
             ($'std::rc::Rc::<str>::from((!count).to_string().as_str())' : string)
             " path="
             (views_path root)
-            ""
+            (sm'.concat_list "" [ " elapsed_ms="; sm'.show (workspace_primitives.clock.ms_since started) ])
     )
 
 :~ view_run () : i32 =

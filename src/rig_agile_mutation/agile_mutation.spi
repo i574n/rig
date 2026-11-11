@@ -96,7 +96,8 @@
 
 := agile_route (subcommand : agile_subcommand) : i32 =
     ?= subcommand ?|
-    | AgileInit => agile_root_only \ _ => $"agile_backlog_scaffold::rig_agile_init_run()"
+    | AgileInit => agile_arity_route (agile_either_arity 2i32 4i32) \ () => $"agile_backlog_scaffold::rig_agile_init_run()"
+    | AgileDialect => agile_arity_route (argument_count_is 3i32) \ () => $"agile_backlog_scaffold::rig_agile_dialect_run()"
     | AgileBegin => agile_arity_route (argument_count_is 3i32) agile_begin_route
     | AgileLease | AgileStatus => agile_root_only agile_lease_status
     | AgileHandoff => agile_root_only agile_handoff

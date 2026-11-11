@@ -49,18 +49,21 @@
         := counted = ? status = "Done" && item.committed ?> done + item.minutes |: done
         items_shown depth agile_text items (at + 1i32) counted
 
+:~ elapsed_field (started : u64) : string = sm'.concat_list "" [ " elapsed_ms="; sm'.show (workspace_primitives.clock.ms_since started) ]
+
 :~ sprint_shown (~root : string) (~id : string) (depth : show_depth) : i32 =
+    := started = workspace_primitives.clock.unix_ms ()
     := state = sm'.replace "\\" "/" root ++# "/state"
-    := sprints_text = file_system.read_text_or_empty (state ++# "/sprints.spi")
+    := sprints_text = agile_state_fs.model.read_state (state ++# "/sprints.spi")
     := heads = rig_agile_sprint_state.state.sprint_head_of (sprints_text, id)
     ? am'.length_base heads = 0i32 ?>
         := which = ? id = "" ?> "open sprint" |: "sprint " ++# id
-        console.write_error_line ("rig error: agile sprint " ++# depth_word depth ++# ": no " ++# which)
+        console.write_error_line ("rig error: agile sprint " ++# depth_word depth ++# ": no " ++# which ++# elapsed_field started)
         1i32
     |:
         := head = am'.index_base 0i32 heads
         := items = rig_agile_sprint_state.state.sprint_items_of (sprints_text, head.id)
-        := agile_text = file_system.read_text_or_empty (state ++# "/agile.spi")
+        := agile_text = agile_state_fs.model.read_state (state ++# "/agile.spi")
         := committed = committed_from items 0i32 0i32
         := today = (conv (workspace_primitives.clock.unix_ms ()) : i64) / 86400000i64
         := left = days_of head.finish - today
@@ -80,13 +83,13 @@
             ++# head.goal
         )
         := done = items_shown depth agile_text items 0i32 0i32
-        console.write_line ("  committed=" ++# sm'.show committed ++# "m done=" ++# sm'.show done ++# "m")
+        console.write_line ("  committed=" ++# sm'.show committed ++# "m done=" ++# sm'.show done ++# "m" ++# elapsed_field started)
         0i32
 
 :~ shown ((root, id) : string * string) : i32 = sprint_shown root id ShowItems
 
 :~ retro ((root, id) : string * string) : i32 =
-    := sprints = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/sprints.spi")
+    := sprints = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/sprints.spi")
     sprint_shown root (? id = "" ?> rig_agile_sprint_state.state.latest_sprint_of sprints |: id) ShowNotes
 
 :~ ^ done_since
@@ -101,18 +104,19 @@
         done_since rows (at + 1i32) since_ms (? fresh ?> listm.append found [ r.item ] |: found)
 
 :~ retro_since ((root, since) : string * string) : i32 =
+    := started = workspace_primitives.clock.unix_ms ()
     := base = sm'.replace "\\" "/" root
     := day = days_of since
     ? day <= 0i64 ?>
         console.write_error_line ("rig error: agile sprint retro --since expects a YYYY-MM-DD date, got " ++# since)
         2i32
     |:
-        := changes = file_system.read_text_or_empty (base ++# "/history/status_changes.spi")
-        := agile_text = file_system.read_text_or_empty (base ++# "/state/agile.spi")
+        := changes = agile_state_fs.model.read_state (base ++# "/history/status_changes.spi")
+        := agile_text = agile_state_fs.model.read_state (base ++# "/state/agile.spi")
         := since_ms : u64 = conv (day * 86400000i64)
         := items = done_since (agile_status_changes.changes.changes_of changes) 0i32 since_ms []
         := count : i32 = listm.length items
-        console.write_line ("rig agile sprint retro ok since=" ++# since ++# " done=" ++# sm'.show count)
+        console.write_line ("rig agile sprint retro ok since=" ++# since ++# " done=" ++# sm'.show count ++# elapsed_field started)
         := item_shown = \ (task : string) =>
             := status = agile_task_census.task_census.status_pair (agile_text, task)
             console.write_line ("  " ++# task ++# " " ++# (? status = "" ?> "unknown" |: status))

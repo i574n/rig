@@ -1,4 +1,5 @@
 :< rust_std_fs.model
+:< agile_state_fs.model
 :< sm'_operators
 :< agile_task_text.model
 :< workspace_primitives.numbers

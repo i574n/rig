@@ -874,23 +874,29 @@ fn fleet_printed_38(mut v0: Rc<RefCell<Vec<(bool, Rc<str>)>>>, mut v1: i32, mut 
             return v2;
         } else {
             let (mut v5, mut v6): (bool, Rc<str>) = v0.borrow()[v1 as usize].clone();
-            let v9: bool = if v5 {
-                let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error:"); } LIT.with(|lit| lit.clone()) };
+            let v12: bool = if v5 {
+                let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit error:"); } LIT.with(|lit| lit.clone()) };
                 let v8: bool = v6.starts_with(&*v7);
-                v8
+                if v8 {
+                    true
+                } else {
+                    let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error:"); } LIT.with(|lit| lit.clone()) };
+                    let v10: bool = v6.starts_with(&*v9);
+                    v10
+                }
             } else {
                 false
             };
-            let v13: i32 = if v9 {
+            let v16: i32 = if v12 {
                 2i32
             } else {
-                let v11: bool = if v5 {
-                    let v10: bool = v2 == 0i32;
-                    v10
+                let v14: bool = if v5 {
+                    let v13: bool = v2 == 0i32;
+                    v13
                 } else {
                     false
                 };
-                if v11 {
+                if v14 {
                     1i32
                 } else {
                     v2
@@ -903,8 +909,8 @@ fn fleet_printed_38(mut v0: Rc<RefCell<Vec<(bool, Rc<str>)>>>, mut v1: i32, mut 
                 println!("{}", v6);
                 ()
             };
-            let v14: i32 = v1.wrapping_add(1i32);
-            (v1, v2) = (v14, v13);
+            let v17: i32 = v1.wrapping_add(1i32);
+            (v1, v2) = (v17, v16);
             continue;
         }
     }

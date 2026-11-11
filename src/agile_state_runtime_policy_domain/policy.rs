@@ -633,6 +633,44 @@ fn closure19() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         agile_state_package_module_name_26(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
+fn agile_state_toml_line_code_29(mut v0: Rc<str>) -> u64 {
+    let mut v1: i32 = (v0.clone().len() as i32);
+    let mut v2: i32 = 0i32;
+    let v3: i32 = method6(v0.clone(), v1, v2);
+    let v4: i32 = v1.wrapping_sub(1i32);
+    let v5: Rc<str> = string_slice(&v0, v3 as i64, v4 as i64);
+    let v6: i32 = (v5.clone().len() as i32);
+    let v7: i32 = method7(v5.clone(), v6);
+    let v8: Rc<str> = string_slice(&v5, 0i32 as i64, v7 as i64);
+    let v9: bool = &*v8 == "modules = '''";
+    if v9 {
+        1u64
+    } else {
+        let v10: bool = &*v8 == "'''";
+        if v10 {
+            3u64
+        } else {
+            let v11: bool = &*v8 == "";
+            let v14: bool = if v11 {
+                true
+            } else {
+                let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("#"); } LIT.with(|lit| lit.clone()) };
+                let v13: bool = v8.starts_with(&*v12);
+                v13
+            };
+            if v14 {
+                0u64
+            } else {
+                2u64
+            }
+        }
+    }
+}
+fn closure20() -> Rc<dyn Fn(Rc<str>) -> u64> {
+    thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> u64> = Rc::new(move |mut v0: Rc<str>| -> u64 {
+        agile_state_toml_line_code_29(v0)
+    }); } CLOSURE.with(|closure| closure.clone())
+}
 pub fn rig_agile_state_mutation_target_decision_binding(v0: i32, v1: i32) -> i32 {
     closure0()(v0, v1)
 }
@@ -692,4 +730,7 @@ pub fn rig_agile_state_package_line_code(v0: &str) -> u64 {
 }
 pub fn rig_agile_state_package_module_name(v0: &str) -> Rc<str> {
     closure19()(Rc::<str>::from(v0))
+}
+pub fn rig_agile_state_toml_line_code(v0: &str) -> u64 {
+    closure20()(Rc::<str>::from(v0))
 }

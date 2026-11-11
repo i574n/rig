@@ -137,23 +137,30 @@ fn job_of_6(mut v0: Rc<str>) -> US1 {
     let v2: Rc<str> = text_field_7(v0.clone(), v1);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("label"); } LIT.with(|lit| lit.clone()) };
     let v4: Rc<str> = text_field_7(v0.clone(), v3);
-    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig job list ok "); } LIT.with(|lit| lit.clone()) };
+    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit job list ok "); } LIT.with(|lit| lit.clone()) };
     let v6: bool = v0.starts_with(&*v5);
-    let v10: bool = if v6 {
-        let mut v7: bool = &*v2 == "running";
-        if v7 {
+    let mut v9: bool = if v6 {
+        true
+    } else {
+        let mut v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig job list ok "); } LIT.with(|lit| lit.clone()) };
+        let v8: bool = v0.starts_with(&*v7);
+        v8
+    };
+    let v13: bool = if v9 {
+        let v10: bool = &*v2 == "running";
+        if v10 {
             true
         } else {
-            let v8: bool = &*v2 == "queued";
-            v8
+            let v11: bool = &*v2 == "queued";
+            v11
         }
     } else {
         false
     };
-    if v10 {
-        let v11: Rc<str> = lane_of_8(v4.clone());
-        let v12: bool = &*v2 == "running";
-        US1::US1_Some(v11, v4, v12)
+    if v13 {
+        let v14: Rc<str> = lane_of_8(v4.clone());
+        let v15: bool = &*v2 == "running";
+        US1::US1_Some(v14, v4, v15)
     } else {
         US1::US1_None
     }

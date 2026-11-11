@@ -19,6 +19,37 @@ pub fn agile_package_input_fingerprint(state_dir: &Path, include_state: bool) ->
         chars.next().is_some_and(|c| c.is_ascii_lowercase() || c == '_')
             && chars.all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '\'')
     }
+    fn resolved_dir(directory: &Path, value: &str) -> Option<PathBuf> {
+        let path = Path::new(value);
+        if path.is_absolute() || value.contains(':') || value.contains('\\') { return None; }
+        let resolved = absolute(&directory.join(path))?;
+        let mut cursor = directory.to_path_buf();
+        for part in path.components() {
+            match part {
+                std::path::Component::Normal(p) => cursor.push(p),
+                std::path::Component::ParentDir => { cursor.pop(); },
+                std::path::Component::CurDir => {},
+                _ => return None,
+            }
+            rig_rust_std_fs::rooted_canonical_directory(&cursor).ok()?;
+        }
+        Some(resolved)
+    }
+    fn module_file(value: &str) -> Option<String> {
+        let stem = value.strip_suffix('-').unwrap_or(value);
+        let (stem, extension) = match stem.strip_suffix('*') { Some(stem) => (stem, "spir"), None => (stem, "spi") };
+        if !name(stem) { return None; }
+        Some(format!("{stem}.{extension}"))
+    }
+    fn package_stem(value: &str) -> Option<String> {
+        let stem = value.strip_suffix('-').unwrap_or(value);
+        if !name(stem) { return None; }
+        Some(stem.to_owned())
+    }
+    fn unquoted(value: &str) -> Option<&str> {
+        value.strip_prefix('\'').and_then(|inner| inner.strip_suffix('\''))
+            .or_else(|| value.strip_prefix('"').and_then(|inner| inner.strip_suffix('"')))
+    }
     struct Graph {
         root: PathBuf,
         active: std::collections::BTreeSet<PathBuf>,
@@ -39,56 +70,68 @@ pub fn agile_package_input_fingerprint(state_dir: &Path, include_state: bool) ->
             if self.visited.contains(&directory) { return Some(()); }
             if self.visited.len() + self.active.len() >= 256 { return None; }
             self.active.insert(directory.clone());
-            let source = String::from_utf8(self.file(&directory.join("package.spiproj"))?).ok()?;
+            let toml = directory.join("spiral.toml");
+            let is_toml = std::fs::symlink_metadata(&toml).is_ok();
+            let project = if is_toml { toml } else { directory.join("package.spiproj") };
+            let source = String::from_utf8(self.file(&project)?).ok()?;
             let mut module_dir = directory.clone();
             let mut package_dir = directory.parent()?.to_owned();
-            let mut section = "";
             let mut fields = std::collections::BTreeSet::new();
             let mut modules = Vec::new();
             let mut packages = Vec::new();
-            for raw in source.lines() {
-                if raw.trim().is_empty() { continue; }
-                if raw.starts_with(' ') {
-                    let value = raw.strip_prefix("    ")?;
-                    if value.starts_with(char::is_whitespace) || value.trim_end() != value { return None; }
-                    match section {
-                        "modules" => {
-                            let stem = value.strip_suffix('-').unwrap_or(value);
-                            let (stem, extension) = match stem.strip_suffix('*') { Some(stem) => (stem, "spir"), None => (stem, "spi") };
-                            if !name(stem) { return None; }
-                            modules.push(format!("{stem}.{extension}"));
-                        },
+            if is_toml {
+                let mut in_modules = false;
+                for raw in source.lines() {
+                    let line = raw.trim();
+                    if in_modules {
+                        if line == "'''" { in_modules = false; continue; }
+                        if line.is_empty() { continue; }
+                        if raw.starts_with(char::is_whitespace) || raw.trim_end() != raw { return None; }
+                        modules.push(module_file(raw)?);
+                        continue;
+                    }
+                    if line.is_empty() || line.starts_with('#') { continue; }
+                    let (key, value) = line.split_once('=')?;
+                    let (key, value) = (key.trim(), value.trim());
+                    if !fields.insert(key.to_owned()) { return None; }
+                    match key {
+                        "modules" if value == "'''" => in_modules = true,
                         "packages" => {
-                            let stem = value.strip_suffix('-').unwrap_or(value);
-                            if !name(stem) { return None; }
-                            packages.push(stem.to_owned());
+                            let inner = value.strip_prefix('[')?.strip_suffix(']')?;
+                            for item in inner.split(',') {
+                                let item = item.trim();
+                                if item.is_empty() { continue; }
+                                packages.push(package_stem(unquoted(item)?)?);
+                            }
                         },
+                        "moduleDir" => module_dir = resolved_dir(&directory, unquoted(value)?)?,
+                        "packageDir" => package_dir = resolved_dir(&directory, unquoted(value)?)?,
                         _ => return None,
                     }
-                } else {
-                    let (key, value) = raw.split_once(':')?;
-                    if !fields.insert(key) { return None; }
-                    let value = value.trim();
-                    match key {
-                        "modules" | "packages" if value.is_empty() => section = key,
-                        "moduleDir" | "packageDir" if !value.is_empty() => {
-                            let path = Path::new(value);
-                            if path.is_absolute() || value.contains(':') || value.contains('\\') { return None; }
-                            let resolved = absolute(&directory.join(path))?;
-                            let mut cursor = directory.clone();
-                            for part in path.components() {
-                                match part {
-                                    std::path::Component::Normal(p) => cursor.push(p),
-                                    std::path::Component::ParentDir => { cursor.pop(); },
-                                    std::path::Component::CurDir => {},
-                                    _ => return None,
-                                }
-                                rig_rust_std_fs::rooted_canonical_directory(&cursor).ok()?;
-                            }
-                            if key == "moduleDir" { module_dir = resolved; } else { package_dir = resolved; }
-                            section = "";
-                        },
-                        _ => return None,
+                }
+                if in_modules { return None; }
+            } else {
+                let mut section = "";
+                for raw in source.lines() {
+                    if raw.trim().is_empty() { continue; }
+                    if raw.starts_with(' ') {
+                        let value = raw.strip_prefix("    ")?;
+                        if value.starts_with(char::is_whitespace) || value.trim_end() != value { return None; }
+                        match section {
+                            "modules" => modules.push(module_file(value)?),
+                            "packages" => packages.push(package_stem(value)?),
+                            _ => return None,
+                        }
+                    } else {
+                        let (key, value) = raw.split_once(':')?;
+                        if !fields.insert(key.to_owned()) { return None; }
+                        let value = value.trim();
+                        match key {
+                            "modules" | "packages" if value.is_empty() => section = key,
+                            "moduleDir" if !value.is_empty() => { module_dir = resolved_dir(&directory, value)?; section = ""; },
+                            "packageDir" if !value.is_empty() => { package_dir = resolved_dir(&directory, value)?; section = ""; },
+                            _ => return None,
+                        }
                     }
                 }
             }
@@ -118,9 +161,9 @@ pub fn agile_package_input_fingerprint(state_dir: &Path, include_state: bool) ->
     u64::from_str_radix(&hash[..16], 16).ok()
 }
 
-use agile_state_runtime_policy_domain::{rig_agile_lease_clock_phase_binding, rig_agile_lease_effective_phase_binding, rig_agile_lease_policy_from_text, rig_agile_lease_readback_decision_binding, rig_agile_prompt_lease_marker_text, rig_agile_prompt_lease_shape_binding, rig_agile_prompt_lease_status_code, rig_agile_spi_escape_text, rig_agile_state_package_line_code, rig_agile_state_package_module_name};
+use agile_state_runtime_policy_domain::{rig_agile_lease_clock_phase_binding, rig_agile_lease_effective_phase_binding, rig_agile_lease_policy_from_text, rig_agile_lease_readback_decision_binding, rig_agile_prompt_lease_marker_text, rig_agile_prompt_lease_shape_binding, rig_agile_prompt_lease_status_code, rig_agile_spi_escape_text, rig_agile_state_package_line_code, rig_agile_state_package_module_name, rig_agile_state_toml_line_code};
 use rig_agile_policy::{rig_agile_attestation_normalize_binding, rig_agile_attestation_value_binding, rig_agile_tuple_parse_binding, rig_agile_u64_decimal_normalize_binding, rig_agile_u64_decimal_value_binding, rig_agile_u64_literal_normalize_binding, rig_agile_u64_literal_value_binding};
-use rig_rust_std_fs::read_regular_text_limited as lease_read_regular_text_limited;
+use rig_rust_std_fs::read_state_text_limited as lease_read_regular_text_limited;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -159,17 +202,21 @@ fn agile_parse_u64_literal(value: &str, label: &str) -> Result<u64, String> {
 }
 
 pub fn agile_package_modules_and_anchor(state_dir: &Path) -> Result<(std::collections::BTreeSet<String>, PathBuf), String> {
-    let source = lease_read_regular_text_limited(&state_dir.join("package.spiproj"), 1024 * 1024)?;
+    let toml = state_dir.join("spiral.toml");
+    let is_toml = std::fs::symlink_metadata(&toml).is_ok();
+    let project = if is_toml { toml } else { state_dir.join("package.spiproj") };
+    let source = lease_read_regular_text_limited(&project, 1024 * 1024)?;
     let mut modules = std::collections::BTreeSet::new();
     let mut in_modules = false;
     let mut last = None;
     for raw in source.lines() {
-        match rig_agile_state_package_line_code(raw) {
+        let code = if is_toml { rig_agile_state_toml_line_code(raw) } else { rig_agile_state_package_line_code(raw) };
+        match code {
             1 => { in_modules = true; continue; }
             3 => { if in_modules { break; } else { continue; } }
             2 if in_modules => {
                 let module = rig_agile_state_package_module_name(raw);
-                if module.is_empty() { return Err(format!("invalid flat state module in package.spiproj: {}", raw.trim())); }
+                if module.is_empty() { return Err(format!("invalid flat state module in {}: {}", project.display(), raw.trim())); }
                 let module = module.as_ref().to_owned();
                 last = Some(state_dir.join(&module));
                 modules.insert(module);

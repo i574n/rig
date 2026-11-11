@@ -37,6 +37,7 @@ enum US1 {
     US1_AgileViews,
     US1_AgileView,
     US1_AgileViewAdd,
+    US1_AgileDialect,
 }
 #[derive(Clone)]
 enum US0 {
@@ -281,11 +282,18 @@ fn agile_subcommand_of_1(mut v0: Rc<str>) -> US0 {
         v129
     };
     let v134: bool = &*v0 == "view-add";
-    if v134 {
+    let v137: US0 = if v134 {
         let v135: US1 = US1::US1_AgileViewAdd;
         US0::US0_AgileKnown(v135)
     } else {
         v133
+    };
+    let v138: bool = &*v0 == "dialect";
+    if v138 {
+        let v139: US1 = US1::US1_AgileDialect;
+        US0::US0_AgileKnown(v139)
+    } else {
+        v137
     }
 }
 fn writes_named_0(mut v0: Rc<str>) -> bool {
@@ -293,7 +301,7 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
     match v1 {
         US0::US0_AgileKnown(v2) => {
             let v2: US1 = v2;
-            let v70: US2 = match v2 {
+            let v72: US2 = match v2 {
                 US1::US1_AgileAdd => {
                     US2::US2_WritesState
                 }
@@ -307,6 +315,9 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                     US2::US2_ReadsState
                 }
                 US1::US1_AgileClaim => {
+                    US2::US2_WritesState
+                }
+                US1::US1_AgileDialect => {
                     US2::US2_WritesState
                 }
                 US1::US1_AgileEdit => {
@@ -397,7 +408,7 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                     US2::US2_ReadsState
                 }
             };
-            match v70 {
+            match v72 {
                 US2::US2_WritesState => {
                     true
                 }

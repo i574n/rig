@@ -62,7 +62,7 @@
 
 :~ state_pairs (~root : string) (row : state_row) : row_pairs =
     := path = root ++# "/state/" ++# row_file row
-    := text = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+    := text = agile_state_fs.model.read_state path
     pairs_from row (sm'.lines text) 0i32 (dict.empty ())
 
 := idle_days_of (now_hour : i64) (last : i64) : i32 =

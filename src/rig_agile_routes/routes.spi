@@ -121,7 +121,7 @@
         checks_joined rows (at + 1i32) (? text = "" ?> check |: text ++# "," ++# check)
 
 :~ lint_warned (~root : string) (~id : string) (~status : string) : () =
-    := text = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+    := text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
     := checks = checks_joined (agile_quality_state.state_rows.item_failures (text, id, status)) 0i32 ""
     ? checks = ""
     ?> ()

@@ -1,5 +1,6 @@
 :< agile_mutation_policy.model
 :< rust_std_fs.model
+:< agile_state_fs.model
 :< agile_task_text.model
 :< workspace_primitives.outcome
 :< workspace_primitives.numbers

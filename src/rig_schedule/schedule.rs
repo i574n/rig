@@ -121,21 +121,28 @@ fn method9(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     v20
 }
 fn schedules_root_7() -> US2 {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_SCHEDULES_HOME"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_SCHEDULES_HOME"); } LIT.with(|lit| lit.clone()) };
     let mut v1: Rc<str> = get_environment_variable_8(v0);
-    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = get_environment_variable_8(v2);
-    let v4: bool = &*v1 != "";
-    if v4 {
-        US2::US2_Some(v1)
+    let mut v2: bool = &*v1 != "";
+    let v5: Rc<str> = if v2 {
+        v1
     } else {
-        let mut v6: bool = &*v3 != "";
-        if v6 {
-            let mut v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit"); } LIT.with(|lit| lit.clone()) };
-            let v8: Rc<str> = method9(v3, v7);
-            let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("schedules"); } LIT.with(|lit| lit.clone()) };
-            let v10: Rc<str> = method9(v8, v9);
-            US2::US2_Some(v10)
+        let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_SCHEDULES_HOME"); } LIT.with(|lit| lit.clone()) };
+        get_environment_variable_8(v3)
+    };
+    let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
+    let mut v7: Rc<str> = get_environment_variable_8(v6);
+    let v8: bool = &*v5 != "";
+    if v8 {
+        US2::US2_Some(v5)
+    } else {
+        let v10: bool = &*v7 != "";
+        if v10 {
+            let mut v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit"); } LIT.with(|lit| lit.clone()) };
+            let mut v12: Rc<str> = method9(v7, v11);
+            let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("schedules"); } LIT.with(|lit| lit.clone()) };
+            let mut v14: Rc<str> = method9(v12, v13);
+            US2::US2_Some(v14)
         } else {
             US2::US2_None
         }

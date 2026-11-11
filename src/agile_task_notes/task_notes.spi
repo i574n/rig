@@ -1,6 +1,7 @@
 ///- --package .
 :# task_notes static =
     :< rust_std_fs.model
+    :< agile_state_fs.model
     :< sm'_operators
     :< agile_task_text.model
     :< agile_note_model.model
@@ -12,6 +13,8 @@
     :< workspace_primitives.files
 
 :< rust_std_fs.model
+
+:< agile_state_fs.model
 :< sm'_operators
 :< agile_task_text.model
 :< agile_note_model.model

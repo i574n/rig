@@ -31,14 +31,13 @@
 :~ waits_text (waits : list task_wait) : string =
     waits_schema () ++# (waits |> listm.map (\ (w : task_wait) => row_of_wait w ++# "\n") |> sm'.concat_list "")
 
-:~ module_added (~package_text : string) : option string =
-    ? sm'.contains "\n    waits\n" package_text || sm'.ends_with "\n    waits" package_text
-    ?> Some package_text
-    |? sm'.contains "modules:\n" package_text
-    ?> Some (sm'.replace "modules:\n" "modules:\n    waits\n" package_text)
-    |: None
+:~ module_added (format : agile_state_fs.project.project_format) (~package_text : string) : option string =
+    ?= agile_state_fs.project.project_with_module format package_text "waits" ?|
+    | agile_state_fs.project.ModuleListed => Some package_text
+    | agile_state_fs.project.ModuleAdded listed => Some listed
+    | agile_state_fs.project.NoModulesSection => None
 
-:~ text_of (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
 
 :~ replaced (~path : string) (~text : string) : bool =
     ?= workspace_primitives.files.replace_file_checked path text ?|
@@ -52,7 +51,7 @@
     := before = text_of path
     := item = change_item change
     := waits = waits_changed (waits_of_text before) change
-    := package = state ++# "/package.spiproj"
+    := package = agile_state_fs.project.project_path_in state
     ? agile_text = ""
     ?> WaitsRefused ("no backlog state at " ++# state)
     |? sm'.contains ("Task (\"" ++# item ++# "\"") agile_text |> not
@@ -62,12 +61,12 @@
     |? replaced path (waits_text waits) |> not
     ?> WaitsRefused "state/waits.spi could not be written"
     |:
-        ?= module_added (text_of package) ?|
-        | None => WaitsRefused "state/package.spiproj has no modules section to list waits in"
+        ?= module_added (agile_state_fs.project.project_format_in state) (text_of package) ?|
+        | None => WaitsRefused "the state project has no modules section to list waits in"
         | Some listed =>
             ? listed = text_of package || replaced package listed
             ?> WaitsWritten (listm.length waits)
-            |: WaitsRefused "state/package.spiproj not updated"
+            |: WaitsRefused "the state project was not updated"
 
 :~ wait_run () : i32 =
     := usage = "rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"
@@ -103,9 +102,11 @@
     testing.expect (waits_changed moved (WaitCleared "S7") = []) "clear drops it"
     := row = "inl wait_of_s7 () = Waits (\"S7\", \"train\", \"TRAIN40\")\n"
     testing.expect (waits_text one = waits_schema () ++# row) "file text"
-    testing.expect (module_added "modules:\n    claims\n" = Some "modules:\n    waits\n    claims\n") "register"
-    testing.expect (module_added "modules:\n    waits\n" = Some "modules:\n    waits\n") "already listed"
-    testing.expect (module_added "packages:\n" = None) "no modules section"
+    := words = agile_state_fs.project.SpiprojProject
+    testing.expect (module_added words "modules:\n    claims\n" = Some "modules:\n    waits\n    claims\n") "register"
+    testing.expect (module_added words "modules:\n    waits\n" = Some "modules:\n    waits\n") "already listed"
+    testing.expect (module_added words "packages:\n" = None) "no modules section"
+    testing.expect (module_added agile_state_fs.project.TomlProject "modules = '''\nclaims\n'''\n" = Some "modules = '''\nwaits\nclaims\n'''\n") "register in spiral.toml"
 
 := main () : i32 =
     export "rig_agile_waits_of" waiting_of

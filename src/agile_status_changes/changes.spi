@@ -47,7 +47,7 @@
 
 :~ history_path (~root : string) : string = sm'.replace "\\" "/" root ++# "/history/status_changes.spi"
 
-:~ text_of (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
 
 :~ replaced (~path : string) (~text : string) : bool =
     ?= workspace_primitives.files.replace_file_checked path text ?|

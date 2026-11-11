@@ -364,3 +364,76 @@
         (part_count json "\"estimate_minutes\":600" = 1i32)
         (cat "the planning row belongs to its own task only: " json)
     fixture_root_remove root
+
+:= dialect_env (root : fixture_root) : cli_args =
+    Arg (
+        cat "KIT_CONFIG_HOME=" (fixture_text_of root),
+        Arg ("KIT_LEASE_POLICY=renewing", Arg ("KIT_AGILE_NOTE_SEGMENTS=1", NoArgs))
+    )
+
+:= dialect_agile (root : fixture_root) (~verb : string) (rest : cli_args) : cli_run =
+    rig_run (temp_directory ()) (dialect_env root) NoArgs (Arg ("agile", Arg (verb, Arg (fixture_text_of root, rest))))
+
+:= dialect_ok (root : fixture_root) (~verb : string) (rest : cli_args) : string = succeeded (dialect_agile root verb rest)
+
+:= stable_lines (~text : string) : string =
+    sm'.split_list "\n" text |> listm'.filter (\ (line : string) => starts line "rig " = !-) |> sm'.concat_list "\n"
+
+:= dialect_item (~id : string) (~kind : string) (~priority : string) (~title : string) : cli_args =
+    Arg (id, Arg (kind, Arg (priority, Arg ("D2", Arg (title, Arg ("team:parity", NoArgs))))))
+
+:= dialect_backlog (root : fixture_root) : () =
+    := _ = dialect_ok root "begin" (Arg ("parity", NoArgs))
+    := _ = dialect_ok root "add" (dialect_item "PAR-EPIC" "Epic" "P1" "Paridade")
+    := _ = dialect_ok root "add" (dialect_item "PAR-ONE" "Story" "P0" "Primeira")
+    := _ = dialect_ok root "edit" (Arg ("PAR-ONE", Arg ("--parent", Arg ("PAR-EPIC", NoArgs))))
+    := _ = dialect_ok root "note" (Arg ("PAR-ONE", Arg ("primeira nota", Arg ("--as", Arg ("tester", NoArgs)))))
+    := _ = dialect_ok root "set" (Arg ("PAR-ONE", Arg ("50", Arg ("Active", NoArgs))))
+    ()
+
+:= dialect_views (root : fixture_root) : string =
+    [
+        dialect_ok root "list" NoArgs
+        dialect_ok root "list" (Arg ("--team", Arg ("parity", Arg ("--tree", NoArgs))))
+        dialect_ok root "next" NoArgs
+        dialect_ok root "show" (Arg ("PAR-ONE", NoArgs))
+        dialect_ok root "plan" NoArgs
+        dialect_ok root "cadence" NoArgs
+    ]
+    |> listm.map stable_lines
+    |> sm'.concat_list "\n----\n"
+
+///> rust
+:# a_backlog_reads_the_same_in_both_spellings_and_writes_keep_its_spelling =
+    := root = fixture_root_create "agile dialect parity"
+    := _ = dialect_ok root "init" NoArgs
+    dialect_backlog root
+    := words = dialect_views root
+    shows (dialect_ok root "dialect" (Arg ("symbols", NoArgs))) "dialect=symbols"
+    shows (fixture_read root "state/spiral.toml") "modules = '''"
+    shows (fixture_read root "state/agile.spi") "\n:= "
+    same (dialect_views root) words
+    := _ = dialect_ok root "note" (Arg ("PAR-ONE", Arg ("segunda nota", Arg ("--as", Arg ("tester", NoArgs)))))
+    := _ = dialect_ok root "set" (Arg ("PAR-ONE", Arg ("80", Arg ("Active", NoArgs))))
+    hides (fixture_read root "state/agile.spi") "\ninl "
+    hides (fixture_read root "state/prompt.spi") "\ninl "
+    := shown = dialect_ok root "show" (Arg ("PAR-ONE", NoArgs))
+    shows shown "segunda nota"
+    shows shown "80"
+    shows (dialect_ok root "dialect" (Arg ("words", NoArgs))) "dialect=words"
+    shows (fixture_read root "state/package.spiproj") "modules:"
+    hides (fixture_read root "state/agile.spi") "\n:= "
+    fixture_root_remove root
+
+///> rust
+:# init_with_the_symbols_dialect_starts_a_working_symbols_root =
+    := root = fixture_root_create "agile dialect init"
+    shows (dialect_ok root "init" (Arg ("--dialect", Arg ("symbols", NoArgs)))) "rig agile init ok"
+    same (fixture_read root "state/spiral.toml") "modules = '''\nagile\nprompt\n'''\n"
+    shows (fixture_read root "state/agile.spi") "\n:| task_kind ="
+    hides (fixture_read root "state/agile.spi") "\nunion "
+    dialect_backlog root
+    shows (dialect_ok root "list" NoArgs) "PAR-EPIC"
+    hides (fixture_read root "state/agile.spi") "\ninl "
+    rejected_with (dialect_agile root "init" (Arg ("--dialect", Arg ("x", NoArgs)))) 1i32 "--dialect takes symbols or words"
+    fixture_root_remove root

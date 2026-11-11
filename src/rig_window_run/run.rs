@@ -685,7 +685,7 @@ fn requested_19(mut v0: US1, mut v1: u64, mut v2: Rc<str>, mut v3: Rc<str>, mut 
     }
 }
 fn child_status_49(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
-    let v2: i32 = { let mut parts = (v0).split(char::from(31u8)); let program = parts.next().unwrap_or_default().to_owned(); match std::process::Command::new(&program).args(parts).env("RIG_WINDOW_HELD", &&*v1).env("KIT_WINDOW_HELD", &*v1).status() { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("rig error: window run: cannot start {program}: {error}"); 127 } } };
+    let v2: i32 = { let mut parts = (v0).split(char::from(31u8)); let program = parts.next().unwrap_or_default().to_owned(); match std::process::Command::new(&program).args(parts).env("RIG_WINDOW_HELD", &*v1).env("KIT_WINDOW_HELD", &*v1).status() { Ok(status) => status.code().unwrap_or(1), Err(error) => { eprintln!("rig error: window run: cannot start {program}: {error}"); 127 } } };
     v2
 }
 fn format_real_51(mut v0: i32) -> Rc<str> {

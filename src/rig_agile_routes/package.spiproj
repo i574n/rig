@@ -1,6 +1,8 @@
 packages:
     |core-
     spiral-
+    agile_state_spelling
+    agile_state_fs
     workspace_primitives
     rust_std_env
     agile_mutation_policy

@@ -24,7 +24,7 @@
 :~ sprint_changed (~root : string) (~id : string) (~task : string) (dropping : bool) : i32 =
     := state = sm'.replace "\\" "/" root ++# "/state"
     := sprints_path = state ++# "/sprints.spi"
-    := existing = file_system.read_text_or_empty sprints_path
+    := existing = agile_state_fs.model.read_state sprints_path
     := heads = rig_agile_sprint_state.state.sprint_head_of (existing, id)
     := word = ? dropping ?> "drop" |: "add"
     := refuse = \ (why : string) =>
@@ -37,7 +37,7 @@
     |:
         := items = rig_agile_sprint_state.state.sprint_items_of (existing, id)
         := present = sprint_has items task 0i32
-        := agile_text = file_system.read_text_or_empty (state ++# "/agile.spi")
+        := agile_text = agile_state_fs.model.read_state (state ++# "/agile.spi")
         := candidate = candidate_of agile_text task
         := problem =
             ? dropping
@@ -51,7 +51,7 @@
         ?> refuse problem
         |:
             := args = existing, id, task, candidate.minutes, dropping
-            file_system.write_all_text sprints_path (rig_agile_sprint_append.append.sprint_item_appended args)
+            agile_state_fs.model.write_state_or_fail sprints_path (rig_agile_sprint_append.append.sprint_item_appended args)
             console.write_line ("rig agile sprint " ++# word ++# " ok id=" ++# id ++# " item=" ++# task)
             0i32
 
@@ -91,18 +91,18 @@
 :~ sprint_closed (~root : string) (~id : string) : i32 =
     := state = sm'.replace "\\" "/" root ++# "/state"
     := sprints_path = state ++# "/sprints.spi"
-    := existing = file_system.read_text_or_empty sprints_path
+    := existing = agile_state_fs.model.read_state sprints_path
     := heads = rig_agile_sprint_state.state.sprint_head_of (existing, id)
     ? am'.length_base heads = 0i32 || (am'.index_base 0i32 heads).running |> not ?>
         console.write_error_line ("rig error: agile sprint close refused: no open sprint " ++# id)
         1i32
     |:
         := items = rig_agile_sprint_state.state.sprint_items_of (existing, id)
-        := agile_text = file_system.read_text_or_empty (state ++# "/agile.spi")
+        := agile_text = agile_state_fs.model.read_state (state ++# "/agile.spi")
         := finished = finished_from agile_text items 0i32 ;[] |> am'.base
         := reviews = rig_agile_sprint_review.review.sprint_review_of (existing, id, finished)
         := closed = rig_agile_sprint_review.review.sprint_closed_text (existing, id, finished)
-        file_system.write_all_text sprints_path closed
+        agile_state_fs.model.write_state_or_fail sprints_path closed
         := r = am'.index_base 0i32 reviews
         := minutes =
             " done=" ++# sm'.show r.done ++# "m carried=" ++# sm'.show r.carried ++# "m dropped="
@@ -114,7 +114,7 @@
         0i32
 
 :~ sprint_velocity (~root : string) (last : i32) : i32 =
-    := text = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/sprints.spi")
+    := text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/sprints.spi")
     := minutes = rig_agile_sprint_state.state.velocity_of (text, last)
     console.write_line ("rig agile sprint velocity ok last=" ++# sm'.show last ++# " minutes=" ++# sm'.show minutes)
     0i32

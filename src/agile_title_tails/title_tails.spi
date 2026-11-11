@@ -1,3 +1,12 @@
+///- --package .
+:# title_tails static =
+    :< agile_task_text.model
+    :< sm'_operators
+    :< agile_note_model.model
+    :< workspace_primitives.outcome
+    :< workspace_primitives.numbers
+    :< workspace_primitives.bytes
+
 :< agile_task_text.model
 :< sm'_operators
 :< agile_note_model.model
@@ -80,17 +89,13 @@
     ?> !+
     |: bare_clock text
 
-:= stamp_window () : i32 = 17i32
-
 :~ ^ stamped_separator_from (~title : string) (~offset : i32) : i32 =
     := found = byte_find_from title (tail_separator ()) offset
     ? found < 0i32
     ?> found
     |:
         := start = (found + 2i32)
-        := window_end = (start + (stamp_window ()))
-        := stop = ? byte_len title <= window_end ?> byte_len title |: window_end
-        ? starts_with_stamp (byte_slice title start stop)
+        ? starts_with_stamp (byte_slice title start (byte_len title))
         ?> found
         |: stamped_separator_from title start
 
@@ -155,6 +160,14 @@
             moved_from title ((first + 2i32)) (byte_len title) id seq "" "" fallback { rows = ""; moved = 0i32 }
         moved.moved, moved.rows
 
+:= kept_end (~title : string) : i32 = stamped_separator_from title 0i32
+
+///> rust
+:# an_accented_tail_after_the_stamp_still_counts =
+    testing.expect (kept_end "Item um titulo; 2026-11-10 revisão de paridade" = 14i32) "a two-byte letter right after the stamp window"
+    testing.expect (kept_end "Item um título; 2026-11-10 revisao" = 15i32) "an accent before the separator"
+    testing.expect (kept_end "Item; sem data; ação" = -1i32) "no stamp anywhere"
+
 := main () : i32 =
     export
         "rig_agile_title_tail_rows"
@@ -162,7 +175,8 @@
             \ (title, id, seq, fallback) => tail_rows title id seq fallback
             : string * string * i32 * string -> i32 * string
         )
-    export "rig_agile_title_kept_end" ((\ title => stamped_separator_from title 0i32) : string -> i32)
+    export "rig_agile_title_kept_end" ((\ title => kept_end title) : string -> i32)
     := _ = tail_rows "a; 03:10 b" "X" 1i32 "now"
     := _ = tail_rows "a (b; c); 2026-10-12 d; e" "X" 1i32 "now"
     0i32
+

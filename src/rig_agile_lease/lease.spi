@@ -40,9 +40,9 @@
 
 := emit_lease_runtime () : () =
     global """
-        use agile_state_runtime_policy_domain::{rig_agile_lease_clock_phase_binding, rig_agile_lease_effective_phase_binding, rig_agile_lease_policy_from_text, rig_agile_lease_readback_decision_binding, rig_agile_prompt_lease_marker_text, rig_agile_prompt_lease_shape_binding, rig_agile_prompt_lease_status_code, rig_agile_spi_escape_text, rig_agile_state_package_line_code, rig_agile_state_package_module_name};
+        use agile_state_runtime_policy_domain::{rig_agile_lease_clock_phase_binding, rig_agile_lease_effective_phase_binding, rig_agile_lease_policy_from_text, rig_agile_lease_readback_decision_binding, rig_agile_prompt_lease_marker_text, rig_agile_prompt_lease_shape_binding, rig_agile_prompt_lease_status_code, rig_agile_spi_escape_text, rig_agile_state_package_line_code, rig_agile_state_package_module_name, rig_agile_state_toml_line_code};
         use rig_agile_policy::{rig_agile_attestation_normalize_binding, rig_agile_attestation_value_binding, rig_agile_tuple_parse_binding, rig_agile_u64_decimal_normalize_binding, rig_agile_u64_decimal_value_binding, rig_agile_u64_literal_normalize_binding, rig_agile_u64_literal_value_binding};
-        use rig_rust_std_fs::read_regular_text_limited as lease_read_regular_text_limited;
+        use rig_rust_std_fs::read_state_text_limited as lease_read_regular_text_limited;
         use std::path::{Path, PathBuf};
         use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -81,17 +81,21 @@
         }
 
         pub fn agile_package_modules_and_anchor(state_dir: &Path) -> Result<(std::collections::BTreeSet<String>, PathBuf), String> {
-            let source = lease_read_regular_text_limited(&state_dir.join("package.spiproj"), 1024 * 1024)?;
+            let toml = state_dir.join("spiral.toml");
+            let is_toml = std::fs::symlink_metadata(&toml).is_ok();
+            let project = if is_toml { toml } else { state_dir.join("package.spiproj") };
+            let source = lease_read_regular_text_limited(&project, 1024 * 1024)?;
             let mut modules = std::collections::BTreeSet::new();
             let mut in_modules = false;
             let mut last = None;
             for raw in source.lines() {
-                match rig_agile_state_package_line_code(raw) {
+                let code = if is_toml { rig_agile_state_toml_line_code(raw) } else { rig_agile_state_package_line_code(raw) };
+                match code {
                     1 => { in_modules = true; continue; }
                     3 => { if in_modules { break; } else { continue; } }
                     2 if in_modules => {
                         let module = rig_agile_state_package_module_name(raw);
-                        if module.is_empty() { return Err(format!("invalid flat state module in package.spiproj: {}", raw.trim())); }
+                        if module.is_empty() { return Err(format!("invalid flat state module in {}: {}", project.display(), raw.trim())); }
                         let module = module.as_ref().to_owned();
                         last = Some(state_dir.join(&module));
                         modules.insert(module);

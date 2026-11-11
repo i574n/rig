@@ -1,3 +1,11 @@
+///- --package .
+:# planning_tally static =
+    :< agile_task_text.model
+    :< agile_planning_model.model
+    :< workspace_primitives.outcome
+    :< workspace_primitives.numbers
+    :< workspace_primitives.bytes
+
 :< agile_task_text.model
 :< agile_planning_model.model
 :< workspace_primitives.outcome
@@ -33,10 +41,14 @@
 
 := unquoted (~token : string) : string = byte_slice token 1i32 (byte_len token - 1i32)
 
+:~ planning_beside (text : string) (~id : string) (arguments : i32) : task_planning =
+    := found = planning_offset_near text id arguments
+    ? found >= 0i32 ?> planning_at text found |: planning_of text id
+
 :~ rollup_task_at (text : string) (arguments : i32) (length : i32) : rollup_task =
     := field = tuple_field text arguments length
     := id = unquoted (field 0i32)
-    { id = id; status = field 6i32; deps = unquoted (field 7i32); plan = planning_of text id }
+    { id = id; status = field 6i32; deps = unquoted (field 7i32); plan = planning_beside text id arguments }
 
 := empty_tally () : planning_tally =
     { tasks = 0i32; open_tasks = 0i32; estimated = 0i32; minutes = 0i32; open_minutes = 0i32 }
@@ -123,6 +135,19 @@
 :~ planning_tally (~text : string) (~group : string) (~value : string) : i32 * i32 * i32 * i32 * i32 =
     := tally = tally_from text 0i32 (byte_len text) (bucket_of group value) (empty_tally ())
     tally.tasks, tally.open_tasks, tally.estimated, tally.minutes, tally.open_minutes
+
+///> rust
+:# a_planning_row_counts_beside_its_task_and_anywhere_else =
+    := text =
+        "inl a () = Task (\"A\", \"a\", Story, P1, D1, 0u32, Planned, \"\", \"team:x\", \"current\", \"current\")\n"
+        ^^ "inl planning_of_a () = Planning (\"A\", Minutes 30u32, Load Light, Assigned Agent)\n"
+        ^^ "inl b () = Task (\"B\", \"b\", Story, P1, D1, 0u32, Done, \"\", \"team:x\", \"current\", \"current\")\n"
+        ^^ "inl c () = Task (\"C\", \"c\", Story, P1, D1, 0u32, Active, \"\", \"team:x\", \"current\", \"current\")\n"
+        ^^ "inl planning_of_c () = Planning (\"C\", Minutes 60u32, Load Light, Assigned Agent)\n"
+        ^^ "inl planning_of_b () = Planning (\"B\", Minutes 45u32, Load Heavy, Assigned User)\n"
+    testing.expect (planning_tally text "all" "" = (3i32, 2i32, 3i32, 135i32, 90i32)) "every planning row counts, adjacent or not"
+    testing.expect (planning_tally text "load" "heavy" = (1i32, 0i32, 1i32, 45i32, 0i32)) "the row after other tasks still types its own task"
+    testing.expect (planning_tally text "load" "light" = (2i32, 2i32, 2i32, 90i32, 90i32)) "adjacent rows"
 
 := main () : i32 =
     export

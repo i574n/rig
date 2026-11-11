@@ -402,7 +402,7 @@ fn planning_at_7(mut v0: Rc<str>, mut v1: i32) -> (US1, US2, US4) {
     };
     (v23, v39, v55)
 }
-fn declared_from_12(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
+fn declared_from_13(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
     loop {
         let mut v3: i32 = v0.get(v2 as usize..).and_then(|rest| rest.find(&*v1)).map(|found| (found + v2 as usize) as i32).unwrap_or(-1);
         let v4: bool = v3 < 0i32;
@@ -423,10 +423,10 @@ fn declared_from_12(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
         }
     }
 }
-fn planning_of_6(mut v0: Rc<str>, mut v1: Rc<str>) -> (US1, US2, US4) {
+fn planning_of_12(mut v0: Rc<str>, mut v1: Rc<str>) -> (US1, US2, US4) {
     let mut v3: Rc<str> = string_concat(&["Planning (\"", &*v1, "\","]);
     let v4: i32 = 0i32;
-    let v5: i32 = declared_from_12(v0.clone(), v3, v4);
+    let v5: i32 = declared_from_13(v0.clone(), v3, v4);
     let v6: bool = v5 < 0i32;
     let (mut v13, mut v14, mut v15): (US1, US2, US4) = if v6 {
         let mut v7: US1 = US1::US1_Unestimated;
@@ -438,6 +438,51 @@ fn planning_of_6(mut v0: Rc<str>, mut v1: Rc<str>) -> (US1, US2, US4) {
         (v10, v11, v12)
     };
     (v13, v14, v15)
+}
+fn byte_find_between_15(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> i32 {
+    let v4: i32 = (v0).get(v2 as usize..v3 as usize).and_then(|slice| slice.find(&*v1)).map(|at| at as i32 + v2).unwrap_or(-1);
+    v4
+}
+fn planning_offset_near_14(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> i32 {
+    let mut v3: i32 = v2.wrapping_add(1i32);
+    let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Task (\""); } LIT.with(|lit| lit.clone()) };
+    let v5: i32 = v0.get(v3 as usize..).and_then(|rest| rest.find(&*v4)).map(|found| (found + v3 as usize) as i32).unwrap_or(-1);
+    let mut v7: Rc<str> = string_concat(&["Planning (\"", &*v1, "\","]);
+    let v8: bool = v5 < 0i32;
+    let v10: i32 = if v8 {
+        let v9: i32 = (v0.clone().len() as i32);
+        v9
+    } else {
+        v5
+    };
+    let v11: i32 = byte_find_between_15(v0.clone(), v7, v2, v10);
+    let v12: bool = v11 >= 0i32;
+    let v17: bool = if v12 {
+        let v13: i32 = v0.get(..v11 as usize).and_then(|head| head.rfind(char::from(10u8))).map(|newline| newline as i32 + 1).unwrap_or(0);
+        let mut v14: Rc<str> = std::rc::Rc::<str>::from(v0.get(v13 as usize..v11 as usize).unwrap_or(""));
+        let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
+        let v16: bool = v14.starts_with(&*v15);
+        v16
+    } else {
+        false
+    };
+    if v17 {
+        v11
+    } else {
+        -1i32
+    }
+}
+fn planning_beside_6(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> (US1, US2, US4) {
+    let mut v3: i32 = planning_offset_near_14(v0.clone(), v1.clone(), v2);
+    let v4: bool = v3 >= 0i32;
+    let (mut v11, mut v12, mut v13): (US1, US2, US4) = if v4 {
+        let (mut v5, mut v6, mut v7): (US1, US2, US4) = planning_at_7(v0, v3);
+        (v5, v6, v7)
+    } else {
+        let (mut v8, mut v9, mut v10): (US1, US2, US4) = planning_of_12(v0, v1);
+        (v8, v9, v10)
+    };
+    (v11, v12, v13)
 }
 fn rollup_task_at_2(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<str>, Rc<str>, US1, US2, US4) {
     let mut v3: i32 = 0i32;
@@ -461,10 +506,10 @@ fn rollup_task_at_2(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<s
     let v21: i32 = (v20.clone().len() as i32);
     let v22: i32 = v21.wrapping_sub(1i32);
     let v23: Rc<str> = std::rc::Rc::<str>::from(v20.get(1i32 as usize..v22 as usize).unwrap_or(""));
-    let (mut v24, mut v25, mut v26): (US1, US2, US4) = planning_of_6(v0, v10.clone());
+    let (mut v24, mut v25, mut v26): (US1, US2, US4) = planning_beside_6(v0, v10.clone(), v1);
     (v10, v15, v23, v24, v25, v26)
 }
-fn method15(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
+fn method18(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
     loop {
         let mut v3: bool = v2 >= v1;
         if v3 {
@@ -498,7 +543,7 @@ fn method15(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
         }
     }
 }
-fn method16(mut v0: Rc<str>, mut v1: i32) -> i32 {
+fn method19(mut v0: Rc<str>, mut v1: i32) -> i32 {
     loop {
         let mut v2: bool = v1 <= 0i32;
         if v2 {
@@ -532,7 +577,7 @@ fn method16(mut v0: Rc<str>, mut v1: i32) -> i32 {
         }
     }
 }
-fn loop_14(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut v3: i32) -> bool {
+fn loop_17(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut v3: i32) -> bool {
     loop {
         let v4: bool = v3 >= v2;
         if v4 {
@@ -541,11 +586,11 @@ fn loop_14(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut 
             let v5: Rc<str> = v1.borrow()[v3 as usize].clone();
             let v6: i32 = (v5.clone().len() as i32);
             let mut v7: i32 = 0i32;
-            let v8: i32 = method15(v5.clone(), v6, v7);
+            let v8: i32 = method18(v5.clone(), v6, v7);
             let v9: i32 = v6.wrapping_sub(1i32);
             let v10: Rc<str> = string_slice(&v5, v8 as i64, v9 as i64);
             let v11: i32 = (v10.clone().len() as i32);
-            let v12: i32 = method16(v10.clone(), v11);
+            let v12: i32 = method19(v10.clone(), v11);
             let v13: Rc<str> = string_slice(&v10, 0i32 as i64, v12 as i64);
             let mut v14: bool = &*v13 == &*v0;
             if v14 {
@@ -558,7 +603,7 @@ fn loop_14(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut 
         }
     }
 }
-fn bucket_holds_13(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: US1, mut v5: US2, mut v6: US4) -> bool {
+fn bucket_holds_16(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: US1, mut v5: US2, mut v6: US4) -> bool {
     match v0 {
         US0::US0_AssigneeBucket(v17) => {
             let v17: i32 = v17;
@@ -594,7 +639,7 @@ fn bucket_holds_13(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str
                 let v28: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v3.split(&*v27).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
                 let v29: i32 = (v28.clone().borrow().len() as i32);
                 let v30: i32 = 0i32;
-                loop_14(v25, v28, v29, v30)
+                loop_17(v25, v28, v29, v30)
             }
         }
         US0::US0_EveryTask => {
@@ -634,7 +679,7 @@ fn bucket_holds_13(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str
         }
     }
 }
-fn tally_with_17(mut v0: i32, mut v1: i32, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: &Rc<str>, mut v6: Rc<str>, mut v7: &Rc<str>, mut v8: US1, mut v9: US2, mut v10: US4) -> (i32, i32, i32, i32, i32) {
+fn tally_with_20(mut v0: i32, mut v1: i32, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: &Rc<str>, mut v6: Rc<str>, mut v7: &Rc<str>, mut v8: US1, mut v9: US2, mut v10: US4) -> (i32, i32, i32, i32, i32) {
     let v13: i32 = match &v8 {
         US1::US1_EstimateMinutes(v11) => {
             let v11: i32 = *v11;
@@ -692,9 +737,9 @@ fn tally_from_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: US0, mut v4: 
             let v16: bool = v14.starts_with(&*v15);
             if v16 {
                 let (mut v17, mut v18, mut v19, mut v20, mut v21, mut v22): (Rc<str>, Rc<str>, Rc<str>, US1, US2, US4) = rollup_task_at_2(v0.clone(), v12, v2);
-                let v23: bool = bucket_holds_13(v3.clone(), v17.clone(), v18.clone(), v19.clone(), v20.clone(), v21.clone(), v22.clone());
+                let v23: bool = bucket_holds_16(v3.clone(), v17.clone(), v18.clone(), v19.clone(), v20.clone(), v21.clone(), v22.clone());
                 if v23 {
-                    let (mut v24, mut v25, mut v26, mut v27, mut v28): (i32, i32, i32, i32, i32) = tally_with_17(v4, v5, v6, v7, v8, &v17, v18, &v19, v20, v21, v22);
+                    let (mut v24, mut v25, mut v26, mut v27, mut v28): (i32, i32, i32, i32, i32) = tally_with_20(v4, v5, v6, v7, v8, &v17, v18, &v19, v20, v21, v22);
                     (v1, v4, v5, v6, v7, v8) = (v12, v24, v25, v26, v27, v28);
                     continue;
                 } else {
@@ -708,7 +753,7 @@ fn tally_from_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: US0, mut v4: 
         }
     }
 }
-fn bucket_of_18(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
+fn bucket_of_21(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
     let mut v2: bool = &*v0 == "all";
     let v5: US0 = if v2 {
         US0::US0_EveryTask
@@ -799,7 +844,7 @@ fn bucket_of_18(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
 fn planning_tally_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (i32, i32, i32, i32, i32) {
     let mut v3: i32 = 0i32;
     let v4: i32 = (v0.clone().len() as i32);
-    let v5: US0 = bucket_of_18(v1, v2);
+    let v5: US0 = bucket_of_21(v1, v2);
     let v6: i32 = 0i32;
     let mut v7: i32 = 0i32;
     let v8: i32 = 0i32;

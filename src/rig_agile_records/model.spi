@@ -92,4 +92,4 @@
     expect ((sm'.length joined_back : i32) = 1000i32 * 27i32 - 1i32) "1000 joined records of 26 bytes plus 999 newlines"
 
 :~ records_unchanged (~path : string) (~original : string) : bool =
-    ? file_system.file_exists path ?> records_as_lines (file_system.read_all_text path) = original |: !-
+    ? file_system.file_exists path ?> records_as_lines (agile_state_fs.model.read_state path) = original |: !-

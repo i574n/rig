@@ -3,6 +3,8 @@ packages:
     spiral-
     workspace_primitives
     agile_task_census
+    agile_state_spelling
+    agile_state_fs
 modules:
     model
     facts

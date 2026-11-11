@@ -2,5 +2,7 @@ packages:
     |core-
     spiral-
     workspace_primitives
+    agile_state_spelling
+    agile_state_fs
 modules:
     changes

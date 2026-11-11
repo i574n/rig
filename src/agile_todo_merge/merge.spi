@@ -191,7 +191,7 @@
     ? file_system.file_exists state_path |> not
     ?> stderr_failure ("agile wip rejected: no backlog state at " ++# state_path)
     |:
-        := backlog = file_system.read_all_text state_path
+        := backlog = agile_state_fs.model.read_state state_path
         := path = cache_path root
         := cache = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
         := start =

@@ -65,15 +65,34 @@
 
 := unspelled (text : string) : string = state_lines text |> listm.map unspelled_line |> sm'.concat_list "\n"
 
+:= respelled_line (line : string) : string =
+    ?= row_head_of line ?|
+    | KeywordHead word =>
+        := cut = (sm'.length (keyword_of word) : i32)
+        symbol_of word ++# sm'.substring cut ((sm'.length line : i32) - cut) line
+    | _ => line
+
+:= respelled (text : string) : string = sm'.split_list "\n" text |> listm.map respelled_line |> sm'.concat_list "\n"
+
+:= unspelled_keeping_endings (text : string) : string = sm'.split_list "\n" text |> listm.map unspelled_line |> sm'.concat_list "\n"
+
 ///> rust
 :# a_respelled_state_is_counted_and_restored =
     := note = " note_of_a_1 () = Note (\"A\", \":= x\")\n"
     := original = "///- --no-respell\nunion status =\n    | Done :: status\ninl" ++# note
-    := respelled = "///- --no-respell\n:| status =\n    | Done :: status\n:=" ++# note
+    := symbols = "///- --no-respell\n:| status =\n    | Done :: status\n:=" ++# note
     testing.expect (respelled_rows original = 0i32) "a keyword-spelled state has no respelled rows"
-    testing.expect (respelled_rows respelled = 2i32) "both symbol heads are counted"
-    testing.expect (unspelled respelled = original) "unspell restores the keyword heads and nothing else"
+    testing.expect (respelled_rows symbols = 2i32) "both symbol heads are counted"
+    testing.expect (unspelled symbols = original) "unspell restores the keyword heads and nothing else"
     testing.expect (unspelled original = original) "unspell leaves a keyword-spelled state byte-identical"
+    testing.expect (respelled original = symbols) "respell writes the symbol heads and nothing else"
+    testing.expect (respelled symbols = symbols) "respell leaves a symbol-spelled state byte-identical"
+    testing.expect (unspelled (respelled original) = original) "respell then unspell round-trips"
+    := crlf_words = "union s =\r\n    | Done :: s\r\ninl a () = 1\r\n"
+    := crlf_symbols = ":| s =\r\n    | Done :: s\r\n:= a () = 1\r\n"
+    testing.expect (respelled crlf_words = crlf_symbols) "respell keeps CRLF endings"
+    testing.expect (unspelled_keeping_endings crlf_symbols = crlf_words) "the ending-keeping unspell keeps CRLF endings"
+    testing.expect (unspelled_keeping_endings crlf_words = crlf_words) "a CRLF keyword state stays byte-identical"
 
 ///> rust
 :# only_column_zero_heads_are_rows =

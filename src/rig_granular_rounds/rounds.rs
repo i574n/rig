@@ -253,27 +253,34 @@ fn get_environment_variable_14(mut v0: Rc<str>) -> Rc<str> {
     v1
 }
 fn config_path_13() -> Rc<str> {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
     let v1: Rc<str> = get_environment_variable_14(v0);
-    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = get_environment_variable_14(v2);
-    let mut v4: bool = &*v1 != "";
-    let v11: Rc<str> = if v4 {
+    let v2: bool = &*v1 != "";
+    let mut v5: Rc<str> = if v2 {
         v1
     } else {
-        let mut v5: bool = &*v3 != "";
-        if v5 {
-            let mut v6: Rc<str> = string_concat(&[&*v3, "/kit"]);
-            v6
+        let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+        get_environment_variable_14(v3)
+    };
+    let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
+    let v7: Rc<str> = get_environment_variable_14(v6);
+    let v8: bool = &*v5 != "";
+    let v15: Rc<str> = if v8 {
+        v5
+    } else {
+        let mut v9: bool = &*v7 != "";
+        if v9 {
+            let mut v10: Rc<str> = string_concat(&[&*v7, "/kit"]);
+            v10
         } else {
-            let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
-            let v8: Rc<str> = get_environment_variable_14(v7);
-            let mut v9: Rc<str> = string_concat(&[&*v8, "/.config/kit"]);
-            v9
+            let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+            let v12: Rc<str> = get_environment_variable_14(v11);
+            let v13: Rc<str> = string_concat(&[&*v12, "/.config/kit"]);
+            v13
         }
     };
-    let v12: Rc<str> = string_concat(&[&*v11, "/granular_rounds.spi"]);
-    v12
+    let v16: Rc<str> = string_concat(&[&*v15, "/granular_rounds.spi"]);
+    v16
 }
 fn method16(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
     loop {

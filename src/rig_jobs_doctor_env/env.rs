@@ -619,15 +619,22 @@ fn method23(mut v0: Rc<UH0>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
             } else {
                 false
             };
-            let v23: bool = if v19 {
+            let v26: bool = if v19 {
                 let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_JOB_"); } LIT.with(|lit| lit.clone()) };
                 let v21: bool = v3.starts_with(&*v20);
-                let v22: bool = v21 == false;
-                v22
+                let v24: bool = if v21 {
+                    true
+                } else {
+                    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_JOB_"); } LIT.with(|lit| lit.clone()) };
+                    let v23: bool = v3.starts_with(&*v22);
+                    v23
+                };
+                let v25: bool = v24 == false;
+                v25
             } else {
                 false
             };
-            if v23 {
+            if v26 {
                 Rc::new(UH0::UH0_Cons(v3, v5))
             } else {
                 v5

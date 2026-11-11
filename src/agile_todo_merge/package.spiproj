@@ -9,5 +9,7 @@ packages:
     agile_task_text
     agile_note_model
     agile_todo_model
+    agile_state_spelling
+    agile_state_fs
 modules:
     merge

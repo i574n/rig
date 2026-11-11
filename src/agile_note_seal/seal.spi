@@ -2,6 +2,7 @@
 :# seal static =
     :< sm'_operators
     :< rust_std_fs.model
+    :< agile_state_fs.model
     :< agile_task_text.model
     :< agile_note_model.model
     :< workspace_primitives.bytes
@@ -12,6 +13,7 @@
 
 :< sm'_operators
 :< rust_std_fs.model
+:< agile_state_fs.model
 :< agile_task_text.model
 :< agile_note_model.model
 :< workspace_primitives.bytes

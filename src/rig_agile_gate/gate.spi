@@ -80,8 +80,8 @@
             := last = am'.length_base rows - 1i32
             := parked = agile_team_lane.lane.paused_of (root, t.team) |> am'.to_list_base' |> listm'.unbox
             := parked_ids = parked |> listm.map (\ (p : agile_team_lane.lane.paused_row) => p.id)
-            := records = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/agile.spi")
-            := waits_text = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/waits.spi")
+            := records = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+            := waits_text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/waits.spi")
             := row_held = \ (id : string) => sm'.contains ("Waits (\"" ++# id ++# "\",") waits_text
             := waiting = listm.append (install_waiting records) (ids_where rows !- last |> listm'.filter row_held)
             := candidates = ids_where rows !- last

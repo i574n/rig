@@ -4,6 +4,8 @@
     :< agile_task_next.ranking
 
 :< rust_std_fs.model
+
+:< agile_state_fs.model
 :< sm'_operators
 :< agile_task_text.model
 :< agile_note_model.model

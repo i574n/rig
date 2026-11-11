@@ -702,11 +702,22 @@ fn owner_home_of_52(mut v0: u64, mut v1: u64) -> Rc<str> {
         v7
     }
 }
-fn get_environment_variable_53(mut v0: Rc<str>) -> Rc<str> {
+fn get_environment_variable_54(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: Rc<str> = Rc::<str>::from(std::env::var(&*v0).unwrap_or_default());
     v1
 }
-fn method54(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
+fn variable_of_53(mut v0: Rc<str>) -> Rc<str> {
+    let mut v1: Rc<str> = string_concat(&["RIG_", &*v0]);
+    let mut v2: Rc<str> = get_environment_variable_54(v1);
+    let mut v3: bool = &*v2 != "";
+    if v3 {
+        v2
+    } else {
+        let mut v4: Rc<str> = string_concat(&["KIT_", &*v0]);
+        get_environment_variable_54(v4)
+    }
+}
+fn method55(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
     loop {
         let mut v3: bool = v2 >= v1;
         if v3 {
@@ -740,7 +751,7 @@ fn method54(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
         }
     }
 }
-fn method55(mut v0: Rc<str>, mut v1: i32) -> i32 {
+fn method56(mut v0: Rc<str>, mut v1: i32) -> i32 {
     loop {
         let mut v2: bool = v1 <= 0i32;
         if v2 {
@@ -774,22 +785,22 @@ fn method55(mut v0: Rc<str>, mut v1: i32) -> i32 {
         }
     }
 }
-fn machine_slots_file_56() -> Rc<str> {
+fn machine_slots_file_57() -> Rc<str> {
     let mut v0: Rc<str> = jobs_root_5();
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("slots"); } LIT.with(|lit| lit.clone()) };
     joined_3(v0, v1)
 }
 fn host_terms_of_51(mut v0: u64, mut v1: u64) -> (Rc<str>, u64, u64, US0, US1) {
     let mut v2: Rc<str> = owner_home_of_52(v0, v1);
-    let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_JOB_HOST_IDLE_EXIT_SECONDS"); } LIT.with(|lit| lit.clone()) };
-    let mut v4: Rc<str> = get_environment_variable_53(v3);
+    let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("JOB_HOST_IDLE_EXIT_SECONDS"); } LIT.with(|lit| lit.clone()) };
+    let mut v4: Rc<str> = variable_of_53(v3);
     let v5: i32 = (v4.clone().len() as i32);
     let mut v6: i32 = 0i32;
-    let mut v7: i32 = method54(v4.clone(), v5, v6);
+    let mut v7: i32 = method55(v4.clone(), v5, v6);
     let v8: i32 = v5.wrapping_sub(1i32);
     let v9: Rc<str> = string_slice(&v4, v7 as i64, v8 as i64);
     let mut v10: i32 = (v9.clone().len() as i32);
-    let mut v11: i32 = method55(v9.clone(), v10);
+    let mut v11: i32 = method56(v9.clone(), v10);
     let v12: Rc<str> = string_slice(&v9, 0i32 as i64, v11 as i64);
     let v13: Option<u64> = (v12).trim().parse::<u64>().ok();
     let v14: Option<u64> = method50(v13);
@@ -813,17 +824,17 @@ fn host_terms_of_51(mut v0: u64, mut v1: u64) -> (Rc<str>, u64, u64, US0, US1) {
             }
         }
     };
-    let v30: Rc<str> = machine_slots_file_56();
+    let v30: Rc<str> = machine_slots_file_57();
     let v31: Rc<str> = text_or_empty_7(v30);
-    let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_JOB_SLOTS"); } LIT.with(|lit| lit.clone()) };
-    let v33: Rc<str> = get_environment_variable_53(v32);
+    let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("JOB_SLOTS"); } LIT.with(|lit| lit.clone()) };
+    let v33: Rc<str> = variable_of_53(v32);
     let v34: i32 = (v33.clone().len() as i32);
     let v35: i32 = 0i32;
-    let v36: i32 = method54(v33.clone(), v34, v35);
+    let v36: i32 = method55(v33.clone(), v34, v35);
     let v37: i32 = v34.wrapping_sub(1i32);
     let v38: Rc<str> = string_slice(&v33.clone(), v36 as i64, v37 as i64);
     let v39: i32 = (v38.clone().len() as i32);
-    let v40: i32 = method55(v38.clone(), v39);
+    let v40: i32 = method56(v38.clone(), v39);
     let v41: Rc<str> = string_slice(&v38, 0i32 as i64, v40 as i64);
     let v42: bool = &*v41 != "";
     let v43: Rc<str> = if v42 {
@@ -833,11 +844,11 @@ fn host_terms_of_51(mut v0: u64, mut v1: u64) -> (Rc<str>, u64, u64, US0, US1) {
     };
     let v44: i32 = (v43.clone().len() as i32);
     let v45: i32 = 0i32;
-    let v46: i32 = method54(v43.clone(), v44, v45);
+    let v46: i32 = method55(v43.clone(), v44, v45);
     let v47: i32 = v44.wrapping_sub(1i32);
     let v48: Rc<str> = string_slice(&v43, v46 as i64, v47 as i64);
     let v49: i32 = (v48.clone().len() as i32);
-    let v50: i32 = method55(v48.clone(), v49);
+    let v50: i32 = method56(v48.clone(), v49);
     let v51: Rc<str> = string_slice(&v48, 0i32 as i64, v50 as i64);
     let v52: Option<u64> = (v51).trim().parse::<u64>().ok();
     let v53: Option<u64> = method50(v52);
@@ -861,11 +872,11 @@ fn host_terms_of_51(mut v0: u64, mut v1: u64) -> (Rc<str>, u64, u64, US0, US1) {
     };
     (v2, v0, v1, v29, v66)
 }
-fn process_alive_57(mut v0: u64) -> bool {
+fn process_alive_58(mut v0: u64) -> bool {
     let mut v1: bool = rig_process_alive::rig_process_alive(v0);
     v1
 }
-fn host_claim_of_58(mut v0: u64, mut v1: u64, mut v2: bool) -> US7 {
+fn host_claim_of_59(mut v0: u64, mut v1: u64, mut v2: bool) -> US7 {
     let mut v3: bool = v0 != 0u64;
     let v5: bool = if v3 {
         let mut v4: bool = v0 != v1;
@@ -880,7 +891,7 @@ fn host_claim_of_58(mut v0: u64, mut v1: u64, mut v2: bool) -> US7 {
         US7::US7_HostOwns
     }
 }
-fn no_children_59() -> rig_os_launch::KitChildren {
+fn no_children_60() -> rig_os_launch::KitChildren {
     let mut v0: rig_os_launch::KitChildren = rig_os_launch::rig_children();
     v0
 }
@@ -897,8 +908,8 @@ fn host_run_0() -> i32 {
     let v13: u64 = decimal_u64_49(v12);
     let v14: u32 = std::process::id();
     let mut v15: u64 = (v14 as u64);
-    let mut v16: bool = process_alive_57(v13);
-    let v17: US7 = host_claim_of_58(v13, v15, v16);
+    let mut v16: bool = process_alive_58(v13);
+    let v17: US7 = host_claim_of_59(v13, v15, v16);
     match v17 {
         US7::US7_HostOwns => {
             let mut v19: Rc<str> = requests_directory_2(v6.clone());
@@ -908,7 +919,7 @@ fn host_run_0() -> i32 {
             let mut v23: u64 = (v22 as u64);
             let v24: Rc<str> = decimal_text_17(v23);
             let v25: Rc<str> = text_written_20(v21, v24);
-            let v26: rig_os_launch::KitChildren = no_children_59();
+            let v26: rig_os_launch::KitChildren = no_children_60();
             let v27: u64 = now_ms_16();
             host_served_1(v26, v6, v7, v8, v9, v10, v27)
         }

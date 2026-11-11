@@ -35,9 +35,9 @@
     ?= env.command_line_arguments () ?|
     | _ :: _ :: root :: words ?& sm'.starts_with "-" root |> not =>
         := state = sm'.replace "\\" "/" root ++# "/state"
-        := text = file_system.read_text_or_empty (state ++# "/agile.spi")
-        := changes_text = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/history/status_changes.spi")
-        := asks_text = file_system.read_text_or_empty (state ++# "/asks.spi")
+        := text = agile_state_fs.model.read_state (state ++# "/agile.spi")
+        := changes_text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/history/status_changes.spi")
+        := asks_text = agile_state_fs.model.read_state (state ++# "/asks.spi")
         := ask_days = number_after words "--ask-days" 3i64
         := now_hour = (conv (workspace_primitives.clock.unix_ms ()) : i64) / 3600000i64
         := hours = number_after words "--hours" 48i64

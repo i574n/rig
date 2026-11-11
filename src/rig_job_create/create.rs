@@ -265,83 +265,90 @@ fn job_launched_2(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: bool, m
                 let v120: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 v120
             };
-            let v122: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_AUTHOR"); } LIT.with(|lit| lit.clone()) };
+            let v122: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_AUTHOR"); } LIT.with(|lit| lit.clone()) };
             let v123: Rc<str> = get_environment_variable_15(v122);
-            let v124: bool = &*v123 == "";
-            let v129: Rc<str> = if v124 {
-                let v125: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                v125
+            let v124: bool = &*v123 != "";
+            let v127: Rc<str> = if v124 {
+                v123
             } else {
-                let v126: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("author"); } LIT.with(|lit| lit.clone()) };
-                let v127: Rc<str> = job_file_11(v20.clone(), v126);
-                text_written_12(v127, v123)
+                let v125: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_AUTHOR"); } LIT.with(|lit| lit.clone()) };
+                get_environment_variable_15(v125)
             };
-            let v130: bool = &*v55 != "";
-            let v132: bool = if v130 {
-                true
+            let v128: bool = &*v127 == "";
+            let v133: Rc<str> = if v128 {
+                let v129: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                v129
             } else {
-                let v131: bool = &*v63 != "";
-                v131
+                let v130: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("author"); } LIT.with(|lit| lit.clone()) };
+                let v131: Rc<str> = job_file_11(v20.clone(), v130);
+                text_written_12(v131, v127)
             };
-            let v134: bool = if v132 {
-                true
-            } else {
-                let v133: bool = &*v70 != "";
-                v133
-            };
+            let v134: bool = &*v55 != "";
             let v136: bool = if v134 {
                 true
             } else {
-                let v135: bool = &*v86 != "";
+                let v135: bool = &*v63 != "";
                 v135
             };
             let v138: bool = if v136 {
                 true
             } else {
-                let v137: bool = &*v96 != "";
+                let v137: bool = &*v70 != "";
                 v137
             };
             let v140: bool = if v138 {
                 true
             } else {
-                let v139: bool = &*v108 != "";
+                let v139: bool = &*v86 != "";
                 v139
             };
             let v142: bool = if v140 {
                 true
             } else {
-                let v141: bool = &*v115 != "";
+                let v141: bool = &*v96 != "";
                 v141
             };
             let v144: bool = if v142 {
                 true
             } else {
-                let v143: bool = &*v121 != "";
+                let v143: bool = &*v108 != "";
                 v143
             };
             let v146: bool = if v144 {
                 true
             } else {
-                let v145: bool = &*v129 != "";
+                let v145: bool = &*v115 != "";
                 v145
             };
-            if v146 {
-                let v154: Rc<str> = string_concat(&[&*v115, &*v55, &*v63, &*v70, &*v86, &*v96, &*v108, &*v121, &*v129]);
-                US1::US1_LaunchRefused(v154)
+            let v148: bool = if v146 {
+                true
             } else {
-                let v158: Rc<str> = if v3 {
-                    let v156: Rc<str> = std::rc::Rc::<str>::from(std::process::id().to_string().as_str());
-                    v156
+                let v147: bool = &*v121 != "";
+                v147
+            };
+            let v150: bool = if v148 {
+                true
+            } else {
+                let v149: bool = &*v133 != "";
+                v149
+            };
+            if v150 {
+                let v158: Rc<str> = string_concat(&[&*v115, &*v55, &*v63, &*v70, &*v86, &*v96, &*v108, &*v121, &*v133]);
+                US1::US1_LaunchRefused(v158)
+            } else {
+                let v162: Rc<str> = if v3 {
+                    let v160: Rc<str> = std::rc::Rc::<str>::from(std::process::id().to_string().as_str());
+                    v160
                 } else {
-                    let v157: Rc<str> = rig_job_host_request::rig_job_host_request(&*v20);
-                    v157
+                    let v161: Rc<str> = rig_job_host_request::rig_job_host_request(&*v20);
+                    v161
                 };
-                let v159: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("error:"); } LIT.with(|lit| lit.clone()) };
-                let v160: bool = v158.starts_with(&*v159);
-                if v160 {
-                    US1::US1_LaunchRefused(v158)
+                let v163: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("error:"); } LIT.with(|lit| lit.clone()) };
+                let v164: bool = v162.starts_with(&*v163);
+                if v164 {
+                    US1::US1_LaunchRefused(v162)
                 } else {
-                    US1::US1_Launched(v20, v158)
+                    US1::US1_Launched(v20, v162)
                 }
             }
         }

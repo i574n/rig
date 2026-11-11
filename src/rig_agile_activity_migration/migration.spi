@@ -18,30 +18,25 @@
 
 :~ schema_module () : string = "activity_schema"
 
-:~ modules_with_schema (~text : string) : string =
-    := line = "    " ++# schema_module () ++# "\n"
-    ? sm'.contains ("\n" ++# line) ("\n" ++# text)
-    ?> text
-    |? sm'.contains "modules:\n" text
-    ?> sm'.replace "modules:\n" ("modules:\n" ++# line) text
-    |: text ++# "modules:\n" ++# line
+:~ modules_with_schema (format : agile_state_fs.project.project_format) (~text : string) : string =
+    agile_state_fs.project.project_with_section_module format text (schema_module ())
 
 :~ step_word (apply : bool) (changed : bool) (~done : string) (~pending : string) : string =
     ? changed |> not ?> "kept" |? apply ?> done |: pending
 
 :~ migrated (mode : migrate_mode) (~root : string) : i32 =
     := state = sm'.replace "\\" "/" root ++# "/state"
-    := project_path = state ++# "/package.spiproj"
+    := project_path = agile_state_fs.project.project_path_in state
     := schema_path = state ++# "/activity_schema.spi"
     ? file_system.file_exists project_path |> not ?>
-        console.write_error_line ("rig error: agile migrate-activity: no state/package.spiproj under " ++# root)
+        console.write_error_line ("rig error: agile migrate-activity: no state project (package.spiproj or spiral.toml) under " ++# root)
         2i32
     |:
         := apply = mode = MigrateApply
         := missing = file_system.file_exists schema_path |> not
         := project = file_system.read_all_text project_path
-        := updated = modules_with_schema project
-        := _ = ? apply && missing ?> file_system.write_all_text schema_path (activity_schema_text ()) |: ()
+        := updated = modules_with_schema (agile_state_fs.project.project_format_in state) project
+        := _ = ? apply && missing ?> agile_state_fs.model.write_state_or_fail schema_path (activity_schema_text ()) |: ()
         := _ = ? apply && updated <> project ?> file_system.write_all_text project_path updated |: ()
         := schema = step_word apply missing "written" "would-write"
         := module = step_word apply (updated <> project) "added" "would-add"
@@ -64,11 +59,14 @@
 
 ///> rust
 :# the_schema_module_is_added_once_and_modes_read_back =
+    := words = agile_state_fs.project.SpiprojProject
     := project = "modules:\n    claims\n    agile\n"
-    := once = modules_with_schema project
+    := once = modules_with_schema words project
     testing.expect (once = "modules:\n    activity_schema\n    claims\n    agile\n") once
-    testing.expect (modules_with_schema once = once) "a second migration changes nothing"
-    testing.expect (modules_with_schema "" = "modules:\n    activity_schema\n") "a bare project gains the section"
+    testing.expect (modules_with_schema words once = once) "a second migration changes nothing"
+    testing.expect (modules_with_schema words "" = "modules:\n    activity_schema\n") "a bare project gains the section"
+    := toml = modules_with_schema agile_state_fs.project.TomlProject "modules = '''\nclaims\n'''\n"
+    testing.expect (toml = "modules = '''\nactivity_schema\nclaims\n'''\n") "spiral.toml gains the module first"
     testing.expect (mode_named "apply" = Some MigrateApply && mode_named "preview" = Some MigratePreview) "modes"
     testing.expect (mode_named "go" = None) "an unknown mode"
     testing.expect (step_word !- !+ "written" "would-write" = "would-write") "a preview only reports"

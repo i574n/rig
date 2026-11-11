@@ -44,7 +44,7 @@
     file_system.read_text_or_empty (dir ++# "/installed-train.txt") |> sm'.replace "\r" "" |> sm'.replace "\n" ""
 
 :~ holding_ids ((root, agile_text) : string * string) : array_base string =
-    := waits = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/waits.spi")
+    := waits = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/waits.spi")
     := held = ? waits = "" ?> [] |: holding_of (waits_of_text waits) (done_ids agile_text) (installed_train ())
     held |> listm'.box |> listm'.to_array'
 
@@ -68,7 +68,7 @@
 
 :~ lane_waits_printed ((root, filters, agile_text) : string * string * string) : i32 =
     := team = team_after (sm'.split_list " " filters)
-    := waits = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/waits.spi")
+    := waits = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/waits.spi")
     ? team = "" || waits = ""
     ?> 0i32
     |:

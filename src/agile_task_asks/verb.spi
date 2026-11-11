@@ -30,21 +30,14 @@
 :~ asks_text (asks : list user_ask) : string =
     asks_schema () ++# (asks |> listm.map (\ (ask : user_ask) => row_of_ask ask ++# "\n") |> sm'.concat_list "")
 
-:| module_listing =
-    | ModuleListed
-    | ModuleAdded : string
-    | NoModulesSection
-
-:~ module_listed (~package_text : string) : module_listing =
-    ? sm'.contains "\n    asks\n" package_text || sm'.ends_with "\n    asks" package_text
-    ?> ModuleListed
-    |? sm'.contains "modules:\n" package_text
-    ?> ModuleAdded (sm'.replace "modules:\n" "modules:\n    asks\n" package_text)
-    |: NoModulesSection
+:~ module_listed (format : agile_state_fs.project.project_format) (~package_text : string)
+    : agile_state_fs.project.module_listing
+    =
+    agile_state_fs.project.project_with_module format package_text "asks"
 
 :~ task_known (~agile_text : string) (~id : string) : bool = sm'.contains ("Task (\"" ++# id ++# "\"") agile_text
 
-:~ text_of (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
 
 :~ replaced (~path : string) (~text : string) : bool =
     ?= workspace_primitives.files.replace_file_checked path text ?|
@@ -67,13 +60,14 @@
     ?> AsksRefused "state/asks.spi could not be written"
     |:
         := count = listm.length asks
-        ?= module_listed (text_of (state ++# "/package.spiproj")) ?|
-        | ModuleListed => AsksWritten count
-        | NoModulesSection => AsksRefused "state/package.spiproj has no modules section to list asks in"
-        | ModuleAdded listed =>
-            ? replaced (state ++# "/package.spiproj") listed
+        := project = agile_state_fs.project.project_path_in state
+        ?= module_listed (agile_state_fs.project.project_format_in state) (text_of project) ?|
+        | agile_state_fs.project.ModuleListed => AsksWritten count
+        | agile_state_fs.project.NoModulesSection => AsksRefused "the state project has no modules section to list asks in"
+        | agile_state_fs.project.ModuleAdded listed =>
+            ? replaced project listed
             ?> AsksWritten count
-            |: AsksRefused "state/package.spiproj not updated"
+            |: AsksRefused "the state project was not updated"
 
 := usage () : string =
     "rig error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"
@@ -115,9 +109,12 @@
     testing.expect (again = [ { first ?| asked_on = "2026-11-02" } ]) "setting again replaces the row"
     testing.expect (asks_changed again (AskCleared "S7") = []) "clear drops it"
     testing.expect (asks_text one = asks_schema () ++# row_of_ask first ++# "\n") "file text"
-    testing.expect (module_listed "modules:\n    agile\n" = ModuleAdded "modules:\n    asks\n    agile\n") "register"
-    testing.expect (module_listed "modules:\n    asks\n" = ModuleListed) "listed"
-    testing.expect (module_listed "packages:\n" = NoModulesSection) "no modules section"
+    := words = agile_state_fs.project.SpiprojProject
+    := symbols = agile_state_fs.project.TomlProject
+    testing.expect (module_listed words "modules:\n    agile\n" = agile_state_fs.project.ModuleAdded "modules:\n    asks\n    agile\n") "register"
+    testing.expect (module_listed words "modules:\n    asks\n" = agile_state_fs.project.ModuleListed) "listed"
+    testing.expect (module_listed words "packages:\n" = agile_state_fs.project.NoModulesSection) "no modules section"
+    testing.expect (module_listed symbols "modules = '''\nagile\n'''\n" = agile_state_fs.project.ModuleAdded "modules = '''\nasks\nagile\n'''\n") "register in spiral.toml"
 := main () : i32 =
     export "rig_agile_asks" asks_of
     export "rig_agile_ask_edit_run" ask_edit_run

@@ -31,21 +31,14 @@
     := rows = links |> listm.map (\ (link : parent_link) => row_of_link link ++# "\n") |> sm'.concat_list ""
     parents_schema () ++# rows
 
-:| module_listing =
-    | ModuleListed
-    | ModuleAdded : string
-    | NoModulesSection
-
-:~ module_listed (~package_text : string) : module_listing =
-    ? sm'.contains "\n    parents\n" package_text || sm'.ends_with "\n    parents" package_text
-    ?> ModuleListed
-    |? sm'.contains "modules:\n" package_text
-    ?> ModuleAdded (sm'.replace "modules:\n" "modules:\n    parents\n" package_text)
-    |: NoModulesSection
+:~ module_listed (format : agile_state_fs.project.project_format) (~package_text : string)
+    : agile_state_fs.project.module_listing
+    =
+    agile_state_fs.project.project_with_module format package_text "parents"
 
 :~ task_known (~agile_text : string) (~id : string) : bool = sm'.contains ("Task (\"" ++# id ++# "\"") agile_text
 
-:~ text_of (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
 
 :~ replaced (~path : string) (~text : string) : bool =
     ?= workspace_primitives.files.replace_file_checked path text ?|
@@ -72,13 +65,13 @@
     |? replaced path (parents_text links) = !-
     ?> ParentsRefused "state/parents.spi could not be written"
     |:
-        := package = state ++# "/package.spiproj"
+        := package = agile_state_fs.project.project_path_in state
         := count = listm.length links
-        ?= module_listed (text_of package) ?|
-        | ModuleListed => ParentsWritten count
-        | NoModulesSection => ParentsRefused "state/package.spiproj has no modules section to list parents in"
-        | ModuleAdded listed =>
-            ? replaced package listed ?> ParentsWritten count |: ParentsRefused "state/package.spiproj not updated"
+        ?= module_listed (agile_state_fs.project.project_format_in state) (text_of package) ?|
+        | agile_state_fs.project.ModuleListed => ParentsWritten count
+        | agile_state_fs.project.NoModulesSection => ParentsRefused "the state project has no modules section to list parents in"
+        | agile_state_fs.project.ModuleAdded listed =>
+            ? replaced package listed ?> ParentsWritten count |: ParentsRefused "the state project was not updated"
 
 :~ parent_edit_run () : i32 =
     ?= env.command_line_arguments () ?|
@@ -105,10 +98,13 @@
     testing.expect (links_changed moved (ParentCleared "S7") = []) "clear drops it"
     := row = "inl parent_of_s7 () = Parent (\"S7\", \"EPIC\")\n"
     testing.expect (parents_text one = parents_schema () ++# row) "file text"
-    := registered = module_listed "modules:\n    claims\n    agile\n"
-    testing.expect (registered = ModuleAdded "modules:\n    parents\n    claims\n    agile\n") "register"
-    testing.expect (module_listed "modules:\n    parents\n    agile\n" = ModuleListed) "already listed"
-    testing.expect (module_listed "packages:\n" = NoModulesSection) "no modules section"
+    := words = agile_state_fs.project.SpiprojProject
+    := registered = module_listed words "modules:\n    claims\n    agile\n"
+    testing.expect (registered = agile_state_fs.project.ModuleAdded "modules:\n    parents\n    claims\n    agile\n") "register"
+    testing.expect (module_listed words "modules:\n    parents\n    agile\n" = agile_state_fs.project.ModuleListed) "already listed"
+    testing.expect (module_listed words "packages:\n" = agile_state_fs.project.NoModulesSection) "no modules section"
+    := toml = module_listed agile_state_fs.project.TomlProject "modules = '''\nagile\n'''\n"
+    testing.expect (toml = agile_state_fs.project.ModuleAdded "modules = '''\nparents\nagile\n'''\n") "register in spiral.toml"
     testing.expect (task_known "x Task (\"S7\", \"t\")" "S7" && task_known "Task (\"S70\"" "S7" = !-) "ids match whole"
 := main () : i32 =
     export "rig_agile_parent_links" links_of

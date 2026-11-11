@@ -4,5 +4,7 @@ packages:
     union_reflection
     agile_activity
     agile_activity_rows
+    agile_state_spelling
+    agile_state_fs
 modules:
     migration

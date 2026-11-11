@@ -172,6 +172,16 @@
         |: agile_state_package_line_kind_code StatePackageModuleCandidate
     |: agile_state_package_line_kind_code StatePackageTopLevelBoundary
 
+:~ agile_state_toml_line_code (~raw : string) : u64 =
+    := trimmed = sm'.trim raw
+    ? (trimmed = "modules = '''")
+    ?> agile_state_package_line_kind_code StatePackageModulesHeader
+    |? (trimmed = "'''")
+    ?> agile_state_package_line_kind_code StatePackageTopLevelBoundary
+    |? (trimmed = "") || sm'.starts_with "#" trimmed
+    ?> agile_state_package_line_kind_code IgnoreStatePackageLine
+    |: agile_state_package_line_kind_code StatePackageModuleCandidate
+
 :~ agile_state_package_module_name (~raw : string) : string =
     := name = sm'.trim raw
     := name = sm'.trim_end_suffix "*" name
@@ -230,6 +240,9 @@
     export
         "rig_agile_state_package_module_name"
         ((\ value => agile_state_package_module_name value) : string -> string)
+    export
+        "rig_agile_state_toml_line_code"
+        ((\ value => agile_state_toml_line_code value) : string -> u64)
     := _ = agile_state_mutation_target_decision_binding 1i32 1i32
     := _ = agile_lease_budget_decision_binding 1i32 1i32
     := _ = agile_lease_readback_decision_binding 1i32 1i32
@@ -252,4 +265,7 @@
     := _ = agile_state_package_line_code "packages:"
     := _ = agile_state_package_module_name "    ratings-"
     := _ = agile_state_package_module_name "    invalid/path"
+    := _ = agile_state_toml_line_code "modules = '''"
+    := _ = agile_state_toml_line_code "agile"
+    := _ = agile_state_toml_line_code "'''"
     0i32

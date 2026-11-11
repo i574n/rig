@@ -56,30 +56,37 @@ fn get_environment_variable_2(mut v0: Rc<str>) -> Rc<str> {
     v1
 }
 fn heavy_queue_0() -> Rc<str> {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_HEAVY_QUEUE"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_HEAVY_QUEUE"); } LIT.with(|lit| lit.clone()) };
     let mut v1: Rc<str> = get_environment_variable_2(v0);
-    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
-    let mut v3: Rc<str> = get_environment_variable_2(v2);
-    let mut v4: bool = &*v3 != "";
-    let v7: Rc<str> = if v4 {
-        v3
-    } else {
-        let mut v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
-        get_environment_variable_2(v5)
-    };
-    let v8: bool = &*v1 != "";
-    if v8 {
+    let mut v2: bool = &*v1 != "";
+    let mut v5: Rc<str> = if v2 {
         v1
     } else {
-        let mut v9: bool = &*v7 == "";
-        if v9 {
-            let mut v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-            v10
+        let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_HEAVY_QUEUE"); } LIT.with(|lit| lit.clone()) };
+        get_environment_variable_2(v3)
+    };
+    let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
+    let v7: Rc<str> = get_environment_variable_2(v6);
+    let v8: bool = &*v7 != "";
+    let mut v11: Rc<str> = if v8 {
+        v7
+    } else {
+        let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+        get_environment_variable_2(v9)
+    };
+    let v12: bool = &*v5 != "";
+    if v12 {
+        v5
+    } else {
+        let mut v13: bool = &*v11 == "";
+        if v13 {
+            let mut v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+            v14
         } else {
-            let mut v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("spiral-bin"); } LIT.with(|lit| lit.clone()) };
-            let v12: Rc<str> = joined_1(v7, v11);
-            let mut v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("heavy-queue"); } LIT.with(|lit| lit.clone()) };
-            joined_1(v12, v13)
+            let mut v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("spiral-bin"); } LIT.with(|lit| lit.clone()) };
+            let mut v16: Rc<str> = joined_1(v11, v15);
+            let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("heavy-queue"); } LIT.with(|lit| lit.clone()) };
+            joined_1(v16, v17)
         }
     }
 }

@@ -3,6 +3,8 @@ packages:
     spiral-
     workspace_primitives
     rust_std_env
+    agile_state_spelling
+    agile_state_fs
 modules:
     asks
     verb

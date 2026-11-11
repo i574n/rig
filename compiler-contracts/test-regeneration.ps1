@@ -3,6 +3,7 @@ param(
     [string]$KitRoot,
     [string]$Filter = '.*',
     [string[]]$Package = @(),
+    [string[]]$TestPackage = @(),
     [switch]$IncludeAuxiliary,
     [string]$TargetDirectory,
     [string]$CompilerBundle = ($env:RIG_SPIRAL_BUNDLE ?? $env:KIT_SPIRAL_BUNDLE),
@@ -188,6 +189,7 @@ if ($Incremental) {
             }
         }
         $lines = [Text.StringBuilder]::new($sharedText)
+        [void]$lines.AppendLine("owner $($owner.Id) $([IO.Path]::GetRelativePath($KitRoot, $owner.Input)) $([IO.Path]::GetRelativePath($KitRoot, $owner.Target))")
         foreach ($member in @($closure | Sort-Object)) {
             foreach ($file in @(Get-ChildItem -LiteralPath (Join-Path $KitRoot "src/$member") -File -Include *.spi, *.spir, package.spiproj, Cargo.toml -Recurse | Where-Object { $_.FullName -notmatch '[\\/]target[\\/]' } | Sort-Object FullName)) {
                 [void]$lines.AppendLine("src $($file.FullName.Substring($KitRoot.Length)) $((Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash)")
@@ -195,6 +197,49 @@ if ($Incremental) {
         }
         $ownerKeys[$owner.Id] = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($lines.ToString())))
     }
+}
+function Get-CachedOutput([string]$Id) {
+    $directory = Join-Path $keyStore 'outputs'
+    New-Item -ItemType Directory -Force $directory | Out-Null
+    Join-Path $directory "$($ownerKeys[$Id]).rs"
+}
+function Get-UnitGraphDirectory([string]$Entry) {
+    $key = (Split-Path -Parent $Entry).Replace('\', '/').TrimEnd('/').ToLowerInvariant()
+    $hash = -join ([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($key))[0..7] | ForEach-Object { $_.ToString('x2') })
+    Join-Path $env:SPIRAL_UNIT_GRAPH_DIR $hash
+}
+function Get-CachedGraphs([string]$Id) {
+    Join-Path $keyStore "outputs/$($ownerKeys[$Id]).units"
+}
+function Get-StagedSpellings {
+    $forward = $staged.Replace('\', '/')
+    @(
+        @($forward, '<staged-forward>'),
+        @($staged.Replace('\', '\\'), '<staged-escaped>'),
+        @($staged, '<staged-native>')
+    )
+}
+function Copy-UnitGraphs([string]$From, [string]$To, [bool]$Saving) {
+    New-Item -ItemType Directory -Force $To | Out-Null
+    foreach ($file in Get-ChildItem -LiteralPath $From -File) {
+        $text = [IO.File]::ReadAllText($file.FullName)
+        foreach ($pair in Get-StagedSpellings) {
+            $text = if ($Saving) { $text.Replace($pair[0], $pair[1], [StringComparison]::OrdinalIgnoreCase) } else { $text.Replace($pair[1], $pair[0]) }
+        }
+        [IO.File]::WriteAllText((Join-Path $To $file.Name), $text, [Text.UTF8Encoding]::new($false))
+    }
+}
+function Save-UnitGraphs($Row) {
+    $from = Get-UnitGraphDirectory $Row.Input
+    $to = Get-CachedGraphs $Row.Member
+    if (Test-Path -LiteralPath $from) { Copy-UnitGraphs $from $to $true }
+    else { New-Item -ItemType Directory -Force $to | Out-Null }
+}
+function Restore-UnitGraphs($Row) {
+    $from = Get-CachedGraphs $Row.Member
+    if (-not (Test-Path -LiteralPath $from)) { return $false }
+    Copy-UnitGraphs $from (Get-UnitGraphDirectory $Row.Input) $false
+    $true
 }
 function Get-StoredKey([string]$Id) {
     $file = Join-Path $keyStore "$($Id -replace '[\\/]', '__').key"
@@ -207,8 +252,10 @@ $results = Join-Path $work 'results.tsv'
 $rows | Export-Csv -LiteralPath (Join-Path $work 'owners.csv') -NoTypeInformation
 $previousWorkspace = $env:SPIRAL_WORKSPACE_ROOT
 $previousBudget = $env:SPIRAL_BUILD_BUDGET_MS
+$previousUnits = $env:SPIRAL_UNIT_GRAPH_DIR
 try {
     $env:SPIRAL_WORKSPACE_ROOT = $BundleRoot
+    $env:SPIRAL_UNIT_GRAPH_DIR = Join-Path $work 'units'
     Write-Host "Regenerating $($rows.Count) declared KIT outputs: $work"
     $encoding = [Text.UTF8Encoding]::new($false)
     $writer = [IO.StreamWriter]::new($results, $false, $encoding)
@@ -231,6 +278,10 @@ try {
             $elapsed = $job.Watch.ElapsedMilliseconds
             if ($job.ExitCode -eq 0 -and (Test-Path -LiteralPath $row.Output)) {
                 $bytes = (Get-Item -LiteralPath $row.Output).Length
+                if ($Incremental) {
+                    Copy-Item -LiteralPath $row.Output -Destination (Get-CachedOutput $row.Member) -Force
+                    Save-UnitGraphs $row
+                }
                 $writer.WriteLine("$($row.Member)`tok`t$elapsed`tbytes=$bytes entry=main revision=process")
                 Write-Host "$($row.Member) ok $elapsed ms ($bytes bytes)"
             } else {
@@ -257,10 +308,17 @@ try {
                 $row = $next
                 if ($Incremental) {
                     $stored = Get-StoredKey $row.Member
-                    if ($stored[0] -and $stored[0] -eq $ownerKeys[$row.Member] -and (Test-Path -LiteralPath $row.Original) -and (Get-FileHash -LiteralPath $row.Original -Algorithm SHA256).Hash -eq $stored[1]) {
+                    if ($stored[0] -and $stored[0] -eq $ownerKeys[$row.Member] -and (Test-Path -LiteralPath $row.Original) -and (Get-FileHash -LiteralPath $row.Original -Algorithm SHA256).Hash -eq $stored[1] -and (Restore-UnitGraphs $row)) {
                         Copy-Item -LiteralPath $row.Original -Destination $row.Output -Force
                         $writer.WriteLine("$($row.Member)`tok`t0`tbytes=$((Get-Item -LiteralPath $row.Output).Length) entry=main revision=unchanged-inputs")
                         Write-Host "$($row.Member) unchanged inputs; compile skipped"
+                        continue
+                    }
+                    $cached = Get-CachedOutput $row.Member
+                    if ((Test-Path -LiteralPath $cached) -and (Restore-UnitGraphs $row)) {
+                        Copy-Item -LiteralPath $cached -Destination $row.Output -Force
+                        $writer.WriteLine("$($row.Member)`tok`t0`tbytes=$((Get-Item -LiteralPath $row.Output).Length) entry=main revision=cached-output")
+                        Write-Host "$($row.Member) same inputs as an earlier regeneration; cached output reused"
                         continue
                     }
                 }
@@ -307,6 +365,7 @@ try {
     }
 } finally {
     $env:SPIRAL_WORKSPACE_ROOT = $previousWorkspace
+    $env:SPIRAL_UNIT_GRAPH_DIR = $previousUnits
     if ($null -eq $previousBudget) { Remove-Item Env:SPIRAL_BUILD_BUDGET_MS -ErrorAction SilentlyContinue }
     else { $env:SPIRAL_BUILD_BUDGET_MS = $previousBudget }
 }
@@ -323,7 +382,7 @@ foreach ($row in $rows) {
     Copy-Item -LiteralPath $row.Output -Destination $row.Target
 }
 if ($CargoCheck) {
-    $cargoArgs = @('check', '--target-dir', $TargetDirectory, '--all-targets', '--locked')
+    $cargoArgs = @('check', '--target-dir', $TargetDirectory, '--all-targets', '--locked', '--keep-going')
     if ($Package.Count) {
         foreach ($name in $Package) { $cargoArgs += @('--package', $name) }
     } else { $cargoArgs += '--workspace' }
@@ -334,7 +393,8 @@ if ($CargoCheck) {
         $cargoLines | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0) {
             $firstError = @($cargoLines | Select-String -Pattern '^error' -Context 0, 10 | Select-Object -First 1 | ForEach-Object { @($_.Line) + $_.Context.PostContext }) -join "`n"
-            throw "Cargo rejected regenerated KIT owners: $staged`n$firstError"
+            $failedCrates = @($cargoLines | Select-String -Pattern '^error: could not compile `([^`]+)`' | ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -Unique)
+            throw "Cargo rejected $($failedCrates.Count) regenerated KIT owners ($($failedCrates -join ', ')): $staged`n$firstError"
         }
     } finally { Pop-Location }
 }
@@ -344,7 +404,7 @@ if ($Test) {
     try {
         $env:RIG_DOTNET = $env:KIT_DOTNET = $dotnet
         $env:RIG_SPIRAL_BUNDLE = $env:KIT_SPIRAL_BUNDLE = $BundleRoot
-        & (Join-Path $staged 'build.ps1') -Test -Package $Package -TargetDirectory $TargetDirectory -SkipRelease:$SkipRelease -CompilerContracts:$CompilerContracts -Offline:$Offline -SpiralCompiler $compiler
+        & (Join-Path $staged 'build.ps1') -Test -Package $(if ($TestPackage.Count) { $TestPackage } else { $Package }) -TargetDirectory $TargetDirectory -SkipRelease:$SkipRelease -CompilerContracts:$CompilerContracts -Offline:$Offline -SpiralCompiler $compiler
         if ($LASTEXITCODE -ne 0) { throw "Regenerated KIT runtime contracts failed: $staged" }
     } finally {
         $env:RIG_DOTNET = $env:KIT_DOTNET = $previousDotnet

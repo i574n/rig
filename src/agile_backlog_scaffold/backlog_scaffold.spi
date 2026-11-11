@@ -1,4 +1,5 @@
 :< rust_std_fs.model
+:< agile_state_fs.model
 :< sm'_operators
 :< agile_task_text.model
 :< workspace_primitives.outcome
@@ -7,18 +8,26 @@
 :< workspace_primitives.clock
 :< workspace_primitives.console
 :< workspace_primitives.files
+:< dialect
 
 := argument_owned index : string = rust_std_env.model.argument_owned index
 
 :| scaffold_file =
     | StatePackage
+    | StateToml
     | BacklogSchema
     | LeasePrompt
 
 := scaffold_relative = \|
     | StatePackage => "/state/package.spiproj"
+    | StateToml => "/state/spiral.toml"
     | BacklogSchema => "/state/agile.spi"
     | LeasePrompt => "/state/prompt.spi"
+
+:= project_file_of (dialect : state_dialect) : scaffold_file =
+    ?= dialect ?|
+    | WordsDialect => StatePackage
+    | SymbolsDialect => StateToml
 
 := expired_lease_text (now : u64) : string =
     := started = now - 5100000u64
@@ -44,6 +53,7 @@
             prompt
 
         """
+    | StateToml => "modules = '''\nagile\nprompt\n'''\n"
     | BacklogSchema =>
         inl kinds = """
             ///- --no-respell
@@ -96,28 +106,45 @@
     := head = "rig agile init ok root=" ++# root ++# " files=3 bytes=" ++# (u64_text written) ++# " elapsed_ms="
     stdout_line (head ++# (u64_text elapsed) ++# " next=kit agile begin <root> <title>")
 
-:= agile_init (~root : string) : i32 =
+:= agile_init (~root : string) (dialect : state_dialect) : i32 =
     := started = unix_ms ()
+    := project = project_file_of dialect
     ? file_present (scaffold_path root BacklogSchema)
     ?> agile_init_failure "state/agile.spi already exists" root
     |? file_present (scaffold_path root StatePackage)
     ?> agile_init_failure "state/package.spiproj already exists" root
+    |? file_present (scaffold_path root StateToml)
+    ?> agile_init_failure "state/spiral.toml already exists" root
     |? file_present (scaffold_path root LeasePrompt) ?> agile_init_failure "state/prompt.spi already exists" root
     |? directory_ready (state_directory root) ?>
-        ? write_text (scaffold_path root StatePackage) (scaffold_text started StatePackage) ?>
+        ? write_text (scaffold_path root project) (scaffold_text started project) ?>
             ? write_text (scaffold_path root BacklogSchema) (scaffold_text started BacklogSchema) ?>
                 ? write_text (scaffold_path root LeasePrompt) (scaffold_text started LeasePrompt) ?>
-                    agile_init_success root ($"!(text_bytes (scaffold_text started StatePackage)) + \
+                    agile_init_success root ($"!(text_bytes (scaffold_text started project)) + \
                         !(text_bytes (scaffold_text started BacklogSchema)) + \
                         !(text_bytes (scaffold_text started LeasePrompt))" : u64) (ms_since started)
                 |: agile_init_failure "could not write state/prompt.spi" root
             |: agile_init_failure "could not write state/agile.spi" root
-        |: agile_init_failure "could not write state/package.spiproj" root
+        |: agile_init_failure "could not write the state project" root
     |: agile_init_failure "could not create the state directory" root
 
-:~ agile_init_entry () : i32 = agile_init (argument_owned 1i32)
+:~ agile_init_entry () : i32 =
+    := root = argument_owned 1i32
+    ? rust_std_env.model.argument_count_is 2i32
+    ?> agile_init root WordsDialect
+    |?
+        rust_std_env.model.argument_count_is 4i32 && argument_owned 2i32 = "--dialect"
+    ?>
+        ?= dialect_of_word (argument_owned 3i32) ?|
+        | DialectChosen dialect => agile_init root dialect
+        | DialectUnknown => agile_init_failure "--dialect takes symbols or words" root
+    |: agile_init_failure "usage: agile init <root> [--dialect symbols|words]" root
+
+:~ agile_dialect_entry () : i32 = agile_dialect (argument_owned 1i32) (argument_owned 2i32)
 
 := main () : i32 =
     export "rig_agile_init_run" ((\ () => agile_init_entry ()) : () -> i32)
+    export "rig_agile_dialect_run" ((\ () => agile_dialect_entry ()) : () -> i32)
     := _ = agile_init_entry ()
+    := _ = agile_dialect_entry ()
     0i32

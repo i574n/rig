@@ -40,9 +40,10 @@
     | AgileViews
     | AgileView
     | AgileViewAdd
+    | AgileDialect
 
 := agile_subcommand_spec = function
-    | AgileInit => { name = "init"; shape = "<root>" }
+    | AgileInit => { name = "init"; shape = "<root> [--dialect symbols|words]" }
     | AgileBegin => { name = "begin"; shape = "<root> <title>" }
     | AgileLease => { name = "lease"; shape = "<root>" }
     | AgileStatus => { name = "status"; shape = "<root>" }
@@ -113,6 +114,7 @@
     | AgileViews => { name = "views"; shape = "<root>" }
     | AgileView => { name = "view"; shape = "<root> <name> [extra flags...]" }
     | AgileViewAdd => { name = "view-add"; shape = "<root> <name> <list|next> [flags...]" }
+    | AgileDialect => { name = "dialect"; shape = "<root> <symbols|words>" }
 
 :| agile_parsed =
     | AgileKnown : agile_subcommand
@@ -155,7 +157,7 @@
     | AgileGate | AgileCadence => ReadsState
     | AgileClaim | AgileRelease | AgileBegin | AgileRecord | AgileSet | AgileAdd | AgileEdit => WritesState
     | AgileMigrateTags | AgileMigrateActivity | AgileNote | AgileNoteEdit | AgileNotes | AgileRename => WritesState
-    | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint => WritesState
+    | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint | AgileDialect => WritesState
 
 :| root_place =
     | RootLeads

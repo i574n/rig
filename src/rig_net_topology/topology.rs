@@ -79,23 +79,30 @@ fn get_environment_variable_2(mut v0: Rc<str>) -> Rc<str> {
     v1
 }
 fn config_dir_1() -> Rc<str> {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
     let v1: Rc<str> = get_environment_variable_2(v0);
-    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = get_environment_variable_2(v2);
-    let v4: bool = &*v1 != "";
-    if v4 {
+    let v2: bool = &*v1 != "";
+    let v5: Rc<str> = if v2 {
         v1
     } else {
-        let v5: bool = &*v3 != "";
-        if v5 {
-            let mut v6: Rc<str> = string_concat(&[&*v3, "/kit"]);
-            v6
+        let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+        get_environment_variable_2(v3)
+    };
+    let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
+    let v7: Rc<str> = get_environment_variable_2(v6);
+    let v8: bool = &*v5 != "";
+    if v8 {
+        v5
+    } else {
+        let mut v9: bool = &*v7 != "";
+        if v9 {
+            let v10: Rc<str> = string_concat(&[&*v7, "/kit"]);
+            v10
         } else {
-            let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
-            let v8: Rc<str> = get_environment_variable_2(v7);
-            let mut v9: Rc<str> = string_concat(&[&*v8, "/.config/kit"]);
-            v9
+            let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+            let v12: Rc<str> = get_environment_variable_2(v11);
+            let v13: Rc<str> = string_concat(&[&*v12, "/.config/kit"]);
+            v13
         }
     }
 }

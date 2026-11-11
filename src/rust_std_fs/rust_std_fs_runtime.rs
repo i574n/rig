@@ -209,6 +209,50 @@ pub fn read_regular_limited(path: &Path, limit: usize) -> Result<Vec<u8>, String
 pub fn read_regular_text_limited(path: &Path, limit: usize) -> Result<String, String> {
     String::from_utf8(read_regular_limited(path, limit)?).map_err(|error| format!("regular file is not UTF-8: {}: {error}", path.display()))
 }
+const STATE_ROW_HEADS: [(&str, &str); 4] = [(":== ", "type "), (":= ", "inl "), (":| ", "union "), (":< ", "open ")];
+fn state_spelled_path(path: &Path) -> bool {
+    path.extension().is_some_and(|extension| extension == "spi")
+        && path.parent().and_then(Path::file_name).and_then(|name| name.to_str()).is_some_and(|name| matches!(name, "state" | "history" | "archive"))
+}
+fn state_symbols_root(path: &Path) -> bool {
+    path.parent().and_then(Path::parent).is_some_and(|root| root.join("state").join("spiral.toml").is_file())
+}
+pub fn state_unspelled(text: &str) -> String {
+    text.split_inclusive('\n')
+        .map(|line| STATE_ROW_HEADS.iter().find_map(|(symbol, word)| line.strip_prefix(symbol).map(|rest| format!("{word}{rest}"))).unwrap_or_else(|| line.to_owned()))
+        .collect()
+}
+pub fn state_respelled(text: &str) -> String {
+    text.split_inclusive('\n')
+        .map(|line| STATE_ROW_HEADS.iter().find_map(|(symbol, word)| line.strip_prefix(word).map(|rest| format!("{symbol}{rest}"))).unwrap_or_else(|| line.to_owned()))
+        .collect()
+}
+pub fn read_state_text_limited(path: &Path, limit: usize) -> Result<String, String> {
+    let text = read_regular_text_limited(path, limit)?;
+    Ok(if state_spelled_path(path) { state_unspelled(&text) } else { text })
+}
+pub fn atomic_write_state(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    match std::str::from_utf8(bytes) {
+        Ok(text) if state_spelled_path(path) && state_symbols_root(path) => atomic_write(path, state_respelled(text).as_bytes()),
+        _ => atomic_write(path, bytes),
+    }
+}
+
+#[cfg(test)]
+mod state_spelling_tests {
+    use super::*;
+    #[test]
+    fn state_rows_respell_and_unspell_like_the_spiral_spelling() {
+        let words = "///- --no-respell\nunion s =\n    | Done :: s\ninl a () = Task (\"A\", \":= x\")\r\n";
+        let symbols = "///- --no-respell\n:| s =\n    | Done :: s\n:= a () = Task (\"A\", \":= x\")\r\n";
+        assert_eq!(state_respelled(words), symbols);
+        assert_eq!(state_unspelled(symbols), words);
+        assert_eq!(state_unspelled(words), words);
+        assert_eq!(state_respelled(symbols), symbols);
+        assert!(state_spelled_path(Path::new("/b/state/agile.spi")) && state_spelled_path(Path::new("/b/history/x.spi")));
+        assert!(!state_spelled_path(Path::new("/b/state/package.spiproj")) && !state_spelled_path(Path::new("/b/src/a.spi")));
+    }
+}
 pub fn rooted_copy_atomic(source: &Path, target: &Path) -> Result<usize, String> {
     let bytes = read_regular_limited(source, usize::MAX)?;
     atomic_write(target, &bytes)?;

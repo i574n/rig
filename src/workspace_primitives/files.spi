@@ -3,6 +3,7 @@
     :< sm'_operators
 
 :< rust_std_fs.model
+:< agile_state_fs.model
 :< sm'_operators
 :< numbers
 

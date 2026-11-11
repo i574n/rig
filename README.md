@@ -308,6 +308,27 @@ source file. Failed validation restores it. Concurrent replacements are preserve
 with the original recovery path reported if restoration cannot complete. Receipt
 verification uses compiler `--check` and preserves adjacent C/Rust files.
 
+## Backlog state spelling
+
+A backlog root keeps its rows in one of two spellings. The words spelling heads each row with
+`inl`, `union`, `open` or `type` and lists the state modules in `state/package.spiproj`. The
+symbols spelling heads the same rows with `:=`, `:|`, `:<` or `:==` and lists the modules in
+`state/spiral.toml` (`modules = '''` ... `'''`). The presence of `state/spiral.toml` decides the
+spelling of the whole root, including `history/` and `archive/`.
+
+Every agile verb reads both spellings the same way and writes in the root's own spelling, so
+`list`, `next`, `show`, `plan`, `list --tree` and `cadence` print the same output for the same
+backlog in either spelling. Only row heads at column 0 change; quoted text, indentation and line
+endings are kept byte for byte.
+
+- `agile init <root> --dialect symbols` starts a root in the symbols spelling; without the flag,
+  or with `--dialect words`, it starts in words.
+- `agile dialect <root> symbols|words` converts an existing root. It reads every `.spi` file under
+  `state/`, `history/` and `archive/` before writing any of them, writes the other project file and
+  then removes the old one. It refuses, before writing anything, a state project that holds keys
+  besides `modules`, so those are converted by hand.
+- Converting to symbols and back to words returns every file byte for byte.
+
 ## Work planning
 
 `pwsh compiler-contracts/test-strict-preflight.ps1` stages a native distribution
