@@ -41,8 +41,10 @@
     ++# " job start "
     ++# sm'.concat_list " " (r.forwarded |> listm.map (\ (w : string) => "\"" ++# w ++# "\""))
 
-:~ ssh_to (~machine : string) (~line : string) : list string =
-    [ "-o"; "BatchMode=yes"; "-o"; "ConnectTimeout=10"; "-o"; "ServerAliveInterval=15"; machine; line ]
+:~ ssh_with (~seconds : string) (~machine : string) (~line : string) : list string =
+    [ "-o"; "BatchMode=yes"; "-o"; "ConnectTimeout=" ++# seconds; "-o"; "ServerAliveInterval=15"; machine; line ]
+
+:~ ssh_to (~machine : string) (~line : string) : list string = ssh_with "10" machine line
 
 :~ ssh_arguments (r : dispatch_request) : list string = ssh_to r.machine (remote_line r)
 
@@ -99,6 +101,8 @@
 :~ machine_binary (~jobs_root : string) (~machine : string) (~given : string) : string =
     rig_job_bin.bin.machine_binary (jobs_root, machine, given)
 
+:~ connect_of (~jobs_root : string) (~machine : string) : string = rig_job_bin.bin.machine_connect (jobs_root, machine)
+
 :~ recorded (~jobs_root : string) (job : remote_job) (~binary : string) (now_ms : u64) : () =
     := folder = joined jobs_root job.id
     := _ = file_system.create_dir_all folder
@@ -119,7 +123,7 @@
             console.write_line ("rig job start busy machine=" ++# r.machine ++# " reason=" ++# gate.reason)
             3i32
         |:
-            := c = process.captured_by "ssh" (ssh_to r.machine gate.line) !+
+            := c = process.captured_by "ssh" (ssh_with (connect_of jobs_root r.machine) r.machine gate.line) !+
             := o = outcome_of r.machine c.ran c.code c.stdout
             ?= o ?|
             | Dispatched job => recorded jobs_root job r.binary (workspace_primitives.clock.unix_ms ())
@@ -141,7 +145,8 @@
         console.write_error_line "rig error: job forwarding refuses quote characters in arguments"
         2i32
     |:
-        := c = process.captured_by "ssh" (ssh_to machine (forward_line binary words)) !+
+        := args = ssh_with (connect_of jobs_root machine) machine (forward_line binary words)
+        := c = process.captured_by "ssh" args !+
         := code = forward_code c.ran c.code
         console.write_line (
             ? code = 4i32 && sm'.trim c.stdout = ""
@@ -150,8 +155,8 @@
         )
         code
 
-:~ listed_on (~machine : string) (~binary : string) (words : list string) : i32 =
-    := c = process.captured_by "ssh" (ssh_to machine (forward_line binary ("list" :: words))) !+
+:~ listed_on (~seconds : string) (~machine : string) (~binary : string) (words : list string) : i32 =
+    := c = process.captured_by "ssh" (ssh_with seconds machine (forward_line binary ("list" :: words))) !+
     := code = forward_code c.ran c.code
     := silent = code = 4i32 && sm'.trim c.stdout = ""
     console.write_line (? silent ?> "rig job unreachable machine=" ++# machine |: sm'.trim c.stdout)
@@ -160,8 +165,8 @@
 :~ list_on_run (~jobs_root : string) : i32 =
     ?= words_from 4i32 (env.command_line_argument_count () + 1i32) ?|
     | machine :: flag :: binary :: rest ?& flag = "--bin" =>
-        listed_on machine (machine_binary jobs_root machine binary) rest
-    | machine :: rest => listed_on machine (machine_binary jobs_root machine "kit") rest
+        listed_on (connect_of jobs_root machine) machine (machine_binary jobs_root machine binary) rest
+    | machine :: rest => listed_on (connect_of jobs_root machine) machine (machine_binary jobs_root machine "kit") rest
     | [] =>
         console.write_error_line "rig error: job list --on needs a machine (an ssh alias)"
         2i32
@@ -171,7 +176,7 @@
     ?= request_of [ "node"; "--heavy"; "kit-x"; "60000"; "cmd"; "/c"; "echo hi" ] ?|
     | RequestRead r =>
         testing.expect
-            (remote_line r = "rig job start \"--heavy\" \"kit-x\" \"60000\" \"cmd\" \"/c\" \"echo hi\"")
+            (remote_line r = "kit job start \"--heavy\" \"kit-x\" \"60000\" \"cmd\" \"/c\" \"echo hi\"")
             (remote_line r)
         testing.expect (listm.length (ssh_arguments r) = 8i32) "ssh options, alias, remote line"
     | RequestRefused reason => testing.expect !- reason
@@ -221,7 +226,7 @@
         (label_of_id "job-1793663094947-smoke-plain" = "smoke-plain" && label_of_id "x" = "x")
         "label from id"
     testing.expect
-        (forward_line "kit" [ "wait"; "job-17-x"; "60000" ] = "rig job \"wait\" \"job-17-x\" \"60000\"")
+        (forward_line "kit" [ "wait"; "job-17-x"; "60000" ] = "kit job \"wait\" \"job-17-x\" \"60000\"")
         "forwarded verb"
     testing.expect
         (

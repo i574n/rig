@@ -7,6 +7,7 @@
 :| lib_layer =
     | Meta
     | Core
+    | Prim
     | Std
     | Os
     | Host : string
@@ -16,15 +17,17 @@
     ?= layer ?|
     | Meta => 0i32
     | Core => 1i32
-    | Std => 2i32
-    | Os => 3i32
-    | Host _ => 4i32
-    | Ecosystem => 5i32
+    | Prim => 2i32
+    | Std => 3i32
+    | Os => 4i32
+    | Host _ => 5i32
+    | Ecosystem => 6i32
 
 :~ layer_word (layer : lib_layer) : string =
     ?= layer ?|
     | Meta => "Meta"
     | Core => "Core"
+    | Prim => "Prim"
     | Std => "Std"
     | Os => "Os"
     | Host backend => "Host " ++# backend
@@ -35,6 +38,8 @@
     ?> Some Meta
     |? word = "Core"
     ?> Some Core
+    |? word = "Prim"
+    ?> Some Prim
     |? word = "Std"
     ?> Some Std
     |? word = "Os"
@@ -82,50 +87,21 @@
     | Host mine, Host theirs ?& mine <> theirs => CrossBackend
     | _ => ranked_verdict from opened
 
-:~ macros_allowed (layer : lib_layer) : bool = layer_rank layer > layer_rank Std
+:~ macros_allowed (layer : lib_layer) : bool = layer = Prim || layer_rank layer > layer_rank Std
 
-:~ code_of (~text : string) : string =
-    := kept = \ ((code, inside) : string * bool) (line : string) =>
-        := trimmed = sm'.trim_start [] line
-        := test_body = inside && (trimmed = "" || sm'.starts_with " " line)
-        ? sm'.starts_with ":#" line
-        ?> code, !+
-        |? test_body || sm'.starts_with "//" trimmed ?> code, inside
-        |: code ++# line ++# "\n", !-
-    := code, _ = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold kept ("", !-)
-    code
+:~ code_of (~text : string) : string = rig_standards_prim_bindings.bindings.code_of text
 
-:~ occurrences (~token : string) (~text : string) : i32 = (listm.length (sm'.split_list token text) : i32) - 1i32
-
-:~ own_macros (~code : string) : i32 =
-    := dollar = "$"
-    occurrences (dollar ++# "'") code + occurrences (dollar ++# "\"") code + occurrences "!!!!" code
-
-:~ word_char (~c : string) : bool =
-    c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'"
-
-:~ last_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring (sm'.length text - 1i32) 1i32 text
-
-:~ first_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring 0i32 1i32 text
-
-:~ member_start (~c : string) : bool = c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyz_"
-
-:~ referenced_by (~code : string) (~name : string) (~separator : string) : bool =
-    := needle = name ++# separator
-    ? sm'.contains needle code |> not
-    ?> !-
-    |:
-        := found = \ ((any, before) : bool * string) (piece : string) =>
-            any || (word_char (last_char before) |> not && member_start (first_char piece)), piece
-        ?= sm'.split_list needle code ?|
-        | head :: rest =>
-            := any, _ = rest |> listm.fold found (!-, head)
-            any
-        | [] => !-
+:~ own_macros (~code : string) : i32 = rig_standards_prim_bindings.bindings.own_macros code
 
 :~ opens_module (~code : string) (~name : string) : bool =
-    := opened = sm'.contains ("\n:< " ++# name ++# "\n") ("\n" ++# code)
-    opened || referenced_by code name "." || referenced_by code name "::"
+    rig_standards_prim_bindings.bindings.module_opened (code, name)
+
+:~ ^ list_from_base (items : array_base string) (at : i32) (found : list string) : list string =
+    ? at < 0i32 ?> found |: list_from_base items (at - 1i32) (am'.index_base at items :: found)
+
+:~ prim_binding_rows (~code : string) : list string =
+    := texts = rig_standards_prim_bindings.bindings.binding_texts code
+    list_from_base texts (am'.length_base texts - 1i32) []
 
 :== module_report = { module : string; word : string; macros : i32; violations : list string }
 
@@ -154,12 +130,15 @@
         := imports = rows |> listm.fold opened []
         := macro_text = sm'.show macros ++# " own host macro(s) in " ++# layer_word layer
         := macro_rows = ? macros > 0i32 && macros_allowed layer |> not ?> [ macro_text ] |: []
-        { module = name; word = layer_word layer; macros = macros; violations = listm.append imports macro_rows }
+        := prim_rows = ? layer = Prim ?> prim_binding_rows code |: []
+        := rows = listm.append imports (listm.append macro_rows prim_rows)
+        { module = name; word = layer_word layer; macros = macros; violations = rows }
 
 :~ violation_count (report : module_report) : i32 =
-    := imports = report.violations |> listm'.filter (\ (v : string) => sm'.starts_with "opens " v)
-    := macros = ? (listm.length imports : i32) < listm.length report.violations ?> report.macros |: 0i32
-    (listm.length imports : i32) + macros
+    := one_each = \ (n : i32) (v : string) =>
+        ? sm'.starts_with "opens " v || sm'.starts_with "partial backend binding" v ?> n + 1i32 |: n
+    := macro_row = listm'.exists' (\ (v : string) => sm'.contains " own host macro(s) in " v) report.violations
+    (report.violations |> listm.fold one_each 0i32) + (? macro_row ?> report.macros |: 0i32)
 
 :~ total_violations (reports : list module_report) : i32 =
     reports |> listm.fold (\ (total : i32) (r : module_report) => total + violation_count r) 0i32
@@ -178,6 +157,19 @@
     testing.expect (opening_verdict (Host "erlang") (Host "rust") = CrossBackend) "no cross-backend host"
     testing.expect (opening_verdict (Host "erlang") Os = Allowed) "a host opens os"
     testing.expect (opening_verdict Os (Host "rust") = UpwardImport) "os never opens a host"
+    testing.expect (opening_verdict Std Prim = Allowed && opening_verdict Prim Std = UpwardImport) "Prim sits below Std"
+    testing.expect (opening_verdict Prim Core = Allowed && layer_named "Prim" "" = Some Prim) "Prim opens Core"
+    testing.expect
+        (macros_allowed Prim && not (macros_allowed Std) && not (macros_allowed Core))
+        "backend bindings live in Prim"
+
+///> rust
+:# a_prim_module_reports_its_partial_backend_bindings =
+    := full = ":= f () =\n    backend_switch {\n        Rust = \\ () => 1\n        Gleam = \\ () => 2\n    }\n"
+    := short = ":= g () =\n    backend_switch {\n        Rust = \\ () => 3\n    }\n"
+    := rows = [ { module = "p"; word = "Prim"; layer = Some Prim } ]
+    := report = module_checked rows "p" (full ++# short)
+    testing.expect (violation_count report = 1i32) "one partial binding, one violation"
 
 ///> rust
 :# code_scan_skips_tests_and_comments_and_finds_bounded_references =
@@ -186,7 +178,6 @@
     testing.expect (own_macros code = 1i32) "one macro outside tests and comments"
     testing.expect (opens_module code "am'" && opens_module code "sm'") "an open line and a qualified ref"
     testing.expect (opens_module code "listm" |> not) "an unrelated module"
-    testing.expect (referenced_by "xsm'.y" "sm'" "." |> not) "a longer name is not a ref"
     := core_row = "inl a () = LayerRow (\"core_a\", \"Core\", \"\")\n"
     := rows = table_rows (core_row ++# "inl b () = LayerRow (\"sm'\", \"Std\", \"\")\n")
     := report = module_checked rows "core_a" text

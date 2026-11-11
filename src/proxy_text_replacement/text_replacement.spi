@@ -27,8 +27,7 @@
 
 :~ regular_file (~path : string) : bool =
     file_system.path_buf_is_file (file_system.new_path_buf (sm'.to_std_string path))
-:= file_text (~path : string) : string = $'std::rc::Rc::<str>::from(std::fs::read_to_string(&*!path).unwrap_or_default\
-    ())' : string
+:= file_text (~path : string) : string = file_system.read_text_or_empty path
 := match_count (~text : string) (~needle : string) : u64 = $'!text.match_indices(&*!needle).count() as u64' : u64
 := replaced_text (~text : string) (~needle : string) (~replacement : string) (count : u64) : string =
     $'std::rc::Rc::<str>::from(!text.replacen(&*!needle, &*!replacement, !count as usize))' : string

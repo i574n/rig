@@ -770,60 +770,69 @@ fn decimal_text_29(mut v0: u64) -> Rc<str> {
 }
 fn receipt_counts_28(mut v0: &Rc<str>, mut v1: bool, mut v2: u64, mut v3: u64, mut v4: u64, mut v5: u64, mut v6: u64, mut v7: u64, mut v8: u64, mut v9: u64, mut v10: u64, mut v11: u64, mut v12: u64) -> Rc<str> {
     let v13: bool = v7 > 0u64;
-    let v24: Rc<str> = if v13 {
+    let v29: Rc<str> = if v13 {
         let v14: Rc<str> = decimal_text_29(v2);
         let v17: Rc<str> = decimal_text_29(v3);
         let v19: Rc<str> = decimal_text_29(v4);
         let v21: Rc<str> = string_concat(&["files ", &*v14, " searched  ", &*v17, " matched  matches ", &*v19]);
-        v21
-    } else {
-        let mut v22: Rc<str> = decimal_text_29(v12);
-        let v23: Rc<str> = string_concat(&["files ", &*v22]);
-        v23
-    };
-    let v25: bool = v7 == 0u64;
-    let v27: bool = if v25 {
-        let v26: bool = v8 > 0u64;
+        let mut v22: bool = v2 == 0u64;
+        let v25: Rc<str> = if v22 {
+            let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("  no file matched the glob"); } LIT.with(|lit| lit.clone()) };
+            v23
+        } else {
+            let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+            v24
+        };
+        let v26: Rc<str> = string_concat(&[&*v21, &*v25]);
         v26
+    } else {
+        let v27: Rc<str> = decimal_text_29(v12);
+        let v28: Rc<str> = string_concat(&["files ", &*v27]);
+        v28
+    };
+    let v30: bool = v7 == 0u64;
+    let v32: bool = if v30 {
+        let v31: bool = v8 > 0u64;
+        v31
     } else {
         false
     };
-    let v31: Rc<str> = if v27 {
-        let v29: Rc<str> = decimal_text_29(v4);
-        let v30: Rc<str> = string_concat(&[&*v24, "  matches ", &*v29]);
-        v30
-    } else {
-        v24
-    };
-    let v32: bool = v8 > 0u64;
     let v36: Rc<str> = if v32 {
-        let v34: Rc<str> = decimal_text_29(v5);
-        let v35: Rc<str> = string_concat(&[&*v31, "  lines ", &*v34]);
+        let v34: Rc<str> = decimal_text_29(v4);
+        let v35: Rc<str> = string_concat(&[&*v29, "  matches ", &*v34]);
         v35
     } else {
-        v31
+        v29
     };
-    let v37: bool = v9 > 0u64;
+    let v37: bool = v8 > 0u64;
     let v41: Rc<str> = if v37 {
-        let v39: Rc<str> = decimal_text_29(v6);
-        let v40: Rc<str> = string_concat(&[&*v36, "  bytes ", &*v39]);
+        let v39: Rc<str> = decimal_text_29(v5);
+        let v40: Rc<str> = string_concat(&[&*v36, "  lines ", &*v39]);
         v40
     } else {
         v36
     };
-    let v42: Rc<str> = decimal_text_29(v10);
-    let v43: Rc<str> = string_concat(&["waits ", &*v42]);
-    let v44: bool = v10 == 0u64;
-    if v44 {
-        v41
+    let v42: bool = v9 > 0u64;
+    let v46: Rc<str> = if v42 {
+        let v44: Rc<str> = decimal_text_29(v6);
+        let v45: Rc<str> = string_concat(&[&*v41, "  bytes ", &*v44]);
+        v45
     } else {
-        let v45: bool = v11 == 0u64;
-        if v45 {
-            v43
+        v41
+    };
+    let v47: Rc<str> = decimal_text_29(v10);
+    let v48: Rc<str> = string_concat(&["waits ", &*v47]);
+    let v49: bool = v10 == 0u64;
+    if v49 {
+        v46
+    } else {
+        let v50: bool = v11 == 0u64;
+        if v50 {
+            v48
         } else {
-            let v47: Rc<str> = decimal_text_29(v11);
-            let v49: Rc<str> = string_concat(&[&*v43, "  timed out ", &*v47, "  exit 3"]);
-            v49
+            let v52: Rc<str> = decimal_text_29(v11);
+            let v54: Rc<str> = string_concat(&[&*v48, "  timed out ", &*v52, "  exit 3"]);
+            v54
         }
     }
 }

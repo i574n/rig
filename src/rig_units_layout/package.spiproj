@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_units_model
+modules:
+    layout

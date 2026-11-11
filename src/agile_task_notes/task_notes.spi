@@ -31,25 +31,26 @@
 
 :~ note_text_of (~raw : string) : string = sm'.trim (? sm'.trim raw = "-" ?> console.read_to_end () |: raw)
 
+:~ file_text_of (~path : string) : string = ? file_system.file_exists path ?> file_system.read_all_text path |: ""
+
 :| note_author_choice =
     | AuthorDefault
     | AuthorNamed : string
     | AuthorUnnamedAgent
     | AuthorMalformed
 
-:= variable_set (name : string) : bool =
-    ? ((sm'.trim (rust_std_env.model.variable_or_empty name)) = "") ?> !- |: !+
-
 := unnamed_choice () : note_author_choice =
-    ? variable_set "KIT_AUTHOR"
-    ?> AuthorNamed (sm'.trim (rust_std_env.model.variable_or_empty "KIT_AUTHOR"))
-    |? variable_set "AI_AGENT" || variable_set "CLAUDECODE"
+    := author = sm'.trim (rust_std_env.model.variable_twin "AUTHOR")
+    ? author <> ""
+    ?> AuthorNamed author
+    |? rust_std_env.model.agent_session ()
     ?> AuthorUnnamedAgent
     |: AuthorDefault
 
 :== note_request =
     {
         body : string
+        text_file : string
         author : note_author_choice
     }
 
@@ -58,13 +59,19 @@
 
 :~ note_request_from (words : list string) : note_request =
     ?= words ?|
-    | _ :: _ :: _ :: _ :: text :: [] => { body = note_text_of text; author = unnamed_choice () }
+    | _ :: _ :: _ :: _ :: f :: path :: [] ?& f = "--text-file" =>
+        { body = ""; text_file = path; author = unnamed_choice () }
+    | _ :: _ :: _ :: _ :: f :: path :: a :: name :: [] ?& f = "--text-file" && a = "--as" =>
+        { body = ""; text_file = path; author = named_author name }
+    | _ :: _ :: _ :: _ :: a :: name :: f :: path :: [] ?& f = "--text-file" && a = "--as" =>
+        { body = ""; text_file = path; author = named_author name }
+    | _ :: _ :: _ :: _ :: text :: [] => { body = note_text_of text; text_file = ""; author = unnamed_choice () }
     | _ :: _ :: _ :: _ :: text :: flag :: name :: [] ?& flag = "--as" =>
-        { body = note_text_of text; author = named_author name }
+        { body = note_text_of text; text_file = ""; author = named_author name }
     | _ :: _ :: _ :: _ :: flag :: name :: text :: [] ?& flag = "--as" =>
-        { body = note_text_of text; author = named_author name }
-    | _ :: _ :: _ :: _ :: text :: _ => { body = note_text_of text; author = AuthorMalformed }
-    | _ => { body = ""; author = AuthorMalformed }
+        { body = note_text_of text; text_file = ""; author = named_author name }
+    | _ :: _ :: _ :: _ :: text :: _ => { body = note_text_of text; text_file = ""; author = AuthorMalformed }
+    | _ => { body = ""; text_file = ""; author = AuthorMalformed }
 
 :~ note_request_of () : note_request = note_request_from (env.command_line_arguments ())
 
@@ -103,8 +110,11 @@
 :~ note_entry () : i32 =
     := id = argument_owned 2i32
     := request = note_request_of ()
-    := body = request.body
-    ? (body = "")
+    := from_file = request.text_file <> ""
+    := body = ? from_file ?> note_text_of (file_text_of request.text_file) |: request.body
+    ? from_file && (file_system.file_exists request.text_file |> not)
+    ?> note_failure ("--text-file " ++# request.text_file ++# " does not exist") id
+    |? (body = "")
     ?> note_failure "the note text is empty" id
     |:
         ?= request.author ?|
@@ -169,6 +179,11 @@
     testing.expect (first.body = "text" && first.author = AuthorNamed "kit") "--as author then text"
     := blank = note_request_from [ "agile"; "note"; "root"; "ID"; "text"; "--as"; " " ]
     testing.expect (blank.author = AuthorMalformed) "a blank author is malformed"
+    := filed = note_request_from [ "agile"; "note"; "root"; "ID"; "--text-file"; "n.txt"; "--as"; "kit" ]
+    testing.expect (filed.text_file = "n.txt" && filed.author = AuthorNamed "kit") "--text-file then --as"
+    := filed_first = note_request_from [ "agile"; "note"; "root"; "ID"; "--as"; "kit"; "--text-file"; "n.txt" ]
+    testing.expect (filed_first.text_file = "n.txt" && filed_first.body = "") "--as then --text-file"
+    testing.expect (named.text_file = "") "inline text names no file"
     := extra = note_request_from [ "agile"; "note"; "root"; "ID"; "text"; "--by"; "kit" ]
     testing.expect (extra.author = AuthorMalformed && extra.body = "text") "an unknown flag is malformed"
 := main () : i32 =

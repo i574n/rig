@@ -1,9 +1,7 @@
 ///- --package .
 :# experiment_plan static =
-    :< rust_std_string.model
     :< experiment_model
 
-:< rust_std_string.model
 :< experiment_model
 
 :! mean_test = ()
@@ -145,12 +143,13 @@
 := band_text (range : band) : string =
     ?= range ?|
     | Band (low, high) =>
-        concat5
-            ($'std::rc::Rc::<str>::from((!low).to_string().as_str())' : string)
-            ".."
-            ($'std::rc::Rc::<str>::from((!high).to_string().as_str())' : string)
+        sm'.concat_list
             ""
-            ""
+            [
+                ($'std::rc::Rc::<str>::from((!low).to_string().as_str())' : string);
+                "..";
+                ($'std::rc::Rc::<str>::from((!high).to_string().as_str())' : string)
+            ]
     | NoBand => "-"
 
 := broken_reason (read : plan_read) : string =
@@ -159,12 +158,17 @@
     | PlanRead _ => ""
 
 := registration (~test : string) (~arms : string) (~prediction : string) : string =
-    concat5
-        (field_line "id" "PR-1")
-        (field_line "test" test)
-        (field_line "metric" "retries")
-        (field_line "arms" arms)
-        (concat5 (field_line "runs" "5") (field_line "prediction" prediction) (field_line "decision" "d") "" "")
+    sm'.concat_list
+        ""
+        [
+            field_line "id" "PR-1";
+            field_line "test" test;
+            field_line "metric" "retries";
+            field_line "arms" arms;
+            field_line "runs" "5";
+            field_line "prediction" prediction;
+            field_line "decision" "d"
+        ]
 
 := read_plan (~text : string) : plan =
     ?= plan_of text ?|

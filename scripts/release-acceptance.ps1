@@ -1,4 +1,4 @@
-param([Parameter(Mandatory)][string] $Candidate, [string] $Work = (Join-Path $env:TEMP ('kit-cand-' + [guid]::NewGuid().ToString('N').Substring(0, 8))))
+param([Parameter(Mandatory)][string] $Candidate, [Parameter(Mandatory)][string] $GitRoot, [string] $Work = (Join-Path $env:TEMP ('kit-cand-' + [guid]::NewGuid().ToString('N').Substring(0, 8))))
 $ErrorActionPreference = 'Continue'
 $installed = Join-Path $env:LOCALAPPDATA 'kit\bin\kit.exe'
 $rows = [Collections.Generic.List[string]]::new()
@@ -27,7 +27,7 @@ Row 'a non-agent run still commits' ($LASTEXITCODE -eq 0 -and $person -match 'co
 if ($saved) { $env:AI_AGENT = $saved }
 Pop-Location
 
-foreach ($repo in 'C:/home/git/kit', 'C:/home/git/i574n.github', 'C:/home/git/spiral') {
+foreach ($repo in 'kit', 'i574n.github', 'spiral' | ForEach-Object { Join-Path $GitRoot $_ }) {
     $program = "git status $repo group by state"
     foreach ($attempt in 1..3) {
         $a = (& $Candidate do C:\ $program 2>&1 | Where-Object { $_ -notmatch '^\S+\s+repos \d+' } | Out-String)
@@ -47,14 +47,14 @@ Row 'append creates parent folders' ($LASTEXITCODE -eq 0 -and (Test-Path (Join-P
 $copied = (& $Candidate do $appendRoot 'copy newpkg/a.txt to out' 2>&1 | Out-String)
 Row 'copy with a literal file source copies the file' ($LASTEXITCODE -eq 0 -and (Test-Path (Join-Path $appendRoot 'out\a.txt'))) (Clip $copied)
 
-$lint = @(& $Candidate lint macros C:\home\git\spiral\lib\spiral 2>&1)
+$lint = @(& $Candidate lint macros (Join-Path $GitRoot 'spiral\lib\spiral') 2>&1)
 $flow = @($lint | Where-Object { $_ -match '^\S+\.spi:\d+\s+\S+\s+flow\s' }).Count
 Row 'lint macros on lib: 0 flow rows' ($flow -eq 0 -and $lint[-1] -match 'violations') (Clip $lint[-1])
-$kitLint = @(& $Candidate lint macros C:\home\git\kit\src --baseline C:\home\git\kit\standards\lint-macros.spi 2>&1)
+$kitLint = @(& $Candidate lint macros (Join-Path $GitRoot 'kit\src') --baseline (Join-Path $GitRoot 'kit\standards\lint-macros.spi') 2>&1)
 Row 'lint macros on kit: no new rows past baseline' ("$($kitLint[-1])" -match '\bnew 0\b') (Clip "$($kitLint[-1])")
-$growth = @(& $Candidate lint growth C:/home/git/kit standards/lint-macros.spi C:/home/git/kit src 2>&1)
+$growth = @(& $Candidate lint growth (Join-Path $GitRoot 'kit') standards/lint-macros.spi (Join-Path $GitRoot 'kit') src 2>&1)
 Row 'kit lint baseline grows only for code at HEAD' ($LASTEXITCODE -eq 0 -and "$($growth[-1])" -match '^(kit|rig) lint growth ok') (Clip "$($growth[-1])")
-$libGrowth = @(& $Candidate lint growth C:/home/git/kit standards/lint-macros-lib.spi C:/home/git/spiral lib/spiral 2>&1)
+$libGrowth = @(& $Candidate lint growth (Join-Path $GitRoot 'kit') standards/lint-macros-lib.spi (Join-Path $GitRoot 'spiral') lib/spiral 2>&1)
 Row 'lib lint baseline grows only for code at HEAD' ($LASTEXITCODE -eq 0 -and "$($libGrowth[-1])" -match '^(kit|rig) lint growth ok') (Clip "$($libGrowth[-1])")
 
 $backlog = Join-Path $Work 'backlog'
@@ -70,7 +70,9 @@ $next = (& $Candidate agile next $backlog 2>&1 | Out-String)
 Row 'agile next hides user-batch items' ($next -match 'PROBE' -and $next -notmatch 'THEIRS') (Clip ($next -split "`n" | Select-Object -Last 2 | Out-String))
 
 $memory = Join-Path $Work 'memory'
-Copy-Item 'C:\Users\i574n\.claude\projects\C--home-git\memory' $memory -Recurse
+[void][IO.Directory]::CreateDirectory($memory)
+[IO.File]::WriteAllText((Join-Path $memory 'fixture.md'), "---`nname: fixture`ndescription: a fixture memory`nmetadata:`n  type: reference`n---`n`nA fixture.`n")
+[IO.File]::WriteAllText((Join-Path $memory 'MEMORY.md'), "- [Fixture](fixture.md) - a fixture memory`n")
 $realIndex = Get-Content (Join-Path $memory 'MEMORY.md') -Raw
 $refused = (& $Candidate memory save $memory feedback probe-rule 'a probe' 'No reasons.' 2>&1 | Out-String)
 Row 'memory save refuses feedback without reasons' ($LASTEXITCODE -eq 2 -and $refused -match 'needs \*\*Why') (Clip $refused)
@@ -87,11 +89,11 @@ $imported = (& $Candidate memory import $memory $memoryData 2>&1 | Out-String)
 $recalled = @(& $Candidate memory recall $memoryData 'stopped session wake heartbeat' --limit 3 2>&1)
 Row 'memory import round-trips and recall ranks by words' ($imported -match 'index_identical=yes' -and "$($recalled[0])" -match 'idle-needs-wake-source') (Clip "$imported $($recalled[0])")
 
-$tsv = @(& $Candidate lint macros C:\home\git\spiral\lib\spiral --tsv 2>&1)
+$tsv = @(& $Candidate lint macros (Join-Path $GitRoot 'spiral\lib\spiral') --tsv 2>&1)
 $wellFormed = @($tsv | Select-Object -Skip 1 -SkipLast 1 | Where-Object { ($_ -split "`t").Count -eq 5 }).Count
 Row 'lint --tsv rows have 5 fields' ($tsv[0] -eq "file`tline`tname`tclass`ttext" -and $wellFormed -eq $tsv.Count - 2) (Clip "rows $wellFormed")
-$shadowsA = (& $installed lint shadows C:\home\git\kit\src 2>&1 | Select-Object -Last 1) -replace '\s+\d+ms.*', ''
-$shadowsB = (& $Candidate lint shadows C:\home\git\kit\src 2>&1 | Select-Object -Last 1) -replace '\s+\d+ms.*', ''
+$shadowsA = (& $installed lint shadows (Join-Path $GitRoot 'kit\src') 2>&1 | Select-Object -Last 1) -replace '\s+\d+ms.*', ''
+$shadowsB = (& $Candidate lint shadows (Join-Path $GitRoot 'kit\src') 2>&1 | Select-Object -Last 1) -replace '\s+\d+ms.*', ''
 Row 'lint shadows walks the same files' ($shadowsA -eq $shadowsB) (Clip $shadowsB)
 $opensRoot = Join-Path $Work 'opens'
 [void][IO.Directory]::CreateDirectory((Join-Path $opensRoot 'pkg'))
@@ -135,7 +137,7 @@ if ($ping) { Stop-Process -Id $ping.ProcessId -Force -Confirm:$false -ErrorActio
 Row 'start-under-shell opens no visible console' ([bool]$ping -and $windows -eq 0) "ping $($ping.ProcessId) visible console windows $windows"
 
 $clock = [Diagnostics.Stopwatch]::StartNew()
-$next = (& $Candidate agile next C:\home\git\i574n.github\docs\backlog 50 2>&1 | Select-Object -Last 1 | Out-String)
+$next = (& $Candidate agile next (Join-Path $GitRoot 'i574n.github\docs\backlog') 50 2>&1 | Select-Object -Last 1 | Out-String)
 $clock.Stop()
 $ownMs = if ($next -match 'elapsed_ms=(\d+)') { [int]$Matches[1] } else { [int]::MaxValue }
 Row 'agile next on the live backlog under 4 s' ($next -match '(kit|rig) agile next ok' -and $ownMs -lt 4000) "$ownMs ms by kit's clock, $($clock.ElapsedMilliseconds) ms wall"

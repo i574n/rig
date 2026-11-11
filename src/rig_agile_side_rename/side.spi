@@ -1,0 +1,157 @@
+///- --package .
+:# side static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| side_file =
+    | ParentsFile
+    | ClaimsFile
+    | WaitsFile
+
+:== id_rename = { old : string; new : string }
+
+:| row_change =
+    | Untouched :: row_change
+    | Pointing :: string -> row_change
+    | Owned :: string -> row_change
+
+:== side_tally = { rows : i32; bindings : i32 }
+
+:== side_acc = { kept : list string; rows : i32; bindings : i32 }
+
+:~ side_files () : list side_file = [ ParentsFile; ClaimsFile; WaitsFile ]
+
+:~ file_name (f : side_file) : string =
+    ?= f ?|
+    | ParentsFile => "parents.spi"
+    | ClaimsFile => "claims.spi"
+    | WaitsFile => "waits.spi"
+
+:~ binding_prefix (f : side_file) : string =
+    ?= f ?|
+    | ParentsFile => "inl parent_of_"
+    | ClaimsFile => "inl claim_"
+    | WaitsFile => "inl wait_of_"
+
+:~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_"
+
+:~ quoted (~id : string) : string = "\"" ++# id ++# "\""
+
+:~ owned_by (~line : string) (~id : string) : bool =
+    ?= sm'.quoted_fields line ?|
+    | first :: _ => first = id
+    | [] => !-
+
+:~ renamed_row (f : side_file) (r : id_rename) (~line : string) : row_change =
+    := fields = sm'.replace (quoted r.old) (quoted r.new) line
+    := head = binding_prefix f ++# slug_of r.old
+    ? owned_by line r.old && sm'.starts_with head fields
+    ?>
+        := rest = sm'.substring (sm'.length head) (sm'.length fields - sm'.length head) fields
+        Owned (binding_prefix f ++# slug_of r.new ++# rest)
+    |? fields <> line
+    ?> Pointing fields
+    |: Untouched
+
+:~ line_after (~line : string) (c : row_change) : string =
+    ?= c ?|
+    | Untouched => line
+    | Pointing text => text
+    | Owned text => text
+
+:~ owns_binding (c : row_change) : bool =
+    ?= c ?|
+    | Owned _ => !+
+    | _ => !-
+
+:~ counted (hit : bool) (n : i32) : i32 = ? hit ?> n + 1i32 |: n
+
+:~ renamed_side (f : side_file) (r : id_rename) (~text : string) : string * side_tally =
+    := step = \ (acc : side_acc) (line : string) =>
+        := c = renamed_row f r line
+        {
+            kept = listm.append acc.kept [ line_after line c ]
+            rows = counted (c <> Untouched) acc.rows
+            bindings = counted (owns_binding c) acc.bindings
+        }
+    := start = { kept = []; rows = 0i32; bindings = 0i32 }
+    := done = sm'.split_list "\n" text |> listm.fold step start
+    sm'.concat_list "\n" done.kept, { rows = done.rows; bindings = done.bindings }
+
+:== side_report = { rows : i32; bindings : i32; problems : list string }
+
+:~ id_rename_of (~old : string) (~new : string) : id_rename = { old = old; new = new }
+
+:~ side_path (~root : string) (f : side_file) : string = root ++# "/state/" ++# file_name f
+
+:~ renamed_sides
+    (~root : string) (r : id_rename) (read : string -> string) (write : string -> string -> string -> string)
+    : side_report
+    =
+    := step = \ (acc : side_report) (f : side_file) =>
+        := path = side_path root f
+        := before = read path
+        := after, tally = renamed_side f r before
+        := problem = ? tally.rows = 0i32 ?> "" |: write path before after
+        := problems = ? problem = "" ?> acc.problems |: listm.append acc.problems [ file_name f ++# ": " ++# problem ]
+        { rows = acc.rows + tally.rows; bindings = acc.bindings + tally.bindings; problems = problems }
+    side_files () |> listm.fold step { rows = 0i32; bindings = 0i32; problems = [] }
+
+:~ occurrences (~id : string) (~text : string) : i32 =
+    := pieces : i32 = listm.length (sm'.split_list (quoted id) text)
+    pieces - 1i32
+
+///> rust
+:# a_wait_row_owned_by_the_old_id_gets_its_binding_and_field_renamed =
+    := r = { old = "KIT-X"; new = "RIG-X" }
+    := owned = "inl wait_of_kit_x () = Waits (\"KIT-X\", \"train\", \"TRAIN44\")"
+    := renamed_owned = "inl wait_of_rig_x () = Waits (\"RIG-X\", \"train\", \"TRAIN44\")"
+    testing.expect (renamed_row WaitsFile r owned = Owned renamed_owned) "binding and field"
+    := pointing = "inl wait_of_scrum () = Waits (\"SCRUM\", \"item\", \"KIT-X\")"
+    := renamed_pointing = "inl wait_of_scrum () = Waits (\"SCRUM\", \"item\", \"RIG-X\")"
+    testing.expect (renamed_row WaitsFile r pointing = Pointing renamed_pointing) "a pointing row keeps its binding"
+    := longer = "inl wait_of_kit_x_y () = Waits (\"KIT-X-Y\", \"train\", \"TRAIN44\")"
+    testing.expect (renamed_row WaitsFile r longer = Untouched) "a longer id is untouched"
+
+///> rust
+:# parent_and_claim_rows_rename_both_sides_and_keep_binding_suffixes =
+    := r = { old = "KIT-SCRUM-XP"; new = "RIG-SCRUM-XP" }
+    := child = "inl parent_of_scrum_xp_s1 () = Parent (\"SCRUM-XP-S1\", \"KIT-SCRUM-XP\")"
+    testing.expect (renamed_row ParentsFile r child = Pointing (sm'.replace "KIT-" "RIG-" child)) "the parent side"
+    := own = "inl parent_of_kit_scrum_xp () = Parent (\"KIT-SCRUM-XP\", \"KIT-SCRUM\")"
+    := renamed_own = "inl parent_of_rig_scrum_xp () = Parent (\"RIG-SCRUM-XP\", \"KIT-SCRUM\")"
+    testing.expect (renamed_row ParentsFile r own = Owned renamed_own) "the child side, the other parent kept"
+    := claim = "inl claim_kit_scrum_xp__declined_o () = Claim (\"KIT-SCRUM-XP\", \"~o\", 17u64, NoPaths)"
+    := renamed_claim = "inl claim_rig_scrum_xp__declined_o () = Claim (\"RIG-SCRUM-XP\", \"~o\", 17u64, NoPaths)"
+    testing.expect (renamed_row ClaimsFile r claim = Owned renamed_claim) "the declined suffix stays"
+
+///> rust
+:# a_side_file_keeps_its_lines_and_no_old_id_survives =
+    := r = { old = "KIT-X"; new = "RIG-X" }
+    := head = "///- --no-respell\nunion task_wait =\n    | Waits :: string * string -> task_wait\n"
+    := owned = "inl wait_of_kit_x () = Waits (\"KIT-X\", \"train\", \"T\")\n"
+    := pointing = "inl wait_of_a () = Waits (\"A\", \"item\", \"KIT-X\")\n"
+    := text = head ++# owned ++# pointing
+    := after, tally = renamed_side WaitsFile r text
+    testing.expect (tally = { rows = 2i32; bindings = 1i32 }) "two rows, one binding"
+    testing.expect (occurrences "KIT-X" after = 0i32) "no old id survives"
+    testing.expect (occurrences "RIG-X" after = occurrences "KIT-X" text) "every id moved"
+    := lines_before : i32 = listm.length (sm'.split_list "\n" text)
+    := lines_after : i32 = listm.length (sm'.split_list "\n" after)
+    testing.expect (lines_before = lines_after && sm'.ends_with "\n" after) "same lines, final newline kept"
+    testing.expect (file_name WaitsFile = "waits.spi" && listm.length (side_files ()) = (3i32 : i32)) "three side files"
+
+///> rust
+:# every_side_file_is_read_rewritten_and_written_once_and_a_refused_write_is_named =
+    := r = id_rename_of "KIT-X" "RIG-X"
+    := waits = "inl wait_of_kit_x () = Waits (\"KIT-X\", \"train\", \"T\")\n"
+    := parents = "inl parent_of_y () = Parent (\"Y\", \"KIT-X\")\n"
+    := read = \ (path : string) =>
+        ? path = "R/state/waits.spi" ?> waits |? path = "R/state/parents.spi" ?> parents |: ""
+    := written = \ (_ : string) (_ : string) (_ : string) => ""
+    := report = renamed_sides "R" r read written
+    testing.expect (report = { rows = 2i32; bindings = 1i32; problems = [] }) "claims.spi is absent and skipped"
+    := refused = \ (path : string) (_ : string) (_ : string) => ? sm'.ends_with "waits.spi" path ?> "changed" |: ""
+    := partial = renamed_sides "R" r read refused
+    testing.expect (partial.problems = [ "waits.spi: changed" ]) "the refused file is named, the others still written"

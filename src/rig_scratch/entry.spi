@@ -1,0 +1,50 @@
+:< sm'_operators
+:< rig_scratch_cited.cited
+
+:~ entries_of (~dir : string) : list string =
+    ? file_system.directory_exists dir |> not
+    ?> []
+    |:
+        file_system.read_directory_names dir
+        |> resultm.unwrap'
+        |> am'.vec_fold' (\ names name => sm'.from_std_string name :: names) []
+        |> listm.rev
+
+:~ state_text (~backlog : string) : string =
+    := dir = sm'.replace "\\" "/" backlog ++# "/state"
+    := files = entries_of dir |> listm'.filter (\ (name : string) => is_state_file name)
+    := read = \ (name : string) => file_system.read_text_or_empty (dir ++# "/" ++# name)
+    files |> listm.map read |> sm'.concat_list "\n"
+
+:~ folders_of (~root : string) : list string =
+    := base = sm'.replace "\\" "/" root
+    entries_of base |> listm'.filter (\ (name : string) => file_system.directory_exists (base ++# "/" ++# name))
+
+:~ kept_count (found : list folder_fate) : i32 =
+    (listm.length found : i32) - (listm.length (removable_names found) : i32)
+
+:~ cited_run (~backlog : string) (~root : string) : i32 =
+    := notes = notes_of_state (state_text backlog)
+    := note_count : i32 = listm.length notes
+    ? note_count = 0i32
+    ?>
+        := under = backlog ++# "/state, so nothing is removable"
+        console.write_error_line ("rig error: scratch cited: no backlog notes under " ++# under)
+        2i32
+    |:
+        := found = fates notes root (folders_of root)
+        found |> listm.iter (\ (f : folder_fate) => console.write_line (fate_line f))
+        := counts = " folders=" ++# sm'.show (listm.length found : i32) ++# " kept=" ++# sm'.show (kept_count found)
+        console.write_line ("rig scratch cited ok notes=" ++# sm'.show note_count ++# counts)
+        0i32
+
+:~ scratch_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: verb :: backlog :: root :: _ ?& verb = "cited" => cited_run backlog root
+    | _ =>
+        console.write_error_line "rig error: scratch cited <backlog root> <scratch root>"
+        2i32
+
+:= main () : i32 =
+    export "rig_scratch_run" scratch_run
+    0i32

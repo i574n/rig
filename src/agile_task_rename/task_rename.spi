@@ -75,8 +75,20 @@
 
 := dash_when_empty (~text : string) : string = ? (text = "") ?> "-" |: text
 
+:~ side_read (~path : string) : string = file_system.read_text_or_empty path
+
+:~ side_write (~path : string) (~before : string) (~after : string) : string =
+    state_write_problem (state_written path before after)
+
+:~ sides_renamed (~root : string) (~old : string) (~new : string) : rig_agile_side_rename.side.side_report =
+    := r = rig_agile_side_rename.side.id_rename_of old new
+    := read = \ (p : string) => side_read p
+    := write = \ (p : string) (b : string) (a : string) => side_write p b a
+    rig_agile_side_rename.side.renamed_sides root r read write
+
 := rename_success
-    (~old : string) (~new : string) (tally : rename_tally) (before : u64) (after : u64) (elapsed : u64)
+    (~old : string) (~new : string) (tally : rename_tally) (sides : rig_agile_side_rename.side.side_report)
+    (before : u64) (after : u64) (elapsed : u64)
     : i32
     =
     := head = "rig agile rename ok old=" ++# old ++# " new=" ++# new ++# " items="
@@ -91,7 +103,8 @@
         ++# i32_text tally.title_count
         ++# " titles_in="
         ++# dash_when_empty tally.title_tasks
-    stdout_line (head ++# deps ++# titles ++# (measured_sizes before after elapsed))
+    := side = " side_rows=" ++# i32_text sides.rows ++# " side_bindings=" ++# i32_text sides.bindings
+    stdout_line (head ++# deps ++# titles ++# side ++# (measured_sizes before after elapsed))
 
 :~ renamed (~root : string) (~old : string) (~new : string) : i32 =
     := started = unix_ms ()
@@ -110,14 +123,22 @@
         |? binding_declared original (planning_binding new)
         ?> rename_failure ("the name inl " ++# (planning_binding new) ++# " is already declared") old
         |:
-            := updated, tally = renamed_text original old new
-            ?= state_written state raw updated ?|
-            | StateWritten => rename_success old new tally (text_bytes original) (text_bytes updated) (ms_since started)
-            | problem => rename_failure (state_write_problem problem) old
+            := sides = sides_renamed root old new
+            ? sides.problems <> []
+            ?>
+                := listed = sm'.concat_list "; " sides.problems
+                rename_failure ("side files not finished (" ++# listed ++# "); run it again") old
+            |:
+                := updated, tally = renamed_text original old new
+                ?= state_written state raw updated ?|
+                | StateWritten =>
+                    rename_success old new tally sides (text_bytes original) (text_bytes updated) (ms_since started)
+                | problem => rename_failure (state_write_problem problem) old
 
 :~ rename_entry () : i32 =
     := old = argument_owned 2i32
     := new = argument_owned 3i32
+    := retired = rig_agile_id_prefix.prefix.new_id_refusal new
     ? negated (argument_count () = 4i32)
     ?> rename_failure "usage: agile rename <root> <old-id> <new-id>" old
     |? negated (id_well_formed new)
@@ -126,6 +147,8 @@
     ?> rename_failure "the new id must start with a letter, so its inl name is a valid identifier" old
     |? (old = new)
     ?> rename_failure "the new id equals the old one" old
+    |? retired <> ""
+    ?> rename_failure retired old
     |: renamed (argument_owned 1i32) old new
 
 := main () : i32 =

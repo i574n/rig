@@ -107,7 +107,7 @@
                 { tally ?|
                     differing = difference_counted tally.differing name
                     sampled = (? sampling ?> tally.sampled + 1i32 |: tally.sampled)
-                    samples = (? sampling ?> listed_line tally.samples sample |: tally.samples)
+                    samples = (? sampling ?> appended tally.samples sample |: tally.samples)
                 }
             pairs_compared rest left right row other key limit next
 

@@ -18,7 +18,8 @@
         := own = own_pid ()
         ?= scope_of rows args.mine own ?|
         | NoSession =>
-            stdout_line "ps --mine: no claude or codex process above this kit"
+            := clients = sm'.concat_list " or " (rig_machine_watch_model.model.agent_clients ())
+            stdout_line ("ps --mine: no " ++# clients ++# " process above this kit")
             2i32
         | scope =>
             := listing =

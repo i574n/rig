@@ -15,8 +15,10 @@ packages:
     rig_agile_gate
     rig_agile_cadence
     agile_task_tree
+    rig_agile_gap
 link:
     agile_task_tree
+    rig_agile_gap
     rig_agile_lock
     rig_agile_activity_migration
     agile_state_access

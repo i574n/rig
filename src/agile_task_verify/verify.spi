@@ -1,0 +1,61 @@
+///- --package .
+:# verify static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== task_verify = { item : string; command : string }
+
+:| verify_reading =
+    | Quoted :: verify_reading
+    | NotQuoted :: verify_reading
+    | NoVerify :: verify_reading
+
+:= row_marker () : string = " = Verify (\""
+
+:~ verify_of_line (~line : string) : option task_verify =
+    := at = sm'.index_of (row_marker ()) line
+    ? at < 0i32
+    ?> None
+    |:
+        := rest = sm'.substring (at + 3i32) (sm'.length line - at - 3i32) line
+        := item = agile_task_waits.waits.nth_quoted rest 0i32
+        := command = agile_task_waits.waits.nth_quoted rest 1i32
+        ? item = "" || command = "" ?> None |: Some { item = item; command = command }
+
+:~ verifies_of_text (~text : string) : list task_verify =
+    := gathered = \ (found : list task_verify) (line : string) =>
+        ?= verify_of_line line ?|
+        | Some v => listm.append found [ v ]
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold gathered []
+
+:~ row_of_verify (v : task_verify) : string =
+    := fields = agile_task_waits.waits.quoted v.item ++# ", " ++# agile_task_waits.waits.quoted v.command
+    "inl verify_of_" ++# agile_task_waits.waits.slug_of v.item ++# " () = Verify (" ++# fields ++# ")"
+
+:~ verify_for (~item : string) (verifies : list task_verify) : option task_verify =
+    verifies |> listm'.try_find_ (\ (v : task_verify) => v.item = item)
+
+:~ reading_of (verify : option task_verify) (~last_note : string) : verify_reading =
+    ?= verify ?|
+    | None => NoVerify
+    | Some v ?& sm'.contains (sm'.to_lower v.command) (sm'.to_lower last_note) => Quoted
+    | Some _ => NotQuoted
+
+///> rust
+:# verify_rows_round_trip_and_a_note_must_quote_the_command =
+    := v = { item = "KIT-A"; command = "kit test src/agile_task_verify/verify.spi" }
+    := row = row_of_verify v
+    := expected = "inl verify_of_kit_a () = Verify (\"KIT-A\", \"kit test src/agile_task_verify/verify.spi\")"
+    testing.expect (row = expected) row
+    testing.expect (verify_of_line row = Some v) "a written row reads back"
+    := b = { item = "B"; command = "kit standards src/b" }
+    := other = row_of_verify b
+    := text = row ++# "\r\ninl wait_of_c () = Waits (\"C\", \"train\", \"T1\")\n" ++# other
+    testing.expect (listm.length (verifies_of_text text) = 2i32) "only verify rows, CRLF tolerated"
+    testing.expect (verify_for "B" (verifies_of_text text) = Some b) "found by item"
+    testing.expect (reading_of (Some v) "proof: KIT TEST src/agile_task_verify/verify.spi exit 0" = Quoted) "quoted"
+    testing.expect (reading_of (Some v) "proof: it passed" = NotQuoted) "evidence without the command"
+    testing.expect (reading_of None "anything" = NoVerify) "no row, no verdict"
+    testing.expect (verify_of_line "inl verify_of_x () = Verify (\"X\", \"\")" = None) "an empty command is no row"

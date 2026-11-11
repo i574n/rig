@@ -1,0 +1,54 @@
+///- --package .
+:# census static =
+    :< sm'_operators
+    :< queue
+
+:< sm'_operators
+:< queue
+
+:~ detector_of (~word : string) : option detector =
+    ? word = "encoded-row" ?> Some EncodedRow
+    |? word = "number-arm" ?> Some NumberArm
+    |? word = "string-concat" ?> Some StringConcat
+    |? word = "std-string-use" ?> Some StdStringUse
+    |? word = "string-tag-compare" ?> Some StringTagCompare
+    |: None
+
+:~ count_of (~line : string) : option i32 =
+    := last_quote = sm'.last_index_of "\"" line
+    := after = sm'.substring (last_quote + 1i32) ((sm'.length line : i32) - last_quote - 1i32) line
+    ?= sm'.split_list "," after |> listm'.filter (\ (p : string) => sm'.trim p <> "") ?|
+    | first :: _ => convert.try_convert (sm'.trim (sm'.replace "i32" "" first))
+    | [] => None
+
+:~ signals_of_census (~text : string) : list signal =
+    := row = \ (found : list signal) (line : string) =>
+        ? sm'.contains " = CensusCount (" line |> not
+        ?> found
+        |:
+            ?= sm'.quoted_fields line, count_of line ?|
+            | [ package; word ], Some count =>
+                ?= detector_of word ?|
+                | Some d => listm.append found [ { package = package; detector = d; count = count } ]
+                | None => found
+            | _ => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold row []
+
+///> rust
+:# census_rows_become_signals_and_rank_the_heal_queue =
+    := rows =
+        [
+            "union census_row = CensusCount : string * string * i32 * i32";
+            "inl census_a_string_concat () = CensusCount (\"todo\", \"string-concat\", 37i32, 752i32)";
+            "inl census_a_std () = CensusCount (\"todo\", \"std-string-use\", 45i32, 752i32)";
+            "inl census_a_host () = CensusCount (\"todo\", \"host-block\", 3i32, 752i32)";
+            "inl census_b_rows () = CensusCount (\"windows\", \"encoded-row\", 14i32, 357i32)";
+            "inl census_b_concat () = CensusCount (\"windows\", \"string-concat\", 32i32, 357i32)"
+        ]
+        |> sm'.concat_list "\n"
+    := signals = signals_of_census rows
+    testing.expect (listm.length signals = 4i32) "four scored rows; the union line and host-block score nothing"
+    := order = ranked signals |> listm.map (\ (c : candidate) => c.package)
+    testing.expect (order = [ "windows"; "todo" ]) "two detectors each, so the score decides: 88 over 82"
+    := sample = "x = CensusCount (\"p\", \"w\", 12i32, 99i32)"
+    testing.expect (count_of sample = Some 12i32) "the first number is the count"

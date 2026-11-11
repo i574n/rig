@@ -1,0 +1,14 @@
+packages:
+    |core-
+    spiral-
+    rig_units_model
+    rig_units_manifest
+    rig_units_edges
+    rig_units_layout
+link:
+    rig_units_manifest
+    rig_units_edges
+    rig_units_layout
+modules:
+    model
+    check

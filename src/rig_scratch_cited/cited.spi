@@ -1,0 +1,111 @@
+///- --package .
+:# cited static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== note = { item : string; text : string }
+
+:| folder_fate =
+    | Removable :: string -> folder_fate
+    | KeptCited :: string * string -> folder_fate
+
+:~ bare_name_length () : i32 = 16i32
+
+:~ boundaries () : list string = [ " "; "\""; "'"; "`"; "("; ")"; "["; "]"; ","; ";"; "="; "<"; ">"; "\r"; "\n" ]
+
+:~ normalized (~text : string) : string =
+    := slashed = sm'.replace "\\" "/" text |> sm'.to_lower
+    := cut = boundaries () |> listm.fold (\ (acc : string) (b : string) => sm'.replace b "/" acc) slashed
+    "/" ++# cut ++# "/" |> sm'.replace "//" "/" |> sm'.replace "//" "/"
+
+:~ note_of (~item : string) (~text : string) : note = { item = item; text = normalized text }
+
+:~ note_marker () : string = "= Note (\""
+
+:~ note_item (~line : string) : string =
+    := at = sm'.index_of (note_marker ()) line
+    := skip = at + sm'.length (note_marker ())
+    ? at < 0i32
+    ?> ""
+    |:
+        ?= sm'.split_list "\"" (sm'.substring skip (sm'.length line - skip) line) ?|
+        | id :: _ => id
+        | [] => ""
+
+:~ notes_of_state (~text : string) : list note =
+    := add = \ (found : list note) (line : string) =>
+        := item = ? sm'.starts_with "inl note_of_" line ?> note_item line |: ""
+        ? item = "" ?> found |: note_of item line :: found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold add [] |> listm.rev
+
+:~ is_state_file (~name : string) : bool = sm'.ends_with ".spi" name
+
+:~ keys_of (~root : string) (~name : string) : list string =
+    := full = normalized (root ++# "/" ++# name)
+    ? sm'.length name >= bare_name_length () ?> [ full; normalized name ] |: [ full ]
+
+:~ cited_by (notes : list note) (~root : string) (~name : string) : option string =
+    := keys = keys_of root name
+    := cites = \ (n : note) => listm'.exists' (\ (k : string) => sm'.index_of k n.text >= 0i32) keys
+    := hit = \ (found : option string) (n : note) =>
+        ?= found ?|
+        | Some _ => found
+        | None => ? cites n ?> Some n.item |: None
+    notes |> listm.fold hit None
+
+:~ fate_of (notes : list note) (~root : string) (~name : string) : folder_fate =
+    ?= cited_by notes root name ?|
+    | Some item => KeptCited (name, item)
+    | None => Removable name
+
+:~ fates (notes : list note) (~root : string) (names : list string) : list folder_fate =
+    names |> listm.map (\ (name : string) => fate_of notes root name)
+
+:~ removable_names (found : list folder_fate) : list string =
+    := keep = \ (names : list string) (f : folder_fate) =>
+        ?= f ?|
+        | Removable name => listm.append names [ name ]
+        | KeptCited _ => names
+    found |> listm.fold keep []
+
+:~ fate_line (f : folder_fate) : string =
+    ?= f ?|
+    | Removable name => "scratch archive / " ++# name ++# " removable after the verify"
+    | KeptCited (name, item) => "scratch archive / " ++# name ++# " kept: cited by " ++# item
+
+///> rust
+:# a_cited_folder_is_kept_and_a_prefix_or_a_short_bare_name_is_not_a_citation =
+    := root = "C:\\Users\\dev\\AppData\\Local\\Temp\\claude\\abc"
+    := notes = [ note_of "A" "log at C:\\Users\\dev\\AppData\\Local\\Temp\\claude\\abc\\pack6c\\run.log, see it" ]
+    testing.expect (fate_of notes root "pack6c" = KeptCited ("pack6c", "A")) "the cited folder is kept"
+    testing.expect (fate_of notes root "pack6" = Removable "pack6") "a prefix of a cited folder is not cited"
+    := tmp = [ note_of "B" "cleaned the tmp dir" ]
+    testing.expect (fate_of tmp root "tmp" = Removable "tmp") "a short bare name is not a citation"
+    := slashes = [ note_of "C" "path=c:/users/dev/appdata/local/temp/claude/abc/PACK6" ]
+    testing.expect (fate_of slashes root "pack6" = KeptCited ("pack6", "C")) "forward slashes, case and path="
+
+///> rust
+:# a_session_id_cited_bare_keeps_its_folder_and_the_first_citing_item_is_named =
+    := root = "C:/t"
+    := session = "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
+    := cites = note_of "Y" ("session " ++# session ++# "'s scratchpad")
+    := notes = [ note_of "X" "nothing here"; cites; note_of "Z" session ]
+    := found = fates notes root [ session; "other-folder-name-long-enough" ]
+    := expected = [ KeptCited (session, "Y"); Removable "other-folder-name-long-enough" ]
+    testing.expect (found = expected) "the bare id cites, the first citing item is named"
+    testing.expect (removable_names found = [ "other-folder-name-long-enough" ]) "only uncited folders are removable"
+    := line = "scratch archive / " ++# session ++# " kept: cited by Y"
+    testing.expect (fate_line (KeptCited (session, "Y")) = line) "one line per folder"
+
+///> rust
+:# note_rows_in_the_state_text_become_notes_named_by_their_item =
+    := head = "inl note_of_a_b_1 () = Note (\"A-B\", 1u32, \"2026-11-10T14:23Z\", \"x\", "
+    := row = head ++# "\"log at C:\\\\t\\\\pack6c\\\\r.log\")"
+    := claim = "inl claim_c () = Claim (\"C\", \"x\", 1u64, NoPaths)\n"
+    := text = "inl a_b () = Task (\"A-B\", \"t\")\r\n" ++# row ++# "\r\n" ++# claim
+    := notes = notes_of_state text
+    testing.expect ((listm.length notes : i32) = 1i32) "only the note row is a note"
+    testing.expect (fate_of notes "C:/t" "pack6c" = KeptCited ("pack6c", "A-B")) "the stored escaped path still cites"
+    testing.expect (fate_of notes "C:/t" "pack6" = Removable "pack6") "and its prefix still does not"
+    testing.expect (is_state_file "notes_202611.spi" && (is_state_file "package.spiproj" |> not)) "state files"

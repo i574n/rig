@@ -11,28 +11,19 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 fn method1(mut v0: Option<usize>) -> Option<usize> {
     v0
 }
 fn closure1() -> Rc<dyn Fn((usize)) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn((usize)) -> i32> = Rc::new(move |mut v0: (usize)| -> i32 {
         let mut v1: usize = (v0);
-        let mut v2: i32 = ((v1) as i32);
+        let v2: i32 = ((v1) as i32);
         v2
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn drift_named_2(mut v0: Rc<str>) -> bool {
     let mut v1: Rc<str> = Rc::<str>::from(v0.to_lowercase());
-    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("receipt"); } LIT.with(|lit| lit.clone()) };
+    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("receipt"); } LIT.with(|lit| lit.clone()) };
     let v3: bool = v1.contains(&*v2);
     let v6: bool = if v3 {
         true
@@ -80,7 +71,7 @@ fn drift_named_2(mut v0: Rc<str>) -> bool {
 fn has_test_block_4(mut v0: Rc<str>) -> bool {
     loop {
         let mut v1: Rc<str> = std::rc::Rc::<str>::from((v0).split(char::from(10u8)).next().unwrap_or(""));
-        let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":# "); } LIT.with(|lit| lit.clone()) };
+        let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":# "); } LIT.with(|lit| lit.clone()) };
         let v3: bool = v1.starts_with(&*v2);
         let v6: bool = if v3 {
             true
@@ -131,117 +122,42 @@ fn any_tested_3(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
         }
     }
 }
-fn method6(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let mut v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method7(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let mut v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn manifest_crates_5(mut v0: Rc<str>) -> bool {
     loop {
         let mut v1: Rc<str> = std::rc::Rc::<str>::from((v0).split(char::from(10u8)).next().unwrap_or(""));
-        let mut v2: i32 = (v1.clone().len() as i32);
-        let v3: i32 = 0i32;
-        let mut v4: i32 = method6(v1.clone(), v2, v3);
-        let v5: i32 = v2.wrapping_sub(1i32);
-        let v6: Rc<str> = string_slice(&v1, v4 as i64, v5 as i64);
-        let mut v7: i32 = (v6.clone().len() as i32);
-        let mut v8: i32 = method7(v6.clone(), v7);
-        let v9: Rc<str> = string_slice(&v6, 0i32 as i64, v8 as i64);
-        let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("crates:"); } LIT.with(|lit| lit.clone()) };
-        let v11: bool = v9.starts_with(&*v10);
-        let v14: bool = if v11 {
+        let v2: Rc<str> = Rc::<str>::from((v1).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+        let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("crates:"); } LIT.with(|lit| lit.clone()) };
+        let mut v4: bool = v2.starts_with(&*v3);
+        let mut v7: bool = if v4 {
             true
         } else {
-            let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("crates ="); } LIT.with(|lit| lit.clone()) };
-            let v13: bool = v9.starts_with(&*v12);
-            v13
+            let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("crates ="); } LIT.with(|lit| lit.clone()) };
+            let v6: bool = v2.starts_with(&*v5);
+            v6
         };
-        let v17: bool = if v14 {
+        let v10: bool = if v7 {
             true
         } else {
-            let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("crates="); } LIT.with(|lit| lit.clone()) };
-            let v16: bool = v9.starts_with(&*v15);
-            v16
+            let mut v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("crates="); } LIT.with(|lit| lit.clone()) };
+            let v9: bool = v2.starts_with(&*v8);
+            v9
         };
-        let v18: bool = &*v0 == "";
-        if v18 {
+        let v11: bool = &*v0 == "";
+        if v11 {
             return false;
         } else {
-            if v17 {
+            if v10 {
                 return true;
             } else {
-                let v19: Rc<str> = std::rc::Rc::<str>::from((v0).split_once(char::from(10u8)).map(|(_, rest)| rest).unwrap_or(""));
-                v0 = v19;
+                let v12: Rc<str> = std::rc::Rc::<str>::from((v0).split_once(char::from(10u8)).map(|(_, rest)| rest).unwrap_or(""));
+                v0 = v12;
                 continue;
             }
         }
     }
 }
 fn package_target_findings_0(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
-    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = Rc::<str>::from(v1.replace(&*v2, &*v3));
     let v5: Option<usize> = v4.rfind(&*v3);

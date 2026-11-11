@@ -30,13 +30,22 @@
 := variable_named (~name : string) : string =
     $'std::env::var(&*!name).map_or_else(|_| std::rc::Rc::<str>::default(), std::rc::Rc::<str>::from)' : string
 
+:= agent_markers () : list string = [ "AI_AGENT"; "CLAUDECODE" ]
+
+:~ agent_session () : bool = listm'.exists' (\ (name : string) => variable_named name <> "") (agent_markers ())
+
+:= variable_twin (~rest : string) : string =
+    := renamed = variable_named ("RIG_" ++# rest)
+    ? renamed <> "" ?> renamed |: variable_named ("KIT_" ++# rest)
+
 := variable_or_empty (~name : string) : string =
     ? sm'.starts_with "KIT_" name || sm'.starts_with "RIG_" name
-    ?>
-        := rest = sm'.substring 4i32 ((sm'.length name : i32) - 4i32) name
-        := renamed = variable_named ("RIG_" ++# rest)
-        ? renamed <> "" ?> renamed |: variable_named ("KIT_" ++# rest)
+    ?> variable_twin (sm'.substring 4i32 ((sm'.length name : i32) - 4i32) name)
     |: variable_named name
+
+:= variable_either (~first : string) (~second : string) : string =
+    := found = variable_named first
+    ? found <> "" ?> found |: variable_named second
 
 := argument_owned (~index : i32) : string =
     $'usize::try_from(!index).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str\

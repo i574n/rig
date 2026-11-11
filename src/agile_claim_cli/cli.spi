@@ -66,8 +66,10 @@
     := existed, rows = stored
     := now_ms = unix_ms ()
     := kind, item, owner, expires, rank, wip, detail, change =
-        ? r.next ?> claim_next r.lane r.ttl_min wsjf active live rows now_ms
-        |? r.release ?> claim_release r.item r.lane r.ttl_min rows now_ms
+        ? r.next
+        ?> claim_next r.lane r.ttl_min wsjf active live rows now_ms
+        |? r.release
+        ?> claim_release r.item r.lane r.ttl_min rows now_ms
         |:
             := paths = sm'.concat_list "," r.paths
             claim_lease r.item r.lane r.ttl_min paths wsjf known live rows now_ms
@@ -88,7 +90,8 @@
         agile_claim_store.store.applied_claims (
             (;[ application ] : array agile_claim_store.store.claim_application) |> am'.base
         )
-    ? problem <> "" ?> failed problem
+    ? problem <> ""
+    ?> failed problem
     |:
         ?= outcome_of kind ?|
         | OutcomeGranted =>
@@ -138,8 +141,8 @@
 
 ///> rust
 :# relative_globs_are_anchored_at_the_callers_directory =
-    := windows = anchored "C:\\home\\git\\kit" "src/agile/**"
-    testing.expect (windows = "C:/home/git/kit/src/agile/**") windows
+    := windows = anchored "C:\\work\\repo" "src/agile/**"
+    testing.expect (windows = "C:/work/repo/src/agile/**") windows
     testing.expect (anchored "/home/x" "./lib/a.spi" = "/home/x/lib/a.spi") (anchored "/home/x" "./lib/a.spi")
     testing.expect (anchored "/home/x" "/etc/y" = "/etc/y" && anchored "/home/x" "D:/z/**" = "D:/z/**") "absolute"
 

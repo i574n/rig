@@ -1,0 +1,98 @@
+///- --package .
+:# key static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| entry_kind =
+    | PackBin
+    | Results
+    | UnitGraph
+    | Verdict
+
+:== input = { name : string; value : string }
+
+:== key_spec = { kind : entry_kind; fields : list string }
+
+:| matrix_row =
+    | Misses :: string -> matrix_row
+    | StaleHit :: string -> matrix_row
+    | HitsOutside :: string -> matrix_row
+    | Overkeyed :: string -> matrix_row
+
+:~ kind_word (k : entry_kind) : string =
+    ?= k ?|
+    | PackBin => "pack-bin"
+    | Results => "results"
+    | UnitGraph => "unit-graph"
+    | Verdict => "verdict"
+
+:~ framed (~text : string) : string = sm'.show (sm'.length text : i32) ++# ":" ++# text
+
+:~ key_of (spec : key_spec) (inputs : list input) : string =
+    := part = \ (acc : string) (i : input) =>
+        ? listm'.contains i.name spec.fields ?> acc ++# "|" ++# framed i.name ++# framed i.value |: acc
+    inputs |> listm.fold part (kind_word spec.kind)
+
+:~ edited_at (inputs : list input) (at : i32) : list input =
+    := step = \ ((n, found) : i32 * list input) (i : input) =>
+        := next = ? n = at ?> { i ?| value = i.value ++# "#edited" } |: i
+        n + 1i32, listm.append found [ next ]
+    := _, found = inputs |> listm.fold step (0i32, [])
+    found
+
+:~ rows_for (spec : key_spec) (all : list input) (names : list string) (offset : i32) (in_reach : bool)
+    : list matrix_row
+    =
+    := base = key_of spec all
+    := step = \ ((n, found) : i32 * list matrix_row) (name : string) =>
+        := moved = key_of spec (edited_at all (offset + n)) <> base
+        := in_row = ? moved ?> Misses name |: StaleHit name
+        := out_row = ? moved ?> Overkeyed name |: HitsOutside name
+        := row = ? in_reach ?> in_row |: out_row
+        n + 1i32, listm.append found [ row ]
+    := _, found = names |> listm.fold step (0i32, [])
+    found
+
+:~ matrix (spec : key_spec) (reach : list input) (outside : list input) : list matrix_row =
+    := all = listm.append reach outside
+    := names = \ (inputs : list input) => inputs |> listm.map (\ (i : input) => i.name)
+    := count : i32 = listm.length reach
+    listm.append (rows_for spec all (names reach) 0i32 !+) (rows_for spec all (names outside) count !-)
+
+:~ failures (rows : list matrix_row) : list matrix_row =
+    := bad = \ (r : matrix_row) =>
+        ?= r ?|
+        | StaleHit _ => !+
+        | Overkeyed _ => !+
+        | _ => !-
+    rows |> listm'.filter bad
+
+///> rust
+:# a_key_that_forgets_an_input_the_build_reads_is_a_stale_hit =
+    := reach = [ { name = "core"; value = "c1" }; { name = "host"; value = "h1" }; { name = "prelude"; value = "p1" } ]
+    := outside = [ { name = "readme"; value = "r1" } ]
+    := forgetful = { kind = PackBin; fields = [ "core"; "host" ] }
+    := rows = matrix forgetful reach outside
+    := expected = [ Misses "core"; Misses "host"; StaleHit "prelude"; HitsOutside "readme" ]
+    testing.expect (rows = expected) "prelude forgotten"
+    testing.expect (failures rows = [ StaleHit "prelude" ]) "the one failure"
+    := complete = { forgetful ?| fields = [ "core"; "host"; "prelude" ] }
+    testing.expect (failures (matrix complete reach outside) = []) "every input in reach, nothing outside"
+    := greedy = { forgetful ?| fields = [ "core"; "host"; "prelude"; "readme" ] }
+    testing.expect (failures (matrix greedy reach outside) = [ Overkeyed "readme" ]) "an input outside the reach"
+
+///> rust
+:# framing_keeps_two_different_input_splits_apart =
+    := spec = { kind = Results; fields = [ "a"; "b" ] }
+    := one = [ { name = "a"; value = "x|b=y" } ]
+    := two = [ { name = "a"; value = "x" }; { name = "b"; value = "y" } ]
+    testing.expect (key_of spec one <> key_of spec two) "length-framed values cannot collide"
+    testing.expect (key_of spec two = "results|1:a1:x|1:b1:y") "the key text"
+
+///> rust
+:# run_time_inputs_key_like_literals =
+    := suffix = file_system.read_text_or_empty "/rig-store-key-run-time-probe-missing"
+    := spec = { kind = Verdict; fields = [ "src" ] }
+    := rows = matrix spec [ { name = "src" ++# suffix; value = "v" } ] []
+    testing.expect (rows = [ Misses ("src" ++# suffix) ]) "run-time names"

@@ -1,0 +1,86 @@
+///- --package .
+:# move static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| boundary_problem =
+    | OutsideFile :: i32 * i32 -> boundary_problem
+    | StartsInsideDefinition :: i32 -> boundary_problem
+    | EndsInsideDefinition :: i32 -> boundary_problem
+
+:| move_plan =
+    | Movable :: list string * list string -> move_plan
+    | Refused :: boundary_problem -> move_plan
+
+:~ top_level (~line : string) : bool = sm'.length line > 0i32 && sm'.substring 0i32 1i32 line <> " "
+
+:~ numbered (lines : list string) : list (i32 * string) =
+    := step = \ ((at, found) : i32 * list (i32 * string)) (line : string) => at + 1i32, (at, line) :: found
+    := _, found = lines |> listm.fold step (1i32, [])
+    listm.rev found
+
+:~ starts_top (rows : list (i32 * string)) (start : i32) : bool =
+    := pick = \ (found : bool) ((at, line) : i32 * string) => ? at = start ?> top_level line |: found
+    rows |> listm.fold pick !-
+
+:~ ends_clean (rows : list (i32 * string)) (stop : i32) : bool =
+    := step = \ ((decided, clean) : bool * bool) ((at, line) : i32 * string) =>
+        ? decided || at <= stop || sm'.trim line = ""
+        ?> decided, clean
+        |: !+, top_level line
+    := _, clean = rows |> listm.fold step (!-, !+)
+    clean
+
+:~ split_rows (rows : list (i32 * string)) (start : i32) (stop : i32) : list string * list string =
+    := step = \ ((kept, moved) : list string * list string) ((at, line) : i32 * string) =>
+        ? at >= start && at <= stop ?> kept, line :: moved |: line :: kept, moved
+    := kept, moved = rows |> listm.fold step ([], [])
+    listm.rev kept, listm.rev moved
+
+:~ move_plan_of (lines : list string) (start : i32) (stop : i32) : move_plan =
+    := rows = numbered lines
+    := count : i32 = listm.length lines
+    ? start < 1i32 || stop < start || stop > count
+    ?> Refused (OutsideFile (start, stop))
+    |? starts_top rows start |> not
+    ?> Refused (StartsInsideDefinition start)
+    |? ends_clean rows stop |> not
+    ?> Refused (EndsInsideDefinition stop)
+    |: Movable (split_rows rows start stop)
+
+:~ problem_line (p : boundary_problem) : string =
+    := head = "rig do move refused: "
+    ?= p ?|
+    | OutsideFile (start, stop) =>
+        head ++# "lines " ++# sm'.show start ++# "-" ++# sm'.show stop ++# " are outside the file"
+    | StartsInsideDefinition at => head ++# "line " ++# sm'.show at ++# " is inside a definition, not its first line"
+    | EndsInsideDefinition at => head ++# "the definition at line " ++# sm'.show at ++# " continues past the range"
+
+///> rust
+:# a_range_moves_only_whole_definitions =
+    := lines = [ ":~ a () = 1"; "    body"; ""; ":~ b () ="; "    2"; ":~ c () = 3" ]
+    := expected = Movable ([ ":~ a () = 1"; "    body"; ""; ":~ c () = 3" ], [ ":~ b () ="; "    2" ])
+    testing.expect (move_plan_of lines 4i32 5i32 = expected) "b moves whole"
+    testing.expect (move_plan_of lines 2i32 2i32 = Refused (StartsInsideDefinition 2i32)) "a body line is no start"
+    testing.expect (move_plan_of lines 1i32 1i32 = Refused (EndsInsideDefinition 1i32)) "a without its body"
+    := through_blank = move_plan_of lines 1i32 3i32
+    := after_a = [ ":~ b () ="; "    2"; ":~ c () = 3" ]
+    testing.expect (through_blank = Movable (after_a, [ ":~ a () = 1"; "    body"; "" ])) "through a blank line"
+    := before_c = [ ":~ a () = 1"; "    body"; ""; ":~ b () ="; "    2" ]
+    testing.expect (move_plan_of lines 6i32 6i32 = Movable (before_c, [ ":~ c () = 3" ])) "the last one"
+
+///> rust
+:# a_range_outside_the_file_is_refused_with_its_bounds =
+    := lines = [ ":~ a () = 1" ]
+    testing.expect (move_plan_of lines 0i32 1i32 = Refused (OutsideFile (0i32, 1i32))) "before the first line"
+    testing.expect (move_plan_of lines 1i32 2i32 = Refused (OutsideFile (1i32, 2i32))) "past the last line"
+    testing.expect (move_plan_of [] 1i32 1i32 = Refused (OutsideFile (1i32, 1i32))) "an empty file"
+    := line = "rig do move refused: line 2 is inside a definition, not its first line"
+    testing.expect (problem_line (StartsInsideDefinition 2i32) = line) "one line per refusal"
+
+///> rust
+:# run_time_lines_are_checked_like_literals =
+    := suffix = file_system.read_text_or_empty "/rig-move-run-time-probe-missing"
+    := lines = [ ":~ a () = 1" ++# suffix; "    body" ++# suffix ]
+    testing.expect (move_plan_of lines 2i32 2i32 = Refused (StartsInsideDefinition 2i32)) "run-time text"

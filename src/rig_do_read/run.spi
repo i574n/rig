@@ -126,6 +126,7 @@
             ++# " searched  "
             ++# decimal_text state.matched
             ++# (" matched  matches " ++# (decimal_text state.matches))
+            ++# (? state.searched = 0u64 ?> "  no file matched the glob" |: "")
         |: "files " ++# (decimal_text touched)
     := with_matches =
         ? state.searches = 0u64 && state.arounds > 0u64

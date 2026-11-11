@@ -10,8 +10,6 @@
 
 := status_word (status : sprint_status) : string = reflection.union_to_string status
 
-:= fate_word (fate : item_fate) : string = reflection.union_to_string fate
-
 := quoted (text : string) : string = "\"" ++# text ++# "\""
 
 := row_text (head : string) (ctor : string) (fields : list string) : string =
@@ -24,7 +22,8 @@
 
 := sprint_item_row (id : string) (item : sprint_item) : string =
     := head = sm'.concat_list "" [ "sprint_item_"; binding_of id; "_"; binding_of item.task ]
-    row_text head "SprintItem" [ quoted id; quoted item.task; sm'.show item.minutes ++# "i32"; fate_word item.fate ]
+    := fate = reflection.union_to_string item.fate
+    row_text head "SprintItem" [ quoted id; quoted item.task; sm'.show item.minutes ++# "i32"; fate ]
 
 := sprint_rows (s : sprint) : list string = sprint_row s :: (s.items |> listm.map (sprint_item_row s.terms.id))
 

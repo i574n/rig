@@ -1,0 +1,105 @@
+///- --package .
+:# bench static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| arm =
+    | Control
+    | Candidate
+
+:== sample = { arm : arm; run : i32; elapsed_ms : i64 }
+
+:| bench_verdict =
+    | Faster :: i64 -> bench_verdict
+    | Slower :: i64 -> bench_verdict
+    | WithinNoise :: i64 -> bench_verdict
+    | TooFewSamples :: i32 -> bench_verdict
+
+:== comparison = { control_ms : i64; candidate_ms : i64; verdict : bench_verdict }
+
+:~ ^ schedule_from (pairs : i32) (at : i32) (found : list arm) : list arm =
+    ? at >= pairs
+    ?> found
+    |:
+        := pair = ? at % 2i32 = 0i32 ?> [ Candidate; Control ] |: [ Control; Candidate ]
+        schedule_from pairs (at + 1i32) (listm.append found pair)
+
+:~ schedule (pairs : i32) : list arm = schedule_from pairs 0i32 []
+
+:~ elapsed_of_receipt (~line : string) : option i64 =
+    := marker = "elapsed_ms="
+    := at = sm'.index_of marker line
+    ? at < 0i32
+    ?> None
+    |:
+        := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
+        ?= sm'.split_list " " rest ?|
+        | digits :: _ => (convert.try_convert (sm'.trim digits) : option i64)
+        | [] => None
+
+:~ median (values : list i64) : i64 =
+    := sorted = list_sort.sorted_by (\ (a : i64) (b : i64) => a < b) values
+    := count : i32 = listm.length sorted
+    := pick = \ ((at, found) : i32 * i64) (value : i64) =>
+        := kept = ? at = count / 2i32 ?> value |: found
+        at + 1i32, kept
+    := _, middle = sorted |> listm.fold pick (0i32, 0i64)
+    middle
+
+:~ elapsed_of (wanted : arm) (samples : list sample) : list i64 =
+    samples |> listm'.filter (\ (s : sample) => s.arm = wanted) |> listm.map (\ (s : sample) => s.elapsed_ms)
+
+:~ compare (noise_pct : i64) (min_per_arm : i32) (samples : list sample) : comparison =
+    := control = elapsed_of Control samples
+    := candidate = elapsed_of Candidate samples
+    := control_count : i32 = listm.length control
+    := candidate_count : i32 = listm.length candidate
+    := fewest = ? control_count < candidate_count ?> control_count |: candidate_count
+    := control_ms = median control
+    := candidate_ms = median candidate
+    := delta_pct = ? control_ms = 0i64 ?> 0i64 |: (candidate_ms - control_ms) * 100i64 / control_ms
+    := verdict =
+        ? fewest < min_per_arm
+        ?> TooFewSamples fewest
+        |? delta_pct <= 0i64 - noise_pct
+        ?> Faster (0i64 - delta_pct)
+        |? delta_pct >= noise_pct
+        ?> Slower delta_pct
+        |: WithinNoise delta_pct
+    { control_ms = control_ms; candidate_ms = candidate_ms; verdict = verdict }
+
+:~ verdict_word (v : bench_verdict) : string =
+    ?= v ?|
+    | Faster pct => "faster by " ++# sm'.show pct ++# "%"
+    | Slower pct => "slower by " ++# sm'.show pct ++# "%"
+    | WithinNoise pct => "within noise (" ++# sm'.show pct ++# "%)"
+    | TooFewSamples count => "too few samples (" ++# sm'.show count ++# " per arm)"
+
+:~ receipt (c : comparison) : string =
+    := medians = "control_ms=" ++# sm'.show c.control_ms ++# " candidate_ms=" ++# sm'.show c.candidate_ms
+    "rig bench " ++# medians ++# " verdict=" ++# verdict_word c.verdict
+
+///> rust
+:# the_schedule_alternates_which_arm_runs_first =
+    testing.expect (schedule 2i32 = [ Candidate; Control; Control; Candidate ]) "two pairs, the order flips"
+    testing.expect (schedule 0i32 = []) "no pairs, no runs"
+    testing.expect (elapsed_of_receipt "rig x ok rows=3 elapsed_ms=1234 bytes=9" = Some 1234i64) "the receipt field"
+    testing.expect (elapsed_of_receipt "rig x ok rows=3" = None) "no field, no sample"
+
+///> rust
+:# the_verdict_compares_medians_against_the_noise_threshold =
+    := at = \ (a : arm) (run : i32) (ms : i64) => { arm = a; run = run; elapsed_ms = ms }
+    := control = [ at Control 1i32 100i64; at Control 2i32 900i64; at Control 3i32 100i64 ]
+    := faster = listm.append control [ at Candidate 1i32 80i64; at Candidate 2i32 70i64; at Candidate 3i32 80i64 ]
+    testing.expect ((compare 5i64 3i32 faster).verdict = Faster 20i64) "medians 100 vs 80, an outlier ignored"
+    := noisy = listm.append control [ at Candidate 1i32 102i64; at Candidate 2i32 98i64; at Candidate 3i32 103i64 ]
+    testing.expect ((compare 5i64 3i32 noisy).verdict = WithinNoise 2i64) "2% is noise at a 5% threshold"
+    testing.expect ((compare 5i64 4i32 faster).verdict = TooFewSamples 3i32) "three per arm is under four"
+    := line = "rig bench control_ms=100 candidate_ms=80 verdict=faster by 20%"
+    testing.expect (receipt (compare 5i64 3i32 faster) = line) "one receipt line"
+
+///> rust
+:# a_receipt_read_at_run_time_parses_like_a_literal =
+    := suffix = file_system.read_text_or_empty "/rig-bench-run-time-probe-missing"
+    testing.expect (elapsed_of_receipt ("ok elapsed_ms=42" ++# suffix) = Some 42i64) "run-time text"

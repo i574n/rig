@@ -1,0 +1,27 @@
+:< sm'_operators
+:< rig_units_model.shape
+:< model
+
+:~ receipt (units : i32) (hard_count : i32) (soft_count : i32) : string =
+    := verdict = ? hard_count = 0i32 ?> "ok" |: "failed"
+    := counts = " units=" ++# sm'.show units ++# " hard=" ++# sm'.show hard_count
+    "rig units check " ++# verdict ++# counts ++# " host_call_deps=" ++# sm'.show soft_count
+
+:~ check_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: _ =>
+        := rows = rig_units_manifest.manifest.rows_under root
+        := members = rig_units_manifest.manifest.members_under root
+        := units = units_of rows
+        := edge_hard = rig_units_edges.edges.edges_hard rows
+        := layout_hard = rig_units_layout.layout.layout_hard (rows, members)
+        := hard_count = edge_hard + layout_hard
+        console.write_line (receipt (listm.length units : i32) hard_count (host_call_deps units))
+        ? hard_count = 0i32 ?> 0i32 |: 1i32
+    | _ =>
+        console.write_error_line "rig error: units check: expected <workspace root>"
+        2i32
+
+:= main () : i32 =
+    export "rig_units_check_run" check_run
+    0i32

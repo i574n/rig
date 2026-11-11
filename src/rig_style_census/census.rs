@@ -440,7 +440,7 @@ fn new_package_problem_23(mut v0: Rc<UH1>) -> Rc<str> {
                     false
                 };
                 if v21 {
-                    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a new package declares types but uses none of the typefeatureset (GADT cases, existentials, foralls, indexed unions, prototypes)"); } LIT.with(|lit| lit.clone()) };
+                    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a new package declares types but uses none of the typed-modeling constructs (GADT cases, existentials, foralls, indexed unions, prototypes)"); } LIT.with(|lit| lit.clone()) };
                     v22
                 } else {
                     let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };

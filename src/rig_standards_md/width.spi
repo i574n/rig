@@ -1,0 +1,87 @@
+///- --package .
+:# width static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| md_line =
+    | Prose :: md_line
+    | FenceEdge :: md_line
+    | InFence :: md_line
+    | TableRow :: md_line
+    | Heading :: md_line
+    | LongUrl :: md_line
+    | LongCode :: md_line
+
+:== md_finding = { line : i32; width : i32 }
+
+:= md_limit () : i32 = 120i32
+
+:= exempt_run () : i32 = 60i32
+
+:~ fence_edge (~text : string) : bool = sm'.starts_with "```" (sm'.trim text) || sm'.starts_with "~~~" (sm'.trim text)
+
+:~ ^ leading (~mark : string) (~text : string) (at : i32) : i32 =
+    ? at < sm'.length text && sm'.slice at at text = mark ?> leading mark text (at + 1i32) |: at
+
+:~ heading (~text : string) : bool =
+    := spaces = leading " " text 0i32
+    := hashes = leading "#" text spaces - spaces
+    := at = spaces + hashes
+    spaces <= 3i32 && hashes >= 1i32 && hashes <= 6i32 && at < sm'.length text && sm'.slice at at text = " "
+
+:~ url_word (~word : string) : bool =
+    := at = sm'.index_of "://" word
+    := scheme = ? at < 4i32 ?> "" |: sm'.substring 0i32 at word
+    (sm'.ends_with "http" scheme || sm'.ends_with "https" scheme) && sm'.length word - at - 3i32 >= exempt_run ()
+
+:~ long_url (~text : string) : bool = listm'.exists' url_word (sm'.split_list " " text)
+
+:~ long_code (~text : string) : bool =
+    := step = \ ((inside, found) : bool * bool) (span : string) =>
+        inside |> not, found || (inside && sm'.length span >= exempt_run ())
+    := _, found = sm'.split_list "`" text |> listm.fold step (!-, !-)
+    found
+
+:~ kind_outside_fence (~text : string) : md_line =
+    ? fence_edge text
+    ?> FenceEdge
+    |? sm'.starts_with "|" (sm'.trim text)
+    ?> TableRow
+    |? heading text
+    ?> Heading
+    |? long_url text
+    ?> LongUrl
+    |? long_code text
+    ?> LongCode
+    |: Prose
+
+:~ md_findings (~text : string) : list md_finding =
+    := lines = sm'.split_list "\n" (sm'.replace "\r" "" text)
+    := step = \ ((number, fenced, found) : i32 * bool * list md_finding) (line : string) =>
+        := kind = ? fenced && (fence_edge line |> not) ?> InFence |: kind_outside_fence line
+        := now_fenced = ? kind = FenceEdge ?> fenced |> not |: fenced
+        := wide = kind = Prose && sm'.length line > md_limit ()
+        number + 1i32, now_fenced, (? wide ?> { line = number; width = sm'.length line } :: found |: found)
+    := _, _, found = lines |> listm.fold step (1i32, !-, [])
+    listm.rev found
+
+:~ finding_text (~path : string) (f : md_finding) : string =
+    := over = " columns, over " ++# sm'.show (md_limit ())
+    path ++# ":" ++# sm'.show f.line ++# " prose line is " ++# sm'.show f.width ++# over
+
+///> rust
+:# the_census_exemptions_hold_and_only_long_prose_counts =
+    := long = sm'.replicate 13i32 "word word "
+    := code = "```\n" ++# long ++# "\n```\n"
+    := table = "| " ++# long ++# " |\n"
+    := url = "see https://example.org/" ++# sm'.replicate 60i32 "a" ++# " " ++# long ++# "\n"
+    := title = "## " ++# long ++# "\n"
+    := inline = "run `" ++# sm'.replicate 60i32 "x" ++# "` then " ++# long ++# "\n"
+    := text = "# Title\n" ++# long ++# "\n" ++# code ++# table ++# url ++# title ++# inline ++# "short\n"
+    testing.expect (md_findings text = [ { line = 2i32; width = 130i32 } ]) "only the prose line on line 2"
+    testing.expect (md_findings (code ++# code) = []) "fences close and reopen"
+    testing.expect (heading "    ## four spaces is code, not a heading" |> not) "at most three leading spaces"
+    testing.expect (long_code ("`" ++# sm'.replicate 59i32 "x" ++# "`") |> not) "a 59-char span is not exempt"
+    := shown = finding_text "a.md" { line = 2i32; width = 130i32 }
+    testing.expect (shown = "a.md:2 prose line is 130 columns, over 120") shown

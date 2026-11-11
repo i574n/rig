@@ -1,0 +1,31 @@
+:< sm'_operators
+:< rig_drafts_model.model
+:< rig_drafts_store.store
+
+:~ put_one (~state : string) (~item : string) (~root : string) (~path : string) : string =
+    := base = slash root
+    := full = ? sm'.contains ":" path || sm'.starts_with "/" path ?> slash path |: base ++# "/" ++# slash path
+    ?= put_checked state item root full ?|
+    | PutRefused why => why
+    | PutAccepted =>
+        := cut = sm'.length base + 1i32
+        moved full (draft_dir root item ++# "/" ++# sm'.substring cut (sm'.length full - cut) full)
+
+:~ put_run (words : list string) : i32 =
+    ?= plain_words words ?|
+    | root :: item :: paths ?& paths <> [] =>
+        := state = file_system.read_text_or_empty (slash (flag_value words "--backlog") ++# "/state/agile.spi")
+        := problems = paths |> listm.map (put_one state item root) |> listm'.filter (\ (p : string) => p <> "")
+        problems |> listm.iter (\ (p : string) => console.write_line ("drafts put refused: " ++# p))
+        := put = (listm.length paths : i32) - (listm.length problems : i32)
+        console.write_line ("rig drafts put " ++# verdict_word problems ++# " moved=" ++# sm'.show put)
+        ? problems = [] ?> 0i32 |: 1i32
+    | _ =>
+        console.write_error_line "rig error: drafts put <repo root> <ITEM> <path...> --backlog <root>"
+        2i32
+
+:~ put_entry () : i32 = put_run (verb_words ())
+
+:= main () : i32 =
+    export "rig_drafts_put_run" put_entry
+    0i32

@@ -31,7 +31,6 @@ enum US2 {
     US2_WindowPruned,
     US2_WindowDropped,
 }
-pub struct Mut0 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US3 {
     US3_StoredRead(Rc<str>, Rc<str>, u64),
@@ -730,4 +729,4 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
 pub fn rig_window_claim_run() -> i32 {
     closure0()()
 }
-pub type SpiralShape_97df63ebabc3 = Mut0;
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut0;

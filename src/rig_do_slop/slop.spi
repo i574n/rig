@@ -1,0 +1,64 @@
+///- --package .
+:# slop static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| slop_finding =
+    | ConsNilSpelled :: i32 -> slop_finding
+    | LineTooWide :: i32 * i32 -> slop_finding
+
+:= line_width () : i32 = 120i32
+
+:~ spiral_source (~path : string) : bool = sm'.ends_with ".spi" path || sm'.ends_with ".spir" path
+
+:~ lines_of (~text : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" text)
+
+:~ added_lines (~before : string) (~after : string) : list (i32 * string) =
+    := old = lines_of before
+    := step = \ ((number, found) : i32 * list (i32 * string)) (line : string) =>
+        := kept = ? listm'.contains line old ?> found |: (number, line) :: found
+        number + 1i32, kept
+    := _, found = lines_of after |> listm.fold step (1i32, [])
+    listm.rev found
+
+:~ words_of (~line : string) : list string =
+    := marks = [ "("; ")"; "["; "]"; ";"; "," ]
+    := spaced = marks |> listm.fold (\ (text : string) (mark : string) => sm'.replace mark " " text) line
+    sm'.split_list " " spaced
+
+:~ spells_cons_nil (~line : string) : bool =
+    listm'.exists' (\ (word : string) => word = "Cons" || word = "Nil") (words_of line)
+
+:~ findings_of ((number, line) : i32 * string) : list slop_finding =
+    := width = sm'.length line
+    := wide = ? width > line_width () ?> [ LineTooWide (number, width) ] |: []
+    ? spells_cons_nil line ?> ConsNilSpelled number :: wide |: wide
+
+:~ finding_text (finding : slop_finding) : string =
+    ?= finding ?|
+    | ConsNilSpelled number => "line " ++# sm'.show number ++# " spells Cons/Nil: write :: and []"
+    | LineTooWide (number, width) =>
+        "line " ++# sm'.show number ++# " is " ++# sm'.show width ++# " columns, over " ++# sm'.show (line_width ())
+
+:~ slop_problem ((path, before, after) : string * string * string) : string =
+    ? spiral_source path |> not
+    ?> ""
+    |:
+        := findings = added_lines before after |> listm.map findings_of |> listm.concat
+        findings |> listm.map finding_text |> sm'.concat_list "; "
+
+///> rust
+:# only_added_spiral_lines_are_judged_and_each_finding_is_named =
+    := before = "a\n:= xs = Cons (1, Nil)\n"
+    := wide = sm'.concat_list "" [ ":= w = "; sm'.replicate 120i32 "x" ]
+    := after = before ++# ":= ys = Cons (2, Nil)\n" ++# wide ++# "\n:= ok = Constant\n"
+    := expected = "line 3 spells Cons/Nil: write :: and []; line 4 is 127 columns, over 120"
+    testing.expect (slop_problem ("a.spi", before, after) = expected) (slop_problem ("a.spi", before, after))
+    testing.expect (slop_problem ("a.md", before, after) = "") "only Spiral sources are judged"
+    testing.expect (slop_problem ("a.spi", after, after) = "") "untouched legacy lines are never refused"
+    testing.expect (spells_cons_nil "| NilLike => Consensus" |> not) "whole words only"
+
+:= main () : i32 =
+    export "rig_do_slop_problem" slop_problem
+    0i32

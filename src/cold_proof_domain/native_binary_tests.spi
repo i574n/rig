@@ -3,7 +3,7 @@
 := append (a : string) (b : string) : string = a ++# b
 := path (root : string) (relative : string) : string = root ++# "/" ++# relative
 := write (path : string) (text : string) : () = $'std::fs::write(&*!path,&*!text).unwrap()' : ()
-:= read (path : string) : string = $'std::rc::Rc::<str>::from(std::fs::read_to_string(&*!path).unwrap())' : string
+:= read (path : string) : string = file_system.read_all_text path
 := remove (path : string) : () = $'std::fs::remove_file(&*!path).unwrap()' : ()
 := hash (path : string) : string = $'std::rc::Rc::<str>::from(rig_proxy_search::inspection_file_sha256(std::path::Path\
     ::new(&*!path)).unwrap())' : string

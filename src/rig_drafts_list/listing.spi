@@ -1,0 +1,36 @@
+:< sm'_operators
+:< rig_drafts_model.model
+:< rig_drafts_store.store
+
+:~ row_of (~repo : string) (~item : string) (~path : string) (now : u64) : draft_row =
+    := full = store_root () ++# "/" ++# repo ++# "/" ++# item ++# "/" ++# path
+    := written = file_system.last_write_ms full
+    := age = ? now > written ?> (conv ((now - written) / 86400000u64) : i64) |: 0i64
+    { repo = repo; item = item; path = path; bytes = (conv (file_system.rust_file_length full) : u64); age_days = age }
+
+:~ rows_of (filter : draft_filter) : list draft_row =
+    := now = workspace_primitives.clock.unix_ms ()
+    := per_item = \ (repo : string) (acc : list draft_row) (item : string) =>
+        := paths = files_under (store_root () ++# "/" ++# repo ++# "/" ++# item) "" []
+        listm.append acc (paths |> listm.map (\ (path : string) => row_of repo item path now))
+    := per_repo = \ (acc : list draft_row) (repo : string) =>
+        names_in (store_root () ++# "/" ++# repo) |> listm.fold (per_item repo) acc
+    names_in (store_root ()) |> listm.fold per_repo [] |> listm'.filter (kept filter)
+
+:~ ^ days_of (~text : string) (index : i32) (days : i64) : i64 =
+    := digit = ? index < sm'.length text ?> sm'.index_of (sm'.substring index 1i32 text) "0123456789" |: (-1i32)
+    ? digit < 0i32 ?> days |: days_of text (index + 1i32) (days * 10i64 + (conv digit : i64))
+
+:~ list_run (words : list string) : i32 =
+    := older = days_of (flag_value words "--older-than") 0i32 0i64
+    := filter = { repo = flag_value words "--repo"; item = flag_value words "--item"; older_than_days = older }
+    := rows = rows_of filter
+    rows |> listm.iter (\ (row : draft_row) => console.write_line (row_line row))
+    console.write_line ("rig drafts list ok drafts=" ++# sm'.show (listm.length rows : i32))
+    0i32
+
+:~ list_entry () : i32 = list_run (verb_words ())
+
+:= main () : i32 =
+    export "rig_drafts_list_run" list_entry
+    0i32

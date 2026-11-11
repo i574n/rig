@@ -56,7 +56,7 @@
 := agile_lease_status (~root : string) : i32 = $"rig_agile_state::agile_lease_status_owned(!root.as_ref())"
 := agile_handoff (~root : string) : i32 = $"rig_handoff_render::handoff_render_owned(!root.as_ref())"
 := agile_record (~root : string) : i32 = $"rig_agile_state::agile_record_owned(!root.as_ref())"
-:= agile_argument_count () : i32 =
+:~ agile_argument_count () : i32 =
     := count = env.host_argument_count ()
     ? count > 2i32 ?> count - 2i32 |: 0i32
 
@@ -80,13 +80,12 @@
     | AgileNext => next_claims ()
     | AgileClaim | AgileRelease => !+
     | _ => !-
-:~ state_lock_taken (~root : string) : bool = rig_agile_lock.lock.lock_taken root
 
 :~ state_lock_released (~root : string) : () =
     := _ = rig_agile_lock.lock.lock_released root
     ()
 
-:~ state_lock_held (writes : bool) (~root : string) : bool = ? writes ?> state_lock_taken root |: !+
+:~ state_lock_held (writes : bool) (~root : string) : bool = ? writes ?> rig_agile_lock.lock.lock_taken root |: !+
 
 :~ state_lock_done (writes : bool) (~root : string) : () = ? writes ?> state_lock_released root |: ()
 
@@ -96,8 +95,12 @@
 
 := agile_route (subcommand : agile_subcommand) : i32 =
     ?= subcommand ?|
-    | AgileInit => agile_arity_route (agile_either_arity 2i32 4i32) \ () => $"agile_backlog_scaffold::rig_agile_init_run()"
-    | AgileDialect => agile_arity_route (argument_count_is 3i32) \ () => $"agile_backlog_scaffold::rig_agile_dialect_run()"
+    | AgileInit =>
+        agile_arity_route (agile_either_arity 2i32 4i32) \ () =>
+            $"agile_backlog_scaffold::rig_agile_init_run()"
+    | AgileDialect =>
+        agile_arity_route (argument_count_is 3i32) \ () =>
+            $"agile_backlog_scaffold::rig_agile_dialect_run()"
     | AgileBegin => agile_arity_route (argument_count_is 3i32) agile_begin_route
     | AgileLease | AgileStatus => agile_root_only agile_lease_status
     | AgileHandoff => agile_root_only agile_handoff
@@ -109,6 +112,7 @@
     | AgileAdd =>
         agile_arity_route (8i32 <= agile_argument_count ()) \ () =>
             $"agile_task_creation::rig_agile_add_run()"
+    | AgileGap => agile_with_root \ () => rig_agile_gap.intake.gap_entry ()
     | AgileEdit => agile_arity_route (agile_either_arity 5i32 7i32) agile_edit_route
     | AgileShow => agile_with_root \ () => $"agile_task_inspection::rig_agile_show_run()"
     | AgilePlan => agile_with_root \ () => $"agile_planning_rollup::rig_agile_planning_rollup_run()"

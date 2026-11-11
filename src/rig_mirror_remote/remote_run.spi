@@ -68,7 +68,8 @@
 
 :~ command_ran (command : remote_command) (words : list string) : i32 =
     := usage =
-        "usage: mirror manifest <root> | plan|sync <ssh-alias> <local-root> <remote-root> | unpack <root> <removal-list>; [--skip a,b]"
+        "usage: mirror manifest <root> | plan|sync <ssh-alias> <local-root> <remote-root> | unpack <root> "
+        ^^ "<removal-list>; [--skip a,b]"
     ?= command, words ?|
     | RemoteUnpack, (root :: list_name :: []) => rig_mirror_unpack.unpack.unpack_printed (root, list_name)
     | RemoteManifest, (root :: rest) =>

@@ -150,7 +150,9 @@
     shows (succeeded (heavy_call root (Arg ("wait", Arg (job, Arg ("60000", NoArgs)))))) "state=finished exit=0"
     shows (fixture_read root (cat "jobs/" (cat job "/window"))) "granted id=win-"
     shows (fixture_read root (cat "jobs/" (cat job "/slot"))) "ready ticket="
-    shows (fixture_read root (cat "jobs/" (cat job "/heavy-wrapper.ps1"))) "-MaxMinutes 1 {"
+    := wrapper = fixture_read root (cat "jobs/" (cat job "/heavy-wrapper.ps1"))
+    shows wrapper "-MaxMinutes 1 {"
+    shows wrapper "$env:RIG_HEAVY_HELD = $env:KIT_HEAVY_HELD = '1'"
     shows (fixture_read root (cat "jobs/" (cat job "/stdout.log"))) "held at most 1 min"
     shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=0"
     fixture_root_remove root

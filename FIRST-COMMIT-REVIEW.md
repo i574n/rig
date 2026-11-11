@@ -36,7 +36,8 @@ next chain (17:43–18:19, compiler snapshot `04874C52…`): 197 tests passed, 0
 **Chain.** `compiler-contracts/renew-strict-evidence.ps1 -Test -ParallelChains 2` (07:34–08:04): structural
 preflight, `build.ps1 -Test -CompilerContracts` 195 passed, 0 failed, `agile begin`, owner growth receipt (the five new
 crates added rows), cold renewal (125 owners, slowest 8.6 s, products a and b identical), `agile check --compiler`,
-closeout preview and apply in the staged root, renewed state copied back, then `test-strict-preflight.ps1 -RequireReady`:
+closeout preview and apply in the staged root, renewed state copied back, then
+`test-strict-preflight.ps1 -RequireReady`:
 **`ready=True diagnostics=0`**. `eoie.exe` after the chain: SHA `CE371E74…`.
 
 **Observed on the way.** One run exceeded the 15 s cold owner budget on a loaded machine (16.7 s at three parallel
@@ -45,21 +46,26 @@ stops on such unrenewable diagnostics before starting.
 
 ## Evidence renewal on the dev21 compiler — October 8, morning
 
-**Compiler.** Single-flight deployed at 06:40 (core `528BE76E5B0F`: Bend backend, no comments in emitted helpers), oracle
+**Compiler.** Single-flight deployed at 06:40 (core `528BE76E5B0F`: Bend backend, no comments in emitted helpers),
+oracle
 re-accepted with identical results (1,960 rows, `DISAGREE` 0).
 
-**Validation (06:40–06:51):** `build.ps1 -Test -CompilerContracts -Offline` 195 tests passed, 0 failed; `renew-cold-rebuild -Apply`;
+**Validation (06:40–06:51):** `build.ps1 -Test -CompilerContracts -Offline` 195 tests passed, 0 failed;
+`renew-cold-rebuild -Apply`;
 `eoie agile check --compiler` exit 0; closeout apply on a staged copy, then `test-strict-preflight.ps1 -RequireReady`:
 **`ready=True diagnostics=0`**. `eoie.exe` after the chain: SHA `504E7AC8…`.
 
 ## Evidence renewal after the comment strip — October 7, evening
 
 **Why.** Lane T removed comments across EOIE's sources (48 `.spi`, 38 `.rs`, 11 `.ps1`, 2 `.py`), which made the strict
-evidence stale. The renewal was blocked for most of the evening: the shared compiler directory held 455 rollback copies from
-the day's deploys, over the 512-entry dependency inventory cap. They were deleted at 20:5x and deploys now keep rollbacks in a
+evidence stale. The renewal was blocked for most of the evening: the shared compiler directory held 455 rollback copies
+from
+the day's deploys, over the 512-entry dependency inventory cap. They were deleted at 20:5x and deploys now keep
+rollbacks in a
 sibling `net11.0-rollback` directory.
 
-**Compiler.** The single-flight compiler deployed at 19:31 (core `06A68645FEF2`: no comments in generated code, Lua fixes),
+**Compiler.** The single-flight compiler deployed at 19:31
+(core `06A68645FEF2`: no comments in generated code, Lua fixes),
 oracle re-accepted with identical results (1,888 rows, `DISAGREE` 0). EOIE's compiler identity covers the whole compiler
 directory (core DLL and runtime dependencies, `DOGFOOD-COMPILER-IDENTITY`), which is why the rollback copies counted.
 
@@ -76,7 +82,8 @@ directory (core DLL and runtime dependencies, `DOGFOOD-COMPILER-IDENTITY`), whic
 out at 1,009 lines, over the 1,000-line crate limit. The cause was compiler output size, not EOIE source.
 
 **Change.** The single-flight compiler deployed at 07:33 (core `F99D0A72AE1C`: leaner Rust emission, portable `Printf`,
-operator arguments) regenerates every crate under the limit. Its oracle suite was re-accepted twice with identical results
+operator arguments) regenerates every crate under the limit. Its oracle suite was re-accepted twice with identical
+results
 (706 rows, `DISAGREE` 0) before deployment.
 
 **Validation, all on this compiler:**
@@ -94,7 +101,8 @@ operator arguments) regenerates every crate under the limit. Its oracle suite wa
 ## Lane Z: CI immune to the committed lease, Linux dotfile — October 7, night
 
 **CI run 37557652854 (the 21:32 commit), diagnosed.** Steps 1–3 passed on both runners, including the rustfmt-dependent
-`eoie_cold_rebuild_matrix` cold-owner tests. Both jobs then failed at "Run every native example", so the regeneration step
+`eoie_cold_rebuild_matrix` cold-owner tests. Both jobs then failed at "Run every native example", so the regeneration
+step
 never ran.
 - **windows-2025** failed with `EOIE could not capture metadata.`: `lease authority blocked mutating effect because
   should_wrap=1`.
@@ -105,7 +113,8 @@ never ran.
 - every directory argument that holds `state/prompt.spi`, including the arguments of a supervised child program;
 - the caller's working directory and its ancestors.
 
-CI runs from the checkout, and the committed `state/prompt.spi` is the lease of the session that produced the commit. Its
+CI runs from the checkout, and the committed `state/prompt.spi` is the lease of the session that produced the commit.
+Its
 budget is 75 min plus a 10 min guard, so it has always expired by the time CI runs. All three committed revisions of
 `prompt.spi` were `LeaseActive` and already past their wrap point when committed. `proxy command-capture` is a mutating
 effect, so every supervised capture was refused. The local strict preflight failed the same way: its supervisor's
@@ -121,7 +130,8 @@ Closing the lease instead is not available:
 - `LeaseClosed` fails the typed shape verdict, so `agile check` and `agile lease` would fail.
 - `prompt.spi` is in the state tree hash, so closing it after the closeout would stale the evidence just renewed.
 
-The renewal below therefore leaves a fresh `LeaseActive` lease again. It will have expired before CI sees the commit, and
+The renewal below therefore leaves a fresh `LeaseActive` lease again. It will have expired before CI sees the commit,
+and
 it is now harmless there. This follows the earlier rule that batch fixtures run from their temporary directory, so an
 expired checkout lease does not invalidate isolated tests.
 
@@ -135,7 +145,8 @@ expired checkout lease does not invalidate isolated tests.
   unchanged.
 - **Regression.** `expired_lease_blocks_first_mutation_but_keeps_wrap_surface` gains two checks, both run from a neutral
   cwd against the expired fixture. Capturing `eoie agile lease <fixture>` into a scratch root succeeds. Capturing with
-  the fixture as the supervisor's own root is still blocked and writes nothing. The pre-fix binary failed the first check
+  the fixture as the supervisor's own root is still blocked and writes nothing. The pre-fix binary failed the first
+  check
   (`lanes/Z/red-guard.txt`).
 - **Dotfiles.** Every other `Get-Item`/`Get-ChildItem` call in `compiler-contracts/*.ps1` either passes `-Force` or
   targets a path that is not a dotfile. The CI log shows that `Test-Path`, `Copy-Item` and `Get-FileHash` handled
@@ -147,7 +158,8 @@ Besides these edits, that compiler also drops `unreachable_patterns` from the ge
 deployed x10 (`1acbf6fa…`) at 03:41, before the renewal, so the cold owner replay, `agile check` and
 `state/toolchain_identity.spi` all use and record x10. The first
 `build.ps1 -Test -CompilerContracts -Offline` run refused to publish: `eoie_contracts` came to 1,001 lines, over the
-1,000-line crate limit, so the new assertions were compacted to five lines. The second run passed **195 tests, 0 failed**
+1,000-line crate limit, so the new assertions were compacted to five lines. The second run passed **195 tests, 0
+failed**
 and published `eoie.exe` (sha256 `40fb0960…`).
 
 Renewal (`tmp/lanes/Z/chain-z1`, 03:49–03:58, the run-4 chain):
@@ -203,27 +215,34 @@ output", has never run in CI. It was run locally with the CI arguments plus `-Of
 
 ## Lane C: read-only promotion on Server 2025, evidence plan in Spiral — October 6, afternoon
 
-**CI failure (run 37460036298, windows-2025), diagnosed and fixed.** `entry_promotion_supports_paths_beyond_the_legacy_windows_limit`
-saw `rooted_promote_nondirectory_within(..., replace=true)` return `Ok` while the read-only target still held `candidate`.
+**CI failure (run 37460036298, windows-2025), diagnosed and fixed.**
+`entry_promotion_supports_paths_beyond_the_legacy_windows_limit`
+saw `rooted_promote_nondirectory_within(..., replace=true)` return `Ok` while the read-only target still held
+`candidate`.
 Root cause: the `FileRenameInfoEx` fallback (`windows_replace_readonly`, `src/rust_std_fs_mutation/windows.rs`) passed
 `size = offset_of(FileName) + 2*len` with no NUL inside it. Kernelbase reads `FileName` up to its NUL, not
 `FileNameLength`. The zero-filled word buffer only supplies a NUL when `size % 8 != 0`, i.e. when the target path length
 is not ≡ 2 (mod 4). Otherwise the call read past the allocation and renamed the stage to `target<heap bytes>`, returning
-success. The test path is `\\?\C:\Users\<user>\AppData\Local\Temp\eoie-fs-actions-<pid>-<nonce>\…\target`: 412 characters
-here (a 5-character user name, 4-digit pid, ≡ 0) and 418 on the runner (`runneradmin`, 4-digit pid, ≡ 2), so it could not fail locally
+success. The test path is `\\?\C:\Users\<user>\AppData\Local\Temp\eoie-fs-actions-<pid>-<nonce>\…\target`: 412
+characters
+here (a 5-character user name, 4-digit pid, ≡ 0) and 418 on the runner (`runneradmin`, 4-digit pid, ≡ 2), so it could
+not fail locally
 for any pid under six digits. Elevation is not the difference: this host's session is also High integrity. (Assumed, not
 observed: the runner's `TEMP` canonicalizes to `runneradmin`.)
 
 Local evidence (`.claude/jobs/…/lanes/C/renameprobe`, a standalone copy of the old and fixed layouts):
-- a garbage tail after the name: `ok=true`, target still `candidate`, the stage renamed to `targetZQ`; a `*` tail fails with
+- a garbage tail after the name: `ok=true`, target still `candidate`, the stage renamed to `targetZQ`; a `*` tail fails
+  with
   error 123; the same buffer with the NUL inside `size` replaces correctly;
 - the old layout over 200 iterations per name-length residue: residue 2 → **200/200 `Ok` without replacing**, residues
   0/1/3 → 200/200 replaced. The fixed layout: 800/800 replaced.
 
-Fix: `windows_rename_info` builds the buffer with the NUL inside the passed size (`FileNameLength` still excludes it), and
+Fix: `windows_rename_info` builds the buffer with the NUL inside the passed size (`FileNameLength` still excludes it),
+and
 promotion now verifies its own postcondition on both paths (`MoveFileExW` and the read-only fallback): the target's
 (volume serial, file index) must equal the stage's, taken before the rename, and the stage name must be gone; otherwise
-it is an error. Tests: `rename_info_name_is_nul_terminated_within_the_passed_size` (red before the fix: `t: NUL outside the
+it is an error. Tests: `rename_info_name_is_nul_terminated_within_the_passed_size`
+(red before the fix: `t: NUL outside the
 passed size`), and the end-to-end test now promotes over read-only targets at four leaf lengths (all four residues). It
 passed on the old code locally, because the bytes after the heap block happened to be zero, so the unit test is the
 deterministic regression. `rust_std_fs_mutation` is at exactly 1,000 crate lines (limit 1,000); the Drop helper of its
@@ -238,16 +257,20 @@ test fixture was compacted to fit. The Linux `renameat` path gained no postcondi
 | Workspace | 11,585 (846,379) → 11,576 (846,056), 258 sites | | |
 
 Tests first: `evidence_rows_follow_the_spiral_currentness_plan` (stage table, tool environments, public binary, SHA-256
-text, and the five patch plan failure messages, the latter from this dependent crate because `patch_control_domain` has no
-test target) failed to build before each slice (E0425) and passes after. The line reduction is small because the Rust glue
+text, and the five patch plan failure messages, the latter from this dependent crate because `patch_control_domain` has
+no
+test target) failed to build before each slice (E0425) and passes after. The line reduction is small because the Rust
+glue
 around each decision stays. A third attempt, moving `evidence_parse_u64` onto the shared `state_receipt_codec_model`
-lexer, compiled, but grew the generated owner to 963 lines, which would break the 1,000-line crate limit, so it was dropped.
+lexer, compiled, but grew the generated owner to 963 lines, which would break the 1,000-line crate limit, so it was
+dropped.
 Two compiler quirks found on the way are on the lane board (FOR-D): `!!!!EQ(s, g X)` and `!!!!EQ(code, -1i32)` inside a
 top-level `let` silently drop the binding. Binding the operand first works.
 **Found on the way: `agile handoff` failed on the renewed checkout.** The morning's ColdProofV4 renewal records the
 binary actually present (`eoie.exe`), but the handoff's Spiral cold-proof projection
 (`handoff_evidence_projection_domain`) accepted only `eoie`, so `eoie agile handoff .` exited 2 with
-`cold proof projection rejected typed state`. That made `eoie_cli`'s `handoff_tolerates_a_reader_that_closes_stdout_early`
+`cold proof projection rejected typed state`. That made `eoie_cli`'s
+`handoff_tolerates_a_reader_that_closes_stdout_early`
 (which runs handoff on the checkout) fail in `build.ps1 -Test` (lane C run1, 12:52). The morning's build had passed only
 because it ran before the closeout renewal. The projection now accepts either platform binary, and its self-check gains
 an `eoie.exe` fixture. The CLI test is the regression: red on the live state before, 4/4 after.
@@ -257,7 +280,8 @@ an `eoie.exe` fixture. The CLI test is the regression: red on the live state bef
 growth receipt (87 owners changed), `renew-cold-rebuild.ps1 -Apply -ParallelChains 3`: two staged source roots hashed
 identical (`522758c6…`), two cold `eoie-cli` builds (2 min 33 s, 2 min 36 s) gave identical products, 106/106 owners
 replayed cold with 0 hard failures (slowest 12.6 s, budget 15 s; at width 12 under the six-lane load 94 of 106 had gone
-over, which is why the script gained `-ParallelChains`), global gate 5.2 s (budget 30 s). Then `agile check . --compiler`
+over, which is why the script gained `-ParallelChains`), global gate 5.2 s (budget 30 s). Then
+`agile check . --compiler`
 ok (63 files, 61 build-attested), `proxy release-closeout apply` on a staged release root (renewed `authority_census`,
 `cold_proof`, `evidence`, `release_closeout`, copied back), and last
 `compiler-contracts/test-strict-preflight.ps1 -RequireReady`: **ready=True, 0 diagnostics**
@@ -274,7 +298,8 @@ ok (63 files, 61 build-attested), `proxy release-closeout apply` on a staged rel
   release-shaped roots (two verified source packages): source a/b through `proxy hash-tree`; product a/b from two cold
   `eoie-cli` builds in fresh target directories with the receipt's normalization plus `-Clink-arg=/Brepro` on Windows
   (the PE timestamps and PDB GUID were the only differences), which came out byte-identical; the 106 declared owners
-  replayed cold through `proxy cold-rebuild-matrix` and `proxy batch-plan` (slowest 11.1 s, budget 15 s); the global gate
+  replayed cold through `proxy cold-rebuild-matrix` and `proxy batch-plan` (slowest 11.1 s, budget 15 s); the global
+  gate
   is the strict release gate `bundle check <root> eoie` (1.8 s, budget 30 s); the toolchain identity is the Windows
   rustc/cargo/rustdoc/rustfmt and the Spiral compiler the owners ran (`SpiralCompiler.dll` and its dotnet host). With
   `-Apply` it writes `state/toolchain_identity.spi` and `state/cold_rebuild.spi` and publishes product a as the root
@@ -294,7 +319,10 @@ ok (63 files, 61 build-attested), `proxy release-closeout apply` on a staged rel
 
 `compiler-contracts/test-strict-preflight.ps1 -RequireReady` still rejects the
 staged distribution. **The source port has not reached a strict release.** This
-session added the missing renewal paths and registered real coverage evidence. Preflight errors went from 4 to 3. Latest report: `.cache/strict-preflight/830d7a99cb1c44f29feb2c28622d313a/report.json` (the same 3 errors, after the differential catalog and family contract renewals). Evidence currentness now stops at `src/Cargo.toml`, which only closeout renews, and semantic closeout and ColdProofV4 are unchanged.
+session added the missing renewal paths and registered real coverage evidence. Preflight errors went from 4 to 3. Latest
+report: `.cache/strict-preflight/830d7a99cb1c44f29feb2c28622d313a/report.json`
+(the same 3 errors, after the differential catalog and family contract renewals). Evidence currentness now stops at
+`src/Cargo.toml`, which only closeout renews, and semantic closeout and ColdProofV4 are unchanged.
 
 | Blocker (October 5) | Result |
 | --- | --- |
@@ -368,7 +396,7 @@ a Windows toolchain identity, not a Linux host.
 
 The coverage workflow needed three fixes before it could pass on this host:
 
-- The Spiral-generated `native_codemod` runner (`eoie-predicate-lift`, `harness = false`)
+- The Spiral-generated `native_codemod` runner (`eoie-predicate-lift`, a test target without libtest)
   exits through `process::exit` and wrote no profile on Windows. It now flushes under
   `cfg(all(windows, eoie_coverage))`, as the CLI does.
 - The `selected_workflow` fixture's nested `eoie-dev`/Cargo processes inherited
@@ -390,11 +418,18 @@ Other fixes:
 
 Validation:
 
-- Tests came first. The new cold-proof renewal scenario (Spiral, `native_binary_tests.spi`) the two differential/family renewal scenarios (`family_contract_renewal_rechecks_the_catalog_settlement_and_rolls_back_on_drift`, `differential_catalog_renewal_requires_the_public_route_and_rolls_back`) and three evidence tests (`registration_tests.rs`) failed to build before the implementation and pass after it. The handoff pipe test failed with the os error 232 panic before its fix.
-- `build.ps1 -Test -CompilerContracts -Offline`: **191 passed, 0 failed or skipped**. The published `eoie.exe` is SHA `9956e08f…`.
-- `flat_bundle_roundtrip_is_self_verified`, which runs closeout apply on a complete fixture, passes through the new renewal.
-- The renewed `state/` package passes `eoie agile check --compiler <single-flight dll>`: 63 files, 61 build-attested. It ran on a staged copy and then on the checkout, which renewed `state/typecheck_receipts.spi`.
-- `dev.ps1 -Publish` regenerated `cold_proof_domain`, `evidence_currentness_domain`, `eoie_legacy_operations`, `eoie_predicate_lift`, `eoie_dev`, `eoie_handoff`, `eoie_cli`, `command_spec_domain` and `authority_state_domain` with the current compiler (3CCCBD5D8346). The regeneration also re-emits unchanged literals in its cached form.
+- Tests came first. The new cold-proof renewal scenario (Spiral, `native_binary_tests.spi`) the two differential/family
+  renewal scenarios
+  (`family_contract_renewal_rechecks_the_catalog_settlement_and_rolls_back_on_drift`, `differential_catalog_renewal_requires_the_public_route_and_rolls_back`) and three evidence tests (`registration_tests.rs`) failed to build before the implementation and pass after it. The handoff pipe test failed with the os error 232 panic before its fix.
+- `build.ps1 -Test -CompilerContracts -Offline`: **191 passed, 0 failed or skipped**. The published `eoie.exe` is SHA
+  `9956e08f…`.
+- `flat_bundle_roundtrip_is_self_verified`, which runs closeout apply on a complete fixture, passes through the new
+  renewal.
+- The renewed `state/` package passes `eoie agile check --compiler <single-flight dll>`: 63 files, 61 build-attested. It
+  ran on a staged copy and then on the checkout, which renewed `state/typecheck_receipts.spi`.
+- `dev.ps1 -Publish` regenerated `cold_proof_domain`, `evidence_currentness_domain`, `eoie_legacy_operations`,
+  `eoie_predicate_lift`, `eoie_dev`, `eoie_handoff`, `eoie_cli`, `command_spec_domain` and `authority_state_domain` with
+  the current compiler (3CCCBD5D8346). The regeneration also re-emits unchanged literals in its cached form.
 
 ## Strict preflight — October 5
 
@@ -431,9 +466,11 @@ therefore now uses the equivalent `unwrap_or_default()`.
 
 Validation:
 
-- `build.ps1 -Test -CompilerContracts -Offline`: **184 passed, 0 failed or skipped**, with the release candidate published.
+- `build.ps1 -Test -CompilerContracts -Offline`: **184 passed, 0 failed or skipped**, with the release candidate
+  published.
 - The new lease and public-binary contracts failed before the fix and pass after it.
-- `dev.ps1 -Package eoie-contracts,command-spec-domain,eoie-agile-lease,eoie-bundle-zip -Publish` regenerated and published the four changed owners.
+- `dev.ps1 -Package eoie-contracts,command-spec-domain,eoie-agile-lease,eoie-bundle-zip -Publish` regenerated and
+  published the four changed owners.
 
 The final strict report is
 `.cache/strict-preflight/bb8690b24185449d80cd4b9ea3470121/report.json`.
@@ -603,7 +640,7 @@ u64 width, duplicate markers and optimized-away parameters.
 
 Regeneration exposed and fixed incorrect codec package imports, u64 string
 lengths emitted as i32, and parameter names lost when used only by embedded
-Rust expressions. The regeneration harness stages sources and products outside
+Rust expressions. The regeneration runner stages sources and products outside
 the checkout and is included in the Windows/Linux CI matrix.
 The review also fixed C line splitting that changed quoted `}new{` plan payloads;
 adjacent block splitting now preserves strings and comments.
@@ -628,7 +665,8 @@ with the imported patch.
 
 ## Reproduction
 
-Build the compiler with `../spiral/apps/compiler/tmp/scripts/build.ps1 -Mode single-flight` (a spiral checkout beside this repository), then run
+Build the compiler with `../spiral/apps/compiler/tmp/scripts/build.ps1 -Mode single-flight`
+(a spiral checkout beside this repository), then run
 `compiler-contracts/test-attestation.ps1` and the compiler's `scripts/test-rust-exports.ps1`.
 Use `compiler-contracts/test-regeneration.ps1 -IncludeAuxiliary -CargoCheck -Test -CompilerContracts`
 to reproduce the isolated 98-output regeneration and runtime validation.

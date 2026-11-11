@@ -115,9 +115,12 @@
     := busy : u64 = conv (cores_sum rows 0i32 0.0f64 / cpusf * 100.0f64)
     := ok = disk >= min_disk && ram >= min_ram && busy < max_busy
     := reason =
-        ? disk < min_disk ?> "disk-" ++# sm'.decimal_text disk ++# "gb<" ++# sm'.decimal_text min_disk
-        |? ram < min_ram ?> "ram-" ++# sm'.decimal_text ram ++# "mb<" ++# sm'.decimal_text min_ram
-        |? busy >= max_busy ?> "busy-" ++# sm'.decimal_text busy ++# "pct>=" ++# sm'.decimal_text max_busy
+        ? disk < min_disk
+        ?> "disk-" ++# sm'.decimal_text disk ++# "gb<" ++# sm'.decimal_text min_disk
+        |? ram < min_ram
+        ?> "ram-" ++# sm'.decimal_text ram ++# "mb<" ++# sm'.decimal_text min_ram
+        |? busy >= max_busy
+        ?> "busy-" ++# sm'.decimal_text busy ++# "pct>=" ++# sm'.decimal_text max_busy
         |: "ok"
     console.write_line (
         "rig machine health gate="

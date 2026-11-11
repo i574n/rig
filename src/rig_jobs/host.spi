@@ -22,14 +22,16 @@
 := sleep_ms (~millis : u64) : () = $'std::thread::sleep(std::time::Duration::from_millis(!millis))' : ()
 
 :~ heavy_gate_script () : string =
-    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_GATE").or_else(|| std::env::var_os("KIT_HEAVY_GATE")).map(std::path::PathBuf::from).filter(|path| \
-        path.is_file()).or_else(|| std::env::current_dir().ok().and_then(|cwd| cwd.ancestors().find_map(|base| { \
-        let compiler = base.join("spiral").join("apps").join("compiler"); [compiler.join("scripts").join("heavy.ps1"), \
+    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_GATE").or_else(|| \
+        std::env::var_os("KIT_HEAVY_GATE")).map(std::path::PathBuf::from).filter(|path| path.is_file()).or_else(|| \
+        std::env::current_dir().ok().and_then(|cwd| cwd.ancestors().find_map(|base| { let compiler = \
+        base.join("spiral").join("apps").join("compiler"); [compiler.join("scripts").join("heavy.ps1"), \
         compiler.join("tmp").join("scripts").join("heavy.ps1")].into_iter().find(|candidate| candidate.is_file()) \
         }))).map(|path| path.to_string_lossy().into_owned()).unwrap_or_default())' : string
 
 :~ jobs_root () : string =
-    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| \
+    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| \
+        std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| \
         std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(\
         || std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))\
         ).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref())' : string
@@ -81,8 +83,10 @@
     $'{ let copy = || -> std::io::Result<std::path::PathBuf> { let source = std::env::current_exe()?; \
         let metadata = std::fs::metadata(&source)?; let stamp = metadata.modified().ok().and_then(|time| \
         time.duration_since(std::time::UNIX_EPOCH).ok()).map(|elapsed| elapsed.as_secs()).unwrap_or(0); \
-        let folder = std::env::var_os("LOCALAPPDATA").or_else(|| std::env::var_os("XDG_CACHE_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("HOME").map(|home| std::path::PathBuf::from(home).join(".cache"))).unwrap_or_else(std::env::temp_dir)\
-        .join("kit").join("supervisor"); std::fs::create_dir_all(&folder)?; \
+        let folder = std::env::var_os("LOCALAPPDATA").or_else(|| \
+        std::env::var_os("XDG_CACHE_HOME")).map(std::path::PathBuf::from).or_else(|| \
+        std::env::var_os("HOME").map(|home| std::path::PathBuf::from(home).join(".cache"))).unwrap_or_else(std::env::t\
+        emp_dir).join("kit").join("supervisor"); std::fs::create_dir_all(&folder)?; \
         let stem = source.file_stem().map(|stem| stem.to_string_lossy().into_owned()).unwrap_or_default(); \
         let target = folder.join(format\!("{}-{}-{}{}", stem, metadata.len(), stamp, std::env::consts::EXE_SUFFIX)); \
         if \!target.is_file() { let temporary = target.with_extension("tmp"); std::fs::copy(&source, &temporary)?; \
@@ -94,7 +98,7 @@
         if same_stem && stale && path \!= target { let _ = std::fs::remove_file(&path); } } } Ok(target) }; \
         std::rc::Rc::<str>::from(copy().map(|path| path.to_string_lossy().into_owned()).unwrap_or_default()) }' : string
 
-:= already_relaunched () : bool = $'std::env::var_os("RIG_JOB_RELAUNCHED").or_else(|| std::env::var_os("KIT_JOB_RELAUNCHED")).is_some()' : bool
+:= already_relaunched () : bool = rust_std_env.model.variable_twin "JOB_RELAUNCHED" <> ""
 
 := running_from (~executable : string) : bool =
     $'std::env::current_exe().map(|path| path.to_string_lossy() == &*!executable).unwrap_or(false)' : bool

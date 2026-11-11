@@ -1,8 +1,8 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-use rig_do_verbs::{fact_verb, option_fact_verb};
 use rig_do_model::{query_verb};
+use rig_do_verbs::{fact_verb, option_fact_verb};
 fn string_concat(parts: &[&str]) -> Rc<str> {
     let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
     let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;

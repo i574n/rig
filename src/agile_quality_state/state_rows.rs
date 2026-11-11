@@ -1,15 +1,6 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 fn string_concat(parts: &[&str]) -> Rc<str> {
     let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
     let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
@@ -79,7 +70,7 @@ fn method3(mut v0: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>)>>, mut v1: i32, mut v2: Rc
 fn method4(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
     match Rc::unwrap_or_clone(v0) {
         UH1::UH1_Cons(v2, v3, v4, v5, v6, v7, v8, v9) => {
-            let mut v2: Rc<str> = v2;
+            let v2: Rc<str> = v2;
             let v3: Rc<str> = v3;
             let mut v4: Rc<str> = v4;
             let mut v5: i32 = v5;
@@ -125,7 +116,7 @@ fn method5(mut v0: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<s
 }
 fn open_failures_in_2(mut v0: Rc<UH1>) -> Rc<UH0> {
     let mut v1: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-    let mut v2: Rc<UH1> = method4(v0, v1);
+    let v2: Rc<UH1> = method4(v0, v1);
     let v3: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = Rc::new(RefCell::new(Vec::new()));
     let mut v4: i32 = 0i32;
     let mut v5: i32 = method5(v3.clone(), v2, v4);
@@ -156,7 +147,7 @@ fn method7(mut v0: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<
 }
 fn facts_list_6(mut v0: Rc<str>) -> Rc<UH1> {
     let mut v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::rig_agile_fact_rows(&v0);
-    let mut v2: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v1).borrow().clone());
+    let v2: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v1).borrow().clone());
     let v3: usize = (v2).len();
     let mut v4: i32 = ((v3) as i32);
     let mut v5: i32 = v4.wrapping_sub(1i32);
@@ -188,7 +179,7 @@ fn method8(mut v0: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>>, mut v1: Rc<UH0
 }
 fn failures_of_0(mut v0: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
     let mut v1: Rc<UH0> = open_failures_1(v0);
-    let mut v2: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = Rc::new(RefCell::new(Vec::new()));
+    let v2: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = Rc::new(RefCell::new(Vec::new()));
     let v3: i32 = 0i32;
     let mut v4: i32 = method8(v2.clone(), v1, v3);
     let mut v5: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>)>> = Rc::new(v2.borrow().clone());
@@ -204,7 +195,7 @@ fn method11(mut v0: Rc<UH2>, mut v1: Rc<UH2>) -> Rc<UH2> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH2::UH2_Cons(v2, v3, v4) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: i32 = v3;
                 let mut v4: Rc<UH2> = v4;
                 let mut v5: Rc<UH2> = Rc::new(UH2::UH2_Cons(v2, v3, v1));
@@ -230,7 +221,7 @@ fn method12(mut v0: Rc<UH0>, mut v1: std::rc::Rc<std::collections::BTreeMap<Rc<s
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3, v4, v5) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<str> = v3;
                 let mut v4: Rc<str> = v4;
                 let mut v5: Rc<UH0> = v5;
@@ -269,7 +260,7 @@ fn method14(mut v0: Rc<UH3>, mut v1: Rc<UH3>) -> Rc<UH3> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH3::UH3_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH3> = v3;
                 let mut v4: Rc<UH3> = Rc::new(UH3::UH3_Cons(v2, v1));
                 (v0, v1) = (v3, v4);
@@ -314,7 +305,7 @@ fn method15(mut v0: std::rc::Rc<std::collections::BTreeMap<Rc<str>, i32>>, mut v
     }
 }
 fn census_of_10(mut v0: Rc<UH0>) -> Rc<UH2> {
-    let mut v2: std::collections::BTreeMap<Rc<str>, i32> = std::collections::BTreeMap::new();
+    let v2: std::collections::BTreeMap<Rc<str>, i32> = std::collections::BTreeMap::new();
     let v3: std::rc::Rc<std::collections::BTreeMap<Rc<str>, i32>> = std::rc::Rc::new(v2);
     let mut v4: std::rc::Rc<std::collections::BTreeMap<Rc<str>, i32>> = method12(v0, v3);
     let mut v5: Vec<Rc<str>> = v4.keys().cloned().collect::<Vec<_>>();
@@ -352,7 +343,7 @@ fn method16(mut v0: Rc<RefCell<Vec<(Rc<str>, i32)>>>, mut v1: Rc<UH2>, mut v2: i
 }
 fn census_text_of_9(mut v0: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, i32)>>> {
     let mut v1: Rc<UH0> = open_failures_1(v0);
-    let mut v2: Rc<UH2> = census_of_10(v1);
+    let v2: Rc<UH2> = census_of_10(v1);
     let v3: Rc<RefCell<Vec<(Rc<str>, i32)>>> = Rc::new(RefCell::new(Vec::new()));
     let mut v4: i32 = 0i32;
     let mut v5: i32 = method16(v3.clone(), v2, v4);
@@ -418,12 +409,12 @@ fn closure3() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>) -> Rc<RefCell<Vec<(Rc<str>
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn method24(mut v0: i32, mut v1: &Rc<RefCell<Mut0>>) -> bool {
-    let mut v2: i32 = v1.borrow().l0;
+    let v2: i32 = v1.borrow().l0;
     let v3: bool = v2 < v0;
     v3
 }
 fn split_list_23(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<UH3> {
-    let mut v2: i32 = (v0.clone().len() as i32);
+    let v2: i32 = (v0.clone().len() as i32);
     let v3: bool = v2 == 0i32;
     if v3 {
         let mut v4: Rc<UH3> = { thread_local!{ static CASE: Rc<UH3> = Rc::new(UH3::UH3_Nil); } CASE.with(|case| case.clone()) };
@@ -459,7 +450,7 @@ fn closure5() -> Rc<dyn Fn((i64)) -> US2> {
 }
 fn stamp_hour_25(mut v0: Rc<str>) -> i64 {
     let mut v1: i32 = (v0.clone().len() as i32);
-    let mut v2: bool = v1 < 13i32;
+    let v2: bool = v1 < 13i32;
     if v2 {
         0i64
     } else {
@@ -591,7 +582,7 @@ fn method22(mut v0: Rc<UH3>, mut v1: i64) -> i64 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH3::UH3_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH3> = v3;
                 let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) };
                 let mut v5: Rc<UH3> = split_list_23(v4, v2);
@@ -649,14 +640,14 @@ fn method22(mut v0: Rc<UH3>, mut v1: i64) -> i64 {
 }
 fn last_note_hour_21(mut v0: Rc<str>) -> i64 {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
-    let mut v2: Rc<UH3> = split_list_23(v1, v0);
+    let v2: Rc<UH3> = split_list_23(v1, v0);
     let v3: i64 = 0i64;
     method22(v2, v3)
 }
 fn method20(mut v0: Rc<UH1>, mut v1: Rc<UH4>) -> Rc<UH4> {
     match Rc::unwrap_or_clone(v0) {
         UH1::UH1_Cons(v2, v3, v4, v5, v6, v7, v8, v9) => {
-            let mut v2: Rc<str> = v2;
+            let v2: Rc<str> = v2;
             let v3: Rc<str> = v3;
             let mut v4: Rc<str> = v4;
             let mut v5: i32 = v5;
@@ -695,7 +686,7 @@ fn method27(mut v0: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i64)>>>, mut v1: 
 }
 fn cadence_of_19(mut v0: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i64)>>> {
     let mut v1: Rc<UH1> = facts_list_6(v0);
-    let mut v2: Rc<UH4> = { thread_local!{ static CASE: Rc<UH4> = Rc::new(UH4::UH4_Nil); } CASE.with(|case| case.clone()) };
+    let v2: Rc<UH4> = { thread_local!{ static CASE: Rc<UH4> = Rc::new(UH4::UH4_Nil); } CASE.with(|case| case.clone()) };
     let v3: Rc<UH4> = method20(v1, v2);
     let mut v4: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i64)>>> = Rc::new(RefCell::new(Vec::new()));
     let mut v5: i32 = 0i32;
@@ -714,89 +705,14 @@ fn closure6() -> Rc<dyn Fn(Rc<str>) -> i64> {
         stamp_hour_25(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method32(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let mut v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let mut v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method33(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let mut v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let mut v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn method31(mut v0: Rc<UH3>, mut v1: Rc<UH3>) -> Rc<UH3> {
     match Rc::unwrap_or_clone(v0) {
         UH3::UH3_Cons(v2, v3) => {
-            let mut v2: Rc<str> = v2;
+            let v2: Rc<str> = v2;
             let v3: Rc<UH3> = v3;
             let mut v4: Rc<UH3> = method31(v3, v1);
-            let mut v5: i32 = (v2.clone().len() as i32);
-            let v6: i32 = 0i32;
-            let mut v7: i32 = method32(v2.clone(), v5, v6);
-            let mut v8: i32 = v5.wrapping_sub(1i32);
-            let mut v9: Rc<str> = string_slice(&v2, v7 as i64, v8 as i64);
-            let v10: i32 = (v9.clone().len() as i32);
-            let v11: i32 = method33(v9.clone(), v10);
-            let v12: Rc<str> = string_slice(&v9, 0i32 as i64, v11 as i64);
-            Rc::new(UH3::UH3_Cons(v12, v4))
+            let mut v5: Rc<str> = Rc::<str>::from((v2).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+            Rc::new(UH3::UH3_Cons(v5, v4))
         }
         UH3::UH3_Nil => {
             v1
@@ -814,7 +730,7 @@ fn closure8(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH3>) -> US0> {
                     US0::US0_Some(v1)
                 } else {
                     let mut v8: i32 = v1.wrapping_add(1i32);
-                    let mut v9: Rc<dyn Fn(Rc<UH3>) -> US0> = method34(v0.clone(), v8);
+                    let mut v9: Rc<dyn Fn(Rc<UH3>) -> US0> = method32(v0.clone(), v8);
                     v9(v5)
                 }
             }
@@ -824,7 +740,7 @@ fn closure8(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH3>) -> US0> {
         }
     })
 }
-fn method34(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH3>) -> US0> {
+fn method32(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH3>) -> US0> {
     closure8(v0, v1)
 }
 fn of_team_30(mut v0: Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: Rc<str>, mut v4: i32, mut v5: &Rc<str>, mut v6: &Rc<str>, mut v7: &Rc<str>) -> bool {
@@ -838,7 +754,7 @@ fn of_team_30(mut v0: Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: Rc<st
         let v12: Rc<UH3> = method31(v10, v11);
         let v13: Rc<str> = string_concat(&["team:", &*v0]);
         let v14: i32 = 0i32;
-        let mut v15: Rc<dyn Fn(Rc<UH3>) -> US0> = method34(v13, v14);
+        let mut v15: Rc<dyn Fn(Rc<UH3>) -> US0> = method32(v13, v14);
         let v16: US0 = v15(v12);
         let v17: bool = match v16 {
             US0::US0_None => {
@@ -877,7 +793,7 @@ fn method29(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
     }
 }
 fn team_failures_of_28(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> {
-    let mut v2: Rc<UH1> = facts_list_6(v1);
+    let v2: Rc<UH1> = facts_list_6(v1);
     let v3: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
     let mut v4: Rc<UH1> = method29(v0, v2, v3);
     let mut v5: Rc<UH0> = open_failures_in_2(v4);

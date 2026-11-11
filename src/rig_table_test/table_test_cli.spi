@@ -33,7 +33,10 @@
     := root = fixture_root_create "table test where"
     fixture_write root
         "runs.tsv"
-        "variant\tretries\terrors\tpassed\na\t10\t0\t5\na\t12\t\t\na\t11\t3\t6\na\t13\t0\t4\nb\t20\t0\t7\nb\t22\t1\t8\nb\t21\t0\t9\n"
+        (
+            "variant\tretries\terrors\tpassed\na\t10\t0\t5\na\t12\t\t\na\t11\t3\t6\na\t13\t0\t4\nb\t20\t0\t7\n"
+            ^^ "b\t22\t1\t8\nb\t21\t0\t9\n"
+        )
     := run =
         tested root (
             Arg (

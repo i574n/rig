@@ -35,6 +35,11 @@
     | HostStatement :: probe drift
     | BannedNameToken :: probe drift
     | ForwardWrapper :: probe drift
+    | MagicNumber :: probe drift
+    | DrivePath :: probe drift
+    | PosixPath :: probe drift
+    | ExeSuffix :: probe drift
+    | SingleSlashPath :: probe drift
 
 :! any_probe = \? side. probe side
 
@@ -72,6 +77,11 @@
     | HostStatement => NeverRises
     | BannedNameToken => NeverRises
     | ForwardWrapper => MayNotRise
+    | MagicNumber => MayNotRise
+    | DrivePath => MayNotRise
+    | PosixPath => MayNotRise
+    | ExeSuffix => MayNotRise
+    | SingleSlashPath => NeverRises
 
 := probe_word \* side. (which : probe side) : string = union_reflection.cases.union_case_kebab "" which
 
@@ -106,6 +116,11 @@
     | ForwardWrapper =>
         "^(:~|:=|inl)\\s+\\w+'*\\s+\\(~?\\w+\\s*:\\s*[^)]+\\)\\s*:\\s*[^=]+="
         ^^ "\\s*[a-z_]\\w*(\\.|')[\\w.']*\\s+\\w+\\s*$"
+    | MagicNumber => "(^|[^\\w.])(\\d{3,}|0x[0-9A-Fa-f]+)(u8|u16|u32|u64|i8|i16|i32|i64|f32|f64)\\b"
+    | DrivePath => "\\x22[A-Za-z]:(\\\\\\\\|/)"
+    | PosixPath => "\\x22/(home|usr|tmp|root|etc|var|opt)/"
+    | ExeSuffix => "\\.exe\\x22"
+    | SingleSlashPath => "\\x22[A-Za-z]:\\\\[A-Za-z]"
 
 := each_probe \* state. (step : state -> any_probe -> state) (initial : state) : state =
     := s = step initial (any_probe (\? GadtCase))
@@ -133,7 +148,12 @@
     := s = step s (any_probe (\? HostBlock))
     := s = step s (any_probe (\? HostStatement))
     := s = step s (any_probe (\? BannedNameToken))
-    step s (any_probe (\? ForwardWrapper))
+    := s = step s (any_probe (\? ForwardWrapper))
+    := s = step s (any_probe (\? MagicNumber))
+    := s = step s (any_probe (\? DrivePath))
+    := s = step s (any_probe (\? PosixPath))
+    := s = step s (any_probe (\? ExeSuffix))
+    step s (any_probe (\? SingleSlashPath))
 
 := any_word (any_probe p : any_probe) : string =
     := \? side. which = p
@@ -196,7 +216,8 @@
                 ^^ "higher-kinded type-decl "
                 ^^ "host-macro wide-host-macro "
                 ^^ "rust-global encoded-row pipe-table number-arm string-concat top-level-macro rc-wrap "
-                ^^ "std-string-use bang-export host-block host-statement banned-name-token forward-wrapper"
+                ^^ "std-string-use bang-export host-block host-statement banned-name-token forward-wrapper "
+                ^^ "magic-number drive-path posix-path exe-suffix single-slash-path"
             )
         )
         words

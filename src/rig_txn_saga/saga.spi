@@ -1,0 +1,60 @@
+///- --package .
+:# saga static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| saga_step =
+    | AddChild :: string -> saga_step
+    | LinkParent :: string * string -> saga_step
+    | AddNote :: string * i32 -> saga_step
+
+:| compensation =
+    | RemoveChild :: string -> compensation
+    | UnlinkParent :: string * string -> compensation
+    | RemoveNote :: string * i32 -> compensation
+
+:| saga_phase =
+    | Running :: saga_phase
+    | PausedForReview :: i32 -> saga_phase
+    | Committed :: saga_phase
+    | Compensated :: list compensation -> saga_phase
+
+:== saga = { pending : list saga_step; done : list saga_step; phase : saga_phase }
+
+:~ undo_of (step : saga_step) : compensation =
+    ?= step ?|
+    | AddChild id => RemoveChild id
+    | LinkParent (child, parent) => UnlinkParent (child, parent)
+    | AddNote (id, number) => RemoveNote (id, number)
+
+:~ ^ advanced (s : saga) (review_after : i32) : saga =
+    ?= s.pending ?|
+    | [] => { s ?| phase = Committed }
+    | step :: rest =>
+        := next = { s ?| pending = rest; done = step :: s.done }
+        ? listm.length next.done = review_after
+        ?> { next ?| phase = PausedForReview review_after }
+        |: advanced next review_after
+
+:~ approved (s : saga) : saga =
+    ?= s.phase ?|
+    | PausedForReview _ => advanced { s ?| phase = Running } (-1i32)
+    | _ => s
+
+:~ rejected (s : saga) : saga =
+    ?= s.phase ?|
+    | PausedForReview _ => { s ?| pending = []; phase = Compensated (s.done |> listm.map undo_of) }
+    | _ => s
+
+///> rust
+:# a_split_saga_pauses_for_review_then_commits_or_compensates_in_reverse =
+    := steps = [ AddChild "E-M1"; LinkParent ("E-M1", "E"); AddNote ("E", 7i32) ]
+    := start = { pending = steps; done = []; phase = Running }
+    := paused = advanced start 2i32
+    testing.expect (paused.phase = PausedForReview 2i32 && listm.length paused.pending = 1i32) "pauses after two steps"
+    testing.expect ((approved paused).phase = Committed && (approved paused).pending = []) "approval runs the rest"
+    := undone = [ UnlinkParent ("E-M1", "E"); RemoveChild "E-M1" ]
+    testing.expect ((rejected paused).phase = Compensated undone) "rejection undoes the done steps, newest first"
+    testing.expect ((advanced start (-1i32)).phase = Committed) "no review point runs to the end"
+    testing.expect ((rejected start).phase = Running) "only a paused saga can be rejected"

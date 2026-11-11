@@ -43,7 +43,6 @@ enum US3 {
     US3_WindowPruned,
     US3_WindowDropped,
 }
-pub struct Mut0 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US4 {
     US4_Granted,
@@ -746,7 +745,7 @@ fn window_requested_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
                         false
                     };
                     let v107: Rc<str> = if v104 {
-                        let v105: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a tree window guards the path in its label; give the rooted path it reads or writes, e.g. C:/home/git/spiral/lib"); } LIT.with(|lit| lit.clone()) };
+                        let v105: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a tree window guards the path in its label; give the rooted path it reads or writes, e.g. C:/work/repo/lib"); } LIT.with(|lit| lit.clone()) };
                         v105
                     } else {
                         let v106: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -764,7 +763,7 @@ fn window_requested_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
                             false
                         };
                         let v116: Rc<str> = if v113 {
-                            let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a tree window guards the path in its label; give the rooted path it reads or writes, e.g. C:/home/git/spiral/lib"); } LIT.with(|lit| lit.clone()) };
+                            let v114: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a tree window guards the path in its label; give the rooted path it reads or writes, e.g. C:/work/repo/lib"); } LIT.with(|lit| lit.clone()) };
                             v114
                         } else {
                             let v115: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -927,4 +926,4 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
 pub fn rig_window_request_run() -> i32 {
     closure0()()
 }
-pub type SpiralShape_97df63ebabc3 = Mut0;
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut0;

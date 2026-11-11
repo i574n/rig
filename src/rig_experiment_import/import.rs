@@ -558,7 +558,7 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn file_text_20(mut v0: Rc<str>) -> Rc<str> {
-    let v1: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v0).unwrap_or_default());
+    let v1: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v0).unwrap_or_default().as_str());
     v1
 }
 fn plan_text_19(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {

@@ -72,24 +72,22 @@
     measures |> listm.fold counted 0i32
 
 :| gate_outcome =
-    | GatePassed
-    | GateFailedOver : i32
-    | GateFailedMissing : i32
-    | GateFailedVacuous
+    | GatePassed :: gate_outcome
+    | GateFailed :: list string * list string -> gate_outcome
+    | GateFailedVacuous :: gate_outcome
 
-:~ missing_count (limit : i32) (measures : list crate_measure) : i32 =
-    := counted = \ count (m : crate_measure) => ?= verdict_of limit m ?| | CrateUnbuilt => count + 1i32 | _ => count
-    measures |> listm.fold counted 0i32
+:~ names_where (limit : i32) (wanted : crate_verdict) (measures : list crate_measure) : list string =
+    := kept = \ (names : list string) (m : crate_measure) =>
+        ? verdict_of limit m = wanted ?> listm.append names [ m.crate ] |: names
+    measures |> listm.fold kept []
 
 :~ gate_outcome_of (enforce : bool) (limit : i32) (measures : list crate_measure) : gate_outcome =
-    := over = over_count limit measures
-    := missing = missing_count limit measures
-    ? enforce && listm.length measures = 0i32
+    := over = names_where limit CrateOver measures
+    := missing = names_where limit CrateUnbuilt measures
+    ? enforce && (listm.length measures : i32) = 0i32
     ?> GateFailedVacuous
-    |? enforce && over > 0i32
-    ?> GateFailedOver over
-    |? enforce && missing > 0i32
-    ?> GateFailedMissing missing
+    |? enforce && (over <> [] || missing <> [])
+    ?> GateFailed (over, missing)
     |: GatePassed
 
 ///> rust
@@ -113,21 +111,15 @@
     expect (measure_line 1000i32 small = "gate / small s.rs 900 lines ok") "ok line"
     expect (verdict_of 1000i32 unbuilt = CrateUnbuilt) "missing output is not counted as over"
     expect
-        ?= gate_outcome_of !+ 1000i32 [ small; big; unbuilt ] ?|
-        | GateFailedOver n => n = 1i32
-        | _ => !-
-        "enforce fails on one crate over"
+        (gate_outcome_of !+ 1000i32 [ small; big; unbuilt ] = GateFailed ([ "big" ], [ "new" ]))
+        "one run names every failing crate of both classes"
     expect
         ?= gate_outcome_of !+ 1000i32 [] ?|
         | GateFailedVacuous => !+
         | _ => !-
         "enforce fails when nothing was measured"
     expect (?= gate_outcome_of !- 1000i32 [ big ] ?| | GatePassed => !+ | _ => !-) "report-only passes"
-    expect
-        ?= gate_outcome_of !+ 1000i32 [ small; unbuilt ] ?|
-        | GateFailedMissing n => n = 1i32
-        | _ => !-
-        "enforce fails on a missing output"
+    expect (gate_outcome_of !+ 1000i32 [ small; unbuilt ] = GateFailed ([], [ "new" ])) "a missing output is named"
     expect
         ?= gate_outcome_of !- 1000i32 [ unbuilt ] ?|
         | GatePassed => !+

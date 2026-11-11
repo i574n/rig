@@ -8,6 +8,7 @@ packages:
 link:
     rig_experiment_args
 modules:
+    experiment_gates
     experiment_model
     experiment_plan
     ledger_host

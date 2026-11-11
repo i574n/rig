@@ -1,0 +1,54 @@
+///- --package .
+:# cost static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== note_row = { team : string; day : i32 }
+
+:== job_row = { label : string; elapsed_ms : u64 }
+
+:== share = { owner : string; amount : u64 }
+
+:= job_cap_ms () : u64 = 43200000u64
+
+:~ lane_of_label (~label : string) : string =
+    ?= sm'.split_list "-" label ?|
+    | "kit" :: _ => "rig"
+    | head :: _ => head
+    | [] => ""
+
+:~ added (shares : list share) (~owner : string) (amount : u64) : list share =
+    := grow = \ (s : share) => ? s.owner = owner ?> { s ?| amount = s.amount + amount } |: s
+    ? listm'.exists' (\ (s : share) => s.owner = owner) shares
+    ?> shares |> listm.map grow
+    |: listm.append shares [ { owner = owner; amount = amount } ]
+
+:~ note_shares (from_day : i32) (to_day : i32) (notes : list note_row) : list share =
+    := inside = \ (n : note_row) => n.day >= from_day && n.day <= to_day
+    notes |> listm'.filter inside |> listm.fold (\ (acc : list share) (n : note_row) => added acc n.team 1u64) []
+
+:~ job_shares (jobs : list job_row) : list share =
+    := capped = \ (ms : u64) => ? ms > job_cap_ms () ?> job_cap_ms () |: ms
+    := step = \ (acc : list share) (j : job_row) => added acc (lane_of_label j.label) (capped j.elapsed_ms)
+    jobs |> listm.fold step []
+
+:~ per_mille_of (shares : list share) (~owner : string) : u64 =
+    := total = shares |> listm.fold (\ (sum : u64) (s : share) => sum + s.amount) 0u64
+    := mine = shares |> listm.fold (\ (sum : u64) (s : share) => ? s.owner = owner ?> sum + s.amount |: sum) 0u64
+    ? total = 0u64 ?> 0u64 |: mine * 1000u64 / total
+
+///> rust
+:# the_tools_share_counts_notes_by_team_and_capped_job_hours_by_lane =
+    := notes =
+        [
+            { team = "rig"; day = 20261103i32 };
+            { team = "org"; day = 20261104i32 };
+            { team = "rig"; day = 20261020i32 }
+        ]
+    testing.expect (per_mille_of (note_shares 20261102i32 20261109i32 notes) "rig" = 500u64) "the old note is outside"
+    := hour = 3600000u64
+    := train = { label = "kit-TRAIN42e"; elapsed_ms = 100u64 * hour }
+    := jobs = [ train; { label = "tibia-port4"; elapsed_ms = 12u64 * hour } ]
+    testing.expect (per_mille_of (job_shares jobs) "rig" = 500u64) "a kit- label counts for rig, capped at 12 h"
+    testing.expect (per_mille_of [] "rig" = 0u64) "no data is zero, never a division by zero"

@@ -47,6 +47,18 @@
         slice_json file (number + 1u64) last (? items = "" ?> item |: items ++# "," ++# item)
     |: items
 
+:~ ^ replaced_in (file : file_load) (number : u64) (total : u64) (found : u64) : u64 =
+    ? number <= total
+    ?>
+        := pieces = (listm.length (sm'.split_list "�" (load_line file number)) : i32)
+        replaced_in file (number + 1u64) total (found + (conv (pieces - 1i32) : u64))
+    |: found
+
+:~ replaced_note (count : u64) : string =
+    ? count = 0u64 ?> "" |: "; " ++# u64_string count ++# " invalid UTF-8 sequences shown as U+FFFD"
+
+:~ replaced_field (count : u64) : string = ? count = 0u64 ?> "" |: ",\"replaced\":" ++# u64_string count
+
 :~ file_slice (~path : string) (range : line_range) (limit : u64) (json : bool) : slice_view =
     := file = file_loaded path
     ? load_failed file ?>
@@ -64,6 +76,7 @@
         := shown_last = u64_lower last (u64_less (u64_sum first limit) 1u64)
         := count = ? first <= shown_last ?> shown_last - first + 1u64 |: 0u64
         := shown = (conv count : i64)
+        := replaced = replaced_in file 1u64 total 0u64
         ? json ?>
             := head =
                 "{\"path\":"
@@ -75,6 +88,7 @@
                     ++# u64_string (u64_upper shown_last (u64_less first 1u64))
                     ++# ",\"total\":"
                     ++# u64_string total
+                    ++# replaced_field replaced
                 )
             {
                 shown = shown
@@ -92,7 +106,9 @@
                 ++# u64_string first
                 ++# "-"
                 ++# (
-                    (u64_string (u64_upper shown_last (u64_less first 1u64))) ++# " of " ++# (u64_string total) ++# ")"
+                    (u64_string (u64_upper shown_last (u64_less first 1u64))) ++# " of " ++# (u64_string total)
+                    ++# replaced_note replaced
+                    ++# ")"
                 )
             )
             slice_printed file first shown_last (u64_digits shown_last)

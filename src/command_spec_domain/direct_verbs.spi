@@ -37,6 +37,9 @@
     | VerbHook
     | VerbRun
     | VerbMetrics
+    | VerbUnits
+    | VerbDrafts
+    | VerbScratch
 
 :== verb_help =
     {
@@ -148,9 +151,9 @@
             line =
                 "standards: <package-dir>... [--json] (rules from the package's standards.spi rows, else "
                 ^^ "no-comment-lines, line-width 120, lf-only, test-targets; exit 1 on findings) | --census <dir>... "
-                ^^ "| --baseline <file.spi> <dir>... | --ratchet <file.spi> <dir>... (typefeatureset and drift counts "
-                ^^ "per package; the ratchet fails when a package gets worse than its baseline or a new package "
-                ^^ "misses the floor)"
+                ^^ "| --baseline <file.spi> <dir>... | --ratchet <file.spi> <dir>... (GADT/existential "
+                ^^ "and drift counts per package; the ratchet fails when a package gets worse than its baseline or a "
+                ^^ "new package misses the floor)"
         }
     | VerbWindow =>
         {
@@ -295,6 +298,27 @@
                 "metrics export --notebooks <dir> [--machine box|node] (Prometheus text: one "
                 ^^ "rig_exec_duration_ms{machine,backend,phase} line per phase of every Cells notebook cell)"
         }
+    | VerbUnits =>
+        {
+            word = "units"
+            line =
+                "units check <workspace root> (one row per drifted edge, kind-edge, entry name, duplicate module and "
+                ^^ "workspace member; host-call deps counted apart; exit 1 on hard findings)"
+        }
+    | VerbDrafts =>
+        {
+            word = "drafts"
+            line =
+                "drafts put <repo root> <ITEM> <path...> --backlog <root> | list [--repo r] [--item I] [--older-than "
+                ^^ "Nd] | promote <repo root> <ITEM> <landing dir> (typed Spiral, manifests and glue only)"
+        }
+    | VerbScratch =>
+        {
+            word = "scratch"
+            line =
+                "scratch cited <backlog root> <scratch root> (one line per folder: kept when a backlog note cites it, "
+                ^^ "else removable after the archive verify; exit 2 when no notes are read)"
+        }
 
 := help_line_for (~target : string) : string =
     union_reflection.cases.union_case_where
@@ -339,6 +363,6 @@
     := text = help_lines ()
     expect (sm'.starts_with "job: " text) "help lines follow the union order"
     expect
-        (am'.length (sm'.split "\n" text |> array) = 29i32)
-        "32 verbs print 29 lines: read, lines and grep share one, ps and kill share one"
+        (am'.length (sm'.split "\n" text |> array) = 32i32)
+        "35 verbs print 32 lines: read, lines and grep share one, ps and kill share one"
     expect (sm'.index_of "mirror check " text >= 0i32) "mirror has a help line"

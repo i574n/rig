@@ -189,7 +189,8 @@ Run the compiler's `scripts/test-rust-exports.ps1` (in the spiral repository's `
 consumer and negative ABI contracts. `compiler-contracts/test-regeneration.ps1`
 regenerates every declared primary Cargo target in an isolated
 cache copy. Use `-CargoCheck -Test -CompilerContracts` to check all targets, run
-the workspace contracts, check source topology with the rebuilt KIT, and build a release executable from those regenerated
+the workspace contracts, check source topology with the rebuilt KIT, and build a release executable from those
+regenerated
 owners. Use `-KitRoot` after relocating KIT, `-Filter` for selected members,
 and `-Offline` with a populated registry cache. Auxiliary probes and operating
 system adapters remain consumers by default; `-IncludeAuxiliary` also regenerates
@@ -363,7 +364,8 @@ whole `src` tree.
 
 `pwsh compiler-contracts/renew-strict-evidence.ps1` runs the whole renewal after a
 source change. It first stops on strict diagnostics that no renewal repairs (a forbidden
-source root file, a symlink, a topology limit), then runs `agile begin`, `bundle growth-receipt`, `renew-cold-rebuild.ps1 -Apply`, `agile check --compiler`,
+source root file, a symlink, a topology limit), then runs `agile begin`, `bundle growth-receipt`,
+`renew-cold-rebuild.ps1 -Apply`, `agile check --compiler`,
 then closeout preview and apply in the root staged by the strict preflight, with the six
 gates and the expected migration read from the current `state/release_closeout.spi`.
 Renewed state files are copied back and `test-strict-preflight.ps1 -RequireReady` must
@@ -456,18 +458,23 @@ Only tokens whose first segment is a backlog ID prefix count as IDs, so `UTF-8` 
 `standards.spi` declares as rows (`inl width () = LineWidth 100u32`, `NoCommentLines`, `LfOnly`,
 `IntegerOnly "module"`, `TestTargets`), or against the defaults (no comment lines outside TODO blocks
 and `///` directives, 120 columns, LF only, a `///>` target above every test block); it prints
-`path:line  rule  detail` per finding and exits 1 when there is any. `kit standards --census <dir>...` counts, per package, the typefeatureset constructs (GADT cases `| X :: t`, existentials, foralls, indexed unions, prototypes) and the drift (host macros, macros over 200 characters, rust_global, tab or record-separated rows, pipe tables, number-coded arms, concat5); `--baseline <file.spi> <dir>...` writes the counts as typed `CensusCount` rows, and `--ratchet <file.spi> <dir>...` exits 1 when a package's drift per thousand lines rose or its typefeatureset use fell beyond noise, or when a package missing from the baseline carries rust_global, wide macros or encoded rows, or declares types without any typefeatureset construct. A directory without `.spi` files stands for its package subdirectories, so `--ratchet standards/census.spi src` checks all of kit.
+`path:line  rule  detail` per finding and exits 1 when there is any. `kit standards --census <dir>...` counts, per
+package, the typed-modeling constructs (GADT cases `| X :: t`, existentials, foralls, indexed unions, prototypes) and
+the drift
+(host macros, macros over 200 characters, rust_global, tab or record-separated rows, pipe tables, number-coded arms, concat5); `--baseline <file.spi> <dir>...` writes the counts as typed `CensusCount` rows, and `--ratchet <file.spi> <dir>...` exits 1 when a package's drift per thousand lines rose or its use of GADT cases, existentials, foralls, indexed unions and prototypes fell beyond noise, or when a package missing from the baseline carries rust_global, wide macros or encoded rows, or declares types without any of those constructs. A directory without `.spi` files stands for its package subdirectories, so `--ratchet standards/census.spi src` checks all of kit.
 
 `kit window request <class> <minutes> [--label <text>] [--wait <minutes>]` takes a machine window
 that every session on the box sees (`%LOCALAPPDATA%\kit\windows`, or `KIT_WINDOWS_HOME`). The
-classes are `live-gui`, `test-suite`, `heavy-build`, `compile`, `compiler-install`, `bench` and `tree-read`: a live GUI run
+classes are `live-gui`, `test-suite`, `heavy-build`, `compile`, `compiler-install`, `bench` and `tree-read`: a live GUI
+run
 or a compiler install excludes every other window, a bench excludes heavy builds, suites and other benches but lets
 compiles through, a tree read only marks a source tree as being read (edits under it are refused while it holds),
 and suites, heavy builds and compiles share the box (the heavy gate counts their slots). A request also needs free
 memory (live-gui 4096 MB, test-suite 3072, compiler-install and bench 2048, heavy-build and compile 1024; the
 heavy gate keeps its own second-slot floor), and a window granted in the last moments still counts as using its
 class's memory until it settles (heavy-build, test-suite and bench 90 s, compile 20 s), so the end of an exclusive
-window admits the queue one grant at a time instead of all at once. A request prints `ok` with the window id, or `blocked` with the holder's id,
+window admits the queue one grant at a time instead of all at once. A request prints `ok` with the window id, or
+`blocked` with the holder's id,
 class, minutes left and label (or `reason=low-memory`) and exits 1. With `--wait` it queues: an older
 waiting live-gui or compiler-install request keeps newer requests out, so a live block is not starved
 by a stream of compiles. Windows end at their minutes (a waiting request lapses after 30 s unless it
@@ -475,15 +482,24 @@ is still polling); `window release <id>` ends one early, `window list` shows the
 <class>` answers without taking one. A `--heavy` job's supervisor waits for its heavy-build window and then for a heavy-gate slot itself (it writes its own heavy-queue ticket and hands it to `Invoke-Heavy` through `SPIRAL_HEAVY_TICKET`), so a queued job costs one small process and no PowerShell; `jobs/<id>/window` and `jobs/<id>/slot` show where it waits, and the window is dropped whenever the job ends. `--slot-within <minutes>` makes a `--heavy` or `--compile` job give up when it has no slot or window by then (state `expired-in-queue`, exit 75, nothing started), and `--done-within <minutes>` caps a job's whole life from submission, never stretched by queue time: still queued then, it expires in the queue; running, it stops as `timed-out`. Every job runs in a kill-on-close job object: when its supervisor ends, for any reason, everything the job started ends with it. Supervisors are children of one `kit job host` per jobs folder (`jobs/host.pid`): the first `job start` launches it, it exits after ten quiet minutes or once its jobs folder is gone, and a start that no host answers within 5 s launches its supervisor detached instead. `kit job run [--heavy] <label> <timeout-ms> <program> [args...]` supervises in the calling process instead of a detached one, so the job stays in its caller's process tree, still shows in `job list`/`status`/`tail`/`stop`, and exits with the job's code; an agent runs it as a background task and gets the completion as a notification instead of blocking on `job wait`. An attached job ends with its caller, so a long run from an agent shell that the memory reaper may kill belongs in `job start` plus a background `job wait`. A job whose supervisor stopped beating and whose child is gone is settled as `lost` the first time it is observed (exit 125, elapsed frozen at the last heartbeat, a detail naming the cause), and a machine window whose job supervisor is dead is dropped instead of waiting out its minutes. `window run <class> <minutes> [--label <text>] [--wait <minutes>] -- <command> [args...]` does all three steps in one call: it takes the window (waiting if asked), runs the command only when the window was granted, releases the window when the command ends and exits with the command's code, so a blocked request never falls through to the work.
 
 `kit experiment register <ledger> <ID> --test welch|one-sample|binomial|wilson|median --metric <col> --runs <n>
---decision <rule> [--group <col> --arms a[,b]] [--prediction <x>] [--confidence 0.95] [--question <text>] [--time <col>]`
+--decision <rule> [--group <col> --arms a[,b]] [--prediction <x>] [--confidence 0.95] [--question <text>]
+[--time <col>]`
 writes `<ledger>/<ID>.registration` once, stamped with the time, before any data. `experiment analyze
 <ledger> <ID> <table.tsv> [--where col=value]...` reads the metric only when every arm has the planned
 number of rows, computes the test (Welch two-sided with a confidence interval, one-sample t against the
 prediction, binomial P(X <= successes) under the predicted rate, or a Wilson band around the observed
-rate, or the median of the arm against a `--prediction low,high` band) and records `<ID>.verdict`; a second analysis is refused. Before the planned count it refuses
+rate, or the median of the arm against a `--prediction low,high` band) and records `<ID>.verdict`; a second analysis is
+refused. Before the planned count it refuses
 unless `--interim <reason>` is given, and then it appends the look to `<ID>.disclosures` instead of a
 verdict. A success cell is any non-empty cell other than `0`, `false`, `no` or `-`. `experiment show`
-prints the registration, the disclosures and the verdict. With `--time <col>` the registration also keeps the local time, and analysis leaves out (and counts as `before_registration`) every row whose time cell sorts before it, so data gathered before the plan cannot decide the verdict. `experiment amend <ledger> <ID> --field <name> --value <v> --reason <text>` changes one plan field (question, test, metric, group, arms, runs, prediction, confidence, decision, time) before any look, appended with its time and reason to `<ID>.amendments` while the registration stays as written; it is refused after an interim look or the verdict, and with `--time` the amendment time becomes the new data cutoff. `experiment addendum <ledger> <ID> <text>` appends a post-hoc note to `<ID>.addenda`, kept apart from the verdict.
+prints the registration, the disclosures and the verdict. With `--time <col>` the registration also keeps the local
+time, and analysis leaves out (and counts as `before_registration`) every row whose time cell sorts before it, so data
+gathered before the plan cannot decide the verdict.
+`experiment amend <ledger> <ID> --field <name> --value <v> --reason <text>` changes one plan field
+(question, test, metric, group, arms, runs, prediction, confidence, decision, time) before any look, appended with its
+time and reason to `<ID>.amendments` while the registration stays as written; it is refused after an interim look or the
+verdict, and with `--time` the amendment time becomes the new data cutoff. `experiment addendum <ledger> <ID> <text>`
+appends a post-hoc note to `<ID>.addenda`, kept apart from the verdict.
 
 `kit table logs <file|dir>... [--glob *.log] [--since regex] (--count name=regex | --count-by name=regex | --sum name=regex | --last name=regex | --field name=regex)... [--out file.tsv] [--quiet]` turns log files into a table: one row per file (directories are walked, `--glob` filters file names), a `file` column, then one column per option in order: `--count` counts the regex matches in the file, `--count-by` adds one `name_<value>` column per distinct capture group 1, `--sum` adds capture group 1 of every match, `--last` keeps capture group 1 of the last match, `--field` takes capture group 1 from the file path. `--since regex` counts only the lines after the first one that matches it. `--values name=regex` stands alone and makes one row per match instead. The TSV goes to stdout (the receipt to stderr, or nothing with `--quiet`) or to `--out`, ready for `table query` and `experiment analyze`.
 

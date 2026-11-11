@@ -1,0 +1,50 @@
+///- --package .
+:# encoding static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| read_encoding =
+    | Strict :: read_encoding
+    | Lossy :: read_encoding
+    | Binary :: read_encoding
+    | Hex :: read_encoding
+
+:== read_disclosure = { replaced : u64; unmatched_globs : list string }
+
+:~ encoding_of (~word : string) : option read_encoding =
+    ? word = "utf8" || word = "strict"
+    ?> Some Strict
+    |? word = "utf8-lossy"
+    ?> Some Lossy
+    |? word = "binary"
+    ?> Some Binary
+    |? word = "hex"
+    ?> Some Hex
+    |: None
+
+:~ disclosure_notes (d : read_disclosure) : list string =
+    := replaced = ? d.replaced = 0u64 ?> [] |: [ sm'.show d.replaced ++# " invalid UTF-8 sequences shown as U+FFFD" ]
+    listm.append replaced (d.unmatched_globs |> listm.map (\ (glob : string) => "no file matched the glob " ++# glob))
+
+:~ strict_refusal (encoding : read_encoding) (replaced : u64) : option string =
+    ?= encoding ?|
+    | Strict ?& replaced > 0u64 =>
+        Some (sm'.show replaced ++# " invalid UTF-8 sequences; read with --encoding utf8-lossy, binary or hex")
+    | _ => None
+
+:~ hex_row (offset : u64) (bytes : list u8) : string =
+    sm'.show offset ++# ": " ++# (bytes |> listm.map crypto.hex_byte |> sm'.concat_list " ")
+
+///> rust
+:# encodings_disclose_what_a_read_could_not_show =
+    testing.expect (encoding_of "utf8-lossy" = Some Lossy && encoding_of "hex" = Some Hex) "known words"
+    testing.expect (encoding_of "latin1" = None) "an unknown encoding is refused, not guessed"
+    := d = { replaced = 3u64; unmatched_globs = [ "*.md" ] }
+    := notes = [ "3 invalid UTF-8 sequences shown as U+FFFD"; "no file matched the glob *.md" ]
+    testing.expect (disclosure_notes d = notes) "every gap is named"
+    testing.expect (disclosure_notes { replaced = 0u64; unmatched_globs = [] } = []) "a clean read says nothing extra"
+    := refusal = strict_refusal Strict 2u64 |> optionm'.default_value ""
+    testing.expect (sm'.contains "utf8-lossy" refusal) "strict refuses and names the lossy read"
+    testing.expect (strict_refusal Lossy 2u64 = None && strict_refusal Strict 0u64 = None) "lossy and clean reads pass"
+    testing.expect (hex_row 16u64 [ 65u8; 255u8; 0u8 ] = "16: 41 ff 00") "hex row"

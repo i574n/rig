@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    rig_drafts_model
+    rig_drafts_store
+modules:
+    listing

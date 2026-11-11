@@ -11,15 +11,6 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum US0 {
     US0_AfterAny,
@@ -55,7 +46,7 @@ fn method2(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH1> = v3;
                 let mut v4: bool = &*v2 == "";
                 let v6: Rc<UH1> = if v4 {
@@ -76,7 +67,7 @@ fn method3(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH1> = v3;
                 let mut v4: Rc<UH1> = Rc::new(UH1::UH1_Cons(v2, v1));
                 (v0, v1) = (v3, v4);
@@ -92,7 +83,7 @@ fn method4(mut v0: Rc<RefCell<std::process::Command>>, mut v1: Rc<UH1>) -> () {
     loop {
         match Rc::unwrap_or_clone(v1) {
             UH1::UH1_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH1> = v3;
                 drop(v0.borrow_mut().arg(&*v2));
                 v1 = v3;
@@ -106,14 +97,14 @@ fn method4(mut v0: Rc<RefCell<std::process::Command>>, mut v1: Rc<UH1>) -> () {
     }
 }
 fn method6(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
-    let mut v2: Rc<str> = v0.borrow().l0.clone();
+    let v2: Rc<str> = v0.borrow().l0.clone();
     let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
 fn format_real_5(mut v0: i32) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let mut v2: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v1 }));
+    let v2: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v1 }));
     let v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
     method6(&v2, v3);
     let mut v4: Rc<str> = v2.borrow().l0.clone();
@@ -123,7 +114,7 @@ fn method7(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
-                let mut v2: Rc<UH1> = v2;
+                let v2: Rc<UH1> = v2;
                 let v3: Rc<UH0> = v3;
                 let mut v4: i32 = v1.wrapping_add(1i32);
                 (v0, v1) = (v3, v4);
@@ -131,74 +122,6 @@ fn method7(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
             }
             UH0::UH0_Nil => {
                 return v1;
-            }
-        }
-    }
-}
-fn method8(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let mut v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let mut v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method9(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let mut v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
             }
         }
     }
@@ -244,11 +167,11 @@ fn serial_ran_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<UH0>, mut v3: i32, mut 
                 };
                 match v37 {
                     US1::US1_None => {
-                        let v49: i32 = v3.wrapping_add(1i32);
-                        let v50: Rc<str> = format_real_5(v49);
-                        let v52: Rc<str> = string_concat(&["rig error: job chain link ", &*v50, " failed"]);
-                        eprintln!("{}", v52);
-                        let v54: bool = match &v1 {
+                        let v42: i32 = v3.wrapping_add(1i32);
+                        let v43: Rc<str> = format_real_5(v42);
+                        let v45: Rc<str> = string_concat(&["rig error: job chain link ", &*v43, " failed"]);
+                        eprintln!("{}", v45);
+                        let v47: bool = match &v1 {
                             US0::US0_AfterAny => {
                                 true
                             }
@@ -256,33 +179,26 @@ fn serial_ran_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<UH0>, mut v3: i32, mut 
                                 false
                             }
                         };
-                        if v54 {
-                            let v55: i32 = v4.wrapping_add(1i32);
-                            (v2, v3, v4) = (v13, v49, v55);
+                        if v47 {
+                            let v48: i32 = v4.wrapping_add(1i32);
+                            (v2, v3, v4) = (v13, v42, v48);
                             continue;
                         } else {
-                            let v57: i32 = 0i32;
-                            let v58: i32 = method7(v13, v57);
-                            let v59: Rc<str> = format_real_5(v58);
-                            let v60: Rc<str> = format_real_5(v49);
-                            let v64: Rc<str> = string_concat(&["rig job chain stopped serial ran=", &*v60, " failed=1 skipped=", &*v59]);
-                            println!("{}", v64);
+                            let v50: i32 = 0i32;
+                            let v51: i32 = method7(v13, v50);
+                            let v52: Rc<str> = format_real_5(v51);
+                            let v53: Rc<str> = format_real_5(v42);
+                            let v57: Rc<str> = string_concat(&["rig job chain stopped serial ran=", &*v53, " failed=1 skipped=", &*v52]);
+                            println!("{}", v57);
                             return 1i32;
                         }
                     }
                     US1::US1_Some(v38) => {
                         let v38: Rc<str> = v38;
-                        let v39: i32 = (v38.clone().len() as i32);
-                        let v40: i32 = 0i32;
-                        let v41: i32 = method8(v38.clone(), v39, v40);
-                        let v42: i32 = v39.wrapping_sub(1i32);
-                        let v43: Rc<str> = string_slice(&v38, v41 as i64, v42 as i64);
-                        let v44: i32 = (v43.clone().len() as i32);
-                        let v45: i32 = method9(v43.clone(), v44);
-                        let v46: Rc<str> = string_slice(&v43, 0i32 as i64, v45 as i64);
-                        println!("{}", v46);
-                        let v47: i32 = v3.wrapping_add(1i32);
-                        (v2, v3) = (v13, v47);
+                        let v39: Rc<str> = Rc::<str>::from((v38).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+                        println!("{}", v39);
+                        let v40: i32 = v3.wrapping_add(1i32);
+                        (v2, v3) = (v13, v40);
                         continue;
                     }
                 }
@@ -302,19 +218,19 @@ fn serial_ran_1(mut v0: Rc<str>, mut v1: US0, mut v2: Rc<UH0>, mut v3: i32, mut 
         }
     }
 }
-fn command_line_argument_count_10() -> i32 {
+fn command_line_argument_count_8() -> i32 {
     let mut v0: usize = std::env::args().count();
     let mut v1: i32 = ((v0) as i32);
-    let mut v2: i32 = v1.wrapping_sub(1i32);
+    let v2: i32 = v1.wrapping_sub(1i32);
     v2
 }
-fn command_line_argument_12(mut v0: i32) -> Rc<str> {
+fn command_line_argument_10(mut v0: i32) -> Rc<str> {
     let mut v1: i32 = v0.wrapping_add(1i32);
-    let mut v2: usize = ((v1) as usize);
+    let v2: usize = ((v1) as usize);
     let v3: Rc<str> = Rc::<str>::from(std::env::args().nth(v2).unwrap_or_default());
     v3
 }
-fn arguments_from_11(mut v0: i32, mut v1: i32, mut v2: Rc<UH1>) -> Rc<UH1> {
+fn arguments_from_9(mut v0: i32, mut v1: i32, mut v2: Rc<UH1>) -> Rc<UH1> {
     loop {
         let v3: bool = v1 <= v0;
         if v3 {
@@ -324,14 +240,14 @@ fn arguments_from_11(mut v0: i32, mut v1: i32, mut v2: Rc<UH1>) -> Rc<UH1> {
             let v6: i32 = v0.wrapping_add(1i32);
             let v7: bool = v0 >= 0i32;
             let v10: bool = if v7 {
-                let v8: i32 = command_line_argument_count_10();
+                let v8: i32 = command_line_argument_count_8();
                 let v9: bool = v0 < v8;
                 v9
             } else {
                 false
             };
             let mut v14: US1 = if v10 {
-                let mut v11: Rc<str> = command_line_argument_12(v0);
+                let mut v11: Rc<str> = command_line_argument_10(v0);
                 US1::US1_Some(v11)
             } else {
                 US1::US1_None
@@ -352,11 +268,11 @@ fn arguments_from_11(mut v0: i32, mut v1: i32, mut v2: Rc<UH1>) -> Rc<UH1> {
         }
     }
 }
-fn method14(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method12(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
-                let mut v2: Rc<UH1> = v2;
+                let v2: Rc<UH1> = v2;
                 let v3: Rc<UH0> = v3;
                 let mut v4: Rc<UH0> = Rc::new(UH0::UH0_Cons(v2, v1));
                 (v0, v1) = (v3, v4);
@@ -368,7 +284,7 @@ fn method14(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn segments_13(mut v0: Rc<UH1>, mut v1: Rc<UH1>, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn segments_11(mut v0: Rc<UH1>, mut v1: Rc<UH1>, mut v2: Rc<UH0>) -> Rc<UH0> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v8, v9) => {
@@ -393,12 +309,12 @@ fn segments_13(mut v0: Rc<UH1>, mut v1: Rc<UH1>, mut v2: Rc<UH0>) -> Rc<UH0> {
                 let mut v4: Rc<UH1> = method3(v1, v3);
                 let v5: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
                 let v6: Rc<UH0> = Rc::new(UH0::UH0_Cons(v4, v5));
-                return method14(v2, v6);
+                return method12(v2, v6);
             }
         }
     }
 }
-fn head_from_15(mut v0: Rc<UH1>, mut v1: US0, mut v2: Rc<str>, mut v3: bool, mut v4: bool) -> US3 {
+fn head_from_13(mut v0: Rc<UH1>, mut v1: US0, mut v2: Rc<str>, mut v3: bool, mut v4: bool) -> US3 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v6, v7) => {
@@ -446,11 +362,11 @@ fn head_from_15(mut v0: Rc<UH1>, mut v1: US0, mut v2: Rc<str>, mut v3: bool, mut
         }
     }
 }
-fn method17(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
+fn method15(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH1> = v3;
                 let mut v4: i32 = v1.wrapping_add(1i32);
                 (v0, v1) = (v3, v4);
@@ -462,14 +378,14 @@ fn method17(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
         }
     }
 }
-fn short_link_16(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
+fn short_link_14(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
-                let mut v2: Rc<UH1> = v2;
+                let v2: Rc<UH1> = v2;
                 let v3: Rc<UH0> = v3;
                 let mut v4: i32 = 0i32;
-                let v5: i32 = method17(v2, v4);
+                let v5: i32 = method15(v2, v4);
                 let v6: bool = v5 < 3i32;
                 if v6 {
                     return v1;
@@ -485,7 +401,7 @@ fn short_link_16(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
         }
     }
 }
-fn method19(mut v0: Option<Rc<str>>) -> Option<Rc<str>> {
+fn method17(mut v0: Option<Rc<str>>) -> Option<Rc<str>> {
     v0
 }
 fn closure1() -> Rc<dyn Fn((Rc<str>)) -> US1> {
@@ -494,14 +410,14 @@ fn closure1() -> Rc<dyn Fn((Rc<str>)) -> US1> {
         US1::US1_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn current_executable_18() -> Rc<str> {
+fn current_executable_16() -> Rc<str> {
     let mut v0: Option<std::path::PathBuf> = std::env::current_exe().ok();
-    let mut v2: bool = true; let _optionm_map_ = v0.map(|x| { //;
+    let v2: bool = true; let _optionm_map_ = v0.map(|x| { //;
     let mut v4: std::path::PathBuf = x;
     let v5: Rc<str> = Rc::<str>::from(v4.to_string_lossy().as_ref());
     let v7: bool = true; v5 });
     let v9: Option<Rc<str>> = _optionm_map_;
-    let v10: Option<Rc<str>> = method19(v9);
+    let v10: Option<Rc<str>> = method17(v9);
     let mut v11: Rc<dyn Fn((Rc<str>)) -> US1> = closure1();
     let mut v12: Option<US1> = v10.map(|x| v11(x));
     let mut v14: US1 = US1::US1_None;
@@ -520,12 +436,12 @@ fn current_executable_18() -> Rc<str> {
 }
 fn serial_run_0() -> i32 {
     let mut v0: i32 = 2i32;
-    let mut v1: i32 = command_line_argument_count_10();
-    let mut v2: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-    let v3: Rc<UH1> = arguments_from_11(v0, v1, v2);
+    let mut v1: i32 = command_line_argument_count_8();
+    let v2: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
+    let v3: Rc<UH1> = arguments_from_9(v0, v1, v2);
     let mut v4: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
     let v5: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let v6: Rc<UH0> = segments_13(v3, v4, v5);
+    let v6: Rc<UH0> = segments_11(v3, v4, v5);
     let v44: US2 = match Rc::unwrap_or_clone(v6) {
         UH0::UH0_Cons(v9, v10) => {
             let v9: Rc<UH1> = v9;
@@ -534,7 +450,7 @@ fn serial_run_0() -> i32 {
             let mut v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
             let v13: bool = false;
             let mut v14: bool = false;
-            let v15: US3 = head_from_15(v9, v11, v12, v13, v14);
+            let v15: US3 = head_from_13(v9, v11, v12, v13, v14);
             match v15 {
                 US3::US3_None => {
                     let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one, --after-ok with --ok, and prints every id; --serial runs the links in order inside one job, so a waiting link holds no process)"); } LIT.with(|lit| lit.clone()) };
@@ -546,7 +462,7 @@ fn serial_run_0() -> i32 {
                     let v20: bool = v20;
                     let v21: bool = v21;
                     let v22: i32 = 1i32;
-                    let mut v23: i32 = short_link_16(v10.clone(), v22);
+                    let mut v23: i32 = short_link_14(v10.clone(), v22);
                     let v24: i32 = 0i32;
                     let v25: i32 = method7(v10.clone(), v24);
                     let v26: bool = v25 == 0i32;
@@ -584,7 +500,7 @@ fn serial_run_0() -> i32 {
             let v49: bool = v49;
             let v50: bool = v50;
             let v51: Rc<UH0> = v51;
-            let v52: Rc<str> = current_executable_18();
+            let v52: Rc<str> = current_executable_16();
             let v53: i32 = 0i32;
             let v54: i32 = 0i32;
             serial_ran_1(v52, v47, v51, v53, v54)

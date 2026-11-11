@@ -1,7 +1,7 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-use rig_do_model::{expectation, write_mode, replace_count, rule_matcher, rule_list, step, steps};
+use rig_do_model::{expectation, replace_count, rule_list, rule_matcher, step, steps, write_mode};
 fn string_concat(parts: &[&str]) -> Rc<str> {
     let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
     let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
@@ -241,38 +241,45 @@ fn rules_over_19(mut v0: Rc<rule_list>, mut v1: bool, mut v2: Rc<str>, mut v3: R
                         if v13 {
                             let v17: std::rc::Rc<(std::rc::Rc<str>, u64, std::rc::Rc<str>)> = match &v11 {
                                 rule_matcher::rule_matcher_Literal => {
-                                    replaced_in_20(v3.clone(), v8.clone(), v9)
+                                    replaced_in_20(v3.clone(), v8.clone(), v9.clone())
                                 }
                                 rule_matcher::rule_matcher_Pattern => {
-                                    replaced_by_pattern_21(v3.clone(), v8.clone(), v9)
+                                    replaced_by_pattern_21(v3.clone(), v8.clone(), v9.clone())
                                 }
                             };
-                            let v21: Rc<str> = match &v11 {
+                            let v24: Rc<str> = match &v11 {
                                 rule_matcher::rule_matcher_Literal => {
                                     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                                     v18
                                 }
                                 rule_matcher::rule_matcher_Pattern => {
-                                    pattern_problem_22(v8.clone())
+                                    let v19: Rc<str> = pattern_problem_22(v8.clone());
+                                    let v20: bool = &*v19 != "";
+                                    if v20 {
+                                        v19
+                                    } else {
+                                        let v21: Rc<str> = rig_do_replacement::rig_do_replacement_problem(&v8, &v9);
+                                        v21
+                                    }
                                 }
                             };
-                            let v22: u64 = v17.clone().1;
-                            let v23: Rc<str> = v17.0.clone();
-                            let v24: u64 = v4.wrapping_add(v22);
-                            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
-                            let v26: Rc<str> = v17.2.clone();
-                            let v27: Rc<str> = joined_with_23(v25, v5, v26);
-                            let v28: bool = &*v21 == "";
-                            let v35: Rc<str> = if v28 {
-                                count_problem_25(v10, v22, v1, v8.clone())
+                            let v25: u64 = v17.clone().1;
+                            let v26: Rc<str> = v17.0.clone();
+                            let v27: u64 = v4.wrapping_add(v25);
+                            let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
+                            let v29: Rc<str> = v17.2.clone();
+                            let v30: Rc<str> = joined_with_23(v28, v5, v29);
+                            let v31: bool = &*v24 == "";
+                            let v38: Rc<str> = if v31 {
+                                count_problem_25(v10, v25, v1, v8.clone())
                             } else {
-                                let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("invalid pattern "); } LIT.with(|lit| lit.clone()) };
-                                let v31: Rc<str> = quoted_27(v8.clone());
-                                let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(": "); } LIT.with(|lit| lit.clone()) };
-                                let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                concat5_24(v30, v31, v32, v21, v33)
+                                let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("invalid pattern "); } LIT.with(|lit| lit.clone()) };
+                                let v34: Rc<str> = quoted_27(v8.clone());
+                                let v35: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(": "); } LIT.with(|lit| lit.clone()) };
+                                let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                concat5_24(v33, v34, v35, v24, v36)
                             };
-                            let v39: Rc<str> = match v11 {
+                            let v42: Rc<str> = match v11 {
                                 rule_matcher::rule_matcher_Literal => {
                                     sites_of_29(v3, v8, v2.clone())
                                 }
@@ -280,8 +287,8 @@ fn rules_over_19(mut v0: Rc<rule_list>, mut v1: bool, mut v2: Rc<str>, mut v3: R
                                     pattern_sites_of_30(v3, v8, v2.clone())
                                 }
                             };
-                            let v40: Rc<str> = lines_joined_31(v7, v39);
-                            (v0, v3, v4, v5, v6, v7) = (v12, v23, v24, v27, v35, v40);
+                            let v43: Rc<str> = lines_joined_31(v7, v42);
+                            (v0, v3, v4, v5, v6, v7) = (v12, v26, v27, v30, v38, v43);
                             continue;
                         } else {
                             return (v3, v4, v5, v6, v7);

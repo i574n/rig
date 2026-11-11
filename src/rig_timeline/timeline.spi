@@ -1,0 +1,76 @@
+///- --package .
+:# timeline static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| timeline_event =
+    | NoteAdded :: string * string -> timeline_event
+    | StatusChanged :: string * string -> timeline_event
+    | JobStarted :: string * string -> timeline_event
+    | JobEnded :: string * i32 -> timeline_event
+    | WindowOpened :: string -> timeline_event
+    | Landed :: string -> timeline_event
+    | DraftWritten :: string -> timeline_event
+
+:== stamped = { at : string; team : string; event : timeline_event }
+
+:== window = { from : string; until : string }
+
+:~ pad2 (n : i64) : string = ? n < 10i64 ?> "0" ++# sm'.show n |: sm'.show n
+
+:~ iso_of_ms (ms : u64) : string =
+    := total_minutes = (conv (ms / 60000u64) : i64)
+    := days = total_minutes / 1440i64
+    := minute_of_day = total_minutes - days * 1440i64
+    := z = days + 719468i64
+    := era = z / 146097i64
+    := doe = z - era * 146097i64
+    := yoe = (doe - doe / 1460i64 + doe / 36524i64 - doe / 146096i64) / 365i64
+    := doy = doe - (365i64 * yoe + yoe / 4i64 - yoe / 100i64)
+    := mp = (5i64 * doy + 2i64) / 153i64
+    := day = doy - (153i64 * mp + 2i64) / 5i64 + 1i64
+    := month = ? mp < 10i64 ?> mp + 3i64 |: mp - 9i64
+    := year = yoe + era * 400i64 + (? month <= 2i64 ?> 1i64 |: 0i64)
+    := clock = pad2 (minute_of_day / 60i64) ++# ":" ++# pad2 (minute_of_day - minute_of_day / 60i64 * 60i64)
+    sm'.show year ++# "-" ++# pad2 month ++# "-" ++# pad2 day ++# "T" ++# clock ++# "Z"
+
+:~ key_of (~at : string) : i64 =
+    := digits = at |> sm'.replace "-" "" |> sm'.replace "T" "" |> sm'.replace ":" "" |> sm'.replace "Z" ""
+    (convert.try_convert digits : option i64) |> optionm'.default_value 0i64
+
+:~ ^ inserted (e : stamped) (sorted : list stamped) : list stamped =
+    ?= sorted ?|
+    | [] => [ e ]
+    | head :: rest => ? key_of e.at < key_of head.at ?> e :: sorted |: head :: inserted e rest
+
+:~ in_view (teams : list string) (w : window) (e : stamped) : bool =
+    := team_ok = teams = [] || listm'.contains e.team teams
+    team_ok && key_of e.at >= key_of w.from && key_of e.at < key_of w.until
+
+:~ timeline (streams : list (list stamped)) (teams : list string) (w : window) : list stamped =
+    streams
+    |> listm.concat
+    |> listm'.filter (in_view teams w)
+    |> listm.fold (\ (sorted : list stamped) (e : stamped) => inserted e sorted) []
+
+///> rust
+:# streams_merge_into_one_time_order_filtered_by_team_and_window =
+    testing.expect (iso_of_ms 0u64 = "1970-01-01T00:00Z") "the epoch"
+    testing.expect (iso_of_ms 1794221691845u64 = "2026-11-09T10:54Z") "a job id stamp"
+    testing.expect (iso_of_ms 951782400000u64 = "2000-02-29T00:00Z") "a leap day in a century year"
+    := notes =
+        [
+            { at = "2026-11-09T10:50Z"; team = "rig"; event = NoteAdded ("A-1", "rig") };
+            { at = "2026-11-09T11:30Z"; team = "org"; event = StatusChanged ("B-2", "Done") }
+        ]
+    := jobs =
+        [
+            { at = iso_of_ms 1794221691845u64; team = "rig"; event = JobStarted ("train", "moon") };
+            { at = "2026-11-09T09:00Z"; team = "rig"; event = JobEnded ("probe", 0i32) }
+        ]
+    := w = { from = "2026-11-09T10:00Z"; until = "2026-11-09T12:00Z" }
+    := all = timeline [ notes; jobs ] [] w
+    := order = all |> listm.map (\ (e : stamped) => e.at)
+    testing.expect (order = [ "2026-11-09T10:50Z"; "2026-11-09T10:54Z"; "2026-11-09T11:30Z" ]) "merged, windowed"
+    testing.expect (listm.length (timeline [ notes; jobs ] [ "org" ] w) = 1i32) "one team's view"

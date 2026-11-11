@@ -1,0 +1,59 @@
+///- --package .
+:# work static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| capability =
+    | Compiler :: capability
+    | Gpu :: capability
+    | NodeHeavy :: capability
+    | BoxOnly :: capability
+    | UserDecision :: capability
+    | Network :: capability
+
+:| owner_kind =
+    | LaneOwned :: string -> owner_kind
+    | RoleOwned :: string -> owner_kind
+    | UserOwned :: owner_kind
+    | MachineOwned :: string -> owner_kind
+
+:== lane_profile = { lane : string; roles : list string; holds : list capability }
+
+:| owner_reading =
+    | Owner :: owner_kind -> owner_reading
+    | UnknownOwner :: string -> owner_reading
+
+:~ owner_of (~word : string) (~value : string) : owner_reading =
+    ? word = "lane" && value <> ""
+    ?> Owner (LaneOwned value)
+    |? word = "role" && value <> ""
+    ?> Owner (RoleOwned value)
+    |? word = "user"
+    ?> Owner UserOwned
+    |? word = "machine" && value <> ""
+    ?> Owner (MachineOwned value)
+    |: UnknownOwner (word ++# ":" ++# value)
+
+:~ owner_fits (profile : lane_profile) (owner : owner_kind) : bool =
+    ?= owner ?|
+    | LaneOwned lane => lane = profile.lane
+    | RoleOwned role => listm'.contains role profile.roles
+    | UserOwned => !-
+    | MachineOwned _ => !-
+
+:~ pullable (profile : lane_profile) (owner : owner_kind) (requires : list capability) : bool =
+    := lacking = requires |> listm'.filter (\ (c : capability) => listm'.contains c profile.holds |> not)
+    owner_fits profile owner && lacking = [] && (listm'.contains UserDecision requires |> not)
+
+///> rust
+:# a_lane_pulls_only_what_it_owns_or_holds_the_role_and_capabilities_for =
+    := org = { lane = "org"; roles = [ "grooming"; "node-ops" ]; holds = [ Network; NodeHeavy ] }
+    testing.expect (pullable org (LaneOwned "org") []) "its own lane"
+    testing.expect (pullable org (RoleOwned "grooming") [ Network ]) "a role it holds, with the capability"
+    testing.expect (pullable org (RoleOwned "grooming") [ Gpu ] |> not) "a missing capability blocks it"
+    testing.expect (pullable org (LaneOwned "rig") [] |> not) "another lane's item"
+    testing.expect (pullable org UserOwned [] |> not) "a user item goes to the user"
+    testing.expect (pullable org (RoleOwned "grooming") [ UserDecision ] |> not) "a user decision never goes to a lane"
+    testing.expect (owner_of "others" "" = UnknownOwner "others:") "no others bucket: an unknown owner is reported"
+    testing.expect (owner_of "role" "grooming" = Owner (RoleOwned "grooming")) "a role owner"

@@ -9,11 +9,12 @@
     shows run.stdout part
 
 := backlog () : string =
-    "inl task_kit_a () = Task (\"KIT-A\", \"claim item\", Story, P1, D2, 0u32, Planned, \"\", \"team:kit\", \"current\", "
-    ^^ "\"current\")\ninl task_kit_b () = Task (\"KIT-B\", \"done item\", Story, P1, D2, 100u32, Done, \"\", \"kit\", "
-    ^^ "\"current\", \"current\")\ninl task_main_c () = Task (\"MAIN-C\", \"other team\", Story, P0, D1, 0u32, "
-    ^^ "Planned, \"\", \"team:main\", \"current\", \"current\")\ninl task_kit_d () = Task (\"KIT-D\", \"overlap item\", "
-    ^^ "Story, P4, D2, 0u32, Planned, \"\", \"kit\", \"current\", \"current\")\ninl main () : i32 = 0i32\n"
+    "inl task_kit_a () = Task (\"KIT-A\", \"claim item\", Story, P1, D2, 0u32, Planned, \"\", \"team:kit\", "
+    ^^ "\"current\", \"current\")\ninl task_kit_b () = Task (\"KIT-B\", \"done item\", Story, P1, D2, 100u32, Done, "
+    ^^ "\"\", \"kit\", \"current\", \"current\")\n"
+    ^^ "inl task_main_c () = Task (\"MAIN-C\", \"other team\", Story, P0, D1, 0u32, Planned, \"\", \"team:main\", "
+    ^^ "\"current\", \"current\")\ninl task_kit_d () = Task (\"KIT-D\", \"overlap item\", Story, P4, D2, 0u32, "
+    ^^ "Planned, \"\", \"kit\", \"current\", \"current\")\ninl main () : i32 = 0i32\n"
 
 := next_any (root : fixture_root) (~lane : string) : cli_run =
     := listed = Arg ("--any", Arg ("--as", Arg (lane, NoArgs)))

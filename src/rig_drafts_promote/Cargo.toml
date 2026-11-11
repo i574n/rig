@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "promoting.spi"
+output = "promoting.rs"
+
+[package]
+name = "rig-drafts-promote"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_drafts_promote"
+path = "promoting.rs"

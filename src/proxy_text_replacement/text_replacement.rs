@@ -506,7 +506,7 @@ fn text_replace_outcome_1() -> US0 {
                                             } else {
                                                 let v58: bool = regular_file_4(v48.clone());
                                                 if v58 {
-                                                    let mut v59: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v48).unwrap_or_default());
+                                                    let mut v59: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v48).unwrap_or_default().as_str());
                                                     let v60: u64 = v59.match_indices(&*v44).count() as u64;
                                                     let v67: bool = match &v43 {
                                                         US4::US4_EveryMatch => {
@@ -536,7 +536,7 @@ fn text_replace_outcome_1() -> US0 {
                                                         };
                                                         match v42 {
                                                             US2::US2_ApplyReplacement => {
-                                                                let v97: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v48).unwrap_or_default());
+                                                                let v97: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v48).unwrap_or_default().as_str());
                                                                 let v98: bool = &*v97 != &*v59;
                                                                 if v98 {
                                                                     let v100: Rc<str> = string_concat(&["text-replace: ", &*v48, " changed since it was read; nothing written, run it again"]);

@@ -1,0 +1,69 @@
+///- --package .
+:# dupes static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== memory_body = { name : string; body : string }
+
+:| similarity =
+    | DupCandidate :: string * string * i32 -> similarity
+
+:= shingle_words () : i32 = 6i32
+
+:= dup_per_cent () : i32 = 35i32
+
+:~ word_char (~c : string) : bool = sm'.index_of c "abcdefghijklmnopqrstuvwxyz0123456789" >= 0i32
+
+:~ ^ words_from (~text : string) (at : i32) (~current : string) (found : list string) : list string =
+    := flushed = ? current = "" ?> found |: current :: found
+    ? at >= sm'.length text
+    ?> listm.rev flushed
+    |:
+        := c = sm'.slice at at text
+        ? word_char c ?> words_from text (at + 1i32) (current ++# c) found |: words_from text (at + 1i32) "" flushed
+
+:~ words_of (~body : string) : list string = words_from (sm'.to_lower body) 0i32 "" []
+
+:~ ^ shingles_from (words : list string) (found : list string) : list string =
+    := head = words |> listm'.take_ (shingle_words ())
+    ? listm.length head < shingle_words ()
+    ?> found
+    |:
+        := shingle = sm'.concat_list " " head
+        := kept = ? listm'.contains shingle found ?> found |: shingle :: found
+        ?= words ?|
+        | _ :: rest => shingles_from rest kept
+        | [] => kept
+
+:~ shingles_of (~body : string) : list string = shingles_from (words_of body) []
+
+:~ per_cent_shared (a : list string) (b : list string) : i32 =
+    := shared = a |> listm'.filter (\ (s : string) => listm'.contains s b) |> listm.length
+    := total = listm.length a + listm.length b - shared
+    ? total = 0i32 ?> 0i32 |: shared * 100i32 / total
+
+:~ ^ pairs_from (bodies : list (string * list string)) (found : list similarity) : list similarity =
+    ?= bodies ?|
+    | [] => listm.rev found
+    | (name, mine) :: rest =>
+        := judged = \ (got : list similarity) ((other, theirs) : string * list string) =>
+            := p = per_cent_shared mine theirs
+            ? p >= dup_per_cent () ?> DupCandidate (name, other, p) :: got |: got
+        pairs_from rest (rest |> listm.fold judged found)
+
+:~ dup_candidates (memories : list memory_body) : list similarity =
+    := shingled = memories |> listm.map (\ (m : memory_body) => m.name, shingles_of m.body)
+    := non_empty = shingled |> listm'.filter (\ ((_, s) : string * list string) => s <> [])
+    pairs_from non_empty []
+
+///> rust
+:# memories_sharing_a_third_of_their_six_word_runs_are_dup_candidates =
+    := expected_words = [ "never"; "stop"; "an"; "install"; "after"; "apply" ]
+    testing.expect (words_of "Never stop, an INSTALL-after apply!" = expected_words) "lower-cased a-z0-9 runs"
+    testing.expect (shingles_of "a b c d e f g" = [ "b c d e f g"; "a b c d e f" ]) "two six-word runs"
+    := a = { name = "a.md"; body = "one two three four five six seven eight" }
+    := b = { name = "b.md"; body = "one two three four five six seven nine" }
+    := c = { name = "c.md"; body = "nothing at all in common with the others here" }
+    testing.expect (dup_candidates [ a; b; c ] = [ DupCandidate ("a.md", "b.md", 50i32) ]) "a and b share 2 of 4 runs"
+    testing.expect (dup_candidates [ a; { name = "short.md"; body = "too short" } ] = []) "no runs, no pair"

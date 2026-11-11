@@ -1,0 +1,70 @@
+///- --package .
+:# external static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| job_handle =
+    | JobHandle :: (\? h. h * (h -> string)) -> job_handle
+
+:== ran = { program : string; code : i32; output : string }
+
+:== started = { label : string; handle : job_handle }
+
+:== settled = { handle_text : string; code : i32 }
+
+:== stopped = { handle_text : string; was_running : bool }
+
+:| external_statement receipt =
+    | RunProgram :: string * list string -> external_statement ran
+    | StartJob :: string * string * list string -> external_statement started
+    | WaitJob :: job_handle -> external_statement settled
+    | StopJob :: job_handle -> external_statement stopped
+
+:== external_host =
+    {
+        run : string -> list string -> i32 * string
+        start : string -> list string -> job_handle
+        wait : job_handle -> i32
+        stop : job_handle -> bool
+    }
+
+:= handle_text (j : job_handle) : string =
+    ?= j ?|
+    | JobHandle payload =>
+        := \? h. value, show = payload
+        show value
+
+:= run_external \* receipt. (host : external_host) (statement : external_statement receipt) : receipt =
+    ?= statement ?|
+    | RunProgram (program, args) =>
+        := code, output = host.run program args
+        { program = program; code = code; output = output }
+    | StartJob (label, program, args) => { label = label; handle = host.start program args }
+    | WaitJob j => { handle_text = handle_text j; code = host.wait j }
+    | StopJob j => { handle_text = handle_text j; was_running = host.stop j }
+
+:= pid_handle (pid : u64) : job_handle = JobHandle (\? (pid, \ (p : u64) => "pid " ++# sm'.show p))
+
+:= job_id_handle (~id : string) : job_handle = JobHandle (\? (id, \ (s : string) => "job " ++# s))
+
+:= fake_host () : external_host =
+    {
+        run = \ (program : string) (args : list string) => 0i32, program ++# " " ++# sm'.concat_list " " args
+        start = \ (program : string) (_ : list string) =>
+            ? program = "pwsh" ?> pid_handle 42u64 |: job_id_handle "job-7"
+        wait = \ (j : job_handle) => ? handle_text j = "pid 42" ?> 0i32 |: 143i32
+        stop = \ (j : job_handle) => handle_text j = "job job-7"
+    }
+
+///> rust
+:# effects_return_their_receipts_and_handles_hide_their_representation =
+    := host = fake_host ()
+    := r = run_external host (RunProgram ("git", [ "status"; "--short" ]))
+    testing.expect (r.code = 0i32 && r.output = "git status --short") "a run receipt"
+    := p = run_external host (StartJob ("probe", "pwsh", [ "-File"; "x.ps1" ]))
+    := j = run_external host (StartJob ("train", "kit", [ "job"; "start" ]))
+    := texts = [ p.handle; j.handle ] |> listm.map handle_text
+    testing.expect (texts = [ "pid 42"; "job job-7" ]) "a pid and a job id in one list of handles"
+    testing.expect ((run_external host (WaitJob p.handle)).code = 0i32) "the process settled"
+    testing.expect ((run_external host (StopJob j.handle)).was_running) "the job was stopped"

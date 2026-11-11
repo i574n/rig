@@ -177,7 +177,8 @@
 ///> rust
 :# a_release_train_command_names_its_train_and_root =
     := command =
-        "\"C:\\Users\\me\\pwsh.exe\" -NoProfile -File C:\\work\\kit\\scripts\\release-train.ps1 -Name train5e-20261031 -Snapshot"
+        "\"C:\\Users\\me\\pwsh.exe\" -NoProfile -File C:\\work\\kit\\scripts\\release-train.ps1 -Name "
+        ^^ "train5e-20261031 -Snapshot"
     expect (train_name_of command = "train5e-20261031") "the name stops at the next flag"
     expect (train_root_of command = "C:/work/kit") "the root is the script's repo"
     expect (train_name_of "pwsh -File run.ps1 -Name x" = "") "only release-train.ps1 counts"

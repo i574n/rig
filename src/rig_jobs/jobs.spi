@@ -7,6 +7,18 @@
 :~ job_directory (~id : string) : string = joined (jobs_root ()) id
 :~ job_file (~id : string) (~name : string) : string = joined (job_directory id) name
 
+:~ machine_defaults_file () : string = joined (jobs_root ()) "defaults.env"
+
+:~ machine_defaults_applied () : () =
+    := apply = \ (count : i32) (d : env_default) =>
+        ? env.get_environment_variable d.name <> ""
+        ?> count
+        |:
+            env.set_environment_variable d.name d.value
+            count + 1i32
+    := _ = defaults_of (text_or_empty (machine_defaults_file ())) |> listm.fold apply 0i32
+    ()
+
 :~ job_environment_adopted (~id : string) : snapshot_verdict =
     := path = job_file id "env"
     ? file_exists path ?>
@@ -14,10 +26,13 @@
         := verdict = snapshot_verdict_of snapshot (\ name => env.get_environment_variable name <> "")
         ? verdict = SnapshotUsable ?>
             env.environment_restored snapshot "KIT_JOB_"
+            machine_defaults_applied ()
             file_system.file_delete path
             verdict
         |: verdict
-    |: SnapshotUsable
+    |:
+        machine_defaults_applied ()
+        SnapshotUsable
 
 :~ job_record_of (~id : string) : job_record =
     record_at
@@ -41,7 +56,9 @@
         ? file_exists (joined (joined (jobs_root ()) "held") id) || file_exists (start_request_path id)
         ?> Live JobPending
         |? file_exists (job_file id "placement")
-        ?> Live JobPlaced
+        ?>
+            := settled_text = text_or_empty (job_file id "placed-exit")
+            ? settled_text = "" ?> Live JobPlaced |: job_state_of { record ?| exit_text = settled_text }
         |? supervisor <> 0u64 && process_alive supervisor
         ?> Live JobRunning
         |:
@@ -154,14 +171,16 @@
 
 := known_job (~id : string) : bool = starts_with id "job-" && directory_exists (job_directory id)
 
-:~ ^ waited (~id : string) (deadline : u64) (~watch : u64) : job_state =
+:~ ^ waited_napping (~id : string) (deadline : u64) (~watch : u64) (nap : u64) : job_state =
     := state = shared_state id
     ? state_settled state || now_ms () > deadline || process_alive watch = !-
     ?> state
     |:
-        sleep_ms 250u64
-        waited id deadline watch
+        sleep_ms nap
+        waited_napping id deadline watch (next_nap nap)
+
+:~ waited (~id : string) (deadline : u64) (~watch : u64) : job_state = waited_napping id deadline watch 250u64
 
 :~ watched_caller () : u64 =
-    := inherited = $'std::env::var("RIG_JOB_WATCH").or_else(|_| std::env::var("KIT_JOB_WATCH")).ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0)' : u64
+    := inherited = decimal_u64 (rust_std_env.model.variable_twin "JOB_WATCH")
     ? inherited = 0u64 ?> parent_pid () |: inherited

@@ -1,0 +1,81 @@
+///- --package .
+:# drift static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| owner_state =
+    | OwnerLive :: i32 -> owner_state
+    | OwnerDone :: owner_state
+    | OwnerAbsent :: owner_state
+
+:| base_state =
+    | BaseMatches :: base_state
+    | BaseMoved :: base_state
+    | BaseMissing :: base_state
+    | LiveGone :: base_state
+
+:== draft_file = { name : string; base : base_state }
+
+:== draft_dir = { repo : string; item : string; owner : owner_state; files : list draft_file }
+
+:| drift =
+    | DoneOwner :: string * string -> drift
+    | AbsentOwner :: string * string -> drift
+    | SilentOwner :: string * string * i32 -> drift
+    | NoBase :: string * string -> drift
+    | StaleDraft :: string * string -> drift
+    | TargetGone :: string * string -> drift
+
+:~ silent_days () : i32 = 3i32
+
+:~ owner_drift (d : draft_dir) : list drift =
+    ?= d.owner ?|
+    | OwnerDone => [ DoneOwner (d.repo, d.item) ]
+    | OwnerAbsent => [ AbsentOwner (d.repo, d.item) ]
+    | OwnerLive days ?& days >= silent_days () => [ SilentOwner (d.repo, d.item, days) ]
+    | OwnerLive _ => []
+
+:~ file_drift (d : draft_dir) (f : draft_file) : list drift =
+    := at = d.item ++# "/" ++# f.name
+    ?= f.base ?|
+    | BaseMatches => []
+    | BaseMoved => [ StaleDraft (d.repo, at) ]
+    | BaseMissing => [ NoBase (d.repo, at) ]
+    | LiveGone => [ TargetGone (d.repo, at) ]
+
+:~ drift_of (d : draft_dir) : list drift =
+    := files = d.files |> listm.fold (\ (acc : list drift) (f : draft_file) => listm.append acc (file_drift d f)) []
+    listm.append (owner_drift d) files
+
+:~ archive_candidate (x : drift) : bool =
+    ?= x ?|
+    | DoneOwner _ => !+
+    | AbsentOwner _ => !+
+    | SilentOwner _ => !+
+    | _ => !-
+
+:~ drift_line (x : drift) : string =
+    ?= x ?|
+    | DoneOwner (repo, item) => "drafts / " ++# repo ++# "/" ++# item ++# " owner Done: archive candidate"
+    | AbsentOwner (repo, item) => "drafts / " ++# repo ++# "/" ++# item ++# " no such item: archive candidate"
+    | SilentOwner (repo, item, days) =>
+        "drafts / " ++# repo ++# "/" ++# item ++# " owner silent " ++# sm'.show days ++# " days: archive candidate"
+    | NoBase (repo, at) => "drafts / " ++# repo ++# "/" ++# at ++# " has no .base"
+    | StaleDraft (repo, at) => "drafts / " ++# repo ++# "/" ++# at ++# " stale: the live file moved under the draft"
+    | TargetGone (repo, at) => "drafts / " ++# repo ++# "/" ++# at ++# " targets a live file that is gone"
+
+///> rust
+:# a_live_owned_draft_with_matching_bases_is_clean_and_every_drift_is_named =
+    := clean = { repo = "x"; item = "X-A"; owner = OwnerLive 1i32; files = [ { name = "a.spi"; base = BaseMatches } ] }
+    testing.expect (drift_of clean = []) "live owner, base matches"
+    testing.expect (drift_of { clean ?| owner = OwnerDone } = [ DoneOwner ("x", "X-A") ]) "a Done owner"
+    testing.expect (drift_of { clean ?| owner = OwnerLive 4i32 } = [ SilentOwner ("x", "X-A", 4i32) ]) "a silent owner"
+    := files = [ { name = "b.spi"; base = BaseMoved }; { name = "c.spi"; base = BaseMissing } ]
+    := found = drift_of { clean ?| owner = OwnerAbsent; files = files }
+    := expected = [ AbsentOwner ("x", "X-A"); StaleDraft ("x", "X-A/b.spi"); NoBase ("x", "X-A/c.spi") ]
+    testing.expect (found = expected) "the owner, a stale draft and a missing base"
+    := archivable : i32 = found |> listm'.filter archive_candidate |> listm.length
+    testing.expect (archivable = 1i32) "only the owner finding is an archive candidate"
+    := line = "drafts / x/X-A/b.spi stale: the live file moved under the draft"
+    testing.expect (drift_line (StaleDraft ("x", "X-A/b.spi")) = line) "one line per finding"

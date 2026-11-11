@@ -7,8 +7,7 @@
     elapsed.as_millis() as u64).unwrap_or(0)' : u64
 :~ joined (~base : string) (~name : string) : string = $'std::rc::Rc::<str>::from(std::path::Path::new(&*!base).join(&\
     *!name).to_string_lossy().as_ref())' : string
-:~ file_text (~path : string) : string = $'std::rc::Rc::<str>::from(std::fs::read_to_string(&*!path).unwrap_or_default\
-    ())' : string
+:~ file_text (~path : string) : string = file_system.read_text_or_empty path
 :~ path_exists (~path : string) : bool = $'std::path::Path::new(&*!path).exists()' : bool
 :~ text_created (~path : string) (~text : string) : string =
     $'std::rc::Rc::<str>::from({ let path = std::path::Path::new(&*!path); \

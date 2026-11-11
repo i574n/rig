@@ -1,0 +1,95 @@
+///- --package .
+:# catalogue static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| lint_smell =
+    | DeepIf :: i32 * i32 -> lint_smell
+    | OptionPresenceMatch :: i32 -> lint_smell
+
+:= deep_if_limit () : i32 = 4i32
+
+:~ ^ leading_spaces (~text : string) (at : i32) : i32 =
+    ? at < sm'.length text && sm'.slice at at text = " " ?> leading_spaces text (at + 1i32) |: at
+
+:~ opens_if (~text : string) : bool = sm'.starts_with "? " (sm'.trim text)
+
+:~ inline_ifs (~text : string) : i32 = listm.length (sm'.split_list "?> ? " text) - 1i32
+
+:~ depth_of_block (lines : list string) : i32 =
+    := step = \ ((stack, deepest) : list i32 * i32) (line : string) =>
+        := indent = leading_spaces line 0i32
+        := continues = sm'.starts_with "?>" (sm'.trim line) || sm'.starts_with "|" (sm'.trim line)
+        := still_open = stack |> listm'.filter (\ (level : i32) => level < indent || continues && level = indent)
+        := now = ? opens_if line ?> indent :: still_open |: still_open
+        := depth = listm.length now + inline_ifs line
+        now, (? depth > deepest ?> depth |: deepest)
+    := _, deepest = lines |> listm.fold step ([], 0i32)
+    deepest
+
+:~ blocks_of (~text : string) : list (i32 * list string) =
+    := lines = sm'.split_list "\n" (sm'.replace "\r" "" text)
+    := step = \ ((number, blocks) : i32 * list (i32 * list string)) (line : string) =>
+        := top = sm'.starts_with ":" line && (sm'.starts_with ":<" line |> not)
+        ?= blocks ?|
+        | (start, body) :: rest ?& top |> not => number + 1i32, (start, listm.append body [ line ]) :: rest
+        | _ => number + 1i32, ? top ?> (number, [ line ]) :: blocks |: blocks
+    := _, blocks = lines |> listm.fold step (1i32, [])
+    listm.rev blocks
+
+:~ deep_ifs (~text : string) : list lint_smell =
+    := judged = \ ((start, body) : i32 * list string) =>
+        := depth = depth_of_block body
+        ? depth >= deep_if_limit () ?> [ DeepIf (start, depth) ] |: []
+    blocks_of text |> listm.map judged |> listm.concat
+
+:~ presence_match (~first : string) (~second : string) (~third : string) : bool =
+    := head = sm'.trim first
+    := some_arm = sm'.replace " " "" (sm'.trim second)
+    := none_arm = sm'.replace " " "" (sm'.trim third)
+    := positive = some_arm = "|Some_=>!+" && none_arm = "|None=>!-"
+    := negative = some_arm = "|Some_=>!-" && none_arm = "|None=>!+"
+    sm'.starts_with "?= " head && sm'.ends_with "?|" head && (positive || negative)
+
+:~ ^ presence_matches (lines : list string) (number : i32) (found : list lint_smell) : list lint_smell =
+    ?= lines ?|
+    | a :: b :: c :: rest =>
+        := next = ? presence_match a b c ?> OptionPresenceMatch number :: found |: found
+        presence_matches (b :: c :: rest) (number + 1i32) next
+    | _ => listm.rev found
+
+:~ smells_of (~text : string) : list lint_smell =
+    := lines = sm'.split_list "\n" (sm'.replace "\r" "" text)
+    listm.append (deep_ifs text) (presence_matches lines 1i32 [])
+
+:~ smell_text (smell : lint_smell) : string =
+    ?= smell ?|
+    | DeepIf (line, depth) =>
+        := advice = "; model the cases as a union or a GADT"
+        "line " ++# sm'.show line ++# ": if-nesting depth " ++# sm'.show depth ++# advice
+    | OptionPresenceMatch line => "line " ++# sm'.show line ++# ": option presence spelled as a match; use a predicate"
+
+///> rust
+:# deep_ifs_and_option_presence_matches_are_found_by_line =
+    := deep =
+        [
+            ":= f x =";
+            "    ? a";
+            "    ?>";
+            "        ? b";
+            "        ?>";
+            "            ? c";
+            "            ?> ? d ?> 1i32 |: 2i32";
+            "            |: 3i32";
+            "        |: 4i32";
+            "    |: 5i32"
+        ]
+        |> sm'.concat_list "\n"
+    testing.expect (deep_ifs deep = [ DeepIf (1i32, 4i32) ]) "four levels, the last one inline"
+    := flat = ":= g x =\n    ? a\n    ?> 1i32\n    |? b\n    ?> 2i32\n    |: 3i32"
+    testing.expect (deep_ifs flat = []) "a flat elif chain is one level"
+    := has = ":= has x =\n    ?= x ?|\n    | Some _ => !+\n    | None => !-\n"
+    testing.expect (smells_of has = [ OptionPresenceMatch 2i32 ]) "presence spelled as a match"
+    := said = smell_text (OptionPresenceMatch 2i32)
+    testing.expect (said = "line 2: option presence spelled as a match; use a predicate") said

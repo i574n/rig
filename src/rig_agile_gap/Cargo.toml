@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "intake.spi"
+output = "intake.rs"
+
+[package]
+name = "rig-agile-gap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_gap"
+path = "intake.rs"
+
+[dependencies]
+rig-agile-records = { path = "../rig_agile_records" }
+agile-task-notes = { path = "../agile_task_notes" }
+agile-task-creation-text = { path = "../agile_task_creation_text" }

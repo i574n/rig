@@ -257,9 +257,10 @@
 := pause_marker (~path : string) : string = rust_std_string.model.concat5 path ".paused" "" "" ""
 := pause_after_read_for_tests (~path : string) : () =
     := marker = pause_marker path
-    $'std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|value| value.parse::<u64>().ok()).map(|ms| { let _ = \
-        std::fs::write(&*!marker, b""); std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = \
-        std::fs::remove_file(&*!marker); }).unwrap_or(())' : ()
+    $'std::env::var("RIG_AGILE_TEST_PAUSE_MS").or_else(|_| std::env::var("KIT_AGILE_TEST_PAUSE_MS")).ok().and_then(|va\
+        lue| value.parse::<u64>().ok()).map(|ms| { let _ = std::fs::write(&*!marker, b""); \
+        std::thread::sleep(std::time::Duration::from_millis(ms)); let _ = std::fs::remove_file(&*!marker); \
+        }).unwrap_or(())' : ()
 
 :~ state_written (~path : string) (~original : string) (~updated : string) : state_write =
     := _ = pause_after_read_for_tests path
@@ -289,7 +290,10 @@
 :~ segment_name (~stamp : string) : string =
     sm'.concat_list "" [ "notes_"; byte_slice stamp 0i32 4i32; byte_slice stamp 5i32 7i32 ]
 
-:~ manifest_with_segment (format : agile_state_fs.project.project_format) (~manifest : string) (~segment : string) : string =
+:~ manifest_with_segment
+    (format : agile_state_fs.project.project_format) (~manifest : string) (~segment : string)
+    : string
+    =
     agile_state_fs.project.project_with_segment format manifest segment
 
 :~ state_text_with_notes (~state_dir : string) : string =
@@ -336,5 +340,6 @@
     expect (manifest_with_segment words ordered "notes_202610" = ordered) "registered once"
     := last = manifest_with_segment words "modules:\n    agile\n" "notes_202610"
     expect (last = "modules:\n    agile\n    notes_202610\n") "agile last"
-    := toml = manifest_with_segment agile_state_fs.project.TomlProject "modules = '''\nagile\nprompt\n'''\n" "notes_202610"
+    := toml_manifest = "modules = '''\nagile\nprompt\n'''\n"
+    := toml = manifest_with_segment agile_state_fs.project.TomlProject toml_manifest "notes_202610"
     expect (toml = "modules = '''\nagile\nnotes_202610\nprompt\n'''\n") "after agile in spiral.toml"

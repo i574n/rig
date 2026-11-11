@@ -1,0 +1,96 @@
+///- --package .
+:# lease static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| lease_phase =
+    | Working :: lease_phase
+    | Wrapping :: lease_phase
+    | Frozen :: lease_phase
+
+:| write_class =
+    | WorkWrite :: write_class
+    | CloseoutWrite :: write_class
+
+:| clock =
+    | RunningSince :: u64 -> clock
+    | PausedAt :: u64 -> clock
+
+:== lease =
+    {
+        turn : string
+        started_ms : u64
+        active_ms : u64
+        clock : clock
+        budget_ms : u64
+        wrap_ms : u64
+        wall_cap_ms : u64
+    }
+
+:== checkpoint = { active_ms : u64; until_wrap_ms : u64; until_freeze_ms : u64; phase : lease_phase }
+
+:~ active_at (l : lease) (now : u64) : u64 =
+    ?= l.clock ?|
+    | RunningSince since => l.active_ms + (? now > since ?> now - since |: 0u64)
+    | PausedAt _ => l.active_ms
+
+:~ left (total : u64) (used : u64) : u64 = ? used >= total ?> 0u64 |: total - used
+
+:~ phase_at (l : lease) (now : u64) : lease_phase =
+    := active = active_at l now
+    := wall = left now l.started_ms
+    ? active >= l.budget_ms || wall >= l.wall_cap_ms
+    ?> Frozen
+    |? active + l.wrap_ms >= l.budget_ms
+    ?> Wrapping
+    |: Working
+
+:~ allowed (phase : lease_phase) (w : write_class) : bool =
+    ?= phase, w ?|
+    | _, CloseoutWrite => !+
+    | Working, WorkWrite => !+
+    | _, WorkWrite => !-
+
+:~ paused (l : lease) (now : u64) : lease =
+    ?= l.clock ?|
+    | RunningSince _ => { l ?| active_ms = active_at l now; clock = PausedAt now }
+    | PausedAt _ => l
+
+:~ resumed (l : lease) (now : u64) : lease =
+    ?= l.clock ?|
+    | PausedAt _ => { l ?| clock = RunningSince now }
+    | RunningSince _ => l
+
+:~ on_turn (l : lease) (~turn : string) (now : u64) : lease =
+    ? turn = l.turn ?> l |: { l ?| turn = turn; started_ms = now; active_ms = 0u64; clock = RunningSince now }
+
+:~ checkpoint_of (l : lease) (now : u64) : checkpoint =
+    := active = active_at l now
+    {
+        active_ms = active
+        until_wrap_ms = left (left l.budget_ms l.wrap_ms) active
+        until_freeze_ms = left l.budget_ms active
+        phase = phase_at l now
+    }
+
+///> rust
+:# active_time_drives_the_phase_closeout_is_never_blocked_and_a_new_turn_rolls_over =
+    := l =
+        {
+            turn = "t1"; started_ms = 0u64; active_ms = 0u64; clock = RunningSince 0u64
+            budget_ms = 600u64; wrap_ms = 100u64; wall_cap_ms = 5000u64
+        }
+    testing.expect (phase_at l 100u64 = Working && phase_at l 550u64 = Wrapping) "work, then wrap"
+    testing.expect (phase_at l 600u64 = Frozen) "frozen at the budget"
+    testing.expect (allowed Wrapping CloseoutWrite && allowed Frozen CloseoutWrite) "closeout writes always pass"
+    testing.expect (allowed Wrapping WorkWrite |> not) "work writes stop at wrap"
+    := away = paused l 200u64
+    testing.expect (active_at away 3000u64 = 200u64 && phase_at away 3000u64 = Working) "paused time does not count"
+    testing.expect (phase_at away 5000u64 = Frozen) "the wall-clock cap still freezes a paused lease"
+    := back = resumed away 3000u64
+    testing.expect (active_at back 3100u64 = 300u64) "resumed time counts again"
+    := c = checkpoint_of back 3100u64
+    testing.expect (c.until_wrap_ms = 200u64 && c.until_freeze_ms = 300u64) "the checkpoint receipt"
+    testing.expect ((on_turn back "t2" 4000u64).active_ms = 0u64) "a new user turn starts a fresh lease"
+    testing.expect (on_turn back "t1" 4000u64 = back) "the same turn keeps it"

@@ -1,0 +1,64 @@
+///- --package .
+:# repo_io static =
+    :< sm'_operators
+    :< repo_entry
+
+:< sm'_operators
+:< repo_entry
+
+:~ ^ indent_from (~line : string) (at : i32) : i32 =
+    ? at < (sm'.length line : i32) && sm'.slice at at line = " " ?> indent_from line (at + 1i32) |: at
+
+:~ run_value (~line : string) : option string =
+    := plain = sm'.trim line
+    := last = (sm'.length plain : i32) - 1i32
+    := after = \ (prefix : string) => sm'.trim (sm'.slice (sm'.length prefix : i32) last plain)
+    ? sm'.starts_with "- run:" plain
+    ?> Some (after "- run:")
+    |? sm'.starts_with "run:" plain
+    ?> Some (after "run:")
+    |: None
+
+:~ ^ block_lines (lines : list string) (deeper_than : i32) (found : list string) : list string * list string =
+    ?= lines ?|
+    | line :: rest ?& sm'.trim line = "" => block_lines rest deeper_than found
+    | line :: rest ?& indent_from line 0i32 > deeper_than => block_lines rest deeper_than (sm'.trim line :: found)
+    | _ => listm.rev found, lines
+
+:~ ^ steps_from (~file : string) (lines : list string) (found : list workflow_step) : list workflow_step =
+    ?= lines ?|
+    | [] => listm.rev found
+    | line :: rest =>
+        ?= run_value line ?|
+        | None => steps_from file rest found
+        | Some value ?& value = "|" || value = ">" =>
+            := body, after = block_lines rest (indent_from line 0i32) []
+            steps_from file after ({ file = file; command = sm'.concat_list "; " body } :: found)
+        | Some value => steps_from file rest ({ file = file; command = value } :: found)
+
+:~ steps_of (~file : string) (~text : string) : list workflow_step =
+    steps_from file (sm'.split_list "\n" (sm'.replace "\r" "" text)) []
+
+:~ repo_facts_of (~root : string) : repo_facts =
+    := dir = root ++# "/.github/workflows"
+    := yaml = \ (n : string) => sm'.ends_with ".yml" n || sm'.ends_with ".yaml" n
+    := ymls = rig_os_files.files.entry_names dir |> listm'.filter yaml
+    := read = \ (name : string) => steps_of name (file_system.read_all_text (dir ++# "/" ++# name))
+    {
+        has_init = file_system.file_exists (root ++# "/scripts/init.ps1")
+        has_workflow = file_system.file_exists (root ++# "/scripts/workflow.ps1")
+        steps = ymls |> listm.map read |> listm.concat
+    }
+
+///> rust
+:# run_lines_and_run_blocks_become_one_step_each =
+    := yml =
+        [
+            "jobs:"; "  ci:"; "    steps:"; "      - run: pwsh scripts/workflow.ps1"; ""; "      - uses: x/y@v1";
+            "        run: |"; "          $a = 1"; ""; "          pwsh scripts/publish.ps1"; "      - run: echo done"
+        ]
+        |> sm'.concat_list "\n"
+    := commands = steps_of "ci.yml" yml |> listm.map (\ (s : workflow_step) => s.command)
+    testing.expect (commands = [ "pwsh scripts/workflow.ps1"; "$a = 1; pwsh scripts/publish.ps1"; "echo done" ]) "steps"
+    := findings = entry_findings { has_init = !+; has_workflow = !+; steps = steps_of "ci.yml" yml }
+    testing.expect (listm.length findings = 2i32) "the block and the echo bypass scripts/workflow.ps1"

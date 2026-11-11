@@ -1,0 +1,53 @@
+///- --package .
+:# reap static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== label_owner = { label : string; pid : u64; started_ms : u64 }
+
+:| submit_verdict =
+    | Submit :: submit_verdict
+    | StopTakenOver :: label_owner -> submit_verdict
+    | StopUnregistered :: submit_verdict
+
+:== labelled_process = { pid : u64; parent : u64; label : string }
+
+:~ submit_decision (me : label_owner) (registry : list label_owner) : submit_verdict =
+    ?= registry |> listm'.try_find_ (\ (o : label_owner) => o.label = me.label) ?|
+    | None => StopUnregistered
+    | Some owner ?& owner.pid = me.pid && owner.started_ms = me.started_ms => Submit
+    | Some owner => StopTakenOver owner
+
+:~ ^ tree_of (processes : list labelled_process) (frontier : list u64) (seen : list u64) : list u64 =
+    ?= frontier ?|
+    | [] => seen
+    | pid :: rest =>
+        ? listm'.contains pid seen
+        ?> tree_of processes rest seen
+        |:
+            := kids = processes |> listm'.filter (\ (p : labelled_process) => p.parent = pid)
+            := children = kids |> listm.map (\ (p : labelled_process) => p.pid)
+            tree_of processes (listm.append rest children) (pid :: seen)
+
+:~ reap_targets (~label : string) (processes : list labelled_process) (own : u64) : list u64 =
+    := mine = tree_of processes [ own ] []
+    processes
+    |> listm'.filter (\ (p : labelled_process) => p.label = label && (listm'.contains p.pid mine |> not))
+    |> listm.map (\ (p : labelled_process) => p.pid)
+
+///> rust
+:# a_poller_submits_only_while_it_owns_its_label_and_reaping_spares_its_own_tree =
+    := me = { label = "rig-probe"; pid = 10u64; started_ms = 1000u64 }
+    testing.expect (submit_decision me [ me ] = Submit) "the owner submits"
+    := newer = { me ?| pid = 20u64; started_ms = 5000u64 }
+    testing.expect (submit_decision me [ newer ] = StopTakenOver newer) "a newer owner stops the old poller"
+    testing.expect (submit_decision me [] = StopUnregistered) "no registry row: stop, never resubmit blindly"
+    := procs =
+        [
+            { pid = 10u64; parent = 1u64; label = "rig-probe" };
+            { pid = 11u64; parent = 10u64; label = "rig-probe" };
+            { pid = 30u64; parent = 1u64; label = "rig-probe" };
+            { pid = 31u64; parent = 1u64; label = "rig-probe-2" }
+        ]
+    testing.expect (reap_targets "rig-probe" procs 10u64 = [ 30u64 ]) "exact label only, never the caller's own tree"

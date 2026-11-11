@@ -1,0 +1,77 @@
+///- --package .
+:# rows static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== finding_row =
+    {
+        path : string
+        size : u64
+        mtime_ms : u64
+        rendered : string
+    }
+
+:| cache_verdict =
+    | Hit :: string -> cache_verdict
+    | Changed :: cache_verdict
+    | Missing :: cache_verdict
+
+:= escaped (~text : string) : string =
+    text |> sm'.replace "\\" "\\\\" |> sm'.replace "\"" "\\\"" |> sm'.replace "\n" "\\n"
+
+:= unescaped (~text : string) : string =
+    text |> sm'.replace "\\n" "\n" |> sm'.replace "\\\"" "\"" |> sm'.replace "\\\\" "\\"
+
+:= row_line (row : finding_row) : string =
+    := head = "inl f () = Findings (\"" ++# escaped row.path ++# "\", " ++# sm'.show row.size ++# "u64, "
+    head ++# sm'.show row.mtime_ms ++# "u64, \"" ++# escaped row.rendered ++# "\")"
+
+:~ ^ number_of (~text : string) (index : i32) (value : u64) : u64 =
+    := c = ? index < sm'.length text ?> sm'.substring index 1i32 text |: ""
+    := digit = sm'.index_of c "0123456789"
+    ? c = "" || digit < 0i32 ?> value |: number_of text (index + 1i32) (value * 10u64 + (conv digit : u64))
+
+:~ row_of_line (~line : string) : option finding_row =
+    := head = "() = Findings (\""
+    := at = sm'.index_of head line
+    ? at < 0i32
+    ?> None
+    |:
+        := skip = at + sm'.length head
+        := rest = sm'.substring skip (sm'.length line - skip) line
+        := path_end = sm'.index_of "\", " rest
+        := numbers = sm'.substring (path_end + 3i32) (sm'.length rest - path_end - 3i32) rest
+        := size = number_of numbers 0i32 0u64
+        := cut = sm'.index_of ", " numbers + 2i32
+        := second = sm'.substring cut (sm'.length numbers - cut) numbers
+        := mtime = number_of second 0i32 0u64
+        := text_at = sm'.index_of "\"" second
+        := tail = sm'.substring (text_at + 1i32) (sm'.length second - text_at - 3i32) second
+        ? path_end < 0i32 || text_at < 0i32
+        ?> None
+        |:
+            := path = unescaped (sm'.substring 0i32 path_end rest)
+            Some ({ path = path; size = size; mtime_ms = mtime; rendered = unescaped tail })
+
+:= verdict_of (cached : option finding_row) (size : u64) (mtime_ms : u64) (changed_by_git : bool) : cache_verdict =
+    ?= cached ?|
+    | None => Missing
+    | Some row => ? changed_by_git || row.size <> size || row.mtime_ms <> mtime_ms ?> Changed |: Hit row.rendered
+
+///> rust
+:# a_finding_row_round_trips_with_quotes_and_newlines =
+    := text = "a.spi:3  marker \"X\"\nwide"
+    := row = { path = "src/a b.spi"; size = 120u64; mtime_ms = 1794200000000u64; rendered = text }
+    testing.expect (row_of_line (row_line row) = Some row) "round trip"
+    testing.expect (row_of_line "packages:" = None) "other lines are not rows"
+
+///> rust
+:# a_cached_row_serves_only_an_unchanged_file =
+    := row = { path = "a.spi"; size = 10u64; mtime_ms = 5u64; rendered = "a.spi:1 marker" }
+    testing.expect (verdict_of (Some row) 10u64 5u64 !- = Hit "a.spi:1 marker") "same size and time: hit"
+    testing.expect (verdict_of (Some row) 11u64 5u64 !- = Changed) "a new size: changed"
+    testing.expect (verdict_of (Some row) 10u64 5u64 !+ = Changed) "git says changed: changed"
+    testing.expect (verdict_of None 10u64 5u64 !- = Missing) "no row: missing"
+
+:= main () : i32 = 0i32

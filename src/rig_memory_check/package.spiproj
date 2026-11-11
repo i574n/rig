@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_memory_typed
+    rig_memory_dupes
+modules:
+    check

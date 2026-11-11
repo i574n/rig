@@ -1,0 +1,88 @@
+///- --package .
+:# degrade static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| handoff_part =
+    | ActiveWork :: handoff_part
+    | OpenWaits :: handoff_part
+    | Evidence :: handoff_part
+    | NextSteps :: handoff_part
+
+:| provenance =
+    | FromHandoff :: string -> provenance
+    | DerivedFromState :: string -> provenance
+    | MissingPart :: string -> provenance
+
+:== handoff_row = { title : string; body : string }
+
+:== typed_state = { active : list string; waits : list string; receipts : list string }
+
+:== projected = { part : handoff_part; source : provenance }
+
+:== projection = { parts : list projected; duplicate_titles : list string }
+
+:= parts () : list handoff_part = [ ActiveWork; OpenWaits; Evidence; NextSteps ]
+
+:~ title_of (p : handoff_part) : string =
+    ?= p ?|
+    | ActiveWork => "Active work"
+    | OpenWaits => "Waits"
+    | Evidence => "Evidence"
+    | NextSteps => "Next steps"
+
+:~ derived (state : typed_state) (p : handoff_part) : provenance =
+    := listed = \ (ids : list string) (~empty_reason : string) =>
+        ? ids = [] ?> MissingPart empty_reason |: DerivedFromState (sm'.concat_list ", " ids)
+    ?= p ?|
+    | ActiveWork => listed state.active "no handoff row and no Active item in the backlog"
+    | OpenWaits => listed state.waits "no handoff row and no wait row"
+    | Evidence => listed state.receipts "no handoff row and no receipt"
+    | NextSteps => MissingPart "next steps live only in the handoff, and it has no such row"
+
+:~ duplicates_of (rows : list handoff_row) : list string =
+    := step = \ ((seen, dups) : list string * list string) (r : handoff_row) =>
+        ? listm'.contains r.title seen
+        ?> seen, (? listm'.contains r.title dups ?> dups |: listm.append dups [ r.title ])
+        |: listm.append seen [ r.title ], dups
+    := _, dups = rows |> listm.fold step ([], [])
+    dups
+
+:~ project (handoff : option (list handoff_row)) (state : typed_state) : projection =
+    := rows = ?= handoff ?| | Some rs => rs | None => []
+    := one = \ (p : handoff_part) =>
+        := source =
+            ?= rows |> listm'.try_find_ (\ (r : handoff_row) => r.title = title_of p && sm'.trim r.body <> "") ?|
+            | Some r => FromHandoff r.body
+            | None => derived state p
+        ({ part = p; source = source } : projected)
+    { parts = parts () |> listm.map one; duplicate_titles = duplicates_of rows }
+
+:~ missing_titles (p : projection) : list string =
+    := gap = \ (x : projected) => ?= x.source ?| | MissingPart _ => !+ | _ => !-
+    p.parts |> listm'.filter gap |> listm.map (\ (x : projected) => title_of x.part)
+
+///> rust
+:# a_partial_or_absent_handoff_degrades_part_by_part_and_names_the_gaps =
+    := state = { active = [ "A-1"; "B-2" ]; waits = []; receipts = [ "train green" ] }
+    := absent = project None state
+    := sources = absent.parts |> listm.map (\ (x : projected) => x.source)
+    := expected =
+        [
+            DerivedFromState "A-1, B-2";
+            MissingPart "no handoff row and no wait row";
+            DerivedFromState "train green";
+            MissingPart "next steps live only in the handoff, and it has no such row"
+        ]
+    testing.expect (sources = expected) "no handoff: derived where state has it, named where not"
+    testing.expect (missing_titles absent = [ "Waits"; "Next steps" ]) "the gaps by title"
+    := rows =
+        [
+            { title = "Next steps"; body = "probe the batch" };
+            { title = "Waits"; body = "  " };
+            { title = "Next steps"; body = "again" }
+        ]
+    := partial = project (Some rows) state
+    testing.expect (missing_titles partial = [ "Waits" ]) "a blank row counts as missing; a written one wins"
+    testing.expect (partial.duplicate_titles = [ "Next steps" ]) "a repeated title is reported, the first kept"

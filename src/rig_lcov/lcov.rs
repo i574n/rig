@@ -58,14 +58,14 @@ enum US4 {
 }
 pub struct Mut0 { pub l0: Rc<str> }
 fn method5(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
-    let mut v2: Rc<str> = v0.borrow().l0.clone();
+    let v2: Rc<str> = v0.borrow().l0.clone();
     let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
 fn format_real_4(mut v0: u64) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let mut v2: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v1 }));
+    let v2: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v1 }));
     let v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
     method5(&v2, v3);
     let v4: Rc<str> = v2.borrow().l0.clone();
@@ -74,7 +74,7 @@ fn format_real_4(mut v0: u64) -> Rc<str> {
 fn hit_reading_of_3(mut v0: Rc<str>) -> US4 {
     let mut v1: bool = { let parts = v0.split(char::from(44u8)).collect::<Vec<_>>(); (2..=3).contains(&parts.len()) && parts[..2].iter().all(|value| !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit())) };
     if v1 {
-        let mut v2: u64 = v0.split(char::from(44u8)).next().and_then(|line| line.parse::<u32>().ok()).filter(|line| *line > 0).map(|line| line as u64).unwrap_or(0);
+        let v2: u64 = v0.split(char::from(44u8)).next().and_then(|line| line.parse::<u32>().ok()).filter(|line| *line > 0).map(|line| line as u64).unwrap_or(0);
         let v3: bool = v2 == 0u64;
         if v3 {
             let v4: US2 = US2::US2_InvalidHitLine;
@@ -94,74 +94,6 @@ fn hit_reading_of_3(mut v0: Rc<str>) -> US4 {
     } else {
         let v16: US2 = US2::US2_InvalidHitFields;
         US4::US4_HitRejected(v16)
-    }
-}
-fn method6(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method7(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
     }
 }
 fn lcov_from_2(mut v0: Rc<str>, mut v1: u64, mut v2: u64, mut v3: US0, mut v4: Rc<str>) -> US1 {
@@ -255,52 +187,52 @@ fn lcov_from_2(mut v0: Rc<str>, mut v1: u64, mut v2: u64, mut v3: US0, mut v4: R
                 US3::US3_EndLine => {
                     match v3 {
                         US0::US0_BetweenSources => {
-                            let v99: US2 = US2::US2_EndBeforeSource;
-                            return US1::US1_LcovRejected(v99);
+                            let v92: US2 = US2::US2_EndBeforeSource;
+                            return US1::US1_LcovRejected(v92);
                         }
-                        US0::US0_InSource(v101) => {
-                            let v101: Rc<str> = v101;
-                            let v102: US0 = US0::US0_BetweenSources;
-                            (v1, v3) = (v6, v102);
+                        US0::US0_InSource(v94) => {
+                            let v94: Rc<str> = v94;
+                            let v95: US0 = US0::US0_BetweenSources;
+                            (v1, v3) = (v6, v95);
                             continue;
                         }
                     }
                 }
-                US3::US3_HitLine(v80) => {
-                    let v80: Rc<str> = v80;
+                US3::US3_HitLine(v73) => {
+                    let v73: Rc<str> = v73;
                     match &v3 {
                         US0::US0_BetweenSources => {
-                            let v81: US2 = US2::US2_HitBeforeSource;
-                            return US1::US1_LcovRejected(v81);
+                            let v74: US2 = US2::US2_HitBeforeSource;
+                            return US1::US1_LcovRejected(v74);
                         }
-                        US0::US0_InSource(v83) => {
-                            let v83: Rc<str> = v83.clone();
-                            let v84: US4 = hit_reading_of_3(v80);
-                            match v84 {
-                                US4::US4_HitRead(v85) => {
-                                    let v85: Rc<str> = v85;
-                                    let v87: Rc<str> = string_concat(&[&*v83, "\t", &*v85]);
-                                    let v88: bool = &*v4 == "";
-                                    let v91: Rc<str> = if v88 {
-                                        v87
+                        US0::US0_InSource(v76) => {
+                            let v76: Rc<str> = v76.clone();
+                            let v77: US4 = hit_reading_of_3(v73);
+                            match v77 {
+                                US4::US4_HitRead(v78) => {
+                                    let v78: Rc<str> = v78;
+                                    let v80: Rc<str> = string_concat(&[&*v76, "\t", &*v78]);
+                                    let v81: bool = &*v4 == "";
+                                    let v84: Rc<str> = if v81 {
+                                        v80
                                     } else {
-                                        let v90: Rc<str> = string_concat(&[&*v4, "\n", &*v87]);
-                                        v90
+                                        let v83: Rc<str> = string_concat(&[&*v4, "\n", &*v80]);
+                                        v83
                                     };
-                                    (v1, v4) = (v6, v91);
+                                    (v1, v4) = (v6, v84);
                                     continue;
                                 }
-                                US4::US4_HitRejected(v93) => {
-                                    let v93: US2 = v93;
-                                    return US1::US1_LcovRejected(v93);
+                                US4::US4_HitRejected(v86) => {
+                                    let v86: US2 = v86;
+                                    return US1::US1_LcovRejected(v86);
                                 }
                             }
                         }
                     }
                 }
                 US3::US3_MalformedLine => {
-                    let v106: US2 = US2::US2_MalformedRecord;
-                    return US1::US1_LcovRejected(v106);
+                    let v99: US2 = US2::US2_MalformedRecord;
+                    return US1::US1_LcovRejected(v99);
                 }
                 US3::US3_OtherLine => {
                     v1 = v6;
@@ -310,29 +242,22 @@ fn lcov_from_2(mut v0: Rc<str>, mut v1: u64, mut v2: u64, mut v3: US0, mut v4: R
                     let v55: Rc<str> = v55;
                     match v3 {
                         US0::US0_BetweenSources => {
-                            let v59: i32 = (v55.clone().len() as i32);
-                            let v60: i32 = 0i32;
-                            let v61: i32 = method6(v55.clone(), v59, v60);
-                            let v62: i32 = v59.wrapping_sub(1i32);
-                            let v63: Rc<str> = string_slice(&v55.clone(), v61 as i64, v62 as i64);
-                            let v64: i32 = (v63.clone().len() as i32);
-                            let v65: i32 = method7(v63.clone(), v64);
-                            let v66: Rc<str> = string_slice(&v63, 0i32 as i64, v65 as i64);
-                            let v67: bool = &*v66 == "";
-                            if v67 {
-                                let v68: US2 = US2::US2_EmptySource;
-                                return US1::US1_LcovRejected(v68);
+                            let v59: Rc<str> = Rc::<str>::from((v55).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+                            let v60: bool = &*v59 == "";
+                            if v60 {
+                                let v61: US2 = US2::US2_EmptySource;
+                                return US1::US1_LcovRejected(v61);
                             } else {
-                                let v70: Rc<str> = std::rc::Rc::<str>::from(v55.replace(char::from(92u8), "/"));
-                                let v71: US0 = US0::US0_InSource(v70.clone());
-                                let v72: bool = &*v4 == "";
-                                let v75: Rc<str> = if v72 {
-                                    v70
+                                let v63: Rc<str> = std::rc::Rc::<str>::from(v55.replace(char::from(92u8), "/"));
+                                let v64: US0 = US0::US0_InSource(v63.clone());
+                                let v65: bool = &*v4 == "";
+                                let v68: Rc<str> = if v65 {
+                                    v63
                                 } else {
-                                    let v74: Rc<str> = string_concat(&[&*v4, "\n", &*v70]);
-                                    v74
+                                    let v67: Rc<str> = string_concat(&[&*v4, "\n", &*v63]);
+                                    v67
                                 };
-                                (v1, v3, v4) = (v6, v71, v75);
+                                (v1, v3, v4) = (v6, v64, v68);
                                 continue;
                             }
                         }
@@ -347,19 +272,19 @@ fn lcov_from_2(mut v0: Rc<str>, mut v1: u64, mut v2: u64, mut v3: US0, mut v4: R
         } else {
             match v3 {
                 US0::US0_BetweenSources => {
-                    let v117: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) };
-                    let v118: bool = v4.contains(&*v117);
-                    if v118 {
+                    let v110: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\t"); } LIT.with(|lit| lit.clone()) };
+                    let v111: bool = v4.contains(&*v110);
+                    if v111 {
                         return US1::US1_LcovRecords(v4);
                     } else {
-                        let v120: US2 = US2::US2_NoLineRecords;
-                        return US1::US1_LcovRejected(v120);
+                        let v113: US2 = US2::US2_NoLineRecords;
+                        return US1::US1_LcovRejected(v113);
                     }
                 }
-                US0::US0_InSource(v114) => {
-                    let v114: Rc<str> = v114;
-                    let v115: US2 = US2::US2_UnterminatedSource;
-                    return US1::US1_LcovRejected(v115);
+                US0::US0_InSource(v107) => {
+                    let v107: Rc<str> = v107;
+                    let v108: US2 = US2::US2_UnterminatedSource;
+                    return US1::US1_LcovRejected(v108);
                 }
             }
         }
@@ -367,7 +292,7 @@ fn lcov_from_2(mut v0: Rc<str>, mut v1: u64, mut v2: u64, mut v3: US0, mut v4: R
 }
 fn lcov_reading_of_1(mut v0: Rc<str>) -> US1 {
     let mut v1: u64 = 0u64;
-    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v0.split(&*v2).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
     let v4: i32 = (v3.clone().borrow().len() as i32);
     let v5: bool = v4 > 0i32;
@@ -394,7 +319,7 @@ fn lcov_error_0(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: US1 = lcov_reading_of_1(v0);
     match v1 {
         US1::US1_LcovRecords(v2) => {
-            let mut v2: Rc<str> = v2;
+            let v2: Rc<str> = v2;
             let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
             v3
         }
@@ -450,11 +375,11 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         lcov_error_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn lcov_rows_8(mut v0: Rc<str>) -> Rc<str> {
+fn lcov_rows_6(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: US1 = lcov_reading_of_1(v0);
     match v1 {
         US1::US1_LcovRecords(v2) => {
-            let mut v2: Rc<str> = v2;
+            let v2: Rc<str> = v2;
             v2
         }
         US1::US1_LcovRejected(v3) => {
@@ -466,7 +391,7 @@ fn lcov_rows_8(mut v0: Rc<str>) -> Rc<str> {
 }
 fn closure1() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> Rc<str>> = Rc::new(move |mut v0: Rc<str>| -> Rc<str> {
-        lcov_rows_8(v0)
+        lcov_rows_6(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 pub fn rig_lcov_error(v0: &str) -> Rc<str> {

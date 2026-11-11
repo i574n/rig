@@ -10,8 +10,10 @@ are relative to the root. Every run ends with one receipt line: `ok` or `failed`
 and the local clock with its offset, so no case ever needs a separate clock or status call. Elapsed times and clocks
 are written `<elapsed>` and `<clock>` in `expected`; the runner substitutes them.
 
-The other placeholders are `<hash>` (a sha256), `<commit>` (a commit id), `<pid>` (a process id) and `<HH:mm>` (the
-clock's hour and minute). A `fixture` block lists a path, then that file's lines; every line ends in LF. A path line
+The other placeholders are `<hash>` (a sha256), `<commit>` (a commit id), `<pid>` (a process id), `<HH:mm>` (the
+clock's hour and minute), `<ms>` (a millisecond count or a window id stamp), `<mb>` (free memory in MB) and `<unix>`
+(unix seconds). Jobs and windows live in a per-case home (`KIT_JOBS_HOME`, `KIT_WINDOWS_HOME`), so a case sees
+only the jobs it starts. A `fixture` block lists a path, then that file's lines; every line ends in LF. A path line
 has no whitespace and either contains `/` or ends in `.` and letters; every other line is content (this rule splits
 all 33 cases correctly). A receipt shows `bytes` when the program read or wrote whole files by size, and `exit` when it
 ran a process or ended in a failure that has a code. A `setup`
@@ -81,7 +83,8 @@ failed  files 0  replacements 0  <elapsed>  <clock>
 
 ## 3. Search many files with context, bounded (read + search + walk: 236 calls)
 
-Habit (Codex, abbreviated): `Get-ChildItem out/...; Get-Content main.rs | Select-String -Pattern 'if v|RecursiveCreate' -Context 1,4 | Select-Object -First 12`, once per sample, in parallel tool calls.
+Habit (Codex, abbreviated):
+`Get-ChildItem out/...; Get-Content main.rs | Select-String -Pattern 'if v|RecursiveCreate' -Context 1,4 | Select-Object -First 12`, once per sample, in parallel tool calls.
 
 ```fixture
 out/a/main.rs
@@ -108,7 +111,9 @@ ok  files 2 searched  1 matched  matches 1  <elapsed>  <clock>
 
 ## 4. Classify a file set and count the classes (read + walk + aggregate: 257 calls)
 
-Habit (Claude, abbreviated): `Get-ChildItem samples -Directory | Where-Object { Test-Path main.c -and Test-Path main.spi }`, then per directory read `main.spi`, regex-match, build `[pscustomobject]` rows, `Group-Object`, format.
+Habit (Claude, abbreviated):
+`Get-ChildItem samples -Directory | Where-Object { Test-Path main.c -and Test-Path main.spi }`, then per directory read
+`main.spi`, regex-match, build `[pscustomobject]` rows, `Group-Object`, format.
 
 ```fixture
 samples/s1/main.spi
@@ -139,7 +144,8 @@ ok  dirs 2 of 3 matched  <elapsed>  <clock>
 
 ## 5. Compare two result tables by key (the suite reviews; json/csv + aggregate)
 
-Habit (Claude, 2026-10-13, abbreviated): `Import-Csv` both `results.tsv`, build a hashtable by `id|backend`, `Where-Object` over changed columns, `Group-Object`, format, every review.
+Habit (Claude, 2026-10-13, abbreviated): `Import-Csv` both `results.tsv`, build a hashtable by `id|backend`,
+`Where-Object` over changed columns, `Group-Object`, format, every review.
 
 ```fixture
 a.tsv
@@ -171,7 +177,8 @@ ok  rows a 3  b 4  changed 2  added 1  removed 0  <elapsed>  <clock>
 
 ## 6. Run until a condition, sample it, always stop (read + process + wait: 150 calls)
 
-Habit (Claude, abbreviated): `Start-Process -PassThru` with redirected logs, a `while` loop with `Start-Sleep 2`, peak working set, regex on the log, `Stop-Process`, `Get-Content -Tail`.
+Habit (Claude, abbreviated): `Start-Process -PassThru` with redirected logs, a `while` loop with `Start-Sleep 2`, peak
+working set, regex on the log, `Stop-Process`, `Get-Content -Tail`.
 
 ```fixture
 server.cmd
@@ -196,7 +203,8 @@ ok  runs 1  <elapsed>  <clock>
 ## 7. Read the lines around a match (read + search: 1,832 calls)
 
 Habit (Claude, abbreviated): `Select-String -Path f -Pattern 'x' | % LineNumber`, then
-`Get-Content f | Select-Object -Skip ($n-2) -First 6`, or `Select-String -Context 1,2` and re-read to see the indentation.
+`Get-Content f | Select-Object -Skip ($n-2) -First 6`, or `Select-String -Context 1,2` and re-read to see the
+indentation.
 
 ```fixture
 src/lib.fs
@@ -277,7 +285,8 @@ ok  files 2  <elapsed>  <clock>
 
 ## 10. Search a tree with includes and excludes, paths only (search + walk: 420 calls)
 
-Habit (Claude, abbreviated): `Get-ChildItem src -Recurse -Include *.rs,*.spi -File | Where-Object { $_.FullName -notmatch
+Habit (Claude, abbreviated):
+`Get-ChildItem src -Recurse -Include *.rs,*.spi -File | Where-Object { $_.FullName -notmatch
 '\\target\\' } | Select-String -Pattern 'show <root> <id> \[--json\]' | ForEach-Object { '{0}:{1}' -f $_.Path,
 $_.LineNumber }`.
 
@@ -450,7 +459,8 @@ failed  runs 1  exit 1  errors 3  <elapsed>  <clock>
 
 ## 17. Files and bytes by extension (walk + aggregate: 207 calls)
 
-Habit (Claude, abbreviated): `Get-ChildItem proj -Recurse -File | Group-Object Extension | ForEach-Object { '{0} {1} {2}'
+Habit (Claude, abbreviated):
+`Get-ChildItem proj -Recurse -File | Group-Object Extension | ForEach-Object { '{0} {1} {2}'
 -f $_.Name, $_.Count, ($_.Group | Measure-Object Length -Sum).Sum }`.
 
 ```fixture
@@ -1020,7 +1030,8 @@ failed  files 0  replacements 0  <elapsed>  <clock>
 
 ## 38. Latency between paired log events across files (read + walk + aggregate: log timing habit, new verb table sequences)
 
-Habit (abbreviated): a loop over log files with a regex per event kind, a hash of open starts, and a subtraction per end, printed per file.
+Habit (abbreviated): a loop over log files with a regex per event kind, a hash of open starts, and a subtraction per
+end, printed per file.
 
 ```fixture
 runs/a.log
@@ -1049,7 +1060,8 @@ The table goes to stdout and the receipt to stderr; each start pairs with the ne
 
 ## 39. Files two trees keep in step, and which side moved (read + walk + hash: the mirrored-repos habit, new verb mirror check)
 
-Habit (abbreviated): hash the same relative paths under two roots and list the ones that differ or exist on one side only.
+Habit (abbreviated): hash the same relative paths under two roots and list the ones that differ or exist on one side
+only.
 
 ```fixture
 left/ci.yml
@@ -1073,7 +1085,8 @@ Anything but in-step exits 1, so a pre-commit step can refuse a change made on o
 
 ## 40. May I edit this path, or is a release reading the tree (read + walk + process: the hand-rolled lease check, new verb window claim)
 
-Habit (abbreviated): list the lease folder, parse each file's pid= line, ask the process table whether that pid still runs, and compare the leased root with the path about to be edited.
+Habit (abbreviated): list the lease folder, parse each file's pid= line, ask the process table whether that pid still
+runs, and compare the leased root with the path about to be edited.
 
 ```setup
 kit window request tree-read 5 --label repo
@@ -1087,13 +1100,15 @@ kit window claim repo/src/a.spi
 kit window claim refused path=repo/src/a.spi edit refused: repo is read by win-<ms>-<pid>-tree-read for 5 more min
 ```
 
-A path outside every leased root prints 'edit allowed' and exits 0; a refusal exits 1, so a hook or a script can gate an edit on the exit code alone.
+A path outside every leased root prints 'edit allowed' and exits 0; a refusal exits 1, so a hook or a script can gate an
+edit on the exit code alone.
 
 ---
 
 ## 41. The same filtered list, asked for by name (agile: the retyped long-flag list, existing verbs view-add and view)
 
-Habit (abbreviated): retype 'agile list <backlog> --team kit --open --load light --sort priority' every time the heavy slots are busy and light work is wanted, sometimes with a flag in the wrong slot.
+Habit (abbreviated): retype 'agile list <backlog> --team kit --open --load light --sort priority' every time the heavy
+slots are busy and light work is wanted, sometimes with a flag in the wrong slot.
 
 ```setup
 kit agile init backlog
@@ -1114,13 +1129,16 @@ A-LIGHT                    P1 D1    0  Planned Story    -      light  -     ligh
 kit agile list ok shown=2 filter=all load=light assignee=all open planned=3 active=0 blocked=0 paused=0 done=0 elapsed_ms=<ms>
 ```
 
-A saved view runs its verb with its stored flags plus any extra flags given after the name, so the long list is typed once.
+A saved view runs its verb with its stored flags plus any extra flags given after the name, so the long list is typed
+once.
 
 ---
 
 ## 42. A serial chain of jobs in one call (jobs: N job starts, each pasting the previous id, new verb job chain)
 
-Habit (abbreviated): start a job, read its id from the receipt, start the next with --after <that id>, and repeat for every job in the chain; when the order changes, stop each job and start it again with new ids (seven or eight re-chains in one day).
+Habit (abbreviated): start a job, read its id from the receipt, start the next with --after <that id>, and repeat for
+every job in the chain; when the order changes, stop each job and start it again with new ids
+(seven or eight re-chains in one day).
 
 ```command
 kit job chain -- one 60000 cmd /c exit 0 -- two 60000 cmd /c exit 0
@@ -1132,13 +1150,16 @@ kit job start ok id=job-<ms>-two supervisor_pid=<pid> timeout_ms=60000 gate=plai
 kit job chain ok jobs=2 ids=job-<ms>-one,job-<ms>-two
 ```
 
-Each link starts with --after the previous id (--after-ok when the chain begins with --ok); a link that does not start stops the chain and names the ids started before it. 'job after <queued-id> <predecessor-id>' re-points a waiting link in place, keeping its id.
+Each link starts with --after the previous id (--after-ok when the chain begins with --ok); a link that does not start
+stops the chain and names the ids started before it. 'job after <queued-id> <predecessor-id>' re-points a waiting link
+in place, keeping its id.
 
 ---
 
 ## 43. Which generated crates are over the line budget (walk + count: the per-repo gate.ps1 habit, new verb crate gate)
 
-Habit (abbreviated): find every Cargo.toml with a [package.metadata.spiral] section, read its output file name, count that file's lines, and compare each with 1000; a repo-specific script per repo, and some scan only apps/.
+Habit (abbreviated): find every Cargo.toml with a [package.metadata.spiral] section, read its output file name, count
+that file's lines, and compare each with 1000; a repo-specific script per repo, and some scan only apps/.
 
 ```fixture
 tool/Cargo.toml
@@ -1171,13 +1192,15 @@ gate / big big.rs 5 lines OVER 4
 kit crate gate refused: 1 crate(s) over the limit; crates=2 over=1 limit=4 root=.
 ```
 
-Without --enforce the same rows print and the call exits 0; with it, a crate over the limit or a crate whose output was never generated exits 1, and a root with no Spiral crate at all is refused rather than read as clean.
+Without --enforce the same rows print and the call exits 0; with it, a crate over the limit or a crate whose output was
+never generated exits 1, and a root with no Spiral crate at all is refused rather than read as clean.
 
 ---
 
 ## 44. An alternation that silently matched nothing (search: a regex-looking needle searched literally, grep hint)
 
-Habit (abbreviated): search for "a|b" expecting either word, get zero matches, conclude neither is there, and only later notice the search was literal.
+Habit (abbreviated): search for "a|b" expecting either word, get zero matches, conclude neither is there, and only later
+notice the search was literal.
 
 ```fixture
 notes.txt
@@ -1193,13 +1216,16 @@ kit grep notes.txt "one|two"
 ok  files 1 searched  0 matched  matches 0  hint: the needle is literal; pass --regex to use it as a pattern  <elapsed>  <clock>
 ```
 
-The hint appears only when nothing matched and the needle holds pattern syntax; with --regex the same needle finds both lines.
+The hint appears only when nothing matched and the needle holds pattern syntax; with --regex the same needle finds both
+lines.
 
 ---
 
 ## 45. Per-run first events in a log that holds many runs (logs: a scratch reader per question, table sequences with sections)
 
-Habit (abbreviated): one log file holds many runs, each opened by a header line; a scratch script splits the file at the headers, moves the lines stamped before a header (@knight+-1) into the run they belong to, and finds each monster's first move per run.
+Habit (abbreviated): one log file holds many runs, each opened by a header line; a scratch script splits the file at the
+headers, moves the lines stamped before a header (@knight+-1) into the run they belong to, and finds each monster's
+first move per run.
 
 ```fixture
 trace.log
@@ -1232,13 +1258,16 @@ section	id	move_time	move_value
 kit table sequences ok files=1 sections=2 rows=2
 ```
 
-A section starts at each line matching --section-on; lines matching --carry before a header belong to the section that header opens. --first keeps the earliest match per section and id, named by the word before '='. (Expected rows from tibia's synthetic trace, TIBIA-EVENT-TIME note 100, verified by hand and by tibia's scratch reader.)
+A section starts at each line matching --section-on; lines matching --carry before a header belong to the section that
+header opens. --first keeps the earliest match per section and id, named by the word before '='.
+(Expected rows from tibia's synthetic trace, TIBIA-EVENT-TIME note 100, verified by hand and by tibia's scratch reader.)
 
 ---
 
 ## 46. First and last event per run and id, side by side (logs: life = last - first, table sequences --first and --last)
 
-Habit (abbreviated): for each run in a multi-run log, find when each creature appeared and when it last acted (or died), by hand-splitting the file per run, then subtract.
+Habit (abbreviated): for each run in a multi-run log, find when each creature appeared and when it last acted (or died),
+by hand-splitting the file per run, then subtract.
 
 ```fixture
 trace.log
@@ -1273,13 +1302,16 @@ section	id	appear_time	appear_value	think_time	think_value
 kit table sequences ok files=1 sections=2 rows=4
 ```
 
-Rows are one per (section, id) seen by any --first or --last, in section order and then by first sighting; a column with no match in that section prints '-'. Ids repeat across sections (each run restarts the server), so the key is the pair. Negative times (@knight+-1, lines carried into the next run) are kept as written. (tibia, KIT-LOG-SEQUENCES note 15.)
+Rows are one per (section, id) seen by any --first or --last, in section order and then by first sighting; a column with
+no match in that section prints '-'. Ids repeat across sections (each run restarts the server), so the key is the pair.
+Negative times (@knight+-1, lines carried into the next run) are kept as written. (tibia, KIT-LOG-SEQUENCES note 15.)
 
 ---
 
 ## 47. The usage of one verb, not a fragment of another (help: help <verb> answered from a grammar line that merely contains the word, per-verb help lines)
 
-Habit (abbreviated): `kit help env` printed the `do` grammar (its `env <A,B>` statement matched first), and `kit help mirror` had no line at all, so the agent read the crate source to learn the flags.
+Habit (abbreviated): `kit help env` printed the `do` grammar (its `env <A,B>` statement matched first), and
+`kit help mirror` had no line at all, so the agent read the crate source to learn the flags.
 
 ```command
 kit help env
@@ -1289,13 +1321,15 @@ kit help env
 usage: kit env check <tool>=<pinned-path>... (each tool is looked up on PATH in order; the first copy found must be the pinned one)
 ```
 
-Every direct verb has exactly one help line, chosen by its own case: a new verb does not compile without one, and verbs that share a grammar (read, lines and grep; ps and kill) share one line. (kit, KIT-UNION-REFLECTION note 34.)
+Every direct verb has exactly one help line, chosen by its own case: a new verb does not compile without one, and verbs
+that share a grammar (read, lines and grep; ps and kill) share one line. (kit, KIT-UNION-REFLECTION note 34.)
 
 ---
 
 ## 48. Host macros that carry logic Spiral should own (walk + classify: the macro-rule.ps1 census, new verb lint macros)
 
-Habit (abbreviated): a scratch classifier greps every .spi for `$'...'`, flags flow, casts and arithmetic by regex, misreads type text such as `Rc<dyn Fn()>` as flow, and counts only tracked files, so new untracked modules slip through.
+Habit (abbreviated): a scratch classifier greps every .spi for `$'...'`, flags flow, casts and arithmetic by regex,
+misreads type text such as `Rc<dyn Fn()>` as flow, and counts only tracked files, so new untracked modules slip through.
 
 ```fixture
 lib/sample.spi
@@ -1317,7 +1351,11 @@ lib/sample.spi:4  sum    arith  $'!a + !b'
 failed  files 1  macros 5  violations 3  new 3  <elapsed>  <clock>
 ```
 
-Classes: long (macro text over 120 characters), flow (if, else, match, for, while, loop, let, return, fn, =>, -> or ; in a term macro), cast (`as T`), arith (an operator between splices or literals), block (a triple-quoted global). Line 5 is the positive control: `->` and `dyn` in a type-position macro (a nominal body) are not flow. Named one-expression boundary primitives that a package's standards.spi allows are exempt. (main, GRANULAR-LINT note 3.)
+Classes: long (macro text over 120 characters), flow
+(if, else, match, for, while, loop, let, return, fn, =>, -> or ; in a term macro), cast (`as T`), arith
+(an operator between splices or literals), block (a triple-quoted global). Line 5 is the positive control: `->` and
+`dyn` in a type-position macro (a nominal body) are not flow. Named one-expression boundary primitives that a package's
+standards.spi allows are exempt. (main, GRANULAR-LINT note 3.)
 
 ---
 
@@ -1344,6 +1382,180 @@ lib/sample.spi:4  sum    arith  $'!a + !b'
 failed  files 1  macros 5  violations 3  new 1  <elapsed>  <clock>
 ```
 
-A named file counts whatever its extension, and a `.diff` or `.patch` contributes only its added lines (`+`, not the `+++` header), so `kit lint macros . change.diff` checks just what a slice adds. The baseline is the verb's own output (`kit lint macros . lib > lint/macros.txt`); a row is keyed by file, definition name and class, not by line number, so edits above a known violation keep it known, and the receipt line in a saved output is not a row. With all three rows listed the call prints no rows and ends `ok  files 1  macros 5  violations 3  new 0`.
+A named file counts whatever its extension, and a `.diff` or `.patch` contributes only its added lines
+(`+`, not the `+++` header), so `kit lint macros . change.diff` checks just what a slice adds. The baseline is the
+verb's own output (`kit lint macros . lib > lint/macros.txt`); a row is keyed by file, definition name and class, not by
+line number, so edits above a known violation keep it known, and the receipt line in a saved output is not a row. With
+all three rows listed the call prints no rows and ends `ok  files 1  macros 5  violations 3  new 0`.
+
+---
+
+## 50. Report a gap the moment a call fails (agile: a long agile add with every planning field and a hand-built note, new verb agile gap)
+
+Habit (abbreviated): a lane hits a missing or failing verb, works around it, and either files nothing or types a
+500-character `agile add` with an invented id, kind, priority, difficulty, tags, estimate, load, assignee, the failed
+call pasted into `--note`, the DoD, Next step and TypeFeatures markers, and `--as`.
+
+```setup
+kit agile init backlog
+kit agile add backlog WEB-GAP-HELP-AGILE-ADD TaskKind P1 D2 "an earlier gap" "rig,gap,help,team:web"
+```
+
+```command
+kit agile gap backlog "help prints no usage for one agile sub-verb" --verb "help agile add" --exit 2 --as web-1
+```
+
+```expected
+rig agile add ok id=WEB-GAP-HELP-AGILE-ADD-2 binding=web_gap_help_agile_add_2 status=Planned progress=0 planned=estimate,load,assignee notes=1 bytes_before=956 bytes_after=2361 elapsed_ms=<ms>
+```
+
+The id is the team (the first word of `--as`), `GAP`, then the verb words, with the first free number when that id is
+taken. The item is a TaskKind at P1 D2, 30 minutes, light, for an agent, tagged `rig,gap,<first verb word>,team:<team>`,
+and its note records the failed call (`FAILED CALL: verb=help agile add exit=2 cwd=- argv=-`) with the lint markers, so
+`agile lint` passes it as filed. `--argv` and `--cwd` add the rest of the call; an unknown flag, a missing title or
+verb, an upper-case verb word or a non-numeric exit is refused before anything is written. (rig, KIT-GAP-INTAKE note 7.)
+
+---
+
+## 51. Paste a diff instead of one replace per change (edit: patch hunks; one of the r30-r34 tutorials owed by KIT-ONE-CALL-SPEC)
+
+Habit (abbreviated): one `replace once "old" with "new"` row per changed line, each old text re-copied by hand with its
+escapes, or a scratch script that runs `git apply` on a temp diff and then re-reads the file to see whether it took.
+
+```fixture
+lib/show.spi
+inl show_i32 (x : i32) : string =
+    show_i64 (convert.i64 x)
+inl show_u8 (x : u8) : string =
+    x |> convert.i64 |> show_i64
+```
+
+```command
+kit do . '
+edit lib/show.spi
+  patch <<<
+@@
+ inl show_u8 (x : u8) : string =
+-    x |> convert.i64 |> show_i64
++    show_i64 (convert.i64 x)
+@@
+-inl show_i32 (x : i32) : string =
++inl show_int (x : i32) : string =
+>>>'
+```
+
+```expected
+edit lib/show.spi  2 replacements  lines 1,3  sha256 <hash> -> <hash>
+ok  files 1  replacements 2  <elapsed>  <clock>
+```
+
+Each `@@` hunk is one replacement: its context (` `) and removed (`-`) lines together are the anchor, which must match
+exactly once, and the context and added (`+`) lines are what replaces it, so no line numbers are needed and hunks may
+come in any order. Run the same call again and the first hunk's anchor is gone:
+`edit lib/show.spi  anchor not found: "inl show_u8 (x : u8) : string =\n    x |> convert.i64 |> show_i64" (0 matches, expected 1)`, then `nothing written: 1 of 1 edits failed validation` and `failed  files 0  replacements 0`, exit 1, so a stale diff never half-applies. (rig, KIT-ONE-CALL-SPEC; output from a real run of the installed kit, 11-09.)
+
+---
+
+## 52. Move a file and see where it landed, never over another (move + files; one of the r30-r34 tutorials owed by KIT-ONE-CALL-SPEC)
+
+Habit (abbreviated): `Move-Item` (which silently replaces with `-Force`, or fails mid-batch without it), then a separate
+`Get-ChildItem` to check the destination.
+
+```fixture
+drafts/parse.spi
+inl parse () = 1
+drafts/old.spi
+inl old () = 2
+lib/old.spi
+inl old () = 3
+```
+
+```command
+kit do . '
+move drafts/parse.spi to lib/parse.spi
+files lib/*'
+```
+
+```expected
+move drafts/parse.spi -> lib/parse.spi
+path           bytes  lines
+lib/old.spi    15     1
+lib/parse.spi  17     1
+ok  files 1 moved  <elapsed>  <clock>
+```
+
+A move never overwrites: `move drafts/old.spi to lib/old.spi` prints `move drafts/old.spi: lib/old.spi already exists`
+and `failed  files 0 moved`, exits 1, and leaves both files as they were. Read statements after the moves see the tree
+after them, so the landing check is part of the same call; absolute destination paths reach other roots.
+(rig, KIT-ONE-CALL-SPEC; output from a real run of the installed kit, 11-09.)
+
+---
+
+## 53. Rewrite every match of a pattern, keeping what it captured (edit: replace pattern with groups; one of the r30-r34 tutorials owed by KIT-ONE-CALL-SPEC)
+
+Habit (abbreviated): a PowerShell `-replace` one-liner over `Get-Content`/`Set-Content`
+(which rewrites line endings and encoding), or one literal `replace once` per site after reading each value by hand.
+
+```fixture
+src/jobs.spi
+timeout 30s
+retry 3
+timeout 45s
+```
+
+```command
+kit do . '
+edit src/jobs.spi
+  replace pattern all "timeout (\d+)s" with "timeout ${1}000ms"
+show src/jobs.spi'
+```
+
+```expected
+edit src/jobs.spi  2 replacements  lines 1,3  sha256 <hash> -> <hash>
+src/jobs.spi
+1  timeout 30000ms
+2  retry 3
+3  timeout 45000ms
+ok  files 1  replacements 2  <elapsed>  <clock>
+```
+
+Write a group as `${1}` whenever a letter, digit or underscore follows it: `$1000ms` names a group called `1000ms`,
+which does not exist, and today it is replaced by nothing (both lines became `timeout `, still exit 0). That silent case
+is filed as RIG-GAP-DO-REPLACE-PATTERN. `once` and `<n> times` make the match count part of the edit, as for literal
+replaces. (rig, KIT-ONE-CALL-SPEC; output from real runs of the installed kit, 11-09.)
+
+---
+
+## 54. Pick up where a team left off in one call (resume: agile next + job list + window list; one of the r30-r34 tutorials owed by KIT-ONE-CALL-SPEC)
+
+Habit (abbreviated): at the start of a session, `agile next --team <team>`, then `job list`, then `window list`, each
+read separately before choosing what to do.
+
+```setup
+kit agile init backlog
+kit agile add backlog WEB-LOGIN Story P1 D2 "login form keeps the typed email" "web,team:web" --estimate 30 --load light
+kit agile add backlog WEB-CACHE Story P2 D3 "cache the menu fetch" "web,team:web"
+kit agile add backlog API-RATE Story P0 D1 "rate limit the token route" "api,team:api"
+```
+
+```command
+kit resume backlog --team web
+```
+
+```expected
+== next work (agile next, WSJF)
+  1  WEB-LOGIN                    P1 D2     30m   wsjf=51200    unblocks=0      login form keeps the typed email
+  2  WEB-CACHE                    P2 D3    180m~  wsjf=2133     unblocks=0      cache the menu fetch
+kit agile next ok role=main ready=2 shown=2 elapsed_ms=<ms>
+== recent jobs (job list)
+
+== machine windows (window list)
+kit window list ok windows=0 free_mb=<mb> heavy_slots=0
+kit resume ok sections=3 team=web unix=<unix>
+```
+
+`--team` keeps API-RATE out even though it is P0. A `~` marks a provisional estimate: WEB-CACHE has none of its own. The
+order is agile next's WSJF ranking. The jobs and windows sections list only this case's own (empty) homes.
+(rig, KIT-ONE-CALL-SPEC; output from a real run of the installed kit, 11-09.)
 
 ---

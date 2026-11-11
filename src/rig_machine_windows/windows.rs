@@ -628,24 +628,11 @@ fn closure1() -> Rc<dyn Fn(Rc<str>) -> u64> {
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn heavy_wrapper_35(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: u64) -> Rc<str> {
-    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" (kit job "); } LIT.with(|lit| lit.clone()) };
-    let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(")"); } LIT.with(|lit| lit.clone()) };
-    let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let v8: Rc<str> = concat5_2(v2, v5, v3, v6, v7.clone());
-    let v9: u64 = v4.wrapping_div(60000u64);
-    let v10: u64 = v9.wrapping_add(1u64);
-    let v11: Rc<str> = number_text_17(v10);
-    let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("$argv = @(Get-Content -LiteralPath '"); } LIT.with(|lit| lit.clone()) };
-    let mut v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("')\n. '"); } LIT.with(|lit| lit.clone()) };
-    let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'\n"); } LIT.with(|lit| lit.clone()) };
-    let v15: Rc<str> = concat5_2(v12, v1, v13, v0, v14);
-    let mut v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Invoke-Heavy -Label '"); } LIT.with(|lit| lit.clone()) };
-    let mut v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("' -MaxMinutes "); } LIT.with(|lit| lit.clone()) };
-    let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
-    let v19: Rc<str> = concat5_2(v16, v8, v17, v11, v18);
-    let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("{ & $argv[0] @($argv | Select-Object -Skip 1) }\n"); } LIT.with(|lit| lit.clone()) };
-    let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("exit $LASTEXITCODE\n"); } LIT.with(|lit| lit.clone()) };
-    concat5_2(v15, v19, v20, v21, v7)
+    let v8: u64 = v4.wrapping_div(60000u64);
+    let v9: u64 = v8.wrapping_add(1u64);
+    let v10: Rc<str> = number_text_17(v9);
+    let v21: Rc<str> = string_concat(&["$argv = @(Get-Content -LiteralPath '", &*v1, "')\n. '", &*v0, "'\nInvoke-Heavy -Label '", &*v2, " (kit job ", &*v3, ")' -MaxMinutes ", &*v10, " { $env:RIG_HEAVY_HELD = $env:KIT_HEAVY_HELD = '1'; & $argv[0] @($argv | Select-Object -Skip 1) }\nexit $LASTEXITCODE\n"]);
+    v21
 }
 fn closure2() -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>, u64) -> Rc<str>> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, Rc<str>, u64) -> Rc<str>> = Rc::new(move |mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: u64| -> Rc<str> {

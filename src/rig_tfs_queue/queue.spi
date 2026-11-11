@@ -1,0 +1,82 @@
+///- --package .
+:# queue static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| detector =
+    | EncodedRow :: detector
+    | NumberArm :: detector
+    | StringConcat :: detector
+    | StdStringUse :: detector
+    | StringTagCompare :: detector
+
+:| heal =
+    | RecordRows :: heal
+    | UnionArms :: heal
+    | LibStringCalls :: heal
+    | TagUnion :: heal
+
+:== signal = { package : string; detector : detector; count : i32 }
+
+:== candidate = { package : string; detectors : i32; score : i32; heals : list heal }
+
+:~ weight_of (d : detector) : i32 =
+    ?= d ?|
+    | EncodedRow => 4i32
+    | NumberArm => 3i32
+    | StringTagCompare => 2i32
+    | StringConcat => 1i32
+    | StdStringUse => 1i32
+
+:~ heal_of (d : detector) : heal =
+    ?= d ?|
+    | EncodedRow => RecordRows
+    | NumberArm => UnionArms
+    | StringConcat => LibStringCalls
+    | StdStringUse => LibStringCalls
+    | StringTagCompare => TagUnion
+
+:~ candidate_of (signals : list signal) (~package : string) : candidate =
+    := mine = signals |> listm'.filter (\ (s : signal) => s.package = package && s.count > 0i32)
+    := score = mine |> listm.fold (\ (sum : i32) (s : signal) => sum + weight_of s.detector * s.count) 0i32
+    := add_heal = \ (got : list heal) (s : signal) =>
+        := h = heal_of s.detector
+        ? listm'.contains h got ?> got |: listm.append got [ h ]
+    { package = package; detectors = listm.length mine; score = score; heals = mine |> listm.fold add_heal [] }
+
+:~ before (a : candidate) (b : candidate) : bool =
+    a.detectors > b.detectors || a.detectors = b.detectors && a.score > b.score
+
+:~ ^ inserted (c : candidate) (sorted : list candidate) : list candidate =
+    ?= sorted ?|
+    | [] => [ c ]
+    | head :: rest => ? before c head ?> c :: sorted |: head :: inserted c rest
+
+:~ ranked (signals : list signal) : list candidate =
+    := add_name = \ (names : list string) (s : signal) =>
+        ? s.count > 0i32 && (listm'.contains s.package names |> not) ?> listm.append names [ s.package ] |: names
+    := names = signals |> listm.fold add_name []
+    := place = \ (sorted : list candidate) (c : candidate) => inserted c sorted
+    names |> listm.map (candidate_of signals) |> listm.fold place []
+
+///> rust
+:# packages_on_more_detectors_rank_first_then_by_weighted_score =
+    := signals =
+        [
+            { package = "windows"; detector = EncodedRow; count = 14i32 };
+            { package = "windows"; detector = StringConcat; count = 32i32 };
+            { package = "todo"; detector = StringConcat; count = 37i32 };
+            { package = "todo"; detector = StdStringUse; count = 45i32 };
+            { package = "todo"; detector = StringTagCompare; count = 5i32 };
+            { package = "quiet"; detector = NumberArm; count = 0i32 }
+        ]
+    := queue = ranked signals
+    := order = queue |> listm.map (\ (c : candidate) => c.package)
+    testing.expect (order = [ "todo"; "windows" ]) "three detectors first, a zero count is no signal"
+    ?= queue ?|
+    | todo :: windows :: [] =>
+        testing.expect (todo.score = 92i32 && windows.score = 88i32) "weighted scores"
+        testing.expect (todo.heals = [ LibStringCalls; TagUnion ]) "one heal per kind, in signal order"
+        testing.expect (windows.heals = [ RecordRows; LibStringCalls ]) "encoded rows become records"
+    | _ => failwith "two candidates"

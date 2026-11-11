@@ -1,0 +1,29 @@
+:< sm'_operators
+:< rig_drafts_model.model
+:< rig_drafts_store.store
+
+:~ promote_one (~root : string) (~item : string) (~landing : string) (~path : string) : string =
+    := target = slash root ++# "/" ++# landing
+    ?= promote_checked landing (file_system.directory_exists target) path ?|
+    | PromoteRefused why => why
+    | PromoteTo place =>
+        moved (draft_dir root item ++# "/" ++# path) (slash root ++# "/" ++# place ++# "/" ++# leaf path)
+
+:~ promote_run (words : list string) : i32 =
+    ?= plain_words words ?|
+    | root :: item :: landing :: _ =>
+        := paths = files_under (draft_dir root item) "" []
+        := problems = paths |> listm.map (promote_one root item landing) |> listm'.filter (\ (p : string) => p <> "")
+        problems |> listm.iter (\ (p : string) => console.write_line ("drafts promote refused: " ++# p))
+        := landed = (listm.length paths : i32) - (listm.length problems : i32)
+        console.write_line ("rig drafts promote " ++# verdict_word problems ++# " landed=" ++# sm'.show landed)
+        ? problems = [] ?> 0i32 |: 1i32
+    | _ =>
+        console.write_error_line "rig error: drafts promote <repo root> <ITEM> <landing dir in the repo>"
+        2i32
+
+:~ promote_entry () : i32 = promote_run (verb_words ())
+
+:= main () : i32 =
+    export "rig_drafts_promote_run" promote_entry
+    0i32

@@ -127,5 +127,5 @@
     testing.expect (matching_version ToolPython "3.12.10" [ "3.15.0"; "3.12.10" ] = Some "3.12.10") "an installed match"
     testing.expect (matching_version ToolZig "0.17.0" [ "0.18.0-dev.146+35accc06e" ] = None) "no dev build stands in"
     := zig = "C:/scoop/apps/zig/0.17.0/zig.exe"
-    testing.expect (fix_line ToolZig "0.17.0" zig = "fix: SPIRAL_ZIG=" ++# zig) "zig names the harness variable"
+    testing.expect (fix_line ToolZig "0.17.0" zig = "fix: SPIRAL_ZIG=" ++# zig) "zig names the runner variable"
     testing.expect (names_in "C:/kit-ci-parity-no-such-folder" = []) "a missing folder lists nothing"

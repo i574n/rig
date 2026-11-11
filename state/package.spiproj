@@ -10,7 +10,6 @@ modules:
     consolidation
     consolidation_fixtures
     dogfood_exit
-    agile
     bundle
     coverage
     evidence

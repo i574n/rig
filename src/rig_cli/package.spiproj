@@ -8,6 +8,9 @@ packages:
     rig_exec_export
     rig_cli_routes
     rig_status_facts
+    rig_units
+    rig_drafts
+    rig_scratch
 link:
     rig_heal_nameof
     rig_hook
@@ -15,5 +18,8 @@ link:
     rig_exec_export
     rig_cli_routes
     rig_status_facts
+    rig_units
+    rig_drafts
+    rig_scratch
 modules:
     main

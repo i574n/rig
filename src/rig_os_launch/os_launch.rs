@@ -229,26 +229,26 @@ pub struct Mut0 { pub l0: Rc<str> }
 fn command_line_argument_count_1() -> i32 {
     let mut v0: usize = std::env::args().count();
     let mut v1: i32 = ((v0) as i32);
-    let mut v2: i32 = v1.wrapping_sub(1i32);
+    let v2: i32 = v1.wrapping_sub(1i32);
     v2
 }
 fn command_line_argument_3(mut v0: i32) -> Rc<str> {
     let mut v1: i32 = v0.wrapping_add(1i32);
-    let mut v2: usize = ((v1) as usize);
+    let v2: usize = ((v1) as usize);
     let v3: Rc<str> = Rc::<str>::from(std::env::args().nth(v2).unwrap_or_default());
     v3
 }
 fn argument_2(mut v0: i32) -> Rc<str> {
     let mut v1: bool = v0 >= 0i32;
-    let v4: bool = if v1 {
-        let mut v2: i32 = command_line_argument_count_1();
+    let mut v4: bool = if v1 {
+        let v2: i32 = command_line_argument_count_1();
         let v3: bool = v0 < v2;
         v3
     } else {
         false
     };
     let v8: US0 = if v4 {
-        let v5: Rc<str> = command_line_argument_3(v0);
+        let mut v5: Rc<str> = command_line_argument_3(v0);
         US0::US0_Some(v5)
     } else {
         US0::US0_None
@@ -270,8 +270,8 @@ fn joined_args_4(mut v0: i32, mut v1: i32, mut v2: Rc<str>) -> Rc<str> {
         if v3 {
             return v2;
         } else {
-            let v4: i32 = v0.wrapping_add(1i32);
-            let v5: Rc<str> = argument_2(v0);
+            let mut v4: i32 = v0.wrapping_add(1i32);
+            let mut v5: Rc<str> = argument_2(v0);
             let v7: Rc<str> = string_concat(&[&*v2, &*v5, "\t"]);
             (v0, v2) = (v4, v7);
             continue;
@@ -281,10 +281,10 @@ fn joined_args_4(mut v0: i32, mut v1: i32, mut v2: Rc<str>) -> Rc<str> {
 fn process_run_0() -> i32 {
     let mut v0: i32 = command_line_argument_count_1();
     let mut v1: i32 = 2i32;
-    let mut v2: Rc<str> = argument_2(v1);
+    let v2: Rc<str> = argument_2(v1);
     let v3: i32 = 1i32;
-    let v4: Rc<str> = argument_2(v3);
-    let v5: bool = &*v4 != "start-under-shell";
+    let mut v4: Rc<str> = argument_2(v3);
+    let mut v5: bool = &*v4 != "start-under-shell";
     let v7: bool = if v5 {
         true
     } else {
@@ -298,8 +298,8 @@ fn process_run_0() -> i32 {
     } else {
         let v9: i32 = 3i32;
         let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-        let mut v11: Rc<str> = joined_args_4(v9, v0, v10);
-        let mut v12: Rc<str> = std::rc::Rc::<str>::from(rig_shell_parented_start_text(&*v2, &*v11).as_str());
+        let v11: Rc<str> = joined_args_4(v9, v0, v10);
+        let v12: Rc<str> = std::rc::Rc::<str>::from(rig_shell_parented_start_text(&*v2, &*v11).as_str());
         let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("pid=0 "); } LIT.with(|lit| lit.clone()) };
         let v14: bool = v12.starts_with(&*v13);
         if v14 {
@@ -318,75 +318,7 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
         process_run_0()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method9(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let mut v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method10(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
-fn method11(mut v0: Option<u64>) -> Option<u64> {
+fn method9(mut v0: Option<u64>) -> Option<u64> {
     v0
 }
 fn closure2() -> Rc<dyn Fn((u64)) -> US1> {
@@ -396,39 +328,32 @@ fn closure2() -> Rc<dyn Fn((u64)) -> US1> {
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn number_of_8(mut v0: Rc<str>) -> u64 {
-    let mut v1: i32 = (v0.clone().len() as i32);
-    let mut v2: i32 = 0i32;
-    let v3: i32 = method9(v0.clone(), v1, v2);
-    let v4: i32 = v1.wrapping_sub(1i32);
-    let v5: Rc<str> = string_slice(&v0, v3 as i64, v4 as i64);
-    let v6: i32 = (v5.clone().len() as i32);
-    let v7: i32 = method10(v5.clone(), v6);
-    let v8: Rc<str> = string_slice(&v5, 0i32 as i64, v7 as i64);
-    let v9: Option<u64> = (v8).trim().parse::<u64>().ok();
-    let v10: Option<u64> = method11(v9);
-    let mut v11: Rc<dyn Fn((u64)) -> US1> = closure2();
-    let mut v12: Option<US1> = v10.map(|x| v11(x));
-    let v14: US1 = US1::US1_None;
-    let v15: US1 = v14.clone();
-    let v16: US1 = v12.unwrap_or(v15);
-    match v16 {
+    let mut v1: Rc<str> = Rc::<str>::from((v0).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+    let v2: Option<u64> = (v1).trim().parse::<u64>().ok();
+    let v3: Option<u64> = method9(v2);
+    let mut v4: Rc<dyn Fn((u64)) -> US1> = closure2();
+    let mut v5: Option<US1> = v3.map(|x| v4(x));
+    let v7: US1 = US1::US1_None;
+    let v8: US1 = v7.clone();
+    let v9: US1 = v5.unwrap_or(v8);
+    match v9 {
         US1::US1_None => {
             0u64
         }
-        US1::US1_Some(v17) => {
-            let v17: u64 = v17;
-            v17
+        US1::US1_Some(v10) => {
+            let v10: u64 = v10;
+            v10
         }
     }
 }
 fn ancestry_from_7(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: i32) -> Rc<UH0> {
     loop {
-        let mut v2: i32 = (v0.clone().borrow().len() as i32);
+        let v2: i32 = (v0.clone().borrow().len() as i32);
         let v3: bool = v1 >= v2;
         if v3 {
             return { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_AncestryEnd); } CASE.with(|case| case.clone()) };
         } else {
-            let v5: Rc<str> = v0.borrow()[v1 as usize].clone();
+            let mut v5: Rc<str> = v0.borrow()[v1 as usize].clone();
             let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
             let v7: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v5.split(&*v6).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
             let v8: i32 = (v7.clone().borrow().len() as i32);
@@ -438,7 +363,7 @@ fn ancestry_from_7(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: i32) -> Rc<UH0> {
                 v1 = v10;
                 continue;
             } else {
-                let mut v12: Rc<str> = v7.borrow()[0i32 as usize].clone();
+                let v12: Rc<str> = v7.borrow()[0i32 as usize].clone();
                 let v13: u64 = number_of_8(v12);
                 let v14: Rc<str> = v7.borrow()[1i32 as usize].clone();
                 let v15: Rc<str> = v7.borrow()[2i32 as usize].clone();
@@ -456,19 +381,19 @@ fn ancestry_of_text_6(mut v0: Rc<str>) -> Rc<UH0> {
         { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_AncestryEnd); } CASE.with(|case| case.clone()) }
     } else {
         let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
-        let v4: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v0.split(&*v3).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
-        let v5: i32 = 0i32;
+        let mut v4: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v0.split(&*v3).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
+        let mut v5: i32 = 0i32;
         ancestry_from_7(v4, v5)
     }
 }
-fn loop_14(mut v0: Rc<str>) -> Rc<str> {
+fn loop_12(mut v0: Rc<str>) -> Rc<str> {
     loop {
         let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".exe"); } LIT.with(|lit| lit.clone()) };
-        let mut v2: bool = v0.ends_with(&*v1);
+        let v2: bool = v0.ends_with(&*v1);
         if v2 {
             let v3: i32 = (v0.clone().len() as i32);
-            let v4: i32 = v3.wrapping_sub(4i32);
-            let v5: i32 = v4.wrapping_sub(1i32);
+            let mut v4: i32 = v3.wrapping_sub(4i32);
+            let mut v5: i32 = v4.wrapping_sub(1i32);
             let v6: Rc<str> = string_slice(&v0, 0i32 as i64, v5 as i64);
             v0 = v6;
             continue;
@@ -477,14 +402,14 @@ fn loop_14(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn launcher_kind_of_13(mut v0: Rc<str>) -> US3 {
+fn launcher_kind_of_11(mut v0: Rc<str>) -> US3 {
     let mut v1: Rc<str> = Rc::<str>::from(v0.to_lowercase());
-    let mut v2: Rc<str> = loop_14(v1);
+    let v2: Rc<str> = loop_12(v1);
     let v3: bool = &*v2 == "cmd";
-    let v5: bool = if v3 {
+    let mut v5: bool = if v3 {
         true
     } else {
-        let v4: bool = &*v2 == "pwsh";
+        let mut v4: bool = &*v2 == "pwsh";
         v4
     };
     let v7: bool = if v5 {
@@ -499,7 +424,7 @@ fn launcher_kind_of_13(mut v0: Rc<str>) -> US3 {
         let v8: bool = &*v2 == "sh";
         v8
     };
-    let mut v11: bool = if v9 {
+    let v11: bool = if v9 {
         true
     } else {
         let v10: bool = &*v2 == "bash";
@@ -508,7 +433,7 @@ fn launcher_kind_of_13(mut v0: Rc<str>) -> US3 {
     let v15: bool = if v11 {
         true
     } else {
-        let mut v12: bool = &*v2 == "conhost";
+        let v12: bool = &*v2 == "conhost";
         if v12 {
             true
         } else {
@@ -539,15 +464,15 @@ fn launcher_kind_of_13(mut v0: Rc<str>) -> US3 {
         }
     }
 }
-fn owner_of_12(mut v0: Rc<UH0>) -> US2 {
+fn owner_of_10(mut v0: Rc<UH0>) -> US2 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Ancestor(v2, v3, v4, v5) => {
-                let mut v2: u64 = v2;
+                let v2: u64 = v2;
                 let v3: Rc<str> = v3;
-                let v4: u64 = v4;
-                let v5: Rc<UH0> = v5;
-                let v6: US3 = launcher_kind_of_13(v3.clone());
+                let mut v4: u64 = v4;
+                let mut v5: Rc<UH0> = v5;
+                let v6: US3 = launcher_kind_of_11(v3.clone());
                 match v6 {
                     US3::US3_OwnerProcess => {
                         return US2::US2_OwnedBy(v2, v3, v4);
@@ -567,21 +492,21 @@ fn owner_of_12(mut v0: Rc<UH0>) -> US2 {
         }
     }
 }
-fn method17(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
-    let mut v2: Rc<str> = v0.borrow().l0.clone();
+fn method15(mut v0: &Rc<RefCell<Mut0>>, mut v1: Rc<str>) -> () {
+    let v2: Rc<str> = v0.borrow().l0.clone();
     let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
-fn format_real_16(mut v0: u64) -> Rc<str> {
+fn format_real_14(mut v0: u64) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let mut v2: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v1 }));
+    let v2: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v1 }));
     let v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
-    method17(&v2, v3);
-    let v4: Rc<str> = v2.borrow().l0.clone();
+    method15(&v2, v3);
+    let mut v4: Rc<str> = v2.borrow().l0.clone();
     v4
 }
-fn owner_home_name_15(mut v0: US2) -> Rc<str> {
+fn owner_home_name_13(mut v0: US2) -> Rc<str> {
     match v0 {
         US2::US2_NoOwner => {
             let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -589,10 +514,10 @@ fn owner_home_name_15(mut v0: US2) -> Rc<str> {
         }
         US2::US2_OwnedBy(v1, v2, v3) => {
             let mut v1: u64 = v1;
-            let mut v2: Rc<str> = v2;
+            let v2: Rc<str> = v2;
             let v3: u64 = v3;
-            let v4: Rc<str> = format_real_16(v1);
-            let v6: Rc<str> = format_real_16(v3);
+            let mut v4: Rc<str> = format_real_14(v1);
+            let v6: Rc<str> = format_real_14(v3);
             let v7: Rc<str> = string_concat(&[&*v4, "-", &*v6]);
             v7
         }
@@ -601,7 +526,7 @@ fn owner_home_name_15(mut v0: US2) -> Rc<str> {
 fn caller_owner_5() -> (Rc<str>, u64, u64) {
     let mut v0: Rc<str> = std::rc::Rc::<str>::from(rig_ancestry_text().as_str());
     let mut v1: Rc<UH0> = ancestry_of_text_6(v0);
-    let mut v2: US2 = owner_of_12(v1);
+    let v2: US2 = owner_of_10(v1);
     match &v2 {
         US2::US2_NoOwner => {
             let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -609,9 +534,9 @@ fn caller_owner_5() -> (Rc<str>, u64, u64) {
         }
         US2::US2_OwnedBy(v3, v4, v5) => {
             let v3: u64 = *v3;
-            let v4: Rc<str> = v4.clone();
-            let v5: u64 = *v5;
-            let v6: Rc<str> = owner_home_name_15(v2);
+            let mut v4: Rc<str> = v4.clone();
+            let mut v5: u64 = *v5;
+            let v6: Rc<str> = owner_home_name_13(v2);
             (v6, v3, v5)
         }
     }
@@ -621,19 +546,19 @@ fn closure1() -> Rc<dyn Fn() -> (Rc<str>, u64, u64)> {
         caller_owner_5()
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn owner_present_18(mut v0: u64, mut v1: u64) -> bool {
-    let mut v2: bool = v0 == 0u64;
+fn owner_present_16(mut v0: u64, mut v1: u64) -> bool {
+    let v2: bool = v0 == 0u64;
     if v2 {
         true
     } else {
         let v3: u64 = rig_process_started_ms(v0);
-        let v4: bool = v3 == v1;
+        let mut v4: bool = v3 == v1;
         v4
     }
 }
 fn closure3() -> Rc<dyn Fn(u64, u64) -> bool> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(u64, u64) -> bool> = Rc::new(move |mut v0: u64, mut v1: u64| -> bool {
-        owner_present_18(v0, v1)
+        owner_present_16(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 pub fn rig_process_launch_run() -> i32 {

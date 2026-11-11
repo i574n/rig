@@ -96,8 +96,8 @@
     |? count_of counts "encoded-row" > 0i32
     ?> "a new package encodes rows with tab or record separators"
     |? count_of counts "type-decl" >= 2i32 && feature_total counts = 0i32 ?>
-        "a new package declares types but uses none of the typefeatureset (GADT cases, existentials, foralls, "
-        ^^ "indexed unions, prototypes)"
+        "a new package declares types but uses none of the typed-modeling constructs (GADT cases, existentials, "
+        ^^ "foralls, indexed unions, prototypes)"
     |: ""
 
 :~ census_verdict (census : package_census) (baseline : array_base baseline_entry) : verdict =

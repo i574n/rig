@@ -1,0 +1,54 @@
+:< sm'_operators
+
+:~ slash (~path : string) : string = sm'.replace "\\" "/" path
+
+:~ leaf (~path : string) : string =
+    := plain = slash path
+    := at = sm'.last_index_of "/" plain
+    ? at < 0i32 ?> plain |: sm'.substring (at + 1i32) (sm'.length plain - at - 1i32) plain
+
+:~ store_root () : string = slash (env.get_environment_variable "LOCALAPPDATA") ++# "/kit/drafts"
+
+:~ names_in (~dir : string) : list string =
+    ? file_system.directory_exists dir |> not
+    ?> []
+    |:
+        file_system.read_directory_names dir
+        |> resultm.unwrap'
+        |> am'.vec_fold' (\ names name => sm'.from_std_string name :: names) []
+        |> listm.rev
+
+:~ ^ files_under (~dir : string) (~prefix : string) (found : list string) : list string =
+    := step = \ (acc : list string) (name : string) =>
+        := child = dir ++# "/" ++# name
+        ? file_system.directory_exists child
+        ?> files_under child (prefix ++# name ++# "/") acc
+        |: listm.append acc [ prefix ++# name ]
+    names_in dir |> listm.fold step found
+
+:~ ^ flag_value (words : list string) (~flag : string) : string =
+    ?= words ?|
+    | word :: value :: _ ?& word = flag => value
+    | _ :: rest => flag_value rest flag
+    | [] => ""
+
+:~ ^ plain_words (words : list string) : list string =
+    ?= words ?|
+    | word :: _ :: rest ?& sm'.starts_with "--" word => plain_words rest
+    | word :: rest => word :: plain_words rest
+    | [] => []
+
+:~ moved (~from : string) (~into : string) : string =
+    := _ = file_system.directory_create_all (sm'.substring 0i32 (sm'.last_index_of "/" into) into)
+    ?= resultm.unbox' (file_system.rename into from) ?|
+    | Ok _ => ""
+    | Error _ => "could not move " ++# from ++# " to " ++# into
+
+:~ draft_dir (~root : string) (~item : string) : string = store_root () ++# "/" ++# leaf root ++# "/" ++# item
+
+:~ verdict_word (problems : list string) : string = ? problems = [] ?> "ok" |: "failed"
+
+:~ verb_words () : list string =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: words => words
+    | _ => []

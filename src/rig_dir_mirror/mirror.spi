@@ -1,0 +1,53 @@
+///- --package .
+:# mirror static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== blob = { path : string; bytes : u64 }
+
+:== mirror_plan = { send : list blob; resend : list blob; remote_only : i32 }
+
+:| mirror_verdict =
+    | Verified :: i32 -> mirror_verdict
+    | MissingOnRemote :: list string -> mirror_verdict
+    | SizeMismatch :: list string -> mirror_verdict
+
+:~ found_in (blobs : list blob) (~path : string) : option blob =
+    blobs |> listm'.try_find_ (\ (b : blob) => b.path = path)
+
+:~ mirror_plan_of (local : list blob) (remote : list blob) : mirror_plan =
+    := absent = local |> listm'.filter (\ (b : blob) => found_in remote b.path = None)
+    := damaged =
+        local |> listm'.filter (\ (b : blob) =>
+            ?= found_in remote b.path ?|
+            | Some r => r.bytes <> b.bytes
+            | None => !-)
+    := extra = remote |> listm'.filter (\ (r : blob) => found_in local r.path = None)
+    { send = absent; resend = damaged; remote_only = listm.length extra }
+
+:~ verdict_of (local : list blob) (remote_after : list blob) : mirror_verdict =
+    := plan = mirror_plan_of local remote_after
+    := path_of = \ (b : blob) => b.path
+    ? plan.send <> []
+    ?> MissingOnRemote (plan.send |> listm.map path_of)
+    |? plan.resend <> []
+    ?> SizeMismatch (plan.resend |> listm.map path_of)
+    |: Verified (listm.length local)
+
+:~ bytes_to_send (plan : mirror_plan) : u64 =
+    listm.append plan.send plan.resend |> listm.fold (\ (sum : u64) (b : blob) => sum + b.bytes) 0u64
+
+///> rust
+:# a_mirror_sends_only_new_or_damaged_blobs_and_never_deletes =
+    := a = { path = "ab/abc1"; bytes = 10u64 }
+    := b = { path = "cd/cde2"; bytes = 20u64 }
+    := c = { path = "ef/efa3"; bytes = 30u64 }
+    := old = { path = "00/0001"; bytes = 5u64 }
+    := plan = mirror_plan_of [ a; b; c ] [ a; { b ?| bytes = 7u64 }; old ]
+    testing.expect (plan.send = [ c ] && plan.resend = [ b ]) "the new blob and the damaged one"
+    testing.expect (plan.remote_only = 1i32) "remote-only blobs are counted, never deleted"
+    testing.expect (bytes_to_send plan = 50u64) "bytes"
+    testing.expect (verdict_of [ a; b ] [ a; b; old ] = Verified 2i32) "verified"
+    testing.expect (verdict_of [ a; b ] [ a ] = MissingOnRemote [ "cd/cde2" ]) "a blob that did not arrive"
+    testing.expect (verdict_of [ a ] [ { a ?| bytes = 1u64 } ] = SizeMismatch [ "ab/abc1" ]) "a truncated copy"

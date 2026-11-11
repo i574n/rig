@@ -54,7 +54,6 @@ enum US5 {
     US5_WindowPruned,
     US5_WindowDropped,
 }
-pub struct Mut0 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US6 {
     US6_Quiet,
@@ -740,4 +739,4 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
 pub fn rig_window_wait_run() -> i32 {
     closure0()()
 }
-pub type SpiralShape_97df63ebabc3 = Mut0;
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut0;

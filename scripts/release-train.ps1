@@ -20,6 +20,9 @@ New-Item -ItemType Directory -Force $out | Out-Null
 $log = Join-Path $out 'train.log'
 function Say([string]$text) { $line = "$(Get-Date -Format 'HH:mm:ss') $text"; Write-Host $line; Add-Content -LiteralPath $log -Value $line }
 function Stop-Train([string]$why) { Say "STOP: $why"; exit 1 }
+if (-not $env:CARGO_BUILD_JOBS) { $env:CARGO_BUILD_JOBS = [string][Math]::Max(1, [int][Math]::Floor([Environment]::ProcessorCount / 2)) }
+if ($IsWindows) { try { (Get-Process -Id $PID).PriorityClass = 'BelowNormal' } catch { } }
+Say "load caps: CARGO_BUILD_JOBS=$env:CARGO_BUILD_JOBS of $([Environment]::ProcessorCount) cores$(if ($IsWindows) { ', priority BelowNormal (children inherit it)' })"
 function Get-GeneratedHashes([string]$root) {
     $map = @{}
     Get-ChildItem -LiteralPath (Join-Path $root 'src') -Recurse -File -Filter *.rs | Where-Object { $_.FullName -notmatch '\\target\\' } |
@@ -54,7 +57,8 @@ if (-not $env:SPIRAL_COMPILER_DLL) {
     $pinnedCore = Join-Path $pinnedDir 'SpiralCompilerCore.dll'
     $stale = (Test-Path -LiteralPath $pinnedCore) -and (Test-Path -LiteralPath $liveCore) -and ((Get-FileHash -LiteralPath $pinnedCore).Hash -ne (Get-FileHash -LiteralPath $liveCore).Hash)
     if ($stale -and -not $Resume) { Say "pinned compiler at $pinnedDir differs from the live core; re-pinning (an earlier launch of $Name left it)"; Remove-Item -LiteralPath $pinnedDir -Recurse -Force }
-    if ($stale -and $Resume) { Stop-Train "-Resume would mix compilers: the pinned core differs from the live one" }
+    if ($stale -and $Resume) { Say "the live core moved since $Name pinned its compiler; resuming on the pin, the compiler of every earlier phase" }
+    if ($Resume -and -not (Test-Path -LiteralPath (Join-Path $pinnedDir 'SpiralCompiler.dll'))) { Stop-Train "-Resume found no compiler pin at $pinnedDir, so the earlier phases' compiler is unknown" }
     if (-not (Test-Path -LiteralPath (Join-Path $pinnedDir 'SpiralCompiler.dll'))) { [void](Copy-KitCompilerSnapshot -Compiler $liveDll -Destination $pinnedDir) }
     $env:SPIRAL_COMPILER_DLL = Join-Path $pinnedDir 'SpiralCompiler.dll'
 }
@@ -89,6 +93,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 Say "phase crate gate: ok ($((Get-Content (Join-Path $out 'crate-gate.log') -Tail 1)))"
 
+if ($Verdicts) {
+    Say "phase candidate: skipped here; $Verdicts holds the node's verdicts for this snapshot, so this machine builds only the release"
+} else {
 Say 'phase candidate: debug build of kit-cli and kit-dev'
 $started = Get-Date
 Push-Location $src
@@ -102,6 +109,10 @@ $candidateHash = (Get-FileHash $candidate).Hash.Substring(0, 8)
 $earlierCandidate = @(Select-String -LiteralPath $log -Pattern 'phase candidate: ok, kit\.exe (\w{8})' | ForEach-Object { $_.Matches[0].Groups[1].Value }) | Select-Object -Last 1
 if ($Resume -and $earlierCandidate -and $earlierCandidate -ne $candidateHash) { Stop-Train "-Resume rebuilt a different candidate ($candidateHash, earlier $earlierCandidate), so the earlier verdicts don't apply; start a fresh -Snapshot train" }
 Say "phase candidate: ok, kit.exe $((Get-FileHash $candidate).Hash.Substring(0, 8)) written $($built.ToString('HH:mm:ss'))$(if ($built -lt $started) { ' (cargo found it fresh)' })"
+& $candidate proxy source-topology $KitRoot *> (Join-Path $out 'topology.log')
+if ($LASTEXITCODE -ne 0) { Get-Content (Join-Path $out 'topology.log') -Tail 5 | ForEach-Object { Say "  topology: $_" }; Stop-Train 'the candidate refuses the source topology; the release build would refuse it too' }
+Say "phase candidate: source topology ok ($((Get-Content (Join-Path $out 'topology.log') -Tail 1)))"
+}
 
 $testBlock = '^(///> |:# (?!.* static =)|test (?!.* static =))'
 $binaryUsers = Get-ChildItem $src -Recurse -File -Filter *.spi | Where-Object { $_.FullName -notmatch '[\\/]target[\\/]' } |
@@ -271,36 +282,46 @@ if ($bad.Count) { Stop-Train "$($bad.Count) candidate notebooks are not green; n
 Say 'phase release: build.ps1 (release build, schema and topology checks, publish kit.exe)'
 Say "phase release: compiler $env:SPIRAL_COMPILER_DLL ($(Get-CompilerStamp))"
 & pwsh -NoProfile -File (Join-Path $KitRoot 'build.ps1') -TimeoutMs 3600000 -SpiralCompiler $env:SPIRAL_COMPILER_DLL *> (Join-Path $out 'release.log')
+if ($LASTEXITCODE -ne 0 -and (Select-String -LiteralPath (Join-Path $out 'release.log') -Pattern 'command timed out after' -Quiet)) {
+    Copy-Item -LiteralPath (Join-Path $out 'release.log') -Destination (Join-Path $out 'release-timed-out.log') -Force
+    Say 'phase release: build.ps1 timed out under load (a starved build is void, not red); resuming it once, cargo keeps what it built'
+    & pwsh -NoProfile -File (Join-Path $KitRoot 'build.ps1') -TimeoutMs 3600000 -SpiralCompiler $env:SPIRAL_COMPILER_DLL *> (Join-Path $out 'release.log')
+}
 if ($LASTEXITCODE -ne 0) { Get-Content (Join-Path $out 'release.log') -Tail 15 | ForEach-Object { Say "  release: $_" }; Stop-Train 'release build failed; installed kit.exe unchanged' }
 Say "phase release: installed kit.exe $((Get-FileHash $installed).Hash.Substring(0, 8)) ($((Select-String -Path (Join-Path $out 'release.log') -Pattern 'published=').Line))"
 
 Say 'phase smoke: the installed binary answers read verbs'
 $smoke = @(& $installed job list 3 2>&1)
 if ($LASTEXITCODE -ne 0) { $smoke | ForEach-Object { Say "  smoke: $_" }; Stop-Train 'installed kit.exe fails job list' }
+$binaryNames = @('rig', 'kit')
 if ($Snapshot -or $Resume) {
-    $liveBinary = Join-Path $liveRoot 'kit.exe'
-    $liveStaged = "$liveBinary.next"
-    Copy-Item -LiteralPath $installed -Destination $liveStaged -Force
     $retiredRepo = Join-Path $env:LOCALAPPDATA 'kit\retired'
     [void][IO.Directory]::CreateDirectory($retiredRepo)
-    if (Test-Path -LiteralPath $liveBinary) { [IO.File]::Move($liveBinary, (Join-Path $retiredRepo "repo-kit-$(Get-Date -Format yyyyMMddHHmmssfff).exe")) }
-    [IO.File]::Move($liveStaged, $liveBinary)
-    Say "snapshot: live repo kit.exe refreshed: $((Get-FileHash $liveBinary).Hash.Substring(0, 8))"
+    foreach ($binaryName in $binaryNames) {
+        $liveBinary = Join-Path $liveRoot "$binaryName.exe"
+        $liveStaged = "$liveBinary.next"
+        Copy-Item -LiteralPath $installed -Destination $liveStaged -Force
+        if (Test-Path -LiteralPath $liveBinary) { [IO.File]::Move($liveBinary, (Join-Path $retiredRepo "repo-$binaryName-$(Get-Date -Format yyyyMMddHHmmssfff).exe")) }
+        [IO.File]::Move($liveStaged, $liveBinary)
+        Say "snapshot: live repo $binaryName.exe refreshed: $((Get-FileHash $liveBinary).Hash.Substring(0, 8))"
+    }
 }
 $laneBin = Join-Path $env:LOCALAPPDATA 'kit\bin'
 if ($env:LOCALAPPDATA) {
     [void][IO.Directory]::CreateDirectory($laneBin)
-    $laneCopy = Join-Path $laneBin 'kit.exe'
-    $staged = "$laneCopy.next"
-    Copy-Item -LiteralPath $installed -Destination $staged -Force
     $retiredRoot = Join-Path $env:LOCALAPPDATA 'kit\retired'
     [void][IO.Directory]::CreateDirectory($retiredRoot)
-    try {
-        if (Test-Path -LiteralPath $laneCopy) { [IO.File]::Move($laneCopy, (Join-Path $retiredRoot "lane-kit-$(Get-Date -Format yyyyMMddHHmmssfff).exe")) }
-        [IO.File]::Move($staged, $laneCopy)
-        Say "lane copy $laneCopy refreshed: $((Get-FileHash $laneCopy).Hash.Substring(0, 8)) (the previous build was renamed into $retiredRoot, so running lanes kept working)"
+    foreach ($binaryName in $binaryNames) {
+        $laneCopy = Join-Path $laneBin "$binaryName.exe"
+        $staged = "$laneCopy.next"
+        Copy-Item -LiteralPath $installed -Destination $staged -Force
+        try {
+            if (Test-Path -LiteralPath $laneCopy) { [IO.File]::Move($laneCopy, (Join-Path $retiredRoot "lane-$binaryName-$(Get-Date -Format yyyyMMddHHmmssfff).exe")) }
+            [IO.File]::Move($staged, $laneCopy)
+            Say "lane copy $laneCopy refreshed: $((Get-FileHash $laneCopy).Hash.Substring(0, 8)) (the previous build was renamed into $retiredRoot, so running lanes kept working)"
+        }
+        catch { Say "lane copy swap failed ($($_.Exception.Message)); the new one waits as $staged" }
     }
-    catch { Say "lane copy swap failed ($($_.Exception.Message)); the new one waits as $staged" }
 }
 Get-SourceManifest $KitRoot | Set-Content -LiteralPath (Join-Path $out 'shipped-manifest.txt')
 Set-Content -LiteralPath $lastInstalled $Name

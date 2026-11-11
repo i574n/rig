@@ -528,12 +528,19 @@ fn package_entry_24(mut v0: Rc<str>) -> bool {
     let v1: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v0).unwrap_or_default().as_str());
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("///- --package ..\n"); } LIT.with(|lit| lit.clone()) };
     let v3: bool = v1.starts_with(&*v2);
-    if v3 {
+    let mut v6: bool = if v3 {
         true
     } else {
         let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("///- --package ..\r\n"); } LIT.with(|lit| lit.clone()) };
         let mut v5: bool = v1.starts_with(&*v4);
         v5
+    };
+    if v6 {
+        true
+    } else {
+        let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("///- --package .. "); } LIT.with(|lit| lit.clone()) };
+        let v8: bool = v1.starts_with(&*v7);
+        v8
     }
 }
 fn closure4(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> bool> {

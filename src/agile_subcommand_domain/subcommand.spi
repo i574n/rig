@@ -16,6 +16,7 @@
     | AgileRecord
     | AgileSet
     | AgileAdd
+    | AgileGap
     | AgileEdit
     | AgileShow
     | AgilePlan
@@ -66,10 +67,18 @@
                 "<root> <ID> <Epic|Feature|Story|TaskKind> <P0..P5> <D0..D8> <title> <tags> [--estimate <m>] "
                 ^^ "[--load <l>] [--assignee <a>] [--deps <A,B>] [--note <text> --as <author>]"
         }
+    | AgileGap =>
+        {
+            name = "gap"
+            shape = "<root> <title> --verb <verb> --as <lane> [--exit <n>] [--argv <text>] [--cwd <dir>]"
+        }
     | AgileEdit =>
         {
             name = "edit"
-            shape = "<root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value>"
+            shape =
+                "<root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value> | "
+                ^^ "<root> <id> --wait <train|item|lane|user|job|when>:<value> | --wait --clear | --parent <EPIC> | "
+                ^^ "--split milestones"
         }
     | AgileShow => { name = "show"; shape = "<root> <id> [--json]" }
     | AgilePlan => { name = "plan"; shape = "<root> [--json]" }
@@ -155,7 +164,7 @@
     | AgileInit | AgileLease | AgileStatus | AgileHandoff | AgileList | AgileCheck | AgileShow => ReadsState
     | AgilePlan | AgileNext | AgileLinks | AgileWip | AgileViews | AgileView | AgileLint => ReadsState
     | AgileGate | AgileCadence => ReadsState
-    | AgileClaim | AgileRelease | AgileBegin | AgileRecord | AgileSet | AgileAdd | AgileEdit => WritesState
+    | AgileClaim | AgileRelease | AgileBegin | AgileRecord | AgileSet | AgileAdd | AgileGap | AgileEdit => WritesState
     | AgileMigrateTags | AgileMigrateActivity | AgileNote | AgileNoteEdit | AgileNotes | AgileRename => WritesState
     | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint | AgileDialect => WritesState
 

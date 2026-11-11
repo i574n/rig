@@ -61,8 +61,10 @@
                 | Some o => Some { o ?| opens = !+ }
                 | None => None
             |: pending
-        ? head <> "" ?> sites_from rest (number + 1i32) started (closed grouped done)
-        |? line <> "" && sm'.starts_with " " line = !- ?> sites_from rest (number + 1i32) None (closed pending done)
+        ? head <> ""
+        ?> sites_from rest (number + 1i32) started (closed grouped done)
+        |? line <> "" && sm'.starts_with " " line = !-
+        ?> sites_from rest (number + 1i32) None (closed pending done)
         |:
             := grown = ?= pending ?| | Some o => Some { o ?| body = o.body ++# " " ++# line } | None => None
             sites_from rest (number + 1i32) grown done

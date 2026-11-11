@@ -77,7 +77,7 @@
 
 :~ home_of (~home : string) : host_home = ? directory_exists (requests_directory home) ?> HomePresent |: HomeGone
 
-:~ ^ host_served (~kids : children) (terms : host_terms) (~idle_since : u64) : i32 =
+:~ ^ host_served (~kids : children) (terms : host_terms) (~idle_since : u64) (~nap : u64) : i32 =
     := home = terms.home
     := dir = requests_directory home
     := name = next_request dir
@@ -86,7 +86,7 @@
         := executable = text_or_empty path
         := _ = request_removed path
         := _ = request_served kids terms executable (request_id name)
-        host_served kids terms (now_ms ())
+        host_served kids terms (now_ms ()) (busy_nap_ms ())
     |:
         := present = owner_present terms.owner_pid terms.owner_start
         := _ = ? present ?> () |: held_stopped_from home (held_names ()) 0i32
@@ -102,11 +102,13 @@
             0i32
         | HostDraining =>
             := _ = text_written (owner_ended_file home) (decimal_text now)
-            sleep_ms 500u64
-            host_served kids terms idle_since
+            sleep_ms (busy_nap_ms ())
+            host_served kids terms idle_since (busy_nap_ms ())
         | KeepServing =>
-            sleep_ms 500u64
-            host_served kids terms (? live > 0u64 ?> now |: idle_since)
+            sleep_ms nap
+            ? live > 0u64
+            ?> host_served kids terms now (busy_nap_ms ())
+            |: host_served kids terms idle_since (next_idle_nap nap)
 
 :~ variable_of (~name : string) : string =
     := renamed = env.get_environment_variable ("RIG_" ++# name)
@@ -131,7 +133,7 @@
     | HostOwns =>
         := _ = directory_created (requests_directory terms.home)
         := _ = text_written (host_pid_file terms.home) (decimal_text (own_pid ()))
-        host_served (no_children ()) terms (now_ms ())
+        host_served (no_children ()) terms (now_ms ()) (busy_nap_ms ())
 
 
 := main () : i32 =

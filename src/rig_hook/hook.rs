@@ -234,89 +234,14 @@ fn split_list_12(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<UH0> {
         method13(v16, v17)
     }
 }
-fn method16(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let mut v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let mut v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let mut v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method17(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let mut v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let mut v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let mut v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn method15(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let mut v3: Rc<UH0> = v3;
             let v4: Rc<UH0> = method15(v3, v1);
-            let mut v5: i32 = (v2.clone().len() as i32);
-            let mut v6: i32 = 0i32;
-            let v7: i32 = method16(v2.clone(), v5, v6);
-            let mut v8: i32 = v5.wrapping_sub(1i32);
-            let mut v9: Rc<str> = string_slice(&v2, v7 as i64, v8 as i64);
-            let mut v10: i32 = (v9.clone().len() as i32);
-            let v11: i32 = method17(v9.clone(), v10);
-            let v12: Rc<str> = string_slice(&v9, 0i32 as i64, v11 as i64);
-            Rc::new(UH0::UH0_Cons(v12, v4))
+            let mut v5: Rc<str> = Rc::<str>::from((v2).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+            Rc::new(UH0::UH0_Cons(v5, v4))
         }
         UH0::UH0_Nil => {
             v1
@@ -345,7 +270,7 @@ fn policy_of_8(mut v0: Rc<UH0>) -> (Rc<str>, Rc<UH0>, Rc<UH0>, Rc<UH0>) {
     let v11: Rc<UH0> = comma_list_10(v10);
     (v2, v5, v8, v11)
 }
-fn method20(mut v0: Rc<UH1>, mut v1: US1) -> US1 {
+fn method18(mut v0: Rc<UH1>, mut v1: US1) -> US1 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v2, v3) => {
@@ -396,11 +321,11 @@ fn method20(mut v0: Rc<UH1>, mut v1: US1) -> US1 {
         }
     }
 }
-fn combined_19(mut v0: Rc<UH1>) -> US1 {
+fn combined_17(mut v0: Rc<UH1>) -> US1 {
     let mut v1: US1 = US1::US1_Allow;
-    method20(v0, v1)
+    method18(v0, v1)
 }
-fn tool_of_21(mut v0: Rc<str>) -> US2 {
+fn tool_of_19(mut v0: Rc<str>) -> US2 {
     let mut v1: bool = &*v0 == "Edit";
     if v1 {
         US2::US2_ToolEdit
@@ -434,7 +359,7 @@ fn tool_of_21(mut v0: Rc<str>) -> US2 {
         }
     }
 }
-fn edits_files_23(mut v0: US2) -> bool {
+fn edits_files_21(mut v0: US2) -> bool {
     match v0 {
         US2::US2_ToolEdit => {
             true
@@ -450,14 +375,14 @@ fn edits_files_23(mut v0: US2) -> bool {
         }
     }
 }
-fn normal_path_25(mut v0: Rc<str>) -> Rc<str> {
+fn normal_path_23(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<str> = Rc::<str>::from(v0.replace(&*v1, &*v2));
     let v4: Rc<str> = Rc::<str>::from(v3.to_lowercase());
     v4
 }
-fn method26(mut v0: Option<usize>) -> Option<usize> {
+fn method24(mut v0: Option<usize>) -> Option<usize> {
     v0
 }
 fn closure1() -> Rc<dyn Fn((usize)) -> i32> {
@@ -467,11 +392,11 @@ fn closure1() -> Rc<dyn Fn((usize)) -> i32> {
         v2
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn state_file_24(mut v0: Rc<str>) -> bool {
-    let mut v1: Rc<str> = normal_path_25(v0);
+fn state_file_22(mut v0: Rc<str>) -> bool {
+    let mut v1: Rc<str> = normal_path_23(v0);
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/docs/backlog/state/"); } LIT.with(|lit| lit.clone()) };
     let mut v3: Option<usize> = v1.find(&*v2);
-    let v4: Option<usize> = method26(v3);
+    let v4: Option<usize> = method24(v3);
     let mut v5: Rc<dyn Fn((usize)) -> i32> = closure1();
     let mut v6: Option<i32> = v4.map(|x| v5(x));
     let mut v8: i32 = v6.unwrap_or(-1i32);
@@ -507,10 +432,10 @@ fn state_file_24(mut v0: Rc<str>) -> bool {
         false
     }
 }
-fn state_verdict_22(mut v0: US2, mut v1: Rc<str>) -> US1 {
-    let mut v2: bool = edits_files_23(v0);
+fn state_verdict_20(mut v0: US2, mut v1: Rc<str>) -> US1 {
+    let mut v2: bool = edits_files_21(v0);
     let v4: bool = if v2 {
-        state_file_24(v1)
+        state_file_22(v1)
     } else {
         false
     };
@@ -521,7 +446,7 @@ fn state_verdict_22(mut v0: US2, mut v1: Rc<str>) -> US1 {
         US1::US1_Allow
     }
 }
-fn method29(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
+fn method27(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -543,15 +468,15 @@ fn closure2() -> Rc<dyn Fn((usize)) -> i32> {
         v2
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn extension_of_28(mut v0: Rc<str>) -> Rc<str> {
+fn extension_of_26(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
-    let mut v2: Rc<str> = normal_path_25(v0);
+    let mut v2: Rc<str> = normal_path_23(v0);
     let mut v3: Rc<UH0> = split_list_12(v1, v2);
     let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let mut v5: Rc<str> = method29(v3, v4.clone());
+    let mut v5: Rc<str> = method27(v3, v4.clone());
     let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("."); } LIT.with(|lit| lit.clone()) };
     let v7: Option<usize> = v5.rfind(&*v6);
-    let mut v8: Option<usize> = method26(v7);
+    let mut v8: Option<usize> = method24(v7);
     let mut v9: Rc<dyn Fn((usize)) -> i32> = closure2();
     let mut v10: Option<i32> = v8.map(|x| v9(x));
     let v12: i32 = v10.unwrap_or(-1i32);
@@ -568,7 +493,7 @@ fn extension_of_28(mut v0: Rc<str>) -> Rc<str> {
         v19
     }
 }
-fn loop_32(mut v0: Rc<str>) -> Rc<str> {
+fn loop_30(mut v0: Rc<str>) -> Rc<str> {
     loop {
         let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
         let mut v2: bool = v0.ends_with(&*v1);
@@ -584,8 +509,8 @@ fn loop_32(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn under_31(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
-    let mut v2: Rc<str> = normal_path_25(v0);
+fn under_29(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
+    let mut v2: Rc<str> = normal_path_23(v0);
     let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let v4: bool = v2.ends_with(&*v3);
     let mut v6: Rc<str> = if v4 {
@@ -594,26 +519,26 @@ fn under_31(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
         let mut v5: Rc<str> = string_concat(&[&*v2, "/"]);
         v5
     };
-    let v7: Rc<str> = normal_path_25(v1.clone());
+    let v7: Rc<str> = normal_path_23(v1.clone());
     let mut v8: bool = v7.starts_with(&*v6);
     if v8 {
         true
     } else {
-        let mut v9: Rc<str> = normal_path_25(v1);
-        let mut v10: Rc<str> = loop_32(v2);
+        let mut v9: Rc<str> = normal_path_23(v1);
+        let mut v10: Rc<str> = loop_30(v2);
         let v11: bool = &*v9 == &*v10;
         v11
     }
 }
 fn closure3(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> bool> {
     Rc::new(move |mut v1: Rc<str>| -> bool {
-        under_31(v1, v0.clone())
+        under_29(v1, v0.clone())
     })
 }
-fn method30(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> bool> {
+fn method28(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>) -> bool> {
     closure3(v0)
 }
-fn method33(mut v0: Rc<str>, mut v1: Rc<dyn Fn(Rc<str>) -> bool>, mut v2: Rc<UH0>) -> bool {
+fn method31(mut v0: Rc<str>, mut v1: Rc<dyn Fn(Rc<str>) -> bool>, mut v2: Rc<UH0>) -> bool {
     loop {
         match Rc::unwrap_or_clone(v2) {
             UH0::UH0_Cons(v3, v4) => {
@@ -623,7 +548,7 @@ fn method33(mut v0: Rc<str>, mut v1: Rc<dyn Fn(Rc<str>) -> bool>, mut v2: Rc<UH0
                 if v5 {
                     return true;
                 } else {
-                    let mut v6: Rc<dyn Fn(Rc<str>) -> bool> = method30(v0.clone());
+                    let mut v6: Rc<dyn Fn(Rc<str>) -> bool> = method28(v0.clone());
                     (v1, v2) = (v6, v4);
                     continue;
                 }
@@ -645,7 +570,7 @@ fn closure4(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US3> {
                     US3::US3_Some(v1)
                 } else {
                     let mut v8: i32 = v1.wrapping_add(1i32);
-                    let mut v9: Rc<dyn Fn(Rc<UH0>) -> US3> = method34(v0.clone(), v8);
+                    let mut v9: Rc<dyn Fn(Rc<UH0>) -> US3> = method32(v0.clone(), v8);
                     v9(v5)
                 }
             }
@@ -655,11 +580,11 @@ fn closure4(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US3> {
         }
     })
 }
-fn method34(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US3> {
+fn method32(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US3> {
     closure4(v0, v1)
 }
-fn new_file_verdict_27(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<UH0>, mut v4: US2, mut v5: Rc<str>, mut v6: bool) -> US1 {
-    let v7: Rc<str> = extension_of_28(v5.clone());
+fn new_file_verdict_25(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<UH0>, mut v4: US2, mut v5: Rc<str>, mut v6: bool) -> US1 {
+    let v7: Rc<str> = extension_of_26(v5.clone());
     let mut v8: bool = match v4 {
         US2::US2_ToolWrite => {
             true
@@ -673,19 +598,19 @@ fn new_file_verdict_27(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3
     if v10 {
         US1::US1_Allow
     } else {
-        let v12: Rc<dyn Fn(Rc<str>) -> bool> = method30(v5.clone());
-        let v13: bool = method33(v5.clone(), v12, v1);
+        let v12: Rc<dyn Fn(Rc<str>) -> bool> = method28(v5.clone());
+        let v13: bool = method31(v5.clone(), v12, v1);
         if v13 {
             let v15: Rc<str> = string_concat(&["new files are not written under ", &*v5, "'s folder; put them in the repo that owns the work"]);
             US1::US1_Deny(v15)
         } else {
-            let v17: bool = under_31(v0, v5);
+            let v17: bool = under_29(v0, v5);
             let v18: bool = v17 == false;
             if v18 {
                 US1::US1_Allow
             } else {
                 let v20: i32 = 0i32;
-                let mut v21: Rc<dyn Fn(Rc<UH0>) -> US3> = method34(v7.clone(), v20);
+                let mut v21: Rc<dyn Fn(Rc<UH0>) -> US3> = method32(v7.clone(), v20);
                 let mut v22: US3 = v21(v2);
                 let v23: bool = match v22 {
                     US3::US3_None => {
@@ -701,7 +626,7 @@ fn new_file_verdict_27(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3
                     US1::US1_Deny(v26)
                 } else {
                     let v28: i32 = 0i32;
-                    let mut v29: Rc<dyn Fn(Rc<UH0>) -> US3> = method34(v7.clone(), v28);
+                    let mut v29: Rc<dyn Fn(Rc<UH0>) -> US3> = method32(v7.clone(), v28);
                     let v30: US3 = v29(v3);
                     let v31: bool = match v30 {
                         US3::US3_None => {
@@ -723,14 +648,14 @@ fn new_file_verdict_27(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3
         }
     }
 }
-fn pre_verdict_18(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<UH0>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: bool) -> US1 {
-    let v7: US2 = tool_of_21(v4);
-    let mut v8: US1 = state_verdict_22(v7.clone(), v5.clone());
-    let mut v9: US1 = new_file_verdict_27(v0, v1, v2, v3, v7, v5, v6);
+fn pre_verdict_16(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<UH0>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: bool) -> US1 {
+    let v7: US2 = tool_of_19(v4);
+    let mut v8: US1 = state_verdict_20(v7.clone(), v5.clone());
+    let mut v9: US1 = new_file_verdict_25(v0, v1, v2, v3, v7, v5, v6);
     let mut v10: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
     let v11: Rc<UH1> = Rc::new(UH1::UH1_Cons(v9, v10));
     let v12: Rc<UH1> = Rc::new(UH1::UH1_Cons(v8, v11));
-    combined_19(v12)
+    combined_17(v12)
 }
 fn pre_text_6(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: bool) -> Rc<str> {
     let v4: bool = &*v2 == "";
@@ -739,11 +664,11 @@ fn pre_text_6(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: bool) -
         v5
     } else {
         let (mut v6, mut v7, mut v8, mut v9): (Rc<str>, Rc<UH0>, Rc<UH0>, Rc<UH0>) = policy_of_8(v0);
-        let mut v10: US1 = pre_verdict_18(v6, v7, v8, v9, v1, v2, v3);
+        let mut v10: US1 = pre_verdict_16(v6, v7, v8, v9, v1, v2, v3);
         pre_output_7(v10)
     }
 }
-fn file_exists_35(mut v0: Rc<str>) -> bool {
+fn file_exists_33(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
@@ -770,10 +695,10 @@ fn pre_answered_5(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
     } else {
         v7
     };
-    let v12: bool = file_exists_35(v11.clone());
+    let v12: bool = file_exists_33(v11.clone());
     pre_text_6(v0, v5, v11, v12)
 }
-fn writes_answered_36(mut v0: Rc<str>) -> Rc<str> {
+fn writes_answered_34(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: Option<serde_json::Value> = serde_json::from_str::<serde_json::Value>(&*v0).ok();
     let mut v2: std::rc::Rc<serde_json::Value> = std::rc::Rc::new(v1.unwrap_or_default());
     let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/tool_input/command"); } LIT.with(|lit| lit.clone()) };
@@ -821,7 +746,7 @@ fn hook_run_0() -> i32 {
                             let v27: std::string::String = String::from(v25);
                             let mut v29: std::string::String = v22.unwrap_or(v27);
                             let v31: Rc<str> = Rc::<str>::from(String::as_str(&v29));
-                            let v32: Rc<str> = writes_answered_36(v31);
+                            let v32: Rc<str> = writes_answered_34(v31);
                             println!("{}", v32);
                             0i32
                         } else {

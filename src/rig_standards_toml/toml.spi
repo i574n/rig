@@ -44,12 +44,17 @@
     | Unformatted _ => 1i32
     | _ => 2i32
 
-:~ taplo_config (~own : string) (own_exists : bool) (~shared : string) : string = ? own_exists ?> own |: shared
+:~ taplo_config (~own : string) (own_exists : bool) (~shared : string) (~bundled : string) : string =
+    ? shared <> "" ?> shared |? own_exists ?> own |: bundled
+
+:~ bundled_config () : string =
+    := path = sm'.replace "\\" "/" (rig_path_first.path_first.config_dir ()) ++# "/.taplo.toml"
+    ? file_system.file_exists path ?> path |: ""
 
 :~ toml_verdict_of (~repo : string) : toml_verdict =
     := own = sm'.replace "\\" "/" repo ++# "/.taplo.toml"
     := shared = sm'.replace "\\" "/" (env.get_environment_variable "TAPLO_CONFIG")
-    := config = taplo_config own (file_system.file_exists own) shared
+    := config = taplo_config own (file_system.file_exists own) shared (bundled_config ())
     ? config = "" || (file_system.file_exists config |> not)
     ?> NoConfig repo
     |:
@@ -85,10 +90,13 @@
     testing.expect (verdict_lines (Formatted 3i32) = [ "rig standards toml ok files=3 unformatted=0" ]) "a clean line"
 
 ///> rust
-:# a_repo_config_wins_and_the_shared_one_is_the_fallback =
-    testing.expect (taplo_config "C:/r/.taplo.toml" !+ "C:/org/.taplo.toml" = "C:/r/.taplo.toml") "the repo copy"
-    testing.expect (taplo_config "C:/r/.taplo.toml" !- "C:/org/.taplo.toml" = "C:/org/.taplo.toml") "the shared one"
-    testing.expect (taplo_config "C:/r/.taplo.toml" !- "" = "") "neither, so the caller refuses"
+:# the_shared_config_wins_and_a_repo_copy_is_only_the_fallback =
+    := kit = "C:/cfg/kit/.taplo.toml"
+    := org = "C:/org/.taplo.toml"
+    testing.expect (taplo_config "C:/r/.taplo.toml" !+ org kit = org) "a stray copy loses"
+    testing.expect (taplo_config "C:/r/.taplo.toml" !+ "" kit = "C:/r/.taplo.toml") "the repo copy without TAPLO_CONFIG"
+    testing.expect (taplo_config "C:/r/.taplo.toml" !- "" kit = kit) "no env and no repo copy: the bundled canonical"
+    testing.expect (taplo_config "C:/r/.taplo.toml" !- "" "" = "") "none of the three, so the caller refuses"
 
 := main () : i32 =
     export "rig_standards_toml_run" toml_run

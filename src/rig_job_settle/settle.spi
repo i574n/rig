@@ -1,0 +1,87 @@
+///- --package .
+:# settle static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== exit_fields = { code : i32; ended_ms : u64; word : string; detail : string; line : string }
+
+:| placed_outcome =
+    | PlacedRunning :: placed_outcome
+    | PlacedSettled :: exit_fields -> placed_outcome
+    | PlacedMissing :: placed_outcome
+    | PlacedUnreadable :: string -> placed_outcome
+
+:== placed_job = { id : string; placed_ms : u64; timeout_ms : u64 }
+
+:| settle_action =
+    | WritePlacedExit :: string * string -> settle_action
+    | LeavePlaced :: string -> settle_action
+    | LostRemoteJob :: string * u64 -> settle_action
+    | NoReply :: string -> settle_action
+
+:~ tab () : string = sm'.char_text 9u8
+
+:~ outcome_of (~reply : string) : placed_outcome =
+    := plain = sm'.replace "\r" "" reply
+    ? sm'.trim plain = "MISSING"
+    ?> PlacedMissing
+    |? sm'.trim plain = "RUNNING"
+    ?> PlacedRunning
+    |:
+        ?= sm'.split_list (tab ()) plain ?|
+        | code :: ended :: word :: rest ?& word <> "" =>
+            ?= (convert.try_convert code : option i32), (convert.try_convert ended : option u64) ?|
+            | Some c, Some e =>
+                := detail = sm'.concat_list (tab ()) rest
+                PlacedSettled { code = c; ended_ms = e; word = word; detail = detail; line = plain }
+            | _ => PlacedUnreadable plain
+        | _ => PlacedUnreadable plain
+
+:~ reply_of (~line : string) : string * string =
+    := at = sm'.index_of (tab ()) line
+    ? at < 0i32 ?> line, "" |: sm'.slice 0i32 (at - 1i32) line, sm'.slice (at + 1i32) (sm'.length line - 1i32) line
+
+:~ action_of (now_ms : u64) (replies : list (string * string)) (job : placed_job) : settle_action =
+    ?= replies |> listm'.try_find_ (\ ((id, _) : string * string) => id = job.id) ?|
+    | None => NoReply job.id
+    | Some (_, reply) =>
+        ?= outcome_of reply ?|
+        | PlacedSettled fields => WritePlacedExit (job.id, fields.line ++# "\n")
+        | PlacedMissing ?& now_ms > job.placed_ms + job.timeout_ms => LostRemoteJob (job.id, now_ms - job.placed_ms)
+        | _ => LeavePlaced job.id
+
+:~ settle_plan (now_ms : u64) (~reply_text : string) (jobs : list placed_job) : list settle_action =
+    := lines = sm'.split_list "\n" reply_text |> listm'.filter (\ (l : string) => sm'.trim l <> "")
+    := replies = lines |> listm.map reply_of
+    jobs |> listm.map (action_of now_ms replies)
+
+///> rust
+:# node_replies_settle_placed_jobs_and_silence_is_never_settled =
+    := t = tab ()
+    := row = \ (cells : list string) => sm'.concat_list t cells
+    := reply_text =
+        [
+            row [ "a"; "2"; "5000"; "finished"; "" ];
+            row [ "b"; "RUNNING" ];
+            row [ "c"; "MISSING" ];
+            row [ "d"; "MISSING" ];
+            row [ "f"; "not an exit line" ]
+        ]
+        |> sm'.concat_list "\n"
+    := job = \ (id : string) => { id = id; placed_ms = 1000u64; timeout_ms = 60000u64 }
+    := d = job "d"
+    := young = { d ?| placed_ms = 90000u64 }
+    := plan = settle_plan 100000u64 reply_text [ job "a"; job "b"; job "c"; young; job "e"; job "f" ]
+    := expected =
+        [
+            WritePlacedExit ("a", row [ "2"; "5000"; "finished"; "" ] ++# "\n");
+            LeavePlaced "b";
+            LostRemoteJob ("c", 99000u64);
+            LeavePlaced "d";
+            NoReply "e";
+            LeavePlaced "f"
+        ]
+    testing.expect (plan = expected) "settled is copied byte for byte (empty detail kept), missing past timeout is lost"
+    := garbled = row [ "x"; "1"; "w" ]
+    testing.expect (outcome_of garbled = PlacedUnreadable garbled) "a non-number exit code is unreadable, not settled"

@@ -1,0 +1,108 @@
+///- --package .
+:# ship static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== quote = { host : string; core : string }
+
+:== box_facts = { installed : quote; train_running : bool; allow_train : bool }
+
+:== node_facts =
+    {
+        free_mb : u64
+        stage_exists : bool
+        archive_sent : string
+        archive_received : string
+        staged : quote
+    }
+
+:| linux_route =
+    | PullObject :: string -> linux_route
+    | SourceBuild :: linux_route
+    | DeferBuild :: u64 * string -> linux_route
+
+:| refusal =
+    | NotInstalled :: quote -> refusal
+    | TrainRunning :: refusal
+    | NodeDiskLow :: u64 -> refusal
+    | StageExists :: refusal
+    | TruncatedCopy :: string * string -> refusal
+    | StagedHostWrong :: string -> refusal
+    | StagedCoreWrong :: string -> refusal
+
+:| ship_plan =
+    | ShipToNode :: ship_plan
+    | Refused :: refusal -> ship_plan
+
+:~ node_disk_floor_mb () : u64 = 2048u64
+
+:~ linux_memory_floor_mb () : u64 = 2100u64
+
+:~ ship_plan_of (want : quote) (box : box_facts) (node : node_facts) : ship_plan =
+    ? box.installed.host <> want.host || box.installed.core <> want.core
+    ?> Refused (NotInstalled box.installed)
+    |? box.train_running && not box.allow_train
+    ?> Refused TrainRunning
+    |? node.free_mb < node_disk_floor_mb ()
+    ?> Refused (NodeDiskLow node.free_mb)
+    |? node.stage_exists
+    ?> Refused StageExists
+    |? node.archive_received <> node.archive_sent
+    ?> Refused (TruncatedCopy (node.archive_sent, node.archive_received))
+    |? node.staged.host <> want.host
+    ?> Refused (StagedHostWrong node.staged.host)
+    |? node.staged.core <> want.core
+    ?> Refused (StagedCoreWrong node.staged.core)
+    |: ShipToNode
+
+:~ linux_route_of (~object : string) (memory_mb : u64) (load_tenths : u64) : linux_route =
+    ? object <> ""
+    ?> PullObject object
+    |? memory_mb >= linux_memory_floor_mb () && load_tenths < 40u64
+    ?> SourceBuild
+    |: DeferBuild (memory_mb, "needs 2100 MB free and load under 4 for a source build")
+
+:~ refusal_line (r : refusal) : string =
+    := head = "rig pack ship refused: "
+    ?= r ?|
+    | NotInstalled q => head ++# "the box runs host " ++# q.host ++# " core " ++# q.core ++# ", not the quote"
+    | TrainRunning => head ++# "a train is running (pass the allow flag to ship anyway)"
+    | NodeDiskLow mb => head ++# "the node has " ++# sm'.show mb ++# " MB free, under 2048"
+    | StageExists => head ++# "the stage folder exists from an earlier ship"
+    | TruncatedCopy (sent, got) => head ++# "the archive arrived as " ++# got ++# ", sent " ++# sent
+    | StagedHostWrong h => head ++# "the staged host is " ++# h
+    | StagedCoreWrong c => head ++# "the staged core is " ++# c ++# " (the old chain checked only the host)"
+
+///> rust
+:# the_gates_refuse_in_order_and_the_core_is_checked_too =
+    := want = { host = "H1"; core = "C1" }
+    := box = { installed = want; train_running = !-; allow_train = !- }
+    := node = { free_mb = 9000u64; stage_exists = !-; archive_sent = "A"; archive_received = "A"; staged = want }
+    testing.expect (ship_plan_of want box node = ShipToNode) "every gate open"
+    := old = { want ?| core = "C0" }
+    testing.expect (ship_plan_of want { box ?| installed = old } node = Refused (NotInstalled old)) "box first"
+    := training = { box ?| train_running = !+ }
+    testing.expect (ship_plan_of want training node = Refused TrainRunning) "a running train holds"
+    testing.expect (ship_plan_of want { training ?| allow_train = !+ } node = ShipToNode) "unless allowed"
+    := cut = { node ?| archive_received = "a" }
+    testing.expect (ship_plan_of want box cut = Refused (TruncatedCopy ("A", "a"))) "truncated"
+    := wrong_core = { node ?| staged = { want ?| core = "C9" } }
+    testing.expect (ship_plan_of want box wrong_core = Refused (StagedCoreWrong "C9")) "the core"
+
+///> rust
+:# linux_pulls_an_existing_object_before_ever_building =
+    testing.expect (linux_route_of "sha256-ab" 100u64 90u64 = PullObject "sha256-ab") "an object wins on a busy host"
+    testing.expect (linux_route_of "" 4000u64 10u64 = SourceBuild) "no object, room to build"
+    := deferred = DeferBuild (1000u64, "needs 2100 MB free and load under 4 for a source build")
+    testing.expect (linux_route_of "" 1000u64 10u64 = deferred) "no object, no room"
+    := line = "rig pack ship refused: the node has 900 MB free, under 2048"
+    testing.expect (refusal_line (NodeDiskLow 900u64) = line) "one line"
+
+///> rust
+:# run_time_hashes_gate_like_literals =
+    := suffix = file_system.read_text_or_empty "/rig-pack-ship-run-time-probe-missing"
+    := want = { host = "H1" ++# suffix; core = "C1" }
+    := box = { installed = { host = "H1"; core = "C1" }; train_running = !-; allow_train = !- }
+    := node = { free_mb = 9000u64; stage_exists = !-; archive_sent = "A"; archive_received = "A"; staged = want }
+    testing.expect (ship_plan_of want box node = ShipToNode) "run-time quote"

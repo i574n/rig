@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+modules:
+    read
+    write
+    external

@@ -1,0 +1,68 @@
+///- --package .
+:# rows static =
+    :< sm'_operators
+    :< work
+
+:< sm'_operators
+:< work
+
+:| requires_reading =
+    | Requires :: capability -> requires_reading
+    | UnknownCapability :: string -> requires_reading
+
+:~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_" |> sm'.replace "." "_"
+
+:~ quoted (~text : string) : string = "\"" ++# sm'.replace "\"" "'" text ++# "\""
+
+:~ capability_word (c : capability) : string =
+    ?= c ?|
+    | Compiler => "Compiler"
+    | Gpu => "Gpu"
+    | NodeHeavy => "NodeHeavy"
+    | BoxOnly => "BoxOnly"
+    | UserDecision => "UserDecision"
+    | Network => "Network"
+
+:~ capability_of (~word : string) : requires_reading =
+    := all = [ Compiler; Gpu; NodeHeavy; BoxOnly; UserDecision; Network ]
+    ?= all |> listm'.try_find_ (\ (c : capability) => capability_word c = word) ?|
+    | Some c => Requires c
+    | None => UnknownCapability word
+
+:~ owner_row (~id : string) (~kind : string) (~value : string) : string =
+    := fields = quoted id ++# ", " ++# quoted kind ++# ", " ++# quoted value
+    "inl owner_of_" ++# slug_of id ++# " () = Owner (" ++# fields ++# ")"
+
+:~ requires_row (~id : string) (c : capability) : string =
+    := word = capability_word c
+    := name = "requires_of_" ++# slug_of id ++# "_" ++# sm'.to_lower word
+    "inl " ++# name ++# " () = Requires (" ++# quoted id ++# ", " ++# quoted word ++# ")"
+
+:~ fields_of (~line : string) (~marker : string) : list string =
+    ? sm'.contains marker line ?> sm'.quoted_fields line |: []
+
+:~ owners_of_text (~text : string) : list (string * owner_reading) =
+    := step = \ (found : list (string * owner_reading)) (line : string) =>
+        ?= fields_of line " = Owner (" ?|
+        | [ id; kind; value ] => listm.append found [ id, owner_of kind value ]
+        | _ => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold step []
+
+:~ requires_of_text (~text : string) : list (string * requires_reading) =
+    := step = \ (found : list (string * requires_reading)) (line : string) =>
+        ?= fields_of line " = Requires (" ?|
+        | [ id; word ] => listm.append found [ id, capability_of word ]
+        | _ => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold step []
+
+///> rust
+:# owner_and_requires_rows_round_trip_and_unknown_words_are_reported =
+    := owner = owner_row "KIT-A" "role" "grooming"
+    testing.expect (owner = "inl owner_of_kit_a () = Owner (\"KIT-A\", \"role\", \"grooming\")") owner
+    testing.expect (owners_of_text (owner ++# "\nother line") = [ "KIT-A", Owner (RoleOwned "grooming") ]) "reads back"
+    := needs = requires_row "KIT-A" Gpu ++# "\n" ++# requires_row "KIT-A" Network
+    := expected = [ "KIT-A", Requires Gpu; "KIT-A", Requires Network ]
+    testing.expect (requires_of_text needs = expected) "one row per capability"
+    := odd = "inl requires_of_x () = Requires (\"X\", \"Quantum\")\ninl owner_of_y () = Owner (\"Y\", \"misc\", \"\")"
+    testing.expect (requires_of_text odd = [ "X", UnknownCapability "Quantum" ]) "an unknown capability is named"
+    testing.expect (owners_of_text odd = [ "Y", UnknownOwner "misc:" ]) "an unknown owner kind is named, never bucketed"

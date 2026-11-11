@@ -1,0 +1,62 @@
+///- --package .
+:# placement static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| block_kind =
+    | TestBlock :: block_kind
+    | DefinitionBlock :: block_kind
+    | ModuleHeader :: block_kind
+
+:| placement_verdict =
+    | TestsBesideCode :: i32 * i32 -> placement_verdict
+    | TestsClusteredAtEnd :: i32 * i32 -> placement_verdict
+    | NoTests :: placement_verdict
+
+:~ kind_of (~line : string) : option block_kind =
+    ? sm'.starts_with ":# " line && sm'.ends_with " static =" (sm'.trim line)
+    ?> Some ModuleHeader
+    |? sm'.starts_with ":# " line
+    ?> Some TestBlock
+    |? sm'.starts_with ":" line && (sm'.starts_with ":<" line |> not)
+    ?> Some DefinitionBlock
+    |: None
+
+:~ kinds_of (~text : string) : list block_kind =
+    sm'.split_list "\n" (sm'.replace "\r" "" text)
+    |> listm.map kind_of
+    |> listm.fold (\ (got : list block_kind) (k : option block_kind) => ?= k ?| | Some x => x :: got | None => got) []
+    |> listm.rev
+
+:~ ^ trailing_tests (reversed : list block_kind) (n : i32) : i32 =
+    ?= reversed ?|
+    | TestBlock :: rest => trailing_tests rest (n + 1i32)
+    | _ => n
+
+:~ verdict_of (~text : string) : placement_verdict =
+    := kinds = kinds_of text
+    := tests = kinds |> listm'.filter (\ (k : block_kind) => k = TestBlock) |> listm.length
+    := at_end = trailing_tests (listm.rev kinds) 0i32
+    ? tests = 0i32
+    ?> NoTests
+    |? at_end >= 2i32 && at_end * 2i32 > tests
+    ?> TestsClusteredAtEnd (at_end, tests)
+    |: TestsBesideCode (at_end, tests)
+
+///> rust
+:# a_file_is_flagged_when_most_tests_sit_in_one_trailing_run =
+    := file = \ (lines : list string) => sm'.concat_list "\n" lines
+    := beside =
+        file
+            [
+                ":# m static ="; ":= a () = 1i32"; "///> rust"; ":# a_is_one ="; "    testing.expect !+ \"a\"";
+                ":= b () = 2i32"; "///> rust"; ":# b_is_two ="; "    testing.expect !+ \"b\""
+            ]
+    testing.expect (verdict_of beside = TestsBesideCode (1i32, 2i32)) "each test follows its definition"
+    := clustered =
+        file [ ":# m static ="; ":= a () = 1i32"; ":= b () = 2i32"; ":# a_is_one ="; "    x"; ":# b_is_two ="; "    y" ]
+    testing.expect (verdict_of clustered = TestsClusteredAtEnd (2i32, 2i32)) "both tests after all the code"
+    := single = file [ ":# m static ="; ":= a () = 1i32"; ":# a_is_one =" ]
+    testing.expect (verdict_of single = TestsBesideCode (1i32, 1i32)) "a lone trailing test is beside its code"
+    testing.expect (verdict_of (file [ ":# m static ="; ":< sm'_operators"; ":= a () = 1i32" ]) = NoTests) "no tests"

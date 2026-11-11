@@ -1,0 +1,77 @@
+///- --package .
+:# degrade static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| gate_phase =
+    | Regen :: gate_phase
+    | Format :: gate_phase
+    | UnitPhase :: gate_phase
+    | Test :: gate_phase
+    | Examples :: gate_phase
+    | Merge :: gate_phase
+
+:= phase_of_word (~word : string) : option gate_phase =
+    ? word = "Regen"
+    ?> Some Regen
+    |? word = "Format"
+    ?> Some Format
+    |? word = "Unit"
+    ?> Some UnitPhase
+    |? word = "Test"
+    ?> Some Test
+    |? word = "Examples"
+    ?> Some Examples
+    |? word = "Merge"
+    ?> Some Merge
+    |: None
+
+:| trend =
+    | Steady :: trend
+    | Rising :: i32 -> trend
+    | NearCap :: i32 -> trend
+    | OverCap :: i32 -> trend
+
+:= percent_of (part : i32) (whole : i32) : i32 = ? whole <= 0i32 ?> 0i32 |: part * 100i32 / whole
+
+:= trend_of (previous : i32) (latest : i32) (cap : i32) : trend =
+    := of_cap = percent_of latest cap
+    := growth = ? previous <= 0i32 ?> 0i32 |: percent_of (latest - previous) previous
+    ? of_cap > 100i32
+    ?> OverCap of_cap
+    |? of_cap >= 80i32
+    ?> NearCap of_cap
+    |? growth > 25i32
+    ?> Rising growth
+    |: Steady
+
+:== host_sample = { process : string; cpu_pct : i32; minutes : i32; waiting_jobs : i32 }
+
+:| hog_verdict =
+    | NoHog :: hog_verdict
+    | Hog :: string -> hog_verdict
+
+:= hog_of (sample : host_sample) : hog_verdict =
+    ? sample.cpu_pct >= 80i32 && sample.minutes >= 30i32 && sample.waiting_jobs > 0i32
+    ?> Hog sample.process
+    |: NoHog
+
+///> rust
+:# a_gate_trends_by_growth_and_by_its_share_of_the_cap =
+    testing.expect (trend_of 1000i32 1100i32 3600i32 = Steady) "ten percent growth well under the cap"
+    testing.expect (trend_of 1000i32 1300i32 3600i32 = Rising 30i32) "thirty percent growth"
+    testing.expect (trend_of 2500i32 3000i32 3600i32 = NearCap 83i32) "past eighty percent of the cap"
+    testing.expect (trend_of 0i32 1146i32 3600i32 = Steady) "11-09 slowest unit against its 60 min unit budget"
+    testing.expect (trend_of 0i32 6030i32 25200i32 = Steady) "11-09 run wall against the 420 min job timeout"
+    testing.expect (trend_of 0i32 4000i32 3600i32 = OverCap 111i32) "a unit past its budget"
+    testing.expect (phase_of_word "Unit" = Some UnitPhase && phase_of_word "Lint" = None) "phase words"
+
+///> rust
+:# a_hog_holds_the_host_long_while_others_wait =
+    := sample = { process = "fiscal gate"; cpu_pct = 95i32; minutes = 45i32; waiting_jobs = 2i32 }
+    testing.expect (hog_of sample = Hog "fiscal gate") "busy, long, and others wait"
+    testing.expect (hog_of { sample ?| waiting_jobs = 0i32 } = NoHog) "nobody waits: not a hog"
+    testing.expect (hog_of { sample ?| minutes = 10i32 } = NoHog) "a short burst is not a hog"
+
+:= main () : i32 = 0i32

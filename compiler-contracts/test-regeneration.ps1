@@ -40,11 +40,24 @@ function Get-ProjectSection([string]$Member, [string[]]$Sections) {
         }
     }
 }
+function Get-UnitLinks([string]$Member) {
+    $explicit = @(Get-ProjectSection $Member @('link'))
+    if ($env:SPIRAL_DERIVED_LINKS -ne '1') { return $explicit }
+    $derived = foreach ($dependency in Get-ProjectSection $Member @('packages')) {
+        $manifest = Join-Path $KitRoot "src/$dependency/Cargo.toml"
+        if (-not (Test-Path -LiteralPath $manifest)) { continue }
+        $entry = @(Select-String -LiteralPath $manifest -Pattern '^entry\s*=\s*"([^"]+)"')[0]
+        if (-not $entry) { continue }
+        $entryPath = Join-Path $KitRoot "src/$dependency/$($entry.Matches[0].Groups[1].Value)"
+        if ((Test-Path -LiteralPath $entryPath) -and (Select-String -LiteralPath $entryPath -Pattern '^\s+export "' -Quiet)) { $dependency }
+    }
+    @(@($explicit) + @($derived) | Select-Object -Unique)
+}
 $linkedOwners = @{}
 $linkQueue = [Collections.Generic.Queue[string]]::new()
 foreach ($owner in $selected) { $linkQueue.Enqueue($owner.Member) }
 while ($linkQueue.Count) {
-    foreach ($link in Get-ProjectSection $linkQueue.Dequeue() @('link')) {
+    foreach ($link in Get-UnitLinks $linkQueue.Dequeue()) {
         if ($link -in $selected.Member -or $linkedOwners.ContainsKey($link)) { continue }
         $linkedOwners[$link] = @(Get-KitOwners -Root $KitRoot -Package $link -IncludeAuxiliary)[0]
         $linkQueue.Enqueue($link)
@@ -57,7 +70,7 @@ $placed = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIg
 function Add-LinkedFirst([string]$Member, [string[]]$Trail) {
     if ($placed.Contains($Member)) { return }
     if ($Member -in $Trail) { throw "link: cycle: $(($Trail + $Member) -join ' -> ')" }
-    foreach ($link in Get-ProjectSection $Member @('link')) { if ($byMember.ContainsKey($link)) { Add-LinkedFirst $link ($Trail + $Member) } }
+    foreach ($link in Get-UnitLinks $Member) { if ($byMember.ContainsKey($link)) { Add-LinkedFirst $link ($Trail + $Member) } }
     if ($placed.Add($Member)) { $ordered.Add($byMember[$Member]) }
 }
 foreach ($owner in $selected) { Add-LinkedFirst $owner.Member @() }
@@ -264,7 +277,8 @@ try {
         $timeoutMs = $TimeoutSec * 1000
         $env:SPIRAL_BUILD_BUDGET_MS = [string]([Math]::Max(1000, $timeoutMs - 3000))
         $linksOf = @{}
-        foreach ($row in $rows) { $linksOf[$row.Member] = @(Get-ProjectSection $row.Member @('link')) }
+        foreach ($row in $rows) { $linksOf[$row.Member] = @(Get-UnitLinks $row.Member) }
+        $linkedUnits = @($linksOf.Values | ForEach-Object { $_ } | Sort-Object -Unique)
         $pending = [Collections.Generic.List[object]]::new()
         foreach ($row in $rows) { $pending.Add($row) }
         $running = [Collections.Generic.List[object]]::new()
@@ -306,7 +320,7 @@ try {
             if ($next) {
                 [void]$pending.Remove($next)
                 $row = $next
-                if ($Incremental) {
+                if ($Incremental -and $row.Member -notin $linkedUnits) {
                     $stored = Get-StoredKey $row.Member
                     if ($stored[0] -and $stored[0] -eq $ownerKeys[$row.Member] -and (Test-Path -LiteralPath $row.Original) -and (Get-FileHash -LiteralPath $row.Original -Algorithm SHA256).Hash -eq $stored[1] -and (Restore-UnitGraphs $row)) {
                         Copy-Item -LiteralPath $row.Original -Destination $row.Output -Force

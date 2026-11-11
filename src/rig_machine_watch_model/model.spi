@@ -7,16 +7,20 @@
 :< rust_std_string.model
 
 :| process_owner =
-    | ClaudeSession : u64
+    | AgentSession : string * u64
     | KitJob : string
     | CellsVm : u64
     | JobLeftover : string
     | Orphan
     | NotATool
 
+:= agent_clients () : list string = [ "claude"; "codex" ]
+
+:~ agent_client (~name : string) : bool = listm'.contains name (agent_clients ())
+
 :~ owner_text (owner : process_owner) : string =
     ?= owner ?|
-    | ClaudeSession pid => "claude:" ++# sm'.decimal_text pid
+    | AgentSession (client, pid) => client ++# ":" ++# sm'.decimal_text pid
     | KitJob id => "kit:" ++# id
     | CellsVm pid => "cells-vm:" ++# sm'.decimal_text pid
     | JobLeftover id => "left-by:" ++# id
@@ -247,7 +251,7 @@
     expect (left_by 4u64 2000u64 4u64 4u64 1999000u64 !+ |> not) "the kernel is never a job"
     expect (left_by 701u64 2000u64 700u64 690u64 1999000u64 !+ |> not) "another parent"
     expect (owner_text (JobLeftover "job-1-x") = "left-by:job-1-x") "label"
-    expect (owner_text (ClaudeSession 42u64) = "claude:42") "session label"
+    expect (owner_text (AgentSession ("claude", 42u64)) = "claude:42") "session label"
     := limits = default_limits ()
     := busy = { pid = 9u64; name = "rustc"; cores = 1.0f64; age_minutes = 2u64; cpu_minutes = 1u64; owner = Orphan }
     expect (rogue limits busy |> not) "a young orphan is not yet a rogue"
@@ -324,9 +328,9 @@
     := orphan =
         { pid = 1u64; name = "dotnet"; cores = 1.0f64; age_minutes = 45u64; cpu_minutes = 20u64; owner = Orphan }
     expect (rogue limits orphan) "an orphan tool over its age"
-    expect (rogue limits { orphan ?| owner = ClaudeSession 9u64 } = !-) "an owned young tool"
+    expect (rogue limits { orphan ?| owner = AgentSession ("codex", 9u64) } = !-) "an owned young tool"
     expect
-        (rogue limits { orphan ?| owner = ClaudeSession 9u64; age_minutes = 200u64; cpu_minutes = 190u64 })
+        (rogue limits { orphan ?| owner = AgentSession ("codex", 9u64); age_minutes = 200u64; cpu_minutes = 190u64 })
         "busy 95% of 3 h"
     expect (rogue limits { orphan ?| owner = NotATool } = !-) "not a tool"
     expect (rogue limits { orphan ?| cores = 0.5f64 } = !-) "below the core threshold"

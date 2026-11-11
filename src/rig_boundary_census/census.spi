@@ -1,0 +1,133 @@
+///- --package .
+:# census static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| construct =
+    | Export
+    | LinkedUnit
+    | HostMacroLine
+
+:| direction =
+    | MustNotShrink
+    | MustNotGrow
+
+:== unit_source = { unit : string; manifest : string; sources : list string }
+
+:== count = { unit : string; construct : construct; value : i32 }
+
+:| finding =
+    | Moved :: string * construct * i32 * i32 -> finding
+    | NewUnit :: string -> finding
+    | GoneUnit :: string -> finding
+
+:~ direction_of (c : construct) : direction =
+    ?= c ?|
+    | Export => MustNotShrink
+    | LinkedUnit => MustNotShrink
+    | HostMacroLine => MustNotGrow
+
+:~ constructs () : list construct = [ Export; LinkedUnit; HostMacroLine ]
+
+:~ lines_of (~text : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" text)
+
+:~ count_lines (texts : list string) (keep : string -> bool) : i32 =
+    := per = \ (total : i32) (text : string) =>
+        total + (listm.length (lines_of text |> listm'.filter keep) : i32)
+    texts |> listm.fold per 0i32
+
+:~ is_export (~line : string) : bool = sm'.starts_with "export \"" (sm'.trim line)
+
+:~ is_host_macro (~line : string) : bool = sm'.index_of "$'" line >= 0i32 || sm'.index_of "$\"" line >= 0i32
+
+:~ linked_units (~manifest : string) : i32 =
+    := step = \ ((inside, total) : bool * i32) (line : string) =>
+        := trimmed = sm'.trim line
+        := indented = sm'.starts_with " " line
+        ? trimmed <> "" && not indented
+        ?> trimmed = "link:", total
+        |? inside && trimmed <> ""
+        ?> inside, total + 1i32
+        |: inside, total
+    := _, total = lines_of manifest |> listm.fold step (!-, 0i32)
+    total
+
+:~ census_of (u : unit_source) : list count =
+    := exports = { unit = u.unit; construct = Export; value = count_lines u.sources (\ (l : string) => is_export l) }
+    := links = { unit = u.unit; construct = LinkedUnit; value = linked_units u.manifest }
+    := host = count_lines u.sources (\ (l : string) => is_host_macro l)
+    [ exports; links; { unit = u.unit; construct = HostMacroLine; value = host } ]
+
+:~ ^ value_in (counts : list count) (~unit : string) (c : construct) : option i32 =
+    ?= counts ?|
+    | [] => None
+    | x :: rest => ? x.unit = unit && x.construct = c ?> Some x.value |: value_in rest unit c
+
+:~ has_unit (counts : list count) (~unit : string) : bool = listm'.exists' (\ (x : count) => x.unit = unit) counts
+
+:~ moved_against (before : i32) (now : i32) (c : construct) : bool =
+    ?= direction_of c ?|
+    | MustNotShrink => now < before
+    | MustNotGrow => now > before
+
+:~ allowed (allow : list (string * construct)) (~unit : string) (c : construct) : bool =
+    listm'.exists' (\ ((u, k) : string * construct) => u = unit && k = c) allow
+
+:~ ratchet (allow : list (string * construct)) (baseline : list count) (current : list count) : list finding =
+    := judge = \ (found : list finding) (x : count) =>
+        := excused = allowed allow x.unit x.construct
+        ?= value_in baseline x.unit x.construct ?|
+        | Some before ?& moved_against before x.value x.construct && not excused =>
+            listm.append found [ Moved (x.unit, x.construct, before, x.value) ]
+        | _ => found
+    := moved = current |> listm.fold judge []
+    := once = \ (seen : list string) (x : count) =>
+        ? listm'.contains x.unit seen ?> seen |: listm.append seen [ x.unit ]
+    := units = \ (counts : list count) => counts |> listm.fold once []
+    := missing_in = \ (counts : list count) (u : string) => not (has_unit counts u)
+    := added = units current |> listm'.filter (missing_in baseline) |> listm.map (\ (u : string) => NewUnit u)
+    := gone = units baseline |> listm'.filter (missing_in current) |> listm.map (\ (u : string) => GoneUnit u)
+    listm.append moved (listm.append added gone)
+
+:~ construct_word (c : construct) : string =
+    ?= c ?|
+    | Export => "exports"
+    | LinkedUnit => "linked units"
+    | HostMacroLine => "host macro lines"
+
+:~ finding_line (f : finding) : string =
+    ?= f ?|
+    | Moved (unit, c, before, now) =>
+        := change = sm'.show before ++# " -> " ++# sm'.show now
+        "boundary census / " ++# unit ++# " " ++# construct_word c ++# " " ++# change
+    | NewUnit unit => "boundary census / " ++# unit ++# " is not in the baseline yet"
+    | GoneUnit unit => "boundary census / " ++# unit ++# " left the tree (archive its baseline rows)"
+
+///> rust
+:# a_unit_counts_its_exports_links_and_host_macro_lines =
+    := manifest = "packages:\n    |core-\n    spiral-\n    unit_a\nlink:\n    unit_a\n    unit_b\nmodules:\n    entry\n"
+    := source = ":= main () : i32 =\n    export \"a_run\" run\n    export \"a_list\" list\n    0i32\n"
+    := host = ":= now () : i64 = $'std::time::now()' : i64\n:= plain () = 1\n"
+    := found = census_of { unit = "unit_c"; manifest = manifest; sources = [ source; host ] }
+    := values = found |> listm.map (\ (x : count) => x.value)
+    testing.expect (values = [ 2i32; 2i32; 1i32 ]) "two exports, two links, one host macro line"
+
+///> rust
+:# the_ratchet_refuses_typed_constructs_shrinking_and_host_lines_growing =
+    := at = \ (u : string) (c : construct) (v : i32) => { unit = u; construct = c; value = v }
+    := baseline = [ at "a" Export 3i32; at "a" HostMacroLine 5i32; at "old" Export 1i32 ]
+    := better = [ at "a" Export 4i32; at "a" HostMacroLine 2i32 ]
+    testing.expect (ratchet [] baseline better = [ GoneUnit "old" ]) "more exports and fewer host lines pass"
+    := worse = [ at "a" Export 2i32; at "a" HostMacroLine 6i32; at "old" Export 1i32; at "new" Export 0i32 ]
+    := expected = [ Moved ("a", Export, 3i32, 2i32); Moved ("a", HostMacroLine, 5i32, 6i32); NewUnit "new" ]
+    testing.expect (ratchet [] baseline worse = expected) "a shrink, a growth and a new unit"
+    := allowed_export = [ Moved ("a", HostMacroLine, 5i32, 6i32); NewUnit "new" ]
+    testing.expect (ratchet [ "a", Export ] baseline worse = allowed_export) "an allowed planned deletion"
+    := line = "boundary census / a host macro lines 5 -> 6"
+    testing.expect (finding_line (Moved ("a", HostMacroLine, 5i32, 6i32)) = line) "one line per finding"
+
+///> rust
+:# a_manifest_read_at_run_time_counts_like_a_literal =
+    := suffix = file_system.read_text_or_empty "/rig-census-run-time-probe-missing"
+    testing.expect (linked_units ("link:\n    unit_a" ++# suffix ++# "\nmodules:\n    x\n") = 1i32) "run-time text"

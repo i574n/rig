@@ -11,15 +11,6 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -36,7 +27,7 @@ fn method2(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let v3: Rc<UH0> = v3;
                 let v4: Rc<UH0> = Rc::new(UH0::UH0_Cons(v2, v1));
                 (v0, v1) = (v3, v4);
@@ -49,12 +40,12 @@ fn method2(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     }
 }
 fn method3(mut v0: i32, mut v1: &Rc<RefCell<Mut0>>) -> bool {
-    let mut v2: i32 = v1.borrow().l0;
+    let v2: i32 = v1.borrow().l0;
     let v3: bool = v2 < v0;
     v3
 }
 fn split_list_1(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<UH0> {
-    let mut v2: i32 = (v0.clone().len() as i32);
+    let v2: i32 = (v0.clone().len() as i32);
     let v3: bool = v2 == 0i32;
     if v3 {
         let v4: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
@@ -138,7 +129,7 @@ fn field_end_8(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: US0) -> i32 {
 }
 fn skip_spaces_9(mut v0: Rc<str>, mut v1: i32) -> i32 {
     loop {
-        let mut v2: i32 = v0.as_bytes().get(v1 as usize).map(|byte| i32::from(*byte)).unwrap_or(-1);
+        let v2: i32 = v0.as_bytes().get(v1 as usize).map(|byte| i32::from(*byte)).unwrap_or(-1);
         let v3: bool = v2 == 32i32;
         if v3 {
             let v4: i32 = v1.wrapping_add(1i32);
@@ -218,81 +209,13 @@ fn unescaped_from_11(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32, mut
 }
 fn unquoted_10(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: i32 = (v0.clone().len() as i32);
-    let mut v2: i32 = v1.wrapping_sub(1i32);
+    let v2: i32 = v1.wrapping_sub(1i32);
     let v3: Rc<str> = std::rc::Rc::<str>::from(v0.get(1i32 as usize..v2 as usize).unwrap_or(""));
     let v4: i32 = 0i32;
     let v5: i32 = 0i32;
     let v6: i32 = (v3.clone().len() as i32);
     let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     unescaped_from_11(v3, v4, v5, v6, v7)
-}
-fn method14(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method15(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
 }
 fn deps_renamed_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: bool) -> (Rc<str>, bool) {
     loop {
@@ -315,29 +238,22 @@ fn deps_renamed_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>, m
                 v12
             };
             let v14: Rc<str> = std::rc::Rc::<str>::from(v0.get(v1 as usize..v11 as usize).unwrap_or(""));
-            let v15: i32 = (v14.clone().len() as i32);
-            let v16: i32 = 0i32;
-            let v17: i32 = method14(v14.clone(), v15, v16);
-            let v18: i32 = v15.wrapping_sub(1i32);
-            let v19: Rc<str> = string_slice(&v14, v17 as i64, v18 as i64);
-            let v20: i32 = (v19.clone().len() as i32);
-            let v21: i32 = method15(v19.clone(), v20);
-            let v22: Rc<str> = string_slice(&v19, 0i32 as i64, v21 as i64);
-            let v23: bool = &*v22 == &*v3;
-            let v24: Rc<str> = if v23 {
+            let v15: Rc<str> = Rc::<str>::from((v14).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+            let v16: bool = &*v15 == &*v3;
+            let v17: Rc<str> = if v16 {
                 v4.clone()
             } else {
-                v22
+                v15
             };
-            let v25: bool = &*v5 == "";
-            let v28: Rc<str> = if v25 {
-                v24
+            let v18: bool = &*v5 == "";
+            let v21: Rc<str> = if v18 {
+                v17
             } else {
-                let mut v27: Rc<str> = string_concat(&[&*v5, ",", &*v24]);
-                v27
+                let v20: Rc<str> = string_concat(&[&*v5, ",", &*v17]);
+                v20
             };
-            let v29: bool = v23 || v6;
-            (v1, v5, v6) = (v13, v28, v29);
+            let v22: bool = v16 || v6;
+            (v1, v5, v6) = (v13, v21, v22);
             continue;
         }
     }
@@ -523,7 +439,7 @@ fn method4(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>, mut v3: Rc<UH0>, m
         }
     }
 }
-fn method16(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<UH0>, mut v2: i32) -> i32 {
+fn method14(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<UH0>, mut v2: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v1) {
             UH0::UH0_Cons(v3, v4) => {
@@ -553,7 +469,7 @@ fn renamed_text_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (Rc<str>
     let v17: Rc<UH0> = method2(v10, v16);
     let v18: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     let v19: i32 = 0i32;
-    let v20: i32 = method16(v18.clone(), v17, v19);
+    let v20: i32 = method14(v18.clone(), v17, v19);
     let v21: Rc<Vec<Rc<str>>> = Rc::new(v18.borrow().clone());
     let v22: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v21).as_ref().clone()));
     let v23: Rc<str> = Rc::<str>::from((*v22.borrow()).join(&*v3));

@@ -1,0 +1,58 @@
+///- --package .
+:# text static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:= spi_escaped (~value : string) : string =
+    value
+    |> sm'.replace "\\" "\\\\"
+    |> sm'.replace "\"" "\\\""
+    |> sm'.replace "\n" "\\n"
+    |> sm'.replace "\r" "\\r"
+    |> sm'.replace "\t" "\\t"
+
+:= spi_quoted (~value : string) : string = "\"" ++# spi_escaped value ++# "\""
+
+:~ task_line
+    ((id, binding, kind, priority, difficulty, title, tags, deps) :
+        string * string * string * string * string * string * string * string)
+    : string
+    =
+    := head = "inl " ++# binding ++# " () = Task (" ++# spi_quoted id ++# ", " ++# spi_quoted title
+    := cases = ", " ++# kind ++# ", " ++# priority ++# ", " ++# difficulty ++# ", 0u32, Planned, "
+    head ++# cases ++# spi_quoted deps ++# ", " ++# spi_quoted tags ++# ", \"current\", \"current\")"
+
+:= when_given (~value : string) (~word : string) : string = ? value = "" ?> "" |: word
+
+:= planned_text (~words : string) : string = ? words = "" ?> "" |: " planned=" ++# sm'.replace " " "," (sm'.trim words)
+
+:= extras_text (~estimate : string) (~load : string) (~assignee : string) (~deps : string) (~note : string) : string =
+    := words = when_given estimate " estimate" ++# when_given load " load" ++# when_given assignee " assignee"
+    when_given deps (" deps=" ++# deps) ++# planned_text words ++# when_given note " notes=1"
+
+:~ add_receipt
+    ((id, binding, estimate, load, assignee, deps, note) : string * string * string * string * string * string * string)
+    : string
+    =
+    := head = "rig agile add ok id=" ++# id ++# " binding=" ++# binding ++# " status=Planned progress=0"
+    head ++# extras_text estimate load assignee deps note
+
+///> rust
+:# a_task_line_quotes_its_texts =
+    := line = task_line ("A-1", "a_1", "TaskKind", "P2", "D1", "say \"hi\"", "team:x", "")
+    := head = "inl a_1 () = Task (\"A-1\", \"say \\\"hi\\\"\", TaskKind, P2, D1, 0u32"
+    testing.expect (sm'.starts_with head line) "head"
+    testing.expect (sm'.ends_with ", \"\", \"team:x\", \"current\", \"current\")" line) "tail"
+
+///> rust
+:# a_receipt_names_only_the_given_extras =
+    := bare = add_receipt ("A-1", "a_1", "", "", "", "", "")
+    testing.expect (bare = "rig agile add ok id=A-1 binding=a_1 status=Planned progress=0") "bare"
+    := full = add_receipt ("A-1", "a_1", "90", "light", "", "B-2", "n")
+    testing.expect (sm'.ends_with " deps=B-2 planned=estimate,load notes=1" full) "deps, planning, note"
+
+:= main () : i32 =
+    export "rig_agile_task_line" task_line
+    export "rig_agile_add_receipt" add_receipt
+    0i32

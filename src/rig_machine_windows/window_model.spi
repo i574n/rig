@@ -165,7 +165,7 @@
 := tree_label_problem (wanted : window_class) (~label : string) : string =
     ? tree_access wanted && rooted_path label |> not ?>
         "a tree window guards the path in its label; give the rooted path it reads or writes, "
-        ^^ "e.g. C:/home/git/spiral/lib"
+        ^^ "e.g. C:/work/repo/lib"
     |: ""
 
 :~ path_overlaps (~held : string) (~wanted : string) : bool =
@@ -419,23 +419,23 @@
 
 ///> rust
 :# a_tree_write_waits_for_readers_and_keeps_new_readers_out =
-    := lib = "C:/home/git/spiral/lib"
-    := reading = tree_row TreeRead Held "win-1" "C:\\home\\git\\spiral\\lib\\spiral" 1000u64
+    := lib = "C:/work/repo/lib"
+    := reading = tree_row TreeRead Held "win-1" "C:\\work\\repo\\lib\\spiral" 1000u64
     testing.expect (row_blocks TreeWrite lib "win-2" 2000u64 !- reading) "a held read below keeps the write waiting"
     testing.expect (row_blocks TreeRead lib "win-2" 2000u64 !- reading = !-) "readers share a path"
     := writing = tree_row TreeWrite Waiting "win-1" lib 1000u64
-    testing.expect (row_blocks TreeRead "c:/home/git/spiral/lib/spiral" "win-2" 2000u64 !- writing) "writer preference"
+    testing.expect (row_blocks TreeRead "c:/work/repo/lib/spiral" "win-2" 2000u64 !- writing) "writer preference"
     testing.expect (row_blocks TreeRead lib "win-2" 500u64 !- writing = !-) "an older reader is not overtaken"
     testing.expect
         (row_blocks TreeWrite lib "win-2" 2000u64 !- (tree_row TreeWrite Held "win-1" lib 1000u64))
         "one writer at a time"
-    testing.expect (row_blocks TreeWrite "C:/home/git/kit" "win-2" 2000u64 !- reading = !-) "disjoint paths never clash"
+    testing.expect (row_blocks TreeWrite "C:/work/tool" "win-2" 2000u64 !- reading = !-) "disjoint paths never clash"
     testing.expect
-        (row_blocks TreeWrite "C:/home/git/spiral/lib2" "win-2" 2000u64 !- reading = !-)
+        (row_blocks TreeWrite "C:/work/repo/lib2" "win-2" 2000u64 !- reading = !-)
         "a sibling with a shared prefix is another path"
     testing.expect (clashes TreeWrite Compile = !- && needed_mb TreeWrite = 0u64) "a tree write is a lease, not a load"
     testing.expect (tree_label_problem TreeWrite "LIB-KEBAB-CASE" <> "") "a tree write without a path guards nothing"
-    := rooted = tree_label_problem TreeRead "C:\\home\\git\\spiral\\lib"
+    := rooted = tree_label_problem TreeRead "C:\\work\\repo\\lib"
     testing.expect (rooted = "" && tree_label_problem Compile "x" = "") "a rooted path, and other classes need none"
 
 ///> rust

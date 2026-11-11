@@ -484,4 +484,4 @@ pub fn rig_job_slot_held_step(v0: &str) -> i32 {
 pub fn rig_job_slot_ticket_dropped(v0: &str) -> () {
     closure3()(Rc::<str>::from(v0))
 }
-use rig_job_ticket::SpiralShape_97df63ebabc3 as Mut0;
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut0;

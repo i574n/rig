@@ -1,0 +1,46 @@
+///- --package .
+:# repo_entry static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== workflow_step = { file : string; command : string }
+
+:== repo_facts = { has_init : bool; has_workflow : bool; steps : list workflow_step }
+
+:| entry_finding =
+    | MissingInit :: entry_finding
+    | MissingWorkflow :: entry_finding
+    | StepBypassesWorkflow :: workflow_step -> entry_finding
+
+:~ through_workflow (step : workflow_step) : bool =
+    sm'.contains "scripts/workflow.ps1" (sm'.replace "\\" "/" step.command)
+
+:~ entry_findings (facts : repo_facts) : list entry_finding =
+    := init = ? facts.has_init ?> [] |: [ MissingInit ]
+    := workflow = ? facts.has_workflow ?> [] |: [ MissingWorkflow ]
+    := bypasses =
+        facts.steps
+        |> listm'.filter (\ (step : workflow_step) => through_workflow step |> not)
+        |> listm.map StepBypassesWorkflow
+    listm.concat [ init; workflow; bypasses ]
+
+:~ finding_text (finding : entry_finding) : string =
+    ?= finding ?|
+    | MissingInit => "RepoEntry: scripts/init.ps1 is missing; it installs the repo's toolchain and is the first CI step"
+    | MissingWorkflow => "RepoEntry: scripts/workflow.ps1 is missing; CI runs only through it"
+    | StepBypassesWorkflow step =>
+        "RepoEntry: " ++# step.file ++# " runs " ++# step.command ++# "; move it into scripts/workflow.ps1"
+
+///> rust
+:# a_repo_runs_ci_only_through_its_two_entry_scripts =
+    := step = \ (command : string) => ({ file = "gh-pages.yml"; command = command } : workflow_step)
+    := good = { has_init = !+; has_workflow = !+; steps = [ step "pwsh scripts/workflow.ps1 -Publish" ] }
+    testing.expect (entry_findings good = []) "the compliant shape"
+    testing.expect (entry_findings { good ?| steps = [ step "pwsh scripts\\workflow.ps1" ] } = []) "either slash"
+    := partial = { has_init = !+; has_workflow = !-; steps = [ step "pwsh scripts/build.ps1" ] }
+    := expected = [ MissingWorkflow; StepBypassesWorkflow (step "pwsh scripts/build.ps1") ]
+    testing.expect (entry_findings partial = expected) "the fiscal shape"
+    := texts = entry_findings { has_init = !-; has_workflow = !-; steps = [] } |> listm.map finding_text
+    := unnamed = listm'.exists' (\ (t : string) => sm'.starts_with "RepoEntry: " t |> not) texts
+    testing.expect (listm.length texts = 2i32 && (unnamed |> not)) "every finding names its rule and fix"

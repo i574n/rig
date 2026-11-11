@@ -124,25 +124,25 @@ fn main() {
     fixture_root_remove root
 
 ///> rust
-:# killing_only_the_supervisor_takes_the_whole_job_tree_down_where_a_job_object_holds_it =
-    ? on_windows () ?>
-        := root = fixture_root_create "job kill on close"
-        := sleeper = rustc_program root "sleeper" (sleeper_source ())
-        := started =
-            succeeded (job_call root (Arg ("start", Arg ("orphan-me", Arg ("60000", Arg (sleeper, Arg ("parent",
-                Arg (fixture_path root "parent.beat", Arg (fixture_path root "child.beat", NoArgs)))))))))
-        expect (path_appears (fixture_path root "child.beat") 20000u64) (cat "the child never beat: " started)
-        := _ =
-            succeeded (rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("kill",
-                Arg (word_after started "supervisor_pid=", NoArgs))))
-        pause_ms 1500u64
-        := child_before = beat_bytes root "child.beat"
-        := parent_before = beat_bytes root "parent.beat"
-        pause_ms 1000u64
-        same (beat_bytes root "child.beat") child_before
-        same (beat_bytes root "parent.beat") parent_before
-        fixture_root_remove root
-    |: ()
+:# killing_only_the_supervisor_takes_the_whole_job_tree_down =
+    := root = fixture_root_create "job kill on close"
+    := sleeper = rustc_program root "sleeper" (sleeper_source ())
+    := started =
+        succeeded (job_call root (Arg ("start", Arg ("orphan-me", Arg ("60000", Arg (sleeper, Arg ("parent",
+            Arg (fixture_path root "parent.beat", Arg (fixture_path root "child.beat", NoArgs)))))))))
+    expect (path_appears (fixture_path root "child.beat") 20000u64) (cat "the child never beat: " started)
+    := _ =
+        succeeded (rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("kill",
+            Arg (word_after started "supervisor_pid=", NoArgs))))
+    := waited = job_call root (Arg ("wait", Arg (word_after started "id=", Arg ("45000", NoArgs))))
+    shows waited.stdout "state=lost"
+    pause_ms 1500u64
+    := child_before = beat_bytes root "child.beat"
+    := parent_before = beat_bytes root "parent.beat"
+    pause_ms 1000u64
+    same (beat_bytes root "child.beat") child_before
+    same (beat_bytes root "parent.beat") parent_before
+    fixture_root_remove root
 
 := decimal_text (~value : u64) : string = (sm'.show value)
 
@@ -475,4 +475,17 @@ fn main() {
     rejected_with (job_call root unknown) 2i32 "expected build or start, received stop"
     := start = Arg ("coordinator", Arg ("start", Arg ("--spool", Arg (fixture_path root "spool", NoArgs))))
     rejected_with (job_call root start) 2i32 "run kit job coordinator build"
+    fixture_root_remove root
+
+///> rust
+:# a_refused_heavy_start_leaves_no_job_record =
+    := root = fixture_root_create "job heavy refused"
+    := gate = cat "KIT_HEAVY_GATE=" (fixture_path root "absent.ps1")
+    := sets = Arg (cat "KIT_JOBS_HOME=" (fixture_path root "jobs"), Arg (gate, NoArgs))
+    := drops = Arg ("KIT_JOB_RELAUNCHED", Arg ("KIT_JOB_WATCH", NoArgs))
+    := start = Arg ("start", Arg ("--heavy", Arg ("heavy-refused", Arg ("60000", Arg ("cmd", NoArgs)))))
+    := refused = rig_run (fixture_text_of root) sets drops (Arg ("job", start))
+    expect (refused.code <> 0i32) (cat "a heavy start without a gate script was accepted: " refused.stdout)
+    shows refused.stderr "--heavy needs"
+    hides (job_call root (Arg ("list", NoArgs))).stdout "heavy-refused"
     fixture_root_remove root

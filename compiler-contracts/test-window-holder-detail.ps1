@@ -1,4 +1,4 @@
-$e = 'C:\home\git\kit\kit.exe'
+$e = Join-Path $PSScriptRoot '..\kit.exe'
 $label = "kit probe detail $PID"
 $start = & $e job start kit-window-holder-probe-detail 300000 $e window run compile 2 --label $label -- pwsh -NoProfile -Command 'Start-Sleep -Seconds 90'
 $id = [regex]::Match("$start", 'id=(\S+)').Groups[1].Value

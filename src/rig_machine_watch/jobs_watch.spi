@@ -104,8 +104,6 @@ let live_block_held (~windows : string) : bool = $'(&*!windows).lines().any(|row
 :~ windows_lines (~windows : string) : string =
     $'rig_machine_window_watch::rig_machine_windows_lines(&*!windows)' : string
 
-:~ gate_summary () : string = $'rig_machine_window_watch::rig_machine_gate_summary()' : string
-
 :~ jobs_and_windows (limits : watch_limits) (~rows : process_rows) : string =
     := windows = window_files ()
     := live = live_block_held windows
@@ -126,12 +124,7 @@ let live_block_held (~windows : string) : bool = $'(&*!windows).lines().any(|row
             ""
             ""
     := job_lines = ? pass.report = "" ?> jobs |: concat5 jobs "\n" pass.report "" ""
-    := gate = gate_summary ()
-    := gate_lines =
-        ? gate = ""
-        ?> "== stop gate: no gate.log"
-        |: concat5 "== stop gate (gate.log, newest 4000 lines)\n" gate "" "" ""
     := now = now_ms ()
     := crowding = $'rig_machine_crowding::rig_machine_crowding(&*!windows, !now)' : string
-    := listed = concat5 job_lines "\n" gate_lines "\n== windows\n" (windows_lines windows)
+    := listed = concat5 job_lines "\n== windows\n" (windows_lines windows) "" ""
     ? crowding = "" ?> listed |: concat5 listed "\n" crowding "" ""

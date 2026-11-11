@@ -1,0 +1,57 @@
+///- --package .
+:# tunnel static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| node_access =
+    | RemoteOnly :: node_access
+    | LocalConsole :: node_access
+
+:| tunnel_state =
+    | Healthy :: tunnel_state
+    | Degraded :: u64 -> tunnel_state
+    | Down :: string -> tunnel_state
+
+:| heal_action =
+    | ReestablishTunnel :: heal_action
+    | RestartSshd :: heal_action
+    | NoHeal :: heal_action
+
+:| heal_decision =
+    | Run :: heal_action -> heal_decision
+    | Refused :: string -> heal_decision
+
+:== probe_result = { connected : bool; exit_code : i32; elapsed_ms : u64 }
+
+:= slow_ms () : u64 = 15000u64
+
+:~ state_of (probe : probe_result) : tunnel_state =
+    ? probe.connected |> not
+    ?> Down ("ssh exit " ++# sm'.show probe.exit_code)
+    |? probe.elapsed_ms > slow_ms ()
+    ?> Degraded probe.elapsed_ms
+    |: Healthy
+
+:~ heal_for (state : tunnel_state) : heal_action =
+    ?= state ?|
+    | Healthy => NoHeal
+    | Degraded _ => NoHeal
+    | Down _ => ReestablishTunnel
+
+:~ decided (access : node_access) (action : heal_action) : heal_decision =
+    ?= access, action ?|
+    | RemoteOnly, RestartSshd => Refused "never restart sshd on a remote-only node: it is the only way in"
+    | _, chosen => Run chosen
+
+///> rust
+:# a_down_tunnel_is_reestablished_and_sshd_is_never_restarted_on_a_remote_only_node =
+    testing.expect (state_of { connected = !+; exit_code = 0i32; elapsed_ms = 900u64 } = Healthy) "fast and connected"
+    testing.expect (state_of { connected = !+; exit_code = 0i32; elapsed_ms = 20000u64 } = Degraded 20000u64) "slow"
+    := down = state_of { connected = !-; exit_code = 255i32; elapsed_ms = 12000u64 }
+    testing.expect (down = Down "ssh exit 255" && heal_for down = ReestablishTunnel) "down: re-establish the tunnel"
+    testing.expect (heal_for (Degraded 20000u64) = NoHeal) "slow is reported, not healed"
+    := refused = decided RemoteOnly RestartSshd
+    testing.expect (refused <> Run RestartSshd) "remote-only refuses an sshd restart"
+    testing.expect (decided LocalConsole RestartSshd = Run RestartSshd) "a node with a console may restart it"
+    testing.expect (decided RemoteOnly ReestablishTunnel = Run ReestablishTunnel) "the tunnel heal is always allowed"

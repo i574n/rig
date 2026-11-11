@@ -12,3 +12,6 @@ publish.workspace = true
 [lib]
 name = "rig_standards_layers_model"
 path = "scan.rs"
+
+[dependencies]
+rig-standards-prim-bindings = { path = "../rig_standards_prim_bindings" }

@@ -1,0 +1,69 @@
+///- --package .
+:# framing static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| row_frame =
+    | WholeRow :: row_frame
+    | BlankRow :: row_frame
+    | NotAnObject :: row_frame
+    | TornRow :: i32 -> row_frame
+
+:== scan = { depth : i32; in_string : bool; escaped : bool; closed_early : bool }
+
+:== frame_counts = { whole : i32; blank : i32; not_object : i32; torn : i32; first_bad : i32 }
+
+:~ stepped (s : scan) (~c : string) : scan =
+    ? s.in_string
+    ?>
+        ? s.escaped ?> { s ?| escaped = !- }
+        |? c = "\\" ?> { s ?| escaped = !+ }
+        |? c = "\"" ?> { s ?| in_string = !- }
+        |: s
+    |? c = "\"" ?> { s ?| in_string = !+ }
+    |? c = "{" || c = "[" ?> { s ?| depth = s.depth + 1i32 }
+    |? c = "}" || c = "]" ?> { s ?| depth = s.depth - 1i32; closed_early = s.closed_early || s.depth <= 0i32 }
+    |: s
+
+:~ ^ scan_from (~text : string) (at : i32) (s : scan) : scan =
+    ? at >= sm'.length text ?> s |: scan_from text (at + 1i32) (stepped s (sm'.slice at at text))
+
+:~ frame_of (~line : string) : row_frame =
+    := plain = sm'.trim (sm'.replace "\r" "" line)
+    ? plain = ""
+    ?> BlankRow
+    |? sm'.starts_with "{" plain |> not
+    ?> NotAnObject
+    |:
+        := s = scan_from plain 0i32 { depth = 0i32; in_string = !-; escaped = !-; closed_early = !- }
+        ? s.depth = 0i32 && (s.in_string |> not) && (s.closed_early |> not) && sm'.ends_with "}" plain
+        ?> WholeRow
+        |: TornRow s.depth
+
+:~ counts_of (~text : string) : frame_counts =
+    := step = \ ((n, c) : i32 * frame_counts) (line : string) =>
+        := bad = \ (got : frame_counts) => ? got.first_bad = 0i32 ?> { got ?| first_bad = n } |: got
+        := next =
+            ?= frame_of line ?|
+            | WholeRow => { c ?| whole = c.whole + 1i32 }
+            | BlankRow => { c ?| blank = c.blank + 1i32 }
+            | NotAnObject => bad { c ?| not_object = c.not_object + 1i32 }
+            | TornRow _ => bad { c ?| torn = c.torn + 1i32 }
+        n + 1i32, next
+    := zero = { whole = 0i32; blank = 0i32; not_object = 0i32; torn = 0i32; first_bad = 0i32 }
+    := _, counts = sm'.split_list "\n" text |> listm.fold step (1i32, zero)
+    counts
+
+///> rust
+:# jsonl_rows_are_whole_blank_not_objects_or_torn =
+    testing.expect (frame_of "{\"kind\":\"start\",\"n\":[1,2]}" = WholeRow) "a whole object"
+    testing.expect (frame_of "{\"text\":\"a } inside { a string\"}" = WholeRow) "braces inside strings do not count"
+    testing.expect (frame_of "{\"text\":\"an escaped \\\" quote\"}" = WholeRow) "an escaped quote stays inside"
+    testing.expect (frame_of "{\"kind\":\"start\",\"n\":[1," = TornRow 2i32) "a row cut mid-write is torn"
+    testing.expect (frame_of "{\"a\":1}}{" = TornRow 0i32) "a close before the end is torn, never whole"
+    testing.expect (frame_of "[1,2]" = NotAnObject && frame_of "   " = BlankRow) "array rows and blank rows"
+    := text = "{\"a\":1}\n\n{\"a\":2}\nnot json\n{\"a\":"
+    := c = counts_of text
+    testing.expect (c.whole = 2i32 && c.blank = 1i32 && c.not_object = 1i32 && c.torn = 1i32) "every row counted once"
+    testing.expect (c.first_bad = 4i32) "the first bad row is named by its line number"

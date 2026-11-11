@@ -1,0 +1,131 @@
+///- --package .
+:# bindings static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| prim_binding =
+    | RawMacros :: i32 -> prim_binding
+    | MissingArms :: i32 * list string -> prim_binding
+
+:== switch_scan = { raw : i32; indent : i32; arms : list string; switches : list (list string) }
+
+:~ occurrences (~token : string) (~text : string) : i32 = (listm.length (sm'.split_list token text) : i32) - 1i32
+
+:~ own_macros (~code : string) : i32 =
+    := dollar = "$"
+    occurrences (dollar ++# "'") code + occurrences (dollar ++# "\"") code + occurrences "!!!!" code
+
+:~ first_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring 0i32 1i32 text
+
+:~ last_char (~text : string) : string = ? text = "" ?> "" |: sm'.substring (sm'.length text - 1i32) 1i32 text
+
+:~ word_char (~c : string) : bool =
+    c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'"
+
+:~ member_start (~c : string) : bool = c <> "" && sm'.contains c "abcdefghijklmnopqrstuvwxyz_"
+
+:~ code_of (~text : string) : string =
+    := kept = \ ((code, inside) : string * bool) (line : string) =>
+        := trimmed = sm'.trim_start [] line
+        := test_body = inside && (trimmed = "" || sm'.starts_with " " line)
+        ? sm'.starts_with ":#" line
+        ?> code, !+
+        |? test_body || sm'.starts_with "//" trimmed ?> code, inside
+        |: code ++# line ++# "\n", !-
+    := code, _ = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold kept ("", !-)
+    code
+
+:~ referenced_by (~code : string) (~name : string) (~separator : string) : bool =
+    := needle = name ++# separator
+    ? sm'.contains needle code |> not
+    ?> !-
+    |:
+        := found = \ ((any, before) : bool * string) (piece : string) =>
+            any || (word_char (last_char before) |> not && member_start (first_char piece)), piece
+        ?= sm'.split_list needle code ?|
+        | head :: rest =>
+            := any, _ = rest |> listm.fold found (!-, head)
+            any
+        | [] => !-
+
+:~ module_opened ((code, name) : string * string) : bool =
+    := opened = sm'.contains ("\n:< " ++# name ++# "\n") ("\n" ++# code)
+    opened || referenced_by code name "." || referenced_by code name "::"
+
+:~ indent_of (~line : string) : i32 = sm'.length line - sm'.length (sm'.trim_start [] line)
+
+:~ arm_word (~trimmed : string) : string =
+    := at = sm'.index_of " = " trimmed
+    := word = ? at > 0i32 ?> sm'.substring 0i32 at trimmed |: ""
+    := head = first_char word
+    ? head <> "" && sm'.contains head "ABCDEFGHIJKLMNOPQRSTUVWXYZ" && sm'.contains " " word |> not ?> word |: ""
+
+:~ switch_closed (s : switch_scan) : switch_scan =
+    ? s.indent < 0i32 ?> s |: { s ?| indent = -1i32; arms = []; switches = listm.append s.switches [ s.arms ] }
+
+:~ scanned_line (s : switch_scan) (~line : string) : switch_scan =
+    := trimmed = sm'.trim_start [] line
+    := macros = own_macros line
+    ? sm'.contains "backend_switch {" line
+    ?> { (switch_closed s) ?| indent = indent_of line }
+    |? s.indent >= 0i32 && trimmed <> "" && indent_of line <= s.indent
+    ?> switch_closed s
+    |? s.indent >= 0i32
+    ?>
+        := word = arm_word trimmed
+        ? word = "" ?> s |: { s ?| arms = listm.append s.arms [ word ] }
+    |: { s ?| raw = s.raw + macros }
+
+:~ prim_bindings (~code : string) : list prim_binding =
+    := start = { raw = 0i32; indent = -1i32; arms = []; switches = [] }
+    := done = sm'.split_list "\n" code |> listm.fold scanned_line start |> switch_closed
+    := once = \ (kept : list string) (a : string) => ? listm'.contains a kept ?> kept |: listm.append kept [ a ]
+    := every = \ (all : list string) (arms : list string) => arms |> listm.fold once all
+    := backends = done.switches |> listm.fold every []
+    := missing = \ ((found, at) : list prim_binding * i32) (arms : list string) =>
+        := absent = backends |> listm'.filter (\ (b : string) => listm'.contains b arms |> not)
+        (? absent = [] ?> found |: listm.append found [ MissingArms (at, absent) ]), at + 1i32
+    := partial, _ = done.switches |> listm.fold missing ([], 1i32)
+    ? done.raw > 0i32 ?> RawMacros done.raw :: partial |: partial
+
+:~ binding_text (b : prim_binding) : string =
+    ?= b ?|
+    | RawMacros n => "partial backend binding: " ++# sm'.show n ++# " host macro(s) outside a backend_switch"
+    | MissingArms (at, absent) =>
+        := named = sm'.concat_list ", " absent
+        "partial backend binding: backend_switch #" ++# sm'.show at ++# " has no arm for " ++# named
+
+:~ binding_texts (~code : string) : array_base string =
+    prim_bindings code
+    |> listm.fold (\ (kept : array string) (b : prim_binding) => kept ++ ;[ binding_text b ]) ;[]
+    |> am'.base
+
+///> rust
+:# a_prim_binding_needs_every_backend_arm_and_no_raw_macro =
+    := full = ":= f () =\n    backend_switch {\n        Rust = \\ () => 1\n        Gleam = \\ () => 2\n    }\n"
+    := short = ":= g () =\n    backend_switch {\n        Rust = \\ () => 3\n    }\n"
+    testing.expect (prim_bindings full = []) "every switch with every arm is clean"
+    := lacking = [ MissingArms (2i32, [ "Gleam" ]) ]
+    testing.expect (prim_bindings (full ++# short) = lacking) "the second switch lacks Gleam"
+    := dollar = "$"
+    := raw = ":= h () = " ++# dollar ++# "'x' : i32\n"
+    testing.expect (prim_bindings (full ++# raw) = [ RawMacros 1i32 ]) "a macro outside any switch"
+    := texts = binding_texts (full ++# short)
+    testing.expect (am'.length_base texts = 1i32) "one text crosses the link"
+
+///> rust
+:# code_scan_skips_tests_and_comments_and_finds_bounded_references =
+    := text = ":< am'\n// $'skip'\n:= f () = $'x' + sm'.length s + xsm'.y\n:# t =\n    $'in test'\n\n:= g () = 1\n"
+    := code = code_of text
+    testing.expect (own_macros code = 1i32) "one macro outside tests and comments"
+    testing.expect (module_opened (code, "am'") && module_opened (code, "sm'")) "an open line and a qualified ref"
+    testing.expect (module_opened (code, "listm") |> not) "an unrelated module"
+    testing.expect (referenced_by "xsm'.y" "sm'" "." |> not) "a longer name is not a ref"
+
+:= main () : i32 =
+    export "rig_standards_prim_binding_texts" binding_texts
+    export "rig_standards_code_of" code_of
+    export "rig_standards_module_opened" module_opened
+    export "rig_standards_own_macros" own_macros
+    0i32

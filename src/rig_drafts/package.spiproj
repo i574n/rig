@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rig_drafts_list
+    rig_drafts_put
+    rig_drafts_promote
+link:
+    rig_drafts_list
+    rig_drafts_put
+    rig_drafts_promote
+modules:
+    entry

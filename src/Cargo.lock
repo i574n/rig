@@ -246,9 +246,15 @@ version = "0.0.0"
 name = "agile-task-creation"
 version = "0.0.0"
 dependencies = [
+ "agile-task-creation-text",
  "agile-task-notes",
+ "rig-agile-id-prefix",
  "rig-agile-records",
 ]
+
+[[package]]
+name = "agile-task-creation-text"
+version = "0.0.0"
 
 [[package]]
 name = "agile-task-inspection"
@@ -311,6 +317,7 @@ name = "agile-task-rename"
 version = "0.0.0"
 dependencies = [
  "agile-rename-rewrite",
+ "rig-agile-id-prefix",
  "rig-agile-records",
 ]
 
@@ -955,12 +962,25 @@ name = "rig-agile-contracts"
 version = "0.0.0"
 
 [[package]]
+name = "rig-agile-gap"
+version = "0.0.0"
+dependencies = [
+ "agile-task-creation-text",
+ "agile-task-notes",
+ "rig-agile-records",
+]
+
+[[package]]
 name = "rig-agile-gate"
 version = "0.0.0"
 dependencies = [
  "agile-team-lane",
  "agile-team-work",
 ]
+
+[[package]]
+name = "rig-agile-id-prefix"
+version = "0.0.0"
 
 [[package]]
 name = "rig-agile-lease"
@@ -980,6 +1000,7 @@ version = "0.0.0"
 dependencies = [
  "agile-quality-lint",
  "agile-quality-state",
+ "rig-agile-id-prefix",
 ]
 
 [[package]]
@@ -1026,6 +1047,7 @@ dependencies = [
  "agile-todo-scan",
  "rig-agile-activity-migration",
  "rig-agile-cadence",
+ "rig-agile-gap",
  "rig-agile-gate",
  "rig-agile-lease",
  "rig-agile-lint",
@@ -1309,6 +1331,7 @@ dependencies = [
  "rig-coverage-prune",
  "rig-crate-gate",
  "rig-do",
+ "rig-drafts",
  "rig-env-pins",
  "rig-evidence",
  "rig-exec-export",
@@ -1343,6 +1366,7 @@ dependencies = [
  "rig-resume",
  "rig-run-cli",
  "rig-schedule",
+ "rig-scratch",
  "rig-standards",
  "rig-status-facts",
  "rig-table-logs",
@@ -1350,6 +1374,7 @@ dependencies = [
  "rig-table-sequences",
  "rig-table-test",
  "rig-toolchain-proxy",
+ "rig-units",
  "semantic-evidence-domain",
 ]
 
@@ -1495,6 +1520,7 @@ dependencies = [
  "rig-do-commit",
  "rig-do-model",
  "rig-do-process",
+ "rig-do-replacement",
  "rig-do-verbs",
  "sha2",
 ]
@@ -1589,6 +1615,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "rig-do-replacement"
+version = "0.0.0"
+
+[[package]]
+name = "rig-do-slop"
+version = "0.0.0"
+
+[[package]]
 name = "rig-do-tables"
 version = "0.0.0"
 
@@ -1616,6 +1650,27 @@ dependencies = [
 
 [[package]]
 name = "rig-domain-probe"
+version = "0.0.0"
+
+[[package]]
+name = "rig-drafts"
+version = "0.0.0"
+dependencies = [
+ "rig-drafts-list",
+ "rig-drafts-promote",
+ "rig-drafts-put",
+]
+
+[[package]]
+name = "rig-drafts-list"
+version = "0.0.0"
+
+[[package]]
+name = "rig-drafts-promote"
+version = "0.0.0"
+
+[[package]]
+name = "rig-drafts-put"
 version = "0.0.0"
 
 [[package]]
@@ -2627,6 +2682,10 @@ name = "rig-schedule"
 version = "0.0.0"
 
 [[package]]
+name = "rig-scratch"
+version = "0.0.0"
+
+[[package]]
 name = "rig-source-map"
 version = "0.1.0"
 dependencies = [
@@ -2660,6 +2719,13 @@ dependencies = [
 
 [[package]]
 name = "rig-standards-layers-model"
+version = "0.0.0"
+dependencies = [
+ "rig-standards-prim-bindings",
+]
+
+[[package]]
+name = "rig-standards-prim-bindings"
 version = "0.0.0"
 
 [[package]]
@@ -2849,6 +2915,27 @@ dependencies = [
  "rig-rust-std-fs",
  "rig-rust-std-fs-mutation",
 ]
+
+[[package]]
+name = "rig-units"
+version = "0.0.0"
+dependencies = [
+ "rig-units-edges",
+ "rig-units-layout",
+ "rig-units-manifest",
+]
+
+[[package]]
+name = "rig-units-edges"
+version = "0.0.0"
+
+[[package]]
+name = "rig-units-layout"
+version = "0.0.0"
+
+[[package]]
+name = "rig-units-manifest"
+version = "0.0.0"
 
 [[package]]
 name = "rig-window-admission"

@@ -1,0 +1,73 @@
+///- --package .
+:# place static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== scratch_file = { session : string; path : string; name : string; hash : string }
+
+:== repo_file = { repo : string; path : string; name : string; hash : string }
+
+:| placement =
+    | AlreadyPlaced :: string -> placement
+    | Diverged :: string * string -> placement
+    | Unplaced :: placement
+
+:== proposal = { session : string; scratch : string; lane : string; verdict : placement }
+
+:~ ^ first_where (files : list repo_file) (keep : repo_file -> bool) : option repo_file =
+    ?= files ?|
+    | [] => None
+    | f :: rest => ? keep f ?> Some f |: first_where rest keep
+
+:~ placement_of (index : list repo_file) (s : scratch_file) : placement =
+    ?= first_where index (\ (r : repo_file) => r.hash = s.hash) ?|
+    | Some same => AlreadyPlaced (same.repo ++# "/" ++# same.path)
+    | None =>
+        ?= first_where index (\ (r : repo_file) => r.name = s.name) ?|
+        | Some named => Diverged (named.repo, named.path)
+        | None => Unplaced
+
+:~ ^ lane_of (owners : list (string * string)) (~repo : string) : string =
+    ?= owners ?|
+    | [] => ""
+    | (r, lane) :: rest => ? r = repo ?> lane |: lane_of rest repo
+
+:~ proposal_of (owners : list (string * string)) (index : list repo_file) (s : scratch_file) : option proposal =
+    := found = placement_of index s
+    := base = { session = s.session; scratch = s.path; lane = ""; verdict = found }
+    ?= found ?|
+    | AlreadyPlaced _ => None
+    | Diverged (repo, _) => Some { base ?| lane = lane_of owners repo }
+    | Unplaced => Some base
+
+:~ proposals_of (owners : list (string * string)) (index : list repo_file) (files : list scratch_file)
+    : list proposal
+    =
+    := step = \ (found : list proposal) (s : scratch_file) =>
+        ?= proposal_of owners index s ?|
+        | Some p => listm.append found [ p ]
+        | None => found
+    files |> listm.fold step []
+
+:~ proposal_line (p : proposal) : string =
+    ?= p.verdict ?|
+    | Diverged (repo, path) =>
+        := target = repo ++# "/" ++# path
+        "diverged  " ++# p.lane ++# "  " ++# target ++# "  <- " ++# p.scratch ++# "  (" ++# p.session ++# ")"
+    | Unplaced => "unplaced  ?  " ++# p.scratch ++# "  (" ++# p.session ++# ")"
+    | AlreadyPlaced at => "placed  " ++# at
+
+///> rust
+:# a_scratch_copy_is_placed_diverged_or_unplaced_and_only_the_last_two_become_proposals =
+    := index = [ { repo = "repo-b"; path = "src/a/x.spi"; name = "x.spi"; hash = "h1" } ]
+    := same = { session = "s1"; path = "scratch/x.spi"; name = "x.spi"; hash = "h1" }
+    testing.expect (placement_of index same = AlreadyPlaced "repo-b/src/a/x.spi") "identical content is already placed"
+    := edited = { same ?| hash = "h2" }
+    testing.expect (placement_of index edited = Diverged ("repo-b", "src/a/x.spi")) "same name, new content"
+    testing.expect (placement_of index { same ?| name = "y.spi"; hash = "h3" } = Unplaced) "nothing like it in a repo"
+    := owners = [ "repo-a", "team-a"; "repo-b", "team-b" ]
+    := files = [ same; { same ?| hash = "h2" }; { same ?| path = "scratch/y.spi"; name = "y.spi"; hash = "h3" } ]
+    := lines = proposals_of owners index files |> listm.map proposal_line
+    := diverged = "diverged  team-b  repo-b/src/a/x.spi  <- scratch/x.spi  (s1)"
+    testing.expect (lines = [ diverged; "unplaced  ?  scratch/y.spi  (s1)" ]) "only the last two become proposals"

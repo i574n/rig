@@ -1,0 +1,102 @@
+///- --package .
+:# cells static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| placeholder =
+    | Elapsed :: placeholder
+    | Clock :: placeholder
+    | HourMinute :: placeholder
+    | Hash :: placeholder
+    | Commit :: placeholder
+    | Pid :: placeholder
+    | Ms :: placeholder
+    | Mb :: placeholder
+    | Unix :: placeholder
+
+:| spec_cell =
+    | Literal :: string -> spec_cell
+    | Hole :: placeholder -> spec_cell
+
+:== hit = { at : i32; kind : placeholder }
+
+:= kinds () : list placeholder = [ Elapsed; Clock; HourMinute; Hash; Commit; Pid; Ms; Mb; Unix ]
+
+:~ token_of (kind : placeholder) : string =
+    ?= kind ?|
+    | Elapsed => "<elapsed>"
+    | Clock => "<clock>"
+    | HourMinute => "<HH:mm>"
+    | Hash => "<hash>"
+    | Commit => "<commit>"
+    | Pid => "<pid>"
+    | Ms => "<ms>"
+    | Mb => "<mb>"
+    | Unix => "<unix>"
+
+:~ earliest (~text : string) : option hit =
+    := closer = \ (best : option hit) (kind : placeholder) =>
+        := at = sm'.index_of (token_of kind) text
+        ?= best ?|
+        | Some b ?& at < 0i32 || b.at <= at => best
+        | _ => ? at < 0i32 ?> None |: Some { at = at; kind = kind }
+    kinds () |> listm.fold closer None
+
+:~ after (~start : i32) (~text : string) : string = sm'.substring start (sm'.length text - start) text
+
+:~ ^ cells_of (~text : string) : list spec_cell =
+    ?= earliest text ?|
+    | None => ? text = "" ?> [] |: [ Literal text ]
+    | Some h =>
+        := tail = Hole h.kind :: cells_of (after (h.at + sm'.length (token_of h.kind)) text)
+        ? h.at = 0i32 ?> tail |: Literal (sm'.substring 0i32 h.at text) :: tail
+
+:~ ^ leading (~allowed : string) (~text : string) (at : i32) : i32 =
+    ? at < sm'.length text && sm'.contains (sm'.slice at at text) allowed ?> leading allowed text (at + 1i32) |: at
+
+:~ span_of (kind : placeholder) (next : list spec_cell) (~rest : string) : i32 =
+    := digits = leading "0123456789" rest 0i32
+    := hex = leading "0123456789abcdef" rest 0i32
+    ?= kind ?|
+    | Hash => ? hex = 64i32 ?> hex |: 0i32
+    | Commit => ? hex >= 7i32 && hex <= 40i32 ?> hex |: 0i32
+    | HourMinute => ? leading "0123456789:" rest 0i32 = 5i32 ?> 5i32 |: 0i32
+    | Pid | Ms | Mb | Unix => digits
+    | Elapsed | Clock =>
+        ?= next ?|
+        | Literal text :: _ => sm'.index_of text rest
+        | _ => sm'.length rest
+
+:~ ^ cells_match (cells : list spec_cell) (~rest : string) : bool =
+    ?= cells ?|
+    | [] => rest = ""
+    | Literal text :: more => sm'.starts_with text rest && cells_match more (after (sm'.length text) rest)
+    | Hole kind :: more =>
+        := taken = span_of kind more rest
+        taken > 0i32 && cells_match more (after taken rest)
+
+:~ line_matches (~expected : string) (~actual : string) : bool = cells_match (cells_of expected) actual
+
+:~ lines_of (~text : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" text)
+
+:~ output_matches (~expected : string) (~actual : string) : bool =
+    := wanted = lines_of expected
+    := got = lines_of actual
+    := differs = \ ((w, g) : string * string) => line_matches w g |> not
+    := same_count = (listm.length wanted : i32) = (listm.length got : i32)
+    same_count && (listm'.zip_ wanted got |> listm'.filter differs) = []
+
+///> rust
+:# expected_lines_match_real_output_through_typed_placeholders =
+    := line = "kit agile next ok ready=2 elapsed_ms=<ms>"
+    testing.expect (cells_of line = [ Literal "kit agile next ok ready=2 elapsed_ms="; Hole Ms ]) "cells"
+    testing.expect (line_matches line "kit agile next ok ready=2 elapsed_ms=8371") "a number fills <ms>"
+    testing.expect (line_matches line "kit agile next ok ready=2 elapsed_ms=" |> not) "a hole is never empty"
+    testing.expect (line_matches line "kit agile next ok ready=3 elapsed_ms=1" |> not) "literals are exact"
+    := receipt = "ok edits 2 <elapsed> at <clock>"
+    testing.expect (line_matches receipt "ok edits 2 41 ms at 10:52 -04:00") "free holes stop at the next literal"
+    testing.expect (line_matches "commit <commit> by <pid>" "commit 9f2c1ab by 4242") "hex and digit classes"
+    testing.expect (line_matches "commit <commit>" "commit 9f2c1" |> not) "a commit id has at least 7 hex digits"
+    testing.expect (output_matches "a\nb=<unix>\n" "a\r\nb=1794233000\r\n") "whole output, CRLF tolerated"
+    testing.expect (output_matches "a\n" "a\nextra\n" |> not) "an extra line fails"

@@ -16,7 +16,6 @@ enum US0 {
     US0_Some(u64),
     US0_None,
 }
-pub struct Mut0 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US1 {
     US1_LiveGui,
@@ -951,4 +950,4 @@ pub fn rig_job_gate_held_step(v0: &str) -> i32 {
 pub fn rig_job_gate_window_dropped(v0: &str) -> () {
     closure4()(Rc::<str>::from(v0))
 }
-pub type SpiralShape_97df63ebabc3 = Mut0;
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut0;

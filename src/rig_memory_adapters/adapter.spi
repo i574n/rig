@@ -1,0 +1,149 @@
+///- --package .
+:# adapter static =
+    :< sm'_operators
+    :< rig_memory_typed.memory
+
+:< sm'_operators
+:< rig_memory_typed.memory
+
+:| memory_client =
+    | ClaudeCode :: memory_client
+    | Codex :: memory_client
+    | Zed :: memory_client
+    | OpenCode :: memory_client
+
+:== store_file = { name : string; text : string }
+
+:| import_result =
+    | Imported :: list memory * list string -> import_result
+    | ImportRefused :: string -> import_result
+
+:= index_name () : string = "MEMORY.md"
+
+:~ claude_import (files : list store_file) : import_result =
+    := step = \ ((ok, bad) : list memory * list string) (f : store_file) =>
+        ? f.name = index_name ()
+        ?> ok, bad
+        |:
+            ?= memory_of_text f.text ?|
+            | Some m => listm.append ok [ m ], bad
+            | None => ok, listm.append bad [ f.name ]
+    := ok, bad = files |> listm.fold step ([], [])
+    Imported (ok, bad)
+
+:~ index_line (m : memory) : string =
+    := about = field_in m.frontmatter "description"
+    "- [" ++# m.name ++# "](" ++# m.name ++# ".md) - " ++# about
+
+:~ claude_export (memories : list memory) : list store_file =
+    := files = memories |> listm.map (\ (m : memory) => { name = m.name ++# ".md"; text = text_of_memory m })
+    := index = memories |> listm.map index_line |> sm'.concat_list "\n"
+    listm.append files [ { name = index_name (); text = index ++# "\n" } ]
+
+:= agents_name () : string = "AGENTS.md"
+
+:== section = { title : string; lines : list string }
+
+:~ sectioned (found : list section) (~line : string) : list section =
+    ? sm'.starts_with "## " line
+    ?> { title = sm'.substring 3i32 (sm'.length line - 3i32) line; lines = [] } :: found
+    |:
+        ?= found ?|
+        | s :: rest => { s ?| lines = line :: s.lines } :: rest
+        | [] => [ { title = ""; lines = [ line ] } ]
+
+:~ slug_of (~title : string) : string = title |> sm'.trim |> sm'.to_lower |> sm'.replace " " "-"
+
+:~ section_memory (s : section) : option memory =
+    := named = [ "---"; "name: " ++# slug_of s.title; "description: " ++# s.title ]
+    := head = listm.append named [ "metadata:"; "  type: feedback"; "---" ]
+    memory_of_text (sm'.concat_list "\n" (listm.append head (listm.rev s.lines)))
+
+:~ blank_section (s : section) : bool = s.lines |> listm.fold (\ (all : bool) (l : string) => all && sm'.trim l = "") !+
+
+:~ agents_file (found : option string) (f : store_file) : option string =
+    ? f.name = agents_name () ?> Some f.text |: found
+
+:~ agents_text (files : list store_file) : option string = files |> listm.fold agents_file None
+
+:~ section_step ((ok, bad) : list memory * list string) (s : section) : list memory * list string =
+    ? s.title = ""
+    ?> (? blank_section s ?> ok, bad |: ok, listm.append bad [ "AGENTS.md preamble" ])
+    |:
+        ?= section_memory s ?|
+        | Some m => listm.append ok [ m ], bad
+        | None => ok, listm.append bad [ s.title ]
+
+:~ agents_import (files : list store_file) : import_result =
+    ?= agents_text files ?|
+    | None => ImportRefused "no AGENTS.md"
+    | Some text =>
+        := sections = sm'.split_list "\n" text |> listm.fold sectioned [] |> listm.rev
+        := ok, bad = sections |> listm.fold section_step ([], [])
+        Imported (ok, bad)
+
+:~ section_text (m : memory) : string = "## " ++# field_in m.frontmatter "description" ++# "\n" ++# m.body
+
+:~ agents_export (memories : list memory) : list store_file =
+    [ { name = agents_name (); text = memories |> listm.map section_text |> sm'.concat_list "\n" } ]
+
+:~ import_of (client : memory_client) (files : list store_file) : import_result =
+    ?= client ?|
+    | ClaudeCode => claude_import files
+    | Codex | Zed => agents_import files
+    | other => ImportRefused ("no adapter yet for " ++# reflection.union_to_string other)
+
+:== memory_adapter =
+    {
+        client : memory_client
+        import_files : list store_file -> import_result
+        export_files : list memory -> list store_file
+    }
+
+:~ adapter_of (client : memory_client) : option memory_adapter =
+    ?= client ?|
+    | ClaudeCode => Some { client = ClaudeCode; import_files = claude_import; export_files = claude_export }
+    | Codex | Zed => Some { client = client; import_files = agents_import; export_files = agents_export }
+    | _ => None
+
+///> rust
+:# the_claude_adapter_imports_every_memory_file_and_exports_them_with_an_index =
+    := one = "---\nname: probe-rule\ndescription: a probe\nmetadata:\n  type: feedback\n---\n\nRule.\n"
+    := index = { name = "MEMORY.md"; text = "- index\n" }
+    := files = [ { name = "probe-rule.md"; text = one }; index; { name = "x.md"; text = "no frontmatter" } ]
+    ?= import_of ClaudeCode files ?|
+    | Imported (memories, unreadable) =>
+        testing.expect (listm.length memories = 1i32 && unreadable = [ "x.md" ]) "one read, one unreadable"
+        := back = claude_export memories
+        := texts = back |> listm.map (\ (f : store_file) => f.text)
+        testing.expect (listm'.contains one texts) "the memory renders back byte for byte"
+        testing.expect (listm'.contains "- [probe-rule](probe-rule.md) - a probe\n" texts) "the index line"
+    | ImportRefused why => failwith why
+    testing.expect (import_of OpenCode [] = ImportRefused "no adapter yet for OpenCode") "others refused, not empty"
+    ?= adapter_of ClaudeCode ?|
+    | Some a =>
+        ?= a.import_files files ?|
+        | Imported (memories, _) =>
+            testing.expect ((a.export_files memories |> listm.length) = 2i32) "the record exports a file and the index"
+        | ImportRefused why => failwith why
+    | None => failwith "the Claude adapter exists"
+    testing.expect (adapter_of OpenCode = None) "no record for a client without an adapter"
+
+///> rust
+:# the_agents_adapter_reads_each_h2_section_as_a_memory_and_writes_the_file_back_byte_for_byte =
+    := text = "## Commit message\nWrite the why.\n\n## Tests first\nRed, then green.\n"
+    := files = [ { name = "AGENTS.md"; text = text }; { name = "config.toml"; text = "x = 1" } ]
+    ?= import_of Zed files ?|
+    | Imported (memories, unreadable) =>
+        := names = memories |> listm.map (\ (m : memory) => m.name)
+        testing.expect (names = [ "commit-message"; "tests-first" ] && unreadable = []) "one memory per section"
+        testing.expect (agents_export memories = [ { name = "AGENTS.md"; text = text } ]) "byte-exact render-back"
+    | ImportRefused why => failwith why
+    testing.expect (import_of Codex [] = ImportRefused "no AGENTS.md") "a client without its file is refused"
+
+///> rust
+:# a_preamble_before_the_first_section_is_named_not_dropped =
+    ?= import_of Codex [ { name = "AGENTS.md"; text = "# Rules\nkeep\n## Only\nbody\n" } ] ?|
+    | Imported (memories, unreadable) =>
+        testing.expect ((listm.length memories : i32) = 1i32 && unreadable = [ "AGENTS.md preamble" ]) "named"
+    | ImportRefused why => failwith why
