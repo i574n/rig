@@ -1,0 +1,108 @@
+///- --package .
+:# profile static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| item_kind =
+    | Specialization :: item_kind
+    | NamedItem :: item_kind
+
+:== generated_item = { name : string; kind : item_kind; first_line : i32; lines : i32; body : string }
+
+:== repeated_block = { names : list string; lines_each : i32 }
+
+:== profile_report =
+    {
+        items : list generated_item
+        total_lines : i32
+        specialized_lines : i32
+        repeated : list repeated_block
+    }
+
+:~ ^ name_until (~text : string) (at : i32) : i32 =
+    := c = sm'.slice at at text
+    ? at >= sm'.length text || c = "(" || c = "<" || c = " " ?> at |: name_until text (at + 1i32)
+
+:~ item_name (~header : string) : option string =
+    := rest =
+        ? sm'.starts_with "pub fn " header ?> sm'.slice 7i32 (sm'.length header - 1i32) header
+        |? sm'.starts_with "fn " header ?> sm'.slice 3i32 (sm'.length header - 1i32) header
+        |: ""
+    ? rest = "" ?> None |: Some (sm'.slice 0i32 (name_until rest 0i32 - 1i32) rest)
+
+:~ specialized (~name : string) : bool =
+    := size = (sm'.length name : i32)
+    := digits_after = \ (prefix : string) =>
+        := n = (sm'.length prefix : i32)
+        sm'.starts_with prefix name && size > n && sm'.index_of (sm'.slice n n name) "0123456789" >= 0i32
+    digits_after "method" || digits_after "closure"
+
+:~ items_of (~text : string) : list generated_item =
+    := step = \ ((n, current, done) : i32 * option generated_item * list generated_item) (line : string) =>
+        ?= current ?|
+        | Some item =>
+            := grown = { item ?| lines = item.lines + 1i32; body = item.body ++# "\n" ++# line }
+            ? line = "}" ?> n + 1i32, None, grown :: done |: n + 1i32, Some grown, done
+        | None =>
+            ?= item_name line ?|
+            | Some name =>
+                := kind = ? specialized name ?> Specialization |: NamedItem
+                n + 1i32, Some { name = name; kind = kind; first_line = n; lines = 1i32; body = "" }, done
+            | None => n + 1i32, None, done
+    := _, _, done = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold step (1i32, None, [])
+    listm.rev done
+
+:~ repeated_of (items : list generated_item) : list repeated_block =
+    := step = \ (groups : list (string * list generated_item)) (item : generated_item) =>
+        ?= groups |> listm'.try_find_ (\ ((body, _) : string * list generated_item) => body = item.body) ?|
+        | Some _ =>
+            := add = \ ((body, members) : string * list generated_item) =>
+                ? body = item.body ?> body, listm.append members [ item ] |: body, members
+            groups |> listm.map add
+        | None => listm.append groups [ item.body, [ item ] ]
+    := groups = items |> listm.fold step []
+    groups
+    |> listm'.filter (\ ((_, members) : string * list generated_item) => listm.length members > 1i32)
+    |> listm.map (\ ((_, members) : string * list generated_item) =>
+        := each = ?= members ?| | first :: _ => first.lines | [] => 0i32
+        ({ names = members |> listm.map (\ (m : generated_item) => m.name); lines_each = each } : repeated_block))
+
+:~ profile_of (~text : string) : profile_report =
+    := items = items_of text
+    := sum = \ (keep : generated_item -> bool) =>
+        items |> listm'.filter keep |> listm.fold (\ (s : i32) (i : generated_item) => s + i.lines) 0i32
+    {
+        items = items
+        total_lines = listm.length (sm'.split_list "\n" text)
+        specialized_lines = sum (\ (i : generated_item) => i.kind = Specialization)
+        repeated = repeated_of items
+    }
+
+///> rust
+:# items_are_counted_specializations_shared_and_identical_bodies_grouped =
+    := text =
+        [
+            "use std::rc::Rc;";
+            "fn method5(mut v0: i32) -> i32 {";
+            "    v0 + 1";
+            "}";
+            "pub fn records_0(mut v0: i32) -> i32 {";
+            "    let v1 = method5(v0);";
+            "    v1";
+            "}";
+            "fn closure1() -> i32 {";
+            "    v0 + 1";
+            "}";
+            "fn methods_total(mut v0: i32) -> i32 {";
+            "    v0 + 1";
+            "}"
+        ]
+        |> sm'.concat_list "\n"
+    := report = profile_of text
+    := names = report.items |> listm.map (\ (i : generated_item) => i.name)
+    testing.expect (names = [ "method5"; "records_0"; "closure1"; "methods_total" ]) "column-0 fn headers open items"
+    testing.expect (report.total_lines = 14i32 && report.specialized_lines = 6i32) "method5 and closure1, 3 lines each"
+    testing.expect (specialized "methods_total" |> not) "a name merely starting with method is not a specialization"
+    := grouped = report.repeated |> listm.map (\ (r : repeated_block) => r.names)
+    testing.expect (grouped = [ [ "method5"; "closure1"; "methods_total" ] ]) "identical bodies, names ignored"

@@ -9,6 +9,7 @@
     | WaitsItem :: string -> wait_kind
     | WaitsLane :: string -> wait_kind
     | WaitsUser :: string -> wait_kind
+    | WaitsJob :: string -> wait_kind
     | ResumeWhen :: string -> wait_kind
 
 :== task_wait = { item : string; kind : wait_kind }
@@ -21,6 +22,7 @@
     | WaitsItem _ => "item"
     | WaitsLane _ => "lane"
     | WaitsUser _ => "user"
+    | WaitsJob _ => "job"
     | ResumeWhen _ => "when"
 
 :~ kind_value (kind : wait_kind) : string =
@@ -29,6 +31,7 @@
     | WaitsItem v => v
     | WaitsLane v => v
     | WaitsUser v => v
+    | WaitsJob v => v
     | ResumeWhen v => v
 
 :~ kind_of (~word : string) (~value : string) : option wait_kind =
@@ -42,6 +45,8 @@
     ?> Some (WaitsLane value)
     |? word = "user"
     ?> Some (WaitsUser value)
+    |? word = "job"
+    ?> Some (WaitsJob value)
     |? word = "when"
     ?> Some (ResumeWhen value)
     |: None
@@ -100,6 +105,8 @@
     testing.expect (wait_of_line row = Some w) "a written row reads back"
     testing.expect (kind_of_flag "item:DELEGATE-2" = Some (WaitsItem "DELEGATE-2")) "an item wait"
     testing.expect (kind_of_flag "when:the box is quiet" = Some (ResumeWhen "the box is quiet")) "a resume condition"
+    := job = Some (WaitsJob "wifi:job-1794221916075-kit-TRAIN42e")
+    testing.expect (kind_of_flag "job:wifi:job-1794221916075-kit-TRAIN42e" = job) "a job wait keeps host and id"
     testing.expect (kind_of_flag "pack:x" = None && kind_of_flag "train:" = None) "unknown kinds and empty values"
     := other = row_of_wait { item = "C"; kind = WaitsTrain "TRAIN40" }
     := text = row ++# "\ninl wait_of_b () = Waits (\"B\", \"pack\", \"x\")\n" ++# other

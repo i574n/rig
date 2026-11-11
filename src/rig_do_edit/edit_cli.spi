@@ -72,6 +72,28 @@
     shows stale.stdout "anchor not found"
     fixture_root_remove root
 
+///> rust
+:# a_replacement_naming_a_missing_group_writes_nothing =
+    := root = fixture_root_create "edit missing group"
+    fixture_write root "jobs.spi" "timeout 30s\n"
+    := refused = do_call root "edit jobs.spi\n  replace pattern all \"timeout (\\d+)s\" with \"timeout $1000ms\""
+    expect (refused.code = 1i32) (cat "a missing group passed, " (run_text refused))
+    := named = "the replacement names group 1000ms, which the pattern does not define (groups 0, 1); "
+    shows refused.stdout (cat named "did you mean ${1}000ms?")
+    shows refused.stdout "nothing written: 1 of 1 edits failed validation"
+    same (fixture_read root "jobs.spi") "timeout 30s\n"
+    fixture_root_remove root
+
+///> rust
+:# a_search_whose_glob_matches_no_file_says_so =
+    := root = fixture_root_create "search no files"
+    fixture_write root "a.txt" "alpha\n"
+    := miss = succeeded (do_call root "search \"zeta\" in *.txt")
+    shows miss "ok  files 1 searched  0 matched  matches 0  "
+    := none = succeeded (do_call root "search \"zeta\" in *.md")
+    shows none "ok  files 0 searched  0 matched  matches 0  no file matched the glob"
+    fixture_root_remove root
+
 := dry_call (root : fixture_root) (~program : string) : cli_run =
     rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("do", Arg (".", Arg ("--dry-run", Arg (program, NoArgs)))))
 

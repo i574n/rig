@@ -45,10 +45,14 @@
     := refused = "rig crate gate refused: "
     ?= outcome ?|
     | GatePassed => 0i32, "rig crate gate ok" ++# summary
-    | GateFailedOver n => 1i32, refused ++# sm'.format n ++# " crate(s) over the limit;" ++# summary
-    | GateFailedMissing n =>
-        := why = " crate(s) have no generated output, so generation did not run or failed;"
-        1i32, refused ++# sm'.format n ++# why ++# summary
+    | GateFailed (over, missing) =>
+        := named = \ (names : list string) => " (" ++# sm'.concat_list ", " names ++# ");"
+        := counted = \ (names : list string) => sm'.format (listm.length names : i32)
+        := over_part = ? over = [] ?> "" |: counted over ++# " crate(s) over the limit" ++# named over
+        := why = " crate(s) have no generated output (generation failed, or the crate is not a workspace member)"
+        := missing_part = ? missing = [] ?> "" |: counted missing ++# why ++# named missing
+        := parts = [ over_part; missing_part ] |> listm'.filter (\ (p : string) => p <> "")
+        1i32, refused ++# sm'.concat_list " " parts ++# summary
     | GateFailedVacuous =>
         := nothing =
             ?= backend ?|

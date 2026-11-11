@@ -17,6 +17,16 @@
         given
     |: binary_of given (? file_system.file_exists path ?> file_system.read_all_text path |: "")
 
+:~ connect_seconds_of (~text : string) : string =
+    := parsed : option i32 = convert.try_convert (sm'.trim text)
+    ?= parsed ?|
+    | Some n ?& n > 0i32 => sm'.show n
+    | _ => "10"
+
+:~ machine_connect ((jobs_root, machine) : string * string) : string =
+    := path = machines_folder jobs_root ++# "/" ++# machine ++# ".connect"
+    connect_seconds_of (? file_system.file_exists path ?> file_system.read_all_text path |: "")
+
 ///> rust
 :# a_remembered_binary_fills_a_bare_kit_and_bin_wins =
     testing.expect
@@ -24,6 +34,9 @@
         "a remembered binary fills a bare kit"
     testing.expect (binary_of "D:/k.exe" "C:/home/bin/kit.exe" = "D:/k.exe" && binary_of "kit" " " = "kit") "--bin wins"
     testing.expect (machines_folder "C:\\jobs" = "C:/jobs/machines") "machines folder"
+    testing.expect (connect_seconds_of "60\r\n" = "60" && connect_seconds_of "" = "10") "a .connect file sets seconds"
+    testing.expect (connect_seconds_of "soon" = "10" && connect_seconds_of "0" = "10") "anything else keeps 10 s"
 := main () : i32 =
     export "rig_job_machine_binary" machine_binary
+    export "rig_job_machine_connect" machine_connect
     0i32

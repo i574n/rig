@@ -576,7 +576,45 @@ fn task_open_20(mut v0: &Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: i3
         }
     }
 }
-fn status_of_22(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
+fn open_child_of_21(mut v0: Rc<UH1>, mut v1: Rc<str>) -> bool {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH1::UH1_NoTasks => {
+                return false;
+            }
+            UH1::UH1_TaskThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) => {
+                let mut v2: Rc<str> = v2;
+                let mut v3: Rc<str> = v3;
+                let v4: Rc<str> = v4;
+                let v5: i32 = v5;
+                let v6: i32 = v6;
+                let v7: Rc<str> = v7;
+                let v8: Rc<str> = v8;
+                let mut v9: Rc<str> = v9;
+                let v10: i32 = v10;
+                let v11: i32 = v11;
+                let v12: i32 = v12;
+                let v13: bool = v13;
+                let mut v14: Rc<str> = v14;
+                let v15: Rc<UH1> = v15;
+                let v16: bool = &*v14 == &*v1;
+                let mut v18: bool = if v16 {
+                    let mut v17: bool = &*v7 != "Done";
+                    v17
+                } else {
+                    false
+                };
+                if v18 {
+                    return true;
+                } else {
+                    v0 = v15;
+                    continue;
+                }
+            }
+        }
+    }
+}
+fn status_of_23(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_NoTasks => {
@@ -609,7 +647,7 @@ fn status_of_22(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn deps_settled_21(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> bool {
+fn deps_settled_22(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> bool {
     loop {
         let mut v3: i32 = (v1.clone().len() as i32);
         let v4: bool = v3 <= v2;
@@ -626,7 +664,7 @@ fn deps_settled_21(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> bool {
             };
             let mut v9: Rc<str> = std::rc::Rc::<str>::from(v1.get(v2 as usize..v8 as usize).unwrap_or(""));
             let v10: Rc<str> = std::rc::Rc::<str>::from(v9.trim());
-            let v11: Rc<str> = status_of_22(v0.clone(), v10);
+            let v11: Rc<str> = status_of_23(v0.clone(), v10);
             let v12: bool = &*v11 == "";
             let mut v14: bool = if v12 {
                 true
@@ -644,7 +682,7 @@ fn deps_settled_21(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> bool {
         }
     }
 }
-fn open_deps_25(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> i32 {
+fn open_deps_26(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> i32 {
     loop {
         let v4: i32 = (v1.clone().len() as i32);
         let v5: bool = v4 <= v2;
@@ -661,7 +699,7 @@ fn open_deps_25(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> i
             };
             let v10: Rc<str> = std::rc::Rc::<str>::from(v1.get(v2 as usize..v9 as usize).unwrap_or(""));
             let v11: Rc<str> = std::rc::Rc::<str>::from(v10.trim());
-            let v12: Rc<str> = status_of_22(v0.clone(), v11);
+            let v12: Rc<str> = status_of_23(v0.clone(), v11);
             let v13: i32 = v9.wrapping_add(1i32);
             let mut v14: bool = &*v12 == "";
             let v16: bool = if v14 {
@@ -681,7 +719,7 @@ fn open_deps_25(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> i
         }
     }
 }
-fn unblocked_weight_24(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> i32 {
+fn unblocked_weight_25(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> i32 {
     loop {
         match &*v0 {
             UH1::UH1_NoTasks => {
@@ -717,7 +755,7 @@ fn unblocked_weight_24(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> i32 {
                 let v32: i32 = if v24 {
                     let v25: i32 = 0i32;
                     let v26: i32 = 0i32;
-                    let v27: i32 = open_deps_25(v0, v9, v25, v26);
+                    let v27: i32 = open_deps_26(v0, v9, v25, v26);
                     let v28: i32 = 1i32 << (2 * (5 - (v6).clamp(0, 5)));
                     let v29: bool = v27 < 1i32;
                     let v30: i32 = if v29 {
@@ -737,7 +775,7 @@ fn unblocked_weight_24(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> i32 {
         }
     }
 }
-fn ranked_of_23(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: &Rc<str>, mut v5: i32, mut v6: i32, mut v7: &Rc<str>, mut v8: &Rc<str>, mut v9: &Rc<str>, mut v10: i32, mut v11: i32, mut v12: i32, mut v13: bool, mut v14: Rc<str>) -> (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>) {
+fn ranked_of_24(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: &Rc<str>, mut v5: i32, mut v6: i32, mut v7: &Rc<str>, mut v8: &Rc<str>, mut v9: &Rc<str>, mut v10: i32, mut v11: i32, mut v12: i32, mut v13: bool, mut v14: Rc<str>) -> (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>) {
     let v15: bool = 0i32 < v10;
     let v33: i32 = if v15 {
         v10
@@ -787,7 +825,7 @@ fn ranked_of_23(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, 
         v32
     };
     let v34: i32 = 0i32;
-    let v35: i32 = unblocked_weight_24(v1, v2.clone(), v34);
+    let v35: i32 = unblocked_weight_25(v1, v2.clone(), v34);
     let v36: i32 = 1i32 << (2 * (5 - (v5).clamp(0, 5)));
     let v37: i32 = v36.wrapping_add(v35);
     let v43: i32 = match &v0 {
@@ -833,7 +871,7 @@ fn ranked_of_23(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, 
     };
     (v2, v3, v5, v6, v33, v15, v35, v55, v14)
 }
-fn inserted_26(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: bool, mut v6: i32, mut v7: i32, mut v8: Rc<str>, mut v9: Rc<UH2>) -> Rc<UH2> {
+fn inserted_27(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: bool, mut v6: i32, mut v7: i32, mut v8: Rc<str>, mut v9: Rc<UH2>) -> Rc<UH2> {
     match &*v9 {
         UH2::UH2_NoRanked => {
             let v10: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_NoRanked); } CASE.with(|case| case.clone()) };
@@ -854,7 +892,7 @@ fn inserted_26(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32, mut v
             if v22 {
                 Rc::new(UH2::UH2_RankedThen(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9))
             } else {
-                let v24: Rc<UH2> = inserted_26(v0, v1, v2, v3, v4, v5, v6, v7, v8, v21);
+                let v24: Rc<UH2> = inserted_27(v0, v1, v2, v3, v4, v5, v6, v7, v8, v21);
                 Rc::new(UH2::UH2_RankedThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v24))
             }
         }
@@ -895,34 +933,46 @@ fn ranked_from_19(mut v0: US5, mut v1: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32,
                 } else {
                     false
                 };
-                let v32: bool = if v23 {
-                    let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("user-batch"); } LIT.with(|lit| lit.clone()) };
-                    let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
-                    let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
-                    let v27: Rc<str> = Rc::<str>::from(v12.replace(&*v25, &*v26));
-                    let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
-                    let v29: Rc<str> = Rc::<str>::from(v27.replace(&*v28, &*v26));
-                    let v30: bool = v29.split("|").any(|item| item == &*v24);
-                    let v31: bool = v30 == false;
-                    v31
+                let v28: bool = if v23 {
+                    let v24: bool = &*v7 == "Epic";
+                    let v26: bool = if v24 {
+                        open_child_of_21(v2.clone(), v5.clone())
+                    } else {
+                        false
+                    };
+                    let v27: bool = v26 == false;
+                    v27
                 } else {
                     false
                 };
-                let v35: bool = if v32 {
-                    let v33: i32 = 0i32;
-                    deps_settled_21(v2.clone(), v11.clone(), v33)
+                let v37: bool = if v28 {
+                    let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("user-batch"); } LIT.with(|lit| lit.clone()) };
+                    let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
+                    let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
+                    let v32: Rc<str> = Rc::<str>::from(v12.replace(&*v30, &*v31));
+                    let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
+                    let v34: Rc<str> = Rc::<str>::from(v32.replace(&*v33, &*v31));
+                    let v35: bool = v34.split("|").any(|item| item == &*v29);
+                    let v36: bool = v35 == false;
+                    v36
                 } else {
                     false
                 };
-                let v37: bool = if v35 {
+                let v40: bool = if v37 {
+                    let v38: i32 = 0i32;
+                    deps_settled_22(v2.clone(), v11.clone(), v38)
+                } else {
+                    false
+                };
+                let v42: bool = if v40 {
                     v1(v5.clone(), v6.clone(), v7.clone(), v8, v9, v10.clone(), v11.clone(), v12.clone(), v13, v14, v15, v16, v17.clone())
                 } else {
                     false
                 };
-                if v37 {
-                    let (mut v38, mut v39, mut v40, mut v41, mut v42, mut v43, mut v44, mut v45, mut v46): (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>) = ranked_of_23(v0.clone(), v2.clone(), v5, v6, &v7, v8, v9, &v10, &v11, &v12, v13, v14, v15, v16, v17);
-                    let v47: Rc<UH2> = inserted_26(v38, v39, v40, v41, v42, v43, v44, v45, v46, v4);
-                    (v3, v4) = (v18, v47);
+                if v42 {
+                    let (mut v43, mut v44, mut v45, mut v46, mut v47, mut v48, mut v49, mut v50, mut v51): (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>) = ranked_of_24(v0.clone(), v2.clone(), v5, v6, &v7, v8, v9, &v10, &v11, &v12, v13, v14, v15, v16, v17);
+                    let v52: Rc<UH2> = inserted_27(v43, v44, v45, v46, v47, v48, v49, v50, v51, v4);
+                    (v3, v4) = (v18, v52);
                     continue;
                 } else {
                     v3 = v18;
@@ -932,7 +982,7 @@ fn ranked_from_19(mut v0: US5, mut v1: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32,
         }
     }
 }
-fn ranked_words_27(mut v0: Rc<UH2>) -> Rc<UH0> {
+fn ranked_words_28(mut v0: Rc<UH2>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH2::UH2_NoRanked => {
             { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) }
@@ -948,18 +998,18 @@ fn ranked_words_27(mut v0: Rc<UH2>) -> Rc<UH0> {
             let mut v9: i32 = v9;
             let v10: Rc<str> = v10;
             let v11: Rc<UH2> = v11;
-            let v12: Rc<UH0> = ranked_words_27(v11);
+            let v12: Rc<UH0> = ranked_words_28(v11);
             Rc::new(UH0::UH0_Cons(v2, v12))
         }
     }
 }
-fn method28(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn method29(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v1) {
         UH0::UH0_Cons(v3, v4) => {
             let mut v3: Rc<str> = v3;
             let v4: Rc<UH0> = v4;
-            let v5: Rc<UH0> = method28(v0.clone(), v4, v2);
-            let v6: Rc<str> = status_of_22(v0, v3.clone());
+            let v5: Rc<UH0> = method29(v0.clone(), v4, v2);
+            let v6: Rc<str> = status_of_23(v0, v3.clone());
             let v7: bool = &*v6 == "Active";
             if v7 {
                 Rc::new(UH0::UH0_Cons(v3, v5))
@@ -972,7 +1022,7 @@ fn method28(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn open_words_29(mut v0: Rc<UH1>) -> Rc<UH0> {
+fn open_words_30(mut v0: Rc<UH1>) -> Rc<UH0> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_NoTasks => {
@@ -998,7 +1048,7 @@ fn open_words_29(mut v0: Rc<UH1>) -> Rc<UH0> {
                     v0 = v15;
                     continue;
                 } else {
-                    let mut v18: Rc<UH0> = open_words_29(v15);
+                    let mut v18: Rc<UH0> = open_words_30(v15);
                     return Rc::new(UH0::UH0_Cons(v2, v18));
                 }
             }
@@ -1010,9 +1060,9 @@ fn ranking_of_17(mut v0: Rc<str>, mut v1: Rc<UH1>) -> (Rc<str>, Rc<str>, Rc<str>
     let mut v3: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) -> bool> = closure2(v0);
     let v4: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_NoRanked); } CASE.with(|case| case.clone()) };
     let v5: Rc<UH2> = ranked_from_19(v2, v3, v1.clone(), v1.clone(), v4);
-    let v6: Rc<UH0> = ranked_words_27(v5);
+    let v6: Rc<UH0> = ranked_words_28(v5);
     let v7: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let v8: Rc<UH0> = method28(v1.clone(), v6.clone(), v7);
+    let v8: Rc<UH0> = method29(v1.clone(), v6.clone(), v7);
     let mut v9: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     let v10: i32 = 0i32;
     let v11: i32 = method11(v9.clone(), v6, v10);
@@ -1026,7 +1076,7 @@ fn ranking_of_17(mut v0: Rc<str>, mut v1: Rc<UH1>) -> (Rc<str>, Rc<str>, Rc<str>
     let v19: Rc<Vec<Rc<str>>> = Rc::new(v16.borrow().clone());
     let v20: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v19).as_ref().clone()));
     let v21: Rc<str> = Rc::<str>::from((*v20.borrow()).join(&*v14));
-    let v22: Rc<UH0> = open_words_29(v1);
+    let v22: Rc<UH0> = open_words_30(v1);
     let v23: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     let v24: i32 = 0i32;
     let v25: i32 = method11(v23.clone(), v22, v24);

@@ -1,0 +1,43 @@
+///- --package .
+:# liveness static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| liveness =
+    | Progressing :: liveness
+    | SilentFor :: u64 -> liveness
+    | Unwatched :: liveness
+
+:== output_mark = { bytes : u64; changed_ms : u64 }
+
+:= minute_ms () : u64 = 60000u64
+
+:~ mark_after (previous : output_mark) (bytes_now : u64) (now_ms : u64) : output_mark =
+    ? bytes_now <> previous.bytes ?> { bytes = bytes_now; changed_ms = now_ms } |: previous
+
+:~ liveness_of (mark : output_mark) (now_ms : u64) (limit_minutes : u64) : liveness =
+    := quiet_minutes = ? now_ms > mark.changed_ms ?> (now_ms - mark.changed_ms) / minute_ms () |: 0u64
+    ? limit_minutes = 0u64
+    ?> Unwatched
+    |? quiet_minutes >= limit_minutes
+    ?> SilentFor quiet_minutes
+    |: Progressing
+
+:~ liveness_word (state : liveness) : string =
+    ?= state ?|
+    | Progressing => "progressing"
+    | SilentFor minutes => "silent=" ++# sm'.show minutes ++# "m"
+    | Unwatched => ""
+
+///> rust
+:# a_job_is_silent_only_after_its_output_stops_growing_for_the_limit =
+    := start = { bytes = 0u64; changed_ms = 1000u64 }
+    := grew = mark_after start 512u64 61000u64
+    testing.expect (grew = { bytes = 512u64; changed_ms = 61000u64 }) "growth moves the mark"
+    testing.expect (mark_after grew 512u64 999000u64 = grew) "no growth keeps the old mark"
+    testing.expect (liveness_of grew (61000u64 + 4u64 * minute_ms ()) 5u64 = Progressing) "quiet 4 of 5 minutes"
+    testing.expect (liveness_of grew (61000u64 + 5u64 * minute_ms ()) 5u64 = SilentFor 5u64) "quiet for the limit"
+    testing.expect (liveness_of grew 999999999u64 0u64 = Unwatched) "no limit, no verdict"
+    testing.expect (liveness_of grew 0u64 1u64 = Progressing) "a clock behind the mark is not silence"
+    testing.expect (liveness_word (SilentFor 12u64) = "silent=12m" && liveness_word Unwatched = "") "words"

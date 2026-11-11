@@ -51,7 +51,6 @@ enum US2 {
     US2_SymbolHead(US3),
     US2_OtherLine,
 }
-pub struct Mut1 { pub l0: Rc<str> }
 fn command_line_argument_count_2() -> i32 {
     let mut v0: usize = std::env::args().count();
     let mut v1: i32 = ((v0) as i32);
@@ -321,7 +320,7 @@ fn method13(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
                         }
                     };
                     let v61: i32 = (v60.len() as i32);
-                    let v68: Rc<str> = match v52 {
+                    let mut v68: Rc<str> = match v52 {
                         US3::US3_HeadInl => {
                             let v62: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
                             v62
@@ -610,82 +609,86 @@ fn lint_run_0() -> i32 {
                                             let v45: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v44).as_ref().clone()));
                                             let v46: Rc<str> = Rc::<str>::from((*v45.borrow()).join(&*v34));
                                             println!("{}", v46);
+                                            let v47: Rc<str> = rig_agile_id_prefix::rig_agile_retired_report(&v28);
+                                            println!("{}", v47);
                                             0i32
                                         } else {
-                                            let v47: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-                                            let v48: Rc<str> = format_real_18(v47);
-                                            let v49: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v48]);
-                                            eprintln!("{}", v49);
+                                            let v48: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
+                                            let v49: Rc<str> = format_real_18(v48);
+                                            let v50: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v49]);
+                                            eprintln!("{}", v50);
                                             2i32
                                         }
                                     }
                                 }
                                 _ => {
-                                    let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
-                                    let v53: bool = v7.starts_with(&*v52);
-                                    let v54: bool = v53 == false;
-                                    if v54 {
-                                        let v55: Rc<str> = state_text_4(v7);
-                                        let v56: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                        let v57: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_state::rig_agile_lint_team_failures(&v55, &v56);
-                                        let v58: i32 = 0i32;
-                                        printed_19(&v57, v58);
-                                        let v59: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-                                        let v60: i32 = (v57.clone().borrow().len() as i32);
-                                        let v61: i32 = 0i32;
+                                    let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
+                                    let v54: bool = v7.starts_with(&*v53);
+                                    let v55: bool = v54 == false;
+                                    if v55 {
+                                        let v56: Rc<str> = state_text_4(v7);
+                                        let v57: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                        let v58: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_state::rig_agile_lint_team_failures(&v56, &v57);
+                                        let v59: i32 = 0i32;
+                                        printed_19(&v58, v59);
+                                        let v60: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
+                                        let v61: i32 = (v58.clone().borrow().len() as i32);
                                         let v62: i32 = 0i32;
-                                        let v63: i32 = distinct_ids_20(&v57, v61, v56.clone(), v62);
-                                        let v64: Rc<str> = format_real_16(v63);
-                                        let v65: Rc<str> = format_real_16(v60);
-                                        let v66: Rc<str> = format_real_18(v59);
-                                        let mut v67: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
-                                        let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile lint ok failing_items="); } LIT.with(|lit| lit.clone()) };
-                                        v67.borrow_mut().push(v68);
-                                        v67.borrow_mut().push(v64);
-                                        let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" failing_checks="); } LIT.with(|lit| lit.clone()) };
-                                        v67.borrow_mut().push(v69);
-                                        v67.borrow_mut().push(v65);
-                                        let v70: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" (report only; legacy items ratchet) elapsed_ms="); } LIT.with(|lit| lit.clone()) };
-                                        v67.borrow_mut().push(v70);
-                                        v67.borrow_mut().push(v66);
-                                        let v71: Rc<Vec<Rc<str>>> = Rc::new(v67.borrow().clone());
-                                        let v72: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v71).as_ref().clone()));
-                                        let v73: Rc<str> = Rc::<str>::from((*v72.borrow()).join(&*v56));
-                                        println!("{}", v73);
+                                        let v63: i32 = 0i32;
+                                        let v64: i32 = distinct_ids_20(&v58, v62, v57.clone(), v63);
+                                        let v65: Rc<str> = format_real_16(v64);
+                                        let v66: Rc<str> = format_real_16(v61);
+                                        let v67: Rc<str> = format_real_18(v60);
+                                        let mut v68: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
+                                        let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig agile lint ok failing_items="); } LIT.with(|lit| lit.clone()) };
+                                        v68.borrow_mut().push(v69);
+                                        v68.borrow_mut().push(v65);
+                                        let v70: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" failing_checks="); } LIT.with(|lit| lit.clone()) };
+                                        v68.borrow_mut().push(v70);
+                                        v68.borrow_mut().push(v66);
+                                        let v71: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" (report only; legacy items ratchet) elapsed_ms="); } LIT.with(|lit| lit.clone()) };
+                                        v68.borrow_mut().push(v71);
+                                        v68.borrow_mut().push(v67);
+                                        let v72: Rc<Vec<Rc<str>>> = Rc::new(v68.borrow().clone());
+                                        let v73: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v72).as_ref().clone()));
+                                        let v74: Rc<str> = Rc::<str>::from((*v73.borrow()).join(&*v57));
+                                        println!("{}", v74);
+                                        let v75: Rc<str> = rig_agile_id_prefix::rig_agile_retired_report(&v56);
+                                        println!("{}", v75);
                                         0i32
                                     } else {
-                                        let v74: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-                                        let v75: Rc<str> = format_real_18(v74);
-                                        let v76: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v75]);
-                                        eprintln!("{}", v76);
+                                        let v76: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
+                                        let v77: Rc<str> = format_real_18(v76);
+                                        let v78: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v77]);
+                                        eprintln!("{}", v78);
                                         2i32
                                     }
                                 }
                             }
                         }
                         _ => {
-                            let v79: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-                            let v80: Rc<str> = format_real_18(v79);
-                            let v81: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v80]);
-                            eprintln!("{}", v81);
+                            let v81: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
+                            let v82: Rc<str> = format_real_18(v81);
+                            let v83: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v82]);
+                            eprintln!("{}", v83);
                             2i32
                         }
                     }
                 }
                 _ => {
-                    let v83: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-                    let v84: Rc<str> = format_real_18(v83);
-                    let v85: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v84]);
-                    eprintln!("{}", v85);
+                    let v85: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
+                    let v86: Rc<str> = format_real_18(v85);
+                    let v87: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v86]);
+                    eprintln!("{}", v87);
                     2i32
                 }
             }
         }
         _ => {
-            let v87: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
-            let v88: Rc<str> = format_real_18(v87);
-            let v89: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v88]);
-            eprintln!("{}", v89);
+            let v89: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v0);
+            let v90: Rc<str> = format_real_18(v89);
+            let v91: Rc<str> = string_concat(&["usage: rig agile lint <root> [--census | --team <team>] elapsed_ms=", &*v90]);
+            eprintln!("{}", v91);
             2i32
         }
     }
@@ -698,5 +701,5 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
 pub fn rig_agile_lint_run() -> i32 {
     closure0()()
 }
+use rig_agile_id_prefix::SpiralShape_97df63ebabc3 as Mut1;
 pub type SpiralShape_652accfc6a8d = Mut0;
-pub type SpiralShape_97df63ebabc3 = Mut1;

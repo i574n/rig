@@ -42,9 +42,7 @@ let read_report (~root : string) (~encoded : string) : string = $'rig_do_read::r
         std::rc::Rc::<str>::from(pattern.replace_all(&*!text, |captures: &regex::Captures| \
         formatted(captures.get(1).map(|format| format.as_str()).unwrap_or("HH:mm:ss"))).into_owned()) }' : string
 
-:~ file_text (~root : string) (~path : string) : string =
-    $'std::rc::Rc::<str>::from(std::fs::read_to_string(std::path::Path::new(&*!root).join(&*!path)).unwrap_or_default(\
-        ))' : string
+:~ file_text (~root : string) (~path : string) : string = file_system.read_text_under root path
 
 := appended_to (~root : string) (~path : string) (~text : string) : string =
     := target = root </> path

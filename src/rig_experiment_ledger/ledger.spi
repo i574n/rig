@@ -1,0 +1,90 @@
+///- --package .
+:# ledger static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| ledger_row =
+    | Registered :: string * string * string -> ledger_row
+    | Amended :: string * string -> ledger_row
+    | Disclosed :: string * string -> ledger_row
+    | Concluded :: string * string -> ledger_row
+    | Addendum :: string * string -> ledger_row
+
+:| append_result =
+    | Appended :: list ledger_row -> append_result
+    | Refused :: string -> append_result
+
+:== entry_view =
+    {
+        id : string
+        registration : string
+        amendments : list string
+        disclosures : list string
+        verdict : option string
+        addenda : list string
+    }
+
+:~ id_of (row : ledger_row) : string =
+    ?= row ?|
+    | Registered (id, _, _) => id
+    | Amended (id, _) => id
+    | Disclosed (id, _) => id
+    | Concluded (id, _) => id
+    | Addendum (id, _) => id
+
+:~ registered (rows : list ledger_row) (~id : string) : bool =
+    rows |> listm'.filter (\ (r : ledger_row) => ?= r ?| | Registered (x, _, _) => x = id | _ => !-) <> []
+
+:~ concluded (rows : list ledger_row) (~id : string) : bool =
+    rows |> listm'.filter (\ (r : ledger_row) => ?= r ?| | Concluded (x, _) => x = id | _ => !-) <> []
+
+:~ appended (rows : list ledger_row) (row : ledger_row) : append_result =
+    := id = id_of row
+    ?= row ?|
+    | Registered _ ?& registered rows id => Refused (id ++# " is already registered")
+    | Registered _ => Appended (listm.append rows [ row ])
+    | _ ?& (registered rows id |> not) => Refused (id ++# " is not registered")
+    | Addendum _ => Appended (listm.append rows [ row ])
+    | _ ?& concluded rows id => Refused (id ++# " has a verdict; only addenda may follow")
+    | _ => Appended (listm.append rows [ row ])
+
+:~ entry_of (rows : list ledger_row) (~id : string) : entry_view =
+    := empty = { id = id; registration = ""; amendments = []; disclosures = []; verdict = None; addenda = [] }
+    := step = \ (v : entry_view) (r : ledger_row) =>
+        ? id_of r <> id
+        ?> v
+        |:
+            ?= r ?|
+            | Registered (_, at, plan) => { v ?| registration = at ++# " " ++# plan }
+            | Amended (_, text) => { v ?| amendments = listm.append v.amendments [ text ] }
+            | Disclosed (_, text) => { v ?| disclosures = listm.append v.disclosures [ text ] }
+            | Concluded (_, text) => { v ?| verdict = Some text }
+            | Addendum (_, text) => { v ?| addenda = listm.append v.addenda [ text ] }
+    rows |> listm.fold step empty
+
+///> rust
+:# one_ledger_file_keeps_preregistration_order_per_entry =
+    := add = \ (rows : list ledger_row) (row : ledger_row) =>
+        ?= appended rows row ?|
+        | Appended next => next
+        | Refused why => failwith why
+    := rows =
+        [
+            Registered ("E-1", "2026-11-09T20:00Z", "welch on p50, lower wins");
+            Amended ("E-1", "n raised to 40");
+            Registered ("E-2", "2026-11-09T20:05Z", "binomial on pass rate");
+            Concluded ("E-1", "b wins, p 0.01");
+            Addendum ("E-1", "rerun on moon agrees")
+        ]
+        |> listm.fold add []
+    := e1 = entry_of rows "E-1"
+    testing.expect (e1.amendments = [ "n raised to 40" ] && e1.verdict = Some "b wins, p 0.01") "one entry, one file"
+    testing.expect (e1.addenda = [ "rerun on moon agrees" ]) "addenda after the verdict"
+    := late = appended rows (Amended ("E-1", "late change"))
+    testing.expect (late = Refused "E-1 has a verdict; only addenda may follow") "no amending after a verdict"
+    := orphan = appended rows (Concluded ("E-9", "x"))
+    testing.expect (orphan = Refused "E-9 is not registered") "no verdict without registration"
+    := twice = appended rows (Registered ("E-2", "t", "p"))
+    testing.expect (twice = Refused "E-2 is already registered") "one registration"
+    testing.expect ((entry_of rows "E-2").verdict = None) "E-2 is still open"

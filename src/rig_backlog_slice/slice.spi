@@ -1,0 +1,92 @@
+///- --package .
+:# slice static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| step_kind =
+    | Authoring :: step_kind
+    | Running :: step_kind
+    | Unclear :: step_kind
+
+:| slice_verdict =
+    | SliceInto :: string * string -> slice_verdict
+    | KeepWhole :: string -> slice_verdict
+
+:== slice_input = { id : string; load : string; next_step : string; children : list string }
+
+:~ authoring_words () : list string =
+    [ "draft"; "write"; "port"; "model"; "author"; "implement"; "add"; "rewrite"; "refactor"; "sample"; "design" ]
+
+:~ running_words () : list string =
+    [ "run"; "measure"; "verify"; "gate"; "train"; "probe"; "launch"; "bench"; "install"; "regen"; "deploy"; "wait" ]
+
+:~ step_body (~text : string) : string =
+    := plain = sm'.trim text
+    := marked = sm'.starts_with "next step:" (sm'.to_lower plain)
+    ? marked ?> sm'.trim (sm'.substring 10i32 (sm'.length plain - 10i32) plain) |: plain
+
+:~ first_word (~text : string) : string =
+    := head = step_body text |> sm'.to_lower
+    ?= sm'.split_list " " head ?|
+    | word :: _ => sm'.replace "," "" word |> sm'.replace ":" ""
+    | [] => ""
+
+:~ step_kind_of (~next_step : string) : step_kind =
+    := word = first_word next_step
+    ? listm'.contains word (authoring_words ())
+    ?> Authoring
+    |? listm'.contains word (running_words ())
+    ?> Running
+    |: Unclear
+
+:~ ^ free_child (~id : string) (children : list string) (n : i32) : string =
+    := candidate = id ++# "-D" ++# sm'.show n
+    ? listm'.contains candidate children ?> free_child id children (n + 1i32) |: candidate
+
+:~ draft_title (~next_step : string) : string =
+    := body = step_body next_step
+    := short = ? sm'.length body > 100i32 ?> sm'.substring 0i32 100i32 body |: body
+    "draft: " ++# short
+
+:~ slice_of (item : slice_input) : slice_verdict =
+    ? item.load = "light" || item.load = "none"
+    ?> KeepWhole "already light"
+    |? sm'.trim item.next_step = ""
+    ?> KeepWhole "no next step to slice"
+    |:
+        ?= step_kind_of item.next_step ?|
+        | Authoring => SliceInto (free_child item.id item.children 1i32, draft_title item.next_step)
+        | Running => KeepWhole "the next step is a run, not authoring"
+        | Unclear => KeepWhole "the next step's kind is unclear, so it stays whole"
+
+:~ slices_for (deficit : i32) (items : list slice_input) : list (string * slice_verdict) =
+    := step = \ ((taken, found) : i32 * list (string * slice_verdict)) (item : slice_input) =>
+        := verdict = slice_of item
+        ?= verdict ?|
+        | SliceInto _ ?& taken < deficit => taken + 1i32, listm.append found [ item.id, verdict ]
+        | _ => taken, found
+    := _, found = items |> listm.fold step (0i32, [])
+    found
+
+///> rust
+:# an_authoring_next_step_slices_and_a_run_step_does_not =
+    := step = "Next step: port the Elixir runner to Spiral"
+    := port = { id = "X-SIM"; load = "heavy"; next_step = step; children = [] }
+    := title = "draft: port the Elixir runner to Spiral"
+    testing.expect (slice_of port = SliceInto ("X-SIM-D1", title)) "authoring slices"
+    := run = { port ?| next_step = "Next step: run the sim gate on moon" }
+    testing.expect (slice_of run = KeepWhole "the next step is a run, not authoring") "a run step stays whole"
+    testing.expect (slice_of { port ?| load = "light" } = KeepWhole "already light") "light items are not sliced"
+    := second = { port ?| children = [ "X-SIM-D1" ] }
+    testing.expect (slice_of second = SliceInto ("X-SIM-D2", title)) "the next free child id"
+    testing.expect (step_kind_of "Next step: think about it" = Unclear) "an unknown verb is unclear"
+
+///> rust
+:# the_gate_slices_at_most_the_floor_deficit =
+    := a = { id = "A"; load = "medium"; next_step = "Next step: write the model"; children = [] }
+    := b = { a ?| id = "B" }
+    := c = { a ?| id = "C"; next_step = "Next step: measure it" }
+    := expected = [ "A", SliceInto ("A-D1", "draft: write the model") ]
+    testing.expect (slices_for 1i32 [ c; a; b ] = expected) "one slot, the run step skipped"
+    testing.expect ((listm.length (slices_for 3i32 [ a; b; c ]) : i32) = 2i32) "never more than the authoring items"

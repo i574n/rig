@@ -755,7 +755,7 @@ fn ready_line_33(mut v0: Rc<str>, mut v1: &Rc<str>, mut v2: Rc<str>, mut v3: Rc<
         let v13: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v12).as_ref().clone()));
         let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
         let v15: Rc<str> = Rc::<str>::from((*v13.borrow()).join(&*v14));
-        let v20: Rc<str> = string_concat(&["Your team's top ready light items: ", &*v15, ". Claim one explicitly (rig agile claim ", &*v0, " <ID> --as ", &*v2, ") and start it now; while a run or train you started is pending, work another of these instead of stopping."]);
+        let v20: Rc<str> = string_concat(&["Your team's top ready light items: ", &*v15, ". Claim one explicitly (kit agile claim ", &*v0, " <ID> --as ", &*v2, ") and start it now; while a run or train you started is pending, work another of these instead of stopping."]);
         v20
     }
 }

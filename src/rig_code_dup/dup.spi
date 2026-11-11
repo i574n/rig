@@ -1,0 +1,81 @@
+///- --package .
+:# dup static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| token =
+    | Ident :: token
+    | Literal :: token
+    | Keyword :: string -> token
+    | Operator :: string -> token
+
+:= keywords () : list string =
+    [ "inl"; "let"; "open"; "type"; "union"; "nominal"; "match"; "with"; "if"; "then"; "else"; "fun"; "function" ]
+
+:= token_text (value : token) : string =
+    ?= value ?|
+    | Ident => "I"
+    | Literal => "L"
+    | Keyword word => word
+    | Operator symbol => symbol
+
+:= word_chars () : string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'"
+
+:= token_of_word (~word : string) : token =
+    := first = sm'.substring 0i32 1i32 word
+    ? sm'.contains first "0123456789" || first = "\""
+    ?> Literal
+    |? listm'.contains word (keywords ())
+    ?> Keyword word
+    |: Ident
+
+:~ ^ words_from (~text : string) (index : i32) (~current : string) (found : list token) : list token =
+    := flush = \ (acc : list token) => ? current = "" ?> acc |: listm.append acc [ token_of_word current ]
+    ? sm'.length text <= index
+    ?> flush found
+    |:
+        := c = sm'.substring index 1i32 text
+        ? sm'.contains c (word_chars ())
+        ?> words_from text (index + 1i32) (current ++# c) found
+        |? sm'.trim c = ""
+        ?> words_from text (index + 1i32) "" (flush found)
+        |: words_from text (index + 1i32) "" (listm.append (flush found) [ Operator c ])
+
+:= tokens_of (~text : string) : list token = words_from text 0i32 "" []
+
+:~ ^ first_n (texts : list string) (n : i32) : list string =
+    ?= texts ?|
+    | [] => []
+    | text :: rest => ? n <= 0i32 ?> [] |: text :: first_n rest (n - 1i32)
+
+:~ ^ shingles_from (texts : list string) (size : i32) (found : list string) : list string =
+    := window = first_n texts size
+    ? (listm.length window : i32) < size
+    ?> found
+    |:
+        ?= texts ?|
+        | [] => found
+        | _ :: rest => shingles_from rest size (listm.append found [ sm'.concat_list " " window ])
+
+:= shingles (size : i32) (~text : string) : list string =
+    shingles_from (tokens_of text |> listm.map token_text) size []
+
+:= overlap (left : list string) (right : list string) : i32 =
+    (left |> listm'.filter (\ (s : string) => listm'.contains s right) |> listm.length : i32)
+
+///> rust
+:# renamed_copies_normalize_to_the_same_tokens =
+    := a = tokens_of "inl total xs = fold add 0 xs" |> listm.map token_text
+    := b = tokens_of "inl sum ys = fold plus 1 ys" |> listm.map token_text
+    testing.expect (a = b) "identifiers and literals are erased"
+    testing.expect (a = [ "inl"; "I"; "I"; "="; "I"; "I"; "L"; "I" ]) "keywords and operators stay"
+
+///> rust
+:# shingles_find_the_shared_windows =
+    := left = shingles 3i32 "inl a = b + c"
+    testing.expect ((listm.length left : i32) = 4i32) "six tokens give four windows of three"
+    testing.expect (overlap left (shingles 3i32 "inl x = y + z") = 4i32) "a renamed copy shares every window"
+    testing.expect (overlap left (shingles 3i32 "let a = b * c") = 1i32) "only the shared I = I window"
+
+:= main () : i32 = 0i32

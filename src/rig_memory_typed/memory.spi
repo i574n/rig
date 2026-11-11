@@ -1,0 +1,218 @@
+///- --package .
+:# memory static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| memory_kind =
+    | UserKind :: memory_kind
+    | FeedbackKind :: memory_kind
+    | ProjectKind :: memory_kind
+    | ReferenceKind :: memory_kind
+
+:= kind_of_word (~word : string) : option memory_kind =
+    := plain = sm'.trim word
+    ? plain = "user"
+    ?> Some UserKind
+    |? plain = "feedback"
+    ?> Some FeedbackKind
+    |? plain = "project"
+    ?> Some ProjectKind
+    |? plain = "reference"
+    ?> Some ReferenceKind
+    |: None
+
+:== memory =
+    {
+        open_mark : string
+        close_mark : string
+        frontmatter : list string
+        body : string
+        name : string
+        kind : option memory_kind
+    }
+
+:~ ^ field_in (lines : list string) (~key : string) : string =
+    ?= lines ?|
+    | [] => ""
+    | line :: rest =>
+        := plain = sm'.trim line
+        ? sm'.starts_with (key ++# ":") plain
+        ?> sm'.trim (sm'.substring (sm'.length key + 1i32) (sm'.length plain - sm'.length key - 1i32) plain)
+        |: field_in rest key
+
+:== split_parts = { front : list string; close_mark : string; after : list string }
+
+:~ ^ split_frontmatter (lines : list string) (found : list string) : option split_parts =
+    ?= lines ?|
+    | [] => None
+    | line :: rest =>
+        ? sm'.trim line = "---"
+        ?> Some ({ front = listm.rev found; close_mark = line; after = rest })
+        |: split_frontmatter rest (line :: found)
+
+:~ memory_of_text (~text : string) : option memory =
+    ?= sm'.split_list "\n" text ?|
+    | first :: rest ?& sm'.trim first = "---" =>
+        ?= split_frontmatter rest [] ?|
+        | Some parts =>
+            := body = sm'.concat_list "\n" parts.after
+            := name, kind = field_in parts.front "name", kind_of_word (field_in parts.front "type")
+            := typed =
+                {
+                    open_mark = first; close_mark = parts.close_mark; frontmatter = parts.front
+                    body = body; name = name; kind = kind
+                }
+            Some typed
+        | None => None
+    | _ => None
+
+:= text_of_memory (m : memory) : string =
+    m.open_mark ++# "\n" ++# sm'.concat_list "\n" m.frontmatter ++# "\n" ++# m.close_mark ++# "\n" ++# m.body
+
+:~ ^ links_from (~text : string) (found : list string) : list string =
+    := open_at = sm'.index_of "[[" text
+    ? open_at < 0i32
+    ?> listm.rev found
+    |:
+        := rest = sm'.substring (open_at + 2i32) (sm'.length text - open_at - 2i32) text
+        := close_at = sm'.index_of "]]" rest
+        ? close_at < 0i32
+        ?> listm.rev found
+        |:
+            := after = sm'.substring (close_at + 2i32) (sm'.length rest - close_at - 2i32) rest
+            links_from after (sm'.substring 0i32 close_at rest :: found)
+
+:= needs_reasons (kind : memory_kind) : bool =
+    ?= kind ?|
+    | FeedbackKind | ProjectKind => !+
+    | _ => !-
+
+:= kind_rule_met (m : memory) : bool =
+    := reasoned = sm'.contains "**Why" m.body && sm'.contains "**How to apply" m.body
+    ?= m.kind ?|
+    | Some kind => needs_reasons kind |> not || reasoned
+    | None => !+
+
+:! user_k = ()
+
+:! feedback_k = ()
+
+:! project_k = ()
+
+:! reference_k = ()
+
+:== reasons = { why : string; how : string }
+
+:| kinded k =
+    | UserMemory :: memory -> kinded user_k
+    | ReferenceMemory :: memory -> kinded reference_k
+    | FeedbackMemory :: memory * reasons -> kinded feedback_k
+    | ProjectMemory :: memory * reasons -> kinded project_k
+
+:| stored =
+    | StoredUser :: kinded user_k -> stored
+    | StoredReference :: kinded reference_k -> stored
+    | StoredFeedback :: kinded feedback_k -> stored
+    | StoredProject :: kinded project_k -> stored
+
+:~ after_marker (~marker : string) (~body : string) : string =
+    := at = sm'.index_of marker body
+    ? at < 0i32
+    ?> ""
+    |:
+        := from = at + (sm'.length marker : i32)
+        := heading = sm'.substring from ((sm'.length body : i32) - from) body
+        := close = sm'.index_of "**" heading
+        ? close < 0i32
+        ?> ""
+        |:
+            := rest = sm'.substring (close + 2i32) ((sm'.length heading : i32) - close - 2i32) heading
+            := stop = sm'.index_of "**" rest
+            sm'.trim (? stop < 0i32 ?> rest |: sm'.substring 0i32 stop rest)
+
+:~ reasons_of (m : memory) : option reasons =
+    := why = after_marker "**Why" m.body
+    := how = after_marker "**How to apply" m.body
+    ? why = "" || how = "" ?> None |: Some { why = why; how = how }
+
+:~ reasoned_store (m : memory) (kind : memory_kind) (found : option reasons) : option stored =
+    ?= found ?|
+    | None => None
+    | Some r =>
+        ? kind = FeedbackKind
+        ?> Some (StoredFeedback (FeedbackMemory (m, r)))
+        |: Some (StoredProject (ProjectMemory (m, r)))
+
+:~ stored_of (m : memory) : option stored =
+    ?= m.kind ?|
+    | None => None
+    | Some kind =>
+        ? kind = UserKind
+        ?> Some (StoredUser (UserMemory m))
+        |? kind = ReferenceKind
+        ?> Some (StoredReference (ReferenceMemory m))
+        |: reasoned_store m kind (reasons_of m)
+
+:= memory_of_kinded \* k. (x : kinded k) : memory =
+    ?= x ?|
+    | UserMemory m => m
+    | ReferenceMemory m => m
+    | FeedbackMemory (m, _) => m
+    | ProjectMemory (m, _) => m
+
+:~ memory_of_stored (s : stored) : memory =
+    ?= s ?|
+    | StoredUser x => memory_of_kinded x
+    | StoredReference x => memory_of_kinded x
+    | StoredFeedback x => memory_of_kinded x
+    | StoredProject x => memory_of_kinded x
+
+///> rust
+:# a_memory_file_round_trips_byte_for_byte =
+    := front = "---\nname: probe-traps\ndescription: \"a trap\"\nmetadata:\n"
+    := head = front ++# "  type: feedback\n  originSessionId: x\n---\n"
+    := body = "\nA rule.\n\n**Why:** it bit.\n\n**How to apply:** check [[index-spiral-traps]] and [[other]].\n"
+    := text = head ++# body
+    ?= memory_of_text text ?|
+    | None => testing.expect !- "parses"
+    | Some m =>
+        testing.expect (text_of_memory m = text) "render(import(x)) is x"
+        testing.expect (m.name = "probe-traps" && m.kind = Some FeedbackKind) "typed fields from the frontmatter"
+        testing.expect (links_from m.body [] = [ "index-spiral-traps"; "other" ]) "links in order"
+        testing.expect (kind_rule_met m) "feedback carries Why and How to apply"
+
+///> rust
+:# a_feedback_memory_without_its_reasons_breaks_the_kind_rule =
+    testing.expect (memory_of_text "no frontmatter" = None) "a file without frontmatter is not a memory"
+    := crlf = "---\r\nname: win\r\nmetadata:\r\n  type: user\r\n---\r\nBody.\r\n"
+    ?= memory_of_text crlf ?|
+    | None => testing.expect !- "a CRLF memory parses"
+    | Some w => testing.expect (text_of_memory w = crlf && w.kind = Some UserKind) "a CRLF memory round trips"
+    := text = "---\nname: bare\nmetadata:\n  type: project\n---\nJust a fact.\n"
+    ?= memory_of_text text ?|
+    | None => testing.expect !- "parses"
+    | Some m => testing.expect (kind_rule_met m |> not && m.kind = Some ProjectKind) "project without Why"
+
+///> rust
+:# the_kind_gadt_admits_feedback_only_with_its_reasons_and_the_store_holds_mixed_kinds =
+    := head = \ (kind : string) => "---\nname: n\ndescription: d\nmetadata:\n  type: " ++# kind ++# "\n---\n"
+    := reasoned = head "feedback" ++# "\nRule.\n\n**Why:** it bit.\n\n**How to apply:** check first.\n"
+    := bare = head "feedback" ++# "\nRule only.\n"
+    := plain = head "user" ++# "\nA fact about the user.\n"
+    := keep = \ (found : list stored) (m : option memory) =>
+        ?= m ?| | Some x => (?= stored_of x ?| | Some s => listm.append found [ s ] | None => found) | None => found
+    := store = [ reasoned; bare; plain ] |> listm.map memory_of_text |> listm.fold keep []
+    testing.expect (listm.length store = 2i32) "a feedback memory without Why and How cannot enter the store"
+    := texts = store |> listm.map (\ (s : stored) => text_of_memory (memory_of_stored s))
+    testing.expect (texts = [ reasoned; plain ]) "both kinds render back byte for byte from one store"
+    ?= memory_of_text reasoned ?|
+    | Some m => testing.expect (reasons_of m = Some { why = "it bit."; how = "check first." }) "the reasons are read"
+    | None => failwith "parses"
+    := reasons_text = "\nFact.\n\n**Why it matters:** cost.\n\n**How to apply (before writing):** look.\n"
+    := qualified = head "project" ++# reasons_text
+    ?= memory_of_text qualified ?|
+    | Some m => testing.expect (reasons_of m = Some { why = "cost."; how = "look." }) "qualified headings count"
+    | None => failwith "parses"
+
+:= main () : i32 = 0i32

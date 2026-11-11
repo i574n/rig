@@ -609,7 +609,7 @@ fn registered_5(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
     }
 }
 fn file_text_24(mut v0: Rc<str>) -> Rc<str> {
-    let v1: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v0).unwrap_or_default());
+    let v1: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v0).unwrap_or_default().as_str());
     v1
 }
 fn path_exists_25(mut v0: Rc<str>) -> bool {

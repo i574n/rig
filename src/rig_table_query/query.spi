@@ -31,14 +31,13 @@
 
 := table_usage () : string =
     "table query <file> [--where col=value|col!=value|col>value|col>=value|col<value|col<=value]... [--cols a,b] "
-    ^^ "[--group col] [--mean|--sd|--median|--sum|--min|--max|--count a,b]... [--limit n] [--quiet] | "
-    ^^ "table diff <left> "
-    ^^ "<right> --key a,b [--cols x,y] [--latest-by col] [--limit n] | "
-    ^^ "table to-spi <file.tsv> <out.spi> [--open <module>] [--whole] (typed row module; --open uses that module's "
-    ^^ "table_row union instead of declaring one, plus an inl rows () index; --whole writes one Table literal of the "
-    ^^ "whole table instead of a Row per line, for tables too big to compile as cell lists) | "
-    ^^ "table append <table.spi|table.tsv> <cell>... | --row-tsv <line> (adds one row, checks its width, rewrites the file "
-    ^^ "in place; a .spi table stays one whole Table literal)"
+    ^^ "[--group col] [--mean|--sd|--median|--sum|--min|--max|--count a,b]... [--limit n] [--quiet] | table diff "
+    ^^ "<left> <right> --key a,b [--cols x,y] [--latest-by col] [--limit n] | table to-spi <file.tsv> <out.spi> "
+    ^^ "[--open <module>] [--whole] (typed row module; --open uses that module's table_row union instead of declaring "
+    ^^ "one, plus an inl rows () index; --whole writes one Table literal of the whole table instead of a Row per "
+    ^^ "line, for tables too big to compile as cell lists) | table append <table.spi|table.tsv> <cell>... | --row-tsv "
+    ^^ "<line> (adds one row, checks its width, rewrites the file in place; a .spi table stays one whole Table "
+    ^^ "literal)"
 
 :== table_request =
     {
@@ -60,7 +59,6 @@
     | StepRejected : string
 
 := appended (~list : string) (~item : string) : string = ? list = "" ?> item |: concat5 list "\n" item "" ""
-:= listed_line (~list : string) (~item : string) : string = appended list item
 := listed (~list : string) (~item : string) : string =
     ? list = "" ?> item |? item = "" ?> list |: concat5 list "," item "" ""
 

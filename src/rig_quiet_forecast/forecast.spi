@@ -1,0 +1,81 @@
+///- --package .
+:# forecast static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== busy = { holder : string; from_ms : u64; until_ms : u64 }
+
+:== queued = { holder : string; duration_ms : u64 }
+
+:== machine_state = { machine : string; running : list busy; queue : list queued; windows : list busy }
+
+:| quiet =
+    | QuietNow :: quiet
+    | QuietAfter :: u64 * string -> quiet
+
+:~ later (a : u64) (b : u64) : u64 = ? a > b ?> a |: b
+
+:~ running_end (now : u64) (running : list busy) : u64 =
+    running |> listm.fold (\ (at : u64) (s : busy) => later at s.until_ms) now
+
+:~ queue_spans (start : u64) (queue : list queued) : list busy =
+    := step = \ ((at, found) : u64 * list busy) (q : queued) =>
+        := ends = at + q.duration_ms
+        ends, listm.append found [ { holder = q.holder; from_ms = at; until_ms = ends } ]
+    := _, spans = queue |> listm.fold step (start, [])
+    spans
+
+:~ earliest_gap (now : u64) (length : u64) (spans : list busy) : quiet =
+    := ordered = list_sort.sorted_by (\ (a : busy) (b : busy) => a.from_ms < b.from_ms) spans
+    := step = \ ((at, settled, blocker) : u64 * bool * string) (s : busy) =>
+        ? settled || s.until_ms <= at
+        ?> at, settled, blocker
+        |? s.from_ms >= at + length
+        ?> at, !+, blocker
+        |: later at s.until_ms, settled, s.holder
+    := found, _, blocker = ordered |> listm.fold step (now, !-, "")
+    ? found = now ?> QuietNow |: QuietAfter (found, blocker)
+
+:~ quiet_at (now : u64) (length : u64) (m : machine_state) : quiet =
+    := queued_spans = queue_spans (running_end now m.running) m.queue
+    earliest_gap now length (listm.append m.running (listm.append m.windows queued_spans))
+
+:~ forecast_line (now : u64) (length : u64) (m : machine_state) : string =
+    := head = "rig quiet forecast " ++# m.machine
+    := wanted = " for " ++# sm'.show (length / 1000u64) ++# " s"
+    ?= quiet_at now length m ?|
+    | QuietNow => head ++# " quiet now" ++# wanted
+    | QuietAfter (at, blocker) =>
+        head ++# " quiet in " ++# sm'.show ((at - now) / 1000u64) ++# " s" ++# wanted ++# " (last: " ++# blocker ++# ")"
+
+///> rust
+:# the_earliest_gap_skips_spans_and_gaps_that_are_too_short =
+    := span = \ (from : u64) (until : u64) => { holder = "h"; from_ms = from; until_ms = until }
+    testing.expect (earliest_gap 1000u64 500u64 [] = QuietNow) "nothing busy"
+    testing.expect (earliest_gap 1000u64 500u64 [ span 2000u64 3000u64 ] = QuietNow) "a 1 s gap fits 0.5 s"
+    testing.expect (earliest_gap 1000u64 1500u64 [ span 2000u64 3000u64 ] = QuietAfter (3000u64, "h")) "too short"
+    := both = [ span 2000u64 3000u64; span 0u64 1500u64 ]
+    testing.expect (earliest_gap 1000u64 600u64 both = QuietAfter (3000u64, "h")) "0.5 s between is too short"
+
+///> rust
+:# a_machine_quiets_after_its_running_jobs_its_queue_and_its_windows =
+    := job = { holder = "run"; from_ms = 0u64; until_ms = 5000u64 }
+    := idle = { machine = "node-a"; running = []; queue = []; windows = [] }
+    testing.expect (quiet_at 1000u64 100u64 idle = QuietNow) "idle"
+    := busy_node = { idle ?| running = [ job ] }
+    testing.expect (quiet_at 1000u64 100u64 busy_node = QuietAfter (5000u64, "run")) "after the running job"
+    := two = [ { holder = "q1"; duration_ms = 1000u64 }; { holder = "q2"; duration_ms = 1000u64 } ]
+    := queued_node = { busy_node ?| queue = two }
+    testing.expect (quiet_at 1000u64 100u64 queued_node = QuietAfter (7000u64, "q2")) "two queued jobs back to back"
+    := window = { holder = "install"; from_ms = 7050u64; until_ms = 9000u64 }
+    := windowed = { queued_node ?| windows = [ window ] }
+    testing.expect (quiet_at 1000u64 100u64 windowed = QuietAfter (9000u64, "install")) "a 50 ms gap is too short"
+    := line = "rig quiet forecast node-a quiet in 6 s for 2 s (last: q2)"
+    testing.expect (forecast_line 1000u64 2000u64 queued_node = line) "one line"
+
+///> rust
+:# run_time_holders_forecast_like_literals =
+    := suffix = file_system.read_text_or_empty "/rig-forecast-run-time-probe-missing"
+    := spans = [ { holder = "h" ++# suffix; from_ms = 0u64; until_ms = 3000u64 } ]
+    testing.expect (earliest_gap 1000u64 500u64 spans = QuietAfter (3000u64, "h" ++# suffix)) "run-time text"

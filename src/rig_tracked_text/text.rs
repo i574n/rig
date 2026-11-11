@@ -11,15 +11,6 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -196,89 +187,14 @@ fn method7(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn method12(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method13(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn method11(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
             let v4: Rc<UH0> = method11(v3, v1);
-            let v5: i32 = (v2.clone().len() as i32);
-            let v6: i32 = 0i32;
-            let v7: i32 = method12(v2.clone(), v5, v6);
-            let v8: i32 = v5.wrapping_sub(1i32);
-            let mut v9: Rc<str> = string_slice(&v2, v7 as i64, v8 as i64);
-            let v10: i32 = (v9.clone().len() as i32);
-            let v11: i32 = method13(v9.clone(), v10);
-            let v12: Rc<str> = string_slice(&v9, 0i32 as i64, v11 as i64);
-            Rc::new(UH0::UH0_Cons(v12, v4))
+            let v5: Rc<str> = Rc::<str>::from((v2).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+            Rc::new(UH0::UH0_Cons(v5, v4))
         }
         UH0::UH0_Nil => {
             v1
@@ -296,12 +212,12 @@ fn untyped_of_6(mut v0: Rc<str>) -> Rc<UH0> {
     let v8: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
     method7(v7, v8)
 }
-fn method14(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn method12(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v1) {
         UH0::UH0_Cons(v3, v4) => {
             let v3: Rc<str> = v3;
             let v4: Rc<UH0> = v4;
-            let v5: Rc<UH0> = method14(v0.clone(), v4, v2);
+            let v5: Rc<UH0> = method12(v0.clone(), v4, v2);
             let v8: Rc<str> = string_concat(&["rig lint tracked-text ", &*v0, ": ", &*v3]);
             Rc::new(UH0::UH0_Cons(v8, v5))
         }
@@ -310,7 +226,7 @@ fn method14(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn method15(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
+fn method13(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -381,14 +297,14 @@ fn repo_lines_3(mut v0: Rc<str>) -> (Rc<UH0>, i32) {
             let v33: Rc<str> = v33;
             let v34: Rc<UH0> = untyped_of_6(v33);
             let v35: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-            let v36: Rc<UH0> = method14(v0, v34.clone(), v35);
+            let v36: Rc<UH0> = method12(v0, v34.clone(), v35);
             let v37: i32 = 0i32;
-            let v38: i32 = method15(v34, v37);
+            let v38: i32 = method13(v34, v37);
             (v36, v38)
         }
     }
 }
-fn method16(mut v0: Rc<UH0>) -> () {
+fn method14(mut v0: Rc<UH0>) -> () {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v1, v2) => {
@@ -412,7 +328,7 @@ fn method2(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
                 let mut v2: Rc<str> = v2;
                 let v3: Rc<UH0> = v3;
                 let (mut v4, mut v5): (Rc<UH0>, i32) = repo_lines_3(v2);
-                method16(v4);
+                method14(v4);
                 let v6: i32 = v1.wrapping_add(v5);
                 (v0, v1) = (v3, v6);
                 continue;
@@ -423,17 +339,17 @@ fn method2(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
         }
     }
 }
-fn method18(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
+fn method16(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
     let mut v2: Rc<str> = v0.borrow().l0.clone();
     let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
-fn format_real_17(mut v0: i32) -> Rc<str> {
+fn format_real_15(mut v0: i32) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: v1 }));
     let v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
-    method18(&v2, v3);
+    method16(&v2, v3);
     let v4: Rc<str> = v2.borrow().l0.clone();
     v4
 }
@@ -447,9 +363,9 @@ fn tracked_text_run_0(mut v0: Rc<RefCell<Vec<Rc<str>>>>) -> i32 {
     let v7: i32 = 0i32;
     let v8: i32 = method2(v6.clone(), v7);
     let mut v9: i32 = 0i32;
-    let v10: i32 = method15(v6, v9);
-    let v11: Rc<str> = format_real_17(v10);
-    let v14: Rc<str> = format_real_17(v8);
+    let v10: i32 = method13(v6, v9);
+    let v11: Rc<str> = format_real_15(v10);
+    let v14: Rc<str> = format_real_15(v8);
     let v15: Rc<str> = string_concat(&["rig lint tracked-text ok repos=", &*v11, " untyped=", &*v14]);
     println!("{}", v15);
     let v16: bool = v8 == 0i32;

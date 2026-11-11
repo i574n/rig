@@ -281,75 +281,7 @@ fn line_of_8(mut v0: Rc<str>, mut v1: US1) -> Rc<str> {
         }
     }
 }
-fn method14(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let mut v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let mut v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let mut v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let mut v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method15(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let mut v3: i32 = v1.wrapping_sub(1i32);
-            let mut v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let mut v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
-fn method17(mut v0: Option<usize>) -> Option<usize> {
+fn method15(mut v0: Option<usize>) -> Option<usize> {
     v0
 }
 fn closure2() -> Rc<dyn Fn((usize)) -> i32> {
@@ -359,7 +291,7 @@ fn closure2() -> Rc<dyn Fn((usize)) -> i32> {
         v2
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method18(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
+fn method16(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -380,7 +312,7 @@ fn method18(mut v0: Rc<UH0>, mut v1: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn method20(mut v0: Option<i32>) -> Option<i32> {
+fn method18(mut v0: Option<i32>) -> Option<i32> {
     v0
 }
 fn closure3() -> Rc<dyn Fn((i32)) -> US2> {
@@ -389,9 +321,9 @@ fn closure3() -> Rc<dyn Fn((i32)) -> US2> {
         US2::US2_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn number_of_19(mut v0: Rc<str>) -> US2 {
+fn number_of_17(mut v0: Rc<str>) -> US2 {
     let mut v1: Option<i32> = (v0).trim().parse::<i32>().ok();
-    let mut v2: Option<i32> = method20(v1);
+    let mut v2: Option<i32> = method18(v1);
     let mut v3: Rc<dyn Fn((i32)) -> US2> = closure3();
     let mut v4: Option<US2> = v2.map(|x| v3(x));
     let v6: US2 = US2::US2_None;
@@ -399,10 +331,10 @@ fn number_of_19(mut v0: Rc<str>) -> US2 {
     let v8: US2 = v4.unwrap_or(v7);
     v8
 }
-fn estimate_in_16(mut v0: Rc<str>) -> i32 {
+fn estimate_in_14(mut v0: Rc<str>) -> i32 {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("estimate="); } LIT.with(|lit| lit.clone()) };
     let mut v2: Option<usize> = v0.find(&*v1);
-    let mut v3: Option<usize> = method17(v2);
+    let mut v3: Option<usize> = method15(v2);
     let mut v4: Rc<dyn Fn((usize)) -> i32> = closure2();
     let mut v5: Option<i32> = v3.map(|x| v4(x));
     let mut v7: i32 = v5.unwrap_or(-1i32);
@@ -417,8 +349,8 @@ fn estimate_in_16(mut v0: Rc<str>) -> i32 {
         let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("m"); } LIT.with(|lit| lit.clone()) };
         let v14: Rc<UH0> = split_list_12(v13, v12);
         let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-        let v16: Rc<str> = method18(v14, v15);
-        let v17: US2 = number_of_19(v16);
+        let v16: Rc<str> = method16(v14, v15);
+        let v17: US2 = number_of_17(v16);
         match v17 {
             US2::US2_None => {
                 0i32
@@ -430,7 +362,7 @@ fn estimate_in_16(mut v0: Rc<str>) -> i32 {
         }
     }
 }
-fn nth_word_22(mut v0: Rc<UH0>, mut v1: i32) -> Rc<str> {
+fn nth_word_20(mut v0: Rc<UH0>, mut v1: i32) -> Rc<str> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -452,12 +384,12 @@ fn nth_word_22(mut v0: Rc<UH0>, mut v1: i32) -> Rc<str> {
         }
     }
 }
-fn method23(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method21(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let mut v3: Rc<UH0> = v3;
-            let mut v4: Rc<UH0> = method23(v3, v1);
+            let mut v4: Rc<UH0> = method21(v3, v1);
             let mut v5: bool = &*v2 != "";
             if v5 {
                 Rc::new(UH0::UH0_Cons(v2, v4))
@@ -470,12 +402,12 @@ fn method23(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn word_at_21(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
+fn word_at_19(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<UH0> = split_list_12(v2, v0);
     let mut v4: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let mut v5: Rc<UH0> = method23(v3, v4);
-    nth_word_22(v5, v1)
+    let mut v5: Rc<UH0> = method21(v3, v4);
+    nth_word_20(v5, v1)
 }
 fn shown_fields_of_7(mut v0: Rc<str>) -> (Rc<str>, Rc<str>, Rc<str>, i32) {
     let mut v1: US1 = US1::US1_HeadLine;
@@ -485,24 +417,17 @@ fn shown_fields_of_7(mut v0: Rc<str>) -> (Rc<str>, Rc<str>, Rc<str>, i32) {
     let mut v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("tags:"); } LIT.with(|lit| lit.clone()) };
     let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v7: Rc<str> = Rc::<str>::from(v4.replace(&*v5, &*v6));
-    let v8: i32 = (v7.clone().len() as i32);
-    let mut v9: i32 = 0i32;
-    let v10: i32 = method14(v7.clone(), v8, v9);
-    let mut v11: i32 = v8.wrapping_sub(1i32);
-    let mut v12: Rc<str> = string_slice(&v7, v10 as i64, v11 as i64);
-    let v13: i32 = (v12.clone().len() as i32);
-    let v14: i32 = method15(v12.clone(), v13);
-    let v15: Rc<str> = string_slice(&v12, 0i32 as i64, v14 as i64);
-    let v16: US1 = US1::US1_PlanningLine;
-    let v17: Rc<str> = line_of_8(v0, v16);
-    let v18: i32 = estimate_in_16(v17);
-    let v19: i32 = 2i32;
-    let v20: Rc<str> = word_at_21(v2.clone(), v19);
-    let v21: i32 = 3i32;
-    let v22: Rc<str> = word_at_21(v2, v21);
-    (v20, v22, v15, v18)
+    let v8: Rc<str> = Rc::<str>::from((v7).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+    let mut v9: US1 = US1::US1_PlanningLine;
+    let v10: Rc<str> = line_of_8(v0, v9);
+    let mut v11: i32 = estimate_in_14(v10);
+    let mut v12: i32 = 2i32;
+    let v13: Rc<str> = word_at_19(v2.clone(), v12);
+    let v14: i32 = 3i32;
+    let v15: Rc<str> = word_at_19(v2, v14);
+    (v13, v15, v8, v11)
 }
-fn gathered_25(mut v0: Rc<RefCell<Vec<(Rc<str>, i32)>>>, mut v1: i32, mut v2: Rc<UH1>) -> Rc<UH1> {
+fn gathered_23(mut v0: Rc<RefCell<Vec<(Rc<str>, i32)>>>, mut v1: i32, mut v2: Rc<UH1>) -> Rc<UH1> {
     loop {
         let mut v3: bool = v1 < 0i32;
         if v3 {
@@ -516,20 +441,20 @@ fn gathered_25(mut v0: Rc<RefCell<Vec<(Rc<str>, i32)>>>, mut v1: i32, mut v2: Rc
         }
     }
 }
-fn steps_of_24(mut v0: Rc<str>) -> Rc<UH1> {
+fn steps_of_22(mut v0: Rc<str>) -> Rc<UH1> {
     let mut v1: Rc<RefCell<Vec<(Rc<str>, i32)>>> = agile_split_plan::rig_agile_split_steps(&v0);
     let mut v2: i32 = (v1.clone().borrow().len() as i32);
     let mut v3: i32 = v2.wrapping_sub(1i32);
     let mut v4: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-    gathered_25(v1, v3, v4)
+    gathered_23(v1, v3, v4)
 }
-fn method27(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
+fn method25(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
     match Rc::unwrap_or_clone(v0) {
         UH1::UH1_Cons(v2, v3, v4) => {
             let mut v2: Rc<str> = v2;
             let mut v3: i32 = v3;
             let mut v4: Rc<UH1> = v4;
-            let mut v5: Rc<UH1> = method27(v4, v1);
+            let mut v5: Rc<UH1> = method25(v4, v1);
             let v6: bool = v3 > 120i32;
             if v6 {
                 Rc::new(UH1::UH1_Cons(v2, v3, v5))
@@ -542,9 +467,9 @@ fn method27(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
         }
     }
 }
-fn split_plan_of_26(mut v0: i32, mut v1: Rc<UH1>) -> US3 {
+fn split_plan_of_24(mut v0: i32, mut v1: Rc<UH1>) -> US3 {
     let mut v2: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-    let mut v3: Rc<UH1> = method27(v1.clone(), v2);
+    let mut v3: Rc<UH1> = method25(v1.clone(), v2);
     let mut v4: bool = v0 <= 240i32;
     if v4 {
         US3::US3_AlreadySmall(v0)
@@ -574,36 +499,36 @@ fn split_plan_of_26(mut v0: i32, mut v1: Rc<UH1>) -> US3 {
         }
     }
 }
-fn method29(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
+fn method27(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
     let mut v2: Rc<str> = v0.borrow().l0.clone();
     let mut v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
-fn format_real_28(mut v0: i32) -> Rc<str> {
+fn format_real_26(mut v0: i32) -> Rc<str> {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: v1 }));
     let mut v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
-    method29(&v2, v3);
+    method27(&v2, v3);
     let mut v4: Rc<str> = v2.borrow().l0.clone();
     v4
 }
-fn child_id_31(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
-    let mut v3: Rc<str> = format_real_28(v1);
+fn child_id_29(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
+    let mut v3: Rc<str> = format_real_26(v1);
     let mut v4: Rc<str> = string_concat(&[&*v0, "-M", &*v3]);
     v4
 }
-fn child_note_32(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> Rc<str> {
-    let v6: Rc<str> = format_real_28(v3);
+fn child_note_30(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> Rc<str> {
+    let v6: Rc<str> = format_real_26(v3);
     let v10: Rc<str> = string_concat(&["split from ", &*v0, " by kit agile split (milestone ", &*v6, "). DoD: ", &*v1, ", proven in the parent item notes. NEXT STEP: read the parent latest note for this milestone."]);
     v10
 }
-fn method33(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method31(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let mut v3: Rc<UH0> = v3;
-            let mut v4: Rc<UH0> = method33(v3, v1);
+            let mut v4: Rc<UH0> = method31(v3, v1);
             Rc::new(UH0::UH0_Cons(v2, v4))
         }
         UH0::UH0_Nil => {
@@ -611,14 +536,14 @@ fn method33(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn children_added_30(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: &Rc<str>, mut v4: Rc<str>, mut v5: i32, mut v6: Rc<UH1>, mut v7: i32, mut v8: Rc<str>) -> i32 {
+fn children_added_28(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: &Rc<str>, mut v4: Rc<str>, mut v5: i32, mut v6: Rc<UH1>, mut v7: i32, mut v8: Rc<str>) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v6) {
             UH1::UH1_Cons(v10, v11, v12) => {
                 let v10: Rc<str> = v10;
                 let mut v11: i32 = v11;
                 let mut v12: Rc<UH1> = v12;
-                let v13: Rc<str> = child_id_31(v1.clone(), v7);
+                let v13: Rc<str> = child_id_29(v1.clone(), v7);
                 let v14: bool = &*v8 == "";
                 let v20: Rc<UH0> = if v14 {
                     { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) }
@@ -628,10 +553,10 @@ fn children_added_30(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
                     let v18: Rc<UH0> = Rc::new(UH0::UH0_Cons(v8, v17));
                     Rc::new(UH0::UH0_Cons(v16, v18))
                 };
-                let v22: Rc<str> = format_real_28(v7);
+                let v22: Rc<str> = format_real_26(v7);
                 let v25: Rc<str> = string_concat(&[&*v1, " milestone ", &*v22, ": ", &*v10]);
-                let v26: Rc<str> = format_real_28(v11);
-                let v27: Rc<str> = child_note_32(v1.clone(), v10, v11, v7);
+                let v26: Rc<str> = format_real_26(v11);
+                let v27: Rc<str> = child_note_30(v1.clone(), v10, v11, v7);
                 let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--note"); } LIT.with(|lit| lit.clone()) };
                 let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--as"); } LIT.with(|lit| lit.clone()) };
                 let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("kit-split"); } LIT.with(|lit| lit.clone()) };
@@ -640,7 +565,7 @@ fn children_added_30(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
                 let v33: Rc<UH0> = Rc::new(UH0::UH0_Cons(v29, v32));
                 let v34: Rc<UH0> = Rc::new(UH0::UH0_Cons(v27, v33));
                 let v35: Rc<UH0> = Rc::new(UH0::UH0_Cons(v28, v34));
-                let v36: Rc<UH0> = method33(v20, v35);
+                let v36: Rc<UH0> = method31(v20, v35);
                 let v37: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("agile"); } LIT.with(|lit| lit.clone()) };
                 let v38: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("add"); } LIT.with(|lit| lit.clone()) };
                 let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TaskKind"); } LIT.with(|lit| lit.clone()) };
@@ -698,7 +623,7 @@ fn children_added_30(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: 
         }
     }
 }
-fn method34(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
+fn method32(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v2, v3, v4) => {
@@ -741,12 +666,12 @@ fn split_run_0() -> i32 {
         2i32
     } else {
         let (mut v17, mut v18, mut v19, mut v20): (Rc<str>, Rc<str>, Rc<str>, i32) = shown_fields_of_7(v12.clone());
-        let v21: Rc<UH1> = steps_of_24(v12);
-        let v22: US3 = split_plan_of_26(v20, v21);
+        let v21: Rc<UH1> = steps_of_22(v12);
+        let v22: US3 = split_plan_of_24(v20, v21);
         match v22 {
             US3::US3_AlreadySmall(v23) => {
                 let v23: i32 = v23;
-                let v24: Rc<str> = format_real_28(v23);
+                let v24: Rc<str> = format_real_26(v23);
                 let v27: Rc<str> = string_concat(&["rig agile split ok id=", &*v3, " children=0 reason=already-small estimate=", &*v24]);
                 println!("{}", v27);
                 0i32
@@ -754,7 +679,7 @@ fn split_run_0() -> i32 {
             US3::US3_MilestoneTooBig(v30, v31) => {
                 let v30: Rc<str> = v30;
                 let v31: i32 = v31;
-                let v32: Rc<str> = format_real_28(v31);
+                let v32: Rc<str> = format_real_26(v31);
                 let v36: Rc<str> = string_concat(&["rig error: agile split refused: milestone ", &*v30, " is ", &*v32, " m; split it to 120 m or less first"]);
                 eprintln!("{}", v36);
                 1i32
@@ -768,8 +693,8 @@ fn split_run_0() -> i32 {
                 let v37: Rc<UH1> = v37;
                 let v38: i32 = 1i32;
                 let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                let v40: i32 = children_added_30(v1.clone(), v3.clone(), v17, &v18, v19, v20, v37.clone(), v38, v39);
-                let v41: Rc<str> = format_real_28(v40);
+                let v40: i32 = children_added_28(v1.clone(), v3.clone(), v17, &v18, v19, v20, v37.clone(), v38, v39);
+                let v41: Rc<str> = format_real_26(v40);
                 let v43: Rc<str> = string_concat(&["split into ", &*v41, " chained children by kit agile split"]);
                 let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("note"); } LIT.with(|lit| lit.clone()) };
                 let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--as"); } LIT.with(|lit| lit.clone()) };
@@ -783,11 +708,11 @@ fn split_run_0() -> i32 {
                 let v53: Rc<UH0> = Rc::new(UH0::UH0_Cons(v44, v52));
                 let v54: Rc<UH0> = Rc::new(UH0::UH0_Cons(v4, v53));
                 let (mut v55, mut v56): (bool, Rc<str>) = rig_said_1(v54);
-                let v59: Rc<str> = format_real_28(v40);
+                let v59: Rc<str> = format_real_26(v40);
                 let v60: Rc<str> = string_concat(&["rig agile split ok id=", &*v3, " children=", &*v59]);
                 println!("{}", v60);
                 let v61: i32 = 0i32;
-                let v62: i32 = method34(v37, v61);
+                let v62: i32 = method32(v37, v61);
                 let v63: bool = v40 == v62;
                 if v63 {
                     0i32

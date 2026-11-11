@@ -197,7 +197,8 @@
                                 ""
                                 ""
                         )
-            ? problem <> "" ?> failed (concat5 "analyze: " problem "" "" "")
+            ? problem <> ""
+            ?> failed (concat5 "analyze: " problem "" "" "")
             |:
                 stdout_line (concat5 "rig experiment analyze ok " line (look_suffix look) "" "")
                 0i32

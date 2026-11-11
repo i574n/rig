@@ -117,7 +117,7 @@
         "rig error: text-replace expected 3 match(es), observed matches=2 (use --expect N or --all for repeated text)"
     same
         (receipt_of root mismatch "corrected: ")
-        "corrected: kit proxy text-replace apply '<root>' copy.txt B C --expect 2"
+        "corrected: rig proxy text-replace apply '<root>' copy.txt B C --expect 2"
     same (fixture_read root "copy.txt") "alpha\nB\nB\n"
     fixture_root_remove root
 

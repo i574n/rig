@@ -8,8 +8,7 @@
     ytes()); }' : ()
 := stdout_line (~text : string) : () = console.write_line text
 := stderr_line (~text : string) : () = console.write_error_line text
-:= text_of (~path : string) : string = $'std::rc::Rc::<str>::from(std::fs::read_to_string(&*!path).unwrap_or_default()\
-    .replace(char::from(13u8), "").as_str())' : string
+:= text_of (~path : string) : string = file_system.read_text_lf path
 :| write_outcome =
     | Written
     | WriteFailed : string

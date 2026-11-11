@@ -74,6 +74,9 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
+fn method1(mut v0: Vec<u8>) -> Vec<u8> {
+    v0
+}
 fn family_renewal_0(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = string_concat(&[&*v0, "/"]);
     let mut v2: Rc<str> = string_concat(&[&*v1, "state/legacy_catalog.spi"]);
@@ -104,9 +107,14 @@ fn family_renewal_0(mut v0: Rc<str>) -> i32 {
     let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("family contract catalog mismatch"); } LIT.with(|lit| lit.clone()) };
     let v18: bool = v16.contains(&*v17);
     if v18 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v19: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v10).unwrap());
-    let v20: bool = &*v19 == "inl current_family_contract_schema () : family_contract_schema = FamilyContractsV1\ninl current_family_contract_status () : family_contract_status = FamilyContractsClosed\ninl current_family_contract_semantic_flags () : u32 = 31u32\ninl current_family_count () : u32 = 36u32\ninl current_family_decision_count () : u32 = 36u32\ninl current_unsettled_family_count () : u32 = 0u32\ninl catalog_gate () = (\"state/legacy_catalog.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\ninl migration_gate () = (\"state/migration.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\ninl runtime_gate () = (\"state/runtime_drift.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\ninl adapter_gate () = (\"state/adapter_inventory.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\n";
-    if v20 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v20: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v10);
+    let v22: Vec<u8> = v20.unwrap();
+    let v23: Vec<u8> = method1(v22);
+    let v25: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v23);
+    let v27: std::string::String = v25.unwrap();
+    let v29: Rc<str> = Rc::<str>::from(String::as_str(&v27));
+    let v30: bool = &*v29 == "inl current_family_contract_schema () : family_contract_schema = FamilyContractsV1\ninl current_family_contract_status () : family_contract_status = FamilyContractsClosed\ninl current_family_contract_semantic_flags () : u32 = 31u32\ninl current_family_count () : u32 = 36u32\ninl current_family_decision_count () : u32 = 36u32\ninl current_unsettled_family_count () : u32 = 0u32\ninl catalog_gate () = (\"state/legacy_catalog.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\ninl migration_gate () = (\"state/migration.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\ninl runtime_gate () = (\"state/runtime_drift.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\ninl adapter_gate () = (\"state/adapter_inventory.spi\", \"0000000000000000000000000000000000000000000000000000000000000000\")\n";
+    if v30 { () } else { std::panic::panic_any("Spiral test assertion failed") };
     0i32
 }
 fn closure0() -> Rc<dyn Fn(Rc<str>) -> i32> {
@@ -114,7 +122,7 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> i32> {
         family_renewal_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn differential_renewal_1(mut v0: Rc<str>) -> i32 {
+fn differential_renewal_2(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = string_concat(&[&*v0, "/"]);
     let mut v2: Rc<str> = string_concat(&[&*v1, "kit.exe"]);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("not an executable differential route"); } LIT.with(|lit| lit.clone()) };
@@ -126,24 +134,34 @@ fn differential_renewal_1(mut v0: Rc<str>) -> i32 {
     let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("differential route"); } LIT.with(|lit| lit.clone()) };
     let v8: bool = v6.contains(&*v7);
     if v8 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v9: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v4).unwrap());
-    let v10: bool = &*v9 == "inl current_differential_catalog_schema () : differential_catalog_schema = DifferentialCatalogV1\n";
-    if v10 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v11: Rc<str> = std::rc::Rc::<str>::from(refresh_cold_proof_census_gate(std::path::Path::new(&*v0)).unwrap_err());
-    let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ColdProofV4 renewal rolled back"); } LIT.with(|lit| lit.clone()) };
-    let v13: bool = v11.contains(&*v12);
-    if v13 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v14: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v4).unwrap());
-    let v15: bool = &*v14 == "inl current_differential_catalog_schema () : differential_catalog_schema = DifferentialCatalogV1\n";
-    if v15 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v10: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v4);
+    let v12: Vec<u8> = v10.unwrap();
+    let v13: Vec<u8> = method1(v12);
+    let v15: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v13);
+    let v17: std::string::String = v15.unwrap();
+    let v19: Rc<str> = Rc::<str>::from(String::as_str(&v17));
+    let v20: bool = &*v19 == "inl current_differential_catalog_schema () : differential_catalog_schema = DifferentialCatalogV1\n";
+    if v20 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v21: Rc<str> = std::rc::Rc::<str>::from(refresh_cold_proof_census_gate(std::path::Path::new(&*v0)).unwrap_err());
+    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ColdProofV4 renewal rolled back"); } LIT.with(|lit| lit.clone()) };
+    let v23: bool = v21.contains(&*v22);
+    if v23 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v25: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v4);
+    let v27: Vec<u8> = v25.unwrap();
+    let v28: Vec<u8> = method1(v27);
+    let v30: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v28);
+    let v32: std::string::String = v30.unwrap();
+    let v34: Rc<str> = Rc::<str>::from(String::as_str(&v32));
+    let v35: bool = &*v34 == "inl current_differential_catalog_schema () : differential_catalog_schema = DifferentialCatalogV1\n";
+    if v35 { () } else { std::panic::panic_any("Spiral test assertion failed") };
     0i32
 }
 fn closure1() -> Rc<dyn Fn(Rc<str>) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> i32> = Rc::new(move |mut v0: Rc<str>| -> i32 {
-        differential_renewal_1(v0)
+        differential_renewal_2(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn selection_2(mut v0: Rc<str>) -> i32 {
+fn selection_3(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = std::rc::Rc::<str>::from(cold_public_binary(std::path::Path::new(&*v0)).unwrap_or(""));
     let mut v2: bool = &*v1 == "";
     if v2 { () } else { std::panic::panic_any("Spiral test assertion failed") };
@@ -168,10 +186,10 @@ fn selection_2(mut v0: Rc<str>) -> i32 {
 }
 fn closure2() -> Rc<dyn Fn(Rc<str>) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> i32> = Rc::new(move |mut v0: Rc<str>| -> i32 {
-        selection_2(v0)
+        selection_3(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn binary_gate_3(mut v0: Rc<str>) -> i32 {
+fn binary_gate_4(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = string_concat(&[&*v0, "/"]);
     let mut v2: Rc<str> = string_concat(&[&*v1, "kit.exe"]);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("native binary payload"); } LIT.with(|lit| lit.clone()) };
@@ -230,10 +248,10 @@ fn binary_gate_3(mut v0: Rc<str>) -> i32 {
 }
 fn closure3() -> Rc<dyn Fn(Rc<str>) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> i32> = Rc::new(move |mut v0: Rc<str>| -> i32 {
-        binary_gate_3(v0)
+        binary_gate_4(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn loop_5(mut v0: Rc<str>, mut v1: u64) -> Rc<str> {
+fn loop_6(mut v0: Rc<str>, mut v1: u64) -> Rc<str> {
     let mut v2: bool = v1 == 10u64;
     if v2 {
         let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -251,12 +269,12 @@ fn loop_5(mut v0: Rc<str>, mut v1: u64) -> Rc<str> {
         };
         let v10: Rc<str> = std::rc::Rc::<str>::from(v5.to_string());
         let v13: u64 = v1.wrapping_add(1u64);
-        let v14: Rc<str> = loop_5(v0, v13);
+        let v14: Rc<str> = loop_6(v0, v13);
         let v15: Rc<str> = string_concat(&[&*v10, "u32", &*v9, &*v14]);
         v15
     }
 }
-fn loop_6(mut v0: &Rc<str>, mut v1: u64) -> Rc<str> {
+fn loop_7(mut v0: &Rc<str>, mut v1: u64) -> Rc<str> {
     let mut v2: bool = v1 == 10u64;
     if v2 {
         let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -272,12 +290,12 @@ fn loop_6(mut v0: &Rc<str>, mut v1: u64) -> Rc<str> {
         };
         let v8: Rc<str> = std::rc::Rc::<str>::from(2147483647u64.to_string());
         let v11: u64 = v1.wrapping_add(1u64);
-        let v12: Rc<str> = loop_6(v0, v11);
+        let v12: Rc<str> = loop_7(v0, v11);
         let v13: Rc<str> = string_concat(&[&*v8, "u32", &*v7, &*v12]);
         v13
     }
 }
-fn census_bounds_4(mut v0: Rc<str>) -> i32 {
+fn census_bounds_5(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = string_concat(&[&*v0, "/"]);
     let mut v2: Rc<str> = string_concat(&[&*v1, "kit.exe"]);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("native binary payload"); } LIT.with(|lit| lit.clone()) };
@@ -301,32 +319,37 @@ fn census_bounds_4(mut v0: Rc<str>) -> i32 {
     std::fs::write(&*v22,&*v29).unwrap();
     let v30: Rc<str> = std::rc::Rc::<str>::from(rig_proxy_search::inspection_file_sha256(std::path::Path::new(&*v5)).unwrap());
     let v31: u64 = 0u64;
-    let v32: Rc<str> = loop_5(v0.clone(), v31);
+    let v32: Rc<str> = loop_6(v0.clone(), v31);
     let v34: Rc<str> = string_concat(&["inl current () = AuthorityCensus (", &*v32, ")\n"]);
     std::fs::write(&*v5,&*v34).unwrap();
     let v36: Rc<str> = string_concat(&["inl census_gate () = (\"state/authority_census.spi\", \"", &*v30, "\")\n"]);
     let v37: Rc<str> = std::rc::Rc::<str>::from(rig_proxy_search::inspection_file_sha256(std::path::Path::new(&*v5)).unwrap());
     let v39: Rc<str> = string_concat(&["inl census_gate () = (\"state/authority_census.spi\", \"", &*v37, "\")\n"]);
-    let v40: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v22).unwrap());
-    let v41: Rc<str> = Rc::<str>::from(v40.replace(&*v36, &*v39));
-    std::fs::write(&*v22,&*v41).unwrap();
-    let v42: Rc<str> = std::rc::Rc::<str>::from(verify_cold_proof(std::path::Path::new(&*v0)).unwrap_err());
-    let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("census value exceeds signed comparison range"); } LIT.with(|lit| lit.clone()) };
-    let v44: bool = v42.contains(&*v43);
-    if v44 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v45: u64 = 0u64;
-    let v46: Rc<str> = loop_6(&v0, v45);
-    let v48: Rc<str> = string_concat(&["AuthorityCensus (", &*v46, ")"]);
-    let v49: bool = cold_census_values(&*v48).unwrap() == [i32::MAX as usize;10];
-    if v49 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v41: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v22);
+    let v43: Vec<u8> = v41.unwrap();
+    let v44: Vec<u8> = method1(v43);
+    let v46: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v44);
+    let v48: std::string::String = v46.unwrap();
+    let v50: Rc<str> = Rc::<str>::from(String::as_str(&v48));
+    let v51: Rc<str> = Rc::<str>::from(v50.replace(&*v36, &*v39));
+    std::fs::write(&*v22,&*v51).unwrap();
+    let v52: Rc<str> = std::rc::Rc::<str>::from(verify_cold_proof(std::path::Path::new(&*v0)).unwrap_err());
+    let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("census value exceeds signed comparison range"); } LIT.with(|lit| lit.clone()) };
+    let v54: bool = v52.contains(&*v53);
+    if v54 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v55: u64 = 0u64;
+    let v56: Rc<str> = loop_7(&v0, v55);
+    let v58: Rc<str> = string_concat(&["AuthorityCensus (", &*v56, ")"]);
+    let v59: bool = cold_census_values(&*v58).unwrap() == [i32::MAX as usize;10];
+    if v59 { () } else { std::panic::panic_any("Spiral test assertion failed") };
     0i32
 }
 fn closure4() -> Rc<dyn Fn(Rc<str>) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> i32> = Rc::new(move |mut v0: Rc<str>| -> i32 {
-        census_bounds_4(v0)
+        census_bounds_5(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn renewal_7(mut v0: Rc<str>) -> i32 {
+fn renewal_8(mut v0: Rc<str>) -> i32 {
     let v1: Rc<str> = string_concat(&[&*v0, "/"]);
     let mut v2: Rc<str> = string_concat(&[&*v1, "kit.exe"]);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("native binary payload"); } LIT.with(|lit| lit.clone()) };
@@ -358,32 +381,47 @@ fn renewal_7(mut v0: Rc<str>) -> i32 {
     let v35: Rc<str> = string_concat(&["inl workspace_gate () = (\"src/Cargo.lock\", \"", &*v33, "\")\n"]);
     let v36: bool = v28.contains(&*v35);
     if v36 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v37: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v21).unwrap());
-    let v38: Rc<str> = std::rc::Rc::<str>::from(refresh_cold_proof_census_gate(std::path::Path::new(&*v0)).unwrap_err());
-    let v39: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ColdProofV4 renewal rolled back"); } LIT.with(|lit| lit.clone()) };
-    let v40: bool = v38.contains(&*v39);
-    if v40 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v41: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v21).unwrap());
-    let v42: bool = &*v41 == &*v37;
-    if v42 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v43: Rc<str> = string_concat(&[&*v1, "kit"]);
-    let v44: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("unix binary"); } LIT.with(|lit| lit.clone()) };
-    std::fs::write(&*v43,&*v44).unwrap();
-    let v45: Rc<str> = std::rc::Rc::<str>::from(refresh_cold_proof_census_gate(std::path::Path::new(&*v0)).unwrap_err());
-    let v46: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("exactly one root binary"); } LIT.with(|lit| lit.clone()) };
-    let v47: bool = v45.contains(&*v46);
-    if v47 { () } else { std::panic::panic_any("Spiral test assertion failed") };
-    let v48: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v21).unwrap());
-    let v49: bool = &*v48 == &*v37;
-    if v49 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v38: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v21);
+    let v40: Vec<u8> = v38.unwrap();
+    let v41: Vec<u8> = method1(v40);
+    let v43: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v41);
+    let v45: std::string::String = v43.unwrap();
+    let v47: Rc<str> = Rc::<str>::from(String::as_str(&v45));
+    let v48: Rc<str> = std::rc::Rc::<str>::from(refresh_cold_proof_census_gate(std::path::Path::new(&*v0)).unwrap_err());
+    let v49: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ColdProofV4 renewal rolled back"); } LIT.with(|lit| lit.clone()) };
+    let v50: bool = v48.contains(&*v49);
+    if v50 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v52: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v21);
+    let v54: Vec<u8> = v52.unwrap();
+    let v55: Vec<u8> = method1(v54);
+    let v57: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v55);
+    let v59: std::string::String = v57.unwrap();
+    let v61: Rc<str> = Rc::<str>::from(String::as_str(&v59));
+    let v62: bool = &*v61 == &*v47;
+    if v62 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v63: Rc<str> = string_concat(&[&*v1, "kit"]);
+    let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("unix binary"); } LIT.with(|lit| lit.clone()) };
+    std::fs::write(&*v63,&*v64).unwrap();
+    let v65: Rc<str> = std::rc::Rc::<str>::from(refresh_cold_proof_census_gate(std::path::Path::new(&*v0)).unwrap_err());
+    let v66: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("exactly one root binary"); } LIT.with(|lit| lit.clone()) };
+    let v67: bool = v65.contains(&*v66);
+    if v67 { () } else { std::panic::panic_any("Spiral test assertion failed") };
+    let v69: Result<Vec<u8>, std::io::Error> = std::fs::read(&*v21);
+    let v71: Vec<u8> = v69.unwrap();
+    let v72: Vec<u8> = method1(v71);
+    let v74: Result<std::string::String, std::string::FromUtf8Error> = std::string::String::from_utf8(v72);
+    let v76: std::string::String = v74.unwrap();
+    let v78: Rc<str> = Rc::<str>::from(String::as_str(&v76));
+    let v79: bool = &*v78 == &*v47;
+    if v79 { () } else { std::panic::panic_any("Spiral test assertion failed") };
     0i32
 }
 fn closure5() -> Rc<dyn Fn(Rc<str>) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> i32> = Rc::new(move |mut v0: Rc<str>| -> i32 {
-        renewal_7(v0)
+        renewal_8(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn cold_proof_equal_binding_8(mut v0: i32, mut v1: i32) -> i32 {
+fn cold_proof_equal_binding_9(mut v0: i32, mut v1: i32) -> i32 {
     let mut v2: bool = v0 == v1;
     if v2 {
         1i32
@@ -391,7 +429,7 @@ fn cold_proof_equal_binding_8(mut v0: i32, mut v1: i32) -> i32 {
         0i32
     }
 }
-fn cold_rebuild_expected_shards_binding_9(mut v0: i32, mut v1: i32) -> i32 {
+fn cold_rebuild_expected_shards_binding_10(mut v0: i32, mut v1: i32) -> i32 {
     let mut v2: bool = v0 < 1i32;
     if v2 {
         -1i32
@@ -420,7 +458,7 @@ fn cold_rebuild_expected_shards_binding_9(mut v0: i32, mut v1: i32) -> i32 {
         }
     }
 }
-fn loop_11(mut v0: Rc<str>, mut v1: u64, mut v2: u64) -> bool {
+fn loop_12(mut v0: Rc<str>, mut v1: u64, mut v2: u64) -> bool {
     loop {
         let v3: bool = v2 == v1;
         if v3 {
@@ -466,7 +504,7 @@ fn loop_11(mut v0: Rc<str>, mut v1: u64, mut v2: u64) -> bool {
         }
     }
 }
-fn check_10(mut v0: Rc<str>) -> bool {
+fn check_11(mut v0: Rc<str>) -> bool {
     let v1: u64 = (v0.clone().len() as u64);
     let mut v2: bool = v1 < 64u64;
     let v4: bool = if v2 {
@@ -477,22 +515,22 @@ fn check_10(mut v0: Rc<str>) -> bool {
     };
     if v4 {
         let v5: u64 = 0u64;
-        loop_11(v0, v1, v5)
+        loop_12(v0, v1, v5)
     } else {
         false
     }
 }
 fn closure6() -> Rc<dyn Fn(Rc<str>) -> bool> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> bool> = Rc::new(move |mut v0: Rc<str>| -> bool {
-        check_10(v0)
+        check_11(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn closure7() -> Rc<dyn Fn(i32, i32) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(i32, i32) -> i32> = Rc::new(move |mut v0: i32, mut v1: i32| -> i32 {
-        cold_proof_equal_binding_8(v0, v1)
+        cold_proof_equal_binding_9(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn cold_proof_binary_binding_12(mut v0: i32) -> i32 {
+fn cold_proof_binary_binding_13(mut v0: i32) -> i32 {
     let v1: bool = v0 == 1i32;
     if v1 {
         1i32
@@ -507,12 +545,12 @@ fn cold_proof_binary_binding_12(mut v0: i32) -> i32 {
 }
 fn closure8() -> Rc<dyn Fn(i32) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(i32) -> i32> = Rc::new(move |mut v0: i32| -> i32 {
-        cold_proof_binary_binding_12(v0)
+        cold_proof_binary_binding_13(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 fn closure9() -> Rc<dyn Fn(i32, i32) -> i32> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(i32, i32) -> i32> = Rc::new(move |mut v0: i32, mut v1: i32| -> i32 {
-        cold_rebuild_expected_shards_binding_9(v0, v1)
+        cold_rebuild_expected_shards_binding_10(v0, v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 pub fn rig_test_family_renewal(v0: &str) -> i32 {

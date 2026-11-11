@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "edges.spi"
+output = "edges.rs"
+
+[package]
+name = "rig-units-edges"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_units_edges"
+path = "edges.rs"

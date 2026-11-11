@@ -1,0 +1,71 @@
+///- --package .
+:# read static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== shown = { path : string; first : i32; lines : list string }
+
+:== hit = { path : string; line : i32; text : string }
+
+:== found = { pattern : string; hits : list hit }
+
+:== listed = { suffix : string; paths : list string }
+
+:| read_statement receipt =
+    | Show :: string * i32 * i32 -> read_statement shown
+    | Search :: string -> read_statement found
+    | Files :: string -> read_statement listed
+
+:! any_read = \? receipt. read_statement receipt
+
+:== tree_file = { name : string; body : string }
+
+:~ lines_of (~body : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" body)
+
+:~ numbered (lines : list string) : list (i32 * string) =
+    := step = \ ((n, acc) : i32 * list (i32 * string)) (line : string) => n + 1i32, (n, line) :: acc
+    := _, acc = lines |> listm.fold step (1i32, [])
+    listm.rev acc
+
+:~ show_of (files : list tree_file) (~path : string) (first : i32) (last : i32) : shown =
+    := body = files |> listm.fold (\ (got : string) (f : tree_file) => ? f.name = path ?> f.body |: got) ""
+    := kept = numbered (lines_of body) |> listm'.filter (\ ((n, _) : i32 * string) => n >= first && n <= last)
+    { path = path; first = first; lines = kept |> listm.map (\ ((_, text) : i32 * string) => text) }
+
+:~ search_of (files : list tree_file) (~pattern : string) : found =
+    := hits_in = \ (f : tree_file) =>
+        numbered (lines_of f.body)
+        |> listm'.filter (\ ((_, text) : i32 * string) => sm'.contains pattern text)
+        |> listm.map (\ ((n, text) : i32 * string) => ({ path = f.name; line = n; text = text } : hit))
+    { pattern = pattern; hits = files |> listm.map hits_in |> listm.concat }
+
+:~ files_of (files : list tree_file) (~suffix : string) : listed =
+    := matching = files |> listm'.filter (\ (f : tree_file) => sm'.ends_with suffix f.name)
+    := names = matching |> listm.map (\ (f : tree_file) => f.name)
+    { suffix = suffix; paths = names }
+
+:= run_read \* receipt. (files : list tree_file) (statement : read_statement receipt) : receipt =
+    ?= statement ?|
+    | Show (path, first, last) => show_of files path first last
+    | Search pattern => search_of files pattern
+    | Files suffix => files_of files suffix
+
+:= statement_word \* receipt. (statement : read_statement receipt) : string =
+    ?= statement ?|
+    | Show _ => "show"
+    | Search _ => "search"
+    | Files _ => "files"
+
+///> rust
+:# each_read_statement_returns_the_receipt_its_type_names =
+    := tree = [ { name = "a.spi"; body = "one\ntwo\nthree" }; { name = "b.md"; body = "two words" } ]
+    := s = run_read tree (Show ("a.spi", 2i32, 3i32))
+    testing.expect (s.lines = [ "two"; "three" ] && s.first = 2i32) "show returns a shown receipt"
+    := f = run_read tree (Search "two")
+    testing.expect (listm.length f.hits = 2i32) "search returns a found receipt with every hit"
+    := first_hit = { path = "a.spi"; line = 2i32; text = "two" }
+    testing.expect (f.hits = [ first_hit; { path = "b.md"; line = 1i32; text = "two words" } ]) "hits"
+    := l = run_read tree (Files ".spi")
+    testing.expect (l.paths = [ "a.spi" ]) "files returns a listed receipt"
+    testing.expect (statement_word (Search "x") = "search") "word"

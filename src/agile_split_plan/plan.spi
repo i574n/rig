@@ -24,9 +24,12 @@
     | w :: rest => minutes_in rest (w :: before)
     | [] => None
 
+:~ without_period (~word : string) : string =
+    ? sm'.length word > 1i32 && sm'.ends_with "." word ?> sm'.slice 0i32 (sm'.length word - 2i32) word |: word
+
 :~ milestone_of (~segment : string) : option milestone =
     := spaced = segment |> sm'.replace "(" " " |> sm'.replace ")" " "
-    := words = sm'.split_list " " spaced |> listm'.filter (\ (w : string) => w <> "")
+    := words = sm'.split_list " " spaced |> listm'.filter (\ (w : string) => w <> "") |> listm.map without_period
     ?= minutes_in words [] ?|
     | Some (before, minutes) ?& minutes > 0i32 && before <> [] =>
         Some { name = sm'.concat_list " " (listm.rev before); minutes = minutes }
@@ -104,6 +107,8 @@
     := boxed = { name = "codes plus a box test"; minutes = 30i32 }
     testing.expect (milestone_of "codes plus a box test (30 m)" = Some boxed) "parens"
     testing.expect (milestone_of "no minutes here" = None) "a step without minutes is not a milestone"
+    := last = { name = "the reader"; minutes = 120i32 }
+    testing.expect (milestone_of "the reader 120 m." = Some last) "a note ending in a period keeps its last step"
     := shown_head = "KIT-A  Story  P1  D4  10%  Planned\ndeps: -\ntags: kit,team:kit\n"
     := planning = "planning: estimate=360m load=light assignee=agent\nnotes (2)\n"
     := text = shown_head ++# planning ++# "2026-11-06T10:00Z  kit  MILESTONES: one 60 m; two 90 m\n"

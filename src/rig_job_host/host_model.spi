@@ -28,6 +28,10 @@
 
 := idle_limit_ms () : u64 = 600000u64
 
+:= busy_nap_ms () : u64 = 500u64
+
+:= next_idle_nap (nap : u64) : u64 = ? nap >= 2000u64 ?> 4000u64 |: nap * 2u64
+
 := owner_ended_detail () : string = "its owner session ended before the job started"
 
 := request_suffix () : string = ".start"
@@ -121,6 +125,11 @@
     testing.expect (idle_policy_of "0" = NeverExit && idle_policy_of " 30 " = ExitAfter 30000u64) "0 never exits"
     testing.expect (host_step_of NeverExit 0u64 0u64 3600000u64 HomePresent !+ = KeepServing) "a pod host stays up"
     testing.expect (host_step_of NeverExit 0u64 0u64 1000u64 HomePresent !- = HostIdleExit) "its owner still ends it"
+
+///> rust
+:# an_idle_host_naps_longer_and_longer_up_to_four_seconds =
+    testing.expect (next_idle_nap (busy_nap_ms ()) = 1000u64 && next_idle_nap 1000u64 = 2000u64) "doubling"
+    testing.expect (next_idle_nap 2000u64 = 4000u64 && next_idle_nap 4000u64 = 4000u64) "capped at four seconds"
 
 ///> rust
 :# an_idle_host_exits_only_after_ten_quiet_minutes_without_children =

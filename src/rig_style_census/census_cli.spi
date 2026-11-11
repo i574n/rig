@@ -13,7 +13,7 @@
         q = char::from(39u8))).collect::<String>().as_str())' : string
 
 ///> rust
-:# the_census_counts_typefeatureset_use_and_drift_per_package =
+:# the_census_counts_type_feature_use_and_drift_per_package =
     := root = fixture_root_create "census"
     fixture_write root "pkgs/old/a.spi" (typed_module ())
     fixture_write root "pkgs/fresh/b.spi" "inl legacy () = rust_global 1\n"

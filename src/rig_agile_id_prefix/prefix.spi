@@ -1,0 +1,104 @@
+///- --package .
+:# prefix static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| retired_prefix =
+    | KitPrefix :: retired_prefix
+    | EoiePrefix :: retired_prefix
+
+:== late_id = { id : string; filed_at : string }
+
+:~ prefix_word (p : retired_prefix) : string =
+    ?= p ?|
+    | KitPrefix => "KIT-"
+    | EoiePrefix => "EOIE-"
+
+:~ retired_prefix_of (~id : string) : option retired_prefix =
+    ? sm'.starts_with (prefix_word KitPrefix) id
+    ?> Some KitPrefix
+    |? sm'.starts_with (prefix_word EoiePrefix) id
+    ?> Some EoiePrefix
+    |: None
+
+:~ rig_spelling (p : retired_prefix) (~id : string) : string =
+    := word = prefix_word p
+    "RIG-" ++# sm'.substring (sm'.length word) (sm'.length id - sm'.length word) id
+
+:~ new_id_refusal (~id : string) : string =
+    ?= retired_prefix_of id ?|
+    | Some p =>
+        "the " ++# prefix_word p ++# " id prefix is retired (the tool and team are rig since 11-08); use "
+        ++# rig_spelling p id
+    | None => ""
+
+:~ decision_minute () : i64 = 202611082340i64
+
+:~ minute_of (~iso : string) : option i64 =
+    := digits = iso |> sm'.replace "-" "" |> sm'.replace "T" "" |> sm'.replace ":" "" |> sm'.replace "Z" ""
+    ? sm'.length digits = 12i32 ?> (convert.try_convert digits : option i64) |: None
+
+:~ late_id_of_line (~line : string) : option late_id =
+    ? sm'.contains "= Note (\"" line |> not
+    ?> None
+    |:
+        ?= sm'.split_list "\"" line ?|
+        | _ :: id :: number :: at :: _ ?& sm'.trim number = ", 1u32," =>
+            ?= retired_prefix_of id, minute_of at ?|
+            | Some _, Some minute ?& minute > decision_minute () => Some { id = id; filed_at = at }
+            | _ => None
+        | _ => None
+
+:~ late_ids (~state_text : string) : list late_id =
+    := step = \ (found : list late_id) (line : string) =>
+        ?= late_id_of_line line ?|
+        | Some row => listm.append found [ row ]
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" state_text) |> listm.fold step []
+
+:~ late_line (row : late_id) : string = row.id ++# " filed " ++# row.filed_at ++# " retired-prefix"
+
+:~ retired_report (~state_text : string) : string =
+    := lines = late_ids state_text |> listm.map late_line
+    := count : i32 = listm.length lines
+    := why = " (KIT- or EOIE- ids filed after the 11-08 rig decision)"
+    listm.append lines [ "rig agile lint retired-prefix ids=" ++# sm'.show count ++# why ] |> sm'.concat_list "\n"
+
+///> rust
+:# a_new_kit_or_eoie_id_is_refused_with_the_rig_spelling =
+    testing.expect (new_id_refusal "RIG-SCRATCH-WATCH" = "") "a rig id passes"
+    testing.expect (new_id_refusal "LINK-WITHOUT-MANIFEST" = "") "an unprefixed id passes"
+    := kit = "the KIT- id prefix is retired (the tool and team are rig since 11-08); use RIG-JOBS"
+    testing.expect (new_id_refusal "KIT-JOBS" = kit) "kit"
+    testing.expect (sm'.ends_with "use RIG-WINDOW-D1" (new_id_refusal "EOIE-WINDOW-D1")) "eoie"
+    testing.expect (new_id_refusal "KITCHEN-SINK" = "") "only the dashed prefix"
+
+///> rust
+:# only_first_notes_after_the_decision_count_as_late =
+    := late = "inl note_of_kit_a_1 () = Note (\"KIT-A\", 1u32, \"2026-11-09T10:00Z\", \"rig\", \"x\")"
+    := early = "inl note_of_kit_b_1 () = Note (\"KIT-B\", 1u32, \"2026-11-08T23:39Z\", \"rig\", \"x\")"
+    := second = "inl note_of_kit_c_2 () = Note (\"KIT-C\", 2u32, \"2026-11-10T10:00Z\", \"rig\", \"x\")"
+    := rig = "inl note_of_rig_d_1 () = Note (\"RIG-D\", 1u32, \"2026-11-10T10:00Z\", \"rig\", \"x\")"
+    := text = sm'.concat_list "\r\n" [ late; early; second; rig; "union task_note =" ]
+    testing.expect (late_ids text = [ { id = "KIT-A"; filed_at = "2026-11-09T10:00Z" } ]) "one late id"
+    testing.expect (late_ids text |> listm.map late_line = [ "KIT-A filed 2026-11-09T10:00Z retired-prefix" ]) "row"
+
+///> rust
+:# state_read_at_run_time_parses_like_a_literal =
+    := suffix = file_system.read_text_or_empty "/rig-agile-id-prefix-run-time-probe-missing"
+    := line = "inl n () = Note (\"EOIE-X" ++# suffix ++# "\", 1u32, \"2026-11-11T04:18Z\", \"c\", \"x\")"
+    testing.expect (late_ids line = [ { id = "EOIE-X"; filed_at = "2026-11-11T04:18Z" } ]) "run-time text"
+    testing.expect (new_id_refusal ("KIT-Y" ++# suffix) <> "") "run-time id"
+
+///> rust
+:# the_report_ends_with_the_count_line =
+    := late = "inl n () = Note (\"KIT-A\", 1u32, \"2026-11-09T10:00Z\", \"rig\", \"x\")"
+    := expected = "KIT-A filed 2026-11-09T10:00Z retired-prefix\nrig agile lint retired-prefix ids=1 "
+    testing.expect (sm'.starts_with expected (retired_report late)) (retired_report late)
+    testing.expect (sm'.starts_with "rig agile lint retired-prefix ids=0 " (retired_report "")) "none"
+
+:= main () : i32 =
+    export "rig_agile_new_id_refusal" new_id_refusal
+    export "rig_agile_retired_report" retired_report
+    0i32

@@ -1,0 +1,91 @@
+///- --package .
+:# index static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| definition_kind =
+    | Inline :: definition_kind
+    | JoinPoint :: definition_kind
+    | Recursive :: definition_kind
+    | Union :: definition_kind
+    | Record :: definition_kind
+    | Test :: definition_kind
+
+:== definition_row =
+    {
+        repo : string
+        file : string
+        name : string
+        kind : definition_kind
+        line : i32
+    }
+
+:== kind_rule = { prefix : string; kind : definition_kind }
+
+:= kind_rules () : list kind_rule =
+    [
+        { prefix = ":~ ^ "; kind = Recursive }
+        { prefix = ":~ "; kind = JoinPoint }
+        { prefix = ":= "; kind = Inline }
+        { prefix = ":| ^ "; kind = Union }
+        { prefix = ":| "; kind = Union }
+        { prefix = ":== "; kind = Record }
+        { prefix = ":# "; kind = Test }
+    ]
+
+:~ ^ first_name_char (~text : string) (index : i32) : i32 =
+    := c = ? index < sm'.length text ?> sm'.substring index 1i32 text |: ""
+    ? c = ""
+    ?> index
+    |? sm'.contains c "abcdefghijklmnopqrstuvwxyz0123456789_'"
+    ?> first_name_char text (index + 1i32)
+    |: index
+
+:~ ^ matched_rule (rules : list kind_rule) (~line : string) : option kind_rule =
+    ?= rules ?|
+    | [] => None
+    | rule :: rest => ? sm'.starts_with rule.prefix line ?> Some rule |: matched_rule rest line
+
+:~ definition_of (~repo : string) (~file : string) (number : i32) (~line : string) : option definition_row =
+    ?= matched_rule (kind_rules ()) line ?|
+    | None => None
+    | Some rule =>
+        := body = sm'.substring (sm'.length rule.prefix) (sm'.length line - sm'.length rule.prefix) line
+        := stop = first_name_char body 0i32
+        ? stop = 0i32
+        ?> None
+        |: Some ({ repo = repo; file = file; name = sm'.substring 0i32 stop body; kind = rule.kind; line = number })
+
+:| reuse =
+    | InLib :: i32 -> reuse
+    | InApps :: i32 -> reuse
+
+:== reuse_count = { lib_sites : i32; app_sites : i32 }
+
+:= counted (sites : reuse_count) (site : reuse) : reuse_count =
+    ?= site ?|
+    | InLib n => { sites ?| lib_sites = sites.lib_sites + n }
+    | InApps n => { sites ?| app_sites = sites.app_sites + n }
+
+:= generic (sites : reuse_count) : bool = sites.app_sites > 0i32 && sites.lib_sites + sites.app_sites > 1i32
+
+///> rust
+:# every_top_level_form_gives_one_typed_row =
+    := row (~line : string) = definition_of "kit" "a.spi" 7i32 line
+    := expected = { repo = "kit"; file = "a.spi"; name = "files_under"; kind = Recursive; line = 7i32 }
+    testing.expect (row ":~ ^ files_under (~dir : string) = ()" = Some expected) "recursive"
+    testing.expect (row ":= shown (~value : string) : string = value" <> None) "an inline"
+    := union_row = row ":| file_kind ="
+    testing.expect (union_row = Some ({ expected ?| name = "file_kind"; kind = Union })) "a union"
+    testing.expect (row "    := local = 1i32" = None && row ":< sm'_operators" = None) "locals and opens are not rows"
+    testing.expect (row ":# a_test_name =" <> None) "tests are rows too"
+
+///> rust
+:# reuse_counts_lib_and_app_sites_apart =
+    := none = { lib_sites = 0i32; app_sites = 0i32 }
+    := sites = [ InLib 2i32; InApps 3i32; InApps 1i32 ] |> listm.fold counted none
+    testing.expect (sites = { lib_sites = 2i32; app_sites = 4i32 }) "two lib sites, four app sites"
+    testing.expect (generic sites && (generic { none ?| lib_sites = 5i32 } |> not)) "used by apps means generic"
+
+:= main () : i32 = 0i32

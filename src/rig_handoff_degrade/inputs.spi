@@ -1,0 +1,77 @@
+///- --package .
+:# inputs static =
+    :< sm'_operators
+    :< degrade
+
+:< sm'_operators
+:< degrade
+
+:~ lines_of (~text : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" text)
+
+:~ handoff_rows_of (~text : string) : option (list handoff_row) =
+    := row = \ (found : list handoff_row) (line : string) =>
+        ? sm'.contains " = HandoffSection (" line |> not
+        ?> found
+        |:
+            ?= sm'.quoted_fields line ?|
+            | [ title; body ] => listm.append found [ { title = title; body = body } ]
+            | _ => found
+    ? sm'.trim text = "" ?> None |: Some (lines_of text |> listm.fold row [])
+
+:~ waits_of (~text : string) : list string =
+    := row = \ (found : list string) (line : string) =>
+        ? sm'.contains " = Waits (" line |> not
+        ?> found
+        |:
+            ?= sm'.quoted_fields line ?|
+            | [ id; kind; value ] => listm.append found [ id ++# " (" ++# kind ++# ":" ++# value ++# ")" ]
+            | _ => found
+    lines_of text |> listm.fold row []
+
+:~ active_of_listing (~listing : string) : list string =
+    := row = \ (found : list string) (line : string) =>
+        := words = sm'.split_list " " (sm'.trim line) |> listm'.filter (\ (w : string) => w <> "")
+        ?= words ?|
+        | id :: rest ?& listm'.contains "Active" rest => listm.append found [ id ]
+        | _ => found
+    lines_of listing |> listm.fold row []
+
+:~ state_of (~listing : string) (~waits_text : string) (receipts : list string) : typed_state =
+    { active = active_of_listing listing; waits = waits_of waits_text; receipts = receipts }
+
+:~ part_line (x : projected) : string =
+    := tagged = \ (tag : string) (text : string) => title_of x.part ++# " [" ++# tag ++# "]: " ++# text
+    ?= x.source ?|
+    | FromHandoff text => tagged "handoff" text
+    | DerivedFromState text => tagged "derived" text
+    | MissingPart reason => tagged "missing" reason
+
+:~ projection_text (p : projection) : string =
+    := parts = p.parts |> listm.map part_line
+    := gaps = missing_titles p
+    := gap_line = ? gaps = [] ?> "missing: none" |: "missing: " ++# sm'.concat_list ", " gaps
+    := dup_line = ? p.duplicate_titles = [] ?> [] |: [ "repeated titles: " ++# sm'.concat_list ", " p.duplicate_titles ]
+    sm'.concat_list "\n" (listm.concat [ parts; [ gap_line ]; dup_line ])
+
+///> rust
+:# a_projection_prints_one_tagged_line_per_part_and_a_missing_line =
+    := state = { active = [ "A-1" ]; waits = []; receipts = [] }
+    := text = projection_text (project None state)
+    := lines = sm'.split_list "\n" text
+    testing.expect (listm'.contains "Active work [derived]: A-1" lines) "a derived part"
+    := waits_line = "Waits [missing]: no handoff row and no wait row"
+    testing.expect (listm'.contains waits_line lines) "a missing part with its reason"
+    testing.expect (listm'.contains "missing: Waits, Evidence, Next steps" lines) "the missing line names every gap"
+
+///> rust
+:# handoff_rows_waits_and_active_items_read_into_the_degrade_inputs =
+    := handoff = "inl a () = HandoffSection (\"Next steps\", \"probe the batch\")\ninl b () = Other (\"x\")"
+    testing.expect (handoff_rows_of handoff = Some [ { title = "Next steps"; body = "probe the batch" } ]) "a row"
+    testing.expect (handoff_rows_of "  \n" = None) "an empty handoff file reads as absent"
+    := waits = "inl wait_of_kit_a () = Waits (\"KIT-A\", \"train\", \"TRAIN44\")"
+    testing.expect (waits_of waits = [ "KIT-A (train:TRAIN44)" ]) "a wait row"
+    := listing = "  KIT-A  TaskKind  P1  D2  40%  Active\n  KIT-B  Story  P2  D3  0%  Planned\nkit agile list ok"
+    := state = state_of listing waits [ "train green" ]
+    testing.expect (state.active = [ "KIT-A" ] && state.receipts = [ "train green" ]) "active ids only"
+    := projected = project (handoff_rows_of handoff) state
+    testing.expect (missing_titles projected = []) "every part filled from the handoff or the state"

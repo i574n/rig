@@ -1,0 +1,177 @@
+///- --package .
+:# replay static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| turn =
+    | System :: string -> turn
+    | User :: string -> turn
+    | Assistant :: string -> turn
+    | Call :: string * string -> turn
+    | Result :: string -> turn
+
+:== call_key = { name : string; arguments : string }
+
+:== exchange = { call : call_key; result : string }
+
+:| record_problem =
+    | OrphanResult :: i32 -> record_problem
+    | UnansweredCall :: call_key -> record_problem
+
+:== recorded = { exchanges : list exchange; open_calls : list call_key; problems : list record_problem }
+
+:~ step (r : recorded) (at : i32) (t : turn) : recorded =
+    ?= t ?|
+    | Call (name, arguments) => { r ?| open_calls = { name = name; arguments = arguments } :: r.open_calls }
+    | Result value =>
+        ?= r.open_calls ?|
+        | innermost :: rest =>
+            := done = { call = innermost; result = value }
+            { r ?| exchanges = done :: r.exchanges; open_calls = rest }
+        | [] => { r ?| problems = OrphanResult at :: r.problems }
+    | _ => r
+
+:~ record (turns : list turn) : recorded =
+    := empty = { exchanges = []; open_calls = []; problems = [] }
+    := numbered = \ ((at, r) : i32 * recorded) (t : turn) => at + 1i32, step r at t
+    := _, walked = turns |> listm.fold numbered (0i32, empty)
+    := unanswered = walked.open_calls |> listm.map UnansweredCall
+    {
+        exchanges = listm.rev walked.exchanges
+        open_calls = []
+        problems = listm.append (listm.rev walked.problems) (listm.rev unanswered)
+    }
+
+:~ replay (exchanges : list exchange) (key : call_key) : option string =
+    := latest = \ (found : option string) (e : exchange) => ? e.call = key ?> Some e.result |: found
+    exchanges |> listm.fold latest None
+
+///> rust
+:# a_transcript_records_call_results_and_replays_them_exactly =
+    := weather = { name = "weather"; arguments = "{\"city\":\"Porto\"}" }
+    := clock = { name = "clock"; arguments = "{}" }
+    := turns =
+        [
+            System "tools on"; User "weather?"; Call ("weather", weather.arguments); Result "18C";
+            User "and the time?"; Call ("clock", "{}"); Result "10:52"; Assistant "18C at 10:52"
+        ]
+    := r = record turns
+    testing.expect (listm.length r.exchanges = 2i32 && r.problems = []) "two exchanges, a balanced transcript"
+    testing.expect (replay r.exchanges weather = Some "18C" && replay r.exchanges clock = Some "10:52") "exact replays"
+    testing.expect (replay r.exchanges { weather ?| arguments = "{}" } = None) "other arguments miss"
+    := nested = record [ Call ("outer", "a"); Call ("inner", "b"); Result "i"; Result "o" ]
+    testing.expect (replay nested.exchanges { name = "inner"; arguments = "b" } = Some "i") "the innermost call first"
+    testing.expect (replay nested.exchanges { name = "outer"; arguments = "a" } = Some "o") "then its caller"
+    := broken = record [ Result "x"; Call ("lost", "z") ]
+    := expected = [ OrphanResult 0i32; UnansweredCall { name = "lost"; arguments = "z" } ]
+    testing.expect (broken.problems = expected) "an orphan result and an unanswered call are both named"
+
+:~ exchange_line (e : exchange) : string =
+    := call = [ "{\"call\":{\"name\":"; json.quote e.call.name; ",\"arguments\":"; json.quote e.call.arguments; "}" ]
+    sm'.concat_list "" (listm.append call [ ",\"result\":"; json.quote e.result; "}" ])
+
+:~ to_lines (exchanges : list exchange) : string = exchanges |> listm.map exchange_line |> sm'.concat_list "\n"
+
+:~ exchange_of (line : string) : exchange = json.decode line
+
+:~ kept_exchange (found : list exchange) (line : string) : list exchange =
+    ? line = "" ?> found |: exchange_of line :: found
+
+:~ of_lines (text : string) : list exchange = sm'.split_list "\n" text |> listm.fold kept_exchange [] |> listm.rev
+
+///> rust
+:# exchanges_round_trip_through_json_lines_and_still_replay =
+    := tricky = { name = "say"; arguments = "{\"text\":\"a \\\"quote\\\"\nand a line\"}" }
+    := saved = [ { call = tricky; result = "ok" }; { call = { name = "clock"; arguments = "{}" }; result = "10:52" } ]
+    := loaded = to_lines saved |> of_lines
+    testing.expect (loaded = saved) (to_lines saved)
+    testing.expect (replay loaded tricky = Some "ok") "a replay after the round trip finds the escaped call"
+    testing.expect (of_lines "" = [] && of_lines "\n\n" = []) "blank lines hold no exchanges"
+
+:== convo_tag = { name : string; value : string }
+
+:| block_reading =
+    | TurnBlock :: turn * list convo_tag -> block_reading
+    | DefineBlock :: string * list convo_tag -> block_reading
+    | UnknownHeader :: i32 * string -> block_reading
+
+:== pending = { header : string; line : i32; body : list string; tags : list convo_tag }
+
+:~ header_word (~line : string) : option string =
+    := plain = sm'.trim line
+    ? sm'.starts_with "> " plain ?> Some (sm'.trim (sm'.substring 2i32 ((sm'.length plain : i32) - 2i32) plain)) |: None
+
+:~ tag_of (~line : string) : option convo_tag =
+    := plain = sm'.trim line
+    := space = sm'.index_of " " plain
+    ? sm'.starts_with "@" plain |> not
+    ?> None
+    |? space < 0i32
+    ?> Some { name = sm'.substring 1i32 ((sm'.length plain : i32) - 1i32) plain; value = "" }
+    |:
+        := value = sm'.trim (sm'.substring space ((sm'.length plain : i32) - space) plain)
+        Some { name = sm'.substring 1i32 (space - 1i32) plain; value = value }
+
+:~ body_text (lines : list string) : string = sm'.trim (sm'.concat_list "\n" (listm.rev lines))
+
+:~ call_name (~rest : string) : string =
+    := cut = sm'.index_of "(" rest
+    sm'.trim (? cut < 0i32 ?> rest |: sm'.substring 0i32 cut rest)
+
+:~ reading_of (p : pending) : block_reading =
+    := body = body_text p.body
+    := called = \ () => call_name (sm'.substring 5i32 ((sm'.length p.header : i32) - 5i32) p.header)
+    ? p.header = "system" ?> TurnBlock (System body, p.tags)
+    |? p.header = "user" ?> TurnBlock (User body, p.tags)
+    |? p.header = "assistant" ?> TurnBlock (Assistant body, p.tags)
+    |? p.header = "result" ?> TurnBlock (Result body, p.tags)
+    |? p.header = "define" ?> DefineBlock (body, p.tags)
+    |? sm'.starts_with "call " p.header ?> TurnBlock (Call (called (), body), p.tags)
+    |: UnknownHeader (p.line, p.header)
+
+:~ ^ blocks_from
+    (lines : list string) (n : i32) (open_block : option pending) (tags : list convo_tag) (found : list block_reading)
+    : list block_reading
+    =
+    := closed = ?= open_block ?| | Some p => reading_of p :: found | None => found
+    ?= lines ?|
+    | [] => listm.rev closed
+    | line :: rest =>
+        ?= header_word line ?|
+        | Some word => blocks_from rest (n + 1i32) (Some { header = word; line = n; body = []; tags = tags }) [] closed
+        | None =>
+            ?= tag_of line, open_block ?|
+            | Some t, _ => blocks_from rest (n + 1i32) open_block (listm.append tags [ t ]) found
+            | None, Some p => blocks_from rest (n + 1i32) (Some { p ?| body = line :: p.body }) tags found
+            | None, None => blocks_from rest (n + 1i32) None tags found
+
+:~ blocks_of (~text : string) : list block_reading =
+    blocks_from (sm'.split_list "\n" (sm'.replace "\r" "" text)) 1i32 None [] []
+
+:~ turns_of (blocks : list block_reading) : list turn =
+    := keep = \ (found : list turn) (b : block_reading) =>
+        ?= b ?| | TurnBlock (t, _) => listm.append found [ t ] | _ => found
+    blocks |> listm.fold keep []
+
+///> rust
+:# a_convo_file_reads_into_turns_that_the_store_records =
+    := convo =
+        [
+            "> define"; "city = \"Recife\""; "> system"; "You answer briefly."; "> user"; "weather?";
+            "@model gpt-x"; "> call getWeather(location: city)"; "{\"location\":\"Recife\"}";
+            "> result"; "18C"; "@time 10:52"; "> assistant"; "18C."; "> weird"; "x"
+        ]
+        |> sm'.concat_list "\n"
+    := blocks = blocks_of convo
+    := turns = turns_of blocks
+    testing.expect (listm.length turns = 5i32) "system, user, call, result, assistant"
+    := args = "{\"location\":\"Recife\"}"
+    testing.expect (listm'.contains (Call ("getWeather", args)) turns) "a call keeps its name and body"
+    testing.expect (listm'.contains (UnknownHeader (15i32, "weird")) blocks) "an unknown header is named with its line"
+    testing.expect (listm'.contains (DefineBlock ("city = \"Recife\"", [])) blocks) "a define block is kept apart"
+    := model_tagged = \ (b : block_reading) =>
+        ?= b ?| | TurnBlock (Call _, [ t ]) => t.name = "model" | _ => !-
+    testing.expect (listm.length (blocks |> listm'.filter model_tagged) = 1i32) "a tag attaches to the block after it"
+    := r = record turns
+    testing.expect (replay r.exchanges { name = "getWeather"; arguments = args } = Some "18C") "the store replays it"

@@ -12,6 +12,41 @@
         owner_running (number pid, number start) |> not && (host_pid = 0u64 || process_alive host_pid |> not)
     | _ => !-
 
+:| group_reap =
+    | ReapedGroup :: group_reap
+    | NoGroupLeft :: group_reap
+    | SkippedPidReused :: group_reap
+    | SkippedNoChildPid :: group_reap
+    | SkippedWindows :: group_reap
+
+:~ reap_skip ((windows, pid, running, same_start) : bool * u64 * bool * bool) : option group_reap =
+    ? windows
+    ?> Some SkippedWindows
+    |? pid <= 1u64
+    ?> Some SkippedNoChildPid
+    |? running && (same_start |> not)
+    ?> Some SkippedPidReused
+    |: None
+
+:~ lost_group_reaped ((pid, pid_written_ms) : u64 * u64) : string =
+    := running = pid > 1u64 && process_alive pid
+    := outcome =
+        ?= reap_skip (platform.rust_is_windows (), pid, running, owner_running (pid, pid_written_ms)) ?|
+        | Some skipped => skipped
+        | None =>
+            := group = sm'.concat_list "" [ "-"; sm'.show pid ]
+            ? rig_os_process.process.group_signalled "-KILL" group ?> ReapedGroup |: NoGroupLeft
+    reflection.union_to_string outcome
+
+///> rust --deps sysinfo="0.38.4"
+:# a_lost_job_group_is_signalled_only_when_its_leader_is_provably_the_child =
+    testing.expect (reap_skip (!+, 42u64, !+, !+) = Some SkippedWindows) "a job object already holds the tree"
+    testing.expect (reap_skip (!-, 0u64, !-, !-) = Some SkippedNoChildPid) "no pid file"
+    testing.expect (reap_skip (!-, 1u64, !+, !+) = Some SkippedNoChildPid) "group 1 would signal every process"
+    testing.expect (reap_skip (!-, 42u64, !+, !-) = Some SkippedPidReused) "a reused pid is never signalled"
+    testing.expect (reap_skip (!-, 42u64, !+, !+) = None) "the recorded child itself"
+    testing.expect (reap_skip (!-, 42u64, !-, !-) = None) "a dead leader's group is held only by its own survivors"
+
 ///> rust --deps sysinfo="0.38.4"
 :# pid_zero_and_a_listed_process_are_alive =
     testing.expect (process_alive 0u64) "pid 0 names no process to wait on"
@@ -26,4 +61,5 @@
     export "rig_process_alive" process_alive
     export "rig_process_owner_running" owner_running
     export "rig_process_home_abandoned" home_abandoned
+    export "rig_process_lost_group_reaped" lost_group_reaped
     0i32

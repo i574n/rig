@@ -6,7 +6,9 @@ packages:
     agile_state_fs
     agile_quality_lint
     agile_quality_state
+    rig_agile_id_prefix
 link:
     agile_quality_state
+    rig_agile_id_prefix
 modules:
     lint_cli

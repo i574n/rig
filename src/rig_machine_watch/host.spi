@@ -44,8 +44,8 @@ inl supervised_job (~command : string) : string = $'std::rc::Rc::<str>::from((!c
     |:
         := name = row_name rows at
         := job = supervised_job (row_command rows at)
-        ? name = "claude"
-        ?> ClaudeSession (row_pid rows at)
+        ? agent_client name
+        ?> AgentSession (name, row_pid rows at)
         |? job <> ""
         ?> KitJob job
         |:

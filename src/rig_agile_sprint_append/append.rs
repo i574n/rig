@@ -170,13 +170,9 @@ fn method3(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH1>) -> Rc<UH1> {
             let mut v17: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v16).as_ref().clone()));
             let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
             let v19: Rc<str> = Rc::<str>::from((*v17.borrow()).join(&*v18));
-            let v21: Rc<str> = string_concat(&["\"", &*v0, "\""]);
-            let v23: Rc<str> = string_concat(&["\"", &*v3, "\""]);
-            let v24: Rc<str> = format_real_4(v4);
-            let v25: Rc<str> = string_concat(&[&*v24, "i32"]);
             ;
             ;
-            let v26: bool = match &v5 {
+            let mut v20: bool = match &v5 {
                 US1::US1_Committed => {
                     true
                 }
@@ -184,15 +180,15 @@ fn method3(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH1>) -> Rc<UH1> {
                     false
                 }
             };
-            let v30: US2 = if v26 {
-                let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Committed"); } LIT.with(|lit| lit.clone()) };
-                US2::US2_Some(v27)
+            let v24: US2 = if v20 {
+                let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Committed"); } LIT.with(|lit| lit.clone()) };
+                US2::US2_Some(v21)
             } else {
                 US2::US2_None
             };
-            let v44: US2 = match v30 {
+            let v38: US2 = match v24 {
                 US2::US2_None => {
-                    let v33: bool = match v5 {
+                    let v27: bool = match v5 {
                         US1::US1_Dropped => {
                             true
                         }
@@ -200,41 +196,45 @@ fn method3(mut v0: Rc<str>, mut v1: Rc<UH0>, mut v2: Rc<UH1>) -> Rc<UH1> {
                             false
                         }
                     };
-                    let v37: US2 = if v33 {
-                        let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
-                        US2::US2_Some(v34)
+                    let v31: US2 = if v27 {
+                        let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
+                        US2::US2_Some(v28)
                     } else {
                         US2::US2_None
                     };
-                    match v37 {
+                    match v31 {
                         US2::US2_None => {
                             US2::US2_None
                         }
-                        US2::US2_Some(v38) => {
-                            let v38: Rc<str> = v38;
-                            US2::US2_Some(v38)
+                        US2::US2_Some(v32) => {
+                            let v32: Rc<str> = v32;
+                            US2::US2_Some(v32)
                         }
                     }
                 }
-                US2::US2_Some(v31) => {
-                    let v31: Rc<str> = v31;
-                    US2::US2_Some(v31)
+                US2::US2_Some(v25) => {
+                    let v25: Rc<str> = v25;
+                    US2::US2_Some(v25)
                 }
             };
-            let v48: Rc<str> = match v44 {
+            let mut v42: Rc<str> = match v38 {
                 US2::US2_None => {
                     std::panic::panic_any::<std::string::String>(format!("{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Option does not have a value."); } LIT.with(|lit| lit.clone()) }))
                 }
-                US2::US2_Some(v45) => {
-                    let v45: Rc<str> = v45;
-                    v45
+                US2::US2_Some(v39) => {
+                    let v39: Rc<str> = v39;
+                    v39
                 }
             };
+            let v44: Rc<str> = string_concat(&["\"", &*v0, "\""]);
+            let v46: Rc<str> = string_concat(&["\"", &*v3, "\""]);
+            let mut v47: Rc<str> = format_real_4(v4);
+            let v48: Rc<str> = string_concat(&[&*v47, "i32"]);
             let mut v49: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
-            v49.borrow_mut().push(v21);
-            v49.borrow_mut().push(v23);
-            v49.borrow_mut().push(v25);
+            v49.borrow_mut().push(v44);
+            v49.borrow_mut().push(v46);
             v49.borrow_mut().push(v48);
+            v49.borrow_mut().push(v42);
             let v50: Rc<Vec<Rc<str>>> = Rc::new(v49.borrow().clone());
             let v51: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v50).as_ref().clone()));
             let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
@@ -372,13 +372,9 @@ fn sprint_item_appended_8(mut v0: bool, mut v1: i32, mut v2: Rc<str>, mut v3: Rc
     let v23: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v22).as_ref().clone()));
     let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v25: Rc<str> = Rc::<str>::from((*v23.borrow()).join(&*v24));
-    let v27: Rc<str> = string_concat(&["\"", &*v3, "\""]);
-    let v29: Rc<str> = string_concat(&["\"", &*v2, "\""]);
-    let v30: Rc<str> = format_real_4(v1);
-    let v31: Rc<str> = string_concat(&[&*v30, "i32"]);
     ;
     ;
-    let v32: bool = match &v7 {
+    let v26: bool = match &v7 {
         US1::US1_Committed => {
             true
         }
@@ -386,15 +382,15 @@ fn sprint_item_appended_8(mut v0: bool, mut v1: i32, mut v2: Rc<str>, mut v3: Rc
             false
         }
     };
-    let v36: US2 = if v32 {
-        let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Committed"); } LIT.with(|lit| lit.clone()) };
-        US2::US2_Some(v33)
+    let v30: US2 = if v26 {
+        let v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Committed"); } LIT.with(|lit| lit.clone()) };
+        US2::US2_Some(v27)
     } else {
         US2::US2_None
     };
-    let v50: US2 = match v36 {
+    let v44: US2 = match v30 {
         US2::US2_None => {
-            let v39: bool = match v7 {
+            let v33: bool = match v7 {
                 US1::US1_Dropped => {
                     true
                 }
@@ -402,41 +398,45 @@ fn sprint_item_appended_8(mut v0: bool, mut v1: i32, mut v2: Rc<str>, mut v3: Rc
                     false
                 }
             };
-            let v43: US2 = if v39 {
-                let v40: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
-                US2::US2_Some(v40)
+            let v37: US2 = if v33 {
+                let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
+                US2::US2_Some(v34)
             } else {
                 US2::US2_None
             };
-            match v43 {
+            match v37 {
                 US2::US2_None => {
                     US2::US2_None
                 }
-                US2::US2_Some(v44) => {
-                    let v44: Rc<str> = v44;
-                    US2::US2_Some(v44)
+                US2::US2_Some(v38) => {
+                    let v38: Rc<str> = v38;
+                    US2::US2_Some(v38)
                 }
             }
         }
-        US2::US2_Some(v37) => {
-            let v37: Rc<str> = v37;
-            US2::US2_Some(v37)
+        US2::US2_Some(v31) => {
+            let v31: Rc<str> = v31;
+            US2::US2_Some(v31)
         }
     };
-    let mut v54: Rc<str> = match v50 {
+    let v48: Rc<str> = match v44 {
         US2::US2_None => {
             std::panic::panic_any::<std::string::String>(format!("{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Option does not have a value."); } LIT.with(|lit| lit.clone()) }))
         }
-        US2::US2_Some(v51) => {
-            let v51: Rc<str> = v51;
-            v51
+        US2::US2_Some(v45) => {
+            let v45: Rc<str> = v45;
+            v45
         }
     };
+    let v50: Rc<str> = string_concat(&["\"", &*v3, "\""]);
+    let v52: Rc<str> = string_concat(&["\"", &*v2, "\""]);
+    let v53: Rc<str> = format_real_4(v1);
+    let mut v54: Rc<str> = string_concat(&[&*v53, "i32"]);
     let mut v55: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
-    v55.borrow_mut().push(v27);
-    v55.borrow_mut().push(v29);
-    v55.borrow_mut().push(v31);
+    v55.borrow_mut().push(v50);
+    v55.borrow_mut().push(v52);
     v55.borrow_mut().push(v54);
+    v55.borrow_mut().push(v48);
     let v56: Rc<Vec<Rc<str>>> = Rc::new(v55.borrow().clone());
     let v57: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v56).as_ref().clone()));
     let v58: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };

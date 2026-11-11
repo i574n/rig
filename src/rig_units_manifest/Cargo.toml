@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "manifest.spi"
+output = "manifest.rs"
+
+[package]
+name = "rig-units-manifest"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_units_manifest"
+path = "manifest.rs"

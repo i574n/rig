@@ -1,7 +1,7 @@
 // Fleet node benchmark — one self-contained exe. CPU (single/all-core) + memory bandwidth +
 // local disk (seq write/read, fsync latency, random 4K IOPS) + optional GPU/WGSL.
 //
-// Two build profiles from ONE source (the "typefeatureset"):
+// Two build profiles from ONE source:
 //   lean (default): `rustc -C opt-level=3 -C lto=fat -C codegen-units=1 --edition 2021 src/main.rs -o nodebench`
 //                   -- zero deps, offline, seconds, every node. These flags MATTER: plain `rustc -O` is opt-level=2
 //                      and the sqrt loop does not vectorize, giving ST ~1.9x slower than the release profile, so
@@ -46,6 +46,47 @@ fn cpu_work(iters: u64) -> f64 {
         s += (i as f64).sqrt();
     }
     s
+}
+
+/// Self-made contention for `--saturated`: cores-1 spinning threads plus one memory-churn thread, so ST/MT/MEM are
+/// timed the way a busy node runs them. Dropping the guard stops and joins every thread, on any return path.
+struct CoLoad {
+    stop: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    threads: Vec<thread::JoinHandle<()>>,
+}
+impl CoLoad {
+    fn start(cores: usize) -> CoLoad {
+        use std::sync::atomic::{AtomicBool, Ordering};
+        let stop = std::sync::Arc::new(AtomicBool::new(false));
+        let mut threads = Vec::new();
+        for _ in 0..cores.saturating_sub(1) {
+            let flag = stop.clone();
+            threads.push(thread::spawn(move || {
+                while !flag.load(Ordering::Relaxed) {
+                    black_box(cpu_work(black_box(1_000_000)));
+                }
+            }));
+        }
+        let flag = stop.clone();
+        threads.push(thread::spawn(move || {
+            let size = 32usize * 1024 * 1024;
+            let src = vec![3u8; size];
+            let mut dst = vec![0u8; size];
+            while !flag.load(Ordering::Relaxed) {
+                dst.copy_from_slice(black_box(&src));
+                black_box(&dst[0]);
+            }
+        }));
+        CoLoad { stop, threads }
+    }
+}
+impl Drop for CoLoad {
+    fn drop(&mut self) {
+        self.stop.store(true, std::sync::atomic::Ordering::Relaxed);
+        for t in self.threads.drain(..) {
+            let _ = t.join();
+        }
+    }
 }
 
 /// A directory that deletes itself (and everything under it) when dropped — on normal exit OR early return.
@@ -266,6 +307,9 @@ fn gpu_probe() -> String {
 
 fn main() {
     let iters: u64 = 50_000_000;
+    let saturated = std::env::args().any(|a| a == "--saturated");
+    let cores = thread::available_parallelism().map(|x| x.get()).unwrap_or(1);
+    let co_load = if saturated { Some(CoLoad::start(cores)) } else { None };
 
     // single-thread: best of 3 (+warmup)
     let st_ms = best_secs(true, 3, || {
@@ -295,12 +339,13 @@ fn main() {
         }
     });
     let mem_gbps = (size as f64 * reps as f64) / mem_secs / 1e9;
+    drop(co_load);
 
     let (dwr, drd, dsync, diops) = disk_probe();
     let gpu = gpu_probe();
 
     println!(
-        "CORES={} ST_MS={:.2} MT_MS={:.2} MEM_GBPS={:.2} DWR_MBPS={:.1} DRD_MBPS={:.1} DSYNC_MS={:.3} DIOPS={:.0} {}",
-        n, st_ms, mt_ms, mem_gbps, dwr, drd, dsync, diops, gpu
+        "CORES={} ST_MS={:.2} MT_MS={:.2} MEM_GBPS={:.2} DWR_MBPS={:.1} DRD_MBPS={:.1} DSYNC_MS={:.3} DIOPS={:.0} {} STATE={}",
+        n, st_ms, mt_ms, mem_gbps, dwr, drd, dsync, diops, gpu, if saturated { "sat" } else { "idle" }
     );
 }

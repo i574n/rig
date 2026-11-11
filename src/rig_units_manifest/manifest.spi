@@ -1,0 +1,158 @@
+///- --package .
+:# manifest static =
+    :< sm'_operators
+    :< rig_units_model.shape
+
+:< sm'_operators
+:< rig_units_model.shape
+
+:~ entry_name (~raw : string) : string =
+    := t = sm'.trim raw |> sm'.replace "\\" "/"
+    := a = ? sm'.starts_with "|" t ?> sm'.substring 1i32 (sm'.length t - 1i32) t |: t
+    := b = ? sm'.ends_with "-" a ?> sm'.substring 0i32 (sm'.length a - 1i32) a |: a
+    := c = ? sm'.ends_with "/" b ?> sm'.substring 0i32 (sm'.length b - 1i32) b |: b
+    := at = sm'.last_index_of "/" c
+    ? at < 0i32 ?> c |: sm'.substring (at + 1i32) (sm'.length c - at - 1i32) c
+
+:~ lines_of (~text : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" text)
+
+:~ spiproj_section (~text : string) (~section : string) : list string =
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        ? sm'.starts_with (section ++# ":") line
+        ?> found, !+
+        |? inside && sm'.starts_with "    " line && sm'.trim line <> ""
+        ?> listm.append found [ entry_name line ], !+
+        |? sm'.trim line = ""
+        ?> found, inside
+        |: found, !-
+    := found, _ = lines_of text |> listm.fold step ([], !-)
+    found
+
+:~ quoted_items (~inner : string) : list string =
+    := item = \ (raw : string) => sm'.trim raw |> sm'.replace "'" "" |> sm'.replace "\"" "" |> sm'.replace "]" ""
+    sm'.split_list "," inner |> listm.map item |> listm'.filter (\ (s : string) => s <> "") |> listm.map entry_name
+
+:~ toml_list (~text : string) (~key : string) : list string =
+    := pick = \ (found : list string) (line : string) =>
+        := plain = sm'.trim line
+        := open_at = sm'.index_of "[" plain
+        := close_at = sm'.last_index_of "]" plain
+        ? sm'.starts_with (key ++# " = [") plain && close_at > open_at
+        ?> listm.append found (quoted_items (sm'.substring (open_at + 1i32) (close_at - open_at - 1i32) plain))
+        |: found
+    lines_of text |> listm.fold pick []
+
+:~ toml_block (~text : string) (~key : string) : list string =
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        := plain = sm'.trim line
+        ? sm'.starts_with (key ++# " = '''") plain
+        ?> found, !+
+        |? inside && plain = "'''"
+        ?> found, !-
+        |? inside && plain <> ""
+        ?> listm.append found [ plain ], !+
+        |: found, inside
+    := found, _ = lines_of text |> listm.fold step ([], !-)
+    found
+
+:~ quoted_after (~key : string) (~line : string) : string =
+    := plain = sm'.trim line
+    ? sm'.starts_with (key ++# " = \"") plain |> not
+    ?> ""
+    |:
+        := rest = sm'.substring (sm'.length key + 4i32) (sm'.length plain - sm'.length key - 4i32) plain
+        := close_at = sm'.index_of "\"" rest
+        ? close_at < 0i32 ?> "" |: sm'.substring 0i32 close_at rest
+
+:~ cargo_value (~cargo : string) (~key : string) : string =
+    := first = \ (found : string) (line : string) => ? found <> "" ?> found |: quoted_after key line
+    lines_of cargo |> listm.fold first ""
+
+:~ path_dep (~line : string) : string =
+    := at = sm'.index_of "path = \"" line
+    := rest = ? at < 0i32 ?> "" |: sm'.substring (at + 8i32) (sm'.length line - at - 8i32) line
+    := close_at = sm'.index_of "\"" rest
+    ? at < 0i32 || close_at < 0i32 ?> "" |: entry_name (sm'.substring 0i32 close_at rest)
+
+:~ cargo_path_deps (~cargo : string) : list string =
+    lines_of cargo |> listm.map path_dep |> listm'.filter (\ (d : string) => d <> "")
+
+:~ unit_of (~name : string) (~manifest : string) (toml_form : bool) (~cargo : string) : unit =
+    := listed = \ (key : string) => ? toml_form ?> toml_list manifest key |: spiproj_section manifest key
+    := modules = ? toml_form ?> toml_block manifest "modules" |: spiproj_section manifest "modules"
+    {
+        name = name
+        kind = kind_of_word (cargo_value cargo "kind")
+        packages = listed "packages"
+        links = listed "link"
+        deps = cargo_path_deps cargo
+        entry = cargo_value cargo "entry"
+        modules = modules
+        crate = cargo <> ""
+    }
+
+:~ members_of (~workspace : string) : list string =
+    := head = "members = ["
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        := plain = sm'.trim line
+        := closed = sm'.ends_with "]" plain
+        ? sm'.starts_with head plain
+        ?> listm.append found (quoted_items (sm'.replace head "" plain)), (closed |> not)
+        |? inside && sm'.starts_with "]" plain
+        ?> found, !-
+        |? inside
+        ?> listm.append found (quoted_items plain), !+
+        |: found, !-
+    := found, _ = lines_of workspace |> listm.fold step ([], !-)
+    found
+
+:~ names_in (~dir : string) : list string =
+    file_system.read_directory_names dir
+    |> resultm.unwrap'
+    |> am'.vec_fold' (\ names name => sm'.from_std_string name :: names) []
+    |> listm.rev
+
+:~ unit_at (~root : string) (~name : string) : option unit =
+    := dir = root ++# "/" ++# name
+    := spiproj = file_system.read_text_or_empty (dir ++# "/package.spiproj")
+    := toml = file_system.read_text_or_empty (dir ++# "/spiral.toml")
+    := cargo = file_system.read_text_or_empty (dir ++# "/Cargo.toml")
+    ? spiproj <> ""
+    ?> Some (unit_of name spiproj !- cargo)
+    |? toml <> ""
+    ?> Some (unit_of name toml !+ cargo)
+    |: None
+
+:~ units_under (~root : string) : list unit =
+    := add = \ (found : list unit) (name : string) =>
+        ?= unit_at root name ?|
+        | Some u => u :: found
+        | None => found
+    names_in root |> listm.fold add [] |> listm.rev
+
+:~ rows_under (~root : string) : array_base unit_row = rows_of (units_under (sm'.replace "\\" "/" root))
+
+:~ members_under (~root : string) : array_base string =
+    base_of_list (members_of (file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/Cargo.toml")))
+
+///> rust
+:# both_manifest_forms_parse_into_the_same_unit_shape =
+    := toml_head = "packageDir = '../lib'\npackages = ['|core-', 'spiral-', '../tu_model-']\n"
+    := toml = toml_head ++# "link = ['../tu_model-']\nmodules = '''\nfeature\ntu_feature\n'''\n"
+    := meta = "[package.metadata.spiral]\nentry = \"tu_feature.spi\"\nkind = \"feature\"\n"
+    := cargo = meta ++# "[dependencies]\ntu_model = { path = \"../tu_model\" }\n"
+    := u = unit_of "tu_feature" toml !+ cargo
+    testing.expect (u.packages = [ "core"; "spiral"; "tu_model" ] && u.links = [ "tu_model" ]) "toml lists"
+    testing.expect (u.modules = [ "feature"; "tu_feature" ] && u.deps = [ "tu_model" ]) "toml modules and deps"
+    testing.expect (u.kind = Feature && u.entry = "tu_feature.spi") "toml kind and entry"
+    := proj_head = "packages:\n    |core-\n    spiral-\n    rig_jobs\n    rig_path_first\n"
+    := spiproj = proj_head ++# "link:\n    rig_path_first\nmodules:\n    env_adopt\n"
+    := v = unit_of "rig_job_env" spiproj !- "[dependencies]\nrig-path-first = { path = \"../rig_path_first\" }\n"
+    testing.expect (v.links = [ "rig_path_first" ] && v.deps = [ "rig_path_first" ] && v.kind = Plain) "spiproj"
+    testing.expect (members_of "[workspace]\nmembers = [\n    \"a\",\n    \"b\",\n]\n" = [ "a"; "b" ]) "members"
+    testing.expect (members_of "members = [\"a\", \"b\"]\nother = 1\n" = [ "a"; "b" ]) "one-line members"
+
+:= main () : i32 =
+    export "rig_units_rows_under" rows_under
+    export "rig_units_members_under" members_under
+    0i32

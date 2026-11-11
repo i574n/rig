@@ -1,0 +1,34 @@
+:< sm'_operators
+:< gap
+:< agile_mutation_policy.model
+
+:= usage () : string =
+    "usage: agile gap <root> <title> --verb <verb> --as <lane> [--exit <n>] [--argv <text>] [--cwd <dir>]"
+
+:= gap_failure (~reason : string) : i32 =
+    workspace_primitives.console.stderr_failure ("agile gap rejected: " ++# reason)
+
+:= gap_extras (request : gap_request) =
+    := note, author = gap_note request, request.author
+    { estimate = "30"; load = "light"; assignee = "agent"; deps = ""; note = note; author = author }
+
+:~ gap_filed (~root : string) (request : gap_request) : i32 =
+    := state = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+    ? state = ""
+    ?> gap_failure "state/agile.spi is missing or empty"
+    |:
+        := id = free_id state (gap_id_base request) 1i32
+        := tags, extras = gap_tags request, gap_extras request
+        agile_task_creation.task_creation.agile_add root id AgileTaskKind AgileP1 AgileD2 request.title tags extras
+
+:~ gap_entry () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: title :: words =>
+        ?= request_checked (request_from words (titled title)) ?|
+        | RequestRefused reason => gap_failure reason
+        | RequestRead request => gap_filed root request
+    | _ => gap_failure (usage ())
+
+:= main () : i32 =
+    export "rig_agile_gap_run" gap_entry
+    0i32

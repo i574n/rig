@@ -28,6 +28,10 @@
     := started = started_in (listing_of (listed_only ())) (pid_of pid) * 1000u64
     started > 0u64 && started + 2000u64 > start_ms && start_ms + 2000u64 > started
 
+:= group_signalled (signal : string) (group : string) : bool =
+    $'std::process::Command::new("kill").args([&*!signal, "--", &*!group]).output().is_ok_and(|o| o.status.success())'
+    : bool
+
 ///> rust --deps sysinfo="0.38.4"
 :# a_listed_process_runs_and_an_unused_pid_does_not =
     testing.expect (process_running (own_pid ())) "this process is running"
@@ -39,3 +43,6 @@
     testing.expect (process_started_at own (started + 500u64)) "this process at its own start time"
     testing.expect (process_started_at own (started + 60000u64) |> not) "a reused pid has another start time"
     testing.expect (process_started_at 4294967290u32 started |> not) "an unused pid never matches"
+///> rust --deps sysinfo="0.38.4"
+:# signalling_a_malformed_group_fails_without_touching_any_process =
+    testing.expect (group_signalled "-0" "-not-a-group" |> not) "kill refuses a non-numeric group"

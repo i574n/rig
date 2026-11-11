@@ -1,0 +1,143 @@
+///- --package .
+:# replacement static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:= name_bytes () : string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+
+:~ ^ name_end (~text : string) (index : i32) : i32 =
+    ? sm'.length text <= index
+    ?> index
+    |? sm'.contains (sm'.substring index 1i32 text) (name_bytes ())
+    ?> name_end text (index + 1i32)
+    |: index
+
+:~ ^ references_from (~text : string) (index : i32) : list string =
+    := size = sm'.length text
+    ? size <= index + 1i32
+    ?> []
+    |? sm'.substring index 1i32 text <> "$"
+    ?> references_from text (index + 1i32)
+    |:
+        := next = sm'.substring (index + 1i32) 1i32 text
+        := rest = sm'.substring (index + 2i32) (size - index - 2i32) text
+        := close = sm'.index_of "}" rest
+        ? next = "$"
+        ?> references_from text (index + 2i32)
+        |? next = "{" && close > 0i32
+        ?> sm'.substring 0i32 close rest :: references_from text (index + 3i32 + close)
+        |:
+            := stop = name_end text (index + 1i32)
+            ? stop = index + 1i32
+            ?> references_from text (index + 1i32)
+            |: sm'.substring (index + 1i32) (stop - index - 1i32) text :: references_from text stop
+
+:~ ^ unknown_reference (groups : list string) (references : list string) : string =
+    ?= references ?|
+    | [] => ""
+    | reference :: rest => ? listm'.contains reference groups ?> unknown_reference groups rest |: reference
+
+:~ ^ digits_end (~text : string) (index : i32) : i32 =
+    ? sm'.length text <= index
+    ?> index
+    |? sm'.contains (sm'.substring index 1i32 text) "0123456789"
+    ?> digits_end text (index + 1i32)
+    |: index
+
+:~ ^ known_prefix (groups : list string) (~reference : string) (cut : i32) : i32 =
+    ? cut <= 0i32
+    ?> 0i32
+    |? listm'.contains (sm'.substring 0i32 cut reference) groups
+    ?> cut
+    |: known_prefix groups reference (cut - 1i32)
+
+:~ braced_hint (groups : list string) (~reference : string) : string =
+    := cut = known_prefix groups reference (digits_end reference 0i32)
+    := index = sm'.substring 0i32 cut reference
+    := tail = sm'.substring cut (sm'.length reference - cut) reference
+    ? cut > 0i32 ?> "; did you mean ${" ++# index ++# "}" ++# tail ++# "?" |: ""
+
+:~ char_at (~text : string) (index : i32) : string =
+    ? index < sm'.length text ?> sm'.substring index 1i32 text |: ""
+
+:~ ^ class_end (~pattern : string) (index : i32) : i32 =
+    := c = char_at pattern index
+    ? c = ""
+    ?> index
+    |? c = "\\"
+    ?> class_end pattern (index + 2i32)
+    |? c = "]"
+    ?> index + 1i32
+    |: class_end pattern (index + 1i32)
+
+:~ class_body (~pattern : string) (index : i32) : i32 =
+    := after_caret = ? char_at pattern index = "^" ?> index + 1i32 |: index
+    ? char_at pattern after_caret = "]" ?> after_caret + 1i32 |: after_caret
+
+:~ ^ group_name_end (~pattern : string) (index : i32) : i32 =
+    := c = char_at pattern index
+    ? c = "" || c = ">" ?> index |: group_name_end pattern (index + 1i32)
+
+:~ ^ numbers_upto (n : i32) (found : list string) : list string =
+    ? n < 0i32 ?> found |: numbers_upto (n - 1i32) (sm'.decimal_text n :: found)
+
+:~ ^ groups_from (~pattern : string) (index : i32) (count : i32) (named : list string) : list string =
+    := c = char_at pattern index
+    ? c = ""
+    ?> listm.append (numbers_upto count []) named
+    |? c = "\\"
+    ?> groups_from pattern (index + 2i32) count named
+    |? c = "["
+    ?> groups_from pattern (class_end pattern (class_body pattern (index + 1i32))) count named
+    |? c <> "("
+    ?> groups_from pattern (index + 1i32) count named
+    |? char_at pattern (index + 1i32) <> "?"
+    ?> groups_from pattern (index + 1i32) (count + 1i32) named
+    |:
+        := start = ? char_at pattern (index + 2i32) = "P" ?> index + 3i32 |: index + 2i32
+        := marker, after = char_at pattern start, char_at pattern (start + 1i32)
+        ? marker = "<" && after <> "=" && after <> "!"
+        ?>
+            := stop = group_name_end pattern (start + 1i32)
+            := name = sm'.substring (start + 1i32) (stop - start - 1i32) pattern
+            groups_from pattern (stop + 1i32) (count + 1i32) (listm.append named [ name ])
+        |: groups_from pattern (index + 1i32) count named
+
+:~ pattern_groups (~pattern : string) : string = groups_from pattern 0i32 0i32 [] |> sm'.concat_list ","
+
+:~ replacement_problem (~groups : string) (~replacement : string) : string =
+    := known = sm'.split_list "," groups
+    := reference = unknown_reference known (references_from replacement 0i32)
+    ? reference = ""
+    ?> ""
+    |:
+        := head = "the replacement names group " ++# reference ++# ", which the pattern does not define"
+        head ++# " (groups " ++# sm'.replace "," ", " groups ++# ")" ++# braced_hint known reference
+
+:~ group_problem ((pattern, replacement) : string * string) : string =
+    replacement_problem (pattern_groups pattern) replacement
+
+///> rust
+:# a_replacement_may_name_only_groups_the_pattern_defines =
+    testing.expect (references_from "timeout ${1}000ms" 0i32 = [ "1" ]) "a braced group"
+    testing.expect (references_from "w$1 $$ ${name}x $id_2." 0i32 = [ "1"; "name"; "id_2" ]) "bare, escaped, braced"
+    testing.expect (references_from "cost $ 5 and $" 0i32 = []) "a lone dollar is text"
+    testing.expect (replacement_problem "0,1" "timeout ${1}000ms" = "") "a known group passes"
+    testing.expect (replacement_problem "0,1,year,2" "${year}-$2" = "") "names and numbers both pass"
+    := expected = "the replacement names group 1000ms, which the pattern does not define (groups 0, 1); did you mean "
+    testing.expect (replacement_problem "0,1" "timeout $1000ms" = expected ++# "${1}000ms?") "the silent empty group"
+    := named = "the replacement names group yeer, which the pattern does not define (groups 0, 1, year)"
+    testing.expect (replacement_problem "0,1,year" "$yeer" = named) "a misspelled name has no hint"
+
+///> rust
+:# the_groups_come_from_the_pattern_text =
+    testing.expect (pattern_groups "timeout (\\d+)s" = "0,1") "one capturing group"
+    testing.expect (pattern_groups "(?P<year>\\d{4})-(?<m>\\d\\d)" = "0,1,2,year,m") "named groups, both spellings"
+    testing.expect (pattern_groups "(?:a)(?i)\\(x\\)[()](?=y)(?<!z)" = "0") "no capture in these"
+    testing.expect (pattern_groups "[]()](b)[^]x](c)" = "0,1,2") "a bracket first in a class is literal"
+    testing.expect (group_problem ("v(\\d+)", "w$1") = "") "the do edit test pattern passes"
+
+:= main () : i32 =
+    export "rig_do_replacement_problem" group_problem
+    0i32

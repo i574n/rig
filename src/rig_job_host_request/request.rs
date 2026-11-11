@@ -23,7 +23,6 @@ enum US1 {
     US1_HostMissing,
     US1_HostRunning(u64),
 }
-pub struct Mut2 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US2 {
     US2_SupervisorUp(u64),
@@ -517,5 +516,5 @@ pub fn rig_job_host_revive() -> Rc<str> {
 pub fn rig_job_host_request(v0: &str) -> Rc<str> {
     closure3()(Rc::<str>::from(v0))
 }
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut2;
 pub type SpiralShape_2617b4e49837 = Mut0;
-pub type SpiralShape_97df63ebabc3 = Mut2;

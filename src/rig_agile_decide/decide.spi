@@ -1,0 +1,79 @@
+///- --package .
+:# decide static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| boundary =
+    | GitHistory :: boundary
+    | Credential :: boundary
+    | Spend :: boundary
+    | PublicPost :: boundary
+    | Elevation :: boundary
+    | SecuritySetting :: boundary
+    | PersistentConfig :: boundary
+
+:| verdict =
+    | Passed :: verdict
+    | Failed :: verdict
+
+:== choice = { picked : string }
+
+:| resolution r =
+    | Settled :: string -> resolution ()
+    | ByTest :: string -> resolution verdict
+    | ByBench :: string -> resolution choice
+    | ByModel :: string -> resolution choice
+    | ByDefault :: string * string -> resolution choice
+    | UserBoundary :: boundary * string -> resolution ()
+
+:! any_resolution = \? r. resolution r
+
+:| certainty =
+    | Known :: certainty
+    | Likely :: certainty
+    | Open :: certainty
+
+:== open_decision = { item : string }
+
+:== ruled_decision = { item : string; rule : string }
+
+:== applied_decision = { item : string; rule : string; result : string }
+
+:~ by_default (~rule : string) (~backup : string) : option (resolution choice) =
+    ? sm'.trim backup = "" ?> None |: Some (ByDefault (rule, backup))
+
+:~ write_rule (d : open_decision) (~rule : string) : ruled_decision = { item = d.item; rule = rule }
+
+:~ record_result (d : ruled_decision) (~result : string) : applied_decision =
+    { item = d.item; rule = d.rule; result = result }
+
+:= agent_ready \* r. (x : resolution r) : bool =
+    ?= x ?|
+    | UserBoundary _ => !-
+    | _ => !+
+
+:= user_step \* r. (x : resolution r) : option (boundary * string) =
+    ?= x ?|
+    | UserBoundary (b, step) => Some (b, step)
+    | _ => None
+
+:~ certainty_of (~word : string) : option certainty =
+    ? word = "known" ?> Some Known |? word = "likely" ?> Some Likely |? word = "open" ?> Some Open |: None
+
+:~ certainty_missing (~priority : string) (c : option certainty) : bool = priority = "P0" && c = None
+
+///> rust
+:# only_user_boundaries_reach_the_user_and_results_need_a_written_rule =
+    testing.expect (agent_ready (ByTest "the probe passes") && agent_ready (Settled "note 4")) "rules are agent work"
+    testing.expect (agent_ready (UserBoundary (Spend, "rent the GPU")) |> not) "a spend boundary waits on the user"
+    := push = UserBoundary (GitHistory, "push the branch")
+    testing.expect (user_step push = Some (GitHistory, "push the branch")) "the user queue shows the prepared step"
+    testing.expect (user_step (ByModel "smaller diff wins") = None) "a model rule never reaches the user queue"
+    testing.expect (by_default "keep the current layout" " " = None) "a default without a backup cannot be built"
+    testing.expect (by_default "keep the current layout" "archive copy" <> None) "with a backup it can"
+    := ruled = write_rule { item = "A-1" } "bench: lower p50 wins"
+    := applied = record_result ruled "candidate b, p50 41 ms"
+    testing.expect (applied.rule = "bench: lower p50 wins" && applied.item = "A-1") "rule before result"
+    testing.expect (certainty_missing "P0" None && (certainty_missing "P1" None |> not)) "only P0 needs a certainty"
+    testing.expect (certainty_of "likely" = Some Likely && certainty_of "maybe" = None) "certainty words"

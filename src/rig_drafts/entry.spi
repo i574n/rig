@@ -1,0 +1,14 @@
+:< sm'_operators
+
+:~ drafts_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: verb :: _ ?& verb = "list" => rig_drafts_list.listing.list_entry ()
+    | _ :: verb :: _ ?& verb = "put" => rig_drafts_put.putting.put_entry ()
+    | _ :: verb :: _ ?& verb = "promote" => rig_drafts_promote.promoting.promote_entry ()
+    | _ =>
+        console.write_error_line "rig error: drafts put|list|promote"
+        2i32
+
+:= main () : i32 =
+    export "rig_drafts_run" drafts_run
+    0i32

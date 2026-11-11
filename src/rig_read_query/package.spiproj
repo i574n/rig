@@ -5,5 +5,6 @@ packages:
     rig_receipt
 modules:
     model
+    encoding
     slice
     read

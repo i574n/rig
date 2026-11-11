@@ -1,6 +1,7 @@
 /src/target/
 /infra/**/target/
 /kit.exe
+/rig.exe
 /kit
 /kit.exe.*
 /src/**/*.c

@@ -1,15 +1,6 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -42,20 +33,20 @@ enum US3 {
 }
 fn command_line_argument_count_2() -> i32 {
     let v0: usize = std::env::args().count();
-    let mut v1: i32 = ((v0) as i32);
-    let mut v2: i32 = v1.wrapping_sub(1i32);
+    let v1: i32 = ((v0) as i32);
+    let v2: i32 = v1.wrapping_sub(1i32);
     v2
 }
 fn command_line_argument_3(mut v0: i32) -> Rc<str> {
-    let mut v1: i32 = v0.wrapping_add(1i32);
-    let mut v2: usize = ((v1) as usize);
+    let v1: i32 = v0.wrapping_add(1i32);
+    let v2: usize = ((v1) as usize);
     let v3: Rc<str> = Rc::<str>::from(std::env::args().nth(v2).unwrap_or_default());
     v3
 }
 fn arguments_from_1(mut v0: i32) -> Rc<UH0> {
-    let mut v1: bool = v0 >= 0i32;
+    let v1: bool = v0 >= 0i32;
     let v4: bool = if v1 {
-        let mut v2: i32 = command_line_argument_count_2();
+        let v2: i32 = command_line_argument_count_2();
         let v3: bool = v0 < v2;
         v3
     } else {
@@ -83,7 +74,7 @@ fn dropped_4(mut v0: i32, mut v1: Rc<UH0>) -> Rc<UH0> {
     loop {
         match &*v1 {
             UH0::UH0_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2.clone();
+                let v2: Rc<str> = v2.clone();
                 let v3: Rc<UH0> = v3.clone();
                 let v4: bool = v0 > 0i32;
                 if v4 {
@@ -100,123 +91,48 @@ fn dropped_4(mut v0: i32, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn method8(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method9(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn valued_applied_7(mut v0: US4, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: Rc<str>, mut v7: bool, mut v8: Rc<str>, mut v9: Rc<str>, mut v10: bool) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) {
-    let v11: i32 = (v1.clone().len() as i32);
-    let v12: i32 = 0i32;
-    let v13: i32 = method8(v1.clone(), v11, v12);
-    let v14: i32 = v11.wrapping_sub(1i32);
-    let v15: Rc<str> = string_slice(&v1.clone(), v13 as i64, v14 as i64);
-    let v16: i32 = (v15.clone().len() as i32);
-    let v17: i32 = method9(v15.clone(), v16);
-    let v18: Rc<str> = string_slice(&v15, 0i32 as i64, v17 as i64);
-    let (mut v69, mut v70, mut v71, mut v72, mut v73, mut v74, mut v75, mut v76, mut v77): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &v0 {
+    let v11: Rc<str> = Rc::<str>::from((v1).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+    let (mut v62, mut v63, mut v64, mut v65, mut v66, mut v67, mut v68, mut v69, mut v70): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &v0 {
         US4::US4_ValuedAs => {
-            let v19: bool = &*v18 == "";
-            if v19 {
+            let v12: bool = &*v11 == "";
+            if v12 {
                 (v2, v3, v4, v5, v6, v7, v8, v9, false)
             } else {
-                (v2, v3, v4, v5, v18, v7, v8, v9, v10)
+                (v2, v3, v4, v5, v11, v7, v8, v9, v10)
             }
         }
         _ => {
-            let (mut v60, mut v61, mut v62, mut v63, mut v64, mut v65, mut v66, mut v67, mut v68): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &v0 {
+            let (mut v53, mut v54, mut v55, mut v56, mut v57, mut v58, mut v59, mut v60, mut v61): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &v0 {
                 US4::US4_ValuedExpectAt => {
-                    let v29: bool = &*v18 == "";
-                    if v29 {
+                    let v22: bool = &*v11 == "";
+                    if v22 {
                         (v2, v3, v4, v5, v6, v7, v8, v9, false)
                     } else {
-                        let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                        (v2, v3, v4, v5, v6, v7, v18, v30, v10)
+                        let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                        (v2, v3, v4, v5, v6, v7, v11, v23, v10)
                     }
                 }
                 _ => {
-                    let (mut v51, mut v52, mut v53, mut v54, mut v55, mut v56, mut v57, mut v58, mut v59): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match v0 {
+                    let (mut v44, mut v45, mut v46, mut v47, mut v48, mut v49, mut v50, mut v51, mut v52): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match v0 {
                         US4::US4_ValuedExpectPrefix => {
-                            let v40: bool = &*v1 == "";
-                            if v40 {
+                            let v33: bool = &*v1 == "";
+                            if v33 {
                                 (v2, v3, v4, v5, v6, v7, v8, v9, false)
                             } else {
-                                let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                (v2, v3, v4, v5, v6, v7, v41, v1, v10)
+                                let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                (v2, v3, v4, v5, v6, v7, v34, v1, v10)
                             }
                         }
                         _ => unreachable!(),
                     };
-                    (v51, v52, v53, v54, v55, v56, v57, v58, v59)
+                    (v44, v45, v46, v47, v48, v49, v50, v51, v52)
                 }
             };
-            (v60, v61, v62, v63, v64, v65, v66, v67, v68)
+            (v53, v54, v55, v56, v57, v58, v59, v60, v61)
         }
     };
-    (v69, v70, v71, v72, v73, v74, v75, v76, v77)
+    (v62, v63, v64, v65, v66, v67, v68, v69, v70)
 }
 fn flags_read_6(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>, mut v5: Rc<str>, mut v6: bool, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: bool) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) {
     loop {
@@ -304,8 +220,8 @@ fn flags_read_6(mut v0: Rc<UH0>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<st
 fn args_of_5(mut v0: &Rc<UH0>) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) {
     let (mut v70, mut v71, mut v72, mut v73, mut v74, mut v75, mut v76, mut v77, mut v78): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = match &**v0 {
         UH0::UH0_Cons(v1, v2) => {
-            let mut v1: Rc<str> = v1.clone();
-            let mut v2: Rc<UH0> = v2.clone();
+            let v1: Rc<str> = v1.clone();
+            let v2: Rc<UH0> = v2.clone();
             match Rc::unwrap_or_clone(v2) {
                 UH0::UH0_Cons(v3, v4) => {
                     let v3: Rc<str> = v3;
@@ -361,8 +277,8 @@ fn args_of_5(mut v0: &Rc<UH0>) -> (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, 
     (v70, v71, v72, v73, v74, v75, v76, v77, v78)
 }
 fn note_args_read_0(mut v0: i32) -> Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool)>>> {
-    let mut v1: i32 = 0i32;
-    let mut v2: Rc<UH0> = arguments_from_1(v1);
+    let v1: i32 = 0i32;
+    let v2: Rc<UH0> = arguments_from_1(v1);
     let v3: Rc<UH0> = dropped_4(v0, v2);
     let (mut v4, mut v5, mut v6, mut v7, mut v8, mut v9, mut v10, mut v11, mut v12): (Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, bool, Rc<str>, Rc<str>, bool) = args_of_5(&v3);
     Rc::new(RefCell::new(vec![(v4, v5, v6, v7, v8, v9, v10, v11, v12)]))

@@ -14,5 +14,6 @@ name = "rig_agile_lint"
 path = "lint_cli.rs"
 
 [dependencies]
+rig-agile-id-prefix = { path = "../rig_agile_id_prefix" }
 agile-quality-lint = { path = "../agile_quality_lint" }
 agile-quality-state = { path = "../agile_quality_state" }

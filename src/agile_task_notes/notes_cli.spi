@@ -59,13 +59,13 @@
     := home = fixture_text_of root
     $'{ let children = (0..!count).map(|k| { let mut command = std::process::Command::new(&*!binary); \
         command.current_dir(std::env::temp_dir()).args(["agile", "note", &*!path, "ID-A", &format\!("race note {k}"), \
-        "--as", "racer"]).env("RIG_LEASE_POLICY", "renewing").env("KIT_LEASE_POLICY", "renewing").env("RIG_CONFIG_HOME", \
-        &*!home).env("KIT_CONFIG_HOME", &*!home).stdout(std::process::Stdio::null()) \
-        .stderr(std::process::Stdio::null()); for name in ["KIT_LEASE_ROOT", "RIG_LEASE_ROOT", \
-        "KIT_CONTROL_READ_ONLY", "RIG_CONTROL_READ_ONLY", "KIT_AGILE_TEST_PAUSE_MS", "RIG_AGILE_TEST_PAUSE_MS", "AI_AGENT", \
-        "CLAUDECODE"] { command.env_remove(name); } command.spawn().unwrap() }).collect::<Vec<_>>(); \
-        children.into_iter().map(|mut child| child.wait().map(|status| \
-        status.success()).unwrap_or(false)).filter(|ok| *ok).count() as i32 }' : i32
+        "--as", "racer"]).env("RIG_LEASE_POLICY", "renewing").env("KIT_LEASE_POLICY", \
+        "renewing").env("RIG_CONFIG_HOME", &*!home).env("KIT_CONFIG_HOME", \
+        &*!home).stdout(std::process::Stdio::null()) .stderr(std::process::Stdio::null()); \
+        for name in ["KIT_LEASE_ROOT", "RIG_LEASE_ROOT", "KIT_CONTROL_READ_ONLY", "RIG_CONTROL_READ_ONLY", \
+        "KIT_AGILE_TEST_PAUSE_MS", "RIG_AGILE_TEST_PAUSE_MS", "AI_AGENT", "CLAUDECODE"] { command.env_remove(name); \
+        } command.spawn().unwrap() }).collect::<Vec<_>>(); children.into_iter().map(|mut child| \
+        child.wait().map(|status| status.success()).unwrap_or(false)).filter(|ok| *ok).count() as i32 }' : i32
 
 ///> rust
 :# agile_add_lands_a_groomed_item_in_one_call =
@@ -195,13 +195,17 @@
     := root = backlog_new "rename"
     := _ = accepted root "note" (Arg ("ID-A", Arg ("moves with the task", NoArgs)))
     := _ = accepted root "edit" (Arg ("ID-A", Arg ("estimate", Arg ("2h", NoArgs))))
+    := _ = accepted root "edit" (Arg ("ID-A", Arg ("--wait", Arg ("train:T1", NoArgs))))
     := renamed = accepted root "rename" (Arg ("ID-A", Arg ("ID-Z", NoArgs)))
     same
         (receipt_shape renamed "rig agile rename " (volatile ()))
         (
             "rig agile rename ok old=ID-A new=ID-Z items=3 deps_rewritten=1 deps_in=ID-B titles_mentioning_old=1 "
-            ^^ "titles_in=ID-C bytes_before=N bytes_after=N elapsed_ms=N"
+            ^^ "titles_in=ID-C side_rows=1 side_bindings=1 bytes_before=N bytes_after=N elapsed_ms=N"
         )
+    := waits = fixture_read root "state/waits.spi"
+    shows waits "inl wait_of_id_z () = Waits (\"ID-Z\", \"train\", \"T1\")"
+    hides waits "\"ID-A\""
     := state = state_text root
     shows state "inl id_z () = Task (\"ID-Z\","
     shows state "inl planning_of_id_z () = Planning (\"ID-Z\","

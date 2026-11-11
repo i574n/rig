@@ -1,7 +1,7 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-use rig_do_verbs::{write_verb, option_write_verb};
+use rig_do_verbs::{option_write_verb, write_verb};
 fn string_concat(parts: &[&str]) -> Rc<str> {
     let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
     let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
@@ -31,45 +31,46 @@ enum US3 {
     US3_Succeeded,
     US3_Failed,
 }
-fn file_text_1(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
-    let mut v2: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(std::path::Path::new(&*v0).join(&*v1)).unwrap_or_default());
-    v2
-}
-fn uses_crlf_2(mut v0: Rc<str>) -> bool {
-    let v1: bool = (v0).contains(&format!("{}{}", char::from(13u8), char::from(10u8)));
-    v1
-}
-fn crlf_3() -> Rc<str> {
-    let v0: Rc<str> = std::rc::Rc::<str>::from(format!("{}{}", char::from(13u8), char::from(10u8)));
+fn method3(mut v0: std::path::PathBuf) -> std::path::PathBuf {
     v0
 }
-fn local_offset_minutes_4() -> i64 {
-    let v0: i64 = { #[cfg(windows)] fn offset() -> i64 { #[repr(C)] #[derive(Default)] #[allow(dead_code)] struct WindowsTime { year: u16, month: u16, weekday: u16, day: u16, hour: u16, minute: u16, second: u16, millis: u16 } unsafe extern "system" { fn GetLocalTime(time: *mut WindowsTime); fn GetSystemTime(time: *mut WindowsTime); } let mut local = WindowsTime::default(); let mut universal = WindowsTime::default(); unsafe { GetLocalTime(&mut local); GetSystemTime(&mut universal); } let minutes = |time: &WindowsTime| time.day as i64 * 1440 + time.hour as i64 * 60 + time.minute as i64; let raw = (minutes(&local) - minutes(&universal)).rem_euclid(1440); ((if raw > 840 { raw - 1440 } else { raw }) as f64 / 15.0).round() as i64 * 15 } #[cfg(not(windows))] fn offset() -> i64 { 0 } offset() };
-    v0
-}
-fn clock_filled_5(mut v0: Rc<str>, mut v1: i64) -> Rc<str> {
-    let mut v2: Rc<str> = { let seconds = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|elapsed| elapsed.as_secs() as i64).unwrap_or(0) + v1 * 60; let (days, day_seconds) = (seconds.div_euclid(86400), seconds.rem_euclid(86400)); let shifted = days + 719468; let era = shifted.div_euclid(146097); let of_era = shifted - era * 146097; let year_of_era = (of_era - of_era / 1460 + of_era / 36524 - of_era / 146096) / 365; let of_year = of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100); let month_index = (5 * of_year + 2) / 153; let day = of_year - (153 * month_index + 2) / 5 + 1; let month = if month_index < 10 { month_index + 3 } else { month_index - 9 }; let year = year_of_era + era * 400 + if month <= 2 { 1 } else { 0 }; let formatted = |format: &str| format.replace("yyyy", &format!("{year:04}")).replace("MM", &format!("{month:02}")).replace("dd", &format!("{day:02}")).replace("HH", &format!("{:02}", day_seconds / 3600)).replace("mm", &format!("{:02}", day_seconds / 60 % 60)).replace("ss", &format!("{:02}", day_seconds % 60)); let pattern = regex::Regex::new("[{]clock(?::([^}]*))?[}]").unwrap(); std::rc::Rc::<str>::from(pattern.replace_all(&*v0, |captures: &regex::Captures| formatted(captures.get(1).map(|format| format.as_str()).unwrap_or("HH:mm:ss"))).into_owned()) };
-    v2
-}
-fn ended_with_newline_6(mut v0: Rc<str>) -> bool {
-    let v1: bool = (v0).is_empty() || (v0).ends_with(char::from(10u8));
-    v1
-}
-fn method8(mut v0: std::path::PathBuf) -> std::path::PathBuf {
-    v0
-}
-fn method7(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+fn method2(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let v3: &str = &*v0;
     let v5: std::string::String = String::from(v3);
     let mut v7: std::path::PathBuf = std::path::PathBuf::from(v5);
     let v9: &str = &*v1;
     let v11: std::string::String = String::from(v9);
     let mut v13: std::path::PathBuf = v7.join(v11);
-    let mut v14: std::path::PathBuf = method8(v13);
+    let mut v14: std::path::PathBuf = method3(v13);
     let mut v16: std::path::Display = v14.display();
     let v18: std::string::String = format!("{}", v16);
     let v20: Rc<str> = Rc::<str>::from(String::as_str(&v18));
     v20
+}
+fn file_text_1(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+    let mut v2: Rc<str> = method2(v0, v1);
+    let v3: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v2).unwrap_or_default().as_str());
+    v3
+}
+fn uses_crlf_4(mut v0: Rc<str>) -> bool {
+    let v1: bool = (v0).contains(&format!("{}{}", char::from(13u8), char::from(10u8)));
+    v1
+}
+fn crlf_5() -> Rc<str> {
+    let v0: Rc<str> = std::rc::Rc::<str>::from(format!("{}{}", char::from(13u8), char::from(10u8)));
+    v0
+}
+fn local_offset_minutes_6() -> i64 {
+    let v0: i64 = { #[cfg(windows)] fn offset() -> i64 { #[repr(C)] #[derive(Default)] #[allow(dead_code)] struct WindowsTime { year: u16, month: u16, weekday: u16, day: u16, hour: u16, minute: u16, second: u16, millis: u16 } unsafe extern "system" { fn GetLocalTime(time: *mut WindowsTime); fn GetSystemTime(time: *mut WindowsTime); } let mut local = WindowsTime::default(); let mut universal = WindowsTime::default(); unsafe { GetLocalTime(&mut local); GetSystemTime(&mut universal); } let minutes = |time: &WindowsTime| time.day as i64 * 1440 + time.hour as i64 * 60 + time.minute as i64; let raw = (minutes(&local) - minutes(&universal)).rem_euclid(1440); ((if raw > 840 { raw - 1440 } else { raw }) as f64 / 15.0).round() as i64 * 15 } #[cfg(not(windows))] fn offset() -> i64 { 0 } offset() };
+    v0
+}
+fn clock_filled_7(mut v0: Rc<str>, mut v1: i64) -> Rc<str> {
+    let mut v2: Rc<str> = { let seconds = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|elapsed| elapsed.as_secs() as i64).unwrap_or(0) + v1 * 60; let (days, day_seconds) = (seconds.div_euclid(86400), seconds.rem_euclid(86400)); let shifted = days + 719468; let era = shifted.div_euclid(146097); let of_era = shifted - era * 146097; let year_of_era = (of_era - of_era / 1460 + of_era / 36524 - of_era / 146096) / 365; let of_year = of_era - (365 * year_of_era + year_of_era / 4 - year_of_era / 100); let month_index = (5 * of_year + 2) / 153; let day = of_year - (153 * month_index + 2) / 5 + 1; let month = if month_index < 10 { month_index + 3 } else { month_index - 9 }; let year = year_of_era + era * 400 + if month <= 2 { 1 } else { 0 }; let formatted = |format: &str| format.replace("yyyy", &format!("{year:04}")).replace("MM", &format!("{month:02}")).replace("dd", &format!("{day:02}")).replace("HH", &format!("{:02}", day_seconds / 3600)).replace("mm", &format!("{:02}", day_seconds / 60 % 60)).replace("ss", &format!("{:02}", day_seconds % 60)); let pattern = regex::Regex::new("[{]clock(?::([^}]*))?[}]").unwrap(); std::rc::Rc::<str>::from(pattern.replace_all(&*v0, |captures: &regex::Captures| formatted(captures.get(1).map(|format| format.as_str()).unwrap_or("HH:mm:ss"))).into_owned()) };
+    v2
+}
+fn ended_with_newline_8(mut v0: Rc<str>) -> bool {
+    let v1: bool = (v0).is_empty() || (v0).ends_with(char::from(10u8));
+    v1
 }
 fn directory_get_parent_9(mut v0: Rc<str>) -> Option<Rc<str>> {
     let mut v2: &str = &*v0;
@@ -78,7 +79,7 @@ fn directory_get_parent_9(mut v0: Rc<str>) -> Option<Rc<str>> {
     let v8: Option<std::path::PathBuf> = v6.parent().map(std::path::PathBuf::from);
     let v10: bool = true; let _optionm_map_ = v8.map(|x| { //;
     let mut v12: std::path::PathBuf = x;
-    let mut v13: std::path::PathBuf = method8(v12.clone());
+    let mut v13: std::path::PathBuf = method3(v12.clone());
     let v15: std::path::Display = v13.display();
     let v17: std::string::String = format!("{}", v15);
     let v19: Rc<str> = Rc::<str>::from(String::as_str(&v17));
@@ -130,16 +131,16 @@ fn counted_12(mut v0: u64, mut v1: Rc<str>, mut v2: Rc<str>) -> Rc<str> {
 }
 fn append_step_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (Rc<str>, bool, u64, u64) {
     let v3: Rc<str> = file_text_1(v0.clone(), v1.clone());
-    let v4: bool = uses_crlf_2(v3.clone());
+    let v4: bool = uses_crlf_4(v3.clone());
     let mut v7: Rc<str> = if v4 {
-        crlf_3()
+        crlf_5()
     } else {
         let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
         v6
     };
-    let v8: i64 = local_offset_minutes_4();
-    let v9: Rc<str> = clock_filled_5(v2, v8);
-    let v10: bool = ended_with_newline_6(v3);
+    let v8: i64 = local_offset_minutes_6();
+    let v9: Rc<str> = clock_filled_7(v2, v8);
+    let v10: bool = ended_with_newline_8(v3);
     let mut v12: Rc<str> = if v10 {
         let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v11
@@ -147,7 +148,7 @@ fn append_step_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (Rc<str>,
         v7.clone()
     };
     let mut v14: Rc<str> = string_concat(&[&*v12, &*v9, &*v7]);
-    let v15: Rc<str> = method7(v0.clone(), v1.clone());
+    let v15: Rc<str> = method2(v0.clone(), v1.clone());
     let mut v16: Option<Rc<str>> = directory_get_parent_9(v15.clone());
     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v19: Rc<str> = v18.clone();
@@ -252,16 +253,16 @@ fn directory_exists_24(mut v0: Rc<str>) -> bool {
 }
 fn append_preview_23(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (Rc<str>, u64) {
     let v3: Rc<str> = file_text_1(v0.clone(), v1.clone());
-    let v4: bool = uses_crlf_2(v3.clone());
+    let v4: bool = uses_crlf_4(v3.clone());
     let mut v7: Rc<str> = if v4 {
-        crlf_3()
+        crlf_5()
     } else {
         let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
         v6
     };
-    let v8: i64 = local_offset_minutes_4();
-    let v9: Rc<str> = clock_filled_5(v2, v8);
-    let v10: bool = ended_with_newline_6(v3);
+    let v8: i64 = local_offset_minutes_6();
+    let v9: Rc<str> = clock_filled_7(v2, v8);
+    let v10: bool = ended_with_newline_8(v3);
     let mut v12: Rc<str> = if v10 {
         let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v11
@@ -269,7 +270,7 @@ fn append_preview_23(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (Rc<s
         v7.clone()
     };
     let mut v14: Rc<str> = string_concat(&[&*v12, &*v9, &*v7]);
-    let v15: Rc<str> = method7(v0, v1.clone());
+    let v15: Rc<str> = method2(v0, v1.clone());
     let mut v16: Option<Rc<str>> = directory_get_parent_9(v15);
     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let v19: Rc<str> = v18.clone();
@@ -410,7 +411,7 @@ fn elapsed_text_27(mut v0: u64) -> Rc<str> {
     v1
 }
 fn clock_text_28() -> Rc<str> {
-    let v0: i64 = local_offset_minutes_4();
+    let v0: i64 = local_offset_minutes_6();
     let v1: Rc<str> = { let offset = v0; let seconds = (std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|elapsed| elapsed.as_secs()).unwrap_or(0) as i64 + offset * 60).rem_euclid(86400); let sign = if offset < 0 { char::from(45u8) } else { char::from(43u8) }; std::rc::Rc::<str>::from(if cfg!(windows) { format!("{:02}:{:02}:{:02}{}{:02}:{:02}", seconds / 3600, seconds / 60 % 60, seconds % 60, sign, offset.abs() / 60, offset.abs() % 60) } else { format!("{:02}:{:02}:{:02}Z", seconds / 3600, seconds / 60 % 60, seconds % 60) }) };
     v1
 }
@@ -627,7 +628,7 @@ fn copies_run_35(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<s
     }
 }
 fn copy_step_29(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>) -> (Rc<str>, bool, u64, u64, u64) {
-    let v4: Rc<str> = method7(v0.clone(), v1.clone());
+    let v4: Rc<str> = method2(v0.clone(), v1.clone());
     let v5: bool = file_exists_30(v4);
     let mut v6: Rc<str> = copy_base_31(v1.clone(), v5);
     let mut v7: Rc<str> = matching_34(v0.clone(), v1.clone());

@@ -39,6 +39,7 @@
 :~ package_entry (~path : string) : bool =
     := text = text_of path
     sm'.starts_with "///- --package ..\n" text || sm'.starts_with "///- --package ..\r\n" text
+    || sm'.starts_with "///- --package .. " text
 
 :~ entries_in (~directory : string) (~sub : string) : list string =
     := folder = joined directory sub

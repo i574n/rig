@@ -1,0 +1,89 @@
+///- --package .
+:# topology static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== ceiling_row =
+    {
+        project : string
+        day : string
+        family : string
+        construct : string
+        expressible : i32
+        typed : i32
+    }
+
+:| row_reading =
+    | Row :: ceiling_row -> row_reading
+    | HeaderRow :: row_reading
+    | Malformed :: string -> row_reading
+
+:== day_coverage = { day : string; per_mille : i32 }
+
+:~ tab () : string = sm'.char_text 9u8
+
+:~ number_of (~text : string) : option i32 = convert.try_convert (sm'.trim text)
+
+:== cells4 = string * string * string * string
+
+:~ counted (~project : string) (~day : string) (~line : string) (cells : cells4) : row_reading =
+    := family, construct, expressible, typed = cells
+    ?= number_of expressible, number_of typed ?|
+    | Some e, Some t =>
+        Row { project = project; day = day; family = family; construct = construct; expressible = e; typed = t }
+    | _ => Malformed line
+
+:~ row_of (~project : string) (~run_day : string) (~line : string) : row_reading =
+    ?= sm'.split_list (tab ()) (sm'.replace "\r" "" line) ?|
+    | "family" :: _ => HeaderRow
+    | family :: construct :: expressible :: typed :: _ :: day :: [] =>
+        counted project day line (family, construct, expressible, typed)
+    | family :: construct :: expressible :: typed :: _ :: [] =>
+        counted project run_day line (family, construct, expressible, typed)
+    | _ => Malformed line
+
+:~ per_mille (rows : list ceiling_row) : i32 =
+    := expressible = rows |> listm.fold (\ (sum : i32) (r : ceiling_row) => sum + r.expressible) 0i32
+    := typed = rows |> listm.fold (\ (sum : i32) (r : ceiling_row) => sum + r.typed) 0i32
+    ? expressible = 0i32 ?> 0i32 |: typed * 1000i32 / expressible
+
+:~ trend (rows : list ceiling_row) (~construct : string) : list day_coverage =
+    := mine = rows |> listm'.filter (\ (r : ceiling_row) => r.construct = construct)
+    := add_day = \ (days : list string) (r : ceiling_row) =>
+        ? listm'.contains r.day days ?> days |: listm.append days [ r.day ]
+    := days = mine |> listm.fold add_day []
+    := on_day = \ (d : string) =>
+        := that_day = mine |> listm'.filter (\ (r : ceiling_row) => r.day = d)
+        ({ day = d; per_mille = per_mille that_day } : day_coverage)
+    days |> listm.map on_day
+
+///> rust
+:# ceiling_rows_read_by_position_and_trend_per_day =
+    := t = tab ()
+    := line = \ (cells : list string) => sm'.concat_list t cells
+    := header = line [ "family"; "construct"; "expressible"; "typed"; "emitted"; "day" ]
+    testing.expect (row_of "fiscal" "2026-11-10" header = HeaderRow) "header"
+    := read = \ (cells : list string) =>
+        ?= row_of "fiscal" "2026-11-10" (line cells) ?|
+        | Row r => [ r ]
+        | _ => []
+    := rows =
+        [
+            [ "nfe"; "signature"; "4"; "1"; "1"; "2026-11-08" ];
+            [ "cte"; "signature"; "4"; "3"; "3"; "2026-11-08" ];
+            [ "nfe"; "signature"; "4"; "4"; "4"; "2026-11-09" ];
+            [ "nfe"; "union"; "2"; "0"; "0"; "2026-11-09" ]
+        ]
+        |> listm.map read
+        |> listm.concat
+    testing.expect (listm.length rows = 4i32) "four data rows"
+    := days = trend rows "signature"
+    := expected = [ { day = "2026-11-08"; per_mille = 500i32 }; { day = "2026-11-09"; per_mille = 1000i32 } ]
+    testing.expect (days = expected) "coverage per day, summed over families"
+    := bad = line [ "nfe"; "x"; "four"; "1"; "1"; "d" ]
+    testing.expect (row_of "fiscal" "2026-11-10" bad = Malformed bad) "a non-number cell is malformed, never zero"
+    := published = line [ "nfe_v2_00"; "choice"; "18"; "18"; "18" ]
+    ?= row_of "fiscal" "2026-11-09" published ?|
+    | Row r => testing.expect (r.day = "2026-11-09" && r.typed = 18i32) "a 5-column row takes the run day"
+    | _ => failwith "a 5-column row reads"

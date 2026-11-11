@@ -124,6 +124,9 @@
     | VerbHook => rig_hook.hook.hook_run ()
     | VerbRun => rig_run_cli.run.run_run ()
     | VerbMetrics => rig_exec_export.export.export_run ()
+    | VerbUnits => rig_units.check.check_run ()
+    | VerbDrafts => rig_drafts.entry.drafts_run ()
+    | VerbScratch => rig_scratch.entry.scratch_run ()
 
 := run_direct () : i32 =
     := verb = argument_file.process_argument 1i32

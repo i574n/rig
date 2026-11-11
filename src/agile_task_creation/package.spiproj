@@ -10,5 +10,10 @@ packages:
     agile_mutation_policy
     agile_task_text
     union_reflection
+    agile_task_creation_text
+    rig_agile_id_prefix
+link:
+    agile_task_creation_text
+    rig_agile_id_prefix
 modules:
     task_creation

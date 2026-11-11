@@ -1,0 +1,128 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== draft_row =
+    {
+        repo : string
+        item : string
+        path : string
+        bytes : u64
+        age_days : i64
+    }
+
+:== draft_filter =
+    {
+        repo : string
+        item : string
+        older_than_days : i64
+    }
+
+:= every_draft () : draft_filter = { repo = ""; item = ""; older_than_days = 0i64 }
+
+:= kept (filter : draft_filter) (row : draft_row) : bool =
+    := repo_ok = filter.repo = "" || filter.repo = row.repo
+    := item_ok = filter.item = "" || filter.item = row.item
+    repo_ok && item_ok && row.age_days >= filter.older_than_days
+
+:= row_line (row : draft_row) : string =
+    := head = row.repo ++# "  " ++# row.item ++# "  " ++# row.path
+    head ++# "  " ++# sm'.show row.bytes ++# "  " ++# sm'.show row.age_days ++# "d"
+
+:| file_kind =
+    | SpiralSource
+    | Manifest
+    | Glue
+    | Junk
+
+:= extension_of (~path : string) : string =
+    := at = sm'.last_index_of "." path
+    := slash = sm'.last_index_of "/" (sm'.replace "\\" "/" path)
+    ? at > slash ?> sm'.to_lower (sm'.substring (at + 1i32) (sm'.length path - at - 1i32) path) |: ""
+
+:= kind_of (~path : string) : file_kind =
+    := ext = extension_of path
+    ? ext = "spi" || ext = "spir"
+    ?> SpiralSource
+    |? ext = "spiproj" || ext = "toml"
+    ?> Manifest
+    |? ext = "rs" || ext = "gleam" || ext = "erl" || ext = "c" || ext = "h"
+    ?> Glue
+    |: Junk
+
+:| put_verdict =
+    | PutAccepted
+    | PutRefused : string
+
+:= task_known (~state : string) (~item : string) : bool = sm'.contains ("Task (\"" ++# item ++# "\",") state
+
+:= inside (~root : string) (~path : string) : bool =
+    := base = sm'.replace "\\" "/" root
+    := full = sm'.replace "\\" "/" path
+    sm'.starts_with (? sm'.ends_with "/" base ?> base |: base ++# "/") full
+
+:= put_checked (~state : string) (~item : string) (~repo_root : string) (~path : string) : put_verdict =
+    ? task_known state item |> not
+    ?> PutRefused ("no backlog item " ++# item ++# "; a draft is always tied to an item (agile add it first)")
+    |? inside repo_root path |> not
+    ?> PutRefused (path ++# " is not inside the repo " ++# repo_root)
+    |: PutAccepted
+
+:| promote_verdict =
+    | PromoteTo : string
+    | PromoteRefused : string
+
+:= junk_refusal (~path : string) : string =
+    path ++# " is not typed Spiral, a manifest or thin glue; archive it or rewrite it in Spiral"
+
+:= landing_missing () : string =
+    "promote needs a decided landing: an existing package or app dir, or one named on the item"
+
+:= landing_absent (~landing : string) : string =
+    "the landing " ++# landing ++# " does not exist; name it on the item or create the package first"
+
+:= promote_checked (~landing : string) (landing_exists : bool) (~path : string) : promote_verdict =
+    ?= kind_of path ?|
+    | Junk => PromoteRefused (junk_refusal path)
+    | _ =>
+        ? landing = ""
+        ?> PromoteRefused (landing_missing ())
+        |? landing_exists |> not
+        ?> PromoteRefused (landing_absent landing)
+        |: PromoteTo landing
+
+///> rust
+:# a_listing_filters_by_repo_item_and_age =
+    := row = { repo = "kit"; item = "KIT-X"; path = "a.spi"; bytes = 12u64; age_days = 9i64 }
+    := other = { row ?| repo = "x"; item = "X-Y"; age_days = 1i64 }
+    testing.expect (kept (every_draft ()) row && kept (every_draft ()) other) "no filter keeps every row"
+    := all = every_draft ()
+    := old = { all ?| older_than_days = 7i64 }
+    testing.expect (kept old row && (kept old other |> not)) "older than 7 days"
+    := repo = { all ?| repo = "kit" }
+    testing.expect (kept repo row && (kept repo other |> not)) "one repo"
+    testing.expect (row_line row = "kit  KIT-X  a.spi  12  9d") "one typed row per draft"
+
+///> rust
+:# put_needs_a_backlog_item_and_a_path_inside_the_repo =
+    := state = "inl kit_x () = Task (\"KIT-X\", \"t\")"
+    testing.expect (put_checked state "KIT-X" "C:\\r" "C:/r/tmp/a.py" = PutAccepted) "a known item, a path in the repo"
+    := missing = "no backlog item KIT-Y; a draft is always tied to an item (agile add it first)"
+    testing.expect (put_checked state "KIT-Y" "C:/r" "C:/r/a.py" = PutRefused missing) "an unknown item"
+    := sibling = PutRefused "C:/rx/a.py is not inside the repo C:/r"
+    testing.expect (put_checked state "KIT-X" "C:/r" "C:/rx/a.py" = sibling) "a sibling dir"
+
+///> rust
+:# promote_takes_typed_files_to_a_decided_landing_only =
+    testing.expect (kind_of "lib/a.spi" = SpiralSource && kind_of "x/Cargo.toml" = Manifest) "spiral and manifests"
+    testing.expect (kind_of "x/glue.rs" = Glue && kind_of "tmp/mine.py" = Junk) "glue and junk"
+    testing.expect (kind_of "a.b/notes" = Junk) "a dot in a directory is not an extension"
+    testing.expect (promote_checked "src/rig_x" !+ "a.spi" = PromoteTo "src/rig_x") "an existing landing"
+    testing.expect (promote_checked "src/rig_x" !+ "rows.tsv" = PromoteRefused (junk_refusal "rows.tsv")) "no junk"
+    testing.expect (promote_checked "" !+ "a.spi" = PromoteRefused (landing_missing ())) "an undecided landing"
+    := absent = PromoteRefused (landing_absent "src/rig_y")
+    testing.expect (promote_checked "src/rig_y" !- "a.spi" = absent) "a landing that does not exist"
+
+:= main () : i32 = 0i32

@@ -1,0 +1,6 @@
+packages:
+    |core-
+    spiral-
+    rig_scratch_cited
+modules:
+    entry

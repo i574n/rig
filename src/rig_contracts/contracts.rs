@@ -424,7 +424,7 @@ fn family_contract_semantic_drift_is_rejected() {
 }
 #[test]
 fn typed_handoff_is_readable_and_versionless() {
-    let surface = run_ok(&["status"]); assert!(surface.contains("spiral_first=true") && !surface.contains("alpha=") && run_ok(&["help"]).contains("usage: rig") && !run(&["unknown"]).status.success());
+    let surface = run_ok(&["status"]); assert!(surface.contains("status ok facts=") &&!surface.contains("alpha=") && run_ok(&["help"]).contains("usage: rig") && !run(&["unknown"]).status.success());
     let root = temporary("handoff");
     fs::create_dir_all(root.join("state")).expect("state");
     write(&root.join("state/handoff.spi"), "union handoff_section = | HandoffSection :: string * string -> handoff_section\ninl a () : handoff_section = HandoffSection (\"Identity\", \"Spiral-first embodiment\")\ninl b () : handoff_section = HandoffSection (\"Proven\", \"Transactional patch and flat bundles\")\ninl c () : handoff_section = HandoffSection (\"Risks\", \"Verification and catalog depth\")\ninl d () : handoff_section = HandoffSection (\"Resume\", \"Acquire lease and check state\")\ninl main () : i32 = 0i32\n");

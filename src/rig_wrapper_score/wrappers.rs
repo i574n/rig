@@ -11,15 +11,6 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -532,101 +523,26 @@ fn method29(mut v0: Rc<RefCell<std::process::Command>>, mut v1: Rc<UH0>) -> () {
         return ();
     }
 }
-fn method31(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method32(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn method30(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
             let v4: Rc<UH0> = method30(v3, v1);
-            let v5: i32 = (v2.clone().len() as i32);
-            let v6: i32 = 0i32;
-            let v7: i32 = method31(v2.clone(), v5, v6);
-            let v8: i32 = v5.wrapping_sub(1i32);
-            let mut v9: Rc<str> = string_slice(&v2, v7 as i64, v8 as i64);
-            let mut v10: i32 = (v9.clone().len() as i32);
-            let v11: i32 = method32(v9.clone(), v10);
-            let v12: Rc<str> = string_slice(&v9, 0i32 as i64, v11 as i64);
-            Rc::new(UH0::UH0_Cons(v12, v4))
+            let v5: Rc<str> = Rc::<str>::from((v2).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+            Rc::new(UH0::UH0_Cons(v5, v4))
         }
         UH0::UH0_Nil => {
             v1
         }
     }
 }
-fn method33(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method31(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
-            let v4: Rc<UH0> = method33(v3, v1);
+            let v4: Rc<UH0> = method31(v3, v1);
             let v5: bool = &*v2 != "";
             if v5 {
                 Rc::new(UH0::UH0_Cons(v2, v4))
@@ -696,13 +612,13 @@ fn listed_files_28(mut v0: Rc<str>) -> US1 {
         let v44: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
         let v45: Rc<UH0> = method30(v43, v44);
         let v46: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-        let v47: Rc<UH0> = method33(v45, v46);
+        let v47: Rc<UH0> = method31(v45, v46);
         US1::US1_Some(v47)
     } else {
         US1::US1_None
     }
 }
-fn method35(mut v0: Option<i32>) -> Option<i32> {
+fn method33(mut v0: Option<i32>) -> Option<i32> {
     v0
 }
 fn closure1() -> Rc<dyn Fn((i32)) -> US2> {
@@ -711,7 +627,7 @@ fn closure1() -> Rc<dyn Fn((i32)) -> US2> {
         US2::US2_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn top_flag_34(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
+fn top_flag_32(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -724,7 +640,7 @@ fn top_flag_34(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
                         let v6: bool = &*v2 == "--top";
                         if v6 {
                             let v7: Option<i32> = (v4).trim().parse::<i32>().ok();
-                            let v8: Option<i32> = method35(v7);
+                            let v8: Option<i32> = method33(v7);
                             let mut v9: Rc<dyn Fn((i32)) -> US2> = closure1();
                             let mut v10: Option<US2> = v8.map(|x| v9(x));
                             let v12: US2 = US2::US2_None;
@@ -789,7 +705,7 @@ fn wrappers_run_0() -> i32 {
                                 US1::US1_Some(v9) => {
                                     let mut v9: Rc<UH0> = v9;
                                     let mut v10: i32 = 20i32;
-                                    let v11: i32 = top_flag_34(v7, v10);
+                                    let v11: i32 = top_flag_32(v7, v10);
                                     wrappers_listed_1(v6, v9, v11)
                                 }
                             }

@@ -104,19 +104,6 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
         windows_watched_0(v0, v1, v2)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn gate_summary_3() -> Rc<str> {
-    let v0: Rc<str> = { let path = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME")).map(std::path::PathBuf::from).unwrap_or_default().join(".claude").join("autonomous").join("gate.log"); let text = std::fs::read_to_string(&path).unwrap_or_default(); let mut sessions: std::collections::BTreeMap<String, (u64, u64)> = std::collections::BTreeMap::new(); let lines = text.lines().collect::<Vec<_>>(); for line in lines.iter().rev().take(4000) { let fields = line.split_whitespace().collect::<Vec<_>>(); if fields.len() < 4 { continue; } let entry = sessions.entry(fields[2].to_owned()).or_insert((0, 0)); if fields[3] == "block" { entry.0 += 1; } else if line.contains("idle") && fields[3] == "pass" { entry.1 += 1; } } std::rc::Rc::<str>::from(sessions.into_iter().map(|(session, (blocks, idle))| format!("  {session}: blocks {blocks}, idle passes {idle}{}", if idle > 0 { "  <- idled" } else { "" })).collect::<Vec<_>>().join("
-").as_str()) };
-    v0
-}
-fn closure1() -> Rc<dyn Fn() -> Rc<str>> {
-    thread_local!{ static CLOSURE: Rc<dyn Fn() -> Rc<str>> = Rc::new(move || -> Rc<str> {
-        gate_summary_3()
-    }); } CLOSURE.with(|closure| closure.clone())
-}
 pub fn rig_machine_windows_lines(v0: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0))
-}
-pub fn rig_machine_gate_summary() -> Rc<str> {
-    closure1()()
 }

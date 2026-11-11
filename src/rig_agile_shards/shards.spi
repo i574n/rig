@@ -1,0 +1,90 @@
+///- --package .
+:# shards static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| shard_key =
+    | TeamShard :: string -> shard_key
+    | Unteamed :: shard_key
+
+:~ ^ first_team (tags : list string) : shard_key =
+    ?= tags ?|
+    | [] => Unteamed
+    | tag :: rest =>
+        := plain = sm'.trim tag
+        ? sm'.starts_with "team:" plain && sm'.length plain > 5i32
+        ?> TeamShard (sm'.substring 5i32 (sm'.length plain - 5i32) plain)
+        |: first_team rest
+
+:= shard_of_tags (~tags : string) : shard_key = first_team (sm'.split_list "," tags)
+
+:= shard_file (key : shard_key) : string =
+    ?= key ?|
+    | TeamShard team => "state/agile/" ++# team ++# ".spi"
+    | Unteamed => "state/agile/_.spi"
+
+:~ id_of_line (~line : string) : string =
+    := marker = " (\""
+    := at = sm'.index_of marker line
+    := record = sm'.starts_with "inl " line
+    ? record = !- || at < 0i32
+    ?> ""
+    |:
+        := rest = sm'.substring (at + 3i32) (sm'.length line - at - 3i32) line
+        := close = sm'.index_of "\"" rest
+        ? close < 0i32 ?> "" |: sm'.substring 0i32 close rest
+
+:== task_home = { id : string; key : shard_key }
+
+:~ tags_of_task_line (~line : string) : string =
+    := tail = "\", \"current\", \"current\")"
+    := at = sm'.last_index_of tail line
+    ? at < 0i32
+    ?> ""
+    |:
+        := head = sm'.substring 0i32 at line
+        := quote_at = sm'.last_index_of "\"" head
+        ? quote_at < 0i32 ?> "" |: sm'.substring (quote_at + 1i32) (sm'.length head - quote_at - 1i32) head
+
+:~ home_of_line (~line : string) : option task_home =
+    ? sm'.contains "= Task (\"" line
+    ?> Some ({ id = id_of_line line; key = shard_of_tags (tags_of_task_line line) })
+    |: None
+
+:~ ^ key_of (homes : list task_home) (~id : string) : shard_key =
+    ?= homes ?|
+    | [] => Unteamed
+    | home :: rest => ? home.id = id ?> home.key |: key_of rest id
+
+:~ lines_of_shard (homes : list task_home) (key : shard_key) (lines : list string) : list string =
+    lines |> listm'.filter (\ (line : string) => key_of homes (id_of_line line) = key)
+
+///> rust
+:# the_first_team_tag_names_the_shard =
+    testing.expect (shard_of_tags "kit,agile,team:rig" = TeamShard "rig") "a team tag"
+    testing.expect (shard_of_tags "team:main,team:rig,lib" = TeamShard "main") "the first team tag wins"
+    testing.expect (shard_of_tags "lib,generic" = Unteamed && shard_of_tags "team:" = Unteamed) "no team"
+    testing.expect (shard_file (TeamShard "org") = "state/agile/org.spi") "one file per team"
+    testing.expect (shard_file Unteamed = "state/agile/_.spi") "the unteamed shard"
+
+///> rust
+:# every_record_line_follows_its_item_and_keeps_its_order =
+    := task = "inl a () = Task (\"A-1\", \"t\", AgileStory)"
+    := note = "inl note_of_a_1 () = Note (\"A-1\", 1u32, \"2026-11-09T00:00Z\", \"rig\", \"x\")"
+    := other = "inl b () = Task (\"B-1\", \"u\", AgileStory)"
+    testing.expect (id_of_line note = "A-1" && id_of_line "packages:" = "") "ids from record lines"
+    := homes = [ { id = "A-1"; key = TeamShard "rig" }; { id = "B-1"; key = TeamShard "org" } ]
+    testing.expect (lines_of_shard homes (TeamShard "rig") [ task; other; note ] = [ task; note ]) "rig's lines"
+    testing.expect (lines_of_shard homes (TeamShard "org") [ task; other; note ] = [ other ]) "org's line"
+    testing.expect (lines_of_shard homes Unteamed [ "inl z () = Task (\"Z\", \"v\")" ] <> []) "unknown ids"
+
+///> rust
+:# a_task_line_names_its_home_from_its_tags =
+    := head = "inl a () = Task (\"A-1\", \"t\", AgileStory, AgileP1, AgileD2, 0u32, Planned, "
+    := line = head ++# "\"\", \"kit,team:rig\", \"current\", \"current\")"
+    testing.expect (tags_of_task_line line = "kit,team:rig") "the tags field"
+    testing.expect (home_of_line line = Some ({ id = "A-1"; key = TeamShard "rig" })) "its home"
+    testing.expect (home_of_line "inl note_of_a_1 () = Note (\"A-1\", 1u32)" = None) "notes follow, they do not decide"
+
+:= main () : i32 = 0i32

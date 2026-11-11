@@ -1,0 +1,72 @@
+///- --package .
+:# requests static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| requester =
+    | ByUser :: requester
+    | ByTeam :: string -> requester
+
+:== request = { item : string; by : requester; day : string; note : i32 }
+
+:= requester_word (who : requester) : string =
+    ?= who ?|
+    | ByUser => "user"
+    | ByTeam team => team
+
+:= requester_of_word (~word : string) : requester = ? word = "user" ?> ByUser |: ByTeam word
+
+:~ ^ digits_value (~text : string) (index : i32) (stop : i32) (value : i32) : i32 =
+    ? index >= stop || index >= sm'.length text
+    ?> value
+    |:
+        := digit = sm'.index_of (sm'.substring index 1i32 text) "0123456789"
+        ? digit < 0i32 ?> (-1i32) |: digits_value text (index + 1i32) stop (value * 10i32 + digit)
+
+:= civil_days (~day : string) : i32 =
+    := y, m, d = digits_value day 0i32 4i32 0i32, digits_value day 5i32 7i32 0i32, digits_value day 8i32 10i32 0i32
+    ? y < 0i32 || m < 1i32 || d < 1i32
+    ?> (-1i32)
+    |:
+        := shifted = ? m <= 2i32 ?> y - 1i32 |: y
+        := era = shifted / 400i32
+        := yoe = shifted - era * 400i32
+        := mp = ? m > 2i32 ?> m - 3i32 |: m + 9i32
+        := doy = (153i32 * mp + 2i32) / 5i32 + d - 1i32
+        := doe = yoe * 365i32 + yoe / 4i32 - yoe / 100i32 + doy
+        era * 146097i32 + doe - 719468i32
+
+:= age_days (~requested : string) (~today : string) : i32 =
+    := from, upto = civil_days requested, civil_days today
+    ? from < 0i32 || upto < from ?> 0i32 |: upto - from
+
+:= urgency_bonus (weight : i32) (~requested : string) (~today : string) : i32 =
+    := days = age_days requested today
+    weight * (? days > 7i32 ?> 7i32 |: days) / 7i32
+
+:= request_from_title (~item : string) (~title : string) : option request =
+    := at = sm'.index_of "(user " title
+    ? at < 0i32 || at + 16i32 > sm'.length title
+    ?> None
+    |:
+        := day = sm'.substring (at + 6i32) 10i32 title
+        ? civil_days day < 0i32 ?> None |: Some ({ item = item; by = ByUser; day = day; note = 0i32 })
+
+///> rust
+:# an_open_request_grows_in_weight_for_a_week_then_stops =
+    testing.expect (age_days "2026-11-02" "2026-11-09" = 7i32 && age_days "2026-10-31" "2026-11-01" = 1i32) "days"
+    testing.expect (urgency_bonus 64i32 "2026-11-09" "2026-11-09" = 0i32) "a fresh request adds nothing yet"
+    testing.expect (urgency_bonus 64i32 "2026-11-02" "2026-11-09" = 64i32) "a week old doubles the weight"
+    testing.expect (urgency_bonus 64i32 "2026-10-01" "2026-11-09" = 64i32) "and never more"
+    testing.expect (urgency_bonus 64i32 "not a day" "2026-11-09" = 0i32) "an unreadable day adds nothing"
+
+///> rust
+:# a_titled_user_request_migrates_into_a_typed_row =
+    := title = "groom so this gets prioritized (user 2026-11-08 19:58)"
+    := expected = { item = "RIG-RENAME"; by = ByUser; day = "2026-11-08"; note = 0i32 }
+    testing.expect (request_from_title "RIG-RENAME" title = Some expected) "the stamp in the title"
+    testing.expect (request_from_title "X" "no stamp here" = None) "no stamp, no row"
+    testing.expect (requester_word (requester_of_word "compiler") = "compiler") "a team requester round trips"
+
+:= main () : i32 = 0i32

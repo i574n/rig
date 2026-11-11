@@ -773,7 +773,7 @@ fn finding_rows_0(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, 
         let v13: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v11.split(&*v12).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
         let v14: i32 = (v13.clone().borrow().len() as i32);
         let mut v15: bool = v14 < 4i32;
-        let v51: US2 = if v15 {
+        let v48: US2 = if v15 {
             US2::US2_None
         } else {
             let v17: Rc<str> = v13.borrow()[0i32 as usize].clone();
@@ -787,31 +787,28 @@ fn finding_rows_0(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, 
             if v24 {
                 US2::US2_None
             } else {
-                let v26: i32 = v22.wrapping_sub(v20);
-                let v27: Rc<str> = v2.borrow()[v18 as usize].clone();
-                let v28: usize = ((v20) as usize);
-                let v29: i32 = v20.wrapping_add(v26);
-                let v30: usize = ((v29) as usize);
-                let v31: Rc<str> = Rc::<str>::from(&(v27)[v28..v30]);
-                let v32: Rc<str> = v13.borrow()[3i32 as usize].clone();
-                let v33: bool = "keyword" == &*v32;
-                let v48: US1 = if v33 {
+                let v26: Rc<str> = v2.borrow()[v18 as usize].clone();
+                let v27: i32 = v22.wrapping_sub(v20);
+                let v28: Rc<str> = Rc::<str>::from((v26).chars().skip(v20 as usize).take(v27 as usize).collect::<String>());
+                let v29: Rc<str> = v13.borrow()[3i32 as usize].clone();
+                let v30: bool = "keyword" == &*v29;
+                let v45: US1 = if v30 {
                     US1::US1_Keyword
                 } else {
-                    let v35: bool = "variable" == &*v32;
-                    if v35 {
+                    let v32: bool = "variable" == &*v29;
+                    if v32 {
                         US1::US1_Variable
                     } else {
-                        let v37: bool = "operator" == &*v32;
-                        if v37 {
+                        let v34: bool = "operator" == &*v29;
+                        if v34 {
                             US1::US1_Operator
                         } else {
-                            let v39: bool = "string" == &*v32;
-                            if v39 {
+                            let v36: bool = "string" == &*v29;
+                            if v36 {
                                 US1::US1_Str
                             } else {
-                                let v41: bool = "parenthesis" == &*v32;
-                                if v41 {
+                                let v38: bool = "parenthesis" == &*v29;
+                                if v38 {
                                     US1::US1_Paren
                                 } else {
                                     US1::US1_OtherClass
@@ -820,41 +817,41 @@ fn finding_rows_0(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, 
                         }
                     }
                 };
-                US2::US2_Some(v18, v31, v48)
+                US2::US2_Some(v18, v28, v45)
             }
         };
-        let v57: Rc<UH2> = match v51 {
+        let v54: Rc<UH2> = match v48 {
             US2::US2_None => {
                 v10
             }
-            US2::US2_Some(v52, v53, v54) => {
-                let v52: i32 = v52;
-                let v53: Rc<str> = v53;
-                let v54: US1 = v54;
-                Rc::new(UH2::UH2_Cons(v52, v53, v54, v10))
+            US2::US2_Some(v49, v50, v51) => {
+                let v49: i32 = v49;
+                let v50: Rc<str> = v50;
+                let v51: US1 = v51;
+                Rc::new(UH2::UH2_Cons(v49, v50, v51, v10))
             }
         };
         v6.borrow_mut().l0 = v9;
-        v6.borrow_mut().l1 = v57;
+        v6.borrow_mut().l1 = v54;
         ()
     };
-    let v58: Rc<UH2> = v6.borrow().l1.clone();
+    let v55: Rc<UH2> = v6.borrow().l1.clone();
+    let v56: i32 = 0i32;
+    let v57: i32 = method6(v55.clone(), v56);
+    let v58: Rc<RefCell<Vec<(i32, Rc<str>, US1)>>> = Rc::new(RefCell::new(vec![<(i32, Rc<str>, US1)>::default(); v57 as usize]));
     let v59: i32 = 0i32;
-    let v60: i32 = method6(v58.clone(), v59);
-    let v61: Rc<RefCell<Vec<(i32, Rc<str>, US1)>>> = Rc::new(RefCell::new(vec![<(i32, Rc<str>, US1)>::default(); v60 as usize]));
-    let v62: i32 = 0i32;
-    let v63: i32 = method7(&v61, v58, v62);
-    let v64: i32 = 0i32;
-    let v65: i32 = -1i32;
-    let v66: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
-    let v67: Rc<UH3> = { thread_local!{ static CASE: Rc<UH3> = Rc::new(UH3::UH3_Nil); } CASE.with(|case| case.clone()) };
-    let v68: Rc<UH3> = arms_from_8(&v61, v64, v65, v66, v67);
-    let v69: Rc<UH3> = { thread_local!{ static CASE: Rc<UH3> = Rc::new(UH3::UH3_Nil); } CASE.with(|case| case.clone()) };
-    let v70: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let v71: Rc<UH0> = runs_from_16(v68, v69, v70);
-    let v72: Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>> = Rc::new(RefCell::new(vec![]));
-    let v73: Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>> = method1(v71, v72);
-    v73
+    let v60: i32 = method7(&v58, v55, v59);
+    let v61: i32 = 0i32;
+    let v62: i32 = -1i32;
+    let v63: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_Nil); } CASE.with(|case| case.clone()) };
+    let v64: Rc<UH3> = { thread_local!{ static CASE: Rc<UH3> = Rc::new(UH3::UH3_Nil); } CASE.with(|case| case.clone()) };
+    let v65: Rc<UH3> = arms_from_8(&v58, v61, v62, v63, v64);
+    let v66: Rc<UH3> = { thread_local!{ static CASE: Rc<UH3> = Rc::new(UH3::UH3_Nil); } CASE.with(|case| case.clone()) };
+    let v67: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+    let v68: Rc<UH0> = runs_from_16(v65, v66, v67);
+    let v69: Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>> = Rc::new(RefCell::new(vec![]));
+    let v70: Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>> = method1(v68, v69);
+    v70
 }
 fn closure0() -> Rc<dyn Fn(Rc<str>, Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>>> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>, Rc<str>) -> Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>>> = Rc::new(move |mut v0: Rc<str>, mut v1: Rc<str>| -> Rc<RefCell<Vec<(Rc<str>, i32, i32, Rc<str>)>>> {

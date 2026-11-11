@@ -30,7 +30,8 @@
     | Duration :: backend * phase * u64 -> metric unit_ms
     | PeakBytes :: string * u64 -> metric unit_bytes
     | Count :: string * u64 -> metric unit_count
-    | JobDuration :: string * u64 -> metric unit_ms
+    | JobDuration :: string * string * u64 -> metric unit_ms
+    | JobPeak :: string * string * u64 -> metric unit_bytes
 
 :| machine =
     | Box
@@ -77,8 +78,12 @@
     | PeakBytes (what, bytes) =>
         sm'.concat_list "" [ "rig_exec_peak_bytes{"; where_; ","; label "what" what; "} "; sm'.show bytes ]
     | Count (what, n) => sm'.concat_list "" [ "rig_exec_count{"; where_; ","; label "what" what; "} "; sm'.show n ]
-    | JobDuration (lane, ms) =>
-        sm'.concat_list "" [ "rig_job_duration_ms{"; where_; ","; label "lane" lane; "} "; sm'.show ms ]
+    | JobDuration (lane, job, ms) =>
+        := labels = sm'.concat_list "," [ where_; label "lane" lane; label "job" job ]
+        sm'.concat_list "" [ "rig_job_duration_ms{"; labels; "} "; sm'.show ms ]
+    | JobPeak (lane, job, bytes) =>
+        := labels = sm'.concat_list "," [ where_; label "lane" lane; label "job" job ]
+        sm'.concat_list "" [ "rig_job_peak_bytes{"; labels; "} "; sm'.show bytes ]
 
 := line_of (s : exec_sample) : string =
     ?= s ?|

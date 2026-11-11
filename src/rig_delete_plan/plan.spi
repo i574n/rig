@@ -1,0 +1,68 @@
+///- --package .
+:# plan static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| tree_entry =
+    | PlainEntry :: string -> tree_entry
+    | JunctionEntry :: string -> tree_entry
+
+:| teardown_step =
+    | UnlinkJunction :: string -> teardown_step
+    | RemoveTree :: string -> teardown_step
+
+:| teardown_plan =
+    | Teardown :: list teardown_step -> teardown_plan
+    | RefusedTeardown :: string -> teardown_plan
+
+:~ forward (~path : string) : string = sm'.replace "\\" "/" path
+
+:~ entry_path (entry : tree_entry) : string =
+    ?= entry ?|
+    | PlainEntry path => forward path
+    | JunctionEntry path => forward path
+
+:~ junctions_in (entries : list tree_entry) : list string =
+    := gathered = \ (found : list string) (entry : tree_entry) =>
+        ?= entry ?|
+        | JunctionEntry path => listm.append found [ forward path ]
+        | PlainEntry _ => found
+    entries |> listm.fold gathered []
+
+:~ below (~parent : string) (~path : string) : bool = sm'.starts_with (parent ++# "/") path
+
+:~ followed_into (links : list string) (entries : list tree_entry) : list string =
+    := inside = \ (link : string) => listm'.exists' (\ (entry : tree_entry) => below link (entry_path entry)) entries
+    links |> listm'.filter inside
+
+:~ teardown_of (~refusal : string) (~target : string) (entries : list tree_entry) : teardown_plan =
+    := root = forward target
+    := links = junctions_in entries
+    := followed = followed_into links entries
+    ? refusal <> ""
+    ?> RefusedTeardown refusal
+    |? followed <> []
+    ?> RefusedTeardown ("the walk entered a junction and would delete through it: " ++# sm'.concat_list ", " followed)
+    |? listm'.contains root links
+    ?> Teardown [ UnlinkJunction root ]
+    |: Teardown (listm.append (links |> listm.map UnlinkJunction) [ RemoveTree root ])
+
+:~ refused (plan : teardown_plan) : bool =
+    ?= plan ?|
+    | RefusedTeardown _ => !+
+    | Teardown _ => !-
+
+///> rust
+:# a_teardown_unlinks_every_junction_before_removing_the_tree =
+    := root = "C:\\work\\mirror"
+    := entries = [ PlainEntry "C:\\work\\mirror\\a.spi"; JunctionEntry "C:\\work\\mirror\\deps" ]
+    := plan = teardown_of "" root entries
+    testing.expect (plan = Teardown [ UnlinkJunction "C:/work/mirror/deps"; RemoveTree "C:/work/mirror" ]) "unlink"
+    := self_link = teardown_of "" "C:/work/deps" [ JunctionEntry "C:/work/deps" ]
+    testing.expect (self_link = Teardown [ UnlinkJunction "C:/work/deps" ]) "a junction target is only unlinked"
+    := walked_in = [ JunctionEntry "C:/work/mirror/deps"; PlainEntry "C:/work/mirror/deps/x" ]
+    testing.expect (refused (teardown_of "" "C:/work/mirror" walked_in)) "a walk that entered a junction is refused"
+    := sibling = [ JunctionEntry "C:/work/mirror/deps"; PlainEntry "C:/work/mirror/depsx/y" ]
+    testing.expect (refused (teardown_of "" "C:/work/mirror" sibling) |> not) "a sibling sharing a prefix is not inside"
+    testing.expect (teardown_of "relative path" "m" [] = RefusedTeardown "relative path") "guard refusal first"

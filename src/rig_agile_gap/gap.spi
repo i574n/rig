@@ -1,0 +1,183 @@
+///- --package .
+:# gap static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| gap_flag =
+    | FlagVerb
+    | FlagExit
+    | FlagArgv
+    | FlagCwd
+    | FlagAs
+
+:= flag_word (flag : gap_flag) : string = "--" ++# sm'.to_lower (union_reflection.cases.union_case_suffix "Flag" flag)
+
+:= flag_words () : string = union_reflection.cases.union_cases_joined flag_word ", "
+
+:| flag_parse =
+    | FlagKnown : gap_flag
+    | FlagUnknown
+
+:~ flag_of_word (~word : string) : flag_parse =
+    union_reflection.cases.union_case_where
+        \ (flag : gap_flag) => word = flag_word flag
+        \ flag => FlagKnown flag
+        FlagUnknown
+
+:== gap_request =
+    {
+        title : string
+        verb : string
+        exit_code : string
+        argv : string
+        cwd : string
+        author : string
+    }
+
+:= titled (~title : string) : gap_request =
+    { title = sm'.trim title; verb = ""; exit_code = ""; argv = ""; cwd = ""; author = "" }
+
+:= request_with (flag : gap_flag) (~value : string) (request : gap_request) : gap_request =
+    := given = sm'.trim value
+    ?= flag ?|
+    | FlagVerb => { request ?| verb = given }
+    | FlagExit => { request ?| exit_code = given }
+    | FlagArgv => { request ?| argv = given }
+    | FlagCwd => { request ?| cwd = given }
+    | FlagAs => { request ?| author = given }
+
+:| request_read =
+    | RequestRead : gap_request
+    | RequestRefused : string
+
+:= unknown_option (~word : string) : string = "unknown option " ++# word ++# " (expected " ++# flag_words () ++# ")"
+
+:~ ^ request_from (words : list string) (request : gap_request) : request_read =
+    ?= words ?|
+    | [] => RequestRead request
+    | word :: rest =>
+        ?= flag_of_word word ?|
+        | FlagUnknown => RequestRefused (unknown_option word)
+        | FlagKnown flag =>
+            ?= rest ?|
+            | [] => RequestRefused (word ++# " needs a value")
+            | value :: after => request_from after (request_with flag value request)
+
+:~ ^ bytes_within (~allowed : string) (~text : string) (index : i32) : bool =
+    ? sm'.length text <= index
+    ?> !+
+    |? sm'.contains (sm'.substring index 1i32 text) allowed
+    ?> bytes_within allowed text (index + 1i32)
+    |: !-
+
+:= lower_words () : string = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+:= team_of (~author : string) : string =
+    ?= sm'.split_list "-" author ?|
+    | first :: _ => first
+    | [] => ""
+
+:= title_missing () : string = "a gap needs its title: what the call needed and did not get"
+:= verb_missing () : string = "--verb names the rig verb that failed or was missing, e.g. --verb 'job chain'"
+:= verb_malformed () : string = "--verb takes lower-case words, digits and dashes, e.g. --verb 'help agile add'"
+:= team_missing () : string = "--as <lane> names who hit the gap; its first word is the team, e.g. --as rig-fc1568a6"
+:= exit_malformed () : string = "--exit takes the failed call's exit code as digits, e.g. --exit 2"
+
+:~ request_checked (read : request_read) : request_read =
+    ?= read ?|
+    | RequestRefused _ => read
+    | RequestRead request =>
+        := team = team_of request.author
+        := verb_ok = bytes_within (lower_words () ++# "- ") request.verb 0i32
+        := team_ok = team <> "" && bytes_within (lower_words ()) team 0i32
+        := exit_ok = bytes_within "0123456789" request.exit_code 0i32
+        ? request.title = ""
+        ?> RequestRefused (title_missing ())
+        |? request.verb = ""
+        ?> RequestRefused (verb_missing ())
+        |? verb_ok = !-
+        ?> RequestRefused (verb_malformed ())
+        |? team_ok = !-
+        ?> RequestRefused (team_missing ())
+        |? exit_ok = !-
+        ?> RequestRefused (exit_malformed ())
+        |: read
+
+:~ ^ trim_dashes (~word : string) : string =
+    ? sm'.starts_with "-" word ?> trim_dashes (sm'.substring 1i32 (sm'.length word - 1i32) word) |: word
+
+:~ ^ upper_words (words : list string) : string =
+    ?= words ?|
+    | [] => ""
+    | word :: rest =>
+        := part = sm'.to_upper (trim_dashes word)
+        := tail = upper_words rest
+        ? part = "" ?> tail |? tail = "" ?> part |: part ++# "-" ++# tail
+
+:= gap_id_base (request : gap_request) : string =
+    := words = sm'.split_list " " request.verb
+    sm'.to_upper (team_of request.author) ++# "-GAP-" ++# upper_words words
+
+:= id_taken (~state : string) (~id : string) : bool = sm'.contains ("Task (\"" ++# id ++# "\",") state
+
+:~ ^ free_id (~state : string) (~base : string) (n : i32) : string =
+    := id = ? n = 1i32 ?> base |: base ++# "-" ++# sm'.decimal_text n
+    ? id_taken state id ?> free_id state base (n + 1i32) |: id
+
+:= first_verb_word (request : gap_request) : string =
+    ?= sm'.split_list " " request.verb ?|
+    | first :: _ => trim_dashes first
+    | [] => ""
+
+:= gap_tags (request : gap_request) : string =
+    "rig,gap," ++# first_verb_word request ++# ",team:" ++# team_of request.author
+
+:= shown (~value : string) : string = ? value = "" ?> "-" |: value
+
+:= gap_note (request : gap_request) : string =
+    := verb = "FAILED CALL: verb=" ++# request.verb ++# " exit=" ++# shown request.exit_code
+    := call = verb ++# " cwd=" ++# shown request.cwd ++# " argv=" ++# shown request.argv
+    := done = ". DoD: the call works in one step, or refuses with intent, usage, valid values and a corrected example."
+    := next = " Next step: reproduce the call, fix it in the lane that hit it, add a spec/one-call case."
+    call ++# done ++# next ++# " TypeFeatures: none yet."
+
+///> rust
+:# a_gap_call_reads_into_one_checked_request =
+    := words = [ "--verb"; "help agile add"; "--exit"; "2"; "--as"; "rig-fc1568a6" ]
+    := read = request_checked (request_from words (titled " help names no sub-verb usage "))
+    ?= read ?|
+    | RequestRefused why => testing.expect !- why
+    | RequestRead request =>
+        := note = gap_note request
+        testing.expect (request.title = "help names no sub-verb usage") "the title is trimmed"
+        testing.expect (gap_id_base request = "RIG-GAP-HELP-AGILE-ADD") "team, GAP, then the verb words"
+        testing.expect (gap_tags request = "rig,gap,help,team:rig") "the team tag comes from --as"
+        testing.expect (sm'.starts_with "FAILED CALL: verb=help agile add exit=2 cwd=- argv=-" note) "the failed call"
+        testing.expect (sm'.contains "DoD:" note && sm'.contains "TypeFeatures:" note) "the lint markers"
+
+///> rust
+:# every_missing_or_malformed_field_is_refused_before_any_write =
+    := checked (words : list string) (~title : string) = request_checked (request_from words (titled title))
+    testing.expect (checked [ "--as"; "rig-a" ] "t" = RequestRefused (verb_missing ())) "a verb"
+    testing.expect (checked [ "--verb"; "job" ] "  " = RequestRefused (title_missing ())) "a title"
+    := upper = [ "--verb"; "Job"; "--as"; "rig-a" ]
+    testing.expect (checked upper "t" = RequestRefused (verb_malformed ())) "lower-case verb words"
+    testing.expect (checked [ "--verb"; "job" ] "t" = RequestRefused (team_missing ())) "an author"
+    := letters = [ "--verb"; "job"; "--as"; "org2-a"; "--exit"; "x" ]
+    testing.expect (checked letters "t" = RequestRefused (exit_malformed ())) "a numeric exit"
+    testing.expect (checked [ "--verb" ] "t" = RequestRefused "--verb needs a value") "a value per flag"
+    := expected = "unknown option --why (expected --verb, --exit, --argv, --cwd, --as)"
+    testing.expect (checked [ "--why"; "x" ] "t" = RequestRefused expected) "the valid flags are listed"
+
+///> rust
+:# the_id_takes_the_first_free_number_and_dashes_leave_flags =
+    := base = titled "t"
+    := request = { base ?| verb = "job start --on"; author = "org2-x" }
+    testing.expect (gap_id_base request = "ORG2-GAP-JOB-START-ON") "a flag's dashes are dropped"
+    := first = "inl a () = Task (\"ORG2-GAP-JOB-START-ON\", \"t\")"
+    := state = first ++# "\ninl b () = Task (\"ORG2-GAP-JOB-START-ON-2\", \"t\")"
+    testing.expect (free_id state "ORG2-GAP-JOB-START-ON" 1i32 = "ORG2-GAP-JOB-START-ON-3") "the first free number"
+    testing.expect (free_id "" "ORG2-GAP-JOB-START-ON" 1i32 = "ORG2-GAP-JOB-START-ON") "the bare id when free"
+
+:= main () : i32 = 0i32

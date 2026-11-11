@@ -1,0 +1,111 @@
+///- --package .
+:# experiment_gates static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| gate =
+    | Identical
+    | Reproduces : f64
+    | ExitIs : i32
+
+:| reading =
+    | Digests : string * string
+    | Derived : f64
+    | Exited : i32
+    | PosixExited : i32
+
+:= exit_byte (code : i32) : i32 = code % 256i32
+
+:= posix_holds (rule : gate) (got : i32) : bool =
+    ?= rule ?|
+    | ExitIs want => exit_byte want = got
+    | _ => !-
+
+:= gate_holds (rule : gate) (seen : reading) : bool =
+    ?= seen ?|
+    | Digests (a, b) => rule = Identical && a = b
+    | Derived got => rule = Reproduces got
+    | Exited got => rule = ExitIs got
+    | PosixExited got => posix_holds rule got
+
+:== checked = { rule : gate; seen : reading }
+
+:== fingerprint = { host : string; compiler : string; tree : string; job : string }
+
+:= comparable (a : fingerprint) (b : fingerprint) : bool = a.compiler = b.compiler && a.tree = b.tree
+
+:| outcome =
+    | Holds
+    | Fails
+    | Void
+
+:= gates_hold (gates : list checked) : bool =
+    gates |> listm.fold (\ (ok : bool) (c : checked) => ok && gate_holds c.rule c.seen) !+
+
+:= outcome_of (gates : list checked) (bar : bool) : outcome =
+    ? gates_hold gates = !- ?> Void |? bar ?> Holds |: Fails
+
+:== band = { low : f64; high : f64 }
+
+:= inside (b : band) (x : f64) : bool = x >= b.low && x <= b.high
+
+:| stake =
+    | Binding
+    | Soft
+
+:== expectation = { stake : stake; met : bool }
+
+:= binding_met (all : list expectation) : bool =
+    all |> listm.fold (\ (ok : bool) (e : expectation) => ok && (e.stake = Soft || e.met)) !+
+
+:== branch = { on : outcome; next : string }
+
+:= next_step (branches : list branch) (o : outcome) : option string =
+    branches |> listm.fold (\ (found : option string) (b : branch) => ? b.on = o ?> Some b.next |: found) None
+
+:| split =
+    | Calibration
+    | Evaluation
+
+:= reaches_verdict (s : split) : bool = s = Evaluation
+
+///> rust
+:# a_failed_gate_voids_the_run_instead_of_failing_it =
+    := same = { rule = Identical; seen = Digests ("cebdd2e8a3dd3734", "cebdd2e8a3dd3734") }
+    := drift = { rule = Identical; seen = Digests ("cebdd2e8a3dd3734", "0f00") }
+    testing.expect (outcome_of [ same ] !+ = Holds) "byte-identical output lets the bar decide"
+    testing.expect (outcome_of [ same ] !- = Fails) "the bar still decides"
+    testing.expect (outcome_of [ same; drift ] !+ = Void) "a moved digest voids even a met bar"
+
+///> rust
+:# controls_reproduce_and_exit_codes_read_through_the_posix_byte =
+    := control = { rule = Reproduces 0.049796116; seen = Derived 0.049796116 }
+    := moved = { rule = Reproduces 0.074348; seen = Derived 0.0743 }
+    := probe = { rule = ExitIs 567i32; seen = PosixExited 55i32 }
+    testing.expect (gates_hold [ control; probe ] = !+) "567 is seen as 55 on Linux"
+    testing.expect (gates_hold [ control; moved ] = !-) "a control that does not re-derive"
+    testing.expect (gate_holds (ExitIs 567i32) (Exited 55i32) = !-) "a full exit code is compared whole"
+
+///> rust
+:# soft_expectations_are_recorded_but_never_decide =
+    := smaller = { stake = Soft; met = !- }
+    := identical = { stake = Binding; met = !+ }
+    testing.expect (binding_met [ smaller; identical ] = !+) "largest under 15k missed, the run still holds"
+    testing.expect (binding_met [ { stake = Binding; met = !- } ] = !-) "a missed binding expectation decides"
+
+///> rust
+:# the_bar_is_a_band_on_the_mean_and_the_next_step_is_chosen_before_the_data =
+    := bar = { low = -17.28; high = -6.20 }
+    := held = { on = Holds; next = "step 11: hold-out seeds" }
+    := branches = [ held; { on = Fails; next = "step 11: train-seed threshold" } ]
+    testing.expect (inside bar -8.30 && inside bar -20.04 = !-) "paired -8.30 inside, mean -20.04 outside"
+    testing.expect (next_step branches Fails = Some "step 11: train-seed threshold") "the branch was registered"
+    testing.expect (next_step branches Void = None) "a void run has no branch, it reruns"
+
+///> rust
+:# arms_compare_only_on_one_compiler_and_tree_and_calibration_rows_stay_out =
+    := base = { host = "node-a"; compiler = "830bada0"; tree = "7231b6e4"; job = "jp3" }
+    testing.expect (comparable base { base ?| host = "node-b"; job = "jp3b" }) "another host is fine"
+    testing.expect (comparable base { base ?| tree = "38c54cc4" } = !-) "a stale mirror is not the tree under test"
+    testing.expect (reaches_verdict Calibration = !- && reaches_verdict Evaluation) "training seeds calibrate only"

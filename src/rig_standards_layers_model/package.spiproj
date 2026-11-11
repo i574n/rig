@@ -1,6 +1,9 @@
 packages:
     |core-
     spiral-
+    rig_standards_prim_bindings
+link:
+    rig_standards_prim_bindings
 modules:
     model
     scan

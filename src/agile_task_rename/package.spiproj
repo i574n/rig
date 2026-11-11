@@ -9,5 +9,9 @@ packages:
     agile_mutation_policy
     agile_task_text
     agile_note_model
+    rig_agile_side_rename
+    rig_agile_id_prefix
+link:
+    rig_agile_id_prefix
 modules:
     task_rename

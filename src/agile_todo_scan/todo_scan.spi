@@ -39,15 +39,13 @@
 
 := path_is_link (~path : string) : bool = $'std::fs::symlink_metadata(&*!path).map(|metadata| \
     metadata.file_type().is_symlink()).unwrap_or(false)' : bool
-:= path_is_directory (~path : string) : bool = file_system.directory_exists path
-:= path_is_file (~path : string) : bool = file_system.file_exists path
 
 := entry_kind_of (~path : string) : entry_kind =
     ? path_is_link path
     ?> LinkedEntry
-    |? path_is_directory path
+    |? file_system.directory_exists path
     ?> Directory
-    |? path_is_file path
+    |? file_system.file_exists path
     ?> RegularFile
     |: AbsentEntry
 

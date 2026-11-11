@@ -1,0 +1,134 @@
+///- --package .
+:# rank static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| item_priority =
+    | P0
+    | P1
+    | P2
+    | P3
+
+:== epic = { id : string; done_children : i32; progress : i32 }
+
+:== ready_item =
+    {
+        id : string
+        priority : item_priority
+        progress : i32
+        parent : option string
+        idle_days : i32
+        tags : list string
+    }
+
+:== weights =
+    {
+        band : i32
+        finish_chain : i32
+        near_done_at : i32
+        near_done : i32
+        unowned_days : i32
+        unowned : i32
+    }
+
+:| reason =
+    | FinishChain :: string -> reason
+    | NearDone :: i32 -> reason
+    | Unowned :: i32 -> reason
+
+:== ranked = { item : ready_item; score : i32; reasons : list reason; lane : string }
+
+:~ default_weights () : weights =
+    {
+        band = 100i32
+        finish_chain = 150i32
+        near_done_at = 80i32
+        near_done = 120i32
+        unowned_days = 2i32
+        unowned = 60i32
+    }
+
+:~ priority_base (w : weights) (p : item_priority) : i32 =
+    ?= p ?|
+    | P0 => 3i32 * w.band
+    | P1 => 2i32 * w.band
+    | P2 => w.band
+    | P3 => 0i32
+
+:~ ^ epic_named (epics : list epic) (~id : string) : option epic =
+    ?= epics ?|
+    | [] => None
+    | e :: rest => ? e.id = id ?> Some e |: epic_named rest id
+
+:~ started (e : epic) : bool = e.done_children > 0i32 || e.progress > 0i32
+
+:~ chain_reason (epics : list epic) (item : ready_item) : list reason =
+    ?= item.parent ?|
+    | None => []
+    | Some parent =>
+        ?= epic_named epics parent ?|
+        | Some e ?& started e => [ FinishChain parent ]
+        | _ => []
+
+:~ reasons_of (w : weights) (epics : list epic) (item : ready_item) : list reason =
+    := near = ? item.progress >= w.near_done_at ?> [ NearDone item.progress ] |: []
+    := idle = ? item.idle_days >= w.unowned_days ?> [ Unowned item.idle_days ] |: []
+    listm.append (chain_reason epics item) (listm.append near idle)
+
+:~ reason_weight (w : weights) (r : reason) : i32 =
+    ?= r ?|
+    | FinishChain _ => w.finish_chain
+    | NearDone _ => w.near_done
+    | Unowned _ => w.unowned
+
+:~ ^ lane_for (routes : list (string * string)) (tags : list string) : string =
+    ?= routes ?|
+    | [] => ""
+    | (tag, lane) :: rest => ? listm'.contains tag tags ?> lane |: lane_for rest tags
+
+:~ ranked_of (w : weights) (epics : list epic) (routes : list (string * string)) (item : ready_item) : ranked =
+    := reasons = reasons_of w epics item
+    := extra = reasons |> listm.fold (\ (sum : i32) (r : reason) => sum + reason_weight w r) 0i32
+    { item = item; score = priority_base w item.priority + extra; reasons = reasons; lane = lane_for routes item.tags }
+
+:~ ranking (w : weights) (epics : list epic) (routes : list (string * string)) (items : list ready_item) : list ranked =
+    := first = \ (a : ranked) (b : ranked) => a.score > b.score
+    items |> listm.map (\ (i : ready_item) => ranked_of w epics routes i) |> list_sort.sorted_by first
+
+:~ reason_text (r : reason) : string =
+    ?= r ?|
+    | FinishChain parent => "finishes " ++# parent
+    | NearDone progress => "near done " ++# sm'.show progress ++# "%"
+    | Unowned days => "unstarted " ++# sm'.show days ++# " days"
+
+:~ rank_line (r : ranked) : string =
+    := why = r.reasons |> listm.map reason_text |> sm'.concat_list ", "
+    := routed = ? r.lane = "" ?> "" |: " -> " ++# r.lane
+    := explained = ? why = "" ?> "" |: " (" ++# why ++# ")"
+    r.item.id ++# " score=" ++# sm'.show r.score ++# routed ++# explained
+
+:~ ids_of (found : list ranked) : list string = found |> listm.map (\ (r : ranked) => r.item.id)
+
+///> rust
+:# a_ready_child_of_a_started_epic_outranks_fresh_work =
+    := fresh = { id = "A"; priority = P1; progress = 0i32; parent = None; idle_days = 0i32; tags = [] }
+    := layout = { fresh ?| id = "SSV-LAYOUT"; parent = Some "SSV" }
+    := urgent = { fresh ?| id = "Z"; priority = P0 }
+    := started_epic = [ { id = "SSV"; done_children = 1i32; progress = 25i32 } ]
+    := order = ranking (default_weights ()) started_epic [] [ fresh; urgent; { fresh ?| id = "B" }; layout ]
+    testing.expect (ids_of order = [ "SSV-LAYOUT"; "Z"; "A"; "B" ]) "the chain child first, ties in input order"
+    := fresh_epic = [ { id = "SSV"; done_children = 0i32; progress = 0i32 } ]
+    := unstarted = ranking (default_weights ()) fresh_epic [] [ fresh; layout ]
+    testing.expect (ids_of unstarted = [ "A"; "SSV-LAYOUT" ]) "an unstarted epic gives no boost"
+
+///> rust
+:# near_done_and_unowned_items_are_named_and_routed_by_tag =
+    := bend = { id = "BEND"; priority = P0; progress = 92i32; parent = None; idle_days = 3i32; tags = [ "team-b" ] }
+    := routes = [ "tag-a", "team-a"; "team-b", "team-b" ]
+    := found = ranked_of (default_weights ()) [] routes bend
+    testing.expect (found.reasons = [ NearDone 92i32; Unowned 3i32 ]) "near done and unstarted for 3 days"
+    testing.expect (found.score = 300i32 + 120i32 + 60i32 && found.lane = "team-b") "score and the skill-fit lane"
+    testing.expect (rank_line found = "BEND score=480 -> team-b (near done 92%, unstarted 3 days)") "one line"
+    := plain = ranked_of (default_weights ()) [] routes { bend ?| progress = 10i32; idle_days = 1i32; tags = [ "x" ] }
+    testing.expect (plain.reasons = [] && plain.lane = "" && rank_line plain = "BEND score=300") "no reason, no lane"

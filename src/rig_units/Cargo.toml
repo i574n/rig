@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "check.spi"
+output = "check.rs"
+
+[package]
+name = "rig-units"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_units"
+path = "check.rs"
+
+[dependencies]
+rig-units-edges = { path = "../rig_units_edges" }
+rig-units-layout = { path = "../rig_units_layout" }
+rig-units-manifest = { path = "../rig_units_manifest" }

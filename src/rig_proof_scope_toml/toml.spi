@@ -57,9 +57,26 @@
 
 :~ boxed (items : list string) : array_base string = items |> listm'.box |> listm'.to_array'
 
+:~ block_quote (~line : string) : bool = sm'.contains "'''" line || sm'.contains "\"\"\"" line
+
+:~ declared_modules (~text : string) : list string =
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        := plain = sm'.trim line
+        := opening = inside = !- && sm'.starts_with "modules" plain && block_quote plain
+        ? opening
+        ?> found, !+
+        |? inside && block_quote plain
+        ?> found, !-
+        |? inside && plain <> ""
+        ?> listm.append found [ plain ], !+
+        |: found, inside
+    := found, _ = text_lines text |> listm.fold step ([], !-)
+    found
+
 :~ toml_package_of ((dir, text) : string * string) : array_base toml_package =
     := package_dir = unquoted (after_equals (key_line PackageDirKey text))
-    := modules = listm.rev (spi_modules_in dir "" 0i32 [])
+    := declared = declared_modules text
+    := modules = ? declared = [] ?> listm.rev (spi_modules_in dir "" 0i32 []) |: declared
     := packages = boxed (key_list PackagesKey text)
     ;[ { package_dir = package_dir; packages = packages; modules = boxed modules } ] |> am'.base
 
@@ -69,6 +86,12 @@
     testing.expect (key_list PackagesKey text = [ "|core-"; "spiral-" ]) "the packages list, quotes either kind"
     testing.expect (unquoted (after_equals (key_line PackageDirKey text)) = "../lib") "the package dir"
     testing.expect (key_list PackagesKey "prelude = [\"base\"]\n" = []) "a missing key is empty"
+
+///> rust
+:# declared_modules_keep_their_dependency_order_not_the_alphabet =
+    := text = "packages = ['|core-']\nmodules = '''\ndfa\nlazy\ncertificate\nagreement\n'''\ntail = 1\n"
+    testing.expect (declared_modules text = [ "dfa"; "lazy"; "certificate"; "agreement" ]) "declared order"
+    testing.expect (declared_modules "packages = ['|core-']\n" = []) "no block, no declared modules"
 := main () : i32 =
     export "rig_proof_scope_toml_package" toml_package_of
     0i32

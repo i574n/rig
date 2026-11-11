@@ -140,28 +140,35 @@ fn directory_exists_9(mut v0: Rc<str>) -> bool {
     }
 }
 fn config_dir_6() -> Rc<str> {
-    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+    let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
     let v1: Rc<str> = get_environment_variable_8(v0);
-    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = get_environment_variable_8(v2);
-    let v4: bool = &*v3 != "";
-    let mut v8: Rc<str> = if v4 {
-        v3
-    } else {
-        let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
-        let mut v6: Rc<str> = get_environment_variable_8(v5);
-        let mut v7: Rc<str> = string_concat(&[&*v6, "/.config"]);
-        v7
-    };
-    let mut v9: Rc<str> = string_concat(&[&*v8, "/rig"]);
-    let v10: bool = directory_exists_9(v9);
-    let v11: bool = &*v1 != "";
-    if v11 {
+    let v2: bool = &*v1 != "";
+    let v5: Rc<str> = if v2 {
         v1
     } else {
-        let v12: Rc<str> = string_concat(&[&*v8, "/kit"]);
-        let v13: bool = directory_exists_9(v12);
-        config_choice_7(v8, v10, v13)
+        let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+        get_environment_variable_8(v3)
+    };
+    let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
+    let mut v7: Rc<str> = get_environment_variable_8(v6);
+    let mut v8: bool = &*v7 != "";
+    let v12: Rc<str> = if v8 {
+        v7
+    } else {
+        let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+        let v10: Rc<str> = get_environment_variable_8(v9);
+        let v11: Rc<str> = string_concat(&[&*v10, "/.config"]);
+        v11
+    };
+    let v13: Rc<str> = string_concat(&[&*v12, "/rig"]);
+    let v14: bool = directory_exists_9(v13);
+    let v15: bool = &*v5 != "";
+    if v15 {
+        v5
+    } else {
+        let v16: Rc<str> = string_concat(&[&*v12, "/kit"]);
+        let v17: bool = directory_exists_9(v16);
+        config_choice_7(v12, v14, v17)
     }
 }
 fn method12(mut v0: Option<usize>) -> Option<usize> {

@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "entry.spi"
+output = "entry.rs"
+
+[package]
+name = "rig-drafts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_drafts"
+path = "entry.rs"
+
+[dependencies]
+rig-drafts-list = { path = "../rig_drafts_list" }
+rig-drafts-put = { path = "../rig_drafts_put" }
+rig-drafts-promote = { path = "../rig_drafts_promote" }

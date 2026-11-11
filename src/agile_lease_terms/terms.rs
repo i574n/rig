@@ -127,50 +127,95 @@ fn get_environment_variable_5(mut v0: Rc<str>) -> Rc<str> {
 }
 fn lease_policy_entry_4() -> Rc<str> {
     let mut v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_LEASE_POLICY"); } LIT.with(|lit| lit.clone()) };
-    let mut v1: Rc<str> = get_environment_variable_5(v0);
-    let mut v2: bool = v1.is_empty() == false;
-    if v2 {
-        v1
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_"); } LIT.with(|lit| lit.clone()) };
+    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_"); } LIT.with(|lit| lit.clone()) };
+    let mut v3: Rc<str> = Rc::<str>::from(v0.replace(&*v1, &*v2));
+    let v4: Rc<str> = get_environment_variable_5(v3);
+    let v5: bool = &*v4 != "";
+    let mut v7: Rc<str> = if v5 {
+        v4
     } else {
-        let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("lease-policy"); } LIT.with(|lit| lit.clone()) };
-        let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
-        let v5: Rc<str> = get_environment_variable_5(v4);
-        let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("XDG_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
-        let mut v7: Rc<str> = get_environment_variable_5(v6);
-        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
-        let v9: Rc<str> = get_environment_variable_5(v8);
-        let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("USERPROFILE"); } LIT.with(|lit| lit.clone()) };
-        let v11: Rc<str> = get_environment_variable_5(v10);
-        let v12: bool = v5.is_empty() == false;
-        let v31: Rc<str> = if v12 {
-            let v14: Rc<str> = string_concat(&[&*v5, "/", &*v3]);
-            v14
+        get_environment_variable_5(v0)
+    };
+    let v8: bool = v7.is_empty() == false;
+    if v8 {
+        v7
+    } else {
+        let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("lease-policy"); } LIT.with(|lit| lit.clone()) };
+        let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+        let v11: Rc<str> = Rc::<str>::from(v10.replace(&*v1, &*v2));
+        let v12: Rc<str> = get_environment_variable_5(v11);
+        let v13: bool = &*v12 != "";
+        let v15: Rc<str> = if v13 {
+            v12
         } else {
-            let v15: bool = v7.is_empty() == false;
-            if v15 {
-                let v17: Rc<str> = string_concat(&[&*v7, "/kit/", &*v3]);
-                v17
+            get_environment_variable_5(v10)
+        };
+        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("XDG_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
+        let v17: Rc<str> = Rc::<str>::from(v16.replace(&*v1, &*v2));
+        let v18: Rc<str> = get_environment_variable_5(v17);
+        let v19: bool = &*v18 != "";
+        let v21: Rc<str> = if v19 {
+            v18
+        } else {
+            get_environment_variable_5(v16)
+        };
+        let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
+        let v23: Rc<str> = Rc::<str>::from(v22.replace(&*v1, &*v2));
+        let v24: Rc<str> = get_environment_variable_5(v23);
+        let v25: bool = &*v24 != "";
+        let v27: Rc<str> = if v25 {
+            v24
+        } else {
+            get_environment_variable_5(v22)
+        };
+        let v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("USERPROFILE"); } LIT.with(|lit| lit.clone()) };
+        let v29: Rc<str> = Rc::<str>::from(v28.replace(&*v1, &*v2));
+        let v30: Rc<str> = get_environment_variable_5(v29);
+        let v31: bool = &*v30 != "";
+        let v33: Rc<str> = if v31 {
+            v30
+        } else {
+            get_environment_variable_5(v28)
+        };
+        let v34: bool = v15.is_empty() == false;
+        let v57: Rc<str> = if v34 {
+            let v36: Rc<str> = string_concat(&[&*v15, "/", &*v9]);
+            v36
+        } else {
+            let v37: bool = v21.is_empty() == false;
+            if v37 {
+                let v39: Rc<str> = string_concat(&[&*v21, "/kit/", &*v9]);
+                v39
             } else {
-                let v18: bool = v9.is_empty() == false;
-                if v18 {
-                    let v20: Rc<str> = string_concat(&[&*v9, "/kit/", &*v3]);
-                    v20
+                let v40: bool = v27.is_empty() == false;
+                if v40 {
+                    let v42: Rc<str> = string_concat(&[&*v27, "/kit/", &*v9]);
+                    v42
                 } else {
-                    let v21: bool = v11.is_empty() == false;
-                    if v21 {
-                        let v23: Rc<str> = string_concat(&[&*v11, "/.config/kit/", &*v3]);
-                        v23
+                    let v43: bool = v33.is_empty() == false;
+                    if v43 {
+                        let v45: Rc<str> = string_concat(&[&*v33, "/.config/kit/", &*v9]);
+                        v45
                     } else {
-                        let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
-                        let v25: Rc<str> = get_environment_variable_5(v24);
-                        let v27: Rc<str> = string_concat(&[&*v25, "/.config/kit/", &*v3]);
-                        v27
+                        let v46: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+                        let v47: Rc<str> = Rc::<str>::from(v46.replace(&*v1, &*v2));
+                        let v48: Rc<str> = get_environment_variable_5(v47);
+                        let v49: bool = &*v48 != "";
+                        let v51: Rc<str> = if v49 {
+                            v48
+                        } else {
+                            get_environment_variable_5(v46)
+                        };
+                        let v53: Rc<str> = string_concat(&[&*v51, "/.config/kit/", &*v9]);
+                        v53
                     }
                 }
             }
         };
-        let v32: Rc<str> = std::fs::read_to_string(&*v31).map(|text| std::rc::Rc::<str>::from(text.trim())).unwrap_or_else(|_| { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) });
-        v32
+        let v58: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v57).unwrap_or_default().as_str());
+        let v59: Rc<str> = Rc::<str>::from((v58).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+        v59
     }
 }
 fn closure1() -> Rc<dyn Fn() -> Rc<str>> {

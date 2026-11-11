@@ -1,0 +1,64 @@
+///- --package .
+:# layout static =
+    :< sm'_operators
+    :< rig_units_model.shape
+
+:< sm'_operators
+:< rig_units_model.shape
+
+:~ ^ closure_of (units : list unit) (pending : list string) (seen : list string) : list string =
+    ?= pending ?|
+    | [] => seen
+    | name :: rest ?& listm'.contains name seen => closure_of units rest seen
+    | name :: rest =>
+        := links = ?= unit_named units name ?| | Some u => u.links | None => []
+        closure_of units (listm.append rest links) (listm.append seen [ name ])
+
+:~ module_pairs (units : list unit) (~name : string) : list (string * string) =
+    ?= unit_named units name ?|
+    | Some o => o.modules |> listm.map (\ (m : string) => m, o.name)
+    | None => []
+
+:~ duplicate_findings (units : list unit) (u : unit) : list units_finding =
+    := gather = \ (acc : list (string * string)) (name : string) => listm.append acc (module_pairs units name)
+    := pairs = closure_of units [ u.name ] [] |> listm.fold gather []
+    := clash = \ (found : list string) ((m, owner) : string * string) =>
+        := twice = listm'.exists' (\ ((n, by) : string * string) => n = m && by <> owner) pairs
+        ? twice && (listm'.contains m found |> not) ?> listm.append found [ m ] |: found
+    pairs |> listm.fold clash [] |> listm.map (\ (m : string) => DuplicateModule (u.name, m))
+
+:~ member_findings (units : list unit) (members : list string) : list units_finding =
+    := unlisted = \ (u : unit) => u.crate && (listm'.contains u.name members |> not)
+    := missing = units |> listm'.filter unlisted |> listm.map (\ (u : unit) => MemberMissing u.name)
+    := stray = members |> listm'.filter (\ (m : string) => is_unit units m |> not)
+    listm.append missing (stray |> listm.map (\ (m : string) => MemberWithoutUnit m))
+
+:~ layout_findings (units : list unit) (members : list string) : list units_finding =
+    := per = \ (acc : list units_finding) (u : unit) => listm.append acc (duplicate_findings units u)
+    listm.append (units |> listm.fold per []) (member_findings units members)
+
+:~ layout_hard ((rows, members) : array_base unit_row * array_base string) : i32 =
+    hard_printed (layout_findings (units_of rows) (list_of_base members))
+
+///> rust
+:# each_layout_rule_reports_its_own_finding =
+    := base =
+        {
+            name = "f"; kind = Feature; packages = [ "m" ]; links = [ "m" ]; deps = [ "m" ]; entry = "f.spi"
+            modules = [ "f" ]; crate = !+
+        }
+    := m =
+        { base ?| name = "m"; kind = Model; packages = []; links = []; deps = []; entry = "m.spi"; modules = [ "m" ] }
+    testing.expect (layout_findings [ base; m ] [ "f"; "m" ] = []) "a clean graph"
+    := b = { m ?| name = "b"; kind = Boundary; entry = "b.spi"; modules = [ "b" ] }
+    := bad = { base ?| links = [ "b" ]; modules = [ "b" ] }
+    := lines = layout_findings [ bad; b; m ] [ "f"; "b"; "q" ] |> listm.map finding_line
+    testing.expect (listm'.contains "units / f duplicate-module b" lines) "a module twice in one closure"
+    testing.expect (listm'.contains "units / m member-missing" lines) "a unit without a member"
+    testing.expect (listm'.contains "units / q member-without-unit" lines) "a member without a unit"
+    := source = { m ?| name = "s"; entry = "s.spi"; modules = [ "s" ]; crate = !- }
+    testing.expect (layout_findings [ source ] [] = []) "a source-only package needs no workspace member"
+
+:= main () : i32 =
+    export "rig_units_layout_hard" layout_hard
+    0i32

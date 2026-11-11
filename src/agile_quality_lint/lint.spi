@@ -40,7 +40,7 @@
     ?= check ?|
     | DoneDefinition => [ "dod:"; "definition of done"; "pronto quando"; "definição de pronto" ]
     | NextStep => [ "next:"; "next step"; "próximo:"; "próximo passo" ]
-    | TypeFeatures => [ "typefeatures:"; "typefeatureset plan" ]
+    | TypeFeatures => [ "typefeatures:"; "type feature plan" ]
     | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven"; "prova:"; "provado"; "verde" ]
     | BlockerNamed => [ "blocked on"; "blocker:"; "waits on"; "bloqueado por"; "bloqueio:"; "espera por" ]
     | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from"; "retomar quando"; "retoma quando" ]
@@ -122,7 +122,7 @@
 
 ///> rust
 :# phrase_style_notes_count_like_marker_lines =
-    := notes = "the definition of done is green CI; next step: wire it; typefeatureset plan below"
+    := notes = "the definition of done is green CI; next step: wire it; type feature plan below"
     := f =
         {
             status = "Active"

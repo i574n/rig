@@ -11,7 +11,9 @@ param(
     [string] $NodeMirror = 'kit-train',
     [string] $SshHost = '',
     [switch] $NodeStage,
-    [string] $ResumeNodeJob = ''
+    [string] $ResumeNodeJob = '',
+    [int] $NodeTimeoutHours = 10,
+    [switch] $NodeOnly
 )
 $ErrorActionPreference = 'Stop'
 if (-not $SshHost) { $SshHost = $Node }
@@ -101,6 +103,17 @@ if ($Node -and -not $NodeStage) {
                 $j = $n - 1; while ($j -ge 0 -and $lines[$j].Trim() -eq '') { $j-- }
                 if ($j -lt 0 -or $lines[$j] -notmatch '^///> ') { "${rel}:$($n + 1): a test block without its own ///> target line" }
             }
+            $nestedArm = [regex]'^\s*\| ([A-Z][A-Za-z0-9_]*) ([A-Z][A-Za-z0-9_]*)\s*(=>|\?&)'
+            $appUpdate = [regex]'\{\s*[a-z_][\w''.]*\s+(?!\?\|)[^\s{}][^{}]*?\?\|'
+            $usesLib = $false
+            for ($k = 0; $k -lt $lines.Count; $k++) {
+                if ($lines[$k] -match '^\s*//') { continue }
+                $code = $lines[$k] -replace '"(?:[^"\\]|\\.)*"', '""' -replace "\$'[^']*'", ''
+                if ($nestedArm.IsMatch($code)) { "${rel}:$($k + 1): a nested constructor pattern (the definition drops, callers see Unbound); bind the inner value and match it" }
+                if ($appUpdate.IsMatch($code)) { "${rel}:$($k + 1): a record update whose subject is an application (parse error, the block drops); bind it first" }
+                if ($code -match "sm'\.|\+\+#") { $usesLib = $true }
+            }
+            if ($usesLib -and (Test-Path -LiteralPath $projPath) -and (Get-Content -LiteralPath $projPath -Raw) -notmatch '(?m)^\s+spiral-\s*$') { "${rel}: uses sm' or ++# but its package.spiproj does not list spiral- (every dependent crate fails regen)" }
         }
         if (@($notebookFindings).Count) { throw "notebook precheck refused the snapshot (each costs a whole train):`n$($notebookFindings -join "`n")" }
         $lockLog = Join-Path ([IO.Path]::GetTempPath()) "kit-train-lock-$PID.txt"
@@ -111,7 +124,8 @@ if ($Node -and -not $NodeStage) {
         $verdict = ($pre -split "`n")[-1]
         [Console]::WriteLine("$(Get-Date -Format HH:mm:ss) launch-train $Name $verdict ($($touched.Count) touched files)")
     }
-    & $kit job start "kit-$Name-node" 43200000 pwsh -NoProfile -File $PSCommandPath -Name $Name -Node $Node -NodeMirror $NodeMirror -SshHost $SshHost -NodeStage -CellsPort $CellsPort
+    $forwarded = @('-NodeTimeoutHours', $NodeTimeoutHours) + @(if ($NodeOnly) { '-NodeOnly' })
+    & $kit job start "kit-$Name-node" 43200000 pwsh -NoProfile -File $PSCommandPath -Name $Name -Node $Node -NodeMirror $NodeMirror -SshHost $SshHost -NodeStage -CellsPort $CellsPort @forwarded
     exit $LASTEXITCODE
 }
 if ($NodeStage) {
@@ -128,6 +142,48 @@ if ($NodeStage) {
             $base = Join-Path $root $dir
             if ([IO.Directory]::Exists($base)) { Get-TreeFiles $base | ForEach-Object { "$($_.Substring($root.Length + 1)) $((Get-FileHash -LiteralPath $_).Hash)" } }
         }) | Sort-Object
+    }
+    function Get-HostSurface([string] $dir) {
+        foreach ($file in [IO.Directory]::EnumerateFiles($dir, '*.spi')) {
+            foreach ($m in [regex]::Matches([IO.File]::ReadAllText($file), 'export\s+"([^"]+)"|pub\s+(?:unsafe\s+)?fn\s+(\w+)|pub\s+use\s+[\w:]*?(\w+)\s*;|pub\s+(?:const|static)\s+(\w+)')) {
+                ($m.Groups | Select-Object -Skip 1 | Where-Object Success | Select-Object -First 1).Value
+            }
+        }
+    }
+    function Get-UnresolvedReferences([string] $src) {
+        $defs = @{}
+        $seen = @{}
+        $surfaces = @{}
+        foreach ($dir in [IO.Directory]::EnumerateDirectories($src)) {
+            $names = @(Get-HostSurface $dir)
+            $proj = Join-Path $dir 'package.spiproj'
+            if ([IO.File]::Exists($proj)) {
+                $inPackages = $false
+                foreach ($line in [IO.File]::ReadAllLines($proj)) {
+                    if ($line -match '^\S') { $inPackages = $line -match '^packages:'; continue }
+                    $included = Join-Path $src $line.Trim().TrimStart('|').TrimEnd('-')
+                    if ($inPackages -and $line.Trim() -and [IO.Directory]::Exists($included)) { $names += @(Get-HostSurface $included) }
+                }
+            }
+            $surfaces[[IO.Path]::GetFileName($dir)] = $names
+        }
+        foreach ($file in [IO.Directory]::EnumerateFiles($src, '*.spi', [IO.SearchOption]::AllDirectories)) {
+            if ($file -match '\\(target|deps)\\') { continue }
+            $text = [regex]::Replace([IO.File]::ReadAllText($file), '(?m)^:#.*(\r?\n([ \t].*)?)*', '')
+            foreach ($m in [regex]::Matches($text, '\b((?:rig|agile|kit)_\w+)::((?:rig|agile|kit)_\w+)\s*\(')) {
+                $crate = $m.Groups[1].Value
+                if ($surfaces.ContainsKey($crate) -and $surfaces[$crate] -notcontains $m.Groups[2].Value) { $seen["${crate}::$($m.Groups[2].Value)"] = 1 }
+            }
+            foreach ($m in [regex]::Matches($text, '(?<![\w.''])((?:rig|agile|kit|rust_std|union|workspace)_\w+)\.(\w+)\.([a-z_][\w'']*)')) {
+                $path = Join-Path (Join-Path $src $m.Groups[1].Value) "$($m.Groups[2].Value).spi"
+                if (-not [IO.File]::Exists($path)) { continue }
+                if (-not $defs.ContainsKey($path)) { $defs[$path] = [IO.File]::ReadAllText($path) }
+                $name = [regex]::Escape($m.Groups[3].Value)
+                $defined = '(?m)^(:[=~|!]|:==|inl|let|union|nominal)\s*(\^\s*)?' + $name + '\b|(?m)^\s+\|\s*' + $name + '\b'
+                if ($defs[$path] -notmatch $defined) { $seen["$($m.Groups[1].Value).$($m.Groups[2].Value).$($m.Groups[3].Value)"] = 1 }
+            }
+        }
+        @($seen.Keys | Sort-Object)
     }
     function Invoke-NodePwsh([string] $script) {
         $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($script))
@@ -155,12 +211,17 @@ if ($NodeStage) {
         $freeGb, $staleDirs = $space.Trim() -split ' '
         if ([double]$freeGb -lt 5) { throw "node C: has $freeGb GB free (< 5 GB; a regen needs ~1.5 GB plus caches); $staleDirs staged workspace(s) older than 6 h sit in $regenDir; free space first, refusing a node train" }
         Say "node disk ok: $freeGb GB free, $staleDirs stale staged workspace(s) in kit-regeneration"
+        $unresolved = @(Get-UnresolvedReferences (Join-Path $kitRoot 'src'))
+        if ($unresolved.Count) { throw "cross-package references no module defines (the regen would fail on them): $($unresolved -join ', '); refusing a node train" }
+        Say "references ok: every package.module.name and crate::function call in src resolves to a definition"
         $snapshotRoot = Join-Path $kitRoot ".cache\release-tree\$Name"
         $libCopy = Join-Path $kitRoot ".cache\release-tree\$Name-lib\lib\spiral"
         $liveLib = (Resolve-Path -LiteralPath (Join-Path $kitRoot '..\spiral\lib\spiral')).Path
         $treeDirs = @('src', 'scripts', 'compiler-contracts')
-        & robocopy $kitRoot $snapshotRoot /MIR /XD target .cache .git /NFL /NDL /NJH /NJS /NP | Out-Null
+        $loose = @(Get-ChildItem -LiteralPath (Join-Path $kitRoot 'src') -Directory | Where-Object { -not (Test-Path -LiteralPath (Join-Path $_.FullName 'package.spiproj')) -and @(Get-ChildItem -LiteralPath $_.FullName -Filter '*.spi' -File).Count } | ForEach-Object { $_.FullName })
+        & robocopy $kitRoot $snapshotRoot /MIR /XD target .cache .git @loose /NFL /NDL /NJH /NJS /NP | Out-Null
         if ($LASTEXITCODE -ge 8) { throw "snapshot copy failed (robocopy exit $LASTEXITCODE)" }
+        if ($loose.Count) { Say "left out of the snapshot, no package.spiproj yet: $(($loose | ForEach-Object { Split-Path $_ -Leaf }) -join ', ')" }
         & robocopy $liveLib $libCopy /MIR /XD bench target /NFL /NDL /NJH /NJS /NP | Out-Null
         if ($LASTEXITCODE -ge 8) { throw "lib copy failed (robocopy exit $LASTEXITCODE)" }
         $snapshotManifest = Get-Manifest $snapshotRoot $treeDirs
@@ -212,30 +273,33 @@ if ($NodeStage) {
         $before = Invoke-NodePwsh "Get-ChildItem '$mirror\kit\src' -Recurse -File -Filter *.rs | Where-Object { `$_.FullName -notmatch '\\target\\' } | ForEach-Object { `"`$(`$_.FullName.Substring('$mirror\kit\'.Length)) `$((Get-FileHash `$_.FullName).Hash)`" }"
         $nodeKit = (Get-Content ~/.config/remote-machines.json -Raw | ConvertFrom-Json -AsHashtable)[$Node].kit
         if (-not $nodeKit) { throw "remote-machines.json has no kit path for $Node" }
-        $start = & $kit job start --on $SshHost --bin $nodeKit "kit-$Name" 36000000 pwsh -NoProfile -File "$mirror\kit\scripts\release-train.ps1" -Name $Name -KitRoot "$mirror\kit" -Lib "$mirror\spiral\lib\spiral" -NotebooksOnly 2>&1 | Out-String
+        $start = & $kit job start --on $SshHost --bin $nodeKit "kit-$Name" ($NodeTimeoutHours * 3600000) pwsh -NoProfile -File "$mirror\kit\scripts\release-train.ps1" -Name $Name -KitRoot "$mirror\kit" -Lib "$mirror\spiral\lib\spiral" -NotebooksOnly 2>&1 | Out-String
         $jobId = [regex]::Match($start, 'id=(\S+)').Groups[1].Value
         if (-not $jobId) { throw "node job did not start: $start" }
         Say "node half started: $jobId"
     }
     $misses = 0
-    $giveUp = (Get-Date).AddHours(11)
+    $giveUp = (Get-Date).AddHours($NodeTimeoutHours + 1)
     while ($true) {
-        $wait = try { & $kit job wait $jobId 43200000 2>&1 | Out-String } catch { "$_" }
-        if ($wait -match '(kit|rig) job wait ok') { break }
-        $misses++
-        Say "node wait lost its route (miss $misses, exit $LASTEXITCODE, retrying until $($giveUp.ToString('HH:mm'))): $(($wait.Trim() -split "`n" | Select-Object -Last 1))"
-        if ((Get-Date) -ge $giveUp) { throw "node half UNKNOWN: no route for the whole node job timeout ($misses misses); the job may still be on $Node. Resume with -NodeStage -ResumeNodeJob $jobId once it answers" }
-        Start-Sleep -Seconds ([Math]::Min(300, 60 * $misses))
+        $listing = try { & $kit job list --on $SshHost 300 2>&1 | Out-String } catch { "$_" }
+        $wait = @($listing -split "`n" | Where-Object { $_ -match "id=$([regex]::Escape($jobId)) " }) | Select-Object -First 1
+        if ($wait -and $wait -notmatch 'state=(running|queued|placed|held)\b') { break }
+        if (-not $wait) {
+            $misses++
+            Say "node job list lost its route or the job (miss $misses, retrying until $($giveUp.ToString('HH:mm'))): $(($listing.Trim() -split "`n" | Select-Object -Last 1))"
+        }
+        if ((Get-Date) -ge $giveUp) { throw "node half UNKNOWN: no settled row for the whole node job timeout ($misses misses); the job may still be on $Node. Resume with -NodeStage -ResumeNodeJob $jobId once it answers" }
+        Start-Sleep -Seconds 120
     }
     & $kit job tail $jobId 40 2>&1 | Where-Object { $_ -match '^\d\d:\d\d:\d\d ' } | ForEach-Object { Say "node: $_" }
-    if ($wait -notmatch 'exit=0\b') { throw "node half failed: $(($wait -split "`n" | Select-Object -Last 1))" }
+    $nodeOk = $wait -match 'exit=0\b'
     $after = Invoke-NodePwsh "Get-ChildItem '$mirror\kit\src' -Recurse -File -Filter *.rs | Where-Object { `$_.FullName -notmatch '\\target\\' } | ForEach-Object { `"`$(`$_.FullName.Substring('$mirror\kit\'.Length)) `$((Get-FileHash `$_.FullName).Hash)`" }"
     $changed = @(Compare-Object $before $after -PassThru | Where-Object SideIndicator -eq '=>')
     $out = Join-Path $kitRoot ".cache\release-train\$Name"
     [void][IO.Directory]::CreateDirectory($out)
     $verdictFile = Join-Path $out 'node-verdicts.txt'
     scp -q "${SshHost}:$($mirror.Replace('\', '/'))/kit/.cache/release-train/$Name/notebooks-verdicts.txt" $verdictFile
-    if (-not (Test-Path -LiteralPath $verdictFile)) { throw 'node verdicts were not fetched' }
+    if (-not (Test-Path -LiteralPath $verdictFile)) { if ($nodeOk) { throw 'node verdicts were not fetched' } else { Say 'node verdicts were not fetched (the node half failed before writing them)' } }
     $copied = 0; $conflicts = 0
     foreach ($row in $changed) {
         $relative, $hash = $row -split ' ', 2
@@ -249,7 +313,9 @@ if ($NodeStage) {
         else { Say "regen output not copied back (edited in the live tree since the snapshot): $relative"; $conflicts++ }
     }
     Say "fetched $($changed.Count) regenerated outputs by hash; $copied copied back to the live tree, $conflicts left"
+    if (-not $nodeOk) { throw "node half failed; its regenerated outputs and any verdicts were fetched into $snapshotRoot first, so failed notebooks can rerun under a new name: $(($wait -split "`n" | Select-Object -Last 1))" }
     Set-Location $kitRoot
+    if ($NodeOnly) { Say "node half green, verdicts at $verdictFile; box half not started (-NodeOnly): build the release on a node, then install"; exit 0 }
     & $kit job start --heavy "kit-$Name" 18000000 pwsh -NoProfile -File (Join-Path $PSScriptRoot 'release-train.ps1') -Name $Name -Resume -Lib $libCopy -Verdicts $verdictFile
     exit $LASTEXITCODE
 }

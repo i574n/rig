@@ -1,0 +1,114 @@
+///- --package .
+:# escaped static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== process_facts =
+    {
+        name : string
+        command : string
+        parent_alive : bool
+        live_child : bool
+        established_tcp : bool
+        age_minutes : u64
+    }
+
+:| escaped_class =
+    | GitFsMonitor :: escaped_class
+    | SshForwarder :: escaped_class
+    | StoppedWatcher :: escaped_class
+    | Leaked :: escaped_class
+    | Attached :: escaped_class
+    | Detached :: escaped_class
+
+:= leak_grace_minutes () : u64 = 60u64
+
+:= shell_named (~name : string) : bool =
+    := lower = sm'.to_lower name
+    lower = "bash.exe" || lower = "bash" || lower = "pwsh.exe" || lower = "pwsh" || lower = "powershell.exe"
+
+:= protected_names () : list string =
+    [ "rustdesk.exe"; "rustdesk"; "sshd.exe"; "sshd"; "explorer.exe"; "winlogon.exe"; "services.exe" ]
+
+:= protected (facts : process_facts) : bool = listm'.contains (sm'.to_lower facts.name) (protected_names ())
+
+:= class_of (facts : process_facts) : escaped_class =
+    := lower = sm'.to_lower facts.command
+    ? facts.parent_alive
+    ?> Attached
+    |? protected facts
+    ?> Detached
+    |? sm'.contains "fsmonitor--daemon" lower
+    ?> GitFsMonitor
+    |? sm'.contains "ssh" (sm'.to_lower facts.name) && sm'.contains " -w " lower
+    ?> SshForwarder
+    |? facts.live_child || facts.established_tcp
+    ?> Detached
+    |? shell_named facts.name
+    ?> StoppedWatcher
+    |? facts.age_minutes >= leak_grace_minutes ()
+    ?> Leaked
+    |: Detached
+
+:= heal_of (class : escaped_class) : string =
+    ?= class ?|
+    | GitFsMonitor => "parentless by design and respawns when killed: disable core.fsmonitor in that repo, never kill"
+    | SshForwarder => "a -W forwarder left by a timed-out ssh: kill it; bound ssh with ConnectTimeout, trap EXIT"
+    | StoppedWatcher => "a watcher shell outlived its stopped task: kill the process tree by pid and verify it is gone"
+    | Leaked => "dead parent, no connection, no child, past the grace: reap it"
+    | Attached => "its parent is alive: not escaped"
+    | Detached => "parentless but working (a live child or connection) or still young: watch, do not reap"
+
+:= reapable (class : escaped_class) : bool =
+    ?= class ?|
+    | SshForwarder | StoppedWatcher | Leaked => !+
+    | _ => !-
+
+:| reap_scope =
+    | OwnLabels :: list string -> reap_scope
+    | EveryOwner :: reap_scope
+
+:= in_scope (scope : reap_scope) (~owner : string) : bool =
+    ?= scope ?|
+    | OwnLabels labels => owner <> "" && listm'.contains owner labels
+    | EveryOwner => !+
+
+:= may_reap (scope : reap_scope) (~owner : string) (facts : process_facts) : bool =
+    in_scope scope owner && (protected facts |> not) && reapable (class_of facts)
+
+///> rust
+:# a_reap_touches_only_owners_in_its_scope =
+    := leaked =
+        {
+            name = "node.exe"; command = "node x.js"; parent_alive = !-
+            live_child = !-; established_tcp = !-; age_minutes = 90u64
+        }
+    := mine = OwnLabels [ "rig-probe" ]
+    testing.expect (may_reap mine "rig-probe" leaked) "an own leaked process"
+    testing.expect (may_reap mine "org-train" leaked |> not) "another lane's process is out of scope"
+    testing.expect (may_reap mine "" leaked |> not) "an unlabelled process is never in an own scope"
+    testing.expect (may_reap EveryOwner "org-train" leaked) "the explicit fleet scope"
+    testing.expect (may_reap EveryOwner "x" { leaked ?| age_minutes = 5u64 } |> not) "still inside the grace"
+
+///> rust
+:# each_catalog_class_gets_its_own_verdict_and_heal =
+    := base =
+        {
+            name = "dotnet.exe"; command = "dotnet x.dll"; parent_alive = !-; live_child = !-; established_tcp = !-
+            age_minutes = 90u64
+        }
+    testing.expect (class_of base = Leaked && reapable Leaked) "an old idle orphan is leaked"
+    testing.expect (class_of { base ?| parent_alive = !+ } = Attached) "a live parent is never escaped"
+    := git = { base ?| name = "git.exe"; command = "git fsmonitor--daemon run --detach" }
+    testing.expect (class_of git = GitFsMonitor && (reapable GitFsMonitor |> not)) "fsmonitor is never reaped"
+    := ssh = { base ?| name = "ssh.exe"; command = "ssh -W host:22 jump" }
+    testing.expect (class_of ssh = SshForwarder) "a -W forwarder"
+    testing.expect (class_of { base ?| name = "bash.exe"; age_minutes = 5u64 } = StoppedWatcher) "a stopped watcher"
+    testing.expect (class_of { base ?| established_tcp = !+ } = Detached) "a connected daemon is working"
+    testing.expect (class_of { base ?| age_minutes = 10u64 } = Detached) "a young orphan waits for the grace"
+    testing.expect (sm'.contains "never kill" (heal_of GitFsMonitor)) "the heal text names the safe action"
+    := rustdesk = { base ?| name = "RustDesk.exe"; command = "rustdesk.exe --help"; age_minutes = 4000u64 }
+    testing.expect (class_of rustdesk = Detached && (reapable (class_of rustdesk) |> not)) "RustDesk is never reaped"
+
+:= main () : i32 = 0i32

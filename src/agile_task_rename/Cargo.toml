@@ -14,5 +14,6 @@ name = "agile_task_rename"
 path = "task_rename.rs"
 
 [dependencies]
+rig-agile-id-prefix = { path = "../rig_agile_id_prefix" }
 rig-agile-records = { path = "../rig_agile_records" }
 agile-rename-rewrite = { path = "../agile_rename_rewrite" }

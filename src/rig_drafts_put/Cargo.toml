@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "putting.spi"
+output = "putting.rs"
+
+[package]
+name = "rig-drafts-put"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_drafts_put"
+path = "putting.rs"

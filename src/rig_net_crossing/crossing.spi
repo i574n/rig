@@ -1,0 +1,71 @@
+///- --package .
+:# crossing static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| path_class =
+    | PublicRepo :: path_class
+    | PrivateData :: path_class
+    | Secret :: path_class
+
+:== class_rule = { prefix : string; class : path_class }
+
+:| crossing =
+    | Crosses :: crossing
+    | CrossesEncrypted :: crossing
+    | Refused :: string -> crossing
+
+:~ normal (~path : string) : string = sm'.replace "\\" "/" path
+
+:~ strictness (class : path_class) : i32 =
+    ?= class ?|
+    | PublicRepo => 0i32
+    | PrivateData => 1i32
+    | Secret => 2i32
+
+:~ stricter (best : path_class) (rule : class_rule) : path_class =
+    ? strictness rule.class > strictness best ?> rule.class |: best
+
+:~ class_of (rules : list class_rule) (~path : string) : path_class =
+    := matching = rules |> listm'.filter (\ (r : class_rule) => sm'.starts_with (normal r.prefix) (normal path))
+    ?= matching ?|
+    | [] => PrivateData
+    | first :: rest => rest |> listm.fold stricter first.class
+
+:~ crossing_of (class : path_class) (encrypted : bool) (~path : string) : crossing =
+    ?= class ?|
+    | PublicRepo => Crosses
+    | PrivateData => ? encrypted ?> CrossesEncrypted |: Refused ("private data crosses only encrypted: " ++# path)
+    | Secret => Refused ("a secret never crosses: " ++# path)
+
+:~ next_verdict (rules : list class_rule) (encrypted : bool) (verdict : crossing) (~path : string) : crossing =
+    ?= verdict ?|
+    | Refused _ => verdict
+    | _ =>
+        ?= crossing_of (class_of rules path) encrypted path ?|
+        | Refused why => Refused why
+        | CrossesEncrypted => CrossesEncrypted
+        | Crosses => verdict
+
+:~ manifest_verdict (rules : list class_rule) (paths : list string) (encrypted : bool) : crossing =
+    paths |> listm.fold (next_verdict rules encrypted) Crosses
+
+///> rust
+:# public_slices_cross_private_data_needs_encryption_and_secrets_never_cross =
+    := public = { prefix = "C:/pub/"; class = PublicRepo }
+    := keys = { prefix = "C:/pub/keys/"; class = Secret }
+    := data = { prefix = "C:/data/"; class = PrivateData }
+    := rules = [ public; keys; data ]
+    testing.expect (class_of rules "C:\\pub\\a.spi" = PublicRepo) "a public repo path"
+    testing.expect (class_of rules "C:/pub/keys/id" = Secret) "the strictest matching rule wins"
+    testing.expect (class_of rules "D:/elsewhere" = PrivateData) "an unknown path is private by default"
+    testing.expect (manifest_verdict rules [ "C:/pub/a"; "C:/pub/b" ] !- = Crosses) "a public slice crosses"
+    testing.expect (manifest_verdict rules [ "C:/pub/a"; "C:/data/x" ] !+ = CrossesEncrypted) "private data, encrypted"
+    := refused = Refused "private data crosses only encrypted: C:/data/x"
+    testing.expect (manifest_verdict rules [ "C:/pub/a"; "C:/data/x" ] !- = refused) "a refusal names the path"
+    := secret = Refused "a secret never crosses: C:/pub/keys/id"
+    testing.expect (manifest_verdict rules [ "C:/pub/keys/id"; "C:/data/x" ] !+ = secret) "never, even encrypted"
+    testing.expect (manifest_verdict rules [] !- = Crosses) "an empty slice crosses"
+
+:= main () : i32 = 0i32

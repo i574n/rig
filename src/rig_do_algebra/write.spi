@@ -1,0 +1,88 @@
+///- --package .
+:# write static =
+    :< sm'_operators
+    :< read
+
+:< sm'_operators
+:< read
+
+:== edited = { path : string; replaced : i32 }
+
+:== written = { path : string; bytes : i32; created : bool }
+
+:== copied = { from : string; into : string }
+
+:| write_mode =
+    | CreateOnly :: write_mode
+    | ReplaceOnly :: write_mode
+
+:| write_statement receipt =
+    | Edit :: string * string * string -> write_statement edited
+    | Write :: string * string * write_mode -> write_statement written
+    | Copy :: string * string -> write_statement copied
+
+:| staged receipt =
+    | Staged :: \* r. r * list tree_file -> staged r
+    | Refused :: \* r. string -> staged r
+
+:~ body_of (files : list tree_file) (~path : string) : option string =
+    ?= files |> listm'.try_find_ (\ (f : tree_file) => f.name = path) ?|
+    | Some f => Some f.body
+    | None => None
+
+:~ with_body (files : list tree_file) (~path : string) (~body : string) : list tree_file =
+    := others = files |> listm'.filter (\ (f : tree_file) => f.name <> path)
+    listm.append others [ { name = path; body = body } ]
+
+:~ occurrences (~needle : string) (~body : string) : i32 = (listm.length (sm'.split_list needle body) : i32) - 1i32
+
+:~ staged_edit (files : list tree_file) (~path : string) (~old : string) (~new : string) : staged edited =
+    ?= body_of files path ?|
+    | None => Refused ("edit: " ++# path ++# " does not exist")
+    | Some body =>
+        := found = occurrences old body
+        ? found <> 1i32
+        ?> Refused ("edit: " ++# path ++# " has " ++# sm'.show found ++# " matches, expected exactly 1")
+        |: Staged ({ path = path; replaced = 1i32 }, with_body files path (sm'.replace old new body))
+
+:~ staged_write (files : list tree_file) (~path : string) (~text : string) (mode : write_mode) : staged written =
+    := present = body_of files path <> None
+    := receipt = { path = path; bytes = (sm'.length text : i32); created = present |> not }
+    ?= mode ?|
+    | CreateOnly ?& present => Refused ("write: " ++# path ++# " exists and the mode is create")
+    | ReplaceOnly ?& (present |> not) => Refused ("write: " ++# path ++# " is missing and the mode is replace")
+    | _ => Staged (receipt, with_body files path text)
+
+:~ staged_copy (files : list tree_file) (~from : string) (~into : string) : staged copied =
+    ?= body_of files from ?|
+    | None => Refused ("copy: " ++# from ++# " does not exist")
+    | Some body => Staged ({ from = from; into = into }, with_body files into body)
+
+:= stage \* receipt. (files : list tree_file) (statement : write_statement receipt) : staged receipt =
+    ?= statement ?|
+    | Edit (path, old, new) => staged_edit files path old new
+    | Write (path, text, mode) => staged_write files path text mode
+    | Copy (from, into) => staged_copy files from into
+
+:= tree_after \* receipt. (files : list tree_file) (s : staged receipt) : list tree_file =
+    ?= s ?|
+    | Staged (_, next) => next
+    | Refused _ => files
+
+///> rust
+:# each_write_statement_stages_its_own_receipt_or_refuses_without_touching_the_tree =
+    := tree = [ { name = "a.spi"; body = "x = 1\ny = 1" } ]
+    ?= stage tree (Edit ("a.spi", "x = 1", "x = 2")) ?|
+    | Staged (r, next) =>
+        testing.expect (r.replaced = 1i32 && body_of next "a.spi" = Some "x = 2\ny = 1") "one replacement staged"
+        ?= stage next (Write ("b.md", "hi", CreateOnly)) ?|
+        | Staged (w, last) => testing.expect (w.created && w.bytes = 2i32 && listm.length last = 2i32) "a created file"
+        | Refused why => failwith why
+    | Refused why => failwith why
+    := ambiguous = stage tree (Edit ("a.spi", "= 1", "= 3"))
+    testing.expect (tree_after tree ambiguous = tree) "two matches refuse and leave the tree as it was"
+    := clash = stage tree (Write ("a.spi", "z", CreateOnly))
+    testing.expect (clash = Refused "write: a.spi exists and the mode is create") "create never overwrites"
+    ?= stage tree (Copy ("a.spi", "c.spi")) ?|
+    | Staged (c, next) => testing.expect (c.into = "c.spi" && body_of next "c.spi" = body_of tree "a.spi") "a copy"
+    | Refused why => failwith why

@@ -1,0 +1,80 @@
+///- --package .
+:# check static =
+    :< sm'_operators
+    :< rig_memory_typed.memory
+    :< rig_memory_dupes.dupes
+
+:< sm'_operators
+:< rig_memory_typed.memory
+:< rig_memory_dupes.dupes
+
+:| memory_finding =
+    | NoFrontmatter :: string -> memory_finding
+    | NoName :: string -> memory_finding
+    | NameMismatch :: string * string -> memory_finding
+    | NoDescription :: string -> memory_finding
+    | NoType :: string -> memory_finding
+    | IndexDeadLink :: string -> memory_finding
+    | Orphan :: string -> memory_finding
+    | Duplicate :: string * string * i32 -> memory_finding
+
+:== memory_file = { file : string; text : string }
+
+:~ stem_of (~file : string) : string = sm'.replace ".md" "" file
+
+:~ file_findings (f : memory_file) : list memory_finding =
+    ?= memory_of_text f.text ?|
+    | None => [ NoFrontmatter f.file ]
+    | Some m =>
+        := field = \ (key : string) => field_in m.frontmatter key
+        := name =
+            ? m.name = "" ?> [ NoName f.file ] |? m.name <> stem_of f.file ?> [ NameMismatch (f.file, m.name) ] |: []
+        := about = ? field "description" = "" ?> [ NoDescription f.file ] |: []
+        := kind = ? m.kind = None ?> [ NoType f.file ] |: []
+        listm.concat [ name; about; kind ]
+
+:~ ^ links_in (~text : string) (found : list string) : list string =
+    := open_at = sm'.index_of "](" text
+    ? open_at < 0i32
+    ?> listm.rev found
+    |:
+        := rest = sm'.substring (open_at + 2i32) ((sm'.length text : i32) - open_at - 2i32) text
+        := close = sm'.index_of ")" rest
+        ? close < 0i32
+        ?> listm.rev found
+        |:
+            := target = sm'.substring 0i32 close rest
+            := kept = ? sm'.ends_with ".md" target && sm'.contains "/" target |> not ?> target :: found |: found
+            links_in (sm'.substring (close + 1i32) ((sm'.length rest : i32) - close - 1i32) rest) kept
+
+:~ index_findings (~index : string) (files : list memory_file) : list memory_finding =
+    := names = files |> listm.map (\ (f : memory_file) => f.file)
+    := linked = links_in index []
+    := dead = linked |> listm'.filter (\ (l : string) => listm'.contains l names |> not) |> listm.map IndexDeadLink
+    := orphans = names |> listm'.filter (\ (n : string) => listm'.contains n linked |> not) |> listm.map Orphan
+    listm.append dead orphans
+
+:~ duplicate_findings (files : list memory_file) : list memory_finding =
+    := bodies = files |> listm.map (\ (f : memory_file) => ({ name = f.file; body = f.text } : memory_body))
+    := as_finding = \ (s : similarity) =>
+        ?= s ?|
+        | DupCandidate (a, b, p) => Duplicate (a, b, p)
+    dup_candidates bodies |> listm.map as_finding
+
+:~ memory_check (~index : string) (files : list memory_file) : list memory_finding =
+    := per_file = files |> listm.map file_findings |> listm.concat
+    listm.concat [ per_file; index_findings index files; duplicate_findings files ]
+
+///> rust
+:# one_check_names_every_sweep_finding_kind =
+    := good = "---\nname: probe-rule\ndescription: a rule\nmetadata:\n  type: user\n---\n\nShort fact.\n"
+    := renamed = "---\nname: other-name\nmetadata:\n  type: user\n---\n\nAnother fact here.\n"
+    := bare = { file = "y.md"; text = "no" }
+    := files = [ { file = "probe-rule.md"; text = good }; { file = "x.md"; text = renamed }; bare ]
+    := index = "- [Probe](probe-rule.md) - a rule\n- [Gone](gone.md) - missing\n- [X](x.md) - x"
+    := found = memory_check index files
+    testing.expect (listm'.contains (NameMismatch ("x.md", "other-name")) found) "name differs from the file stem"
+    testing.expect (listm'.contains (NoDescription "x.md") found) "no description"
+    testing.expect (listm'.contains (NoFrontmatter "y.md") found) "no frontmatter"
+    testing.expect (listm'.contains (IndexDeadLink "gone.md") found && listm'.contains (Orphan "y.md") found) "index"
+    testing.expect (listm'.contains (Orphan "probe-rule.md") found |> not) "a linked file is no orphan"

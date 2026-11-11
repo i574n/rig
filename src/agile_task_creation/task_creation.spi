@@ -1,3 +1,4 @@
+:< sm'_operators
 :< agile_mutation_policy.model
 :< rust_std_fs.model
 :< agile_state_fs.model
@@ -65,8 +66,8 @@
     | FlagLoad => { extras ?| load = value }
     | FlagAssignee => { extras ?| assignee = value }
     | FlagDeps => { extras ?| deps = value }
-    | FlagNote => { extras ?| note = rust_std_string.model.trim value }
-    | FlagAs => { extras ?| author = rust_std_string.model.trim value }
+    | FlagNote => { extras ?| note = sm'.trim value }
+    | FlagAs => { extras ?| author = sm'.trim value }
 
 :| flag_parse =
     | FlagKnown : add_flag
@@ -97,7 +98,7 @@
 
 := author_settled (extras : add_extras) : add_extras =
     ? extras.author = ""
-    ?> { extras ?| author = rust_std_string.model.trim (rust_std_env.model.variable_or_empty "KIT_AUTHOR") }
+    ?> { extras ?| author = sm'.trim (rust_std_env.model.variable_either "RIG_AUTHOR" "KIT_AUTHOR") }
     |: extras
 
 :~ extras_checked (read : extras_read) : extras_read =
@@ -112,17 +113,9 @@
         |: ExtrasRead extras
 
 := task_line (~id : string) kind priority difficulty (~title : string) (~tags : string) (~deps : string) : string =
-    := head = rust_std_string.model.concat5 "inl " (task_binding id) " () = Task (" (spi_quoted id) ", "
-    := middle =
-        rust_std_string.model.concat5 (spi_quoted title) ", " (agile_case_text kind) ", " (agile_case_text priority)
-    := tail =
-        rust_std_string.model.concat5
-            ", "
-            (agile_case_text difficulty)
-            ", 0u32, Planned, "
-            (spi_quoted deps)
-            (rust_std_string.model.concat5 ", " (spi_quoted tags) ", \"current\", \"current\")" "" "")
-    rust_std_string.model.concat5 head middle tail "" ""
+    := level = agile_case_text difficulty
+    := row = id, task_binding id, agile_case_text kind, agile_case_text priority, level, title, tags, deps
+    agile_task_creation_text.text.task_line row
 
 :| added_text =
     | AddedText : string
@@ -135,30 +128,6 @@
         &*!body, &*!author)' : i32 * string
     ? code = 0i32 ?> AddedText detail |: AddedRefused detail
 
-:= extras_receipt (extras : add_extras) : string =
-    := deps = ? extras.deps = "" ?> "" |: rust_std_string.model.concat5 " deps=" extras.deps "" "" ""
-    := planning =
-        rust_std_string.model.concat5
-            (? extras.estimate = "" ?> "" |: " estimate")
-            (? extras.load = "" ?> "" |: " load")
-            (? extras.assignee = "" ?> "" |: " assignee")
-            ""
-            ""
-    rust_std_string.model.concat5 deps
-        (
-            ? planning = ""
-            ?> ""
-            |:
-                rust_std_string.model.concat5
-                    " planned="
-                    (sm'.replace " " "," (rust_std_string.model.trim planning))
-                    ""
-                    ""
-                    ""
-        )
-        (? extras.note = "" ?> "" |: " notes=1")
-        ""
-        ""
 
 := agile_add_failure (~reason : string) (~id : string) : i32 =
     stderr_failure (rust_std_string.model.concat5 "agile add " id " rejected: " reason "")
@@ -166,14 +135,8 @@
     (~id : string) (~binding : string) (extras : add_extras) (before : u64) (after : u64) (elapsed : u64)
     : i32
     =
-    := head =
-        rust_std_string.model.concat5
-            "rig agile add ok id="
-            id
-            " binding="
-            binding
-            (rust_std_string.model.concat5 " status=Planned progress=0" (extras_receipt extras) "" "" "")
-    stdout_line (rust_std_string.model.concat5 head (measured_sizes before after elapsed) "" "" "")
+    := receipt = id, binding, extras.estimate, extras.load, extras.assignee, extras.deps, extras.note
+    stdout_line (agile_task_creation_text.text.add_receipt receipt ++# measured_sizes before after elapsed)
 := task_listed (~id : string) (~original : string) : bool =
     sm'.contains (rust_std_string.model.concat5 "Task (\"" id "\"," "" "") original
 := agile_add
@@ -189,13 +152,8 @@
         ? task_listed id original
         ?> agile_add_failure "a task with this id already exists" id
         |:
-            := appended =
-                rust_std_string.model.concat5
-                    (rust_std_string.model.trim_end_matches original "\n")
-                    "\n"
-                    (task_line id kind priority difficulty title tags extras.deps)
-                    "\n"
-                    ""
+            := line = task_line id kind priority difficulty title tags extras.deps
+            := appended = rust_std_string.model.trim_end_matches original "\n" ++# "\n" ++# line ++# "\n"
             ?= extras_applied appended id extras ?|
             | AddedRefused reason => agile_add_failure reason id
             | AddedText updated =>
@@ -209,8 +167,11 @@
                         (ms_since started)
                 | problem => agile_add_failure (file_replacement_problem problem) id
 :~ agile_add_entry () : i32 =
+    := retired = rig_agile_id_prefix.prefix.new_id_refusal (argument_owned 2i32)
     ? i32_digit (argument_byte 2i32 0i32)
     ?> agile_add_failure "the id must start with a letter, so its inl name is a valid identifier" (argument_owned 2i32)
+    |? retired <> ""
+    ?> agile_add_failure retired (argument_owned 2i32)
     |:
         ?=
             validate_task_id (),

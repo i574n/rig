@@ -33,7 +33,6 @@ enum US2 {
     US2_Some(u64),
     US2_None,
 }
-pub struct Mut0 { pub l0: Rc<str> }
 #[derive(Clone)]
 enum US3 {
     US3_ProcessHolder,
@@ -721,7 +720,7 @@ fn window_ran_0() -> i32 {
                 false
             };
             let v61: Rc<str> = if v58 {
-                let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a tree window guards the path in its label; give the rooted path it reads or writes, e.g. C:/home/git/spiral/lib"); } LIT.with(|lit| lit.clone()) };
+                let v59: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("a tree window guards the path in its label; give the rooted path it reads or writes, e.g. C:/work/repo/lib"); } LIT.with(|lit| lit.clone()) };
                 v59
             } else {
                 let v60: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
@@ -941,4 +940,4 @@ pub fn rig_window_run_run() -> i32 {
 pub fn rig_heavy_holders_text() -> Rc<str> {
     closure3()()
 }
-pub type SpiralShape_97df63ebabc3 = Mut0;
+use rig_process_alive::SpiralShape_97df63ebabc3 as Mut0;

@@ -1,0 +1,66 @@
+///- --package .
+:# edges static =
+    :< sm'_operators
+    :< rig_units_model.shape
+
+:< sm'_operators
+:< rig_units_model.shape
+
+:~ kind_allows (from : unit_kind) (target : unit_kind) : bool =
+    ?= from, target ?|
+    | Plain, _ => !+
+    | Bin, _ => !+
+    | Model, _ => !-
+    | Boundary, Model => !+
+    | Boundary, _ => !-
+    | Feature, Boundary => !-
+    | Feature, _ => !+
+
+:~ link_findings (units : list unit) (u : unit) (~link : string) : list units_finding =
+    := listed = ? listm'.contains link u.packages ?> [] |: [ LinkNotInPackages (u.name, link) ]
+    := dep = ? listm'.contains link u.deps ?> [] |: [ LinkWithoutCargoDep (u.name, link) ]
+    := kind =
+        ?= unit_named units link ?|
+        | Some target ?& (kind_allows u.kind target.kind |> not) => [ KindEdge (u.name, link) ]
+        | _ => []
+    listm.append listed (listm.append dep kind)
+
+:~ host_dep (units : list unit) (u : unit) (~dep : string) : bool =
+    is_unit units dep && (listm'.contains dep u.links |> not)
+
+:~ edge_findings (units : list unit) (u : unit) : list units_finding =
+    := add = \ (acc : list units_finding) (l : string) => listm.append acc (link_findings units u l)
+    := links = u.links |> listm.fold add []
+    := hosts = u.deps |> listm'.filter (host_dep units u) |> listm.map (\ (d : string) => HostCallDep (u.name, d))
+    := named = u.kind = Plain || u.entry = u.name ++# ".spi"
+    := entry = ? named ?> [] |: [ EntryNotNamedAfterUnit (u.name, u.entry) ]
+    listm.append links (listm.append hosts entry)
+
+:~ all_edge_findings (units : list unit) : list units_finding =
+    units |> listm.fold (\ (acc : list units_finding) (u : unit) => listm.append acc (edge_findings units u)) []
+
+:~ edges_hard (rows : array_base unit_row) : i32 = hard_printed (all_edge_findings (units_of rows))
+
+///> rust
+:# each_edge_rule_reports_its_own_finding =
+    := base =
+        {
+            name = "f"; kind = Feature; packages = [ "m" ]; links = [ "m" ]; deps = [ "m" ]; entry = "f.spi"
+            modules = [ "f" ]; crate = !+
+        }
+    := m =
+        { base ?| name = "m"; kind = Model; packages = []; links = []; deps = []; entry = "m.spi"; modules = [ "m" ] }
+    testing.expect (all_edge_findings [ base; m ] = []) "a clean graph"
+    := b = { m ?| name = "b"; kind = Boundary; entry = "b.spi"; modules = [ "b" ] }
+    := bad = { base ?| packages = []; links = [ "b" ]; deps = [ "x" ]; entry = "unit.spi"; modules = [ "b" ] }
+    := lines = all_edge_findings [ bad; b; m ] |> listm.map finding_line
+    testing.expect (listm'.contains "units / f link-not-in-packages b" lines) "listed"
+    testing.expect (listm'.contains "units / f link-without-cargo-dep b" lines) "cargo"
+    testing.expect (listm'.contains "units / f kind-edge b" lines) "a feature never links a boundary"
+    testing.expect (listm'.contains "units / f entry-not-named-after-unit unit.spi" lines) "entry"
+    := host = all_edge_findings [ { base ?| deps = [ "m"; "b" ] }; b; m ]
+    testing.expect (host = [ HostCallDep ("f", "b") ]) "a host call dep is counted, and is not a refusal"
+
+:= main () : i32 =
+    export "rig_units_edges_hard" edges_hard
+    0i32

@@ -4,7 +4,7 @@ One self-contained Rust exe that measures a node's raw compute/memory/disk (and 
 prints a single key=value line. It never ranks or rates — the fleet-relative **0-1000 rating + rank** is
 computed centrally by the fleet coordinator (its copy of `rate.ps1`), the only place that sees all nodes.
 
-## Build (two profiles from one source — the "typefeatureset")
+## Build (two profiles from one source)
 
 | profile | command | deps | where |
 |---|---|---|---|
@@ -42,7 +42,8 @@ CORES=N ST_MS=.. MT_MS=.. MEM_GBPS=.. DWR_MBPS=.. DRD_MBPS=.. DSYNC_MS=.. DIOPS=
 - **ST/MT/MEM use best-of-N (min)** — a throughput probe wants the least-interfered sample; the mean
   absorbed Defender/scheduler noise (an earth read swung 311→450ms as a mean, stable as a min).
 - **ns timing** throughout — integer `as_millis()` hid sub-ms gaps between fast nodes (89 vs 87).
-- **mem buffer is 64MB** (128MB working set) so it never OOMs the smallest (1 GB) node. On a huge-L3 node (the largest, 28-core
+- **mem buffer is 64MB** (128MB working set) so it never OOMs the smallest (1 GB) node. On a huge-L3 node
+  (the largest, 28-core
   one) part of this sits in cache, so `MEM_GBPS` there reads high — read it as "cache+RAM", not pure DRAM.
 - **disk temp dir is RAII-cleaned** (`TempGuard: Drop`) — removed on normal exit *and* early return, so a
   failed probe leaves nothing behind (teardown-sweeps-every-layer).
@@ -57,7 +58,8 @@ creds + network egress); it runs only where object-store credentials are configu
 tooling, and its numbers fold into the disk dimension for those nodes only. See STORE-NO-DANGLING (team:management).
 
 ## Rating (computed centrally, not here)
-See the fleet coordinator's copy of `rate.ps1`. Each dimension is scored **log-relative** to the fleet (fleet-min→0, fleet-max→1000
+See the fleet coordinator's copy of `rate.ps1`. Each dimension is scored **log-relative** to the fleet
+(fleet-min→0, fleet-max→1000
 on a `ln` axis, so a fixed *ratio* is a fixed number of points), then blended:
 `parallel 0.28 · single 0.24 · mem 0.18 · disk 0.22 · gpu 0.08` (gpu weight redistributes when no hardware GPU).
 Disk is `0.5·DWR + 0.3·DIOPS + 0.2·(1/DSYNC)` before the log step. The overall 0-1000 + rank is stored at the

@@ -11,17 +11,29 @@
     | lane :: _ :: _ => lane
     | _ => label
 
-:~ job_sample (m : machine) (~label : string) (elapsed : u64) (settled : bool) : option exec_sample =
-    ? settled && elapsed > 0u64 ?> Some (TimedSample (m, JobDuration (lane_of label, elapsed))) |: None
+:~ job_sample (m : machine) (~label : string) (~id : string) (elapsed : u64) (settled : bool) : option exec_sample =
+    ? settled && elapsed > 0u64 ?> Some (TimedSample (m, JobDuration (lane_of label, id, elapsed))) |: None
+
+:~ peak_sample (m : machine) (~label : string) (~id : string) (peak_mb : u64) : option exec_sample =
+    ? peak_mb > 0u64 ?> Some (SizedSample (m, JobPeak (lane_of label, id, peak_mb * 1048576u64))) |: None
+
+:~ peak_mb_of (~id : string) : u64 =
+    := text = sm'.trim (rig_jobs.host.text_or_empty (rig_jobs.jobs.job_file id "peak_private_mb"))
+    := parsed : option u64 = convert.try_convert text
+    ?= parsed ?|
+    | Some n => n
+    | None => 0u64
 
 :~ job_samples (m : machine) (since : u64) : list exec_sample =
     := sampled = \ (acc : list exec_sample) (id : string) =>
         := record = rig_jobs.jobs.job_record_of id
         := label = sm'.trim (rig_jobs.host.text_or_empty (rig_jobs.jobs.job_file id "label"))
         := settled = record.exit_text <> "" && record.started_ms >= since
-        ?= job_sample m label (rig_jobs.jobs.elapsed_of id) settled ?|
-        | Some sample => sample :: acc
-        | None => acc
+        := timed = ?= job_sample m label id (rig_jobs.jobs.elapsed_of id) settled ?| | Some s => s :: acc | None => acc
+        := peak = ? settled ?> peak_sample m label id (peak_mb_of id) |: None
+        ?= peak ?|
+        | Some sample => sample :: timed
+        | None => timed
     := root = rig_jobs.host.jobs_root ()
     ? file_system.directory_exists root |> not
     ?> []
@@ -37,13 +49,19 @@
 
 ///> rust
 :# a_settled_job_becomes_one_duration_sample_for_its_lane =
-    ?= job_sample Box "kit-owner-alive-tests" 189047u64 !+ ?|
+    ?= job_sample Box "kit-owner-alive-tests" "job-1" 189047u64 !+ ?|
     | Some s =>
-        := line = "rig_job_duration_ms{machine=\"box\",lane=\"kit\"} 189047"
+        := line = "rig_job_duration_ms{machine=\"box\",lane=\"kit\",job=\"job-1\"} 189047"
         testing.expect (exported [ s ] = line) (exported [ s ])
     | None => testing.expect !- "a settled job has a duration"
-    testing.expect (job_sample Box "x" 5u64 !- = None) "a running job has none"
-    testing.expect (job_sample Box "x" 0u64 !+ = None) "a job without a duration has none"
+    testing.expect (job_sample Box "x" "job-2" 5u64 !- = None) "a running job has none"
+    testing.expect (job_sample Box "x" "job-3" 0u64 !+ = None) "a job without a duration has none"
+    ?= peak_sample Box "x-y-z" "job-4" 192u64 ?|
+    | Some p =>
+        := peak = "rig_job_peak_bytes{machine=\"box\",lane=\"x\",job=\"job-4\"} 201326592"
+        testing.expect (exported [ p ] = peak) (exported [ p ])
+    | None => testing.expect !- "a recorded peak becomes bytes"
+    testing.expect (peak_sample Box "x" "job-5" 0u64 = None) "no recorded peak, no sample"
     testing.expect (lane_of "x-parity-probe" = "x" && lane_of "solo" = "solo") "the lane is the label prefix"
 := main () : i32 =
     export "rig_exec_jobs_prom" jobs_prom

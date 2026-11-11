@@ -101,7 +101,12 @@
                 ?= rule.matcher ?|
                 | Literal => replaced_in before anchor rule.replacement
                 | Pattern => replaced_by_pattern before anchor rule.replacement
-            := invalid = ?= rule.matcher ?| | Literal => "" | Pattern => pattern_problem anchor
+            := invalid =
+                ?= rule.matcher ?|
+                | Literal => ""
+                | Pattern =>
+                    := broken = pattern_problem anchor
+                    ? broken <> "" ?> broken |: rig_do_replacement.replacement.group_problem (anchor, rule.replacement)
             := found = outcome_count outcome
             := next =
                 {

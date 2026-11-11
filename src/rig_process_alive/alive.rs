@@ -1,6 +1,16 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
+fn string_concat(parts: &[&str]) -> Rc<str> {
+    let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
+    let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
+    let mut at = 0;
+    for part in parts {
+        unsafe { std::ptr::copy_nonoverlapping(part.as_ptr(), bytes.add(at), part.len()) };
+        at += part.len();
+    }
+    unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
@@ -11,6 +21,25 @@ pub struct Mut0 { pub l0: i32, pub l1: Rc<UH0> }
 enum US0 {
     US0_Some(u64),
     US0_None,
+}
+#[derive(Clone)]
+enum US2 {
+    US2_ReapedGroup,
+    US2_NoGroupLeft,
+    US2_SkippedPidReused,
+    US2_SkippedNoChildPid,
+    US2_SkippedWindows,
+}
+#[derive(Clone)]
+enum US1 {
+    US1_Some(US2),
+    US1_None,
+}
+pub struct Mut1 { pub l0: Rc<str> }
+#[derive(Clone)]
+enum US3 {
+    US3_Some(Rc<str>),
+    US3_None,
 }
 fn process_alive_0(mut v0: u64) -> bool {
     let v1: bool = v0 == 0u64;
@@ -215,6 +244,210 @@ fn closure2() -> Rc<dyn Fn(Rc<str>, u64) -> bool> {
         home_abandoned_2(v1, v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
+fn reap_skip_8(mut v0: bool, mut v1: bool, mut v2: u64, mut v3: bool) -> US1 {
+    if v3 {
+        let mut v4: US2 = US2::US2_SkippedWindows;
+        US1::US1_Some(v4)
+    } else {
+        let v6: bool = v2 <= 1u64;
+        if v6 {
+            let v7: US2 = US2::US2_SkippedNoChildPid;
+            US1::US1_Some(v7)
+        } else {
+            let mut v10: bool = if v1 {
+                let mut v9: bool = v0 == false;
+                v9
+            } else {
+                false
+            };
+            if v10 {
+                let mut v11: US2 = US2::US2_SkippedPidReused;
+                US1::US1_Some(v11)
+            } else {
+                US1::US1_None
+            }
+        }
+    }
+}
+fn method10(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
+    let v2: Rc<str> = v0.borrow().l0.clone();
+    let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
+    v0.borrow_mut().l0 = v3;
+    ()
+}
+fn format_real_9(mut v0: u64) -> Rc<str> {
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+    let v2: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: v1 }));
+    let v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
+    method10(&v2, v3);
+    let mut v4: Rc<str> = v2.borrow().l0.clone();
+    v4
+}
+fn lost_group_reaped_7(mut v0: u64, mut v1: u64) -> Rc<str> {
+    let v2: bool = v1 > 1u64;
+    let mut v4: bool = if v2 {
+        process_alive_0(v1)
+    } else {
+        false
+    };
+    let mut v5: bool = cfg!(windows);
+    let v6: bool = owner_running_1(v0, v1);
+    let v7: US1 = reap_skip_8(v6, v4, v1, v5);
+    let v22: US2 = match v7 {
+        US1::US1_None => {
+            let mut v9: Rc<str> = format_real_9(v1);
+            let mut v10: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
+            let mut v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
+            v10.borrow_mut().push(v11);
+            v10.borrow_mut().push(v9);
+            let v12: Rc<Vec<Rc<str>>> = Rc::new(v10.borrow().clone());
+            let v13: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v12).as_ref().clone()));
+            let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+            let v15: Rc<str> = Rc::<str>::from((*v13.borrow()).join(&*v14));
+            let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-KILL"); } LIT.with(|lit| lit.clone()) };
+            let v17: bool = std::process::Command::new("kill").args([&*v16, "--", &*v15]).output().is_ok_and(|o| o.status.success());
+            if v17 {
+                US2::US2_ReapedGroup
+            } else {
+                US2::US2_NoGroupLeft
+            }
+        }
+        US1::US1_Some(v8) => {
+            let v8: US2 = v8;
+            v8
+        }
+    };
+    ;
+    ;
+    ;
+    ;
+    ;
+    let v23: bool = match &v22 {
+        US2::US2_ReapedGroup => {
+            true
+        }
+        _ => {
+            false
+        }
+    };
+    let v27: US3 = if v23 {
+        let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ReapedGroup"); } LIT.with(|lit| lit.clone()) };
+        US3::US3_Some(v24)
+    } else {
+        US3::US3_None
+    };
+    let v68: US3 = match v27 {
+        US3::US3_None => {
+            let v30: bool = match &v22 {
+                US2::US2_NoGroupLeft => {
+                    true
+                }
+                _ => {
+                    false
+                }
+            };
+            let v34: US3 = if v30 {
+                let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("NoGroupLeft"); } LIT.with(|lit| lit.clone()) };
+                US3::US3_Some(v31)
+            } else {
+                US3::US3_None
+            };
+            match v34 {
+                US3::US3_None => {
+                    let v37: bool = match &v22 {
+                        US2::US2_SkippedPidReused => {
+                            true
+                        }
+                        _ => {
+                            false
+                        }
+                    };
+                    let v41: US3 = if v37 {
+                        let v38: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SkippedPidReused"); } LIT.with(|lit| lit.clone()) };
+                        US3::US3_Some(v38)
+                    } else {
+                        US3::US3_None
+                    };
+                    match v41 {
+                        US3::US3_None => {
+                            let v44: bool = match &v22 {
+                                US2::US2_SkippedNoChildPid => {
+                                    true
+                                }
+                                _ => {
+                                    false
+                                }
+                            };
+                            let v48: US3 = if v44 {
+                                let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SkippedNoChildPid"); } LIT.with(|lit| lit.clone()) };
+                                US3::US3_Some(v45)
+                            } else {
+                                US3::US3_None
+                            };
+                            match v48 {
+                                US3::US3_None => {
+                                    let v51: bool = match v22 {
+                                        US2::US2_SkippedWindows => {
+                                            true
+                                        }
+                                        _ => {
+                                            false
+                                        }
+                                    };
+                                    let v55: US3 = if v51 {
+                                        let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SkippedWindows"); } LIT.with(|lit| lit.clone()) };
+                                        US3::US3_Some(v52)
+                                    } else {
+                                        US3::US3_None
+                                    };
+                                    match v55 {
+                                        US3::US3_None => {
+                                            US3::US3_None
+                                        }
+                                        US3::US3_Some(v56) => {
+                                            let v56: Rc<str> = v56;
+                                            US3::US3_Some(v56)
+                                        }
+                                    }
+                                }
+                                US3::US3_Some(v49) => {
+                                    let v49: Rc<str> = v49;
+                                    US3::US3_Some(v49)
+                                }
+                            }
+                        }
+                        US3::US3_Some(v42) => {
+                            let v42: Rc<str> = v42;
+                            US3::US3_Some(v42)
+                        }
+                    }
+                }
+                US3::US3_Some(v35) => {
+                    let v35: Rc<str> = v35;
+                    US3::US3_Some(v35)
+                }
+            }
+        }
+        US3::US3_Some(v28) => {
+            let v28: Rc<str> = v28;
+            US3::US3_Some(v28)
+        }
+    };
+    match v68 {
+        US3::US3_None => {
+            std::panic::panic_any::<std::string::String>(format!("{}", { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Option does not have a value."); } LIT.with(|lit| lit.clone()) }))
+        }
+        US3::US3_Some(v69) => {
+            let v69: Rc<str> = v69;
+            v69
+        }
+    }
+}
+fn closure4() -> Rc<dyn Fn(u64, u64) -> Rc<str>> {
+    thread_local!{ static CLOSURE: Rc<dyn Fn(u64, u64) -> Rc<str>> = Rc::new(move |mut v0: u64, mut v1: u64| -> Rc<str> {
+        lost_group_reaped_7(v1, v0)
+    }); } CLOSURE.with(|closure| closure.clone())
+}
 pub fn rig_process_alive(v0: u64) -> bool {
     closure0()(v0)
 }
@@ -224,4 +457,8 @@ pub fn rig_process_owner_running(v0: u64, v1: u64) -> bool {
 pub fn rig_process_home_abandoned(v0: &str, v1: u64) -> bool {
     closure2()(Rc::<str>::from(v0), v1)
 }
+pub fn rig_process_lost_group_reaped(v0: u64, v1: u64) -> Rc<str> {
+    closure4()(v0, v1)
+}
 pub type SpiralShape_652accfc6a8d = Mut0;
+pub type SpiralShape_97df63ebabc3 = Mut1;

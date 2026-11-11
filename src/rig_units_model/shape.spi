@@ -1,0 +1,145 @@
+///- --package .
+:# shape static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| unit_kind =
+    | Plain
+    | Model
+    | Boundary
+    | Feature
+    | Bin
+
+:== unit =
+    {
+        name : string
+        kind : unit_kind
+        packages : list string
+        links : list string
+        deps : list string
+        entry : string
+        modules : list string
+        crate : bool
+    }
+
+:== unit_row =
+    {
+        name : string
+        kind : string
+        packages : array_base string
+        links : array_base string
+        deps : array_base string
+        entry : string
+        modules : array_base string
+        crate : bool
+    }
+
+:| units_finding =
+    | LinkNotInPackages :: string * string -> units_finding
+    | LinkWithoutCargoDep :: string * string -> units_finding
+    | HostCallDep :: string * string -> units_finding
+    | MemberMissing :: string -> units_finding
+    | MemberWithoutUnit :: string -> units_finding
+    | KindEdge :: string * string -> units_finding
+    | EntryNotNamedAfterUnit :: string * string -> units_finding
+    | DuplicateModule :: string * string -> units_finding
+
+:~ kind_of_word (~word : string) : unit_kind =
+    ? word = "model"
+    ?> Model
+    |? word = "boundary"
+    ?> Boundary
+    |? word = "feature"
+    ?> Feature
+    |? word = "bin"
+    ?> Bin
+    |: Plain
+
+:~ kind_word (k : unit_kind) : string =
+    ?= k ?|
+    | Plain => "plain"
+    | Model => "model"
+    | Boundary => "boundary"
+    | Feature => "feature"
+    | Bin => "bin"
+
+:~ base_of_list (items : list string) : array_base string =
+    items |> listm.fold (\ (kept : array string) (item : string) => kept ++ ;[ item ]) ;[] |> am'.base
+
+:~ ^ list_from_base (items : array_base string) (at : i32) (found : list string) : list string =
+    ? at < 0i32 ?> found |: list_from_base items (at - 1i32) (am'.index_base at items :: found)
+
+:~ list_of_base (items : array_base string) : list string = list_from_base items (am'.length_base items - 1i32) []
+
+:~ row_of (u : unit) : unit_row =
+    {
+        name = u.name
+        kind = kind_word u.kind
+        packages = base_of_list u.packages
+        links = base_of_list u.links
+        deps = base_of_list u.deps
+        entry = u.entry
+        modules = base_of_list u.modules
+        crate = u.crate
+    }
+
+:~ unit_of_row (r : unit_row) : unit =
+    {
+        name = r.name
+        kind = kind_of_word r.kind
+        packages = list_of_base r.packages
+        links = list_of_base r.links
+        deps = list_of_base r.deps
+        entry = r.entry
+        modules = list_of_base r.modules
+        crate = r.crate
+    }
+
+:~ rows_of (units : list unit) : array_base unit_row =
+    units |> listm.fold (\ (kept : array unit_row) (u : unit) => kept ++ ;[ row_of u ]) ;[] |> am'.base
+
+:~ ^ units_from (rows : array_base unit_row) (at : i32) (found : list unit) : list unit =
+    ? at < 0i32 ?> found |: units_from rows (at - 1i32) (unit_of_row (am'.index_base at rows) :: found)
+
+:~ units_of (rows : array_base unit_row) : list unit = units_from rows (am'.length_base rows - 1i32) []
+
+:~ is_unit (units : list unit) (~name : string) : bool = listm'.exists' (\ (u : unit) => u.name = name) units
+
+:~ ^ unit_named (units : list unit) (~name : string) : option unit =
+    ?= units ?|
+    | [] => None
+    | u :: rest => ? u.name = name ?> Some u |: unit_named rest name
+
+:~ hard (f : units_finding) : bool = ?= f ?| | HostCallDep _ => !- | _ => !+
+
+:~ finding_line (f : units_finding) : string =
+    := row = \ (u : string) (word : string) (x : string) =>
+        "units / " ++# u ++# " " ++# word ++# (? x = "" ?> "" |: " " ++# x)
+    ?= f ?|
+    | LinkNotInPackages (u, x) => row u "link-not-in-packages" x
+    | LinkWithoutCargoDep (u, x) => row u "link-without-cargo-dep" x
+    | HostCallDep (u, x) => row u "host-call-dep" x
+    | MemberMissing u => row u "member-missing" ""
+    | MemberWithoutUnit m => row m "member-without-unit" ""
+    | KindEdge (u, x) => row u "kind-edge" x
+    | EntryNotNamedAfterUnit (u, x) => row u "entry-not-named-after-unit" x
+    | DuplicateModule (u, m) => row u "duplicate-module" m
+
+:~ hard_printed (findings : list units_finding) : i32 =
+    findings |> listm.iter (\ (f : units_finding) => console.write_line (finding_line f))
+    (findings |> listm'.filter hard |> listm.length : i32)
+
+///> rust
+:# a_unit_crosses_the_crate_boundary_as_a_flat_row_and_comes_back_equal =
+    := u =
+        {
+            name = "f"; kind = Feature; packages = [ "m"; "x" ]; links = [ "m" ]; deps = []; entry = "f.spi"
+            modules = [ "f" ]; crate = !+
+        }
+    := g = { u ?| name = "g"; kind = Bin }
+    testing.expect (units_of (rows_of [ u; g ]) = [ u; g ]) "two units round-trip"
+    testing.expect (unit_of_row (row_of { u ?| kind = Plain; crate = !- }) = { u ?| kind = Plain; crate = !- }) "plain"
+    testing.expect (list_of_base (base_of_list []) = [] && kind_of_word (kind_word Boundary) = Boundary) "empty, kind"
+    testing.expect (finding_line (KindEdge ("f", "b")) = "units / f kind-edge b") "a finding line"
+    testing.expect (hard (HostCallDep ("f", "b")) |> not) "a host call dep is not a refusal"

@@ -1,0 +1,194 @@
+///- --package .
+:# patterns static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| construct =
+    | Gadt :: construct
+    | Forall :: construct
+    | Existential :: construct
+    | Prototype :: construct
+    | Phantom :: construct
+    | Nominal :: construct
+    | PlainUnion :: construct
+
+:| slot =
+    | ModelUnit :: slot
+    | BoundaryUnit :: slot
+    | FeatureUnit :: slot
+    | BinUnit :: slot
+    | OwnLib :: slot
+    | TestBlocks :: slot
+    | Ratchets :: slot
+
+:== proof = { repo : string; file : string; test : string }
+
+:== pattern_fact = { name : string; proof : proof; constructs : list construct; invariant : string }
+
+:! kept = ()
+:! left_out = ()
+
+:| row v =
+    | Kept :: pattern_fact * slot -> row kept
+    | LeftOut :: pattern_fact * string -> row left_out
+
+:~ fact (~name : string) (repo : string) (file : string) (test : string) (constructs : list construct) (~why : string)
+    : pattern_fact
+    =
+    { name = name; proof = { repo = repo; file = file; test = test }; constructs = constructs; invariant = why }
+
+:~ keep (f : pattern_fact) (s : slot) : row kept = Kept (f, s)
+
+:~ leave (f : pattern_fact) (~why : string) : row left_out = LeftOut (f, why)
+
+:~ kept_rows () : list (row kept) =
+    [
+        keep
+            (fact "typed command entry" "x" "apps/client/cli.spi" "unknown_commands_are_rejected" [ PlainUnion ]
+                "an unknown command is Rejected with a hint before any I/O")
+            BinUnit
+        keep
+            (fact "phantom caller witness" "x" "apps/client/wire.spi" "the_app_token_cannot_write"
+                [ Gadt; Forall; Phantom ]
+                "an app token cannot write, and only the user context can be signed")
+            ModelUnit
+        keep
+            (fact "two-backend codec" "x" "apps/sim/spi/sim_events.spi"
+                "streams_decode_back_to_themselves" [ PlainUnion ]
+                "Rust and Gleam write the same bytes and decode them back to the same value")
+            BoundaryUnit
+        keep
+            (fact "polymorphic recursion across sorts" "fiscal" "src/corpus_checks.spi" "models_the_corpus_census"
+                [ Forall ]
+                "one walk counts every sort of schema node, recursing at the sort each child has")
+            FeatureUnit
+        keep
+            (fact "versioned persisted union" "spiral" "lib/spiral/xsd_emit.spi"
+                "versioned_families_read_through_one_witness" [ Gadt; Phantom ]
+                "one witness reads every stored version")
+            ModelUnit
+        keep
+            (fact "event log" "spiral" "lib/spiral/event_log.spi"
+                "a_repeated_command_replays_and_a_changed_payload_collides" [ Gadt; Forall; Nominal ]
+                "a retried command replays instead of appending twice")
+            FeatureUnit
+        keep
+            (fact "one-way ratchet" "kit" "src/rig_boundary_census/census.spi"
+                "the_ratchet_refuses_typed_constructs_shrinking_and_host_lines_growing" [ PlainUnion ]
+                "a package's construct counts never shrink and its host lines never grow")
+            Ratchets
+        keep
+            (fact "typed children" "spiral" "lib/spiral/ui_view.spi"
+                "controls_and_inline_svg_render_with_typed_children" [ Gadt; Forall; Existential; Phantom ]
+                "an element accepts only children of the content kind it allows")
+            FeatureUnit
+        keep
+            (fact "prototype per type" "html" "html_render/render.spi" "the_prototype_dispatches_per_type" [ Prototype ]
+                "rendering is chosen per type, not by a runtime tag")
+            FeatureUnit
+        keep
+            (fact "certified core" "regex" "src/typed.spi" "the_typed_core_is_the_certified_minimal_dfa_up_to_renaming"
+                [ Existential ] "a core one row short does not type")
+            ModelUnit
+        keep
+            (fact "laws over every small input" "regex" "src/laws.spi"
+                "every_regex_of_depth_one_keeps_all_five_laws_on_every_short_word" [ PlainUnion ]
+                "the laws hold on every input up to a size, not on samples")
+            TestBlocks
+        keep
+            (fact "held-out seeds" "tibia" "src/pack_sim.spi"
+                "judging_on_training_seeds_does_not_compile" [ Gadt; Phantom ]
+                "a trial reads training seeds only and a judgement reads held-out seeds only")
+            ModelUnit
+        keep
+            (fact "C oracle beside the backend" "tibia" "src/gpu_sim.spi" "ten_ticks_of_a_troll_pack_on_the_oracle"
+                [ PlainUnion ] "the backend result equals a C reference on the same input")
+            TestBlocks
+        keep
+            (fact "run-time data test" "kit" "src/rig_boundary_census/census.spi"
+                "a_manifest_read_at_run_time_counts_like_a_literal" [ PlainUnion ]
+                "a test on run-time data beside each literal test, so compile-time folding cannot hide a bug")
+            TestBlocks
+        keep
+            (fact "reply-indexed routes" "spiral" "apps/realworld/realworld_api.spi"
+                "a_route_names_its_method_path_and_auth" [ Gadt; Phantom ]
+                "a route fixes its reply type and its method, path and auth level")
+            BoundaryUnit
+        keep
+            (fact "verified-token witness" "spiral" "apps/realworld/auth.spi"
+                "a_token_signed_with_another_secret_is_a_bad_token" [ Gadt; Phantom ]
+                "a request is authenticated only through a verified token; a mis-signed token cannot build one")
+            ModelUnit
+        keep
+            (fact "phase-indexed plan" "dice" "contract/dice_contract.spi" "a_plan_cannot_draw_before_hashing"
+                [ Gadt; Forall; Existential; Phantom; Prototype ]
+                "a roll can only go request, bound, gather, hash, draw")
+            ModelUnit
+        keep
+            (fact "curve-indexed outline" "alphabet" "lib/font_outline.spi"
+                "lowering_is_total_and_preserves_segment_count"
+                [ Gadt; Phantom ] "lowering a cubic outline is total and preserves the segment count")
+            ModelUnit
+        keep
+            (fact "unit exports one union" "i574n.github" "examples/typed-units/tu_model/tu_model.spi"
+                "a_figure_keeps_its_kind_static" [ Gadt; Forall; Phantom ] "units meet at one exported union")
+            OwnLib
+    ]
+
+:~ left_rows () : list (row left_out) =
+    [
+        leave
+            (fact "kind-indexed page" "html" "html_model/model.spi" "a_page_keeps_its_kind_static" [ Gadt; Phantom ]
+                "a page's kind is fixed at the type level")
+            "its test only round-trips text; html adds a fails-Unification test for a page used at the wrong kind"
+        leave
+            (fact "occupancy tables" "spiral" "lib/spiral/occupancy.spi"
+                "h100_with_48_kb_of_shared_memory_keeps_4_blocks_and_half_occupancy" [ PlainUnion ]
+                "GPU sizing")
+            "domain specific: GPU repos only"
+        leave
+            (fact "mega samples" "spiral" "apps/compiler/tmp/samples" "mega suite" [ Gadt; Forall; Existential ]
+                "construct density")
+            "a density target for the ratchet floor, not a template file"
+    ]
+
+:~ fact_of (r : row kept) : pattern_fact =
+    ?= r ?|
+    | Kept (f, _) => f
+
+:~ slot_of (r : row kept) : slot =
+    ?= r ?|
+    | Kept (_, s) => s
+
+:~ typed (f : pattern_fact) : bool = listm'.exists' (\ (c : construct) => c <> PlainUnion) f.constructs
+
+:~ in_slot (wanted : slot) (rows : list (row kept)) : list string =
+    rows |> listm'.filter (\ (r : row kept) => slot_of r = wanted) |> listm.map (\ (r : row kept) => (fact_of r).name)
+
+:~ typed_share (rows : list (row kept)) : i32 * i32 =
+    := count : i32 = listm.length rows
+    := typed_count : i32 = rows |> listm'.filter (\ (r : row kept) => typed (fact_of r)) |> listm.length
+    typed_count, count
+
+///> rust
+:# every_template_slot_has_a_proven_pattern =
+    := rows = kept_rows ()
+    := slots = [ ModelUnit; BoundaryUnit; FeatureUnit; BinUnit; OwnLib; TestBlocks; Ratchets ]
+    := empty = slots |> listm'.filter (\ (s : slot) => in_slot s rows = [])
+    testing.expect (empty = []) "no empty slot"
+    testing.expect (in_slot BinUnit rows = [ "typed command entry" ]) "one entry pattern"
+
+///> rust
+:# every_kept_row_names_its_proof_and_invariant =
+    := incomplete = \ (r : row kept) =>
+        := f = fact_of r
+        f.proof.file = "" || f.proof.test = "" || f.invariant = "" || f.constructs = []
+    testing.expect (kept_rows () |> listm'.filter incomplete = []) "complete rows"
+    := typed_count, count = typed_share (kept_rows ())
+    testing.expect (typed_count * 3i32 >= count * 2i32) "at least two thirds of the kept rows use a typed construct"
+
+///> rust
+:# a_left_out_row_cannot_reach_the_scaffold fails "Unification" =
+    := left = left_rows ()
+    testing.expect (in_slot ModelUnit left = []) "rejected at compile time"

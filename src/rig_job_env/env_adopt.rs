@@ -28,9 +28,20 @@ enum US1 {
     US1_None,
 }
 #[derive(Clone)]
+enum UH1 {
+    UH1_Nil,
+    UH1_Cons(Rc<str>, Rc<str>, Rc<UH1>),
+}
+pub struct Mut0 { pub l0: i32, pub l1: Rc<UH0> }
+#[derive(Clone)]
 enum US2 {
-    US2_Ok,
-    US2_Error(Rc<str>),
+    US2_Some(Rc<str>, Rc<str>),
+    US2_None,
+}
+#[derive(Clone)]
+enum US3 {
+    US3_Ok,
+    US3_Error(Rc<str>),
 }
 fn joined_3(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let mut v2: Rc<str> = std::rc::Rc::<str>::from(std::path::Path::new(&*v0).join(&*v1).to_string_lossy().as_ref());
@@ -52,7 +63,7 @@ fn file_exists_6(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
-    let v8: bool = v6.is_file();
+    let mut v8: bool = v6.is_file();
     v8
 }
 fn text_or_empty_7(mut v0: Rc<str>) -> Rc<str> {
@@ -73,7 +84,7 @@ fn method8(mut v0: Rc<str>, mut v1: Rc<UH0>) -> US1 {
                 let mut v6: bool = &*v5 != "";
                 let mut v18: bool = if v6 {
                     let v7: Option<char> = char::from_u32(0u32);
-                    let v9: char = v7.unwrap();
+                    let mut v9: char = v7.unwrap();
                     let v10: Rc<str> = Rc::<str>::from(format!("{}", v9));
                     let v11: Rc<str> = Rc::<str>::from(v3.to_lowercase());
                     let v13: Rc<str> = string_concat(&[&*v10, &*v11, "="]);
@@ -117,11 +128,11 @@ fn value_in_13(mut v0: &Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<str>, mut v2: i32)
         } else {
             let mut v6: Rc<str> = v0.borrow()[v2 as usize].clone();
             let v7: i32 = (v6.clone().len() as i32);
-            let v8: bool = v7 < 2i32;
+            let mut v8: bool = v7 < 2i32;
             let v21: i32 = if v8 {
                 -1i32
             } else {
-                let v9: i32 = v7.wrapping_sub(1i32);
+                let mut v9: i32 = v7.wrapping_sub(1i32);
                 let v10: usize = ((1i32) as usize);
                 let v11: i32 = 1i32.wrapping_add(v9);
                 let v12: usize = ((v11) as usize);
@@ -187,8 +198,8 @@ fn set_changed_11(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<RefCell<Vec<Rc<s
             let v20: i32 = if v7 {
                 -1i32
             } else {
-                let v8: i32 = v6.wrapping_sub(1i32);
-                let v9: usize = ((1i32) as usize);
+                let mut v8: i32 = v6.wrapping_sub(1i32);
+                let mut v9: usize = ((1i32) as usize);
                 let v10: i32 = 1i32.wrapping_add(v8);
                 let v11: usize = ((v10) as usize);
                 let v12: Rc<str> = Rc::<str>::from(&(v5)[v9..v11]);
@@ -268,7 +279,7 @@ fn method14(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<UH0>, mut v3: bool) -> 
                     if v7 {
                         true
                     } else {
-                        let v8: Rc<str> = Rc::<str>::from(v4.to_lowercase());
+                        let mut v8: Rc<str> = Rc::<str>::from(v4.to_lowercase());
                         let v10: Rc<str> = string_concat(&[&*v0, &*v8, "="]);
                         let v11: bool = v1.contains(&*v10);
                         v11
@@ -296,11 +307,11 @@ fn removed_extras_16(mut v0: &Rc<RefCell<Vec<Rc<str>>>>, mut v1: &Rc<RefCell<Vec
         if v5 {
             let mut v6: Rc<str> = v0.borrow()[v3 as usize].clone();
             let v7: i32 = (v6.clone().len() as i32);
-            let v8: bool = v7 < 2i32;
+            let mut v8: bool = v7 < 2i32;
             let v21: i32 = if v8 {
                 -1i32
             } else {
-                let v9: i32 = v7.wrapping_sub(1i32);
+                let mut v9: i32 = v7.wrapping_sub(1i32);
                 let v10: usize = ((1i32) as usize);
                 let v11: i32 = 1i32.wrapping_add(v9);
                 let v12: usize = ((v11) as usize);
@@ -380,8 +391,8 @@ fn environment_restored_10(mut v0: Rc<str>, mut v1: Rc<str>) -> () {
     let v26: Rc<UH0> = if v5 {
         let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("PATH"); } LIT.with(|lit| lit.clone()) };
         let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SystemRoot"); } LIT.with(|lit| lit.clone()) };
-        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TEMP"); } LIT.with(|lit| lit.clone()) };
-        let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMP"); } LIT.with(|lit| lit.clone()) };
+        let mut v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TEMP"); } LIT.with(|lit| lit.clone()) };
+        let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMP"); } LIT.with(|lit| lit.clone()) };
         let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("USERPROFILE"); } LIT.with(|lit| lit.clone()) };
         let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
         let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
@@ -421,11 +432,180 @@ fn environment_restored_10(mut v0: Rc<str>, mut v1: Rc<str>) -> () {
     let v38: i32 = 0i32;
     set_changed_11(v33, v36, v38)
 }
-fn file_exists_17(mut v0: Rc<str>) -> bool {
+fn machine_defaults_file_18() -> Rc<str> {
+    let v0: Rc<str> = jobs_root_5();
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("defaults.env"); } LIT.with(|lit| lit.clone()) };
+    joined_3(v0, v1)
+}
+fn method20(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH1::UH1_Cons(v2, v3, v4) => {
+                let mut v2: Rc<str> = v2;
+                let mut v3: Rc<str> = v3;
+                let v4: Rc<UH1> = v4;
+                let v5: Rc<UH1> = Rc::new(UH1::UH1_Cons(v2, v3, v1));
+                (v0, v1) = (v4, v5);
+                continue;
+            }
+            UH1::UH1_Nil => {
+                return v1;
+            }
+        }
+    }
+}
+fn method22(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH0::UH0_Cons(v2, v3) => {
+                let mut v2: Rc<str> = v2;
+                let mut v3: Rc<UH0> = v3;
+                let v4: Rc<UH0> = Rc::new(UH0::UH0_Cons(v2, v1));
+                (v0, v1) = (v3, v4);
+                continue;
+            }
+            UH0::UH0_Nil => {
+                return v1;
+            }
+        }
+    }
+}
+fn method23(mut v0: i32, mut v1: &Rc<RefCell<Mut0>>) -> bool {
+    let mut v2: i32 = v1.borrow().l0;
+    let mut v3: bool = v2 < v0;
+    v3
+}
+fn split_list_21(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<UH0> {
+    let mut v2: i32 = (v0.clone().len() as i32);
+    let mut v3: bool = v2 == 0i32;
+    if v3 {
+        let v4: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+        Rc::new(UH0::UH0_Cons(v1, v4))
+    } else {
+        let mut v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v1.split(&*v0).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
+        let v7: i32 = (v6.clone().borrow().len() as i32);
+        let mut v8: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+        let mut v9: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: 0i32, l1: v8 }));
+        while method23(v7, &v9) {
+            let v11: i32 = v9.borrow().l0;
+            let v12: Rc<UH0> = v9.borrow().l1.clone();
+            let v13: Rc<str> = v6.borrow()[v11 as usize].clone();
+            let v14: i32 = v11.wrapping_add(1i32);
+            let v15: Rc<UH0> = Rc::new(UH0::UH0_Cons(v13, v12));
+            v9.borrow_mut().l0 = v14;
+            v9.borrow_mut().l1 = v15;
+            ()
+        };
+        let mut v16: Rc<UH0> = v9.borrow().l1.clone();
+        let mut v17: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+        method22(v16, v17)
+    }
+}
+fn default_of_line_25(mut v0: Rc<str>) -> US2 {
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\r"); } LIT.with(|lit| lit.clone()) };
+    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+    let mut v3: Rc<str> = Rc::<str>::from(v0.replace(&*v1, &*v2));
+    let v4: Rc<str> = Rc::<str>::from((v3).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("="); } LIT.with(|lit| lit.clone()) };
+    let mut v6: Option<usize> = v4.find(&*v5);
+    let v7: Option<usize> = method12(v6);
+    let mut v8: Rc<dyn Fn((usize)) -> i32> = closure1();
+    let mut v9: Option<i32> = v7.map(|x| v8(x));
+    let v11: i32 = v9.unwrap_or(-1i32);
+    let v12: bool = v11 <= 0i32;
+    if v12 {
+        US2::US2_None
+    } else {
+        let v14: i32 = (v4.clone().len() as i32);
+        let v15: usize = ((0i32) as usize);
+        let mut v16: usize = ((v11) as usize);
+        let mut v17: Rc<str> = Rc::<str>::from(&(v4)[v15..v16]);
+        let mut v18: i32 = v11.wrapping_add(1i32);
+        let v19: i32 = v14.wrapping_sub(v11);
+        let v20: i32 = v19.wrapping_sub(1i32);
+        let v21: usize = ((v18) as usize);
+        let v22: i32 = v18.wrapping_add(v20);
+        let v23: usize = ((v22) as usize);
+        let v24: Rc<str> = Rc::<str>::from(&(v4)[v21..v23]);
+        US2::US2_Some(v17, v24)
+    }
+}
+fn method24(mut v0: Rc<UH0>, mut v1: Rc<UH1>) -> Rc<UH1> {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH0::UH0_Cons(v2, v3) => {
+                let mut v2: Rc<str> = v2;
+                let mut v3: Rc<UH0> = v3;
+                let v4: US2 = default_of_line_25(v2);
+                let mut v9: Rc<UH1> = match v4 {
+                    US2::US2_None => {
+                        v1
+                    }
+                    US2::US2_Some(v5, v6) => {
+                        let v5: Rc<str> = v5;
+                        let mut v6: Rc<str> = v6;
+                        Rc::new(UH1::UH1_Cons(v5, v6, v1))
+                    }
+                };
+                (v0, v1) = (v3, v9);
+                continue;
+            }
+            UH0::UH0_Nil => {
+                return v1;
+            }
+        }
+    }
+}
+fn defaults_of_19(mut v0: Rc<str>) -> Rc<UH1> {
+    let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+    let mut v2: Rc<UH0> = split_list_21(v1, v0);
+    let mut v3: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
+    let v4: Rc<UH1> = method24(v2, v3);
+    let v5: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
+    method20(v4, v5)
+}
+fn set_environment_variable_27(mut v0: Rc<str>, mut v1: Rc<str>) -> () {
+    unsafe { std::env::set_var(&*v0, &*v1) };
+    ()
+}
+fn method26(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH1::UH1_Cons(v2, v3, v4) => {
+                let mut v2: Rc<str> = v2;
+                let mut v3: Rc<str> = v3;
+                let v4: Rc<UH1> = v4;
+                let v5: Rc<str> = get_environment_variable_9(v2.clone());
+                let mut v6: bool = &*v5 != "";
+                let mut v8: i32 = if v6 {
+                    v1
+                } else {
+                    set_environment_variable_27(v2, v3);
+                    let v7: i32 = v1.wrapping_add(1i32);
+                    v7
+                };
+                (v0, v1) = (v4, v8);
+                continue;
+            }
+            UH1::UH1_Nil => {
+                return v1;
+            }
+        }
+    }
+}
+fn machine_defaults_applied_17() -> () {
+    let v0: Rc<str> = machine_defaults_file_18();
+    let mut v1: Rc<str> = text_or_empty_7(v0);
+    let mut v2: Rc<UH1> = defaults_of_19(v1);
+    let mut v3: i32 = 0i32;
+    let v4: i32 = method26(v2, v3);
+    ()
+}
+fn file_exists_28(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
-    let v8: bool = v6.exists();
+    let mut v8: bool = v6.exists();
     if v8 {
         let v10: bool = v6.is_file();
         v10
@@ -439,23 +619,23 @@ fn closure2() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
         v1
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method18() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
+fn method29() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
     closure2()
 }
-fn ok_c3() -> Rc<dyn Fn() -> US2> {
-    thread_local!{ static CLOSURE: Rc<dyn Fn() -> US2> = Rc::new(move || -> US2 {
-        US2::US2_Ok
+fn ok_c3() -> Rc<dyn Fn() -> US3> {
+    thread_local!{ static CLOSURE: Rc<dyn Fn() -> US3> = Rc::new(move || -> US3 {
+        US3::US3_Ok
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method19() -> Rc<dyn Fn() -> US2> {
+fn method30() -> Rc<dyn Fn() -> US3> {
     ok_c3()
 }
-fn error_c4() -> Rc<dyn Fn(Rc<str>) -> US2> {
-    thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> US2> = Rc::new(move |mut v0: Rc<str>| -> US2 {
-        US2::US2_Error(v0)
+fn error_c4() -> Rc<dyn Fn(Rc<str>) -> US3> {
+    thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> US3> = Rc::new(move |mut v0: Rc<str>| -> US3 {
+        US3::US3_Error(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method20() -> Rc<dyn Fn(Rc<str>) -> US2> {
+fn method31() -> Rc<dyn Fn(Rc<str>) -> US3> {
     error_c4()
 }
 fn job_environment_adopted_1(mut v0: Rc<str>) -> US0 {
@@ -469,8 +649,8 @@ fn job_environment_adopted_1(mut v0: Rc<str>) -> US0 {
             US0::US0_SnapshotEmpty
         } else {
             let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("PATH"); } LIT.with(|lit| lit.clone()) };
-            let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SystemRoot"); } LIT.with(|lit| lit.clone()) };
-            let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TEMP"); } LIT.with(|lit| lit.clone()) };
+            let mut v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SystemRoot"); } LIT.with(|lit| lit.clone()) };
+            let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TEMP"); } LIT.with(|lit| lit.clone()) };
             let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMP"); } LIT.with(|lit| lit.clone()) };
             let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("USERPROFILE"); } LIT.with(|lit| lit.clone()) };
             let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
@@ -505,7 +685,8 @@ fn job_environment_adopted_1(mut v0: Rc<str>) -> US0 {
         if v29 {
             let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_JOB_"); } LIT.with(|lit| lit.clone()) };
             environment_restored_10(v4, v30);
-            let v31: bool = file_exists_17(v2.clone());
+            machine_defaults_applied_17();
+            let v31: bool = file_exists_28(v2.clone());
             let mut v35: Result<(), std::io::Error> = if v31 {
                 let v33: Result<(), std::io::Error> = std::fs::remove_file(&*v2);
                 v33
@@ -513,19 +694,19 @@ fn job_environment_adopted_1(mut v0: Rc<str>) -> US0 {
                 let v34: Result<(), std::io::Error> = Ok::<(), std::io::Error>(());
                 v34
             };
-            let mut v36: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method18();
+            let mut v36: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method29();
             let v38: Result<(), Rc<str>> = v35.map_err(|x| v36(x));
-            let mut v39: Rc<dyn Fn() -> US2> = method19();
-            let mut v40: Rc<dyn Fn(Rc<str>) -> US2> = method20();
-            let v41: US2 = match v38 { Ok(()) => v39(), Err(e) => v40(e) };
+            let mut v39: Rc<dyn Fn() -> US3> = method30();
+            let mut v40: Rc<dyn Fn(Rc<str>) -> US3> = method31();
+            let v41: US3 = match v38 { Ok(()) => v39(), Err(e) => v40(e) };
             match v41 {
-                US2::US2_Error(v42) => {
+                US3::US3_Error(v42) => {
                     let v42: Rc<str> = v42;
                     let v43: Rc<str> = string_concat(&["file_system.file_delete: ", &*v42]);
                     eprintln!("{}", v43);
                     ()
                 }
-                US2::US2_Ok => {
+                US3::US3_Ok => {
                     ()
                 }
             };
@@ -534,14 +715,15 @@ fn job_environment_adopted_1(mut v0: Rc<str>) -> US0 {
             v28
         }
     } else {
+        machine_defaults_applied_17();
         US0::US0_SnapshotUsable
     }
 }
-fn text_written_22(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+fn text_written_33(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let mut v2: Rc<str> = { let temporary = format!("{}.tmp", &*v0); std::rc::Rc::<str>::from(std::fs::write(&temporary, v1.as_bytes()).and_then(|_| std::fs::rename(&temporary, &*v0)).err().map(|error| format!("write {}: {error}", &*v0)).unwrap_or_default()) };
     v2
 }
-fn config_choice_24(mut v0: Rc<str>, mut v1: bool, mut v2: bool) -> Rc<str> {
+fn config_choice_35(mut v0: Rc<str>, mut v1: bool, mut v2: bool) -> Rc<str> {
     let v4: bool = if v1 {
         true
     } else {
@@ -556,11 +738,11 @@ fn config_choice_24(mut v0: Rc<str>, mut v1: bool, mut v2: bool) -> Rc<str> {
         v6
     }
 }
-fn directory_exists_25(mut v0: Rc<str>) -> bool {
+fn directory_exists_36(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
-    let v8: bool = v6.exists();
+    let mut v8: bool = v6.exists();
     if v8 {
         let v10: bool = v6.is_dir();
         v10
@@ -568,7 +750,7 @@ fn directory_exists_25(mut v0: Rc<str>) -> bool {
         false
     }
 }
-fn config_dir_23() -> Rc<str> {
+fn config_dir_34() -> Rc<str> {
     let v0: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("RIG_CONFIG_HOME"); } LIT.with(|lit| lit.clone()) };
     let mut v1: Rc<str> = get_environment_variable_9(v0);
     let mut v2: bool = &*v1 != "";
@@ -580,32 +762,28 @@ fn config_dir_23() -> Rc<str> {
     };
     let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
     let v7: Rc<str> = get_environment_variable_9(v6);
-    let v8: bool = &*v7 != "";
+    let mut v8: bool = &*v7 != "";
     let v12: Rc<str> = if v8 {
         v7
     } else {
-        let v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+        let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
         let v10: Rc<str> = get_environment_variable_9(v9);
         let v11: Rc<str> = string_concat(&[&*v10, "/.config"]);
         v11
     };
     let v13: Rc<str> = string_concat(&[&*v12, "/rig"]);
-    let v14: bool = directory_exists_25(v13);
+    let v14: bool = directory_exists_36(v13);
     let v15: bool = &*v5 != "";
     if v15 {
         v5
     } else {
         let mut v16: Rc<str> = string_concat(&[&*v12, "/kit"]);
-        let mut v17: bool = directory_exists_25(v16);
-        config_choice_24(v12, v14, v17)
+        let mut v17: bool = directory_exists_36(v16);
+        config_choice_35(v12, v14, v17)
     }
 }
-fn set_environment_variable_26(mut v0: Rc<str>, mut v1: Rc<str>) -> () {
-    unsafe { std::env::set_var(&*v0, &*v1) };
-    ()
-}
-fn path_first_noted_21(mut v0: Rc<str>) -> Rc<str> {
-    let mut v1: Rc<str> = config_dir_23();
+fn path_first_noted_32(mut v0: Rc<str>) -> Rc<str> {
+    let mut v1: Rc<str> = config_dir_34();
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("PATH"); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<str> = get_environment_variable_9(v2.clone());
     let v4: Rc<str> = rig_path_first::rig_path_first_value(&v1, &v3);
@@ -614,11 +792,11 @@ fn path_first_noted_21(mut v0: Rc<str>) -> Rc<str> {
         let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v6
     } else {
-        set_environment_variable_26(v2, v4.clone());
+        set_environment_variable_27(v2, v4.clone());
         let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("path-first"); } LIT.with(|lit| lit.clone()) };
-        let v8: Rc<str> = job_file_2(v0, v7);
-        let v9: Rc<str> = string_concat(&["path-first PATH=", &*v4]);
-        text_written_22(v8, v9)
+        let mut v8: Rc<str> = job_file_2(v0, v7);
+        let mut v9: Rc<str> = string_concat(&["path-first PATH=", &*v4]);
+        text_written_33(v8, v9)
     }
 }
 fn environment_refusal_0(mut v0: Rc<str>) -> Rc<str> {
@@ -640,7 +818,7 @@ fn environment_refusal_0(mut v0: Rc<str>) -> Rc<str> {
     };
     let v11: bool = &*v10 == "";
     let v14: Rc<str> = if v11 {
-        path_first_noted_21(v0)
+        path_first_noted_32(v0)
     } else {
         let v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v13
@@ -655,3 +833,4 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {
 pub fn rig_job_environment_adopted(v0: &str) -> Rc<str> {
     closure0()(Rc::<str>::from(v0))
 }
+pub type SpiralShape_652accfc6a8d = Mut0;

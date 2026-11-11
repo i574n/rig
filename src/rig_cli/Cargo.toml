@@ -37,6 +37,9 @@ rig-lint-macros = { path = "../rig_lint_macros" }
 rig-lint-cli = { path = "../rig_lint_cli" }
 rig-table-sequences = { path = "../rig_table_sequences" }
 rig-guide = { path = "../rig_guide" }
+rig-units = { path = "../rig_units" }
+rig-drafts = { path = "../rig_drafts" }
+rig-scratch = { path = "../rig_scratch" }
 rig-machine-watch = { path = "../rig_machine_watch" }
 rig-adoption = { path = "../rig_adoption" }
 rig-schedule = { path = "../rig_schedule" }

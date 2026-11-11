@@ -22,7 +22,9 @@
     ?= args ?|
     | NoArgs => NoArgs
     | Arg (head, rest) =>
-        ? starts head "KIT_" ?> Arg (head, Arg (sm'.replace "KIT_" "RIG_" head, twinned rest)) |: Arg (head, twinned rest)
+        ? starts head "KIT_"
+        ?> Arg (head, Arg (sm'.replace "KIT_" "RIG_" head, twinned rest))
+        |: Arg (head, twinned rest)
 
 := fixture_root_create (~label : string) : fixture_root =
     fixture_root (
@@ -116,8 +118,9 @@
     := drop_text = joined (twinned drops)
     := arg_text = joined args
     := code, stdout, stderr =
-        $'{ let mut command = std::process::Command::new(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| \
-            "kit".to_owned())); command.current_dir(&*!cwd).args((!arg_text).split_terminator(char::from(31u8))); \
+        $'{ let mut command = std::process::Command::new(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
+            std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| "kit".to_owned())); \
+            command.current_dir(&*!cwd).args((!arg_text).split_terminator(char::from(31u8))); \
             for name in (!drop_text).split_terminator(char::from(31u8)) { command.env_remove(name); \
             } for pair in (!set_text).split_terminator(char::from(31u8)) { if let Some((key, \
             value)) = pair.split_once(char::from(61u8)) { command.env(key, value); \
@@ -137,10 +140,11 @@
     := drop_text = joined (twinned drops)
     := arg_text = joined args
     := code, stdout, stderr =
-        $'{ let mut command = std::process::Command::new(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| \
-            "kit".to_owned())); command.current_dir(&*!cwd).args((!arg_text).split_terminator(char::from(31u8))).stdou\
-            t(std::process::Stdio::piped()).stderr(std::process::Stdio::piped()); \
-            for name in (!drop_text).split_terminator(char::from(31u8)) { command.env_remove(name); \
+        $'{ let mut command = std::process::Command::new(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
+            std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| "kit".to_owned())); \
+            command.current_dir(&*!cwd).args((!arg_text).split_terminator(char::from(31u8))).stdout(std::process::Stdi\
+            o::piped()).stderr(std::process::Stdio::piped()); for name in \
+            (!drop_text).split_terminator(char::from(31u8)) { command.env_remove(name); \
             } for pair in (!set_text).split_terminator(char::from(31u8)) { if let Some((key, \
             value)) = pair.split_once(char::from(61u8)) { command.env(key, value); \
             } } let child = command.spawn().unwrap_or_else(|error| std::panic::panic_any(format\!("cannot start {:?} \
@@ -158,7 +162,8 @@
 := rig_run_closing_stdout (~cwd : string) (args : cli_args) : cli_run =
     := arg_text = joined args
     := code, stderr =
-        $'{ let mut child = std::process::Command::new(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| \
+        $'{ let mut child = std::process::Command::new(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
+            std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| \
             "kit".to_owned())).current_dir(&*!cwd).args((!arg_text).split_terminator(char::from(31u8))).stdout(std::pr\
             ocess::Stdio::piped()).stderr(std::process::Stdio::piped()).spawn().unwrap(); drop(child.stdout.take()); \
             let output = child.wait_with_output().unwrap(); (output.status.code().unwrap_or(-1), \
@@ -173,11 +178,13 @@
         let created = std::process::Command::new("pwsh").creation_flags(0x0800_0000).args(["-NoProfile", \
         "-NonInteractive", "-Command", "New-Item -ItemType Junction -Path $env:KIT_TEST_LINK -Target \
         $env:KIT_TEST_SOURCE -ErrorAction Stop | Out-Null"]).env("RIG_TEST_LINK", &*!path).env("KIT_TEST_LINK", \
-        &*!path).env("RIG_TEST_SOURCE", &*!source).env("KIT_TEST_SOURCE", &*!source).output().unwrap(); if \!created.status.success() { \
-        std::panic::panic_any(String::from_utf8_lossy(&created.stderr).into_owned()); \
+        &*!path).env("RIG_TEST_SOURCE", &*!source).env("KIT_TEST_SOURCE", &*!source).output().unwrap(); \
+        if \!created.status.success() { std::panic::panic_any(String::from_utf8_lossy(&created.stderr).into_owned()); \
         } } \#[cfg(unix)] std::os::unix::fs::symlink(&*!source, &*!path).unwrap(); }' : ()
-:= rig_checkout () : string = $'std::rc::Rc::<str>::from(std::path::PathBuf::from(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| std::env::var("KIT_BIN_UNDER_TEST")).\
-    unwrap()).ancestors().nth(4).unwrap().to_string_lossy().as_ref())' : string
+:= rig_checkout () : string =
+    $'std::rc::Rc::<str>::from(std::path::PathBuf::from(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
+        std::env::var("KIT_BIN_UNDER_TEST")).unwrap()).ancestors().nth(4).unwrap().to_string_lossy().as_ref())'
+    : string
 := now_ms () : u64 =
     $'std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64' : u64
 
@@ -216,8 +223,8 @@
         _ => token.replace(char::from(92u8), "/") }).collect::<Vec<_>>().join(" ")).unwrap_or_default().as_str())'
     : string
 
-:= rig_binary () : string = $'std::rc::Rc::<str>::from(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| \
-    "kit".to_owned()).as_str())' : string
+:= rig_binary () : string = $'std::rc::Rc::<str>::from(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
+    std::env::var("KIT_BIN_UNDER_TEST")).unwrap_or_else(|_| "kit".to_owned()).as_str())' : string
 := path_exists (~path : string) : bool = $'std::path::Path::new(&*!path).exists()' : bool
 := trimmed (~text : string) : string = $'std::rc::Rc::<str>::from((!text).trim())' : string
 := line_starting (~text : string) (~prefix : string) : string = $'std::rc::Rc::<str>::from((!text).lines().find(|line| \

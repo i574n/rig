@@ -76,14 +76,20 @@
     := at : i32 = sm'.last_index_of "/" trimmed
     ? at < 0i32 ?> trimmed |: sm'.substring (at + 1i32) ((sm'.length trimmed : i32) - at - 1i32) trimmed
 
+:~ ends_test_block (~line : string) : bool =
+    ? line = ""
+    ?> !-
+    |? sm'.starts_with ":#" line
+    ?> !-
+    |: sm'.trim (sm'.substring 0i32 1i32 line) <> ""
+
 :~ ^ tests_from (lines : array string) (at : i32) (inside : bool) (count : i32) : i32 =
     ? at >= am'.length lines
     ?> count
     |:
         := line = am'.index at lines
         := marker = sm'.starts_with "///> " line
-        := entry = sm'.starts_with ":= main" line || sm'.starts_with "inl main" line
-        := now_inside = ? marker ?> !+ |? entry ?> !- |: inside
+        := now_inside = ? marker ?> !+ |? ends_test_block line ?> !- |: inside
         tests_from lines (at + 1i32) now_inside (? now_inside ?> count + 1i32 |: count)
 :~ ^ rows_from
     (specs : array_base probe_pair) (~name : string) (lines : array string) (total : i32) (at : i32)
@@ -119,8 +125,20 @@
     := guarded = lines_of (":~ present (path : string) : bool = file_system.file_exists path" ++# guard)
     testing.expect (matching_lines guarded wrapper_probe = 0i32) "a wrapper that adds logic is no forward"
     testing.expect (skipped_dir "C:/r/apps" |> not) "code dirs are walked"
+    := magic = probe_pattern MagicNumber
+    := typed = "    := cap = 65535u16\n    := mask = 0xFFu8\n"
+    := literals = lines_of (typed ++# "    := one = 1i32\n    := x1000i32 = 2.500f64\n")
+    testing.expect (matching_lines literals magic = 2i32) "typed 3+ digit and hex literals count, small ones do not"
+    := hosts = "    := a = \"C:/work/x\"\n    := b = \"D:\\\\w\"\n    := c = \"/tmp/y\"\n"
+    := paths = lines_of (hosts ++# "    := d = \"tool.exe\"\n    := e = \"work/x\"\n    := f = \"C:\\home\"\n")
+    testing.expect (matching_lines paths (probe_pattern DrivePath) = 2i32) "both drive spellings count"
+    testing.expect (matching_lines paths (probe_pattern PosixPath) = 1i32) "a rooted POSIX system path counts"
+    testing.expect (matching_lines paths (probe_pattern ExeSuffix) = 1i32) "a literal .exe suffix counts"
+    testing.expect (matching_lines paths (probe_pattern SingleSlashPath) = 1i32) "a single-backslash drive path counts"
     := mixed = lines_of ":= f () = 1i32\n///> rust\n:# t =\n    ()\n:= main () : i32 = 2i32\n"
     testing.expect (tests_from mixed 0i32 !- 0i32 = 3i32) "a test region is its marker and body, up to the entry"
+    := two_files = ;[ "///> rust"; ":# t ="; "    ()"; ""; ":< sm'_operators"; ":= g () = 1i32"; ":= h () = 2i32" ]
+    testing.expect (tests_from two_files 0i32 !- 0i32 = 4i32) "a test block ends at the next top-level line, no main"
 
 ///> rust -d regex
 :# edition_three_shapes_are_counted =

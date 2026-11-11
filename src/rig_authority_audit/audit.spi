@@ -1,0 +1,109 @@
+///- --package .
+:# audit static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| source_role =
+    | Owns :: source_role
+    | Mirrors :: i32 -> source_role
+
+:== authority = { fact : string; source : string; role : source_role }
+
+:== reading = { site : string; fact : string; source : string; age_minutes : i32 }
+
+:| authority_finding =
+    | WrongAuthority :: string * string * string * string -> authority_finding
+    | StaleMirror :: string * string * i32 * i32 -> authority_finding
+    | NoOwnerDeclared :: string * string -> authority_finding
+
+:~ owner_of (table : list authority) (~fact : string) : option string =
+    ?= table |> listm'.try_find_ (\ (a : authority) => a.fact = fact && a.role = Owns) ?|
+    | Some a => Some a.source
+    | None => None
+
+:~ judged (table : list authority) (r : reading) : list authority_finding =
+    ?= owner_of table r.fact ?|
+    | None => [ NoOwnerDeclared (r.site, r.fact) ]
+    | Some owner =>
+        ?= table |> listm'.try_find_ (\ (a : authority) => a.fact = r.fact && a.source = r.source) ?|
+        | Some a =>
+            ?= a.role ?|
+            | Owns => []
+            | Mirrors limit => ? r.age_minutes > limit ?> [ StaleMirror (r.site, r.fact, r.age_minutes, limit) ] |: []
+        | None => [ WrongAuthority (r.site, r.fact, r.source, owner) ]
+
+:~ audit (table : list authority) (readings : list reading) : list authority_finding =
+    readings |> listm.map (judged table) |> listm.concat
+
+///> rust
+:# a_fact_is_trusted_only_from_its_owner_or_a_fresh_mirror =
+    := table =
+        [
+            { fact = "remote-job-exit"; source = "node-exit-file"; role = Owns };
+            { fact = "remote-job-exit"; source = "box-placed-exit"; role = Mirrors 30i32 };
+            { fact = "claim-holder"; source = "claims-state"; role = Owns }
+        ]
+    := read = \ (site : string) (fact : string) (source : string) (age : i32) =>
+        ({ site = site; fact = fact; source = source; age_minutes = age } : reading)
+    := readings =
+        [
+            read "job list" "remote-job-exit" "node-exit-file" 0i32;
+            read "doctor" "remote-job-exit" "box-placed-exit" 10i32;
+            read "gate" "remote-job-exit" "box-placed-exit" 90i32;
+            read "job list" "remote-job-exit" "box-placement" 0i32;
+            read "help pool" "claim-holder" "last-note-author" 0i32;
+            read "report" "train-verdict" "chat-summary" 0i32
+        ]
+    := expected =
+        [
+            StaleMirror ("gate", "remote-job-exit", 90i32, 30i32);
+            WrongAuthority ("job list", "remote-job-exit", "box-placement", "node-exit-file");
+            WrongAuthority ("help pool", "claim-holder", "last-note-author", "claims-state");
+            NoOwnerDeclared ("report", "train-verdict")
+        ]
+    testing.expect (audit table readings = expected) "owner and fresh mirror pass; stale, foreign and unowned are named"
+
+:~ owns (~fact : string) (~source : string) : authority = { fact = fact; source = source; role = Owns }
+
+:~ mirrors (~fact : string) (~source : string) (minutes : i32) : authority =
+    { fact = fact; source = source; role = Mirrors minutes }
+
+:~ kit_authorities () : list authority =
+    [
+        owns "job-exit" "job-exit-file";
+        owns "remote-job-exit" "node-exit-file";
+        mirrors "remote-job-exit" "box-placed-exit" 30i32;
+        owns "job-liveness" "job-heartbeat-file";
+        owns "claim-holder" "claims-state";
+        owns "item-wait" "waits-state";
+        mirrors "item-wait" "gate-ready-cache" 60i32;
+        owns "train-verdict" "node-verdict-files";
+        mirrors "train-verdict" "box-coordinator-log" 15i32;
+        owns "installed-kit" "installed-binary-hash"
+    ]
+
+:~ read_at (~site : string) (~fact : string) (~source : string) (age : i32) : reading =
+    { site = site; fact = fact; source = source; age_minutes = age }
+
+:~ kit_readings_11_09 () : list reading =
+    [
+        read_at "job list before the settle fix" "remote-job-exit" "box-placement" 0i32;
+        read_at "job list after the settle fix" "remote-job-exit" "box-placed-exit" 5i32;
+        read_at "train result after the coordinator ended" "train-verdict" "box-coordinator-log" 2i32;
+        read_at "the stop gate at 19:00" "item-wait" "gate-ready-cache" 245i32;
+        read_at "help pool" "claim-holder" "claims-state" 0i32;
+        read_at "the rename sweep" "installed-kit" "repo-source" 0i32
+    ]
+
+///> rust
+:# kit_real_reads_from_11_09_are_audited_against_the_authority_table =
+    := found = audit (kit_authorities ()) (kit_readings_11_09 ())
+    := before = "job list before the settle fix"
+    := placement = WrongAuthority (before, "remote-job-exit", "box-placement", "node-exit-file")
+    testing.expect (listm'.contains placement found) "the placed-forever bug is a wrong-authority read"
+    := stale = StaleMirror ("the stop gate at 19:00", "item-wait", 245i32, 60i32)
+    testing.expect (listm'.contains stale found) "a stale cache"
+    := installed = WrongAuthority ("the rename sweep", "installed-kit", "repo-source", "installed-binary-hash")
+    testing.expect (listm'.contains installed found) "reading the source as if it were the installed binary"
+    testing.expect (listm.length found = 3i32) "the fixed settle read, a fresh log and the claims read pass"

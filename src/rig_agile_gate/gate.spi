@@ -19,7 +19,7 @@
     ? ready = []
     ?> ""
     |:
-        := claim = "rig agile claim " ++# t.root ++# " <ID> --as " ++# t.lane
+        := claim = "kit agile claim " ++# t.root ++# " <ID> --as " ++# t.lane
         "Your team's top ready light items: " ++# sm'.concat_list ", " ready
         ++# ". Claim one explicitly (" ++# claim
         ++# ") and start it now; while a run or train you started is pending, work another of these"

@@ -11,15 +11,6 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum US0 {
     US0_WordToken,
@@ -654,74 +645,6 @@ fn format_real_14(mut v0: i32) -> Rc<str> {
     let v4: Rc<str> = v2.borrow().l0.clone();
     v4
 }
-fn method16(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let mut v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let mut v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method17(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let mut v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let mut v11: bool = if v5 {
-                true
-            } else {
-                let mut v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn reviewed_lines_4(mut v0: &Rc<RefCell<Vec<Rc<str>>>>, mut v1: &Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut v3: bool, mut v4: Rc<str>) -> (bool, Rc<str>) {
     loop {
         let v5: i32 = (v0.clone().borrow().len() as i32);
@@ -759,17 +682,10 @@ fn reviewed_lines_4(mut v0: &Rc<RefCell<Vec<Rc<str>>>>, mut v1: &Rc<RefCell<Vec<
                         v21
                     }
                 };
-                let v28: i32 = (v8.clone().len() as i32);
-                let v29: i32 = 0i32;
-                let v30: i32 = method16(v8.clone(), v28, v29);
-                let v31: i32 = v28.wrapping_sub(1i32);
-                let v32: Rc<str> = string_slice(&v8, v30 as i64, v31 as i64);
-                let v33: i32 = (v32.clone().len() as i32);
-                let v34: i32 = method17(v32.clone(), v33);
-                let v35: Rc<str> = string_slice(&v32, 0i32 as i64, v34 as i64);
-                let v36: Rc<str> = string_concat(&[&*v17, &*v25, ": ", &*v35]);
-                let v42: bool = if v3 {
-                    let v40: i32 = match v13 {
+                let v28: Rc<str> = Rc::<str>::from((v8).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+                let v29: Rc<str> = string_concat(&[&*v17, &*v25, ": ", &*v28]);
+                let v35: bool = if v3 {
+                    let v33: i32 = match v13 {
                         US1::US1_BooleanChange => {
                             2i32
                         }
@@ -783,19 +699,19 @@ fn reviewed_lines_4(mut v0: &Rc<RefCell<Vec<Rc<str>>>>, mut v1: &Rc<RefCell<Vec<
                             4i32
                         }
                     };
-                    let v41: bool = v40 == 1i32;
-                    v41
+                    let v34: bool = v33 == 1i32;
+                    v34
                 } else {
                     false
                 };
-                let v43: bool = &*v4 == "";
-                let v46: Rc<str> = if v43 {
-                    v36
+                let v36: bool = &*v4 == "";
+                let v39: Rc<str> = if v36 {
+                    v29
                 } else {
-                    let v45: Rc<str> = string_concat(&[&*v4, "\n", &*v36]);
-                    v45
+                    let v38: Rc<str> = string_concat(&[&*v4, "\n", &*v29]);
+                    v38
                 };
-                (v2, v3, v4) = (v14, v42, v46);
+                (v2, v3, v4) = (v14, v35, v39);
                 continue;
             }
         }
@@ -858,19 +774,19 @@ fn reviewed_files_1(mut v0: Rc<str>, mut v1: Rc<str>) -> i32 {
         1i32
     }
 }
-fn command_line_argument_count_18() -> i32 {
+fn command_line_argument_count_16() -> i32 {
     let mut v0: usize = std::env::args().count();
     let mut v1: i32 = ((v0) as i32);
     let mut v2: i32 = v1.wrapping_sub(1i32);
     v2
 }
-fn command_line_argument_19(mut v0: i32) -> Rc<str> {
+fn command_line_argument_17(mut v0: i32) -> Rc<str> {
     let mut v1: i32 = v0.wrapping_add(1i32);
     let mut v2: usize = ((v1) as usize);
     let mut v3: Rc<str> = Rc::<str>::from(std::env::args().nth(v2).unwrap_or_default());
     v3
 }
-fn file_exists_20(mut v0: Rc<str>) -> bool {
+fn file_exists_18(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
@@ -883,11 +799,11 @@ fn file_exists_20(mut v0: Rc<str>) -> bool {
     }
 }
 fn accept_review_run_0() -> i32 {
-    let mut v0: i32 = command_line_argument_count_18();
+    let mut v0: i32 = command_line_argument_count_16();
     let mut v1: bool = 2i32 < v0;
     let mut v6: US2 = if v1 {
         let mut v2: i32 = 2i32;
-        let mut v3: Rc<str> = command_line_argument_19(v2);
+        let mut v3: Rc<str> = command_line_argument_17(v2);
         US2::US2_Some(v3)
     } else {
         US2::US2_None
@@ -902,11 +818,11 @@ fn accept_review_run_0() -> i32 {
             v7
         }
     };
-    let mut v11: i32 = command_line_argument_count_18();
+    let mut v11: i32 = command_line_argument_count_16();
     let v12: bool = 3i32 < v11;
     let mut v17: US2 = if v12 {
         let v13: i32 = 3i32;
-        let v14: Rc<str> = command_line_argument_19(v13);
+        let v14: Rc<str> = command_line_argument_17(v13);
         US2::US2_Some(v14)
     } else {
         US2::US2_None
@@ -933,14 +849,14 @@ fn accept_review_run_0() -> i32 {
         println!("{}", v25);
         2i32
     } else {
-        let v26: bool = file_exists_20(v10.clone());
+        let v26: bool = file_exists_18(v10.clone());
         let v27: bool = v26 == false;
         if v27 {
             let v28: Rc<str> = string_concat(&["rig error: repo accept-review: no file at ", &*v10]);
             println!("{}", v28);
             2i32
         } else {
-            let v29: bool = file_exists_20(v21.clone());
+            let v29: bool = file_exists_18(v21.clone());
             let v30: bool = v29 == false;
             if v30 {
                 let v31: Rc<str> = string_concat(&["rig error: repo accept-review: no file at ", &*v21]);

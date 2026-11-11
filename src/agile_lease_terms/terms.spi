@@ -47,8 +47,7 @@
 := environment_text (~name : string) : string =
     := renamed = env.get_environment_variable (sm'.replace "KIT_" "RIG_" name)
     ? renamed <> "" ?> renamed |: env.get_environment_variable name
-:= trimmed_file_text (~path : string) : string = $'std::fs::read_to_string(&*!path).map(|text| \
-    std::rc::Rc::<str>::from(text.trim())).unwrap_or_else(|_| std::rc::Rc::<str>::from(""))' : string
+:= trimmed_file_text (~path : string) : string = sm'.trim (file_system.read_text_or_empty path)
 := present (~text : string) : bool = $"!text.is_empty() == false"
 
 := rig_config_file (~name : string) : string =

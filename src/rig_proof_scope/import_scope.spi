@@ -120,10 +120,12 @@
     | [] => []
 
 :~ src_text () : string =
-    "packageDir: ../deps/spiral/lib\npackages:\n    |core-\n    spiral-\nmodules:\n    a\n    engine/\n        b\n        c\n    d\n"
+    "packageDir: ../deps/spiral/lib\npackages:\n    |core-\n    spiral-\nmodules:\n    a\n    engine/\n        b\n"
+    ^^ "        c\n    d\n"
 
 :~ arena_text () : string =
-    "packageDir: ../../deps/spiral/lib\r\npackages:\r\n    |core-\r\n    spiral-\r\n    ../../src-\r\nmodules:\r\n    x\r\n    y\r\n"
+    "packageDir: ../../deps/spiral/lib\r\npackages:\r\n    |core-\r\n    spiral-\r\n    ../../src-\r\nmodules:\r\n"
+    ^^ "    x\r\n    y\r\n"
 
 :~ lone_text () : string = "packageDir: ../../deps/spiral/lib\npackages:\n    |core-\n    spiral-\nmodules:\n    q\n"
 

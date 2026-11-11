@@ -1,0 +1,168 @@
+///- --package .
+:# registration static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| stat_test =
+    | Welch :: stat_test
+    | OneSample :: stat_test
+    | Binomial :: stat_test
+    | Wilson :: stat_test
+    | Median :: stat_test
+    | BinomialBand :: stat_test
+
+:== registration =
+    {
+        id : string
+        registered : string
+        question : string
+        test : stat_test
+        metric : string
+        group : string
+        arms : list string
+        runs : i32
+        prediction : string
+        confidence : string
+        decision : string
+        time : string
+        registered_local : string
+    }
+
+:| read_result =
+    | Read :: registration -> read_result
+    | Refused :: string -> read_result
+
+:~ test_word (t : stat_test) : string =
+    ?= t ?|
+    | Welch => "welch"
+    | OneSample => "one-sample"
+    | Binomial => "binomial"
+    | Wilson => "wilson"
+    | Median => "median"
+    | BinomialBand => "binomial-band"
+
+:~ test_of_word (~word : string) : option stat_test =
+    := every = [ Welch; OneSample; Binomial; Wilson; Median; BinomialBand ]
+    ?= listm'.filter (\ (t : stat_test) => test_word t = word) every ?|
+    | t :: _ => Some t
+    | [] => None
+
+:~ value_of (lines : list string) (~key : string) : option string =
+    := prefix = key ++# "="
+    := step = \ (found : option string) (line : string) =>
+        ?= found ?|
+        | Some _ => found
+        | None =>
+            ? sm'.starts_with prefix line
+            ?> Some (sm'.substring (sm'.length prefix) (sm'.length line - sm'.length prefix) line)
+            |: None
+    lines |> listm.fold step None
+
+:~ arms_of (~text : string) : list string = ? text = "" ?> [] |: sm'.split_list "," text
+
+:~ registration_of_text (~text : string) : read_result =
+    := lines = sm'.split_list "\n" (sm'.replace "\r" "" text)
+    := field = \ (key : string) => value_of lines key
+    := text_or_empty = \ (key : string) => ?= field key ?| | Some v => v | None => ""
+    ?= field "id", field "test", field "runs" ?|
+    | Some id, Some test_text, Some runs_text =>
+        ?= test_of_word test_text, (convert.try_convert runs_text : option i32) ?|
+        | Some test, Some runs =>
+            Read
+                {
+                    id = id
+                    registered = text_or_empty "registered"
+                    question = text_or_empty "question"
+                    test = test
+                    metric = text_or_empty "metric"
+                    group = text_or_empty "group"
+                    arms = arms_of (text_or_empty "arms")
+                    runs = runs
+                    prediction = text_or_empty "prediction"
+                    confidence = text_or_empty "confidence"
+                    decision = text_or_empty "decision"
+                    time = text_or_empty "time"
+                    registered_local = text_or_empty "registered_local"
+                }
+        | None, _ => Refused "no known test (welch, one-sample, binomial, wilson, median, binomial-band)"
+        | _, None => Refused ("runs is not a whole number: " ++# runs_text)
+    | None, _, _ => Refused "no id"
+    | _, None, _ => Refused "no test"
+    | _, _, None => Refused "no runs"
+
+:~ key_value_text (r : registration) : string =
+    := pairs =
+        [
+            ("id", r.id); ("registered", r.registered); ("question", r.question); ("test", test_word r.test)
+            ("metric", r.metric); ("group", r.group); ("arms", sm'.concat_list "," r.arms); ("runs", sm'.show r.runs)
+            ("prediction", r.prediction); ("confidence", r.confidence); ("decision", r.decision); ("time", r.time)
+            ("registered_local", r.registered_local)
+        ]
+    pairs |> listm.map (\ ((k, v) : string * string) => k ++# "=" ++# v ++# "\n") |> sm'.concat_list ""
+
+:~ quoted (~text : string) : string = "\"" ++# (text |> sm'.replace "\\" "\\\\" |> sm'.replace "\"" "\\\"") ++# "\""
+
+:~ binding_of (~id : string) : string = "registration_" ++# (id |> sm'.to_lower |> sm'.replace "-" "_")
+
+:~ spiral_row (r : registration) : string =
+    := arms = ? r.arms = [] ?> "[]" |: "[ " ++# (r.arms |> listm.map quoted |> sm'.concat_list "; ") ++# " ]"
+    := lines =
+        [
+            "inl " ++# binding_of r.id ++# " () : registration ="; "    {"
+            "        id = " ++# quoted r.id; "        registered = " ++# quoted r.registered
+            "        question = " ++# quoted r.question; "        test = " ++# reflection.union_to_string r.test
+            "        metric = " ++# quoted r.metric; "        group = " ++# quoted r.group
+            "        arms = " ++# arms; "        runs = " ++# sm'.show r.runs ++# "i32"
+            "        prediction = " ++# quoted r.prediction; "        confidence = " ++# quoted r.confidence
+            "        decision = " ++# quoted r.decision; "        time = " ++# quoted r.time
+            "        registered_local = " ++# quoted r.registered_local; "    }"
+        ]
+    lines |> sm'.concat_list "\n"
+
+:~ control_text () : string =
+    sm'.concat_list "\r\n"
+        [
+            "id=CONV-CTRL-SHUFFLED"; "registered=2026-11-09T15:42Z"
+            "question=Control: does every arm stay at chance (accuracy minus the \"majority\" rate = 0)?"
+            "test=one-sample"; "metric=ood_accuracy"; "group="; "arms="; "runs=5"; "prediction=0"; "confidence=0.95"
+            "decision=the control holds when the 95% CI contains 0"; "time="; "registered_local=2026-11-09T11:42:49"; ""
+        ]
+
+///> rust
+:# a_registration_file_reads_into_a_typed_row_without_loss =
+    ?= registration_of_text (control_text ()) ?|
+    | Read r =>
+        testing.expect (r.test = OneSample && r.arms = [] && r.runs = 5i32) "typed fields"
+        testing.expect (r.registered = "2026-11-09T15:42Z") "the registered stamp is kept"
+        testing.expect (key_value_text r = sm'.replace "\r" "" (control_text ())) "byte-identical round trip"
+    | Refused why => testing.expect !- why
+
+///> rust
+:# the_spiral_row_is_a_record_literal_with_escaped_text =
+    ?= registration_of_text (control_text ()) ?|
+    | Read r =>
+        := row = spiral_row r
+        testing.expect (sm'.starts_with "inl registration_conv_ctrl_shuffled () : registration =\n    {" row) "binding"
+        testing.expect (sm'.contains "        test = OneSample\n" row) "the test is a constructor"
+        testing.expect (sm'.contains "        runs = 5i32\n" row) "runs is a number"
+        testing.expect (sm'.contains "minus the \\\"majority\\\" rate" row) "quotes are escaped"
+    | Refused why => testing.expect !- why
+
+///> rust
+:# arms_and_refusals =
+    := two = sm'.replace "arms=\r\n" "arms=ssm,transformer\r\n" (control_text ())
+    ?= registration_of_text two ?|
+    | Read r => testing.expect (r.arms = [ "ssm"; "transformer" ]) "two arms"
+    | Refused why => testing.expect !- why
+    := unknown = sm'.replace "test=one-sample" "test=anova" (control_text ())
+    ?= registration_of_text unknown ?|
+    | Refused why => testing.expect (sm'.starts_with "no known test" why) why
+    | Read _ => testing.expect !- "anova is not a registered test"
+
+///> rust
+:# a_file_read_at_run_time_parses_like_a_literal =
+    := suffix = file_system.read_text_or_empty "/rig-registration-run-time-probe-missing"
+    ?= registration_of_text (control_text () ++# suffix) ?|
+    | Read r => testing.expect (r.metric = "ood_accuracy") "run-time text"
+    | Refused why => testing.expect !- why

@@ -129,6 +129,13 @@
         := head = "rig agile lint warning id=" ++# id ++# " status=" ++# status ++# " failing=" ++# checks
         := markers = " (add a note with the marker lines, e.g. 'dod:' or 'pronto quando:', 'next:' or 'próximo:'"
         console.write_error_line (head ++# markers ++# "; a later train refuses the change)")
+        ? sm'.contains "ProseWait" checks
+        ?>
+            := form = " --wait <train|item|lane|user|job|when>:<value>"
+            := command = "rig agile edit " ++# root ++# " " ++# id ++# form
+            := hint = "  ProseWait: a wait in prose keeps the item in agile next; record it: "
+            console.write_error_line (hint ++# command)
+        |: ()
 
 := agile_set_route () : i32 =
     := root = argument_owned 1i32

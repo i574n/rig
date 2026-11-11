@@ -156,7 +156,10 @@
     expect
         (
             edited_text (root_added one "C:/work/repo/src")
-            = "refused: C:/work/repo/src overlaps harvest root C:/work/repo (one root per tree, so every file is scanned once)"
+            = (
+                "refused: C:/work/repo/src overlaps harvest root C:/work/repo (one root per tree, so every file is "
+                ^^ "scanned once)"
+            )
         )
         "nested inside"
     expect

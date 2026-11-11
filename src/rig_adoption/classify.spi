@@ -33,7 +33,7 @@
 
 ///> rust
 :# commands_split_into_kit_habit_and_other_calls =
-    expect_call "rig read src/x.spi" KitCall
+    expect_call "kit read src/x.spi" KitCall
     expect_call "C:\\work\\tools\\kit.exe job list" KitCall
     expect_call "cd C:\\work\\repo && cargo build" OtherCall
     expect_call "Get-Content C:\\work\\x.txt -TotalCount 5" HabitCall

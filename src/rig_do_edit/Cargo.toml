@@ -20,3 +20,4 @@ rig-do-commit = { path = "../rig_do_commit" }
 regex = "1.13.1"
 sha2 = "0.11.1"
 rig-do-model = { path = "../rig_do_model" }
+rig-do-replacement = { path = "../rig_do_replacement" }

@@ -1,0 +1,86 @@
+///- --package .
+:# baseline static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| baseline_row =
+    | FileRow :: string * string -> baseline_row
+    | EnvRow :: string * string -> baseline_row
+    | DirSetRow :: string * string -> baseline_row
+    | CompilerRow :: string * string -> baseline_row
+
+:| config_drift =
+    | Changed :: string -> config_drift
+    | Missing :: string -> config_drift
+    | EnvChanged :: string * string * string -> config_drift
+    | DirSetChanged :: string -> config_drift
+    | CompilerUnsanctioned :: string -> config_drift
+
+:== baseline_check = { drift : list config_drift; sanctioned : list string; checked : i32 }
+
+:~ key_of (row : baseline_row) : string =
+    ?= row ?|
+    | FileRow (path, _) => "file:" ++# path
+    | EnvRow (name, _) => "env:" ++# name
+    | DirSetRow (dir, _) => "dirset:" ++# dir
+    | CompilerRow (kind, _) => "compiler:" ++# kind
+
+:~ value_of (row : baseline_row) : string =
+    ?= row ?|
+    | FileRow (_, v) => v
+    | EnvRow (_, v) => v
+    | DirSetRow (_, v) => v
+    | CompilerRow (_, v) => v
+
+:~ live_for (live : list baseline_row) (row : baseline_row) : option baseline_row =
+    live |> listm'.try_find_ (\ (l : baseline_row) => key_of l = key_of row)
+
+:~ judged (live : list baseline_row) (newer_install : bool) (acc : baseline_check) (row : baseline_row)
+    : baseline_check
+    =
+    := counted = { acc ?| checked = acc.checked + 1i32 }
+    ?= live_for live row ?|
+    | Some now ?& value_of now = value_of row => counted
+    | found =>
+        := now_value =
+            ?= found ?|
+            | Some now => value_of now
+            | None => ""
+        ?= row ?|
+        | FileRow (path, _) =>
+            := problem = ? now_value = "" ?> Missing path |: Changed path
+            { counted ?| drift = listm.append counted.drift [ problem ] }
+        | EnvRow (name, before) =>
+            { counted ?| drift = listm.append counted.drift [ EnvChanged (name, before, now_value) ] }
+        | DirSetRow (dir, _) => { counted ?| drift = listm.append counted.drift [ DirSetChanged dir ] }
+        | CompilerRow (kind, before) =>
+            := moved = kind ++# " " ++# before ++# "->" ++# now_value
+            ? newer_install
+            ?> { counted ?| sanctioned = listm.append counted.sanctioned [ moved ] }
+            |: { counted ?| drift = listm.append counted.drift [ CompilerUnsanctioned moved ] }
+
+:~ check_of (baseline : list baseline_row) (live : list baseline_row) (newer_install : bool) : baseline_check =
+    baseline |> listm.fold (judged live newer_install) { drift = []; sanctioned = []; checked = 0i32 }
+
+:~ drift_text (d : config_drift) : string =
+    ?= d ?|
+    | Changed path => "CHANGED " ++# path
+    | Missing path => "MISSING " ++# path
+    | EnvChanged (name, before, now) => "ENV " ++# name ++# ": baseline '" ++# before ++# "' now '" ++# now ++# "'"
+    | DirSetChanged dir => "DIRSET " ++# dir
+    | CompilerUnsanctioned moved => "COMPILER UNSANCTIONED " ++# moved
+
+///> rust
+:# a_baseline_check_names_each_drift_and_sanctions_an_installed_compiler =
+    := baseline = [ FileRow ("C:/work/a.json", "h1"); EnvRow ("MODE", "x"); CompilerRow ("core", "aa11") ]
+    := same = check_of baseline baseline !-
+    testing.expect (same.drift = [] && same.checked = 3i32) "clean"
+    := live = [ FileRow ("C:/work/a.json", "h2"); EnvRow ("MODE", "y"); CompilerRow ("core", "bb22") ]
+    := drifted = check_of baseline live !-
+    := expected = [ Changed "C:/work/a.json"; EnvChanged ("MODE", "x", "y"); CompilerUnsanctioned "core aa11->bb22" ]
+    testing.expect (drifted.drift = expected) "each change is named, the compiler unsanctioned without an install"
+    := installed = check_of baseline live !+
+    testing.expect (installed.sanctioned = [ "core aa11->bb22" ] && listm.length installed.drift = 2i32) "sanctioned"
+    := gone = check_of [ FileRow ("C:/work/gone", "h") ] [] !-
+    testing.expect (gone = { drift = [ Missing "C:/work/gone" ]; sanctioned = []; checked = 1i32 }) "a missing file"

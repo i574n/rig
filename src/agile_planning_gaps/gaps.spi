@@ -68,5 +68,6 @@
     := gaps = planning_gaps_text text
     ? sm'.contains "missing=estimate id=B" gaps ?> () |: failwith gaps
     ? sm'.contains "missing=estimate,load,assignee id=C" gaps ?> () |: failwith gaps
-    ? sm'.contains "id=A" gaps |> not && sm'.contains "id=E" gaps |> not && sm'.contains "id=D" gaps |> not ?> ()
+    ? sm'.contains "id=A" gaps |> not && sm'.contains "id=E" gaps |> not && sm'.contains "id=D" gaps |> not
+    ?> ()
     |: failwith gaps

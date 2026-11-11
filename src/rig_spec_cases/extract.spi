@@ -1,0 +1,109 @@
+///- --package .
+:# extract static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== fixture_file = { path : string; text : string }
+
+:== spec_case =
+    {
+        number : i32
+        title : string
+        fixture : list fixture_file
+        setup : string
+        command : string
+        expected : string
+    }
+
+:~ ^ letters_from (~text : string) (at : i32) : bool =
+    ? at >= (sm'.length text : i32)
+    ?> !+
+    |? sm'.index_of (sm'.to_lower (sm'.slice at at text)) "abcdefghijklmnopqrstuvwxyz" < 0i32
+    ?> !-
+    |: letters_from text (at + 1i32)
+
+:~ letters_only (~text : string) : bool = text <> "" && letters_from text 0i32
+
+:~ path_line (~line : string) : bool =
+    := spaced = sm'.contains " " line || sm'.contains (sm'.char_text 9u8) line
+    := dot = sm'.last_index_of "." line
+    := extension = ? dot < 0i32 ?> "" |: sm'.substring (dot + 1i32) ((sm'.length line : i32) - dot - 1i32) line
+    line <> "" && (spaced |> not) && (sm'.contains "/" line || letters_only extension)
+
+:~ ^ files_from (lines : list string) (current : option fixture_file) (found : list fixture_file) : list fixture_file =
+    := closed = ?= current ?| | Some f => listm.append found [ f ] | None => found
+    ?= lines ?|
+    | [] => closed
+    | line :: rest ?& path_line line => files_from rest (Some { path = line; text = "" }) closed
+    | line :: rest =>
+        ?= current ?|
+        | Some f => files_from rest (Some { f ?| text = f.text ++# line ++# "\n" }) found
+        | None => files_from rest None found
+
+:~ fixture_of (~block : string) : list fixture_file = files_from (sm'.split_list "\n" block) None []
+
+:~ heading_of (~line : string) : option (i32 * string) =
+    := body = sm'.substring 3i32 ((sm'.length line : i32) - 3i32) line
+    := dot = sm'.index_of ". " body
+    ? sm'.starts_with "## " line |> not || dot < 1i32
+    ?> None
+    |:
+        ?= (convert.try_convert (sm'.substring 0i32 dot body) : option i32) ?|
+        | Some n => Some (n, sm'.substring (dot + 2i32) ((sm'.length body : i32) - dot - 2i32) body)
+        | None => None
+
+:~ with_block (c : spec_case) (~kind : string) (~block : string) : spec_case =
+    ? kind = "fixture" ?> { c ?| fixture = fixture_of block }
+    |? kind = "setup" ?> { c ?| setup = block }
+    |? kind = "command" ?> { c ?| command = block }
+    |? kind = "expected" ?> { c ?| expected = block }
+    |: c
+
+:== scan = { cases : list spec_case; fence : string; block : list string }
+
+:~ ^ cases_from (lines : list string) (s : scan) : list spec_case =
+    ?= lines ?|
+    | [] => listm.rev s.cases
+    | line :: rest ?& s.fence <> "" && line = "```" =>
+        := block = sm'.concat_list "\n" (listm.rev s.block)
+        := cases = ?= s.cases ?| | c :: older => with_block c s.fence block :: older | [] => []
+        cases_from rest { cases = cases; fence = ""; block = [] }
+    | line :: rest ?& s.fence <> "" => cases_from rest { s ?| block = line :: s.block }
+    | line :: rest ?& sm'.starts_with "```" line && s.cases <> [] =>
+        cases_from rest { s ?| fence = sm'.trim (sm'.substring 3i32 ((sm'.length line : i32) - 3i32) line) }
+    | line :: rest =>
+        ?= heading_of line ?|
+        | Some (n, title) =>
+            := fresh = { number = n; title = title; fixture = []; setup = ""; command = ""; expected = "" }
+            cases_from rest { s ?| cases = fresh :: s.cases }
+        | None => cases_from rest s
+
+:~ cases_of (~text : string) : list spec_case =
+    cases_from (sm'.split_list "\n" (sm'.replace "\r" "" text)) { cases = []; fence = ""; block = [] }
+
+///> rust
+:# fenced_blocks_become_typed_cases_and_fixture_paths_follow_the_spec_rule =
+    := fence = "```"
+    := spec =
+        [
+            "# One call"; "A fixture lists paths."; "## 1. Edit anchors"; "Habit: read then replace.";
+            fence ++# "fixture"; "lib/a.spi"; "inl x = 1"; "notes.txt"; "  indented line"; fence;
+            fence ++# "command"; "kit do . 'show lib/a.spi'"; fence;
+            fence ++# "expected"; "lib/a.spi"; "1  inl x = 1"; fence;
+            "## 2. Companion"; fence ++# "setup"; "kit do . 'git init'"; fence;
+            fence ++# "command"; "kit do . 'x'"; fence
+        ]
+        |> sm'.concat_list "\n"
+    := cases = cases_of spec
+    testing.expect ((cases |> listm.map (\ (c : spec_case) => c.number)) = [ 1i32; 2i32 ]) "two cases by heading"
+    ?= cases ?|
+    | first :: second :: [] =>
+        testing.expect (first.title = "Edit anchors" && first.command = "kit do . 'show lib/a.spi'") "title and command"
+        := files = [ { path = "lib/a.spi"; text = "inl x = 1\n" }; { path = "notes.txt"; text = "  indented line\n" } ]
+        testing.expect (first.fixture = files) "the path rule splits the fixture, every line ends in LF"
+        testing.expect (first.expected = "lib/a.spi\n1  inl x = 1") "expected kept whole"
+        testing.expect (second.setup = "kit do . 'git init'" && second.fixture = []) "a setup block, no fixture"
+    | _ => failwith "two cases"
+    testing.expect (path_line "inl x = 1" |> not && path_line "Cargo.toml" && path_line "a/b") "path lines"
+    testing.expect (path_line "v1.2" |> not) "a dot then digits is no extension"

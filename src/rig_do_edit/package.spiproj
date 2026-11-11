@@ -6,8 +6,10 @@ packages:
     rig_do_model
     rig_do_records
     rig_do_store
+    rig_do_replacement
 link:
     rig_do_model
+    rig_do_replacement
 modules:
     host
     decode

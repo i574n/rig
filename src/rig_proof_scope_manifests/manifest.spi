@@ -45,8 +45,10 @@
     | l :: rest =>
         := d = indent_of l 0i32
         := entry = sm'.trim l
-        ? entry = "" ?> read_lines rest now stack pdir deps mods
-        |? d = 0i32 ?> read_header rest pdir deps mods entry
+        ? entry = ""
+        ?> read_lines rest now stack pdir deps mods
+        |? d = 0i32
+        ?> read_header rest pdir deps mods entry
         |: read_entry rest now stack pdir deps mods d entry
 :& :~ read_header (rest : list string) (pdir : string) (deps : list string) (mods : list string) (entry : string)
     : string * list string * list string
@@ -103,7 +105,8 @@
     ? sm'.starts_with "." dep ?> joined_path dir dep |: joined_path (joined_path dir pdir) dep
 
 :~ src_text () : string =
-    "packageDir: ../deps/spiral/lib\npackages:\n    |core-\n    spiral-\nmodules:\n    a\n    engine/\n        b\n        c\n    d\n"
+    "packageDir: ../deps/spiral/lib\npackages:\n    |core-\n    spiral-\nmodules:\n    a\n    engine/\n        b\n"
+    ^^ "        c\n    d\n"
 
 ///> rust
 :# a_manifest_yields_its_package_dir_deps_and_nested_modules_in_order =

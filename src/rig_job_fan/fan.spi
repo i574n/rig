@@ -1,0 +1,56 @@
+///- --package .
+:# fan static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| fan_host =
+    | Box :: fan_host
+    | Node :: string -> fan_host
+    | Codespace :: i32 -> fan_host
+
+:== shard_run = { host : fan_host; shard : i32; shards : i32; argv : list string }
+
+:== shard_result = { shard : i32; exit_code : i32 }
+
+:| merge_decision =
+    | Merge :: merge_decision
+    | FailedShards :: list i32 -> merge_decision
+
+:= codespace_min_minutes () : i32 = 20i32
+
+:~ substituted (~word : string) (shard : i32) (shards : i32) : string =
+    word |> sm'.replace "{shard}" (sm'.show shard) |> sm'.replace "{shards}" (sm'.show shards)
+
+:~ worth_hosting (expected_minutes : i32) (host : fan_host) : bool =
+    ?= host ?|
+    | Codespace _ => expected_minutes >= codespace_min_minutes ()
+    | _ => !+
+
+:~ shard_plan (hosts : list fan_host) (expected_minutes : i32) (argv : list string) : list shard_run =
+    := used = hosts |> listm'.filter (worth_hosting expected_minutes)
+    := shards = listm.length used
+    := step = \ ((k, acc) : i32 * list shard_run) (host : fan_host) =>
+        := words = argv |> listm.map (\ (w : string) => substituted w k shards)
+        k + 1i32, listm.append acc [ { host = host; shard = k; shards = shards; argv = words } ]
+    := _, plan = used |> listm.fold step (1i32, [])
+    plan
+
+:~ merge_decision_of (results : list shard_result) : merge_decision =
+    := failing = results |> listm'.filter (\ (r : shard_result) => r.exit_code <> 0i32)
+    := failed = failing |> listm.map (\ (r : shard_result) => r.shard)
+    ? failed = [] ?> Merge |: FailedShards failed
+
+///> rust
+:# a_fan_numbers_its_shards_skips_unprofitable_codespaces_and_merges_only_when_all_pass =
+    := argv = [ "build.ps1"; "-Shards"; "{shards}"; "-ShardSet"; "{shard}" ]
+    := plan = shard_plan [ Box; Node "moon"; Codespace 4i32 ] 10i32 argv
+    testing.expect (listm.length plan = 2i32) "a ten-minute job skips the codespace"
+    := second = plan |> listm'.try_find_ (\ (r : shard_run) => r.shard = 2i32)
+    := words = [ "build.ps1"; "-Shards"; "2"; "-ShardSet"; "2" ]
+    testing.expect (second = Some { host = Node "moon"; shard = 2i32; shards = 2i32; argv = words }) "shard 2 of 2"
+    testing.expect (listm.length (shard_plan [ Box; Codespace 4i32 ] 45i32 argv) = 2i32) "a long job uses the codespace"
+    := ok = { shard = 1i32; exit_code = 0i32 }
+    testing.expect (merge_decision_of [ ok; { shard = 2i32; exit_code = 0i32 } ] = Merge) "all pass"
+    := bad = { shard = 2i32; exit_code = 1i32 }
+    testing.expect (merge_decision_of [ ok; bad ] = FailedShards [ 2i32 ]) "failed shards named"

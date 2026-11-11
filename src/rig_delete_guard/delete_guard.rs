@@ -1,15 +1,6 @@
 #![allow(unused_mut, unused_variables, unused_imports, unused_parens, unused_braces, unused_assignments, dead_code, non_snake_case, non_camel_case_types, unreachable_code, while_true)]
 use std::cell::RefCell;
 use std::rc::Rc;
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 fn string_concat(parts: &[&str]) -> Rc<str> {
     let mut joined = Rc::<[u8]>::new_uninit_slice(parts.iter().map(|part| part.len()).sum());
     let bytes = Rc::get_mut(&mut joined).unwrap().as_mut_ptr() as *mut u8;
@@ -19,6 +10,15 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
         at += part.len();
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
+}
+fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
+    let bytes = value.as_bytes();
+    let length = bytes.len() as i64;
+    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
+    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
+    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
+    let slice = &bytes[from as usize..(to + 1) as usize];
+    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
 }
 #[derive(Clone)]
 enum US0 {
@@ -42,100 +42,32 @@ enum UH0 {
     UH0_Nil,
     UH0_Cons(Rc<str>, Rc<UH0>),
 }
-fn method1(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let mut v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let mut v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let mut v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let mut v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let mut v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method2(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let mut v3: i32 = v1.wrapping_sub(1i32);
-            let mut v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let mut v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let mut v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let mut v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
-fn method6(mut v0: std::path::PathBuf) -> std::path::PathBuf {
+fn method4(mut v0: std::path::PathBuf) -> std::path::PathBuf {
     v0
 }
-fn get_current_directory_5() -> Rc<str> {
+fn get_current_directory_3() -> Rc<str> {
     let mut v1: Result<std::path::PathBuf, std::io::Error> = std::env::current_dir();
     let mut v3: std::path::PathBuf = v1.unwrap();
-    let mut v4: std::path::PathBuf = method6(v3);
+    let mut v4: std::path::PathBuf = method4(v3);
     let mut v6: std::path::Display = v4.display();
     let mut v8: std::string::String = format!("{}", v6);
     let v10: Rc<str> = Rc::<str>::from(String::as_str(&v8));
     v10
 }
-fn method7(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+fn method5(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let mut v3: &str = &*v0;
     let mut v5: std::string::String = String::from(v3);
     let mut v7: std::path::PathBuf = std::path::PathBuf::from(v5);
     let mut v9: &str = &*v1;
     let v11: std::string::String = String::from(v9);
     let mut v13: std::path::PathBuf = v7.join(v11);
-    let mut v14: std::path::PathBuf = method6(v13);
+    let mut v14: std::path::PathBuf = method4(v13);
     let v16: std::path::Display = v14.display();
     let v18: std::string::String = format!("{}", v16);
     let v20: Rc<str> = Rc::<str>::from(String::as_str(&v18));
     v20
 }
-fn method13(mut v0: Option<Rc<str>>) -> Option<Rc<str>> {
+fn method11(mut v0: Option<Rc<str>>) -> Option<Rc<str>> {
     v0
 }
 fn closure1() -> Rc<dyn Fn((Rc<str>)) -> US0> {
@@ -144,8 +76,8 @@ fn closure1() -> Rc<dyn Fn((Rc<str>)) -> US0> {
         US0::US0_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn get_file_name_12(mut v0: Rc<str>) -> Rc<str> {
-    let mut v2: &str = &*v0;
+fn get_file_name_10(mut v0: Rc<str>) -> Rc<str> {
+    let v2: &str = &*v0;
     let mut v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
     let mut v8: Option<&std::ffi::OsStr> = v6.file_name();
@@ -158,7 +90,7 @@ fn get_file_name_12(mut v0: Rc<str>) -> Rc<str> {
     let v22: Rc<str> = Rc::<str>::from(String::as_str(&v20));
     let v24: bool = true; v22 });
     let mut v26: Option<Rc<str>> = _optionm_map_;
-    let mut v27: Option<Rc<str>> = method13(v26);
+    let mut v27: Option<Rc<str>> = method11(v26);
     let mut v28: Rc<dyn Fn((Rc<str>)) -> US0> = closure1();
     let mut v29: Option<US0> = v27.map(|x| v28(x));
     let mut v31: US0 = US0::US0_None;
@@ -175,14 +107,14 @@ fn get_file_name_12(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn directory_get_parent_14(mut v0: Rc<str>) -> Option<Rc<str>> {
-    let mut v2: &str = &*v0;
+fn directory_get_parent_12(mut v0: Rc<str>) -> Option<Rc<str>> {
+    let v2: &str = &*v0;
     let mut v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
     let mut v8: Option<std::path::PathBuf> = v6.parent().map(std::path::PathBuf::from);
     let v10: bool = true; let _optionm_map_ = v8.map(|x| { //;
     let mut v12: std::path::PathBuf = x;
-    let mut v13: std::path::PathBuf = method6(v12.clone());
+    let mut v13: std::path::PathBuf = method4(v12.clone());
     let v15: std::path::Display = v13.display();
     let v17: std::string::String = format!("{}", v15);
     let v19: Rc<str> = Rc::<str>::from(String::as_str(&v17));
@@ -196,7 +128,7 @@ fn closure2() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
         v1
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method15() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
+fn method13() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
     closure2()
 }
 fn ok_c3() -> Rc<dyn Fn(std::path::PathBuf) -> US1> {
@@ -204,7 +136,7 @@ fn ok_c3() -> Rc<dyn Fn(std::path::PathBuf) -> US1> {
         US1::US1_Ok(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method16() -> Rc<dyn Fn(std::path::PathBuf) -> US1> {
+fn method14() -> Rc<dyn Fn(std::path::PathBuf) -> US1> {
     ok_c3()
 }
 fn error_c4() -> Rc<dyn Fn(Rc<str>) -> US1> {
@@ -212,13 +144,13 @@ fn error_c4() -> Rc<dyn Fn(Rc<str>) -> US1> {
         US1::US1_Error(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method17() -> Rc<dyn Fn(Rc<str>) -> US1> {
+fn method15() -> Rc<dyn Fn(Rc<str>) -> US1> {
     error_c4()
 }
-fn run_11(mut v0: Rc<str>, mut v1: Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result<std::path::PathBuf, std::io::Error>>>, mut v2: u8, mut v3: Rc<str>, mut v4: Rc<str>) -> Result<std::path::PathBuf, std::io::Error> {
-    let mut v5: Rc<str> = get_file_name_12(v4.clone());
-    let mut v6: Option<Rc<str>> = directory_get_parent_14(v4.clone());
-    let mut v7: Option<Rc<str>> = method13(v6);
+fn run_9(mut v0: Rc<str>, mut v1: Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result<std::path::PathBuf, std::io::Error>>>, mut v2: u8, mut v3: Rc<str>, mut v4: Rc<str>) -> Result<std::path::PathBuf, std::io::Error> {
+    let mut v5: Rc<str> = get_file_name_10(v4.clone());
+    let mut v6: Option<Rc<str>> = directory_get_parent_12(v4.clone());
+    let mut v7: Option<Rc<str>> = method11(v6);
     let mut v8: Rc<dyn Fn((Rc<str>)) -> US0> = closure1();
     let mut v9: Option<US0> = v7.map(|x| v8(x));
     let v11: US0 = US0::US0_None;
@@ -242,10 +174,10 @@ fn run_11(mut v0: Rc<str>, mut v1: Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result
                     let v25: u8 = v2.wrapping_add(1u8);
                     let mut v26: Rc<dyn Fn(Rc<str>) -> Result<std::path::PathBuf, std::io::Error>> = v1(v25);
                     let mut v27: Result<std::path::PathBuf, std::io::Error> = v26(v22);
-                    let mut v28: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method15();
+                    let mut v28: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method13();
                     let v30: Result<std::path::PathBuf, Rc<str>> = v27.map_err(|x| v28(x));
-                    let mut v31: Rc<dyn Fn(std::path::PathBuf) -> US1> = method16();
-                    let mut v32: Rc<dyn Fn(Rc<str>) -> US1> = method17();
+                    let mut v31: Rc<dyn Fn(std::path::PathBuf) -> US1> = method14();
+                    let mut v32: Rc<dyn Fn(Rc<str>) -> US1> = method15();
                     let mut v33: US1 = match v30 { Ok(x) => v31(x), Err(e) => v32(e) };
                     match v33 {
                         US1::US1_Error(v48) => {
@@ -259,10 +191,10 @@ fn run_11(mut v0: Rc<str>, mut v1: Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result
                         }
                         US1::US1_Ok(v34) => {
                             let mut v34: std::path::PathBuf = v34;
-                            let mut v35: std::path::PathBuf = method6(v34);
+                            let mut v35: std::path::PathBuf = method4(v34);
                             let v37: std::path::Display = v35.display();
                             let v38: Rc<str> = Rc::<str>::from(format!("{}", v37));
-                            let v39: Rc<str> = method7(v38, v5);
+                            let v39: Rc<str> = method5(v38, v5);
                             let v41: &str = &*v39;
                             let v43: std::string::String = String::from(v41);
                             let v45: std::path::PathBuf = std::path::PathBuf::from(v43);
@@ -292,7 +224,7 @@ fn run_11(mut v0: Rc<str>, mut v1: Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result
 }
 fn closure6(mut v0: Rc<str>, mut v1: u8) -> Rc<dyn Fn(Rc<str>) -> Result<std::path::PathBuf, std::io::Error>> {
     Rc::new(move |mut v2: Rc<str>| -> Result<std::path::PathBuf, std::io::Error> {
-        method10(v0.clone(), v1, v2)
+        method8(v0.clone(), v1, v2)
     })
 }
 fn closure5(mut v0: Rc<str>) -> Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result<std::path::PathBuf, std::io::Error>>> {
@@ -300,18 +232,18 @@ fn closure5(mut v0: Rc<str>) -> Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result<st
         closure6(v0.clone(), v1)
     })
 }
-fn method10(mut v0: Rc<str>, mut v1: u8, mut v2: Rc<str>) -> Result<std::path::PathBuf, std::io::Error> {
+fn method8(mut v0: Rc<str>, mut v1: u8, mut v2: Rc<str>) -> Result<std::path::PathBuf, std::io::Error> {
     let mut v4: Result<std::path::PathBuf, std::io::Error> = std::fs::read_link(&*v2);
-    let mut v5: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method15();
+    let mut v5: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method13();
     let mut v7: Result<std::path::PathBuf, Rc<str>> = v4.map_err(|x| v5(x));
-    let mut v8: Rc<dyn Fn(std::path::PathBuf) -> US1> = method16();
-    let mut v9: Rc<dyn Fn(Rc<str>) -> US1> = method17();
+    let mut v8: Rc<dyn Fn(std::path::PathBuf) -> US1> = method14();
+    let mut v9: Rc<dyn Fn(Rc<str>) -> US1> = method15();
     let v10: US1 = match v7 { Ok(x) => v8(x), Err(e) => v9(e) };
     match v10 {
         US1::US1_Error(v14) => {
             let mut v14: Rc<str> = v14;
             let v15: Rc<dyn Fn(u8) -> Rc<dyn Fn(Rc<str>) -> Result<std::path::PathBuf, std::io::Error>>> = closure5(v0.clone());
-            run_11(v0, v15, v1, v14, v2)
+            run_9(v0, v15, v1, v14, v2)
         }
         US1::US1_Ok(v11) => {
             let v11: std::path::PathBuf = v11;
@@ -320,8 +252,8 @@ fn method10(mut v0: Rc<str>, mut v1: u8, mut v2: Rc<str>) -> Result<std::path::P
         }
     }
 }
-fn directory_exists_18(mut v0: Rc<str>) -> bool {
-    let mut v2: &str = &*v0;
+fn directory_exists_16(mut v0: Rc<str>) -> bool {
+    let v2: &str = &*v0;
     let mut v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
     let mut v8: bool = v6.exists();
@@ -332,17 +264,17 @@ fn directory_exists_18(mut v0: Rc<str>) -> bool {
         false
     }
 }
-fn read_link_9(mut v0: Rc<str>) -> Result<std::path::PathBuf, std::io::Error> {
-    let mut v1: bool = directory_exists_18(v0.clone());
+fn read_link_7(mut v0: Rc<str>) -> Result<std::path::PathBuf, std::io::Error> {
+    let mut v1: bool = directory_exists_16(v0.clone());
     if v1 {
         let mut v3: Result<std::path::PathBuf, std::io::Error> = std::fs::read_link(&*v0);
         v3
     } else {
         let mut v4: u8 = 0u8;
-        method10(v0.clone(), v4, v0)
+        method8(v0.clone(), v4, v0)
     }
 }
-fn method19(mut v0: Option<std::path::PathBuf>) -> Option<std::path::PathBuf> {
+fn method17(mut v0: Option<std::path::PathBuf>) -> Option<std::path::PathBuf> {
     v0
 }
 fn closure7() -> Rc<dyn Fn((std::path::PathBuf)) -> US2> {
@@ -351,15 +283,15 @@ fn closure7() -> Rc<dyn Fn((std::path::PathBuf)) -> US2> {
         US2::US2_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn normalize_path_8(mut v0: Rc<str>) -> Rc<str> {
+fn normalize_path_6(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: bool = &*v0 == "";
     if v1 {
-        let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+        let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v2
     } else {
-        let mut v3: Result<std::path::PathBuf, std::io::Error> = read_link_9(v0.clone());
+        let mut v3: Result<std::path::PathBuf, std::io::Error> = read_link_7(v0.clone());
         let mut v5: Option<std::path::PathBuf> = v3.ok();
-        let mut v6: Option<std::path::PathBuf> = method19(v5);
+        let mut v6: Option<std::path::PathBuf> = method17(v5);
         let mut v7: Rc<dyn Fn((std::path::PathBuf)) -> US2> = closure7();
         let mut v8: Option<US2> = v6.map(|x| v7(x));
         let v10: US2 = US2::US2_None;
@@ -371,7 +303,7 @@ fn normalize_path_8(mut v0: Rc<str>) -> Rc<str> {
             }
             US2::US2_Some(v13) => {
                 let mut v13: std::path::PathBuf = v13;
-                let mut v14: std::path::PathBuf = method6(v13);
+                let mut v14: std::path::PathBuf = method4(v13);
                 let v16: std::path::Display = v14.display();
                 let v17: Rc<str> = Rc::<str>::from(format!("{}", v16));
                 v17
@@ -413,30 +345,30 @@ fn normalize_path_8(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn method20(mut v0: &Rc<RefCell<Mut0>>) -> bool {
+fn method18(mut v0: &Rc<RefCell<Mut0>>) -> bool {
     let mut v1: i32 = v0.borrow().l0;
-    let mut v2: bool = v1 > 0i32;
+    let v2: bool = v1 > 0i32;
     v2
 }
-fn method21(mut v0: i32, mut v1: &Rc<RefCell<Mut1>>) -> bool {
-    let mut v2: i32 = v1.borrow().l0;
+fn method19(mut v0: i32, mut v1: &Rc<RefCell<Mut1>>) -> bool {
+    let v2: i32 = v1.borrow().l0;
     let mut v3: bool = v2 < v0;
     v3
 }
-fn directory_separator_char_22() -> u8 {
+fn directory_separator_char_20() -> u8 {
     let v0: u8 = (std::path::MAIN_SEPARATOR as u8);
     v0
 }
-fn get_full_path_4(mut v0: Rc<str>) -> Rc<str> {
-    let mut v1: Rc<str> = get_current_directory_5();
-    let mut v2: Rc<str> = method7(v1.clone(), v0);
-    let mut v3: Rc<str> = normalize_path_8(v2);
+fn get_full_path_2(mut v0: Rc<str>) -> Rc<str> {
+    let mut v1: Rc<str> = get_current_directory_3();
+    let v2: Rc<str> = method5(v1.clone(), v0);
+    let mut v3: Rc<str> = normalize_path_6(v2);
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let mut v5: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v3.split(&*v4).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
     let mut v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(vec![]));
     let mut v7: i32 = (v5.clone().borrow().len() as i32);
     let mut v8: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v7, l1: 0i32, l2: v6 }));
-    while method20(&v8) {
+    while method18(&v8) {
         let v10: i32 = v8.borrow().l0;
         let v11: i32 = v10.wrapping_sub(1i32);
         let (mut v12, mut v13): (i32, Rc<RefCell<Vec<Rc<str>>>>) = (v8.borrow().l1, v8.borrow().l2.clone());
@@ -473,7 +405,7 @@ fn get_full_path_4(mut v0: Rc<str>) -> Rc<str> {
                         let mut v32: i32 = v30.wrapping_add(v31);
                         let mut v33: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(vec![<Rc<str>>::default(); v32 as usize]));
                         let mut v34: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: 0i32 }));
-                        while method21(v32, &v34) {
+                        while method19(v32, &v34) {
                             let v36: i32 = v34.borrow().l0;
                             let v37: bool = v36 < v30;
                             let v41: Rc<str> = if v37 {
@@ -497,7 +429,7 @@ fn get_full_path_4(mut v0: Rc<str>) -> Rc<str> {
                         let v46: i32 = v44.wrapping_add(v45);
                         let mut v47: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(vec![<Rc<str>>::default(); v46 as usize]));
                         let mut v48: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: 0i32 }));
-                        while method21(v46, &v48) {
+                        while method19(v46, &v48) {
                             let v50: i32 = v48.borrow().l0;
                             let v51: bool = v50 < v44;
                             let v55: Rc<str> = if v51 {
@@ -528,14 +460,14 @@ fn get_full_path_4(mut v0: Rc<str>) -> Rc<str> {
     };
     let (mut v66, mut v67): (i32, Rc<RefCell<Vec<Rc<str>>>>) = (v8.borrow().l1, v8.borrow().l2.clone());
     let v68: Rc<Vec<Rc<str>>> = Rc::new(v67.borrow().clone());
-    let v69: u8 = directory_separator_char_22();
+    let v69: u8 = directory_separator_char_20();
     let v70: Rc<str> = Rc::<str>::from(((v69) as char).to_string());
     let v71: Rc<str> = Rc::<str>::from(v68.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(&*v70));
     v71
 }
-fn method23(mut v0: Rc<str>, mut v1: i32) -> i32 {
+fn method21(mut v0: Rc<str>, mut v1: i32) -> i32 {
     loop {
-        let mut v2: bool = v1 <= 0i32;
+        let v2: bool = v1 <= 0i32;
         if v2 {
             return -1i32;
         } else {
@@ -551,20 +483,20 @@ fn method23(mut v0: Rc<str>, mut v1: i32) -> i32 {
         }
     }
 }
-fn delete_comparable_path_3(mut v0: Rc<str>) -> Rc<str> {
-    let mut v1: Rc<str> = get_full_path_4(v0);
-    let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+fn delete_comparable_path_1(mut v0: Rc<str>) -> Rc<str> {
+    let mut v1: Rc<str> = get_full_path_2(v0);
+    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
     let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = Rc::<str>::from(v1.replace(&*v2, &*v3));
     let mut v5: i32 = (v4.clone().len() as i32);
-    let mut v6: i32 = method23(v4.clone(), v5);
+    let mut v6: i32 = method21(v4.clone(), v5);
     let mut v7: Rc<str> = string_slice(&v4, 0i32 as i64, v6 as i64);
     let mut v8: Rc<str> = Rc::<str>::from(v7.to_lowercase());
     v8
 }
-fn delete_shape_protected_24(mut v0: Rc<str>) -> bool {
+fn delete_shape_protected_22(mut v0: Rc<str>) -> bool {
     let mut v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
-    let mut v2: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v0.split(&*v1).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
+    let v2: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(v0.split(&*v1).map(|x| Rc::<str>::from(x)).collect::<Vec<Rc<str>>>()));
     let mut v3: i32 = (v2.clone().borrow().len() as i32);
     let mut v4: bool = 0i32 < v3;
     let mut v7: Rc<str> = if v4 {
@@ -684,20 +616,20 @@ fn delete_shape_protected_24(mut v0: Rc<str>) -> bool {
         }
     }
 }
-fn get_environment_variable_26(mut v0: Rc<str>) -> Rc<str> {
+fn get_environment_variable_24(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: Rc<str> = Rc::<str>::from(std::env::var(&*v0).unwrap_or_default());
     v1
 }
-fn delete_variable_protected_25(mut v0: Rc<str>, mut v1: Rc<UH0>) -> bool {
+fn delete_variable_protected_23(mut v0: Rc<str>, mut v1: Rc<UH0>) -> bool {
     loop {
         match Rc::unwrap_or_clone(v1) {
             UH0::UH0_Cons(v2, v3) => {
-                let mut v2: Rc<str> = v2;
+                let v2: Rc<str> = v2;
                 let mut v3: Rc<UH0> = v3;
-                let mut v4: Rc<str> = get_environment_variable_26(v2);
+                let mut v4: Rc<str> = get_environment_variable_24(v2);
                 let mut v5: bool = &*v4 != "";
                 let mut v13: bool = if v5 {
-                    let mut v6: Rc<str> = delete_comparable_path_3(v4);
+                    let mut v6: Rc<str> = delete_comparable_path_1(v4);
                     let mut v7: bool = &*v6 != "";
                     if v7 {
                         let mut v8: bool = &*v0 == &*v6;
@@ -728,73 +660,66 @@ fn delete_variable_protected_25(mut v0: Rc<str>, mut v1: Rc<UH0>) -> bool {
     }
 }
 fn delete_target_refusal_0(mut v0: Rc<str>) -> Rc<str> {
-    let mut v1: i32 = (v0.clone().len() as i32);
-    let mut v2: i32 = 0i32;
-    let mut v3: i32 = method1(v0.clone(), v1, v2);
-    let mut v4: i32 = v1.wrapping_sub(1i32);
-    let mut v5: Rc<str> = string_slice(&v0.clone(), v3 as i64, v4 as i64);
-    let mut v6: i32 = (v5.clone().len() as i32);
-    let mut v7: i32 = method2(v5.clone(), v6);
-    let mut v8: Rc<str> = string_slice(&v5, 0i32 as i64, v7 as i64);
-    let mut v9: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
-    let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
-    let v11: Rc<str> = Rc::<str>::from(v8.replace(&*v9, &*v10));
-    let mut v12: bool = v11.starts_with(&*v10);
-    let v18: bool = if v12 {
+    let mut v1: Rc<str> = Rc::<str>::from((v0).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+    let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+    let mut v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
+    let mut v4: Rc<str> = Rc::<str>::from(v1.replace(&*v2, &*v3));
+    let mut v5: bool = v4.starts_with(&*v3);
+    let v11: bool = if v5 {
         true
     } else {
-        let mut v13: i32 = (v11.clone().len() as i32);
-        let mut v14: bool = v13 >= 3i32;
-        if v14 {
-            let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":/"); } LIT.with(|lit| lit.clone()) };
-            let v16: bool = v11.contains(&*v15);
-            v16
+        let mut v6: i32 = (v4.clone().len() as i32);
+        let mut v7: bool = v6 >= 3i32;
+        if v7 {
+            let mut v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":/"); } LIT.with(|lit| lit.clone()) };
+            let mut v9: bool = v4.contains(&*v8);
+            v9
         } else {
             false
         }
     };
-    let v19: bool = v18 == false;
-    if v19 {
-        let v20: Rc<str> = string_concat(&["rig refuses to remove a relative path, which resolves against the current folder: ", &*v0]);
-        v20
+    let mut v12: bool = v11 == false;
+    if v12 {
+        let mut v13: Rc<str> = string_concat(&["rig refuses to remove a relative path, which resolves against the current folder: ", &*v0]);
+        v13
     } else {
-        let v21: Rc<str> = delete_comparable_path_3(v0.clone());
-        let v22: bool = &*v0 == "";
-        let v24: bool = if v22 {
+        let mut v14: Rc<str> = delete_comparable_path_1(v0.clone());
+        let v15: bool = &*v0 == "";
+        let v17: bool = if v15 {
             true
         } else {
-            delete_shape_protected_24(v21.clone())
+            delete_shape_protected_22(v14.clone())
         };
-        let v45: bool = if v24 {
+        let v38: bool = if v17 {
             true
         } else {
-            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("USERPROFILE"); } LIT.with(|lit| lit.clone()) };
-            let mut v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
-            let mut v27: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TEMP"); } LIT.with(|lit| lit.clone()) };
-            let mut v28: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMP"); } LIT.with(|lit| lit.clone()) };
-            let mut v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMPDIR"); } LIT.with(|lit| lit.clone()) };
-            let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
-            let mut v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
-            let mut v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SystemRoot"); } LIT.with(|lit| lit.clone()) };
-            let mut v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ProgramData"); } LIT.with(|lit| lit.clone()) };
-            let mut v34: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-            let mut v35: Rc<UH0> = Rc::new(UH0::UH0_Cons(v33, v34));
-            let v36: Rc<UH0> = Rc::new(UH0::UH0_Cons(v32, v35));
-            let v37: Rc<UH0> = Rc::new(UH0::UH0_Cons(v31, v36));
-            let v38: Rc<UH0> = Rc::new(UH0::UH0_Cons(v30, v37));
-            let v39: Rc<UH0> = Rc::new(UH0::UH0_Cons(v29, v38));
-            let v40: Rc<UH0> = Rc::new(UH0::UH0_Cons(v28, v39));
-            let v41: Rc<UH0> = Rc::new(UH0::UH0_Cons(v27, v40));
-            let v42: Rc<UH0> = Rc::new(UH0::UH0_Cons(v26, v41));
-            let v43: Rc<UH0> = Rc::new(UH0::UH0_Cons(v25, v42));
-            delete_variable_protected_25(v21, v43)
+            let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("USERPROFILE"); } LIT.with(|lit| lit.clone()) };
+            let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("HOME"); } LIT.with(|lit| lit.clone()) };
+            let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TEMP"); } LIT.with(|lit| lit.clone()) };
+            let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMP"); } LIT.with(|lit| lit.clone()) };
+            let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("TMPDIR"); } LIT.with(|lit| lit.clone()) };
+            let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("LOCALAPPDATA"); } LIT.with(|lit| lit.clone()) };
+            let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("APPDATA"); } LIT.with(|lit| lit.clone()) };
+            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("SystemRoot"); } LIT.with(|lit| lit.clone()) };
+            let mut v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("ProgramData"); } LIT.with(|lit| lit.clone()) };
+            let mut v27: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+            let mut v28: Rc<UH0> = Rc::new(UH0::UH0_Cons(v26, v27));
+            let mut v29: Rc<UH0> = Rc::new(UH0::UH0_Cons(v25, v28));
+            let v30: Rc<UH0> = Rc::new(UH0::UH0_Cons(v24, v29));
+            let mut v31: Rc<UH0> = Rc::new(UH0::UH0_Cons(v23, v30));
+            let mut v32: Rc<UH0> = Rc::new(UH0::UH0_Cons(v22, v31));
+            let mut v33: Rc<UH0> = Rc::new(UH0::UH0_Cons(v21, v32));
+            let mut v34: Rc<UH0> = Rc::new(UH0::UH0_Cons(v20, v33));
+            let mut v35: Rc<UH0> = Rc::new(UH0::UH0_Cons(v19, v34));
+            let v36: Rc<UH0> = Rc::new(UH0::UH0_Cons(v18, v35));
+            delete_variable_protected_23(v14, v36)
         };
-        if v45 {
-            let mut v47: Rc<str> = string_concat(&["rig refuses to remove a protected folder (a drive or system root, a user profile, its AppData or temp, or an ancestor of one): ", &*v0]);
-            v47
+        if v38 {
+            let v40: Rc<str> = string_concat(&["rig refuses to remove a protected folder (a drive or system root, a user profile, its AppData or temp, or an ancestor of one): ", &*v0]);
+            v40
         } else {
-            let mut v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-            v48
+            let v41: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+            v41
         }
     }
 }

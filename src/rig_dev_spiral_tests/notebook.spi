@@ -9,25 +9,27 @@
 
 :~ run_batch (root : string) (target : string) (relatives : string) (timeout : u64) : batch_outcome =
     $'{ let root=std::path::Path::new(&*!root); let target=std::path::Path::new(&*!target); \
-        let cells_root=std::env::var_os("RIG_SPIRAL_CELLS").or_else(|| std::env::var_os("KIT_SPIRAL_CELLS")).map(std::path::PathBuf::from).or_else(|| \
-        std::env::var_os("RIG_SPIRAL_BUNDLE").or_else(|| std::env::var_os("KIT_SPIRAL_BUNDLE")).map(|bundle| std::path::PathBuf::from(bundle).join("..").join("..").join\
-        ("cells"))).unwrap_or_else(|| root.join("..").join("spiral").join("apps").join("cells")); \
+        let cells_root=std::env::var_os("RIG_SPIRAL_CELLS").or_else(|| \
+        std::env::var_os("KIT_SPIRAL_CELLS")).map(std::path::PathBuf::from).or_else(|| \
+        std::env::var_os("RIG_SPIRAL_BUNDLE").or_else(|| std::env::var_os("KIT_SPIRAL_BUNDLE")).map(|bundle| \
+        std::path::PathBuf::from(bundle).join("..").join("..").join("cells"))).unwrap_or_else(|| \
+        root.join("..").join("spiral").join("apps").join("cells")); \
         let relatives=(&*!relatives).lines().map(str::to_owned).collect::<Vec<_>>(); \
         let reports_dir=target.join("spiral-tests"); let _=std::fs::create_dir_all(&reports_dir); \
         let kit=target.join("debug").join(format\!("kit{}",std::env::consts::EXE_SUFFIX)); \
         let port=20000+std::process::id()%10000; let mut command=std::process::Command::new("pwsh"); \
         command.current_dir(root).arg("-NoProfile").arg("-File").arg(cells_root.join("spi").join("run_notebook.ps1")); \
         for relative in &relatives { command.arg("--path").arg(root.join(relative)); \
-        } command.arg("--output-dir").arg(&reports_dir).arg("--no-html").arg("--gate").env("RIG_BIN_UNDER_TEST", &&kit).env("KIT_BIN_UNDER_TEST", &kit).\
-        env("SPIRAL_CELLS_WARM","0").env("SPIRAL_CELLS_MEMO","0").env_remove("SPIRAL_CELLS_COMPILER").env("SPIRAL_CELL\
-        S_COMPILER_PORT",port.to_string()); let bounded=(!timeout).saturating_mul(relatives.len().max(1) as u64); \
-        let stdout_handle=std::io::stdout(); let stderr_handle=std::io::stderr(); \
-        let streamed=rig_process_streaming::run_bounded_streaming(&mut command,bounded,None,|kind,bytes| match kind { \
-        rig_process_streaming::ProcessStreamKind::Stdout => { let mut out=stdout_handle.lock(); \
-        std::io::Write::write_all(&mut out,bytes).and_then(|_| std::io::Write::flush(&mut out)).map_err(|error| \
-        error.to_string()) } rig_process_streaming::ProcessStreamKind::Stderr => { let mut err=stderr_handle.lock(); \
-        std::io::Write::write_all(&mut err,bytes).and_then(|_| std::io::Write::flush(&mut err)).map_err(|error| \
-        error.to_string()) } }); match streamed { Ok(capture) => { let code=if \
+        } command.arg("--output-dir").arg(&reports_dir).arg("--no-html").arg("--gate").env("RIG_BIN_UNDER_TEST", \
+        &&kit).env("KIT_BIN_UNDER_TEST", &kit).env("SPIRAL_CELLS_WARM","0").env("SPIRAL_CELLS_MEMO","0").env("SPIRAL_CELLS_PER_TEST","0").env_remove("S\
+        PIRAL_CELLS_COMPILER").env("SPIRAL_CELLS_COMPILER_PORT",port.to_string()); \
+        let bounded=(!timeout).saturating_mul(relatives.len().max(1) as u64); let stdout_handle=std::io::stdout(); \
+        let stderr_handle=std::io::stderr(); let streamed=rig_process_streaming::run_bounded_streaming(&mut \
+        command,bounded,None,|kind,bytes| match kind { rig_process_streaming::ProcessStreamKind::Stdout => { let mut \
+        out=stdout_handle.lock(); std::io::Write::write_all(&mut out,bytes).and_then(|_| std::io::Write::flush(&mut \
+        out)).map_err(|error| error.to_string()) } rig_process_streaming::ProcessStreamKind::Stderr => { let mut \
+        err=stderr_handle.lock(); std::io::Write::write_all(&mut err,bytes).and_then(|_| std::io::Write::flush(&mut \
+        err)).map_err(|error| error.to_string()) } }); match streamed { Ok(capture) => { let code=if \
         matches\!(capture.termination,rig_process_streaming::ProcessTermination::TimedOut) { 124 } else { \
         capture.status.code().unwrap_or(1) }; let quote=char::from(34u8); \
         let failed_key=format\!("{quote}failed{quote}:"); let file_key=format\!("{quote}file{quote}:{quote}"); \

@@ -1,0 +1,60 @@
+///- --package .
+:# rows static =
+    :< sm'_operators
+    :< ledger
+
+:< sm'_operators
+:< ledger
+
+:~ quoted (~text : string) : string = "\"" ++# sm'.replace "\"" "'" text ++# "\""
+
+:~ fields_text (fields : list string) : string = fields |> listm.map quoted |> sm'.concat_list ", "
+
+:~ row_line (n : i32) (row : ledger_row) : string =
+    := head = "inl ledger_row_" ++# sm'.show n ++# " () = "
+    ?= row ?|
+    | Registered (id, at, plan) => head ++# "Registered (" ++# fields_text [ id; at; plan ] ++# ")"
+    | Amended (id, text) => head ++# "Amended (" ++# fields_text [ id; text ] ++# ")"
+    | Disclosed (id, text) => head ++# "Disclosed (" ++# fields_text [ id; text ] ++# ")"
+    | Concluded (id, text) => head ++# "Concluded (" ++# fields_text [ id; text ] ++# ")"
+    | Addendum (id, text) => head ++# "Addendum (" ++# fields_text [ id; text ] ++# ")"
+
+:~ ledger_text (rows : list ledger_row) : string =
+    := step = \ ((n, lines) : i32 * list string) (row : ledger_row) => n + 1i32, listm.append lines [ row_line n row ]
+    := _, lines = rows |> listm.fold step (0i32, [])
+    sm'.concat_list "\n" lines ++# "\n"
+
+:~ row_of_line (~line : string) : option ledger_row =
+    := has = \ (ctor : string) => sm'.contains (" = " ++# ctor ++# " (") line
+    ?= sm'.quoted_fields line ?|
+    | [ id; at; plan ] ?& has "Registered" => Some (Registered (id, at, plan))
+    | [ id; text ] ?& has "Amended" => Some (Amended (id, text))
+    | [ id; text ] ?& has "Disclosed" => Some (Disclosed (id, text))
+    | [ id; text ] ?& has "Concluded" => Some (Concluded (id, text))
+    | [ id; text ] ?& has "Addendum" => Some (Addendum (id, text))
+    | _ => None
+
+:~ rows_of_text (~text : string) : list ledger_row =
+    := keep = \ (found : list ledger_row) (line : string) =>
+        ?= row_of_line line ?|
+        | Some r => listm.append found [ r ]
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold keep []
+
+///> rust
+:# the_ledger_file_round_trips_its_rows_in_order =
+    := rows =
+        [
+            Registered ("E-1", "2026-11-09T20:00Z", "welch on p50, \"lower\" wins");
+            Amended ("E-1", "n raised to 40");
+            Concluded ("E-1", "b wins");
+            Addendum ("E-1", "moon agrees")
+        ]
+    := text = ledger_text rows
+    testing.expect (sm'.contains "inl ledger_row_0 () = Registered (\"E-1\", " text) "rows are named by position"
+    := back = rows_of_text text
+    testing.expect (listm.length back = 4i32) "four rows back"
+    := plan = (entry_of back "E-1").registration
+    testing.expect (plan = "2026-11-09T20:00Z welch on p50, 'lower' wins") "inner quotes become '"
+    testing.expect ((entry_of back "E-1").verdict = Some "b wins") "the verdict survives the round trip"
+    testing.expect (rows_of_text "union x = Y\nnot a row" = []) "other lines are ignored"

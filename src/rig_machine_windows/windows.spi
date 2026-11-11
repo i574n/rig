@@ -4,7 +4,8 @@
 :< window_model
 
 :~ windows_root () : string =
-    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| \
+    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_WINDOWS_HOME").or_else(|| \
+        std::env::var_os("KIT_WINDOWS_HOME")).map(std::path::PathBuf::from).or_else(|| \
         std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("windows"))).or_el\
         se(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("wind\
         ows"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-windows")).to_string_lossy().as_ref())' : string
@@ -46,7 +47,8 @@
         \#[cfg(not(windows))] fn free() -> u64 { std::fs::read_to_string("/proc/meminfo").ok().and_then(|text| \
         text.lines().find(|line| line.starts_with("MemAvailable:")).and_then(|line| \
         line.split_whitespace().nth(1)).and_then(|kb| kb.parse::<u64>().ok())).map(|kb| kb / \
-        1024).unwrap_or(u64::MAX) } std::env::var("RIG_WINDOWS_FREE_MB").or_else(|_| std::env::var("KIT_WINDOWS_FREE_MB")).ok().and_then(|text| \
+        1024).unwrap_or(u64::MAX) } std::env::var("RIG_WINDOWS_FREE_MB").or_else(|_| \
+        std::env::var("KIT_WINDOWS_FREE_MB")).ok().and_then(|text| \
         text.trim().parse::<u64>().ok()).unwrap_or_else(free) }' : u64
 
 :~ option_value (~flag : string) : string = rust_std_env.model.argument_after_flag flag
@@ -310,14 +312,13 @@
         path.to_string_lossy().into_owned()).unwrap_or_default())' : string
 
 :~ heavy_wrapper (~gate : string) (~inner : string) (~label : string) (~id : string) (timeout : u64) : string =
-    := tag = concat5 label " (kit job " id ")" ""
+    := tag = label ++# " (kit job " ++# id ++# ")"
     := minutes = number_text (timeout / 60000u64 + 1u64)
-    concat5
-        (concat5 "$argv = @(Get-Content -LiteralPath '" inner "')\n. '" gate "'\n")
-        (concat5 "Invoke-Heavy -Label '" tag "' -MaxMinutes " minutes " ")
-        "{ & $argv[0] @($argv | Select-Object -Skip 1) }\n"
-        "exit $LASTEXITCODE\n"
-        ""
+    := head = "$argv = @(Get-Content -LiteralPath '" ++# inner ++# "')\n. '" ++# gate ++# "'\n"
+    := call = "Invoke-Heavy -Label '" ++# tag ++# "' -MaxMinutes " ++# minutes ++# " "
+    := held = "$env:RIG_HEAVY_HELD = $env:KIT_HEAVY_HELD = '1'; "
+    := body = "{ " ++# held ++# "& $argv[0] @($argv | Select-Object -Skip 1) }\n"
+    head ++# call ++# body ++# "exit $LASTEXITCODE\n"
 
 := main () : i32 =
     export "rig_window_run" ((\ () => window_run ()) : () -> i32)

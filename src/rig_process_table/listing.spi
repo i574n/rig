@@ -8,13 +8,11 @@
     | SessionTree : u64
     | NoSession
 
-:= agent_named (~name : string) : bool = name = "claude" || name = "codex"
-
 :~ ^ session_root (~rows : process_rows) (pid : u64) (hops : i32) : u64 =
     := at = row_of_pid rows pid
     ? at < 0i32 || hops > 32i32
     ?> 0u64
-    |? agent_named (row_name rows at)
+    |? rig_machine_watch_model.model.agent_client (row_name rows at)
     ?> pid
     |: session_root rows (row_parent rows at) (hops + 1i32)
 

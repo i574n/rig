@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "slop.spi"
+output = "slop.rs"
+
+[package]
+name = "rig-do-slop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do_slop"
+path = "slop.rs"

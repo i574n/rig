@@ -1,0 +1,87 @@
+///- --package .
+:# duties static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| cadence =
+    | Once :: cadence
+    | PerReport :: cadence
+    | Daily :: cadence
+
+:= cadence_word (value : cadence) : string =
+    ?= value ?|
+    | Once => "once"
+    | PerReport => "per-report"
+    | Daily => "daily"
+
+:= cadence_of_word (~word : string) : option cadence =
+    := plain = sm'.trim word
+    ? plain = "once"
+    ?> Some Once
+    |? plain = "per-report"
+    ?> Some PerReport
+    |? plain = "daily"
+    ?> Some Daily
+    |: None
+
+:== duty = { id : string; cadence : cadence }
+
+:= duty_line (row : duty) : string =
+    "inl duty_of_" ++# sm'.to_lower (sm'.replace "-" "_" row.id) ++# " () = Duty (\"" ++# row.id ++# "\", \""
+    ++# cadence_word row.cadence ++# "\")"
+
+:~ duty_of_line (~line : string) : option duty =
+    := head = "() = Duty (\""
+    := at = sm'.index_of head line
+    ? at < 0i32
+    ?> None
+    |:
+        := skip = at + sm'.length head
+        := rest = sm'.substring skip (sm'.length line - skip) line
+        := id_end = sm'.index_of "\"" rest
+        := tail = sm'.substring (id_end + 4i32) (sm'.length rest - id_end - 4i32) rest
+        := word_end = sm'.index_of "\"" tail
+        ? id_end < 0i32 || word_end < 0i32
+        ?> None
+        |:
+            ?= cadence_of_word (sm'.substring 0i32 word_end tail) ?|
+            | Some value => Some ({ id = sm'.substring 0i32 id_end rest; cadence = value })
+            | None => None
+
+:~ ^ cadence_in (duties : list duty) (~id : string) : cadence =
+    ?= duties ?|
+    | [] => Once
+    | row :: rest => ? row.id = id ?> row.cadence |: cadence_in rest id
+
+:= ranked_by_next (duties : list duty) (~id : string) : bool = cadence_in duties id = Once
+
+:| duty_state =
+    | DutyDone :: duty_state
+    | DutyDue :: duty_state
+    | NotADuty :: duty_state
+
+:= duty_state_of (value : cadence) (~last_note_day : string) (~today : string) : duty_state =
+    ?= value ?|
+    | Once => NotADuty
+    | PerReport => DutyDone
+    | Daily => ? last_note_day = today ?> DutyDone |: DutyDue
+
+///> rust
+:# a_duty_row_round_trips_and_unknown_words_are_rejected =
+    := row = { id = "LANE-GAUGE-DAILY"; cadence = Daily }
+    testing.expect (duty_line row = "inl duty_of_lane_gauge_daily () = Duty (\"LANE-GAUGE-DAILY\", \"daily\")") "line"
+    testing.expect (duty_of_line (duty_line row) = Some row) "round trip"
+    := odd = "inl duty_of_x () = Duty (\"X\", \"hourly\")"
+    testing.expect (duty_of_line odd = None && duty_of_line "packages:" = None) "only known cadences"
+    testing.expect (cadence_of_word " per-report " = Some PerReport) "words are trimmed"
+
+///> rust
+:# only_once_items_are_ranked_and_a_daily_duty_without_a_note_today_is_due =
+    := rows = [ { id = "LANE-GAUGE-DAILY"; cadence = Daily }; { id = "SOTA-SCORE"; cadence = PerReport } ]
+    testing.expect (ranked_by_next rows "KIT-X" && (ranked_by_next rows "SOTA-SCORE" |> not)) "next ranks Once only"
+    testing.expect (duty_state_of Daily "2026-11-08" "2026-11-09" = DutyDue) "no note today: due"
+    testing.expect (duty_state_of Daily "2026-11-09" "2026-11-09" = DutyDone) "noted today: done"
+    testing.expect (duty_state_of Once "" "2026-11-09" = NotADuty) "a once item is not a duty"
+
+:= main () : i32 = 0i32

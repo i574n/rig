@@ -72,10 +72,10 @@
                 code
 
 :~ heavy_queue_directory () : string =
-    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_QUEUE").or_else(|| std::env::var_os("KIT_HEAVY_QUEUE")).or_else(|| \
-        std::env::var_os("LOCALAPPDATA").or_else(|| std::env::var_os("HOME")).map(|base| \
-        std::path::PathBuf::from(base).join("spiral-bin").join("heavy-queue").into_os_string())).map(|path| \
-        path.to_string_lossy().into_owned()).unwrap_or_default().as_str())' : string
+    $'std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_QUEUE").or_else(|| \
+        std::env::var_os("KIT_HEAVY_QUEUE")).or_else(|| std::env::var_os("LOCALAPPDATA").or_else(|| \
+        std::env::var_os("HOME")).map(|base| std::path::PathBuf::from(base).join("spiral-bin").join("heavy-queue").int\
+        o_os_string())).map(|path| path.to_string_lossy().into_owned()).unwrap_or_default().as_str())' : string
 
 :~ holder_paths (~queue : string) : string =
     $'std::rc::Rc::<str>::from({ let mut paths = std::fs::read_dir(&*!queue).into_iter().flatten().flatten().map(|entr\

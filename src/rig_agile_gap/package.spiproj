@@ -1,0 +1,13 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    agile_mutation_policy
+    agile_task_creation
+    union_reflection
+    agile_task_creation_text
+link:
+    agile_task_creation_text
+modules:
+    gap
+    intake
