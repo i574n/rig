@@ -1,0 +1,27 @@
+packages:
+    |core-
+    spiral-
+    agile_state_spelling
+    agile_state_fs
+    workspace_primitives
+    rust_std_env
+    agile_mutation_policy
+    agile_planning_model
+    agile_subcommand_domain
+    union_reflection
+    agile_quality_lint
+    agile_quality_state
+    agile_task_parents
+    agile_task_asks
+    agile_task_split
+    agile_status_changes
+    agile_task_waits
+link:
+    agile_quality_state
+    agile_task_parents
+    agile_task_asks
+    agile_task_split
+    agile_status_changes
+    agile_task_waits
+modules:
+    routes

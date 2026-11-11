@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_jobs
+    rig_machine_windows
+modules:
+    admission

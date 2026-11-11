@@ -1,0 +1,15 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_machine_windows
+    rig_job_gate
+    rig_job_env
+    rig_job_after
+link:
+    rig_machine_windows
+    rig_job_gate
+    rig_job_env
+    rig_job_after
+modules:
+    supervise

@@ -1,0 +1,6 @@
+:= main () : i32 =
+    rig_cli_routing.routing_terminal.emit_runtime ()
+    $'std::panic::set_hook(Box::new(|info| { if info.to_string().contains("failed printing to stdout") { \
+        std::process::exit(0) } eprintln\!("{info}") }))' : ()
+    := code = rig_cli_model.model.run ()
+    $"rig_coverage_prune::coverage_finish(!code)" : i32

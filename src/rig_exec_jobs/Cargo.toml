@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "jobs.spi"
+output = "jobs.rs"
+
+[package]
+name = "rig-exec-jobs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_exec_jobs"
+path = "jobs.rs"
+
+[dependencies]
+rig-process-alive = { path = "../rig_process_alive" }

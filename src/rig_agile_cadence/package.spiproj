@@ -1,0 +1,18 @@
+packages:
+    |core-
+    spiral-
+    agile_state_spelling
+    agile_state_fs
+    workspace_primitives
+    agile_quality_lint
+    agile_quality_state
+    rig_cadence_done
+    rig_cadence_activity
+    rig_cadence_asks
+link:
+    agile_quality_state
+    rig_cadence_done
+    rig_cadence_activity
+    rig_cadence_asks
+modules:
+    cadence

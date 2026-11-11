@@ -1,0 +1,74 @@
+///- --package .
+:# toml static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== toml_package = { package_dir : string; packages : array_base string; modules : array_base string }
+
+:| toml_key =
+    | PackageDirKey :: toml_key
+    | PackagesKey :: toml_key
+
+:= key_word = \|
+    | PackageDirKey => "packageDir"
+    | PackagesKey => "packages"
+
+:~ text_lines (~text : string) : list string =
+    text |> sm'.replace "\r" "" |> sm'.split "\n" |> am'.to_list_base' |> listm'.unbox
+
+:~ key_line (key : toml_key) (~text : string) : string =
+    := word = key_word key
+    := keyed = \ (entry : string) => sm'.starts_with (word ++# " ") entry || sm'.starts_with (word ++# "=") entry
+    := first = \ (found : string) (line : string) => ? found = "" && keyed (sm'.trim line) ?> sm'.trim line |: found
+    text_lines text |> listm.fold first ""
+
+:~ after_equals (~entry : string) : string =
+    := at = sm'.index_of "=" entry
+    ? at < 0i32 ?> "" |: sm'.trim (sm'.slice (at + 1i32) (sm'.length entry - 1i32) entry)
+
+:~ unquoted (~word : string) : string = word |> sm'.trim |> sm'.replace "\"" "" |> sm'.replace "'" ""
+
+:~ key_list (key : toml_key) (~text : string) : list string =
+    := value = after_equals (key_line key text) |> sm'.replace "[" "" |> sm'.replace "]" ""
+    sm'.split "," value |> am'.to_list_base' |> listm'.unbox |> listm.map unquoted
+    |> listm'.filter (\ (w : string) => w <> "")
+
+:= skipped () : list string = [ "target"; ".git"; "node_modules"; ".cache"; "_build"; "deps"; "bin"; "obj" ]
+
+:~ names_in (~dir : string) : list string =
+    file_system.read_directory_names dir
+    |> resultm.unwrap'
+    |> am'.vec_fold' (\ names name => sm'.from_std_string name :: names) []
+    |> listm.rev
+
+:~ ^ spi_modules_in (~dir : string) (~prefix : string) (depth : i32) (found : list string) : list string =
+    := step = \ (acc : list string) (name : string) =>
+        := child = dir ++# "/" ++# name
+        := folder = file_system.directory_exists child
+        ? listm'.contains name (skipped ()) || folder && depth >= 6i32
+        ?> acc
+        |? folder
+        ?> spi_modules_in child (prefix ++# name ++# "/") (depth + 1i32) acc
+        |? sm'.ends_with ".spi" name
+        ?> (prefix ++# sm'.slice 0i32 (sm'.length name - 5i32) name) :: acc
+        |: acc
+    names_in dir |> listm.fold step found
+
+:~ boxed (items : list string) : array_base string = items |> listm'.box |> listm'.to_array'
+
+:~ toml_package_of ((dir, text) : string * string) : array_base toml_package =
+    := package_dir = unquoted (after_equals (key_line PackageDirKey text))
+    := modules = listm.rev (spi_modules_in dir "" 0i32 [])
+    := packages = boxed (key_list PackagesKey text)
+    ;[ { package_dir = package_dir; packages = packages; modules = boxed modules } ] |> am'.base
+
+///> rust
+:# a_spiral_toml_reads_its_packages_and_package_dir =
+    := text = "packageDir = \"../lib\"\npackages = ['|core-', \"spiral-\"]\nprelude = [\"base\"]\n"
+    testing.expect (key_list PackagesKey text = [ "|core-"; "spiral-" ]) "the packages list, quotes either kind"
+    testing.expect (unquoted (after_equals (key_line PackageDirKey text)) = "../lib") "the package dir"
+    testing.expect (key_list PackagesKey "prelude = [\"base\"]\n" = []) "a missing key is empty"
+:= main () : i32 =
+    export "rig_proof_scope_toml_package" toml_package_of
+    0i32

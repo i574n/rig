@@ -1,0 +1,13 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    rust_std_env
+    agile_quality_lint
+    agile_quality_state
+    agile_task_asks
+link:
+    agile_quality_state
+    agile_task_asks
+modules:
+    asks

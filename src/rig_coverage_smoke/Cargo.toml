@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "smoke.spi"
+output = "smoke.rs"
+
+[package]
+name = "rig-coverage-smoke"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_coverage_smoke"
+path = "smoke.rs"
+
+[dependencies]
+rig-process-observation = { path = "../rig_process_observation" }

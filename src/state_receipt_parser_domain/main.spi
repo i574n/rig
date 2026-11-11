@@ -1,0 +1,12 @@
+///- --package .
+:# main static =
+    :< sm'_operators
+
+///> rust
+:# the_fixture_parses_to_its_table_and_a_malformed_source_to_nothing =
+    testing.expect (receipt_parse (parser_fixture_source ()) = parser_fixture_table ()) "the fixture table"
+    testing.expect (receipt_parse (parser_malformed_source ()) = "") "a malformed source parses to nothing"
+
+:= main () : i32 =
+    export "rig_state_receipt_parse" ((\ value => receipt_parse value) : string -> string)
+    0i32

@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "export.spi"
+output = "export.rs"
+
+[package]
+name = "rig-exec-export"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_exec_export"
+path = "export.rs"
+
+[dependencies]
+rig-exec-cells = { path = "../rig_exec_cells" }
+rig-exec-jobs = { path = "../rig_exec_jobs" }

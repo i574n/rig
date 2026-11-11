@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "lease_verbs.spi"
+output = "lease_verbs.rs"
+
+[package]
+name = "rig-hook-verbs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_hook_verbs"
+path = "lease_verbs.rs"

@@ -1,0 +1,16 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    rust_std_fs
+    agile_state_spelling
+    agile_state_fs
+modules:
+    outcome
+    numbers
+    bytes
+    clock
+    console
+    files
+    rooted
+    toolchain

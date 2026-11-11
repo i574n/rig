@@ -1,0 +1,14 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_receipt
+    rig_do_model
+    rig_do_records
+    rig_do_verbs
+    rig_do_write_host
+link:
+    rig_do_model
+    rig_do_verbs
+modules:
+    steps

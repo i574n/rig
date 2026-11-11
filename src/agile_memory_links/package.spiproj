@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    agile_state_spelling
+    agile_state_fs
+modules:
+    links_model
+    links

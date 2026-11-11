@@ -1,0 +1,52 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| status_fact =
+    | InstalledTrain :: string * string * i64 -> status_fact
+    | GateVerdict :: string * string * i64 -> status_fact
+    | BacklogCounts :: string * string -> status_fact
+    | FactMissing :: string * string -> status_fact
+
+:~ age_text (hours : i64) : string = ? hours < 0i64 ?> "" |: " age_hours=" ++# sm'.show hours
+
+:~ fact_line (fact : status_fact) : string =
+    ?= fact ?|
+    | InstalledTrain (train, source, hours) =>
+        "rig status train=" ++# train ++# age_text hours ++# " source=" ++# source
+    | GateVerdict (verdict, source, hours) =>
+        "rig status gate " ++# verdict ++# age_text hours ++# " source=" ++# source
+    | BacklogCounts (counts, source) => "rig status backlog" ++# counts ++# " source=" ++# source
+    | FactMissing (name, source) => "rig status missing " ++# name ++# " source=" ++# source
+
+:~ fact_missing (fact : status_fact) : bool = ?= fact ?| | FactMissing _ => !+ | _ => !-
+
+:~ receipt_line (facts : list status_fact) : string =
+    := missing : i32 = facts |> listm'.filter fact_missing |> listm.length
+    := total : i32 = listm.length facts
+    "rig status ok facts=" ++# sm'.show (total - missing) ++# " missing=" ++# sm'.show missing
+
+:~ train_of (~text : string) (~source : string) (hours : i64) : status_fact =
+    := train = sm'.trim (sm'.first_line text)
+    ? train = "" ?> FactMissing ("train", source) |: InstalledTrain (train, source, hours)
+
+:~ verdict_of (~log : string) (~source : string) (hours : i64) : status_fact =
+    := gate_line = \ (line : string) => sm'.starts_with "kit crate gate " line || sm'.starts_with "rig crate gate " line
+    := last = \ (kept : string) (line : string) => ? gate_line line ?> line |: kept
+    := line = sm'.split_list "\n" (sm'.replace "\r" "" log) |> listm.fold last ""
+    := verdict = sm'.replace "kit crate gate " "" line |> sm'.replace "rig crate gate " ""
+    ? line = "" ?> FactMissing ("gate", source) |: GateVerdict (verdict, source, hours)
+
+///> rust
+:# facts_print_with_their_source_and_a_missing_source_is_never_a_default =
+    := marker = "r/last-installed.txt"
+    testing.expect (train_of "TRAIN33\n" marker 5i64 = InstalledTrain ("TRAIN33", marker, 5i64)) "train"
+    testing.expect (train_of "" marker 0i64 = FactMissing ("train", marker)) "no train"
+    := log = "gate / a a.rs 10 lines ok\nkit crate gate ok crates=358 over=0 limit=1000 root=x\n"
+    := verdict = "ok crates=358 over=0 limit=1000 root=x"
+    testing.expect (verdict_of log "g.log" 2i64 = GateVerdict (verdict, "g.log", 2i64)) "gate"
+    := facts = [ train_of "TRAIN33" "t" 1i64; verdict_of "" "g" -1i64 ]
+    testing.expect (receipt_line facts = "rig status ok facts=1 missing=1") "receipt"
+    testing.expect (fact_line (FactMissing ("gate", "g")) = "rig status missing gate source=g") "missing line"

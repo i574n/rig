@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "supervise.spi"
+output = "supervise.rs"
+
+[package]
+name = "rig-job-supervise"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_supervise"
+path = "supervise.rs"
+
+[dependencies]
+rig-job-env = { path = "../rig_job_env" }
+rig-machine-windows = { path = "../rig_machine_windows" }
+rig-job-gate = { path = "../rig_job_gate" }
+rig-job-after = { path = "../rig_job_after" }

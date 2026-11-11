@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    agile_state_spelling
+    agile_state_fs
+modules:
+    annotation

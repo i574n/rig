@@ -1,0 +1,16 @@
+[package.metadata.spiral]
+entry = "coordinator.spi"
+output = "coordinator.rs"
+
+[package]
+name = "rig-job-coordinator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_coordinator"
+path = "coordinator.rs"
+[dependencies]
+rig-job-coordinator-args = { path = "../rig_job_coordinator_args" }

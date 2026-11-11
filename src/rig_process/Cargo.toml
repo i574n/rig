@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "process.spi"
+output = "process.rs"
+
+[package]
+name = "rig-process"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_process"
+path = "process.rs"
+
+[dependencies]
+rig-compiler-discovery = { path = "../rig_compiler_discovery" }
+rig-process-streaming = { path = "../rig_process_streaming" }

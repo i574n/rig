@@ -1,0 +1,11 @@
+:< check
+
+:~ env_drift () : bool * string = $'rig_jobs_doctor_env::rig_job_doctor_env_drift()' : bool * string
+
+:~ server_report () : i32 * string = $'rig_jobs_doctor_servers::rig_job_doctor_server_report()' : i32 * string
+
+:~ doctor_checked () : i32 = doctor_run env_drift server_report
+
+:= main () : i32 =
+    export "rig_job_doctor_run" doctor_checked
+    0i32

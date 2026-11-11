@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "measures.spi"
+output = "sequence_measures.rs"
+
+[package]
+name = "rig-table-sequence-measures"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_table_sequence_measures"
+path = "sequence_measures.rs"
+
+[dependencies]
+rig-log-sequences = { path = "../rig_log_sequences" }

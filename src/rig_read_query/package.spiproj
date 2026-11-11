@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_receipt
+modules:
+    model
+    slice
+    read

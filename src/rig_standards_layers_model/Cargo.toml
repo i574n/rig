@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "scan.spi"
+output = "scan.rs"
+
+[package]
+name = "rig-standards-layers-model"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_standards_layers_model"
+path = "scan.rs"

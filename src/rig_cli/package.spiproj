@@ -1,0 +1,19 @@
+packages:
+    |core-
+    rig_cli_model
+    rig_cli_routing
+    rig_heal_nameof
+    rig_hook
+    rig_run_cli
+    rig_exec_export
+    rig_cli_routes
+    rig_status_facts
+link:
+    rig_heal_nameof
+    rig_hook
+    rig_run_cli
+    rig_exec_export
+    rig_cli_routes
+    rig_status_facts
+modules:
+    main

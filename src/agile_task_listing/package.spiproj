@@ -1,0 +1,15 @@
+packages:
+    |core-
+    workspace_primitives
+    rust_std_fs
+    agile_state_spelling
+    agile_state_fs
+    agile_mutation_policy
+    agile_task_text
+    union_reflection
+    spiral-
+    rig_agile_list_args
+link:
+    rig_agile_list_args
+modules:
+    task_listing

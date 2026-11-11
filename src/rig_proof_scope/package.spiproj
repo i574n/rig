@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_proof_scope_manifests
+link:
+    rig_proof_scope_manifests
+modules:
+    import_scope
+    scope_run

@@ -1,0 +1,7 @@
+:< text
+
+:= main () : i32 =
+    export "rig_table_problem" ((\ path => table_problem path) : string -> string)
+    export "rig_table_tsv" ((\ path => table_tsv path) : string -> string)
+    export "rig_table_spi_of_tsv" ((\ text => rig_table_rows.rows.spi_of_tsv text) : string -> string)
+    0i32

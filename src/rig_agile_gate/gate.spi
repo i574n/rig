@@ -1,0 +1,114 @@
+///- --package .
+:# gate static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== gate_terms = { root : string; team : string; lane : string }
+
+:~ ^ flag_value (words : list string) (~flag : string) : string =
+    ?= words ?|
+    | name :: value :: _ ?& name = flag => value
+    | _ :: rest => flag_value rest flag
+    | [] => ""
+
+:~ terms_of (~root : string) (words : list string) : gate_terms =
+    { root = root; team = flag_value words "--team"; lane = flag_value words "--as" }
+
+:~ ready_line (t : gate_terms) (ready : list string) : string =
+    ? ready = []
+    ?> ""
+    |:
+        := claim = "rig agile claim " ++# t.root ++# " <ID> --as " ++# t.lane
+        "Your team's top ready light items: " ++# sm'.concat_list ", " ready
+        ++# ". Claim one explicitly (" ++# claim
+        ++# ") and start it now; while a run or train you started is pending, work another of these"
+        ++# " instead of stopping."
+
+:~ parked_line (t : gate_terms) (parked : list string) : string =
+    ? parked = []
+    ?> ""
+    |:
+        "Paused P0/P1 items for team " ++# t.team
+        ++# " (re-decide each: resume as Planned, or keep Paused only with a reason AND a resume condition): "
+        ++# sm'.concat_list ", " parked ++# "."
+
+:~ waiting_line (waiting : list string) : string =
+    ? waiting = []
+    ?> ""
+    |: "Built and waiting on a train install (not ready work): " ++# sm'.concat_list ", " waiting ++# "."
+
+:~ install_waiting (~records : string) : list string =
+    := marker = " = Note (\""
+    := seen = \ (waiting : list string) (line : string) =>
+        := at = sm'.index_of marker line
+        ? at < 0i32
+        ?> waiting
+        |:
+            := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
+            := first_piece = \ (first : string) (p : string) => ? first = "" ?> p |: first
+            := id = sm'.split_list "\"" rest |> listm.fold first_piece ""
+            := others = waiting |> listm'.filter (\ (w : string) => w <> id)
+            ? sm'.contains "waits on install: train" (sm'.to_lower line) ?> listm.append others [ id ] |: others
+    sm'.split_list "\n" records |> listm.fold seen []
+
+:~ ^ ids_where (rows : array_base agile_team_work.work.gate_row) (parked : bool) (at : i32) : list string =
+    ? at < 0i32
+    ?> []
+    |:
+        := row = am'.index_base at rows
+        := earlier = ids_where rows parked (at - 1i32)
+        ? row.parked = parked ?> listm.append earlier [ row.id ] |: earlier
+
+:~ gate_lines (t : gate_terms) (ready : list string) (parked : list string) (waiting : list string) : list string =
+    := receipt =
+        "rig agile gate ok team=" ++# t.team ++# " ready=" ++# sm'.show (listm.length ready : i32)
+        ++# " paused=" ++# sm'.show (listm.length parked : i32)
+        ++# " waiting=" ++# sm'.show (listm.length waiting : i32)
+    := lines = [ ready_line t ready; parked_line t parked; waiting_line waiting; receipt ]
+    lines |> listm'.filter (\ (line : string) => line <> "")
+
+:~ gate_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: words ?& sm'.starts_with "-" root |> not =>
+        := t = terms_of root words
+        ? t.team = "" || t.lane = "" ?>
+            console.write_error_line "usage: kit agile gate <root> --team <team> --as <lane>"
+            2i32
+        |:
+            := rows = agile_team_work.work.gate_rows (root, t.team)
+            := last = am'.length_base rows - 1i32
+            := parked = agile_team_lane.lane.paused_of (root, t.team) |> am'.to_list_base' |> listm'.unbox
+            := parked_ids = parked |> listm.map (\ (p : agile_team_lane.lane.paused_row) => p.id)
+            := records = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+            := waits_text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/waits.spi")
+            := row_held = \ (id : string) => sm'.contains ("Waits (\"" ++# id ++# "\",") waits_text
+            := waiting = listm.append (install_waiting records) (ids_where rows !- last |> listm'.filter row_held)
+            := candidates = ids_where rows !- last
+            := open_now = \ (id : string) => listm'.contains id waiting |> not
+            := ready = candidates |> listm'.filter open_now |> listm'.take_ 3i32
+            := held = candidates |> listm'.filter (\ (id : string) => listm'.contains id waiting)
+            gate_lines t ready parked_ids held |> listm.iter console.write_line
+            0i32
+    | _ =>
+        console.write_error_line "usage: kit agile gate <root> --team <team> --as <lane>"
+        2i32
+
+///> rust
+:# the_gate_names_ready_work_and_parked_items_then_a_receipt =
+    := t = terms_of "B" [ "--team"; "kit"; "--as"; "kit-1" ]
+    testing.expect (t = { root = "B"; team = "kit"; lane = "kit-1" }) "flags"
+    := lines = gate_lines t [ "A-1"; "A-2" ] [ "P-9" ] []
+    testing.expect (listm.length lines = 3i32) "ready, parked, receipt"
+    := built = "inl note_of_a_3_1 () = Note (\"A-3\", 1u32, \"t\", \"k\", \"x. Waits on install: TRAIN9\")\n"
+    := later = "inl note_of_a_3_2 () = Note (\"A-3\", 2u32, \"t\", \"k\", \"installed, closing\")\n"
+    testing.expect (install_waiting built = [ "A-3" ] && install_waiting (built ++# later) = []) "the last note decides"
+    := unnamed = "inl note_of_a_4_1 () = Note (\"A-4\", 1u32, \"t\", \"k\", \"waits on install: none\")\n"
+    testing.expect (install_waiting unnamed = []) "the marker must name a train"
+    testing.expect (listm.length (gate_lines t [] [] [ "A-3" ]) = 2i32) "a waiting line and the receipt"
+    := expected = "items: A-1, A-2. Claim one explicitly (kit agile claim B <ID> --as kit-1)"
+    testing.expect (listm'.exists' (sm'.contains expected) lines) "ready"
+    testing.expect (gate_lines t [] [] [] = [ "rig agile gate ok team=kit ready=0 paused=0 waiting=0" ]) "receipt only"
+:= main () : i32 =
+    export "rig_agile_gate_run" gate_run
+    0i32

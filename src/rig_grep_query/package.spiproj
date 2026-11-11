@@ -1,0 +1,13 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_receipt
+    rig_read_query
+    rig_grep_found
+link:
+    rig_grep_found
+modules:
+    hits
+    search
+    grep

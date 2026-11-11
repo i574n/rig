@@ -1,0 +1,161 @@
+///- --package .
+:# epic_tree static =
+    :< sm'_operators
+    :< agile_task_parents.parents
+
+:< sm'_operators
+:< agile_task_parents.parents
+
+:~ file_text (~path : string) : string = agile_state_fs.model.read_state path
+
+:~ tree_wanted () : bool = listm'.contains "--tree" (env.command_line_arguments ())
+
+:| team_scope =
+    | AllTeams
+    | OneTeam : string
+    | TeamMissing
+
+:~ ^ team_after (args : list string) : team_scope =
+    ?= args ?|
+    | "--team" :: team :: _ ?& sm'.starts_with "--" team = !- => OneTeam team
+    | "--team" :: _ => TeamMissing
+    | _ :: rest => team_after rest
+    | [] => AllTeams
+
+:~ in_scope (scope : team_scope) (~tags : string) : bool =
+    ?= scope ?|
+    | OneTeam team => sm'.split_list "," tags |> listm.map sm'.trim |> listm'.contains ("team:" ++# team)
+    | _ => !+
+
+:~ quoted_value (~token : string) : string =
+    := inner = sm'.trim token
+    := bare = ? sm'.starts_with "\"" inner && sm'.ends_with "\"" inner ?> sm'.slice 1i32 (sm'.length inner - 2i32) inner |: inner
+    bare |> sm'.replace "\\\"" "\"" |> sm'.replace "\\\\" "\\"
+
+:~ titles_of (~text : string) : list (string * string) =
+    := titled = \ (acc : list (string * string)) (line : string) =>
+        := found = sm'.index_of (agile_task_text.model.task_marker ()) line
+        ? sm'.starts_with "inl " line && found >= 0i32
+        ?>
+            := arguments = found + agile_task_text.model.task_arguments_offset ()
+            := length = sm'.length line
+            := field = \ (position : i32) => quoted_value (agile_task_text.model.tuple_field line arguments length position)
+            (field 0i32, field 1i32) :: acc
+        |: acc
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold titled []
+
+:~ title_for (titles : list (string * string)) (~id : string) : option string =
+    titles |> listm.fold (\ found ((key, title) : string * string) => ? key = id ?> Some title |: found) None
+
+:~ titled_line (titles : list (string * string)) (~id : string) (~line : string) : string =
+    ?= title_for titles id ?|
+    | Some title => line ++# "  " ++# title
+    | None => line
+
+:~ epics_of (links : list parent_link) : list string =
+    := added = \ (epics : list string) (link : parent_link) =>
+        ? listm'.contains link.parent epics ?> epics |: listm.append epics [ link.parent ]
+    links |> listm.fold added []
+
+:~ fact_for (facts : list agile_quality_lint.lint.fact_row) (~id : string) : option agile_quality_lint.lint.fact_row =
+    facts |> listm.fold (\ found (fact : agile_quality_lint.lint.fact_row) => ? fact.id = id ?> Some fact |: found) None
+
+:~ child_line (facts : list agile_quality_lint.lint.fact_row) (~id : string) : string =
+    ?= fact_for facts id ?|
+    | Some fact => "  " ++# id ++# "  " ++# fact.status ++# " " ++# sm'.format fact.estimate_minutes ++# "m"
+    | None => "  " ++# id ++# "  unknown"
+
+:~ epic_line (facts : list agile_quality_lint.lint.fact_row) (links : list parent_link) (~epic : string) : string =
+    := sum = \ (done_only : bool) =>
+        children_of links epic
+        |> listm.fold (\ (count, minutes) (child : string) =>
+            ?= fact_for facts child ?|
+            | Some fact ?& done_only = !- || fact.status = "Done" => count + 1i32, minutes + fact.estimate_minutes
+            | _ => count, minutes) (0i32, 0i32)
+    := done, done_minutes = sum !+
+    := all, minutes = sum !-
+    := counts = "  done=" ++# sm'.format done ++# "/" ++# sm'.format all
+    epic ++# counts ++# " minutes=" ++# sm'.format done_minutes ++# "/" ++# sm'.format minutes
+
+:~ epic_tags (facts : list agile_quality_lint.lint.fact_row) (~epic : string) : string =
+    ?= fact_for facts epic ?|
+    | Some fact => fact.tags
+    | None => ""
+
+:~ tree_text_of
+    (facts : list agile_quality_lint.lint.fact_row)
+    (titles : list (string * string))
+    (scope : team_scope)
+    (links : list parent_link)
+    : list string
+    =
+    := child_lines = \ (epic : string) =>
+        children_of links epic |> listm.map (\ (child : string) => titled_line titles child (child_line facts child))
+    := block = \ (epic : string) => titled_line titles epic (epic_line facts links epic) :: child_lines epic
+    epics_of links
+    |> listm'.filter (\ (epic : string) => in_scope scope (epic_tags facts epic))
+    |> listm.map block
+    |> listm.fold listm.append []
+
+:~ tree_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: _ =>
+        := base = sm'.replace "\\" "/" root
+        := links = links_of_text (file_text (base ++# "/state/parents.spi"))
+        := text = file_text (base ++# "/state/agile.spi")
+        := rows = agile_quality_facts.facts.fact_rows_of text
+        := facts = rows |> am'.to_list_base' |> listm'.unbox
+        ?= team_after (env.command_line_arguments ()) ?|
+        | TeamMissing =>
+            console.write_error_line "rig error: usage: agile list <root> --tree [--team <team>]"
+            2i32
+        | scope =>
+            := lines = tree_text_of facts (titles_of text) scope links
+            lines |> listm.iter (\ (line : string) => console.write_line line)
+            := epics = epics_of links |> listm'.filter (\ (epic : string) => in_scope scope (epic_tags facts epic))
+            := scoped = links |> listm'.filter (\ (link : parent_link) => listm'.contains link.parent epics)
+            := shown = sm'.format (listm.length epics : i32)
+            := count = sm'.format (listm.length scoped : i32)
+            console.write_line ("rig agile list ok tree epics=" ++# shown ++# " links=" ++# count)
+            0i32
+    | _ =>
+        console.write_error_line "rig error: usage: agile list <root> --tree"
+        2i32
+
+:~ list_routed () : i32 = ? tree_wanted () ?> tree_run () |: agile_task_listing.task_listing.agile_list_entry ()
+
+///> rust
+:# epics_list_their_children_once_each =
+    := link = \ (child : string) (parent : string) => ({ child = child; parent = parent } : parent_link)
+    := links = [ link "A" "E1"; link "B" "E2"; link "C" "E1" ]
+    testing.expect (epics_of links = [ "E1"; "E2" ]) "each epic once, in first-seen order"
+    := fact = \ (id : string) (status : string) (minutes : i32) =>
+        ({ id = id; status = status; tags = ""; estimate_minutes = minutes; load = ""; assignee = ""; notes = "" }
+            : agile_quality_lint.lint.fact_row)
+    := facts = [ fact "A" "Done" 60i32; fact "C" "Planned" 180i32; fact "B" "Active" 30i32 ]
+    testing.expect (epic_line facts links "E1" = "E1  done=1/2 minutes=60/240") "minutes-weighted progress"
+    testing.expect (child_line facts "C" = "  C  Planned 180m" && child_line facts "Z" = "  Z  unknown") "child lines"
+    := e1 = [ "E1  done=1/2 minutes=60/240"; "  A  Done 60m"; "  C  Planned 180m" ]
+    := e2 = [ "E2  done=0/1 minutes=0/30"; "  B  Active 30m" ]
+    testing.expect (tree_text_of facts [] AllTeams links = listm.append e1 e2) "each epic, then its children"
+
+///> rust
+:# a_team_scope_keeps_its_epics_with_all_their_children_and_titles_follow_ids =
+    := link = \ (child : string) (parent : string) => ({ child = child; parent = parent } : parent_link)
+    := links = [ link "A" "E1"; link "B" "E2" ]
+    := fact = \ (id : string) (tags : string) =>
+        ({ id = id; status = "Planned"; tags = tags; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "" }
+            : agile_quality_lint.lint.fact_row)
+    := facts = [ fact "E1" "team:alpha,x"; fact "E2" "team:beta"; fact "A" "team:alpha"; fact "B" "team:beta" ]
+    := text = "inl e1 () = Task (\"E1\", \"First epic\", Epic)\ninl a () = Task (\"A\", \"Child a\", Story)\n"
+    := lines = tree_text_of facts (titles_of text) (OneTeam "alpha") links
+    testing.expect (lines = [ "E1  done=0/1 minutes=0/0  First epic"; "  A  Planned 0m  Child a" ]) "only alpha, with titles"
+    testing.expect (team_after [ "agile"; "list"; "r"; "--team"; "beta"; "--tree" ] = OneTeam "beta") "team flag"
+    testing.expect (team_after [ "agile"; "list"; "r"; "--tree" ] = AllTeams) "no team flag"
+    testing.expect (team_after [ "agile"; "list"; "r"; "--tree"; "--team" ] = TeamMissing) "team flag without a value"
+    testing.expect (team_after [ "agile"; "list"; "r"; "--team"; "--tree" ] = TeamMissing) "team flag followed by a flag"
+    := quoted = "inl q () = Task (\"Q\", \"Prompt \\\"loop\\\", then, more\", Story)\n"
+    testing.expect (title_for (titles_of quoted) "Q" = Some "Prompt \"loop\", then, more") "escaped quotes and commas survive"
+:= main () : i32 =
+    export "rig_agile_list_routed" list_routed
+    0i32

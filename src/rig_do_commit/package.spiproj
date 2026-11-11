@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    rust_std_fs
+    workspace_primitives
+    rig_do_store
+modules:
+    commit
+    entry

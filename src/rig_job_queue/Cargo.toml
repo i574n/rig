@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "decide.spi"
+output = "decide.rs"
+
+[package]
+name = "rig-job-queue"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_queue"
+path = "decide.rs"
+
+[dependencies]
+rig-job-state = { path = "../rig_job_state" }
+rig-job-slot = { path = "../rig_job_slot" }
+rig-job-gate = { path = "../rig_job_gate" }

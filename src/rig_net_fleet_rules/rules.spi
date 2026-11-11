@@ -1,0 +1,102 @@
+///- --package .
+:# rules static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== member = { id : string; network : string; hub : bool; reach : string }
+
+:| reach =
+    | DirectReach :: reach
+    | JumpReach :: reach
+    | ReverseReach :: reach
+
+:| fleet_problem =
+    | MachineInTwoNetworks :: string -> fleet_problem
+    | HubCount :: string * i32 -> fleet_problem
+    | UnknownNetwork :: string * string -> fleet_problem
+    | AnchorCount :: string * i32 -> fleet_problem
+
+:~ reach_of (~word : string) : reach =
+    ? word = "direct"
+    ?> DirectReach
+    |? word = "reverse"
+    ?> ReverseReach
+    |: JumpReach
+
+:= reverse_reach = \|
+    | ReverseReach => !+
+    | _ => !-
+
+:= direct_reach = \|
+    | DirectReach => !+
+    | _ => !-
+
+:~ hub_problems (networks : list string) (members : list member) : list fleet_problem =
+    := hubs_of = \ (net : string) =>
+        members |> listm.fold (\ count (m : member) => ? m.network = net && m.hub ?> count + 1i32 |: count) 0i32
+    := checked = \ (found : list fleet_problem) (net : string) =>
+        := hubs = hubs_of net
+        ? hubs = 1i32 ?> found |: HubCount (net, hubs) :: found
+    networks |> listm.fold checked []
+
+:~ membership_problems (networks : list string) (members : list member) : list fleet_problem =
+    := seen_in = \ (id : string) =>
+        members |> listm.fold (\ (nets : list string) (m : member) =>
+            ? m.id = id && not (listm'.contains m.network nets) ?> m.network :: nets |: nets) []
+    := checked = \ (found : list fleet_problem) (m : member) =>
+        := twice = listm.length (seen_in m.id) > 1i32 && not (listm'.contains (MachineInTwoNetworks m.id) found)
+        := found = ? twice ?> MachineInTwoNetworks m.id :: found |: found
+        ? listm'.contains m.network networks ?> found |: UnknownNetwork (m.id, m.network) :: found
+    members |> listm.fold checked []
+
+:~ anchor_problems (networks : list string) (members : list member) : list fleet_problem =
+    := checked = \ (found : list fleet_problem) (net : string) =>
+        := inside = members |> listm'.filter (\ (m : member) => m.network = net)
+        := indirect_one = \ (any : bool) (m : member) => any || not (direct_reach (reach_of m.reach))
+        := indirect = inside |> listm.fold indirect_one !-
+        := counted = \ (count : i32) (m : member) => ? reverse_reach (reach_of m.reach) ?> count + 1i32 |: count
+        := anchors = inside |> listm.fold counted 0i32
+        ? indirect && anchors <> 1i32 ?> AnchorCount (net, anchors) :: found |: found
+    networks |> listm.fold checked []
+
+:~ fleet_problems (networks : list string) (members : list member) : list fleet_problem =
+    := counted = listm.append (hub_problems networks members) (anchor_problems networks members)
+    listm.append (membership_problems networks members) counted
+
+:~ problem_text (p : fleet_problem) : string =
+    ?= p ?|
+    | MachineInTwoNetworks id => "machine " ++# id ++# " is listed in two networks"
+    | HubCount (net, n) => "network " ++# net ++# " has " ++# sm'.show n ++# " hubs; it needs exactly one"
+    | UnknownNetwork (id, net) => "machine " ++# id ++# " names unknown network " ++# net
+    | AnchorCount (net, n) =>
+        "network " ++# net ++# " has " ++# sm'.show n ++# " reverse anchors; a network with indirect machines needs one"
+
+:~ problem_lines ((networks, members) : array_base string * array_base member) : array_base string =
+    := nets = am'.to_list_base' networks |> listm'.unbox
+    := all = am'.to_list_base' members |> listm'.unbox
+    fleet_problems nets all |> listm.map problem_text |> listm'.box |> listm'.to_array'
+
+///> rust
+:# a_fleet_has_one_hub_per_network_one_anchor_when_indirect_and_each_machine_in_one_network =
+    := hub_a = { id = "a-hub"; network = "alpha"; hub = !+; reach = "direct" }
+    := hub_b = { id = "b-hub"; network = "beta"; hub = !+; reach = "reverse" }
+    := worker = { id = "b-worker"; network = "beta"; hub = !-; reach = "jump" }
+    testing.expect (fleet_problems [ "alpha"; "beta" ] [ hub_a; hub_b; worker ] = []) "a clean two-network fleet"
+    := no_hub = [ HubCount ("beta", 0i32); AnchorCount ("beta", 0i32) ]
+    testing.expect (fleet_problems [ "alpha"; "beta" ] [ hub_a; worker ] = no_hub) "no hub and no anchor"
+    := jumped_hub = { hub_b ?| reach = "jump" }
+    testing.expect (fleet_problems [ "beta" ] [ jumped_hub; worker ] = [ AnchorCount ("beta", 0i32) ]) "no anchor"
+    := second_hub = { hub_a ?| id = "a-hub-2" }
+    testing.expect (fleet_problems [ "alpha" ] [ hub_a; second_hub ] = [ HubCount ("alpha", 2i32) ]) "two hubs"
+    := moved = { worker ?| network = "alpha" }
+    := problems = fleet_problems [ "alpha"; "beta" ] [ hub_a; hub_b; worker; moved ]
+    testing.expect (listm'.contains (MachineInTwoNetworks "b-worker") problems) "one machine, two networks"
+    := stray = { hub_a ?| network = "gamma" }
+    := expected = [ UnknownNetwork ("a-hub", "gamma"); HubCount ("alpha", 0i32) ]
+    testing.expect (fleet_problems [ "alpha" ] [ stray ] = expected) "unknown network"
+    := lines = problem_lines (;[ "alpha" ] |> am'.base, ;[ second_hub; hub_a ] |> am'.base)
+    testing.expect (am'.length_base lines = 1i32) "problem lines cross as text"
+:= main () : i32 =
+    export "rig_net_fleet_problem_lines" problem_lines
+    0i32

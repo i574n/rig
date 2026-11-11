@@ -1,0 +1,57 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| path_first_row =
+    | PathFirst :: string * string -> path_first_row
+
+:~ row_dir (row : path_first_row) : string = ?= row ?| | PathFirst (_, dir) => dir
+
+:~ path_first_rows (~text : string) : list path_first_row =
+    := marker = " = PathFirst ("
+    := picked = \ (found : list path_first_row) (line : string) =>
+        := at = sm'.index_of marker line
+        ? at < 0i32
+        ?> found
+        |:
+            := rest = sm'.substring (at + sm'.length marker) (sm'.length line - at - sm'.length marker) line
+            ?= sm'.split_list "\"" rest ?|
+            | _ :: tool :: _ :: dir :: _ ?& tool <> "" && dir <> "" => listm.append found [ PathFirst (tool, dir) ]
+            | _ => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold picked []
+
+:~ same_dir (~a : string) (~b : string) : bool =
+    := plain = \ (d : string) =>
+        := slashed = sm'.to_lower (sm'.replace "\\" "/" (sm'.trim d))
+        ? sm'.ends_with "/" slashed ?> sm'.substring 0i32 (sm'.length slashed - 1i32) slashed |: slashed
+    plain a = plain b
+
+:~ path_with_first (~path : string) (dirs : list string) (~separator : string) : string =
+    := entries = sm'.split_list separator path |> listm'.filter (\ (e : string) => e <> "")
+    := listed = \ (e : string) => dirs |> listm.fold (\ (any : bool) (d : string) => any || same_dir d e) !-
+    := rest = entries |> listm'.filter (\ (e : string) => listed e |> not)
+    listm.append dirs rest |> sm'.concat_list separator
+
+:~ config_choice (~base : string) (rig_exists : bool) (legacy_exists : bool) : string =
+    := fresh = rig_exists || (legacy_exists |> not)
+    ? fresh ?> base ++# "/rig" |: base ++# "/kit"
+
+///> rust
+:# the_config_dir_prefers_rig_and_keeps_an_existing_kit_dir =
+    testing.expect (config_choice "C:/a" !- !- = "C:/a/rig") "a fresh machine gets rig"
+    testing.expect (config_choice "C:/a" !- !+ = "C:/a/kit") "a legacy dir alone stays in use"
+    testing.expect (config_choice "C:/a" !+ !- = "C:/a/rig") "a rig dir alone is used"
+    testing.expect (config_choice "C:/a" !+ !+ = "C:/a/rig") "rig wins when both exist"
+    testing.expect ((!+ || !+ |> not) = !+) "a pipe binds tighter than ||"
+
+///> rust
+:# rows_parse_and_their_dirs_lead_the_path_once =
+    := gcc = "inl path_first_gcc () = PathFirst (\"gcc\", \"C:/tools/gcc-15.2/bin\")\n"
+    := rows = path_first_rows (gcc ++# "inl odd () = PathFirst (\"\", \"x\")\nnoise\n")
+    testing.expect (rows |> listm.map row_dir = [ "C:/tools/gcc-15.2/bin" ]) "one usable row"
+    := path = "C:\\tools\\mingw-16.2\\bin;C:\\Tools\\gcc-15.2\\bin\\;C:\\Windows"
+    := moved = path_with_first path [ "C:/tools/gcc-15.2/bin" ] ";"
+    testing.expect (moved = "C:/tools/gcc-15.2/bin;C:\\tools\\mingw-16.2\\bin;C:\\Windows") "moved to the front once"
+    testing.expect (path_with_first "/usr/bin:/bin" [] ":" = "/usr/bin:/bin") "no rows keep the path"

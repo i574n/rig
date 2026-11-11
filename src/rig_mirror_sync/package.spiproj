@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rust_std_fs
+    rig_os_process
+    rig_mirror_local
+    rig_mirror_plan
+link:
+    rig_mirror_local
+    rig_mirror_plan
+modules:
+    sync

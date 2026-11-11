@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "run.rs"
+
+[package]
+name = "rig-run-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_run_cli"
+path = "run.rs"
+
+[dependencies]
+rig-run-build = { path = "../rig_run_build" }

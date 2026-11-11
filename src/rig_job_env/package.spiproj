@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_path_first
+link:
+    rig_path_first
+modules:
+    env_adopt

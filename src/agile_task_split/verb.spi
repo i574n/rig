@@ -1,0 +1,108 @@
+///- --package .
+:# verb static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== step = { name : string; minutes : i32 }
+
+:| split_plan =
+    | SplitInto :: list step -> split_plan
+    | NoMilestones :: split_plan
+    | MilestoneTooBig :: string * i32 -> split_plan
+    | AlreadySmall :: i32 -> split_plan
+
+:= split_limit () : i32 = 120i32
+
+:= item_limit () : i32 = 240i32
+
+:~ split_plan_of (estimate : i32) (steps : list step) : split_plan =
+    := too_big = steps |> listm'.filter (\ (m : step) => m.minutes > split_limit ())
+    ? estimate <= item_limit ()
+    ?> AlreadySmall estimate
+    |:
+        ?= too_big ?|
+        | big :: _ => MilestoneTooBig (big.name, big.minutes)
+        | [] => ? steps = [] ?> NoMilestones |: SplitInto steps
+
+:~ child_id (~parent : string) (index : i32) : string = parent ++# "-M" ++# sm'.show index
+
+:~ ^ gathered (shown : array_base agile_split_plan.plan.milestone) (at : i32) (acc : list step) : list step =
+    ? at < 0i32
+    ?> acc
+    |:
+        := m = am'.index_base at shown
+        gathered shown (at - 1i32) ({ name = m.name; minutes = m.minutes } :: acc)
+
+:~ steps_of (text : string) : list step =
+    := shown = agile_split_plan.plan.shown_steps text
+    gathered shown (am'.length_base shown - 1i32) []
+
+:~ rig_said (args : list string) : bool * string =
+    := c = process.captured_by (env.current_executable ()) args !+
+    c.ran && c.code = 0i32, c.stdout
+
+:~ child_note (~parent : string) (s : step) (index : i32) : string =
+    "split from " ++# parent ++# " by kit agile split (milestone " ++# sm'.show index ++# "). DoD: " ++# s.name
+    ++# ", proven in the parent item notes. NEXT STEP: read the parent latest note for this milestone."
+
+:~ ^ children_added
+    (~root : string) (~parent : string) (item : agile_split_plan.plan.shown_fields) (steps : list step) (index : i32)
+    (~previous : string)
+    : i32
+    =
+    ?= steps ?|
+    | [] => index - 1i32
+    | s :: rest =>
+        := id = child_id parent index
+        := deps = ? previous = "" ?> [] |: [ "--deps"; previous ]
+        := title = parent ++# " milestone " ++# sm'.show index ++# ": " ++# s.name
+        := head = [ "agile"; "add"; root; id; "TaskKind"; item.priority; "D1"; title; item.tags ]
+        := sizing = [ "--estimate"; sm'.show s.minutes; "--load"; "light"; "--assignee"; "agent" ]
+        := tail = [ "--note"; child_note parent s index; "--as"; "kit-split" ]
+        := added, _ = rig_said (listm.concat [ head; sizing; deps; tail ])
+        := linked, _ = ? added ?> rig_said [ "agile"; "edit"; root; id; "--parent"; parent ] |: (!-, "")
+        ? added && linked ?> children_added root parent item rest (index + 1i32) id |: index - 1i32
+
+:~ split_run () : i32 =
+    := root = rust_std_env.model.argument_owned 1i32
+    := id = rust_std_env.model.argument_owned 2i32
+    := shown, text = rig_said [ "agile"; "show"; root; id ]
+    ? shown = !- || id = "" ?>
+        console.write_error_line "rig error: usage: agile edit <root> <id> --split milestones (needs MILESTONES:)"
+        2i32
+    |:
+        := item = agile_split_plan.plan.shown_fields_of text
+        ?= split_plan_of item.estimate (steps_of text) ?|
+        | AlreadySmall minutes =>
+            := why = " children=0 reason=already-small estimate=" ++# sm'.show minutes
+            console.write_line ("rig agile split ok id=" ++# id ++# why)
+            0i32
+        | NoMilestones =>
+            console.write_error_line ("rig error: agile split refused: " ++# id ++# " has no note with MILESTONES:")
+            1i32
+        | MilestoneTooBig (name, minutes) =>
+            := size = " is " ++# sm'.show minutes ++# " m; split it to 120 m or less first"
+            console.write_error_line ("rig error: agile split refused: milestone " ++# name ++# size)
+            1i32
+        | SplitInto steps =>
+            := made = children_added root id item steps 1i32 ""
+            := said = "split into " ++# sm'.show made ++# " chained children by kit agile split"
+            := _ = rig_said [ "agile"; "note"; root; id; said; "--as"; "kit-split" ]
+            console.write_line ("rig agile split ok id=" ++# id ++# " children=" ++# sm'.show made)
+            ? made = listm.length steps ?> 0i32 |: 1i32
+
+///> rust
+:# a_plan_keeps_items_whole_under_four_hours_and_refuses_big_steps =
+    := steps = [ { name = "one"; minutes = 60i32 }; { name = "two"; minutes = 90i32 } ]
+    testing.expect (split_plan_of 200i32 steps = AlreadySmall 200i32) "items under four hours stay whole"
+    testing.expect (split_plan_of 360i32 steps = SplitInto steps) "a big item splits"
+    := huge = [ { name = "one"; minutes = 300i32 } ]
+    testing.expect (split_plan_of 360i32 huge = MilestoneTooBig ("one", 300i32)) "big"
+    testing.expect (split_plan_of 360i32 [] = NoMilestones) "no milestones, no split"
+    testing.expect (child_id "KIT-A" 2i32 = "KIT-A-M2") "child ids"
+    := text = "KIT-A  Story  P1  D4  10%  Planned\nplanning: estimate=360m\nx  MILESTONES: one 60 m; two 90 m\n"
+    testing.expect (steps_of text = steps) "steps cross from the plan crate"
+:= main () : i32 =
+    export "rig_agile_split_run" split_run
+    0i32

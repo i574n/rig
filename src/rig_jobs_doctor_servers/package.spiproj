@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_machine_watch
+    rig_jobs_doctor_model
+modules:
+    servers
+    entry

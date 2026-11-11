@@ -1,0 +1,12 @@
+packages:
+    |core-
+    workspace_primitives
+    spiral-
+    union_reflection
+    rust_std_env
+    rig_standards_targets
+link:
+    rig_standards_targets
+modules:
+    rules
+    standards

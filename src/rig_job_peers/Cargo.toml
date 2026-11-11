@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "peers.spi"
+output = "peers.rs"
+
+[package]
+name = "rig-job-peers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_peers"
+path = "peers.rs"
+
+[dependencies]
+rig-job-state = { path = "../rig_job_state" }
+rig-process-alive = { path = "../rig_process_alive" }

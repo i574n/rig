@@ -1,0 +1,157 @@
+///- --package .
+:# gate static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== machine_gate = { max_load_x100 : i32; floor_mb : i32; memory_max_mb : i32 }
+
+:| gate_rule =
+    | Ungated :: gate_rule
+    | Gated :: machine_gate -> gate_rule
+
+:== machine_sample = { load_x100 : i32; available_mb : i32 }
+
+:| admission =
+    | Admitted :: admission
+    | TooLoaded :: i32 * i32 -> admission
+    | TooLittleMemory :: i32 * i32 -> admission
+    | SampleUnread :: string -> admission
+
+:== gated_dispatch = { admitted : bool; line : string; reason : string }
+
+:= row_marker () : string = " = MachineGate ("
+
+:~ number_of (~text : string) : option i32 =
+    convert.try_convert (sm'.trim text |> sm'.replace "i32" "")
+
+:~ gate_of_text (~text : string) : gate_rule =
+    := found = \ (rule : gate_rule) (line : string) =>
+        := row = sm'.trim line
+        := at = sm'.index_of (row_marker ()) row
+        ? at < 0i32 || sm'.ends_with ")" row |> not
+        ?> rule
+        |:
+            := inner = sm'.slice (at + sm'.length (row_marker ())) (sm'.length row - 2i32) row
+            ?= sm'.split_list "," inner ?|
+            | a :: b :: c :: [] =>
+                ?= number_of a, number_of b, number_of c ?|
+                | Some load, Some floor, Some cap =>
+                    Gated { max_load_x100 = load; floor_mb = floor; memory_max_mb = cap }
+                | _ => rule
+            | _ => rule
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold found Ungated
+
+:~ load_x100_of (~word : string) : option i32 =
+    ?= sm'.split_list "." (sm'.trim word) ?|
+    | whole :: fraction :: [] =>
+        := size : i32 = sm'.length fraction
+        := hundredths = sm'.substring 0i32 (? size >= 2i32 ?> 2i32 |: size) fraction
+        := scale = ? (sm'.length hundredths : i32) = 1i32 ?> 10i32 |: 1i32
+        ?= number_of whole, number_of hundredths ?|
+        | Some w, Some h => Some (w * 100i32 + h * scale)
+        | _ => None
+    | whole :: [] =>
+        ?= number_of whole ?|
+        | Some w => Some (w * 100i32)
+        | None => None
+    | _ => None
+
+:~ load_line (~line : string) : option i32 =
+    ?= sm'.split_list " " (sm'.trim line) ?|
+    | first :: _ :: _ :: _ ?& sm'.contains "/" line => load_x100_of first
+    | _ => None
+
+:~ memory_line (~line : string) : option i32 =
+    ? sm'.starts_with "MemAvailable:" line |> not
+    ?> None
+    |:
+        ?= sm'.replace "MemAvailable:" "" line |> sm'.replace "kB" "" |> number_of ?|
+        | Some kb => Some (kb / 1024i32)
+        | None => None
+
+:~ sample_of (~output : string) : option machine_sample =
+    := lines = sm'.split_list "\n" (sm'.replace "\r" "" output)
+    := first_of = \ (read : string -> option i32) (best : option i32) (line : string) =>
+        ?= best ?|
+        | Some _ => best
+        | None => read line
+    := load = first_of load_line
+    := memory = first_of memory_line
+    ?= lines |> listm.fold load None, lines |> listm.fold memory None ?|
+    | Some l, Some m => Some { load_x100 = l; available_mb = m }
+    | _ => None
+
+:~ admitted_by (g : machine_gate) (s : machine_sample) : admission =
+    ? s.load_x100 >= g.max_load_x100
+    ?> TooLoaded (s.load_x100, g.max_load_x100)
+    |? s.available_mb < g.memory_max_mb + g.floor_mb
+    ?> TooLittleMemory (s.available_mb, g.memory_max_mb + g.floor_mb)
+    |: Admitted
+
+:~ hundredths_text (value : i32) : string =
+    := rest = value % 100i32
+    sm'.show (value / 100i32) ++# "." ++# (? rest < 10i32 ?> "0" |: "") ++# sm'.show rest
+
+:~ reason_of (a : admission) : string =
+    ?= a ?|
+    | Admitted => ""
+    | TooLoaded (load, limit) => "admission: load " ++# hundredths_text load ++# " >= " ++# hundredths_text limit
+    | TooLittleMemory (have, need) =>
+        "admission: MemAvailable " ++# sm'.show have ++# " MB < cap + floor " ++# sm'.show need ++# " MB"
+    | SampleUnread said => "admission: no load or MemAvailable in the sample (" ++# sm'.trim said ++# ")"
+
+:~ scoped_line (g : machine_gate) (~line : string) : string =
+    := cap = sm'.show g.memory_max_mb
+    "systemd-run --scope --quiet -p MemoryMax=" ++# cap ++# "M -p MemorySwapMax=0 " ++# line
+
+:~ sample_command () : string = "cat /proc/loadavg; grep MemAvailable /proc/meminfo"
+
+:~ gate_path (~jobs_root : string) (~machine : string) : string =
+    sm'.replace "\\" "/" jobs_root ++# "/machines/" ++# machine ++# ".gate"
+
+:~ gated_of (rule : gate_rule) (~sampled : string) (~line : string) : gated_dispatch =
+    ?= rule ?|
+    | Ungated => { admitted = !+; line = line; reason = "" }
+    | Gated g =>
+        := a =
+            ?= sample_of sampled ?|
+            | Some s => admitted_by g s
+            | None => SampleUnread sampled
+        ?= a ?|
+        | Admitted => { admitted = !+; line = scoped_line g line; reason = "" }
+        | _ => { admitted = !-; line = line; reason = reason_of a }
+
+:~ gated_line ((jobs_root, machine, line) : string * string * string) : array_base gated_dispatch =
+    := path = gate_path jobs_root machine
+    := rule = gate_of_text (? file_system.file_exists path ?> file_system.read_all_text path |: "")
+    := decided =
+        ?= rule ?|
+        | Ungated => gated_of rule "" line
+        | Gated _ =>
+            := ssh = [ "-o"; "BatchMode=yes"; "-o"; "ConnectTimeout=10"; machine; sample_command () ]
+            := c = process.captured_by "ssh" ssh !+
+            gated_of rule c.stdout line
+    ;[ decided ] |> am'.base
+
+///> rust
+:# a_gated_machine_admits_under_its_limits_and_wraps_the_job_in_a_memory_scope =
+    := rule = gate_of_text "inl gate_of_m () = MachineGate (400i32, 600i32, 2500i32)\n"
+    testing.expect (rule = Gated { max_load_x100 = 400i32; floor_mb = 600i32; memory_max_mb = 2500i32 }) "the gate row"
+    testing.expect (gate_of_text "" = Ungated) "no gate file, no gate"
+    := calm = "0.52 0.61 0.70 1/180 4242\nMemAvailable:    3481600 kB\n"
+    testing.expect (sample_of calm = Some { load_x100 = 52i32; available_mb = 3400i32 }) "load and memory"
+    := ok = gated_of rule calm "rig job start x"
+    := scope = "systemd-run --scope --quiet -p MemoryMax=2500M -p MemorySwapMax=0 "
+    testing.expect (ok.admitted && ok.line = scope ++# "rig job start x") ok.line
+    := loaded = "4.20 3.9 3.1 2/200 99\nMemAvailable: 3481600 kB\n"
+    := busy = gated_of rule loaded "rig job start x"
+    testing.expect (busy.admitted = !- && busy.reason = "admission: load 4.20 >= 4.00") busy.reason
+    := tight = gated_of rule "0.10 0.1 0.1 1/1 1\nMemAvailable: 2097152 kB\n" "rig job start x"
+    testing.expect (tight.reason = "admission: MemAvailable 2048 MB < cap + floor 3100 MB") tight.reason
+    testing.expect ((gated_of rule "" "x").admitted = !-) "an unread sample refuses"
+    testing.expect ((gated_of Ungated "" "rig job start x").line = "rig job start x") "ungated lines pass unchanged"
+    testing.expect (load_x100_of "1.5" = Some 150i32 && load_x100_of "12" = Some 1200i32) "load words"
+:= main () : i32 =
+    export "rig_job_remote_gated_line" gated_line
+    0i32

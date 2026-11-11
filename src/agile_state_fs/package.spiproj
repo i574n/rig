@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rust_std_fs
+    agile_state_spelling
+modules:
+    model
+    project

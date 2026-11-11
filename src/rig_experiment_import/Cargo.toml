@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "import.spi"
+output = "import.rs"
+
+[package]
+name = "rig-experiment-import"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_experiment_import"
+path = "import.rs"
+
+[dependencies]
+rig-experiment-args = { path = "../rig_experiment_args" }
+rig-experiment-verb-args = { path = "../rig_experiment_verb_args" }

@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "asks.spi"
+output = "asks.rs"
+
+[package]
+name = "rig-cadence-asks"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_cadence_asks"
+path = "asks.rs"
+
+[dependencies]
+agile-quality-state = { path = "../agile_quality_state" }
+agile-task-asks = { path = "../agile_task_asks" }

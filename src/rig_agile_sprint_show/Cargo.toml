@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "show.spi"
+output = "show.rs"
+
+[package]
+name = "rig-agile-sprint-show"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_sprint_show"
+path = "show.rs"
+
+[dependencies]
+agile-task-census = { path = "../agile_task_census" }
+rig-agile-sprint-state = { path = "../rig_agile_sprint_state" }
+agile-note-listing = { path = "../agile_note_listing" }
+agile-status-changes = { path = "../agile_status_changes" }

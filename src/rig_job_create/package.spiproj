@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_jobs
+    rig_job_launch_model
+modules:
+    create

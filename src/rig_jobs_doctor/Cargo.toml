@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "entry.spi"
+output = "doctor.rs"
+
+[package]
+name = "rig-jobs-doctor"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_jobs_doctor"
+path = "doctor.rs"
+
+[dependencies]
+rig-machine-sample = { path = "../rig_machine_sample" }
+rig-jobs-doctor-env = { path = "../rig_jobs_doctor_env" }
+rig-jobs-doctor-servers = { path = "../rig_jobs_doctor_servers" }

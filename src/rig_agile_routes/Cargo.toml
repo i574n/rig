@@ -1,0 +1,27 @@
+[package.metadata.spiral]
+entry = "routes.spi"
+output = "routes.rs"
+
+[package]
+name = "rig-agile-routes"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_agile_routes"
+path = "routes.rs"
+
+[dependencies]
+rig-agile-state = { path = "../rig_agile_state" }
+rig-agile-lease = { path = "../rig_agile_lease" }
+agile-todo-scan = { path = "../agile_todo_scan" }
+agile-planning-revision = { path = "../agile_planning_revision" }
+agile-task-revision = { path = "../agile_task_revision" }
+agile-quality-state = { path = "../agile_quality_state" }
+agile-task-parents = { path = "../agile_task_parents" }
+agile-task-asks = { path = "../agile_task_asks" }
+agile-task-split = { path = "../agile_task_split" }
+agile-status-changes = { path = "../agile_status_changes" }
+agile-task-waits = { path = "../agile_task_waits" }

@@ -1,0 +1,19 @@
+packages:
+    |core-
+    spiral-
+    agile_state_spelling
+    agile_state_fs
+    union_reflection
+    workspace_primitives
+    agile_sprint
+    agile_task_census
+    agile_planning_fields
+    rig_agile_sprint_state
+    rig_agile_sprint_append
+link:
+    agile_task_census
+    agile_planning_fields
+    rig_agile_sprint_state
+    rig_agile_sprint_append
+modules:
+    start

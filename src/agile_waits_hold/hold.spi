@@ -1,0 +1,110 @@
+///- --package .
+:# hold static =
+    :< sm'_operators
+    :< agile_task_waits.waits
+
+:< sm'_operators
+:< agile_task_waits.waits
+
+:~ ^ digits_from (~text : string) (at : i32) (value : i32) : i32 =
+    := c = ? at < sm'.length text ?> sm'.substring at 1i32 text |: ""
+    := digit = sm'.index_of c "0123456789"
+    ? c <> "" && digit >= 0i32 ?> digits_from text (at + 1i32) (value * 10i32 + digit) |: value
+
+:~ train_number (~name : string) : i32 =
+    := head = "TRAIN"
+    := size = sm'.length head
+    := starts = sm'.starts_with head name && sm'.length name > size
+    ? starts && sm'.contains (sm'.substring size 1i32 name) "0123456789" ?> digits_from name size 0i32 |: -1i32
+
+:~ done_ids (~agile_text : string) : list string =
+    := picked = \ (found : list string) (line : string) =>
+        := at = sm'.index_of "= Task (\"" line
+        := rest = ? at < 0i32 ?> "" |: sm'.substring (at + 8i32) (sm'.length line - at - 8i32) line
+        := id = nth_quoted rest 0i32
+        ? id <> "" && sm'.contains "u32, Done, " line ?> id :: found |: found
+    sm'.split_list "\n" (sm'.replace "\r" "" agile_text) |> listm.fold picked []
+
+:~ wait_holds (w : task_wait) (done : list string) (~installed : string) : bool =
+    ?= w.kind ?|
+    | WaitsItem id => listm'.contains id done |> not
+    | WaitsTrain train =>
+        := waited = train_number train
+        := have = train_number installed
+        waited < 0i32 || have < waited
+    | _ => !+
+
+:~ holding_of (waits : list task_wait) (done : list string) (~installed : string) : list string =
+    waits |> listm'.filter (\ (w : task_wait) => wait_holds w done installed) |> waiting_ids
+
+:~ installed_train () : string =
+    := exe = sm'.replace "\\" "/" (env.current_executable ())
+    := at = sm'.last_index_of "/" exe
+    := dir = ? at < 0i32 ?> "." |: sm'.substring 0i32 at exe
+    file_system.read_text_or_empty (dir ++# "/installed-train.txt") |> sm'.replace "\r" "" |> sm'.replace "\n" ""
+
+:~ holding_ids ((root, agile_text) : string * string) : array_base string =
+    := waits = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/waits.spi")
+    := held = ? waits = "" ?> [] |: holding_of (waits_of_text waits) (done_ids agile_text) (installed_train ())
+    held |> listm'.box |> listm'.to_array'
+
+:~ ^ team_after (words : list string) : string =
+    ?= words ?|
+    | flag :: value :: rest => ? flag = "--team" ?> value |: team_after (value :: rest)
+    | _ => ""
+
+:~ lane_name (~value : string) : string =
+    ? sm'.starts_with "team:" value ?> sm'.substring 5i32 (sm'.length value - 5i32) value |: value
+
+:~ routed_to (~team : string) (w : task_wait) : bool =
+    ?= w.kind ?|
+    | WaitsLane lane => lane_name lane = team
+    | _ => !-
+
+:~ unblock_lines (waits : list task_wait) (done : list string) (~team : string) : list string =
+    := line = \ (w : task_wait) => "unblock  " ++# w.item ++# "  waits on team " ++# team ++# ": answer or pull it"
+    := undone = \ (w : task_wait) => listm'.contains w.item done |> not
+    waits |> listm'.filter (routed_to team) |> listm'.filter undone |> listm.map line
+
+:~ lane_waits_printed ((root, filters, agile_text) : string * string * string) : i32 =
+    := team = team_after (sm'.split_list " " filters)
+    := waits = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/waits.spi")
+    ? team = "" || waits = ""
+    ?> 0i32
+    |:
+        := lines = unblock_lines (waits_of_text waits) (done_ids agile_text) team
+        lines |> listm.iter console.write_line
+        listm.length lines
+
+///> rust
+:# a_lane_wait_reaches_the_team_that_must_act =
+    := waits = [ { item = "A"; kind = WaitsLane "compiler" }; { item = "B"; kind = WaitsLane "team:rig" } ]
+    := also = [ { item = "C"; kind = WaitsItem "A" } ]
+    := rig_lines = unblock_lines (listm.append waits also) [] "rig"
+    testing.expect (rig_lines = [ "unblock  B  waits on team rig: answer or pull it" ]) "rig sees only its lane wait"
+    testing.expect ((listm.length (unblock_lines waits [] "compiler") : i32) = 1i32) "compiler sees its own"
+    testing.expect (unblock_lines waits [ "A" ] "compiler" = []) "a Done item routes no unblock line"
+    testing.expect (team_after [ "--words"; "x"; "--team"; "ops" ] = "ops") "the team flag value"
+    testing.expect (team_after [ "--words"; "x" ] = "") "no team flag"
+
+///> rust
+:# waits_clear_when_their_item_is_done_or_their_train_is_installed =
+    := done_row = "inl b () = Task (\"B\", \"t\", TaskKind, P1, D1, 100u32, Done, \"\", \"x\")"
+    := open_row = "inl c () = Task (\"C\", \"t\", TaskKind, P1, D1, 10u32, Active, \"\", \"x\")"
+    testing.expect (done_ids (done_row ++# "\n" ++# open_row) = [ "B" ]) "only Done rows"
+    testing.expect (train_number "TRAIN40" = 40i32 && train_number "TRAIN39r2" = 39i32) "train numbers"
+    testing.expect (train_number "PACK62" = -1i32 && train_number "TRAIN" = -1i32) "not a train"
+    := waits =
+        [
+            { item = "W1"; kind = WaitsItem "B" }; { item = "W2"; kind = WaitsItem "C" }
+            { item = "W3"; kind = WaitsTrain "TRAIN40" }; { item = "W4"; kind = WaitsTrain "TRAIN41" }
+            { item = "W5"; kind = WaitsLane "compiler" }
+        ]
+    testing.expect (holding_of waits [ "B" ] "TRAIN40" = [ "W2"; "W4"; "W5" ]) "item and train cleared"
+    testing.expect (holding_of waits [] "TRAIN41" = [ "W1"; "W2"; "W5" ]) "a later train clears an earlier wait"
+    testing.expect (holding_of waits [] "" = [ "W1"; "W2"; "W3"; "W4"; "W5" ]) "no installed train"
+
+:= main () : i32 =
+    export "rig_agile_waits_holding" holding_ids
+    export "rig_agile_lane_waits_printed" lane_waits_printed
+    0i32

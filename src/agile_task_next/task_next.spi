@@ -1,0 +1,167 @@
+:< rust_std_fs.model
+:< agile_state_fs.model
+:< agile_task_text.model
+:< workspace_primitives.numbers
+:< workspace_primitives.bytes
+:< workspace_primitives.clock
+:< workspace_primitives.console
+:< workspace_primitives.files
+:< ranking
+:< sm'_operators
+
+:= planned_load_selected (~text : string) (~id : string) (~load : string) : bool =
+    := every = "all"
+    $'agile_planning_filters::rig_agile_planning_selected(&!text, &!id, &!load, &!every)' : bool
+
+:~ load_words (~loads : string) : array string = sm'.split "," loads |> array
+
+:~ ^ loads_pass (~text : string) (~id : string) (words : array string) (at : i32) : bool =
+    ? am'.length words <= at
+    ?> !-
+    |? planned_load_selected text id (am'.index at words)
+    ?> !+
+    |: loads_pass text id words (at + 1i32)
+:= argument_owned index : string = rust_std_env.model.argument_owned index
+:= unquoted (~token : string) : string = byte_slice token 1i32 (byte_len token - 1i32)
+:= progress_of (~token : string) : i32 = $'(!token).trim().trim_end_matches("u32").parse::<i32>().unwrap_or(0)' : i32
+
+:~ backlog_task_at (text : string) (arguments : i32) (length : i32) : backlog_task =
+    := field = tuple_field text arguments length
+    := id = unquoted (field 0i32)
+    {
+        id = id
+        title = unquoted (field 1i32)
+        kind = field 2i32
+        priority = level_of (field 3i32)
+        difficulty = level_of (field 4i32)
+        status = field 6i32
+        deps = unquoted (field 7i32)
+        tags = unquoted (field 8i32)
+        estimate = $'agile_planning_fields::rig_agile_planning_minutes_near(&!text, &!id, !arguments)' : i32
+        progress = progress_of (field 5i32)
+        idle_days = 0i32
+        asked = !-
+        parent = ""
+    }
+
+:~ ^ ids_text (tasks : task_list) (~kept : string) : string =
+    ?= tasks ?|
+    | NoTasks => kept
+    | TaskThen (task, rest) => ids_text rest (? kept = "" ?> task.id |: kept ++# "\n" ++# task.id)
+
+:~ ^ annotated_from
+    (notes : array_base agile_task_annotation.annotation.task_annotation) (tasks : task_list) (at : i32)
+    : task_list
+    =
+    ?= tasks ?|
+    | NoTasks => NoTasks
+    | TaskThen (task, rest) =>
+        := note = am'.index_base at notes
+        := annotated = { task ?| idle_days = note.idle_days; parent = note.parent; asked = note.asked }
+        TaskThen (annotated, annotated_from notes rest (at + 1i32))
+
+:~ annotated_tasks (~root : string) (~text : string) (now_hour : i64) (tasks : task_list) : task_list =
+    := ids = ids_text tasks ""
+    annotated_from (agile_task_annotation.annotation.annotations_of (root, text, ids, now_hour)) tasks 0i32
+
+:~ ^ tasks_from (text : string) (offset : i32) (length : i32) (tasks : task_list) : task_list =
+    := found = byte_find_from text (task_marker ()) offset
+    ? found < 0i32
+    ?> tasks
+    |:
+        := arguments = (found + (task_arguments_offset ()))
+        ? declared_task text found
+        ?> tasks_from text arguments length (TaskThen (backlog_task_at text arguments length, tasks))
+        |: tasks_from text arguments length tasks
+
+:~ ^ ranked_count (list : ranked_list) (counted : i32) : i32 =
+    ?= list ?|
+    | NoRanked => counted
+    | RankedThen (_, rest) => ranked_count rest (counted + 1i32)
+
+:== next_request =
+    {
+        role : rank_role
+        limit : i32
+        filters : string
+        load : string
+        json : bool
+    }
+
+:~ ^ rows_of (list : ranked_list) (limit : i32) (kept : array agile_next_print.next_print.next_row)
+    : array agile_next_print.next_print.next_row
+    =
+    ?= list ?|
+    | NoRanked => kept
+    | RankedThen (item, rest) =>
+        ? am'.length kept >= limit
+        ?> kept
+        |:
+            := row =
+                {
+                    id = item.id; title = item.title; priority = item.priority; difficulty = item.difficulty
+                    minutes = item.minutes; estimated = item.estimated; unblocks = item.unblocks; key = item.key
+                    parent = item.parent
+                }
+            rows_of rest limit (kept ++ ;[ row ])
+
+:~ ^ listed_at (ids : array_base string) (~id : string) (at : i32) : bool =
+    ? at >= am'.length_base ids
+    ?> !-
+    |? am'.index_base at ids = id
+    ?> !+
+    |: listed_at ids id (at + 1i32)
+
+:= next_failure (~reason : string) : i32 =
+    stderr_failure (rust_std_string.model.concat5 "agile next rejected: " reason "" "" "")
+
+:~ agile_next (~root : string) (request : next_request) : i32 =
+    := role = request.role
+    := limit = request.limit
+    := started = unix_ms ()
+    ?= probe (unchecked (backlog_state_path root)) ?|
+    | FileMissing _ => next_failure "state/agile.spi is missing"
+    | FileReadable file =>
+        := text = records_text (loaded_string (read_text file))
+        := length = byte_len text
+        := malformed = first_malformed_task text 0i32 length
+        ? malformed < 0i32 ?>
+            := holding = agile_waits_hold.hold.holding_ids (root, text)
+            := waiting = \ (id : string) => listed_at holding id 0i32
+            := list =
+                ranking_where role
+                    \ task =>
+                        task_passes request.filters task && loads_pass text task.id (load_words request.load) 0i32
+                        && waiting task.id |> not
+                    (
+                        annotated_tasks root text (conv (started / 3600000u64))
+                            (tasks_from text 0i32 length NoTasks)
+                    )
+            := rows = rows_of list limit ;[] |> am'.base
+            := main_agent = ? role = MainAgent ?> !+ |: !-
+            := elapsed = ms_since started
+            := code =
+                agile_next_print.next_print.next_printed
+                    (rows, rank_role_word role, main_agent, request.json, request.load, elapsed, ranked_count list 0i32)
+            := _ = ? request.json ?> 0i32 |: agile_waits_hold.hold.lane_waits_printed (root, request.filters, text)
+            code
+        |: next_failure (rust_std_string.model.concat5 "malformed Task fields at byte " (i32_text malformed) "" "" "")
+
+:~ agile_next_entry () : i32 =
+    := parsed, reason, role, limit, filters, load, json =
+        $'rig_agile_next_args::rig_agile_next_request()' : bool * string * string * i32 * string * string * bool
+    ? parsed ?>
+        := request =
+            {
+                role = (? role = "subagent" ?> Subagent |: MainAgent)
+                limit = limit
+                filters = filters
+                load = load
+                json = json
+            }
+        agile_next (argument_owned 1i32) request
+    |: next_failure reason
+:= main () : i32 =
+    export "rig_agile_next_run" ((\ () => agile_next_entry ()) : () -> i32)
+    := _ = agile_next_entry ()
+    0i32

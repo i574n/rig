@@ -1,0 +1,23 @@
+[package.metadata.spiral]
+entry = "launch.spi"
+output = "launch.rs"
+
+[package]
+name = "rig-job-launch"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_launch"
+path = "launch.rs"
+
+[dependencies]
+rig-job-state = { path = "../rig_job_state" }
+rig-job-summary = { path = "../rig_job_summary" }
+rig-job-create = { path = "../rig_job_create" }
+rig-job-start-args = { path = "../rig_job_start_args" }
+rig-machine-windows = { path = "../rig_machine_windows" }
+rig-job-supervise = { path = "../rig_job_supervise" }
+rig-job-host = { path = "../rig_job_host" }

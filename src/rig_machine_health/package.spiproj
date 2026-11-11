@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    rig_jobs
+    rig_machine_windows
+    rig_machine_watch_model
+    rust_std_env
+    rig_machine_watch
+    rig_os_machine
+modules:
+    health

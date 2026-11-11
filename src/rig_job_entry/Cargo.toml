@@ -1,0 +1,33 @@
+[package.metadata.spiral]
+entry = "entry.spi"
+output = "entry.rs"
+
+[package]
+name = "rig-job-entry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_entry"
+path = "entry.rs"
+
+[dependencies]
+rig-process-alive = { path = "../rig_process_alive" }
+rig-job-dispatch = { path = "../rig_job_dispatch" }
+rig-job-chain = { path = "../rig_job_chain" }
+rig-job-serial = { path = "../rig_job_serial" }
+rig-job-control = { path = "../rig_job_control" }
+rig-job-rechain = { path = "../rig_job_rechain" }
+rig-jobs-doctor = { path = "../rig_jobs_doctor" }
+rig-job-supervise = { path = "../rig_job_supervise" }
+rig-job-launch = { path = "../rig_job_launch" }
+rig-job-host = { path = "../rig_job_host" }
+rig-job-state = { path = "../rig_job_state" }
+rig-job-summary = { path = "../rig_job_summary" }
+rig-machine-windows = { path = "../rig_machine_windows" }
+rig-job-gate = { path = "../rig_job_gate" }
+rig-job-host-request = { path = "../rig_job_host_request" }
+rig-job-query = { path = "../rig_job_query" }
+rig-job-coordinator = { path = "../rig_job_coordinator" }

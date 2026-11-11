@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "scope_run.spi"
+output = "scope_run.rs"
+
+[package]
+name = "rig-proof-scope"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_proof_scope"
+path = "scope_run.rs"
+
+[dependencies]
+rig-proof-scope-manifests = { path = "../rig_proof_scope_manifests" }

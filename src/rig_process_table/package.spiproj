@@ -1,0 +1,14 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_receipt
+    rig_machine_watch
+    rig_machine_watch_model
+    rig_jobs
+modules:
+    ownership
+    model
+    host
+    listing
+    run

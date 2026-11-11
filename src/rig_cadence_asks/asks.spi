@@ -1,0 +1,108 @@
+///- --package .
+:# asks static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| ask_priority =
+    | UrgentAsk :: ask_priority
+    | HighAsk :: ask_priority
+    | LowerAsk :: ask_priority
+
+:== neglected_ask = { id : string; priority : ask_priority; asked_on : string; idle_hours : i64 }
+
+:= priority_word = \|
+    | UrgentAsk => "P0"
+    | HighAsk => "P1"
+    | LowerAsk => "lower"
+
+:= groomed = \|
+    | LowerAsk => !-
+    | _ => !+
+
+:~ priority_of (~word : string) : ask_priority =
+    ? word = "P0"
+    ?> UrgentAsk
+    |? word = "P1"
+    ?> HighAsk
+    |: LowerAsk
+
+:~ task_priority (~line : string) : option (string * ask_priority) =
+    := parts = sm'.split "\"" line |> array
+    := count = am'.length parts
+    ? sm'.starts_with "inl " line |> not || sm'.contains "() = Task (" line |> not || count < 10i32
+    ?> None
+    |:
+        := words = sm'.split_list "," (am'.index (count - 9i32) parts) |> listm.map sm'.trim
+        := found = \ (best : ask_priority) (w : string) => ? w = "P0" || w = "P1" ?> priority_of w |: best
+        Some (am'.index 1i32 parts, words |> listm.fold found LowerAsk)
+
+:~ priorities_of (~text : string) : list (string * ask_priority) =
+    := kept = \ (acc : list (string * ask_priority)) (line : string) =>
+        ?= task_priority line ?|
+        | Some found => found :: acc
+        | None => acc
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold kept [] |> listm.rev
+
+:~ priority_in (rows : list (string * ask_priority)) (~id : string) : ask_priority =
+    rows |> listm.fold (\ best (key, p) => ? key = id ?> p |: best) LowerAsk
+
+:~ team_tagged (~team : string) (~tags : string) : bool =
+    team = "" || sm'.split_list "," tags |> listm.map sm'.trim |> listm'.contains ("team:" ++# team)
+
+:~ ^ neglected_from
+    (rows : array_base agile_quality_state.state_rows.cadence_row) (at : i32)
+    (context : list (string * ask_priority) * list agile_task_asks.asks.user_ask * i64 * i64 * string)
+    (acc : list neglected_ask)
+    : list neglected_ask
+    =
+    ? at < 0i32
+    ?> acc
+    |:
+        := priorities, asks, now_hour, days, team = context
+        := r = am'.index_base at rows
+        := priority = priority_in priorities r.id
+        := asked_for = \ found (a : agile_task_asks.asks.user_ask) => ? a.item = r.id ?> Some a |: found
+        := next =
+            ?= asks |> listm.fold asked_for None ?|
+            | Some a ?& r.status = "Planned" && groomed priority && team_tagged team r.tags =>
+                := asked_hour = agile_quality_state.state_rows.stamp_hour (a.asked_on ++# "T00:00Z")
+                := touched = ? r.last_note_hour > asked_hour ?> r.last_note_hour |: asked_hour
+                := idle = now_hour - touched
+                ? idle >= days * 24i64
+                ?> { id = r.id; priority = priority; asked_on = a.asked_on; idle_hours = idle } :: acc
+                |: acc
+            | _ => acc
+        neglected_from rows (at - 1i32) context next
+
+:~ ask_line (n : neglected_ask) : string =
+    "rig agile cadence neglected-ask id=" ++# n.id ++# " priority=" ++# priority_word n.priority ++# " asked="
+    ++# n.asked_on ++# " idle_days=" ++# sm'.show (n.idle_hours / 24i64)
+
+:~ asks_report
+    ((text, asks_text, now_hour, days, team) : string * string * i64 * i64 * string)
+    : array_base string
+    =
+    := rows = agile_quality_state.state_rows.cadence_of text
+    := asks = am'.to_list_base' (agile_task_asks.asks.asks_of asks_text) |> listm'.unbox
+    := context = priorities_of text, asks, now_hour, days, team
+    neglected_from rows (am'.length_base rows - 1i32) context [] |> listm.map ask_line |> listm'.box |> listm'.to_array'
+
+///> rust
+:# planned_p0_p1_user_asks_untouched_for_days_are_listed =
+    := task = \ (id : string) (p : string) (status : string) =>
+        "inl t () = Task (\"" ++# id ++# "\", \"t\", Story, " ++# p ++# ", D3, 0u32, " ++# status ++# ", \"\", "
+        ++# "\"team:kit\", \"current\", \"current\")"
+    := note = "inl note_of_b_1 () = Note (\"B\", 1u32, \"2026-11-05T10:00Z\", \"kit\", \"touched\")"
+    := text = sm'.concat_list "\n" [ task "A" "P1" "Planned"; task "B" "P0" "Planned"; task "C" "P2" "Planned"; note ]
+    := asked = \ (id : string) => "inl a () = Asked (\"" ++# id ++# "\", \"2026-11-01\", \"do it\")"
+    := asks_text = sm'.concat_list "\n" [ asked "A"; asked "B"; asked "C" ]
+    := now_hour = agile_quality_state.state_rows.stamp_hour "2026-11-06T12:00Z"
+    := lines = asks_report (text, asks_text, now_hour, 3i64, "") |> am'.to_list_base' |> listm'.unbox
+    testing.expect (lines = [ "rig agile cadence neglected-ask id=A priority=P1 asked=2026-11-01 idle_days=5" ]) "A"
+    testing.expect (task_priority (task "X" "P0" "Active") = Some ("X", UrgentAsk)) "the priority cell"
+    := other_team = asks_report (text, asks_text, now_hour, 3i64, "x") |> am'.length_base
+    testing.expect (other_team = 0i32) "--team x drops kit asks"
+:= main () : i32 =
+    export "rig_cadence_asks_report" asks_report
+    0i32

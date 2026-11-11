@@ -1,0 +1,36 @@
+:< sm'_operators
+:< model
+
+:~ report_lines (report : module_report) : list string =
+    := head =
+        "layers / "
+        ++# report.module
+        ++# " "
+        ++# report.word
+        ++# " macros="
+        ++# sm'.show report.macros
+        ++# " violations="
+        ++# sm'.show (violation_count report)
+    head :: (report.violations |> listm.map (\ (v : string) => "    " ++# v))
+
+:~ table_count (table : string) : i32 = listm.length (table_rows table)
+
+:~ table_problems (table : string) : array_base string =
+    := unknown = \ (found : list string) (row : layer_row) =>
+        ?= row.layer ?|
+        | None => listm.append found [ "layers / table: unknown layer " ++# row.word ++# " for " ++# row.module ]
+        | Some _ => found
+    table_rows table |> listm.fold unknown [] |> listm'.box |> listm'.to_array'
+
+:~ module_lines ((table, name, text) : string * string * string) : array_base string =
+    report_lines (module_checked (table_rows table) name text) |> listm'.box |> listm'.to_array'
+
+:~ module_violations ((table, name, text) : string * string * string) : i32 =
+    violation_count (module_checked (table_rows table) name text)
+
+:= main () : i32 =
+    export "rig_layers_table_count" table_count
+    export "rig_layers_table_problems" table_problems
+    export "rig_layers_module_lines" module_lines
+    export "rig_layers_module_violations" module_violations
+    0i32

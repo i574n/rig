@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_ci_model
+modules:
+    model
+    parity
+    entry

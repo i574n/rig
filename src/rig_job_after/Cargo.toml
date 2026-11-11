@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "after.spi"
+output = "after.rs"
+
+[package]
+name = "rig-job-after"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_after"
+path = "after.rs"
+
+[dependencies]
+rig-process-alive = { path = "../rig_process_alive" }

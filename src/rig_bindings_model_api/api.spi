@@ -1,0 +1,4 @@
+:= rig_bindings_module_of (~crate : string) (~text : string) : string =
+    $'rig_bindings_model::rig_bindings_module_of(&*!crate, &*!text)' : string
+:= rig_bindings_counted (~text : string) : i32 * i32 =
+    $'rig_bindings_model::rig_bindings_counted(&*!text)' : i32 * i32

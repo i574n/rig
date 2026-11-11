@@ -1,0 +1,15 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    rig_jobs
+    rig_machine_windows
+    rig_machine_watch_model
+    rust_std_env
+    rig_net_topology
+link:
+    rig_net_topology
+modules:
+    host
+    jobs_watch
+    run

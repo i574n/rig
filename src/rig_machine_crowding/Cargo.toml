@@ -1,0 +1,16 @@
+[package.metadata.spiral]
+entry = "crowding.spi"
+output = "crowding.rs"
+
+[package]
+name = "rig-machine-crowding"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_machine_crowding"
+path = "crowding.rs"
+
+[dependencies]

@@ -1,0 +1,19 @@
+[package.metadata.spiral]
+entry = "memory.spi"
+output = "memory.rs"
+
+[package]
+name = "rig-memory"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_memory"
+path = "memory.rs"
+
+[dependencies]
+rig-memory-save = { path = "../rig_memory_save" }
+rig-memory-query = { path = "../rig_memory_query" }
+rig-memory-import = { path = "../rig_memory_import" }

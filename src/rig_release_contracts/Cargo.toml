@@ -1,0 +1,20 @@
+[package.metadata.kit]
+test-requires-cli = true
+
+[package.metadata.spiral]
+entry = "main.spi"
+output = "release_contracts.rs"
+
+[package]
+name = "rig-release-contracts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_release_contracts"
+path = "release_contracts.rs"
+
+[dev-dependencies]
+rig-release-hygiene = { path = "../rig_release_hygiene" }

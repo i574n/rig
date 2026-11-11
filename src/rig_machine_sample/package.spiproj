@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rust_std_string
+    rig_machine_watch_model
+    rig_jobs
+    rig_os_launch
+modules:
+    sample
+    entry

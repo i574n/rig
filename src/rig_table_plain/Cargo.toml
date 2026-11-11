@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "plain.spi"
+output = "plain.rs"
+
+[package]
+name = "rig-table-plain"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_table_plain"
+path = "plain.rs"
+
+[dependencies]
+rig-table-text = { path = "../rig_table_text" }

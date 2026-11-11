@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_receipt
+    rig_do_records
+modules:
+    host

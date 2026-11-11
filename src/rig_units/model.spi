@@ -1,0 +1,268 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| unit_kind =
+    | Plain
+    | Model
+    | Boundary
+    | Feature
+    | Bin
+
+:== unit =
+    {
+        name : string
+        kind : unit_kind
+        packages : list string
+        links : list string
+        deps : list string
+        entry : string
+        modules : list string
+    }
+
+:| units_finding =
+    | LinkNotInPackages :: string * string -> units_finding
+    | LinkWithoutCargoDep :: string * string -> units_finding
+    | HostCallDep :: string * string -> units_finding
+    | MemberMissing :: string -> units_finding
+    | MemberWithoutUnit :: string -> units_finding
+    | KindEdge :: string * string -> units_finding
+    | EntryNotNamedAfterUnit :: string * string -> units_finding
+    | DuplicateModule :: string * string -> units_finding
+
+:~ kind_of_word (~word : string) : unit_kind =
+    ? word = "model"
+    ?> Model
+    |? word = "boundary"
+    ?> Boundary
+    |? word = "feature"
+    ?> Feature
+    |? word = "bin"
+    ?> Bin
+    |: Plain
+
+:~ entry_name (~raw : string) : string =
+    := t = sm'.trim raw |> sm'.replace "\\" "/"
+    := a = ? sm'.starts_with "|" t ?> sm'.substring 1i32 (sm'.length t - 1i32) t |: t
+    := b = ? sm'.ends_with "-" a ?> sm'.substring 0i32 (sm'.length a - 1i32) a |: a
+    := c = ? sm'.ends_with "/" b ?> sm'.substring 0i32 (sm'.length b - 1i32) b |: b
+    := at = sm'.last_index_of "/" c
+    ? at < 0i32 ?> c |: sm'.substring (at + 1i32) (sm'.length c - at - 1i32) c
+
+:~ lines_of (~text : string) : list string = sm'.split_list "\n" (sm'.replace "\r" "" text)
+
+:~ spiproj_section (~text : string) (~section : string) : list string =
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        ? sm'.starts_with (section ++# ":") line
+        ?> found, !+
+        |? inside && sm'.starts_with "    " line && sm'.trim line <> ""
+        ?> listm.append found [ entry_name line ], !+
+        |? sm'.trim line = ""
+        ?> found, inside
+        |: found, !-
+    := found, _ = lines_of text |> listm.fold step ([], !-)
+    found
+
+:~ quoted_items (~inner : string) : list string =
+    := item = \ (raw : string) => sm'.trim raw |> sm'.replace "'" "" |> sm'.replace "\"" "" |> sm'.replace "]" ""
+    sm'.split_list "," inner |> listm.map item |> listm'.filter (\ (s : string) => s <> "") |> listm.map entry_name
+
+:~ toml_list (~text : string) (~key : string) : list string =
+    := pick = \ (found : list string) (line : string) =>
+        := plain = sm'.trim line
+        := open_at = sm'.index_of "[" plain
+        := close_at = sm'.last_index_of "]" plain
+        ? sm'.starts_with (key ++# " = [") plain && close_at > open_at
+        ?> listm.append found (quoted_items (sm'.substring (open_at + 1i32) (close_at - open_at - 1i32) plain))
+        |: found
+    lines_of text |> listm.fold pick []
+
+:~ toml_block (~text : string) (~key : string) : list string =
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        := plain = sm'.trim line
+        ? sm'.starts_with (key ++# " = '''") plain
+        ?> found, !+
+        |? inside && plain = "'''"
+        ?> found, !-
+        |? inside && plain <> ""
+        ?> listm.append found [ plain ], !+
+        |: found, inside
+    := found, _ = lines_of text |> listm.fold step ([], !-)
+    found
+
+:~ quoted_after (~key : string) (~line : string) : string =
+    := plain = sm'.trim line
+    ? sm'.starts_with (key ++# " = \"") plain |> not
+    ?> ""
+    |:
+        := rest = sm'.substring (sm'.length key + 4i32) (sm'.length plain - sm'.length key - 4i32) plain
+        := close_at = sm'.index_of "\"" rest
+        ? close_at < 0i32 ?> "" |: sm'.substring 0i32 close_at rest
+
+:~ cargo_value (~cargo : string) (~key : string) : string =
+    := first = \ (found : string) (line : string) => ? found <> "" ?> found |: quoted_after key line
+    lines_of cargo |> listm.fold first ""
+
+:~ path_dep (~line : string) : string =
+    := at = sm'.index_of "path = \"" line
+    := rest = ? at < 0i32 ?> "" |: sm'.substring (at + 8i32) (sm'.length line - at - 8i32) line
+    := close_at = sm'.index_of "\"" rest
+    ? at < 0i32 || close_at < 0i32 ?> "" |: entry_name (sm'.substring 0i32 close_at rest)
+
+:~ cargo_path_deps (~cargo : string) : list string =
+    lines_of cargo |> listm.map path_dep |> listm'.filter (\ (d : string) => d <> "")
+
+:~ unit_of (~name : string) (~manifest : string) (toml_form : bool) (~cargo : string) : unit =
+    := listed = \ (key : string) => ? toml_form ?> toml_list manifest key |: spiproj_section manifest key
+    := modules = ? toml_form ?> toml_block manifest "modules" |: spiproj_section manifest "modules"
+    {
+        name = name
+        kind = kind_of_word (cargo_value cargo "kind")
+        packages = listed "packages"
+        links = listed "link"
+        deps = cargo_path_deps cargo
+        entry = cargo_value cargo "entry"
+        modules = modules
+    }
+
+:~ members_of (~workspace : string) : list string =
+    := head = "members = ["
+    := step = \ ((found, inside) : list string * bool) (line : string) =>
+        := plain = sm'.trim line
+        := closed = sm'.ends_with "]" plain
+        ? sm'.starts_with head plain
+        ?> listm.append found (quoted_items (sm'.replace head "" plain)), (closed |> not)
+        |? inside && sm'.starts_with "]" plain
+        ?> found, !-
+        |? inside
+        ?> listm.append found (quoted_items plain), !+
+        |: found, !-
+    := found, _ = lines_of workspace |> listm.fold step ([], !-)
+    found
+
+:~ is_unit (units : list unit) (~name : string) : bool = listm'.exists' (\ (u : unit) => u.name = name) units
+
+:~ ^ unit_named (units : list unit) (~name : string) : option unit =
+    ?= units ?|
+    | [] => None
+    | u :: rest => ? u.name = name ?> Some u |: unit_named rest name
+
+:~ kind_allows (from : unit_kind) (target : unit_kind) : bool =
+    ?= from, target ?|
+    | Plain, _ => !+
+    | Bin, _ => !+
+    | Model, _ => !-
+    | Boundary, Model => !+
+    | Boundary, _ => !-
+    | Feature, Boundary => !-
+    | Feature, _ => !+
+
+:~ link_findings (units : list unit) (u : unit) (~link : string) : list units_finding =
+    := listed = ? listm'.contains link u.packages ?> [] |: [ LinkNotInPackages (u.name, link) ]
+    := dep = ? listm'.contains link u.deps ?> [] |: [ LinkWithoutCargoDep (u.name, link) ]
+    := kind =
+        ?= unit_named units link ?|
+        | Some target ?& (kind_allows u.kind target.kind |> not) => [ KindEdge (u.name, link) ]
+        | _ => []
+    listm.append listed (listm.append dep kind)
+
+:~ host_dep (units : list unit) (u : unit) (~dep : string) : bool =
+    is_unit units dep && (listm'.contains dep u.links |> not)
+
+:~ edge_findings (units : list unit) (u : unit) : list units_finding =
+    := add = \ (acc : list units_finding) (l : string) => listm.append acc (link_findings units u l)
+    := links = u.links |> listm.fold add []
+    := hosts = u.deps |> listm'.filter (host_dep units u) |> listm.map (\ (d : string) => HostCallDep (u.name, d))
+    := named = u.kind = Plain || u.entry = u.name ++# ".spi"
+    := entry = ? named ?> [] |: [ EntryNotNamedAfterUnit (u.name, u.entry) ]
+    listm.append links (listm.append hosts entry)
+
+:~ ^ closure_of (units : list unit) (pending : list string) (seen : list string) : list string =
+    ?= pending ?|
+    | [] => seen
+    | name :: rest ?& listm'.contains name seen => closure_of units rest seen
+    | name :: rest =>
+        := links = ?= unit_named units name ?| | Some u => u.links | None => []
+        closure_of units (listm.append rest links) (listm.append seen [ name ])
+
+:~ module_pairs (units : list unit) (~name : string) : list (string * string) =
+    ?= unit_named units name ?|
+    | Some o => o.modules |> listm.map (\ (m : string) => m, o.name)
+    | None => []
+
+:~ duplicate_findings (units : list unit) (u : unit) : list units_finding =
+    := gather = \ (acc : list (string * string)) (name : string) => listm.append acc (module_pairs units name)
+    := pairs = closure_of units [ u.name ] [] |> listm.fold gather []
+    := clash = \ (found : list string) ((m, owner) : string * string) =>
+        := twice = listm'.exists' (\ ((n, by) : string * string) => n = m && by <> owner) pairs
+        ? twice && (listm'.contains m found |> not) ?> listm.append found [ m ] |: found
+    pairs |> listm.fold clash [] |> listm.map (\ (m : string) => DuplicateModule (u.name, m))
+
+:~ member_findings (units : list unit) (members : list string) : list units_finding =
+    := unlisted = \ (u : unit) => listm'.contains u.name members |> not
+    := missing = units |> listm'.filter unlisted |> listm.map (\ (u : unit) => MemberMissing u.name)
+    := stray = members |> listm'.filter (\ (m : string) => is_unit units m |> not)
+    listm.append missing (stray |> listm.map (\ (m : string) => MemberWithoutUnit m))
+
+:~ findings_of (units : list unit) (members : list string) : list units_finding =
+    := per = \ (acc : list units_finding) (u : unit) =>
+        listm.append acc (listm.append (edge_findings units u) (duplicate_findings units u))
+    listm.append (units |> listm.fold per []) (member_findings units members)
+
+:~ hard (f : units_finding) : bool = ?= f ?| | HostCallDep _ => !- | _ => !+
+
+:~ finding_line (f : units_finding) : string =
+    := row = \ (u : string) (word : string) (x : string) =>
+        "units / " ++# u ++# " " ++# word ++# (? x = "" ?> "" |: " " ++# x)
+    ?= f ?|
+    | LinkNotInPackages (u, x) => row u "link-not-in-packages" x
+    | LinkWithoutCargoDep (u, x) => row u "link-without-cargo-dep" x
+    | HostCallDep (u, x) => row u "host-call-dep" x
+    | MemberMissing u => row u "member-missing" ""
+    | MemberWithoutUnit m => row m "member-without-unit" ""
+    | KindEdge (u, x) => row u "kind-edge" x
+    | EntryNotNamedAfterUnit (u, x) => row u "entry-not-named-after-unit" x
+    | DuplicateModule (u, m) => row u "duplicate-module" m
+
+///> rust
+:# both_manifest_forms_parse_into_the_same_unit_shape =
+    := toml_head = "packageDir = '../lib'\npackages = ['|core-', 'spiral-', '../tu_model-']\n"
+    := toml = toml_head ++# "link = ['../tu_model-']\nmodules = '''\nfeature\ntu_feature\n'''\n"
+    := meta = "[package.metadata.spiral]\nentry = \"tu_feature.spi\"\nkind = \"feature\"\n"
+    := cargo = meta ++# "[dependencies]\ntu_model = { path = \"../tu_model\" }\n"
+    := u = unit_of "tu_feature" toml !+ cargo
+    testing.expect (u.packages = [ "core"; "spiral"; "tu_model" ] && u.links = [ "tu_model" ]) "toml lists"
+    testing.expect (u.modules = [ "feature"; "tu_feature" ] && u.deps = [ "tu_model" ]) "toml modules and deps"
+    testing.expect (u.kind = Feature && u.entry = "tu_feature.spi") "toml kind and entry"
+    := proj_head = "packages:\n    |core-\n    spiral-\n    rig_jobs\n    rig_path_first\n"
+    := spiproj = proj_head ++# "link:\n    rig_path_first\nmodules:\n    env_adopt\n"
+    := v = unit_of "rig_job_env" spiproj !- "[dependencies]\nrig-path-first = { path = \"../rig_path_first\" }\n"
+    testing.expect (v.links = [ "rig_path_first" ] && v.deps = [ "rig_path_first" ] && v.kind = Plain) "spiproj"
+    testing.expect (members_of "[workspace]\nmembers = [\n    \"a\",\n    \"b\",\n]\n" = [ "a"; "b" ]) "members"
+    testing.expect (members_of "members = [\"a\", \"b\"]\nother = 1\n" = [ "a"; "b" ]) "one-line members"
+
+///> rust
+:# each_rule_reports_its_own_finding =
+    := base =
+        {
+            name = "f"; kind = Feature; packages = [ "m" ]; links = [ "m" ]; deps = [ "m" ]; entry = "f.spi"
+            modules = [ "f" ]
+        }
+    := m =
+        { base ?| name = "m"; kind = Model; packages = []; links = []; deps = []; entry = "m.spi"; modules = [ "m" ] }
+    testing.expect (findings_of [ base; m ] [ "f"; "m" ] = []) "a clean graph"
+    := b = { m ?| name = "b"; kind = Boundary; entry = "b.spi"; modules = [ "b" ] }
+    := bad = { base ?| packages = []; links = [ "b" ]; deps = [ "x" ]; entry = "unit.spi"; modules = [ "b" ] }
+    := lines = findings_of [ bad; b; m ] [ "f"; "b"; "q" ] |> listm.map finding_line
+    testing.expect (listm'.contains "units / f link-not-in-packages b" lines) "listed"
+    testing.expect (listm'.contains "units / f link-without-cargo-dep b" lines) "cargo"
+    testing.expect (listm'.contains "units / f kind-edge b" lines) "a feature never links a boundary"
+    testing.expect (listm'.contains "units / f entry-not-named-after-unit unit.spi" lines) "entry"
+    testing.expect (listm'.contains "units / f duplicate-module b" lines) "a module twice in one closure"
+    testing.expect (listm'.contains "units / m member-missing" lines) "a unit without a member"
+    testing.expect (listm'.contains "units / q member-without-unit" lines) "a member without a unit"
+    := host = findings_of [ { base ?| deps = [ "m"; "b" ] }; b; m ] [ "f"; "b"; "m" ]
+    testing.expect (host = [ HostCallDep ("f", "b") ]) "a host call dep is counted"
+    testing.expect (hard (HostCallDep ("f", "b")) |> not && hard (MemberMissing "m")) "and is not a refusal"

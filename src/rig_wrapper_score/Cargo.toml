@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "wrappers.spi"
+output = "wrappers.rs"
+
+[package]
+name = "rig-wrapper-score"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_wrapper_score"
+path = "wrappers.rs"
+
+[dependencies]
+rig-wrapper-score-model = { path = "../rig_wrapper_score_model" }

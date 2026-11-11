@@ -1,0 +1,23 @@
+[package.metadata.spiral]
+entry = "routes.spi"
+output = "routes.rs"
+
+[package]
+name = "rig-cli-routes"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_cli_routes"
+path = "routes.rs"
+[dependencies]
+rig-repo-state = { path = "../rig_repo_state" }
+rig-repo-affected = { path = "../rig_repo_affected" }
+rig-repo-accept-review = { path = "../rig_repo_accept_review" }
+rig-table-query = { path = "../rig_table_query" }
+rig-table-logs = { path = "../rig_table_logs" }
+rig-table-sequences = { path = "../rig_table_sequences" }
+rig-table-test = { path = "../rig_table_test" }
+rig-proof-scope = { path = "../rig_proof_scope" }

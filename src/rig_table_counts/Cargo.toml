@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "counts.spi"
+output = "table_counts.rs"
+
+[package]
+name = "rig-table-counts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_table_counts"
+path = "table_counts.rs"
+
+[dependencies]
+rig-log-counts = { path = "../rig_log_counts" }

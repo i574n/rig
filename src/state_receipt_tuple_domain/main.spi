@@ -1,0 +1,23 @@
+///- --package .
+:# main static =
+    :< sm'_operators
+
+///> rust
+:# receipt_rows_split_into_snapshot_and_module_tuples =
+    := snapshot_kind, snapshot_value, snapshot_extra0, snapshot_extra1, snapshot_extra2 =
+        receipt_row_tuple "snapshot\t42"
+    testing.expect (snapshot_kind = "snapshot" && snapshot_value = "42") "a snapshot row"
+    := extras = snapshot_extra0 ++# snapshot_extra1 ++# snapshot_extra2
+    testing.expect (extras = "") "a snapshot has no extra fields"
+    := tuple_kind, tuple_path, tuple_bytes, tuple_fingerprint, tuple_attestation =
+        receipt_row_tuple "module\talpha.spi\t12\t34\tbuild:99"
+    testing.expect (tuple_kind = "module" && tuple_path = "alpha.spi" && tuple_bytes = "12") "a module row"
+    testing.expect (tuple_fingerprint = "34" && tuple_attestation = "build:99") "fingerprint and attestation"
+    := bad_kind, _, _, _, _ = receipt_row_tuple "module\talpha.spi\t12\t34\tbuild:99\textra"
+    testing.expect (bad_kind = "") "an extra field rejects the row"
+
+:= main () : i32 =
+    export
+        "rig_state_receipt_row_tuple"
+        ((\ value => receipt_row_tuple value) : string -> string * string * string * string * string)
+    0i32

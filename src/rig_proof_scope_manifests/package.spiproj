@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    rig_proof_scope_toml
+link:
+    rig_proof_scope_toml
+modules:
+    manifest
+    manifest_walk

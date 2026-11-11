@@ -1,0 +1,98 @@
+:< sm'_operators
+
+:~ git_run (~root : string) (args : list string) : option string =
+    := run = process.captured_by "git" (listm.append [ "-C"; root ] args) !-
+    ? run.ran && run.code = 0i32 ?> Some run.stdout |: None
+
+:~ listed (~output : string) : list string =
+    sm'.split_list "\n" (sm'.replace "\r" "" output) |> listm.map sm'.trim |> listm'.filter (\ (l : string) => l <> "")
+
+:~ stem_of (~path : string) : string =
+    := file = sm'.split_list "/" path |> listm.fold (\ (_ : string) (p : string) => p) ""
+    := at = sm'.last_index_of "." file
+    ? at <= 0i32 ?> file |: sm'.substring 0i32 at file
+
+:~ lines_of (rows : array_base string) : list string = am'.to_list_base' rows |> listm'.unbox
+
+:== layers_tree = { files : string; changed : string; untracked : string }
+
+:~ tree_of (~root : string) : option layers_tree =
+    := spiral = [ "--"; "*.spi"; "*.spir" ]
+    := files = git_run root (listm.append [ "ls-files"; "--cached"; "--others"; "--exclude-standard" ] spiral)
+    := changed = git_run root (listm.append [ "diff"; "--name-only"; "--relative"; "HEAD" ] spiral)
+    := untracked = git_run root (listm.append [ "ls-files"; "--others"; "--exclude-standard" ] spiral)
+    ?= files, changed, untracked ?|
+    | Some f, Some c, Some u => Some { files = f; changed = c; untracked = u }
+    | _ => None
+
+:~ violations_in (~table_text : string) (paths : list string) (text_at : string -> string) : i32 =
+    := counted = \ (sum : i32) (p : string) =>
+        sum + rig_standards_layers_model.scan.module_violations (table_text, stem_of p, text_at p)
+    paths |> listm.fold counted 0i32
+
+:~ layers_measured (~root : string) (~table : string) (~table_text : string) (tree : layers_tree) : i32 =
+    := table_file = "/" ++# sm'.replace "\\" "/" table
+    := paths = listed tree.files |> listm'.filter (\ (p : string) => sm'.ends_with ("/" ++# p) table_file |> not)
+    := base = sm'.replace "\\" "/" root
+    := now = \ (p : string) => file_system.read_text_or_empty (base ++# "/" ++# p)
+    := changed = listed tree.changed
+    := fresh = listed tree.untracked
+    := before = \ (p : string) =>
+        ? listm'.contains p changed ?> optionm'.default_value "" (git_run root [ "show"; "HEAD:./" ++# p ]) |: now p
+    := head_paths = paths |> listm'.filter (\ (p : string) => listm'.contains p fresh |> not)
+    lines_of (rig_standards_layers_model.scan.table_problems table_text) |> listm.iter console.write_line
+    := printed = \ (unassigned : i32) (p : string) =>
+        := lines = lines_of (rig_standards_layers_model.scan.module_lines (table_text, stem_of p, now p))
+        lines |> listm.iter console.write_line
+        := loose = lines |> listm'.exists' (\ (l : string) => sm'.contains " unassigned macros=" l)
+        ? loose ?> unassigned + 1i32 |: unassigned
+    := unassigned = paths |> listm.fold printed 0i32
+    := total = violations_in table_text paths now
+    := baseline = violations_in table_text head_paths before
+    := summary =
+        " modules="
+        ++# sm'.show (listm.length paths : i32)
+        ++# " unassigned="
+        ++# sm'.show unassigned
+        ++# " violations="
+        ++# sm'.show total
+        ++# " baseline="
+        ++# sm'.show baseline
+    ? total > baseline ?>
+        console.write_line ("rig standards layers refused: violations grew past the HEAD baseline;" ++# summary)
+        1i32
+    |:
+        console.write_line ("rig standards layers ok" ++# summary)
+        0i32
+
+:~ layers_checked (~root : string) (~table : string) : i32 =
+    := table_text = file_system.read_text_or_empty table
+    ? rig_standards_layers_model.scan.table_count table_text = 0i32 ?>
+        console.write_error_line ("rig error: standards --layers: no LayerRow rows in " ++# table)
+        2i32
+    |:
+        ?= tree_of root ?|
+        | Some tree => layers_measured root table table_text tree
+        | None =>
+            := why = "; the baseline needs HEAD"
+            console.write_error_line ("rig error: standards --layers: git could not list " ++# root ++# why)
+            2i32
+
+:~ ^ table_flag (words : list string) (~found : string) : string =
+    ?= words ?|
+    | word :: value :: rest ?& word = "--table" => table_flag rest value
+    | _ :: rest => table_flag rest found
+    | [] => found
+
+:~ layers_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: rest =>
+        := given = table_flag rest ""
+        layers_checked root (? given = "" ?> sm'.replace "\\" "/" root ++# "/layers.spi" |: given)
+    | _ =>
+        console.write_error_line "rig error: usage: standards --layers <lib root> [--table <layers.spi>]"
+        2i32
+
+:= main () : i32 =
+    export "rig_standards_layers_run" layers_run
+    0i32

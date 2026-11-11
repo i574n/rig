@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "rounds.spi"
+output = "rounds.rs"
+
+[package]
+name = "rig-granular-rounds"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_granular_rounds"
+path = "rounds.rs"
+
+[dependencies]
+rig-style-measure = { path = "../rig_style_measure" }

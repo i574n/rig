@@ -1,0 +1,5 @@
+packages:
+    |core-
+    rig_process_observation
+modules:
+    main

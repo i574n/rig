@@ -1,0 +1,25 @@
+[package.metadata.spiral]
+entry = "lint.spi"
+output = "lint.rs"
+
+[package]
+name = "rig-lint-macros"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_lint_macros"
+path = "lint.rs"
+
+[dependencies]
+rig-lint-scan = { path = "../rig_lint_scan" }
+rig-lint-classify = { path = "../rig_lint_classify" }
+rig-lint-flow = { path = "../rig_lint_flow" }
+rig-lint-walk = { path = "../rig_lint_walk" }
+rig-lint-baseline = { path = "../rig_lint_baseline" }
+rig-lint-flow-constructs = { path = "../rig_lint_flow_constructs" }
+rig-lint-flow-idioms = { path = "../rig_lint_flow_idioms" }
+rig-lint-shadows = { path = "../rig_lint_shadows" }
+rig-lint-args = { path = "../rig_lint_args" }

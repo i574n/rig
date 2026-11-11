@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_wrapper_score_model
+link:
+    rig_wrapper_score_model
+modules:
+    wrappers

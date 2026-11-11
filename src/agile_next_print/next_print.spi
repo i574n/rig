@@ -1,0 +1,101 @@
+///- --package .
+:# next_print static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== next_row =
+    {
+        id : string
+        title : string
+        priority : i32
+        difficulty : i32
+        minutes : i32
+        estimated : bool
+        unblocks : i32
+        key : i32
+        parent : string
+    }
+
+:| next_format =
+    | NextText :: next_format
+    | NextJson :: next_format
+
+:= format_of (json : bool) : next_format = ? json ?> NextJson |: NextText
+
+:~ ^ spaces (count : i32) : string = ? count <= 0i32 ?> "" |: " " ++# spaces (count - 1i32)
+
+:= padded (~text : string) (width : i32) : string = text ++# spaces (width - (sm'.length text : i32))
+
+:= right_aligned (~text : string) (width : i32) : string = spaces (width - (sm'.length text : i32)) ++# text
+
+:~ row_line (main_agent : bool) (rank : i32) (row : next_row) : string =
+    := minutes = sm'.show row.minutes ++# "m" ++# (? row.estimated ?> " " |: "~")
+    := score = ? main_agent ?> "  wsjf=" ++# padded (sm'.show row.key) 7i32 |: ""
+    := head = right_aligned (sm'.show rank) 3i32 ++# "  " ++# padded row.id 28i32 ++# " P" ++# sm'.show row.priority
+    := middle = " D" ++# sm'.show row.difficulty ++# "  " ++# right_aligned minutes 7i32 ++# score
+    := parent = ? row.parent = "" ?> "" |: "  parent=" ++# row.parent
+    := tail = "  unblocks=" ++# padded (sm'.show row.unblocks) 5i32 ++# parent
+    head ++# middle ++# tail ++# "  " ++# sm'.clip 72i32 row.title
+
+:~ row_json (rank : i32) (row : next_row) : string =
+    := head = "{\"rank\":" ++# sm'.show rank ++# ",\"id\":\"" ++# row.id
+    := level = "\",\"priority\":" ++# sm'.show row.priority
+    := sizes =
+        ",\"difficulty\":" ++# sm'.show row.difficulty ++# ",\"minutes\":" ++# sm'.show row.minutes
+        ++# ",\"estimated\":" ++# (? row.estimated ?> "true" |: "false")
+    := rank_part = ",\"wsjf\":" ++# sm'.show row.key ++# ",\"unblocks\":" ++# sm'.show row.unblocks
+    := named = ",\"parent\":\"" ++# row.parent ++# "\",\"title\":\"" ++# row.title ++# "\"}"
+    head ++# level ++# sizes ++# rank_part ++# named
+
+:~ ^ json_items (rows : array_base next_row) (at : i32) (~items : string) : string =
+    ? at >= am'.length_base rows
+    ?> items
+    |:
+        := item = row_json (at + 1i32) (am'.index_base at rows)
+        json_items rows (at + 1i32) (? items = "" ?> item |: items ++# "," ++# item)
+
+:~ ^ lines_printed (main_agent : bool) (rows : array_base next_row) (at : i32) : () =
+    ? at >= am'.length_base rows
+    ?> ()
+    |:
+        console.write_line (row_line main_agent (at + 1i32) (am'.index_base at rows))
+        lines_printed main_agent rows (at + 1i32)
+
+:~ next_printed
+    ((rows, role_word, main_agent, json, load, elapsed_ms, ready)
+        : array_base next_row * string * bool * bool * string * u64 * i32)
+    : i32
+    =
+    := shown = sm'.show (am'.length_base rows)
+    ?= format_of json ?|
+    | NextJson =>
+        := head = "{\"role\":\"" ++# role_word ++# "\",\"ready\":" ++# sm'.show ready ++# ",\"shown\":" ++# shown
+        console.write_line (head ++# ",\"items\":[" ++# json_items rows 0i32 "" ++# "]}")
+    | NextText =>
+        lines_printed main_agent rows 0i32
+        := load = ? load = "all" ?> "" |: " load=" ++# load
+        := counts = " ready=" ++# sm'.show ready ++# " shown=" ++# shown ++# load
+        := elapsed = " elapsed_ms=" ++# sm'.show elapsed_ms
+        console.write_line ("rig agile next ok role=" ++# role_word ++# counts ++# elapsed)
+    0i32
+
+///> rust
+:# a_next_row_prints_as_one_aligned_line_and_one_json_object =
+    := row =
+        {
+            id = "KIT-A"; title = "do it"; priority = 1i32; difficulty = 2i32; minutes = 45i32; estimated = !+
+            unblocks = 0i32; key = 25600i32; parent = "EPIC"
+        }
+    := line = row_line !+ 1i32 row
+    testing.expect (sm'.starts_with "  1  KIT-A" line && sm'.contains "wsjf=25600" line) line
+    testing.expect (sm'.contains "  parent=EPIC  do it" line) line
+    testing.expect (sm'.contains "wsjf=" (row_line !- 1i32 row) = !-) "subagents print no score"
+    := json_head = "{\"rank\":1,\"id\":\"KIT-A\",\"priority\":1,\"difficulty\":2,\"minutes\":45,\"estimated\":true,"
+    := json_tail = "\"wsjf\":25600,\"unblocks\":0,\"parent\":\"EPIC\",\"title\":\"do it\"}"
+    testing.expect (row_json 1i32 row = json_head ++# json_tail) (row_json 1i32 row)
+    testing.expect (padded "ab" 4i32 = "ab  " && right_aligned "ab" 4i32 = "  ab") "padding"
+    testing.expect (padded "abcde" 3i32 = "abcde") "never truncates"
+:= main () : i32 =
+    export "rig_agile_next_printed" next_printed
+    0i32

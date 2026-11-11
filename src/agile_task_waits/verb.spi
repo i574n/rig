@@ -1,0 +1,114 @@
+///- --package .
+:# verb static =
+    :< sm'_operators
+    :< waits
+
+:< sm'_operators
+:< waits
+
+:| wait_change =
+    | WaitSet :: task_wait -> wait_change
+    | WaitCleared :: string -> wait_change
+
+:| waits_write =
+    | WaitsWritten :: i32 -> waits_write
+    | WaitsRefused :: string -> waits_write
+
+:= waits_schema () : string =
+    "///- --no-respell\nunion task_wait =\n" ^^ "    | Waits :: string * string * string -> task_wait\n"
+
+:~ change_item (change : wait_change) : string =
+    ?= change ?|
+    | WaitSet w => w.item
+    | WaitCleared item => item
+
+:~ waits_changed (waits : list task_wait) (change : wait_change) : list task_wait =
+    := kept = waits |> listm'.filter (\ (w : task_wait) => w.item <> change_item change)
+    ?= change ?|
+    | WaitSet w => listm.append kept [ w ]
+    | WaitCleared _ => kept
+
+:~ waits_text (waits : list task_wait) : string =
+    waits_schema () ++# (waits |> listm.map (\ (w : task_wait) => row_of_wait w ++# "\n") |> sm'.concat_list "")
+
+:~ module_added (format : agile_state_fs.project.project_format) (~package_text : string) : option string =
+    ?= agile_state_fs.project.project_with_module format package_text "waits" ?|
+    | agile_state_fs.project.ModuleListed => Some package_text
+    | agile_state_fs.project.ModuleAdded listed => Some listed
+    | agile_state_fs.project.NoModulesSection => None
+
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
+
+:~ replaced (~path : string) (~text : string) : bool =
+    ?= workspace_primitives.files.replace_file_checked path text ?|
+    | workspace_primitives.files.Replaced => !+
+    | _ => !-
+
+:~ waits_written (~root : string) (change : wait_change) : waits_write =
+    := state = sm'.replace "\\" "/" root ++# "/state"
+    := agile_text = text_of (state ++# "/agile.spi")
+    := path = state ++# "/waits.spi"
+    := before = text_of path
+    := item = change_item change
+    := waits = waits_changed (waits_of_text before) change
+    := package = agile_state_fs.project.project_path_in state
+    ? agile_text = ""
+    ?> WaitsRefused ("no backlog state at " ++# state)
+    |? sm'.contains ("Task (\"" ++# item ++# "\"") agile_text |> not
+    ?> WaitsRefused ("no task " ++# item)
+    |? text_of path <> before
+    ?> WaitsRefused "state/waits.spi changed since it was read; run again"
+    |? replaced path (waits_text waits) |> not
+    ?> WaitsRefused "state/waits.spi could not be written"
+    |:
+        ?= module_added (agile_state_fs.project.project_format_in state) (text_of package) ?|
+        | None => WaitsRefused "the state project has no modules section to list waits in"
+        | Some listed =>
+            ? listed = text_of package || replaced package listed
+            ?> WaitsWritten (listm.length waits)
+            |: WaitsRefused "the state project was not updated"
+
+:~ wait_run () : i32 =
+    := usage = "rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"
+    := change =
+        ?= env.command_line_arguments () ?|
+        | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait" && value = "--clear" =>
+            Some (root, WaitCleared item)
+        | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait" =>
+            ?= kind_of_flag value ?|
+            | Some kind => Some (root, WaitSet { item = item; kind = kind })
+            | None => None
+        | _ => None
+    ?= change ?|
+    | None =>
+        console.write_error_line usage
+        2i32
+    | Some (root, c) =>
+        ?= waits_written root c ?|
+        | WaitsWritten count =>
+            console.write_line ("rig agile edit ok id=" ++# change_item c ++# " waits=" ++# sm'.show count)
+            0i32
+        | WaitsRefused reason =>
+            console.write_error_line ("rig error: agile edit --wait: " ++# reason)
+            2i32
+
+:~ waiting_of (text : string) : array_base task_wait = waits_of_text text |> listm'.box |> listm'.to_array'
+
+///> rust
+:# a_task_has_one_wait_row_and_clear_drops_it =
+    := one = waits_changed [] (WaitSet { item = "S7"; kind = WaitsTrain "TRAIN40" })
+    := moved = waits_changed one (WaitSet { item = "S7"; kind = WaitsItem "DELEGATE-2" })
+    testing.expect (moved = [ { item = "S7"; kind = WaitsItem "DELEGATE-2" } ]) "setting again replaces the row"
+    testing.expect (waits_changed moved (WaitCleared "S7") = []) "clear drops it"
+    := row = "inl wait_of_s7 () = Waits (\"S7\", \"train\", \"TRAIN40\")\n"
+    testing.expect (waits_text one = waits_schema () ++# row) "file text"
+    := words = agile_state_fs.project.SpiprojProject
+    testing.expect (module_added words "modules:\n    claims\n" = Some "modules:\n    waits\n    claims\n") "register"
+    testing.expect (module_added words "modules:\n    waits\n" = Some "modules:\n    waits\n") "already listed"
+    testing.expect (module_added words "packages:\n" = None) "no modules section"
+    testing.expect (module_added agile_state_fs.project.TomlProject "modules = '''\nclaims\n'''\n" = Some "modules = '''\nwaits\nclaims\n'''\n") "register in spiral.toml"
+
+:= main () : i32 =
+    export "rig_agile_waits_of" waiting_of
+    export "rig_agile_wait_run" wait_run
+    0i32

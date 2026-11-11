@@ -1,0 +1,11 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    workspace_primitives
+    rig_jobs
+    rig_machine_windows
+    rig_window_announce
+    rig_window_announce_rows
+modules:
+    check

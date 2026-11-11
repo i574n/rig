@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "run.spi"
+output = "do_git.rs"
+
+[package]
+name = "rig-do-git"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_do_git"
+path = "do_git.rs"
+
+[dependencies]
+rig-do-git-reports = { path = "../rig_do_git_reports" }

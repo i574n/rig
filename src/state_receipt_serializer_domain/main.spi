@@ -1,0 +1,13 @@
+///- --package .
+:# main static =
+    :< sm'_operators
+
+///> rust
+:# the_fixture_serializes_to_its_source_and_a_malformed_table_to_an_empty_receipt =
+    testing.expect (receipt_serialize (serializer_fixture_table ()) = serializer_fixture_source ()) "the fixture source"
+    := empty = sm.concat (receipt_header ()) (receipt_footer ())
+    testing.expect (receipt_serialize (serializer_malformed_table ()) = empty) "only the header and footer"
+
+:= main () : i32 =
+    export "rig_state_receipt_serialize" ((\ value => receipt_serialize value) : string -> string)
+    0i32

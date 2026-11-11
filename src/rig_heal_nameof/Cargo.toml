@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "heal.spi"
+output = "heal.rs"
+
+[package]
+name = "rig-heal-nameof"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_heal_nameof"
+path = "heal.rs"
+
+[dependencies]
+rig-nameof-findings = { path = "../rig_nameof_findings" }

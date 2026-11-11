@@ -1,0 +1,13 @@
+packages:
+    |core-
+    spiral-
+    spiral-
+    union_reflection
+    rig_jobs
+    rig_machine_windows
+    rig_tree_lease
+    rig_process_alive
+link:
+    rig_process_alive
+modules:
+    claim

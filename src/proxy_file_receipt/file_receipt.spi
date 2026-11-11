@@ -1,0 +1,28 @@
+///- --package .
+:# file_receipt static =
+    :< workspace_primitives.numbers
+    :< workspace_primitives.clock
+    :< sm'_operators
+
+:< workspace_primitives.numbers
+:< workspace_primitives.clock
+:< sm'_operators
+
+:~ file_clock_ms () : u64 = unix_ms ()
+
+:= elapsed_text (started : u64) : string = " elapsed_ms=" ++# u64_text (ms_since started)
+
+:~ elapsed_field (started : u64) : string = elapsed_text started
+
+///> rust
+:# the_elapsed_field_is_a_whole_millisecond_count =
+    := field = elapsed_field (file_clock_ms ())
+    testing.expect (sm'.starts_with " elapsed_ms=" field) "the field name"
+    := digits = sm'.replace " elapsed_ms=" "" field
+    testing.expect (digits <> "" && sm'.trim digits = digits) "a bare number"
+    testing.expect (file_clock_ms () > 1700000000000u64) "the clock reads real epoch milliseconds"
+:= main () : i32 =
+    export "rig_file_clock_ms" ((\ () => file_clock_ms ()) : () -> u64)
+    export "rig_elapsed_field" ((\ started => elapsed_field started) : u64 -> string)
+    := _ = elapsed_field (file_clock_ms ())
+    0i32

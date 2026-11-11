@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    workspace_primitives
+    rig_style_measure
+link:
+    rig_style_measure
+modules:
+    rounds

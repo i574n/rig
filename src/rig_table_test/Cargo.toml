@@ -1,0 +1,20 @@
+[package.metadata.spiral]
+entry = "table_test.spi"
+output = "table_test.rs"
+
+[package]
+name = "rig-table-test"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_table_test"
+path = "table_test.rs"
+
+[dependencies]
+rig-table-text = { path = "../rig_table_text" }
+rig-experiment-stats = { path = "../rig_experiment_stats" }
+rig-table-query = { path = "../rig_table_query" }
+rig-experiment-args = { path = "../rig_experiment_args" }

@@ -1,0 +1,43 @@
+:< sm'_operators
+:< model
+
+:~ release_home (~rig_root : string) : string =
+    := rig_given = env.get_environment_variable "RIG_RELEASE_HOME"
+    := given = ? rig_given <> "" ?> rig_given |: env.get_environment_variable "KIT_RELEASE_HOME"
+    ? given <> "" ?> sm'.replace "\\" "/" given |: sm'.replace "\\" "/" rig_root ++# "/.cache/release-train"
+
+:~ age_hours (~path : string) : i64 =
+    := modified = (conv (file_system.last_write_ms path) : i64)
+    := now = (conv (workspace_primitives.clock.unix_ms ()) : i64)
+    ? modified <= 0i64 ?> -1i64 |: (now - modified) / 3600000i64
+
+:~ facts_of ((rig_root, backlog) : string * string) : array_base string =
+    := home = release_home rig_root
+    := marker = home ++# "/last-installed.txt"
+    := train = train_of (file_system.read_text_or_empty marker) marker (age_hours marker)
+    := gate =
+        ?= train ?|
+        | InstalledTrain (name, _, _) =>
+            := log = home ++# "/" ++# name ++# "/crate-gate.log"
+            verdict_of (file_system.read_text_or_empty log) log (age_hours log)
+        | _ => FactMissing ("gate", home ++# "/<train>/crate-gate.log")
+    := state = sm'.replace "\\" "/" backlog ++# "/state/agile.spi"
+    := counts =
+        ? backlog = ""
+        ?> []
+        |:
+            := text = agile_state_fs.model.read_state state
+            ? text = ""
+            ?> [ FactMissing ("backlog", state) ]
+            |: [ BacklogCounts (agile_task_census.task_census.census_text text, state) ]
+    := facts = listm.append [ train; gate ] counts
+    listm.append (facts |> listm.map fact_line) [ receipt_line facts ] |> listm'.box |> listm'.to_array'
+
+:~ status_printed ((rig_root, backlog) : string * string) : i32 =
+    am'.to_list_base' (facts_of (rig_root, backlog)) |> listm'.unbox |> listm.iter console.write_line
+    0i32
+
+:= main () : i32 =
+    export "rig_status_facts" facts_of
+    export "rig_status_printed" status_printed
+    0i32

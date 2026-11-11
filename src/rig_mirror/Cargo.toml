@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "check.spi"
+output = "check.rs"
+
+[package]
+name = "rig-mirror"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_mirror"
+path = "check.rs"
+
+[dependencies]
+rig-mirror-remote = { path = "../rig_mirror_remote" }

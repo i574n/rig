@@ -1,0 +1,109 @@
+///- --package .
+:# changes static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== status_change = { item : string; status : string; at_ms : u64 }
+
+:| change_write =
+    | ChangeAppended
+    | ChangeUnchanged
+    | ChangeRefused : string
+
+:= row_marker () : string = " = StatusChanged (\""
+
+:= changes_schema () : string =
+    := head = "///- --no-respell\nunion status_change_row =\n"
+    head ++# "    | StatusChanged :: string * string * u64 -> status_change_row\n"
+
+:~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_" |> sm'.replace "." "_"
+
+:~ row_of_change (change : status_change) : string =
+    := name = "inl status_changed_" ++# slug_of change.item ++# "_" ++# sm'.show change.at_ms
+    name ++# " () = StatusChanged (\"" ++# change.item ++# "\", \"" ++# change.status ++# "\", "
+    ++# sm'.show change.at_ms ++# "u64)"
+
+:~ change_of_line (~line : string) : option status_change =
+    := row = sm'.trim line
+    := at = sm'.index_of (row_marker ()) row
+    ? at < 0i32 || sm'.ends_with "u64)" row |> not
+    ?> None
+    |:
+        := inner = sm'.slice (at + sm'.length (row_marker ())) (sm'.length row - 5i32) row
+        ?= sm'.split_list "\", " inner ?|
+        | item :: status :: stamp :: [] ?& item <> "" =>
+            ?= convert.try_convert stamp ?|
+            | Some at_ms => Some { item = item; status = sm'.replace "\"" "" status; at_ms = at_ms }
+            | None => None
+        | _ => None
+
+:~ changes_of_text (~text : string) : list status_change =
+    := gathered = \ (found : list status_change) (line : string) =>
+        ?= change_of_line line ?|
+        | Some change => change :: found
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold gathered [] |> listm.rev
+
+:~ history_path (~root : string) : string = sm'.replace "\\" "/" root ++# "/history/status_changes.spi"
+
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
+
+:~ replaced (~path : string) (~text : string) : bool =
+    ?= workspace_primitives.files.replace_file_checked path text ?|
+    | workspace_primitives.files.Replaced => !+
+    | _ => !-
+
+:~ appended (~before : string) (change : status_change) : string =
+    := head = ? before = "" ?> changes_schema () |: before
+    := joined = ? head = "" || sm'.ends_with "\n" head ?> head |: head ++# "\n"
+    joined ++# row_of_change change ++# "\n"
+
+:~ last_status (~before : string) (~item : string) : string =
+    := latest = \ (found : string) (change : status_change) => ? change.item = item ?> change.status |: found
+    changes_of_text before |> listm.fold latest ""
+
+:~ change_written (~root : string) (change : status_change) : change_write =
+    := base = sm'.replace "\\" "/" root
+    := path = history_path root
+    := before = text_of path
+    ? text_of (base ++# "/state/agile.spi") = ""
+    ?> ChangeRefused ("no backlog state at " ++# base ++# "/state")
+    |? last_status before change.item = change.status
+    ?> ChangeUnchanged
+    |:
+        := _ = file_system.create_dir_all (base ++# "/history")
+        ? replaced path (appended before change)
+        ?> ChangeAppended
+        |: ChangeRefused "history/status_changes.spi could not be written"
+
+:~ change_recorded ((root, item, status) : string * string * string) : i32 =
+    := change = { item = item; status = status; at_ms = workspace_primitives.clock.unix_ms () }
+    ?= change_written root change ?|
+    | ChangeAppended => 0i32
+    | ChangeUnchanged => 0i32
+    | ChangeRefused reason =>
+        console.write_error_line ("rig agile status change not recorded id=" ++# item ++# ": " ++# reason)
+        1i32
+
+:~ changes_of (text : string) : array_base status_change = changes_of_text text |> listm'.box |> listm'.to_array'
+
+///> rust
+:# a_status_change_row_round_trips_and_appends_under_one_schema =
+    := change = { item = "KIT-A.2"; status = "Done"; at_ms = 1793990000000u64 }
+    := row = row_of_change change
+    := head = "inl status_changed_kit_a_2_1793990000000 () = "
+    testing.expect (row = head ++# "StatusChanged (\"KIT-A.2\", \"Done\", 1793990000000u64)") row
+    testing.expect (change_of_line row = Some change) "the row reads back"
+    testing.expect (change_of_line "inl task_a () = Task (\"A\")" = None) "other rows are not changes"
+    := once = appended "" change
+    := twice = appended once { change ?| status = "Active"; at_ms = 1793990000001u64 }
+    testing.expect (sm'.starts_with (changes_schema ()) twice) "the schema heads the file once"
+    testing.expect ((listm.length (changes_of_text twice) : i32) = 2i32) "two changes read back"
+    testing.expect (last_status twice "KIT-A.2" = "Active") "the latest status of an item"
+    testing.expect (last_status twice "KIT-B" = "") "an item without changes"
+    testing.expect (history_path "C:\\b" = "C:/b/history/status_changes.spi") "a sidecar outside the attested state"
+:= main () : i32 =
+    export "rig_agile_status_changes" changes_of
+    export "rig_agile_status_change_recorded" change_recorded
+    0i32

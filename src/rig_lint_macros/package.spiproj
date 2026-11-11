@@ -1,0 +1,11 @@
+packages:
+    |core-
+    spiral-
+    rig_receipt
+    rig_lint_model
+    rig_lint_walk
+    rig_lint_args
+link:
+    rig_lint_args
+modules:
+    lint

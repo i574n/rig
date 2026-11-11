@@ -1,0 +1,8 @@
+packages:
+    |core-
+    spiral-
+    rig_coordinator_model
+modules:
+    table
+    decision
+    dispatch

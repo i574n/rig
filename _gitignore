@@ -1,0 +1,15 @@
+/src/target/
+/infra/**/target/
+/kit.exe
+/kit
+/kit.exe.*
+/src/**/*.c
+/src/**/*.spiral-entry
+/src/**/*.kit-plan-ir-*.ir
+/src/**/*.pdb
+/src/**/*.rlib
+/src/**/*.rmeta
+/.cache/
+/state/candidate_binary_install.receipt
+/.release-kit-candidate*
+/dist/

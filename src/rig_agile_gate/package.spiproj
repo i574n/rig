@@ -1,0 +1,12 @@
+packages:
+    |core-
+    spiral-
+    agile_state_spelling
+    agile_state_fs
+    agile_team_work
+    agile_team_lane
+link:
+    agile_team_work
+    agile_team_lane
+modules:
+    gate

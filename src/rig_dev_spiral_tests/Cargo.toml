@@ -1,0 +1,20 @@
+[package.metadata.kit]
+test-requires-cli = true
+
+[package.metadata.spiral]
+entry = "main.spi"
+output = "spiral_tests.rs"
+
+[package]
+name = "rig-dev-spiral-tests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "spiral_tests.rs"
+
+[dependencies]
+rig-process = { path = "../rig_process" }
+rig-process-streaming = { path = "../rig_process_streaming" }

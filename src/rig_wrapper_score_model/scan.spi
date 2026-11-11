@@ -1,0 +1,13 @@
+:< sm'_operators
+:< model
+
+:== wrapper_row = { name : string; shape : string; callee : string; line : i32; base : i32 }
+
+:~ wrapper_rows (text : string) : array_base wrapper_row =
+    := row = \ (w : wrapper) =>
+        { name = w.name; shape = shape_word w.shape; callee = w.callee; line = w.line; base = wrapper_score w 2i32 }
+    wrappers_in text |> listm.map row |> listm'.box |> listm'.to_array'
+
+:= main () : i32 =
+    export "rig_wrapper_rows" wrapper_rows
+    0i32

@@ -1,0 +1,9 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_jobs
+    rig_machine_windows
+    rig_window_announce
+modules:
+    rows

@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "domain_probe.rs"
+
+[package]
+name = "rig-domain-probe"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[example]]
+name = "rig-domain-probe"
+path = "domain_probe.rs"

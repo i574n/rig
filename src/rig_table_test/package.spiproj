@@ -1,0 +1,13 @@
+packages:
+    |core-
+    spiral-
+    union_reflection
+    rig_table_query
+    agile_note_model
+    rig_experiments
+    rig_experiment_analysis
+    rig_experiment_args
+link:
+    rig_experiment_args
+modules:
+    table_test

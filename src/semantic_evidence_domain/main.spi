@@ -1,0 +1,17 @@
+///- --package .
+:# main static =
+    :< sm'_operators
+
+///> rust
+:# a_closeout_is_current_only_with_all_six_gates_and_all_three_flags =
+    testing.expect (semantic_closeout_verdict_binding 63i32 7i32 = 1i32) "every gate and every flag"
+    testing.expect (semantic_closeout_verdict_binding 31i32 7i32 = 0i32) "a missing gate blocks"
+    testing.expect (semantic_closeout_verdict_binding 63i32 3i32 = 0i32) "a missing flag blocks"
+    testing.expect (semantic_closeout_verdict_binding 127i32 7i32 = 0i32) "an unknown extra gate blocks"
+:= main () : i32 =
+    := _ = semantic_closeout_verdict_binding 63i32 7i32
+    emit_runtime ()
+    export
+        "rig_semantic_closeout_verdict"
+        ((\ (first, second) => semantic_closeout_verdict_binding first second) : i32 * i32 -> i32)
+    0i32

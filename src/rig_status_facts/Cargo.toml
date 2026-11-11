@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "facts.spi"
+output = "facts.rs"
+
+[package]
+name = "rig-status-facts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_status_facts"
+path = "facts.rs"

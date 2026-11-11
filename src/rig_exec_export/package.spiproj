@@ -1,0 +1,10 @@
+packages:
+    |core-
+    spiral-
+    rig_exec_cells
+    rig_exec_jobs
+link:
+    rig_exec_cells
+    rig_exec_jobs
+modules:
+    export

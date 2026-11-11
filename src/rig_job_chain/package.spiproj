@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_job_after_model
+modules:
+    chain
+    entry

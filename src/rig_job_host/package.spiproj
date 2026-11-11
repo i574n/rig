@@ -1,0 +1,18 @@
+packages:
+    |core-
+    spiral-
+    rig_jobs
+    rig_os_launch
+    rig_job_peers
+    rig_process_alive
+    rig_os_process
+    rig_job_names
+link:
+    rig_job_names
+    rig_process_alive
+    rig_job_peers
+modules:
+    host_model
+    host_paths
+    queue
+    host_run

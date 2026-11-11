@@ -1,0 +1,18 @@
+[package.metadata.spiral]
+entry = "health.spi"
+output = "health.rs"
+
+[package]
+name = "rig-machine-health"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_machine_health"
+path = "health.rs"
+
+[dependencies]
+rig-machine-sample = { path = "../rig_machine_sample" }
+sysinfo = "0.38.4"

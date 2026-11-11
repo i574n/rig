@@ -1,0 +1,121 @@
+///- --package .
+:# verb static =
+    :< sm'_operators
+    :< asks
+
+:< sm'_operators
+:< asks
+
+:| ask_change =
+    | AskSet : user_ask
+    | AskCleared : string
+
+:| asks_write =
+    | AsksWritten : i32
+    | AsksRefused : string
+
+:= asks_schema () : string =
+    "///- --no-respell\nunion task_ask =\n" ^^ "    | Asked :: string * string * string -> task_ask\n"
+
+:= change_item = \|
+    | AskSet ask => ask.item
+    | AskCleared item => item
+
+:~ asks_changed (asks : list user_ask) (change : ask_change) : list user_ask =
+    := kept = asks |> listm'.filter (\ (ask : user_ask) => ask.item <> change_item change)
+    ?= change ?|
+    | AskSet ask => listm.append kept [ ask ]
+    | AskCleared _ => kept
+
+:~ asks_text (asks : list user_ask) : string =
+    asks_schema () ++# (asks |> listm.map (\ (ask : user_ask) => row_of_ask ask ++# "\n") |> sm'.concat_list "")
+
+:~ module_listed (format : agile_state_fs.project.project_format) (~package_text : string)
+    : agile_state_fs.project.module_listing
+    =
+    agile_state_fs.project.project_with_module format package_text "asks"
+
+:~ task_known (~agile_text : string) (~id : string) : bool = sm'.contains ("Task (\"" ++# id ++# "\"") agile_text
+
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
+
+:~ replaced (~path : string) (~text : string) : bool =
+    ?= workspace_primitives.files.replace_file_checked path text ?|
+    | workspace_primitives.files.Replaced => !+
+    | _ => !-
+
+:~ asks_written (~root : string) (change : ask_change) : asks_write =
+    := state = sm'.replace "\\" "/" root ++# "/state"
+    := agile_text = text_of (state ++# "/agile.spi")
+    := path = state ++# "/asks.spi"
+    := before = text_of path
+    := asks = asks_changed (asks_of_text before) change
+    ? agile_text = ""
+    ?> AsksRefused ("no backlog state at " ++# state)
+    |? task_known agile_text (change_item change) = !-
+    ?> AsksRefused ("no task " ++# change_item change ++# " in state/agile.spi")
+    |? text_of path <> before
+    ?> AsksRefused "state/asks.spi changed since it was read; run again"
+    |? replaced path (asks_text asks) = !-
+    ?> AsksRefused "state/asks.spi could not be written"
+    |:
+        := count = listm.length asks
+        := project = agile_state_fs.project.project_path_in state
+        ?= module_listed (agile_state_fs.project.project_format_in state) (text_of project) ?|
+        | agile_state_fs.project.ModuleListed => AsksWritten count
+        | agile_state_fs.project.NoModulesSection => AsksRefused "the state project has no modules section to list asks in"
+        | agile_state_fs.project.ModuleAdded listed =>
+            ? replaced project listed
+            ?> AsksWritten count
+            |: AsksRefused "the state project was not updated"
+
+:= usage () : string =
+    "rig error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"
+
+:~ reported (~item : string) (~asked_on : string) (outcome : asks_write) : i32 =
+    ?= outcome ?|
+    | AsksWritten count =>
+        := counts = " asked=" ++# asked_on ++# " asks=" ++# sm'.format count
+        console.write_line ("rig agile edit ok id=" ++# item ++# counts)
+        0i32
+    | AsksRefused reason =>
+        console.write_error_line ("rig error: agile edit --asked: " ++# reason)
+        2i32
+
+:= word (index : i32) : string = rust_std_env.model.argument_owned index
+
+:~ ask_request () : option (string * ask_change * string) =
+    := root, item, day, quote = word 1i32, word 2i32, word 4i32, word 6i32
+    ? word 3i32 <> "--asked"
+    ?> None
+    |? day = "--clear" && word 5i32 = ""
+    ?> Some (root, AskCleared item, "none")
+    |? word 5i32 = "--quote" && word 7i32 = "" && day_shaped day && sm'.trim quote <> "" ?>
+        Some (root, AskSet { item = item; asked_on = day; quote = quote }, day)
+    |: None
+
+:~ ask_edit_run () : i32 =
+    ?= ask_request () ?|
+    | Some (root, change, day) => reported (change_item change) day (asks_written root change)
+    | None =>
+        console.write_error_line (usage ())
+        2i32
+
+///> rust
+:# an_item_has_one_ask_row_and_clear_drops_it =
+    := first = { item = "S7"; asked_on = "2026-11-01"; quote = "do it" }
+    := one = asks_changed [] (AskSet first)
+    := again = asks_changed one (AskSet { first ?| asked_on = "2026-11-02" })
+    testing.expect (again = [ { first ?| asked_on = "2026-11-02" } ]) "setting again replaces the row"
+    testing.expect (asks_changed again (AskCleared "S7") = []) "clear drops it"
+    testing.expect (asks_text one = asks_schema () ++# row_of_ask first ++# "\n") "file text"
+    := words = agile_state_fs.project.SpiprojProject
+    := symbols = agile_state_fs.project.TomlProject
+    testing.expect (module_listed words "modules:\n    agile\n" = agile_state_fs.project.ModuleAdded "modules:\n    asks\n    agile\n") "register"
+    testing.expect (module_listed words "modules:\n    asks\n" = agile_state_fs.project.ModuleListed) "listed"
+    testing.expect (module_listed words "packages:\n" = agile_state_fs.project.NoModulesSection) "no modules section"
+    testing.expect (module_listed symbols "modules = '''\nagile\n'''\n" = agile_state_fs.project.ModuleAdded "modules = '''\nasks\nagile\n'''\n") "register in spiral.toml"
+:= main () : i32 =
+    export "rig_agile_asks" asks_of
+    export "rig_agile_ask_edit_run" ask_edit_run
+    0i32

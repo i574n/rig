@@ -1,0 +1,14 @@
+[package.metadata.spiral]
+entry = "main.spi"
+output = "fallback.rs"
+
+[package]
+name = "rig-patch-fallback-domain"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_patch_fallback_domain"
+path = "fallback.rs"

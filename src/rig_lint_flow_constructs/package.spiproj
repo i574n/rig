@@ -1,0 +1,7 @@
+packages:
+    |core-
+    spiral-
+    rig_lint_pattern
+modules:
+    constructs
+    entry

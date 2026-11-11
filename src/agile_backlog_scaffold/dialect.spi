@@ -1,0 +1,203 @@
+///- --package .
+:# dialect static =
+    :< sm'_operators
+    :< workspace_primitives.outcome
+    :< workspace_primitives.console
+
+:< sm'_operators
+:< workspace_primitives.outcome
+:< workspace_primitives.console
+
+:| state_dialect =
+    | WordsDialect
+    | SymbolsDialect
+
+:| dialect_choice =
+    | DialectChosen : state_dialect
+    | DialectUnknown
+
+:= dialect_of_word (~word : string) : dialect_choice =
+    ? word = "symbols"
+    ?> DialectChosen SymbolsDialect
+    |? word = "words"
+    ?> DialectChosen WordsDialect
+    |: DialectUnknown
+
+:= dialect_word (dialect : state_dialect) : string =
+    ?= dialect ?|
+    | WordsDialect => "words"
+    | SymbolsDialect => "symbols"
+
+:= project_format_of (dialect : state_dialect) : agile_state_fs.project.project_format =
+    ?= dialect ?|
+    | WordsDialect => agile_state_fs.project.SpiprojProject
+    | SymbolsDialect => agile_state_fs.project.TomlProject
+
+:= converted_text (dialect : state_dialect) (~text : string) : string =
+    ?= dialect ?|
+    | SymbolsDialect => agile_state_spelling.spelling.respelled text
+    | WordsDialect => agile_state_spelling.spelling.unspelled_keeping_endings text
+
+:~ names_in (~directory : string) : list string =
+    ? file_system.directory_exists directory |> not
+    ?> []
+    |:
+        file_system.read_directory_names directory
+        |> resultm.unwrap'
+        |> am'.vec_fold' (\ names name => (sm'.from_std_string name :: names)) []
+
+:~ spi_files (~root : string) : list string =
+    [ "state"; "history"; "archive" ]
+    |> listm.fold
+        \ found (folder : string) =>
+            := directory = sm'.concat_list "/" [ root; folder ]
+            names_in directory
+            |> listm'.filter (\ (name : string) => sm'.ends_with ".spi" name)
+            |> listm.map (\ (name : string) => sm'.concat_list "/" [ directory; name ])
+            |> listm.append found
+        []
+
+:| planned_file =
+    | FileUnchanged
+    | FileRewritten : string * string
+    | FileUnreadable : string
+
+:~ planned (dialect : state_dialect) (~path : string) : planned_file =
+    := unreadable, text = rust_std_fs.model.scan_text_of path
+    ? unreadable
+    ?> FileUnreadable path
+    |:
+        := next = converted_text dialect text
+        ? next = text ?> FileUnchanged |: FileRewritten (path, next)
+
+:~ unreadable_of (plan : list planned_file) : list string =
+    plan
+    |> listm.fold
+        \ found (file : planned_file) =>
+            ?= file ?|
+            | FileUnreadable path => path :: found
+            | _ => found
+        []
+
+:~ unwritten_of (plan : list planned_file) : list string =
+    plan
+    |> listm.fold
+        \ failed (file : planned_file) =>
+            ?= file ?|
+            | FileRewritten (path, text) => ? rust_std_fs.model.write_text path text ?> failed |: path :: failed
+            | _ => failed
+        []
+
+:~ rewritten_count (plan : list planned_file) : i32 =
+    plan
+    |> listm.fold
+        \ count (file : planned_file) =>
+            ?= file ?|
+            | FileRewritten _ => count + 1i32
+            | _ => count
+        0i32
+
+:| dialect_outcome =
+    | DialectConverted : i32
+    | DialectAlready
+    | DialectRefused : string
+
+:~ dialect_converted (~root : string) (dialect : state_dialect) : dialect_outcome =
+    := state = sm'.concat_list "/" [ root; "state" ]
+    := current = agile_state_fs.project.project_format_in state
+    := target = project_format_of dialect
+    := source_path = sm'.concat_list "/" [ state; agile_state_fs.project.file_name_of current ]
+    := target_path = sm'.concat_list "/" [ state; agile_state_fs.project.file_name_of target ]
+    ? rust_std_fs.model.file_exists source_path |> not
+    ?> DialectRefused "no state project (package.spiproj or spiral.toml) under the root"
+    |? current = target
+    ?>
+        := plan = spi_files root |> listm.map (\ (path : string) => planned dialect path)
+        := missing = unreadable_of plan
+        ? missing <> []
+        ?> DialectRefused (sm'.concat_list "" [ "could not read "; sm'.concat_list ", " missing; "; nothing written" ])
+        |:
+            := failed = unwritten_of plan
+            ? failed <> []
+            ?> DialectRefused (sm'.concat_list "" [ "could not write "; sm'.concat_list ", " failed ])
+            |? rewritten_count plan = 0i32
+            ?> DialectAlready
+            |: DialectConverted (rewritten_count plan)
+    |:
+        := unreadable, project = rust_std_fs.model.scan_text_of source_path
+        ? unreadable
+        ?> DialectRefused (sm'.concat_list "" [ "could not read "; source_path ])
+        |:
+            ?= agile_state_fs.project.converted_project current target project ?|
+            | agile_state_fs.project.ProjectNotConvertible reason => DialectRefused reason
+            | agile_state_fs.project.ProjectConverted converted =>
+                := plan = spi_files root |> listm.map (\ (path : string) => planned dialect path)
+                := missing = unreadable_of plan
+                ? missing <> []
+                ?> DialectRefused (sm'.concat_list "" [ "could not read "; sm'.concat_list ", " missing; "; nothing written" ])
+                |:
+                    := failed = unwritten_of plan
+                    ? failed <> []
+                    ?> DialectRefused (sm'.concat_list "" [ "could not write "; sm'.concat_list ", " failed ])
+                    |? rust_std_fs.model.write_text target_path converted |> not
+                    ?> DialectRefused (sm'.concat_list "" [ "could not write "; target_path ])
+                    |? rust_std_fs.model.remove_file source_path |> not
+                    ?> DialectRefused (sm'.concat_list "" [ "could not remove "; source_path ])
+                    |: DialectConverted (rewritten_count plan)
+
+:~ agile_dialect (~root : string) (~word : string) : i32 =
+    := rejected (~reason : string) = stderr_failure (sm'.concat_list "" [ "agile dialect "; root; " rejected: "; reason ])
+    ?= dialect_of_word word ?|
+    | DialectUnknown => rejected (sm'.concat_list "" [ "the dialect is symbols or words, not "; word ])
+    | DialectChosen dialect =>
+        := head = sm'.concat_list "" [ "rig agile dialect ok root="; root; " dialect="; dialect_word dialect ]
+        ?= dialect_converted root dialect ?|
+        | DialectConverted files => stdout_line (sm'.concat_list "" [ head; " files="; sm'.show files ])
+        | DialectAlready => stdout_line (sm'.concat_list "" [ head; " files=0 unchanged=already" ])
+        | DialectRefused reason => rejected reason
+
+///> rust
+:# a_root_converts_to_symbols_and_back =
+    := root = sm'.concat_list "/" [ file_system.get_temp_path (); "rig-dialect-roundtrip" ]
+    file_system.remove_dir_all root |> ignore
+    file_system.create_dir_all (sm'.concat_list "/" [ root; "state" ]) |> ignore
+    file_system.create_dir_all (sm'.concat_list "/" [ root; "history" ]) |> ignore
+    := agile = "///- --no-respell\nunion task_status =\n    | Done :: task_status\ninl a () = Task (\"A\", \":= x\")\n"
+    := history = "union status_change_row =\n    | Changed :: string -> status_change_row\ninl changed_a () = Changed \"A\"\n"
+    file_system.write_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ]) agile
+    file_system.write_all_text (sm'.concat_list "/" [ root; "history/status_changes.spi" ]) history
+    file_system.write_all_text (sm'.concat_list "/" [ root; "state/package.spiproj" ]) "modules:\n    agile\n"
+    := converted = dialect_converted root SymbolsDialect
+    := symbols_agile = file_system.read_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ])
+    := symbols_history = file_system.read_all_text (sm'.concat_list "/" [ root; "history/status_changes.spi" ])
+    := toml = file_system.read_all_text (sm'.concat_list "/" [ root; "state/spiral.toml" ])
+    := spiproj_gone = file_system.file_exists (sm'.concat_list "/" [ root; "state/package.spiproj" ]) |> not
+    := again = dialect_converted root SymbolsDialect
+    file_system.write_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ]) agile
+    := repaired = dialect_converted root SymbolsDialect
+    := repaired_agile = file_system.read_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ])
+    := back = dialect_converted root WordsDialect
+    := words_agile = file_system.read_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ])
+    := words_project = file_system.read_all_text (sm'.concat_list "/" [ root; "state/package.spiproj" ])
+    file_system.remove_dir_all root |> ignore
+    testing.expect (converted = DialectConverted 2i32) "both state and history files are respelled"
+    testing.expect (sm'.contains "\n:| task_status =\n" symbols_agile && sm'.contains "\n:= a () = Task (\"A\", \":= x\")\n" symbols_agile) "row heads become symbols, strings stay"
+    testing.expect (sm'.starts_with ":| status_change_row =" symbols_history) "history is respelled"
+    testing.expect (toml = "modules = '''\nagile\n'''\n" && spiproj_gone) "the project moves to spiral.toml"
+    testing.expect (again = DialectAlready) "a second conversion changes nothing"
+    testing.expect (repaired = DialectConverted 1i32 && repaired_agile = symbols_agile) "a words file left in a symbols root is respelled"
+    testing.expect (back = DialectConverted 2i32 && words_agile = agile && words_project = "modules:\n    agile\n") "words round-trips byte for byte"
+
+///> rust
+:# a_project_with_other_keys_is_refused_before_any_write =
+    := root = sm'.concat_list "/" [ file_system.get_temp_path (); "rig-dialect-refused" ]
+    file_system.remove_dir_all root |> ignore
+    file_system.create_dir_all (sm'.concat_list "/" [ root; "state" ]) |> ignore
+    file_system.write_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ]) "inl a () = 1\n"
+    file_system.write_all_text (sm'.concat_list "/" [ root; "state/package.spiproj" ]) "packageDir: ../src\nmodules:\n    agile\n"
+    := outcome = dialect_converted root SymbolsDialect
+    := agile = file_system.read_all_text (sm'.concat_list "/" [ root; "state/agile.spi" ])
+    file_system.remove_dir_all root |> ignore
+    testing.expect (outcome = DialectRefused "the state project holds keys besides modules; convert it by hand") "refused"
+    testing.expect (agile = "inl a () = 1\n") "nothing was respelled"
+    testing.expect (dialect_of_word "symbols" = DialectChosen SymbolsDialect && dialect_of_word "x" = DialectUnknown) "words"

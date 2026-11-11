@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "grep.spi"
+output = "grep_query.rs"
+
+[package]
+name = "rig-grep-query"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_grep_query"
+path = "grep_query.rs"
+
+[dependencies]
+rig-grep-found = { path = "../rig_grep_found" }

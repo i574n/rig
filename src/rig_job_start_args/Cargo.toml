@@ -1,0 +1,17 @@
+[package.metadata.spiral]
+entry = "start_args.spi"
+output = "start_args.rs"
+
+[package]
+name = "rig-job-start-args"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_job_start_args"
+path = "start_args.rs"
+
+[dependencies]
+rig-flag-words = { path = "../rig_flag_words" }
