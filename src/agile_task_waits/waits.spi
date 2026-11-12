@@ -89,9 +89,12 @@
 
 :~ quoted (~text : string) : string = "\"" ++# sm'.replace "\"" "'" text ++# "\""
 
-:~ row_of_wait (w : task_wait) : string =
+:~ row_of_wait_numbered (w : task_wait) (n : i32) : string =
     := fields = quoted w.item ++# ", " ++# quoted (kind_word w.kind) ++# ", " ++# quoted (kind_value w.kind)
-    "inl wait_of_" ++# slug_of w.item ++# " () = Waits (" ++# fields ++# ")"
+    := suffix = ? n <= 1i32 ?> "" |: "_" ++# sm'.show n
+    "inl wait_of_" ++# slug_of w.item ++# suffix ++# " () = Waits (" ++# fields ++# ")"
+
+:~ row_of_wait (w : task_wait) : string = row_of_wait_numbered w 1i32
 
 :~ waiting_ids (waits : list task_wait) : list string = waits |> listm.map (\ (w : task_wait) => w.item)
 

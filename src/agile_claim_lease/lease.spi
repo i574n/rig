@@ -20,7 +20,13 @@
     (live : liveness) (now_ms : u64)
     : string * string * string * u64 * i32 * i32 * string * string
     =
-    ?= refusal_of claims live item lane asked now_ms ?|
+    := adding, wanted =
+        ?= asked ?|
+        | first :: rest ?& first = "+" || sm'.ends_with "/+" first => !+, rest
+        | _ => !-, asked
+    := held = held_paths claims item
+    := merged = listm.append held (wanted |> listm'.filter (\ (glob : string) => listm'.contains glob held |> not))
+    ?= refusal_of claims live item lane wanted now_ms ?|
     | Some refused =>
         outcome_word OutcomeRefused,
         item,
@@ -31,7 +37,7 @@
         refusal_reason refused,
         change_word ChangeNone
     | None =>
-        := paths = ? asked = [] ?> held_paths claims item |: asked
+        := paths = ? adding ?> merged |? wanted = [] ?> held |: wanted
         := lease = { item = item; owner = lane; expires_ms = now_ms + (conv ttl_min : u64) * 60000u64; paths = paths }
         := wip = live_count (upserted claims lease) now_ms
         := rank = position_of item (words wsjf " ")
@@ -61,6 +67,19 @@
 := known () : string = "GATE SMALL-P2 KIT-SIDE BIG-P0"
 
 ///> rust
+:# adding_paths_keeps_the_held_ones_and_replacing_drops_them =
+    := held = claims_text [ lease_of "GATE" "a" 9000u64 [ "src/agile/**" ] ]
+    := _, _, _, _, _, _, added, _ = lease_claimed "GATE" "a" 90i32 "+,src/kit/**" (known ()) (known ()) "" held 1000u64
+    testing.expect (added = "src/agile/**;src/kit/**") added
+    := _, _, _, _, _, _, again, _ =
+        lease_claimed "GATE" "a" 90i32 "+,src/agile/**" (known ()) (known ()) "" held 1000u64
+    testing.expect (again = "src/agile/**") "adding a held path keeps one copy"
+    := _, _, _, _, _, _, replaced, _ = lease_claimed "GATE" "a" 90i32 "src/kit/**" (known ()) (known ()) "" held 1000u64
+    testing.expect (replaced = "src/kit/**") "a plain --paths still replaces the list"
+    := _, _, _, _, _, _, anchored, _ = lease_claimed "GATE" "a" 90i32 "C:/r/+,C:/r/k" (known ()) (known ()) "" held 1000u64
+    testing.expect (anchored = "src/agile/**;C:/r/k") "an anchored marker still means add"
+
+///> rust
 :# claims_refuse_held_and_overlapping_work =
     := held = claims_text [ lease_of "GATE" "a" 9000u64 [ "src/agile/**" ] ]
     := kind, _, _, _, _, _, reason, change =
@@ -78,10 +97,13 @@
     testing.expect (kind = "unknown") kind
 
 ///> rust
-:# a_decline_refuses_only_the_lane_that_declined =
-    := declined = claims_text [ lease_of "GATE" "~a" 9000u64 [] ]
+:# a_decline_keeps_the_queue_from_handing_the_item_back_but_an_explicit_claim_wins =
+    := rows = [ lease_of "GATE" "~a" 9000u64 [] ]
+    := declined = claims_text rows
     := kind, _, _, _, _, _, reason, _ = lease_claimed "GATE" "a" 90i32 "" (known ()) (known ()) "" declined 1000u64
-    testing.expect (kind = "refused" && reason = "declined-by-you-until:9000") reason
+    testing.expect (kind = "granted") ("the lane that released may claim again on purpose: " ++# reason)
+    testing.expect (candidates [ "GATE" ] rows "a" 1000u64 5i32 = []) "the queue does not hand it back to that lane"
+    testing.expect (candidates [ "GATE" ] rows "b" 1000u64 5i32 = [ "GATE" ]) "other lanes still get it from the queue"
     := kind, _, _, _, _, _, _, _ = lease_claimed "GATE" "b" 90i32 "" (known ()) (known ()) "" declined 1000u64
     testing.expect (kind = "granted") "another lane may take a declined item"
 

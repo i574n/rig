@@ -125,6 +125,51 @@
         )
     rig_run (fixture_text_of root) sets (Arg ("KIT_JOB_RELAUNCHED", Arg ("KIT_JOB_WATCH", NoArgs))) (Arg ("job", args))
 
+:= installed_rig (root : fixture_root) : string =
+    := into = fixture_path root (cat "bin/rig" (exe_suffix ()))
+    := from = rig_binary ()
+    := _ = $'{ std::fs::create_dir_all(std::path::Path::new(&*!into).parent().unwrap()).unwrap(); \
+        std::fs::copy(&*!from, &*!into).unwrap(); }' : ()
+    into
+
+:= installed_call (root : fixture_root) (~binary : string) (args : cli_args) : cli_run =
+    := cwd = fixture_text_of root
+    := jobs = fixture_path root "jobs"
+    := windows = fixture_path root "windows"
+    := queue = fixture_path root "queue"
+    := arg_text = joined (Arg ("job", args))
+    := code, stdout, stderr =
+        $'{ let mut command = std::process::Command::new(&*!binary); \
+            command.current_dir(&*!cwd).args((!arg_text).split_terminator(char::from(31u8))); \
+            for name in ["KIT_HEAVY_GATE", "RIG_HEAVY_GATE", "KIT_JOB_RELAUNCHED", "RIG_JOB_RELAUNCHED", \
+            "KIT_JOB_WATCH", "RIG_JOB_WATCH"] { command.env_remove(name); } \
+            command.env("KIT_JOBS_HOME", &*!jobs).env("RIG_JOBS_HOME", &*!jobs).env("KIT_WINDOWS_HOME", \
+            &*!windows).env("RIG_WINDOWS_HOME", &*!windows); for (key, value) in [("WINDOWS_FREE_MB", "8000"), \
+            ("HEAVY_QUEUE", &*!queue), ("HEAVY_MUTEX", "kit-test-installed-mutex")] { \
+            command.env(format\!("KIT_{key}"), value).env(format\!("RIG_{key}"), value); } \
+            let output = command.output().unwrap(); (output.status.code().unwrap_or(-1), \
+            std::rc::Rc::<str>::from(String::from_utf8_lossy(&output.stdout).as_ref()), \
+            std::rc::Rc::<str>::from(String::from_utf8_lossy(&output.stderr).as_ref())) }'
+        : i32 * string * string
+    { code = code; stdout = stdout; stderr = stderr }
+
+///> rust
+:# an_installed_rig_outside_any_checkout_gates_heavy_jobs_with_the_script_beside_it =
+    := root = fixture_root_create "window installed heavy"
+    := rig = installed_rig root
+    := quick = rustc_program root "quick" "fn main() {}"
+    := run = Arg ("run", Arg ("--heavy", Arg ("installed", Arg ("30000", Arg (quick, NoArgs)))))
+    := refused = installed_call root rig run
+    expect (refused.code <> 0i32) (cat "no script beside the binary was accepted: " (run_text refused))
+    shows refused.stderr "put heavy.ps1 beside the rig executable"
+    fixture_write root "bin/heavy.ps1" (fake_gate ())
+    := gated = installed_call root rig run
+    expect (gated.code = 0i32) (run_text gated)
+    shows gated.stdout "gate=heavy"
+    shows gated.stdout "held at most 1 min"
+    shows gated.stdout "state=finished exit=0"
+    fixture_root_remove root
+
 ///> rust
 :# a_heavy_job_waits_for_a_live_window_and_releases_its_own =
     := root = fixture_root_create "window heavy job"
@@ -241,6 +286,23 @@
 := run_orphan_row () : string =
     $'std::rc::Rc::<str>::from(format\!("win-1-4294967290-compile-run{0}compile{0}held{0}a stopped window \
         run{0}1{0}{1}", char::from(9u8), u64::MAX / 2).as_str())' : string
+
+:= overrun_id () : string =
+    $'std::rc::Rc::<str>::from(format\!("win-1-{}-heavy-build-run", std::process::id()).as_str())' : string
+
+:= overrun_row (~id : string) : string =
+    $'std::rc::Rc::<str>::from(format\!("{1}{0}heavy-build{0}held{0}a build past its \
+        minutes{0}1{0}2", char::from(9u8), &*!id).as_str())' : string
+
+///> rust
+:# a_window_run_keeps_its_slot_past_its_minutes_while_its_command_runs =
+    := root = fixture_root_create "window run overrun"
+    := id = overrun_id ()
+    := file = cat (cat "windows/" id) ".window"
+    fixture_write root file (overrun_row id)
+    shows (succeeded (window_call root "8000" (Arg ("list", NoArgs)))) "rig window list ok windows=1"
+    testing.expect (path_exists (fixture_path root file)) "the running command still holds the window"
+    fixture_root_remove root
 
 := lease_row () : string =
     $'std::rc::Rc::<str>::from(format\!("win-2-4294967291-compile{0}compile{0}held{0}a lease from window \

@@ -5,8 +5,17 @@
 
 :~ dispatched () : i32 = rig_job_dispatch.dispatch.dispatch_run (jobs_root ())
 
+:~ line_ended (~text : string) : string = ? text = "" || sm'.ends_with "\n" text ?> text |: text ++# "\n"
+
+:~ output_echoed (~id : string) : () =
+    := out = line_ended (text_or_empty (job_file id "stdout.log"))
+    := err = line_ended (text_or_empty (job_file id "stderr.log"))
+    := _ = ? out = "" ?> () |: console.write out
+    ? err = "" ?> () |: $'eprint\!("{}", &*!err)' : ()
+
 :~ started_code (attached : bool) : i32 =
     := answer = rig_job_launch.launch.start_answered attached |> am'.index 0i32
+    := _ = ? attached && answer.id <> "" ?> output_echoed answer.id |: ()
     := _ = ? attached && answer.id <> "" ?> stdout_line (shared_summary "run" answer.id) |: ()
     answer.code
 

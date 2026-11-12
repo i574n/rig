@@ -43,6 +43,10 @@
     | AgileView
     | AgileViewAdd
     | AgileDialect
+    | AgileReceipts
+    | AgileTerms
+    | AgileChanges
+    | AgileAsk
 
 := agile_subcommand_spec = function
     | AgileInit => { name = "init"; shape = "<root> [--dialect symbols|words]" }
@@ -60,7 +64,11 @@
         }
     | AgileCheck => { name = "check"; shape = "<root> [--compiler <absolute>]" }
     | AgileRecord => { name = "record"; shape = "<root>" }
-    | AgileSet => { name = "set"; shape = "<root> <id> <progress> <Planned|Active|Blocked|Paused|Done>" }
+    | AgileSet =>
+        {
+            name = "set"
+            shape = "<root> <id> <progress|-> <Planned|Active|Blocked|Paused|Done> [--expect <status>] [--as <lane>]"
+        }
     | AgileAdd =>
         {
             name = "add"
@@ -78,8 +86,10 @@
             name = "edit"
             shape =
                 "<root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value> | "
-                ^^ "<root> <id> --wait <train|item|lane|user|job|when>:<value> | --wait --clear | --parent <EPIC> | "
-                ^^ "--split milestones"
+                ^^ "<root> <id> --wait <train|item|lane|user|job|when>:<value> | --wait-remove <kind>:<value> | "
+                ^^ "--wait --clear | --parent <EPIC> | --split milestones | "
+                ^^ "--asked <yyyy-mm-dd> --ask \"<scope>; done when <criterion>\" | --asked --clear | "
+                ^^ "<field> <value> --expect <current value>"
         }
     | AgileShow => { name = "show"; shape = "<root> <id> [--json]" }
     | AgilePlan => { name = "plan"; shape = "<root> [--json]" }
@@ -118,7 +128,7 @@
         }
     | AgileClaim => { name = "claim"; shape = "<root> <ID> --as <lane> [--paths <glob,glob>] [--ttl <minutes>]" }
     | AgileRelease => { name = "release"; shape = "<root> <ID> --as <lane>" }
-    | AgileClaims => { name = "claims"; shape = "<root> [--as <lane>]" }
+    | AgileClaims => { name = "claims"; shape = "<root> [--as <lane>] [--team <team>]" }
     | AgileRoots => { name = "roots"; shape = "<root> [add|drop <path>...]" }
     | AgileLinks => { name = "links"; shape = "<root> --memory <dir> [--json]" }
     | AgileWip => { name = "wip"; shape = "<root>" }
@@ -126,6 +136,10 @@
     | AgileView => { name = "view"; shape = "<root> <name> [extra flags...]" }
     | AgileViewAdd => { name = "view-add"; shape = "<root> <name> <list|next> [flags...]" }
     | AgileDialect => { name = "dialect"; shape = "<root> <symbols|words>" }
+    | AgileChanges => { name = "changes"; shape = "<root> --since <8h|30m|iso> [--team <team>]" }
+    | AgileReceipts => { name = "receipts"; shape = "<root> verify <file>" }
+    | AgileTerms => { name = "terms"; shape = "<root>" }
+    | AgileAsk => { name = "ask"; shape = "<root> <id> \"<scope>; done when <criterion>\"" }
 
 :| agile_parsed =
     | AgileKnown : agile_subcommand
@@ -163,12 +177,13 @@
     | WritesState
 
 := state_access_of = \|
-    | AgileInit | AgileLease | AgileStatus | AgileHandoff | AgileList | AgileCheck | AgileShow => ReadsState
+    | AgileInit | AgileLease | AgileStatus | AgileHandoff | AgileList | AgileShow => ReadsState
     | AgilePlan | AgileNext | AgileLinks | AgileWip | AgileViews | AgileView | AgileLint => ReadsState
-    | AgileGate | AgileCadence | AgileClaims => ReadsState
+    | AgileGate | AgileCadence | AgileClaims | AgileReceipts | AgileTerms | AgileChanges => ReadsState
     | AgileClaim | AgileRelease | AgileBegin | AgileRecord | AgileSet | AgileAdd | AgileGap | AgileEdit => WritesState
     | AgileMigrateTags | AgileMigrateActivity | AgileNote | AgileNoteEdit | AgileNotes | AgileRename => WritesState
-    | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint | AgileDialect => WritesState
+    | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint | AgileDialect | AgileCheck => WritesState
+    | AgileAsk => WritesState
 
 :| root_place =
     | RootLeads

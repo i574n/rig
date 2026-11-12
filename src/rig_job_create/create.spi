@@ -43,8 +43,8 @@
     ? heavy_missing || problem <> "" ?>
         ? heavy_missing ?>
             LaunchRefused (
-                "--heavy needs spiral's scripts/heavy.ps1: set KIT_HEAVY_GATE or run from inside a tree that has a "
-                ^^ "spiral checkout"
+                "--heavy needs spiral's scripts/heavy.ps1: put heavy.ps1 beside the rig executable (rig-deploy "
+                ^^ "does), set RIG_HEAVY_GATE to its path, or run from inside a tree that has a spiral checkout"
             )
         |: LaunchRefused problem
     |:

@@ -9,6 +9,7 @@ packages:
     rig_cli_routes
     rig_status_facts
     rig_units
+    rig_verdict
     rig_drafts
     rig_scratch
 link:
@@ -19,6 +20,7 @@ link:
     rig_cli_routes
     rig_status_facts
     rig_units
+    rig_verdict
     rig_drafts
     rig_scratch
 modules:

@@ -17,8 +17,9 @@
     ? state = ""
     ?> gap_failure "state/agile.spi is missing or empty"
     |:
-        := id = free_id state (gap_id_base request) 1i32
-        := tags, extras = gap_tags request, gap_extras request
+        := markers = file_system.read_text_or_empty (sm'.replace "\\" "/" root ++# "/state/markers.spi")
+        := id = free_id state (gap_id_base request state markers) 1i32
+        := tags, extras = gap_tags request state markers, gap_extras request
         agile_task_creation.task_creation.agile_add root id AgileTaskKind AgileP1 AgileD2 request.title tags extras
 
 :~ gap_entry () : i32 =

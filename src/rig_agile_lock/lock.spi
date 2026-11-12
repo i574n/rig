@@ -39,7 +39,8 @@
     ?> !+
     |:
         := holder = file_system.read_text_or_empty (lock_holder_path root)
-        ? holder = "" && unread < 400i32 ?>
+        := unwritten = holder = "" || sm'.index_of " " holder < 0i32
+        ? unwritten && unread < 400i32 ?>
             threading.rust_sleep_ms 25u64
             state_lock_waited root deadline (unread + 1i32)
         |? lock_holder_stale holder (workspace_primitives.clock.unix_ms ()) ?>
@@ -49,7 +50,7 @@
         ?> !-
         |:
             threading.rust_sleep_ms 25u64
-            state_lock_waited root deadline unread
+            state_lock_waited root deadline 0i32
 
 := inherited_key () : string = "KIT_AGILE_LOCK_HOLDER"
 
@@ -59,20 +60,48 @@
     := holder = file_system.read_text_or_empty (lock_holder_path root)
     inherited <> "" && inherited <> sm'.show own && sm'.starts_with (inherited ++# " ") holder
 
+:~ os_lock_path (~root : string) : string =
+    $'std::rc::Rc::<str>::from({ let state = std::path::Path::new(&*!root).join("state"); \
+        let canonical = std::fs::canonicalize(&state).unwrap_or(state); \
+        let mut hash: u64 = 0xcbf29ce484222325; \
+        for byte in canonical.to_string_lossy().to_lowercase().bytes() { \
+            hash ^= byte as u64; hash = hash.wrapping_mul(0x100000001b3); } \
+        let dir = std::env::temp_dir().join("rig-agile-locks"); let _ = std::fs::create_dir_all(&dir); \
+        dir.join(format\!("{:016x}.lock", hash)).to_string_lossy().into_owned() })' : string
+
+:~ os_lock_taken (~path : string) (wait_ms : u64) : bool =
+    $'{ let deadline = std::time::Instant::now() + std::time::Duration::from_millis(!wait_ms); \
+        let mark = format\!("{} {}", std::process::id(), &*!path); \
+        if std::env::var("RIG_AGILE_OSLOCK").ok().as_deref() == Some(mark.as_str()) { true } else { \
+        match std::fs::OpenOptions::new().create(true).read(true).write(true).open(&*!path) { \
+            Err(_) => true, \
+            Ok(file) => loop { match file.try_lock() { \
+                Ok(()) => { std::mem::forget(file); \
+                    unsafe { std::env::set_var("RIG_AGILE_OSLOCK", &mark) }; break true } \
+                Err(std::fs::TryLockError::WouldBlock) if std::time::Instant::now() < deadline => \
+                    std::thread::sleep(std::time::Duration::from_millis(10)), \
+                Err(_) => break false } } } } }' : bool
+
 :~ lock_taken (~root : string) : bool =
     ? held_by_ancestor root
     ?> !+
+    |? os_lock_taken (os_lock_path root) 300000u64 |> not
+    ?> !-
     |? state_lock_waited root (workspace_primitives.clock.unix_ms () + 300000u64) 0i32 ?>
         := own : u64 = convert.convert (rig_os_process.process.own_pid ())
         env.set_environment_variable (inherited_key ()) (sm'.show own)
         !+
     |: !-
 
+:~ owns_holder (own : u64) (~holder : string) : bool = sm'.starts_with (sm'.show own ++# " ") holder
+
 :~ lock_released (~root : string) : bool =
     ? held_by_ancestor root
     ?> !+
     |:
-        state_lock_cleared root
+        := own : u64 = convert.convert (rig_os_process.process.own_pid ())
+        := holder = file_system.read_text_or_empty (lock_holder_path root)
+        := _ = ? owns_holder own holder ?> state_lock_cleared root |: ()
         !+
 
 ///> rust
@@ -83,6 +112,8 @@
     testing.expect (holder_stale_by alive "8 1000" 2000u64) "a dead holder's lock is stale"
     testing.expect (holder_stale_by alive "7 1000" 700000u64) "a ten-minute-old lock is stale even if its pid lives"
     testing.expect (lock_holder_text 7u64 1000u64 = "7 1000") "the holder line is the pid, then the start"
+    testing.expect (owns_holder 7u64 "7 1000" && owns_holder 7u64 "70 1000" |> not) "release clears only its own holder"
+    testing.expect (owns_holder 7u64 "" |> not) "an unwritten holder belongs to no one"
 := main () : i32 =
     export "rig_agile_lock_taken" lock_taken
     export "rig_agile_lock_released" lock_released

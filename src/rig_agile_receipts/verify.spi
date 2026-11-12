@@ -1,0 +1,135 @@
+///- --package .
+:# verify static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| receipt_verdict =
+    | Verified
+    | Missing
+    | Duplicated : i32
+    | Superseded
+    | Refused
+    | NotReceipt
+
+:== backlog_text = { agile : string; waits : string; parents : string }
+
+:== tally = { verified : i32; refused : i32; superseded : i32; missing : i32; duplicated : i32 }
+
+:~ after (~marker : string) (~line : string) : string =
+    := at = sm'.index_of marker line
+    ? at < 0i32
+    ?> ""
+    |:
+        := start = at + sm'.length marker
+        sm'.substring start (sm'.length line - start) line
+
+:~ word_of (~text : string) : string =
+    := stop = sm'.index_of " " text
+    ? stop < 0i32 ?> text |: sm'.substring 0i32 stop text
+
+:~ field_of (~key : string) (~line : string) : string = word_of (after (" " ++# key ++# "=") line)
+
+:~ verb_of (~line : string) : string =
+    ? sm'.starts_with "rig agile " line ?> word_of (after "rig agile " line) |: ""
+
+:~ occurrences (~needle : string) (~text : string) : i32 = listm.length (sm'.split_list needle text) - 1i32
+
+:~ counted (n : i32) : receipt_verdict = ? n = 1i32 ?> Verified |? n = 0i32 ?> Missing |: Duplicated n
+
+:~ task_key (~id : string) : string = "() = Task (\"" ++# id ++# "\","
+
+:~ status_current (~agile : string) (~id : string) (~status : string) : bool =
+    := current = \ (row : string) => sm'.contains (task_key id) row && sm'.contains (", " ++# status ++# ",") row
+    listm'.exists' current (sm'.split_list "\n" agile)
+
+:~ verdict_of (state : backlog_text) (~line : string) : receipt_verdict =
+    := verb = verb_of line
+    := id = field_of "id" line
+    := child = field_of "child" line
+    := receipted = verb <> "" && sm'.contains ("rig agile " ++# verb ++# " ok ") line
+    ? sm'.starts_with "rig error" line
+    ?> Refused
+    |? receipted |> not
+    ?> NotReceipt
+    |? verb = "note" || verb = "note-edit"
+    ?> counted (occurrences ("Note (\"" ++# id ++# "\", " ++# field_of "note" line ++# "u32,") state.agile)
+    |? verb = "add"
+    ?> counted (occurrences (task_key id) state.agile)
+    |? verb = "set"
+    ?> ? status_current state.agile id (field_of "status" line) ?> Verified |: Superseded
+    |? verb = "edit" && child <> ""
+    ?> counted (occurrences ("Parent (\"" ++# child ++# "\",") state.parents)
+    |? verb = "edit" && sm'.contains " waits=" line
+    ?> ? occurrences ("Waits (\"" ++# id ++# "\",") state.waits > 0i32 ?> Verified |: Missing
+    |? verb = "edit"
+    ?> counted (occurrences (task_key id) state.agile)
+    |: NotReceipt
+
+:~ tallied (t : tally) (verdict : receipt_verdict) : tally =
+    ?= verdict ?|
+    | Verified => { t ?| verified = t.verified + 1i32 }
+    | Refused => { t ?| refused = t.refused + 1i32 }
+    | Superseded => { t ?| superseded = t.superseded + 1i32 }
+    | Missing => { t ?| missing = t.missing + 1i32 }
+    | Duplicated _ => { t ?| duplicated = t.duplicated + 1i32 }
+    | NotReceipt => t
+
+:~ summary_of (t : tally) : string =
+    sm'.concat_list "" [
+        "rig agile receipts verified="; sm'.show t.verified; " refused="; sm'.show t.refused
+        " superseded="; sm'.show t.superseded; " missing="; sm'.show t.missing; " duplicated="; sm'.show t.duplicated
+    ]
+
+:~ reported (state : backlog_text) (t : tally) (~line : string) : tally =
+    := verdict = verdict_of state line
+    := _ =
+        ?= verdict ?|
+        | Missing => console.write_line ("missing " ++# line)
+        | Duplicated n => console.write_line ("duplicated x" ++# sm'.show n ++# " " ++# line)
+        | _ => ()
+    tallied t verdict
+
+:= usage () : string = "usage: rig agile receipts <root> verify <file> (one receipt or rig error line per row)"
+
+:~ verify_run () : i32 =
+    := root = rust_std_env.model.argument_owned 1i32
+    := file = rust_std_env.model.argument_owned 3i32
+    ? rust_std_env.model.argument_owned 2i32 <> "verify" || file = ""
+    ?>
+        console.write_error_line (usage ())
+        2i32
+    |:
+        := state = sm'.replace "\\" "/" root ++# "/state"
+        := read = \ (name : string) => agile_state_fs.model.read_state (state ++# "/" ++# name)
+        := text = { agile = read "agile.spi"; waits = read "waits.spi"; parents = read "parents.spi" }
+        := rows = sm'.split_list "\n" (sm'.replace "\r" "" (file_system.read_text_or_empty file))
+        := zero = { verified = 0i32; refused = 0i32; superseded = 0i32; missing = 0i32; duplicated = 0i32 }
+        := t = rows |> listm.fold (\ (acc : tally) (line : string) => reported text acc line) zero
+        console.write_line (summary_of t)
+        ? t.missing + t.duplicated > 0i32 ?> 1i32 |: 0i32
+
+///> rust
+:# a_receipt_counts_only_when_its_write_is_in_the_state_exactly_once =
+    := task = "inl t_a () = Task (\"T-A\", \"x\", Story, P1, D1, 0u32, Active, \"\", \"t\", \"current\", \"current\")"
+    := note = "inl note_of_t_a_1 () = Note (\"T-A\", 1u32, \"2026-11-11T10:00Z\", \"rig\", \"n\")"
+    := agile = task ++# "\n" ++# note
+    := state = { agile = agile; waits = ""; parents = "" }
+    testing.expect (verdict_of state "rig agile note ok id=T-A note=1 at=x" = Verified) "a present note"
+    testing.expect (verdict_of state "rig agile note ok id=T-A note=2 at=x" = Missing) "a lost note"
+    testing.expect (verdict_of state "rig agile set ok id=T-A progress=5 status=Active" = Verified) "the current status"
+    testing.expect (verdict_of state "rig agile set ok id=T-A progress=5 status=Done" = Superseded) "a later set"
+    testing.expect (verdict_of state "rig error: promote stage: Access is denied." = Refused) "a refusal"
+    testing.expect (verdict_of state "rig agile add ok id=T-B binding=t_b" = Missing) "a lost add"
+    testing.expect (verdict_of state "rig agile lint ok failing_items=0" = NotReceipt) "a report is no receipt"
+    := twice = { state ?| agile = agile ++# "\n" ++# task }
+    testing.expect (verdict_of twice "rig agile add ok id=T-A binding=t_a" = Duplicated 2i32) "an add written twice"
+    := waited = { state ?| waits = ":= wait_of_t_a () = Waits (\"T-A\", \"item\", \"T-B\")" }
+    testing.expect (verdict_of waited "rig agile edit ok id=T-A waits=1" = Verified) "a recorded wait"
+    := linked = { state ?| parents = ":= parent_of_t_a () = Parent (\"T-A\", \"E\")" }
+    testing.expect (verdict_of linked "rig agile edit ok child=T-A parent=E links=1" = Verified) "a recorded parent"
+    testing.expect (field_of "note" "rig agile note ok id=T-A note=12 at=x" = "12") "fields end at a space"
+
+:= main () : i32 =
+    export "rig_agile_receipts_verify_run" verify_run
+    0i32

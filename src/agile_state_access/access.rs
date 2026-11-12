@@ -40,6 +40,10 @@ enum US1 {
     US1_AgileView,
     US1_AgileViewAdd,
     US1_AgileDialect,
+    US1_AgileReceipts,
+    US1_AgileTerms,
+    US1_AgileChanges,
+    US1_AgileAsk,
 }
 #[derive(Clone)]
 enum US0 {
@@ -305,11 +309,39 @@ fn agile_subcommand_of_1(mut v0: Rc<str>) -> US0 {
         v141
     };
     let v146: bool = &*v0 == "dialect";
-    if v146 {
+    let v149: US0 = if v146 {
         let v147: US1 = US1::US1_AgileDialect;
         US0::US0_AgileKnown(v147)
     } else {
         v145
+    };
+    let v150: bool = &*v0 == "receipts";
+    let v153: US0 = if v150 {
+        let v151: US1 = US1::US1_AgileReceipts;
+        US0::US0_AgileKnown(v151)
+    } else {
+        v149
+    };
+    let v154: bool = &*v0 == "terms";
+    let v157: US0 = if v154 {
+        let v155: US1 = US1::US1_AgileTerms;
+        US0::US0_AgileKnown(v155)
+    } else {
+        v153
+    };
+    let v158: bool = &*v0 == "changes";
+    let v161: US0 = if v158 {
+        let v159: US1 = US1::US1_AgileChanges;
+        US0::US0_AgileKnown(v159)
+    } else {
+        v157
+    };
+    let v162: bool = &*v0 == "ask";
+    if v162 {
+        let v163: US1 = US1::US1_AgileAsk;
+        US0::US0_AgileKnown(v163)
+    } else {
+        v161
     }
 }
 fn writes_named_0(mut v0: Rc<str>) -> bool {
@@ -317,8 +349,11 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
     match v1 {
         US0::US0_AgileKnown(v2) => {
             let v2: US1 = v2;
-            let v76: US2 = match v2 {
+            let v84: US2 = match v2 {
                 US1::US1_AgileAdd => {
+                    US2::US2_WritesState
+                }
+                US1::US1_AgileAsk => {
                     US2::US2_WritesState
                 }
                 US1::US1_AgileBegin => {
@@ -327,8 +362,11 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                 US1::US1_AgileCadence => {
                     US2::US2_ReadsState
                 }
-                US1::US1_AgileCheck => {
+                US1::US1_AgileChanges => {
                     US2::US2_ReadsState
+                }
+                US1::US1_AgileCheck => {
+                    US2::US2_WritesState
                 }
                 US1::US1_AgileClaim => {
                     US2::US2_WritesState
@@ -387,6 +425,9 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                 US1::US1_AgilePlan => {
                     US2::US2_ReadsState
                 }
+                US1::US1_AgileReceipts => {
+                    US2::US2_ReadsState
+                }
                 US1::US1_AgileRecord => {
                     US2::US2_WritesState
                 }
@@ -414,6 +455,9 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                 US1::US1_AgileStatus => {
                     US2::US2_ReadsState
                 }
+                US1::US1_AgileTerms => {
+                    US2::US2_ReadsState
+                }
                 US1::US1_AgileTodos => {
                     US2::US2_WritesState
                 }
@@ -430,7 +474,7 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                     US2::US2_ReadsState
                 }
             };
-            match v76 {
+            match v84 {
                 US2::US2_WritesState => {
                     true
                 }

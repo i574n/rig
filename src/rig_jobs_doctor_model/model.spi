@@ -20,8 +20,19 @@
 
 :| job_standing =
     | JobLive
+    | JobSettling
     | JobSettled
     | JobMissing
+
+:= settle_grace_ms () : u64 = 30000u64
+
+:= standing_at (~exit_text : string) (now_ms : u64) : job_standing =
+    := ended_text =
+        ?= sm'.split_list "\t" exit_text ?|
+        | _ :: second :: _ => sm'.trim second
+        | _ => ""
+    := ended = optionm'.default_value 0u64 (convert.try_convert ended_text)
+    ? ended > 0u64 && now_ms < ended + settle_grace_ms () ?> JobSettling |: JobSettled
 
 :== chain_fact =
     {
@@ -69,6 +80,9 @@
     |? sm'.contains " window run " command
     ?> WindowHolder
     |: OtherCall
+
+:= rig_process_name (~name : string) : bool =
+    name = "rig" || name = "kit" || sm'.starts_with "rig-" name || sm'.starts_with "kit-" name
 
 := cells_socket_marker () : string = "spiral-cells-"
 
@@ -118,11 +132,13 @@
                 ?= standing job ?|
                 | JobSettled => SettledButSupervised (process.pid, job) :: found
                 | JobLive => ? listm'.contains job waited ?> found |: UnwatchedJob (process.pid, job) :: found
+                | JobSettling => found
                 | JobMissing => found
             | JobWaiter job =>
                 ?= standing job ?|
                 | JobSettled => WaitOnSettled (process.pid, job) :: found
                 | JobMissing => WaitOnMissing (process.pid, job) :: found
+                | JobSettling => found
                 | JobLive => found
             | _ => found
         []
@@ -170,14 +186,30 @@
     | HostEnvironmentDiffers names => "host-environment-differs " ++# names
     | UnwatchedJob (pid, job) =>
         "unwatched-job pid=" ++# sm'.format pid ++# " job=" ++# job
-        ++# " (live, but no kit job wait holds it; nothing will notice when it ends)"
+        ++# " (live, but no rig job wait holds it; nothing will notice when it ends)"
 
 := usage () : string =
-    "job doctor [--env] (audits kit processes, job files, after-chains and Cells compiler servers whose erl is gone; "
+    "job doctor [--env] (audits rig processes, job files, after-chains and Cells compiler servers whose erl is gone; "
     ^^ "--env also compares a detached job's "
-    ^^ "environment with this shell's; exit 1 on a finding)"
+    ^^ "environment with this shell's; exit 1 on a finding; the receipt carries ms= and sample_ms=, the time spent "
+    ^^ "in all and in listing processes)"
 
 := expect (condition : bool) (~detail : string) : () = ? condition ?> () |: failwith detail
+
+///> rust
+:# a_job_that_just_settled_is_settling_not_a_finding =
+    expect (standing_at "0\t1000000\t" 1010000u64 = JobSettling) "ten seconds after the exit file"
+    expect (standing_at "0\t1000000\t" 1040000u64 = JobSettled) "past the grace"
+    expect (standing_at "0" 1010000u64 = JobSettled && standing_at "" 5u64 = JobSettled) "no end time"
+    := ending =
+        [
+            { pid = 31u64; parent_alive = !+; role = JobSupervisor "job-3-ending" }
+            { pid = 32u64; parent_alive = !+; role = JobWaiter "job-3-ending" }
+        ]
+    expect (process_findings ending (\ _ => JobSettling) = []) "a supervisor and a waiter on a settling job"
+    expect
+        ((listm.length (process_findings ending (\ _ => JobSettled)) : i32) = 2i32)
+        "the same pair past the grace"
 
 ///> rust
 :# todays_census_is_clean_while_the_old_host_drains =
@@ -213,6 +245,9 @@
     expect (role_of "\"C:\\x\\kit-1.exe\" job supervise job-17-a" = JobSupervisor "job-17-a") "supervisor role"
     expect (role_of "C:\\x\\kit.exe job wait job-17-a 30000" = JobWaiter "job-17-a") "waiter role"
     expect (role_of "C:\\x\\kit-1.exe job host" = JobHost) "host role"
+    expect (rig_process_name "rig" && rig_process_name "rig-191872000-1762941600") "rig and its supervisor copy"
+    expect (rig_process_name "kit" && rig_process_name "kit-1") "the older kit names"
+    expect (rig_process_name "rigel" |> not && rig_process_name "pwsh" |> not) "other programs"
     expect
         (
             chain_findings [ { job = "job-2-b"; predecessor = "job-1-a"; standing = JobMissing } ]

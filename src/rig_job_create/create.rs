@@ -63,7 +63,7 @@ fn decimal_text_4(mut v0: u64) -> Rc<str> {
     format_real_5(v0)
 }
 fn heavy_gate_script_7() -> Rc<str> {
-    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_GATE").or_else(|| std::env::var_os("KIT_HEAVY_GATE")).map(std::path::PathBuf::from).filter(|path| path.is_file()).or_else(|| std::env::current_dir().ok().and_then(|cwd| cwd.ancestors().find_map(|base| { let compiler = base.join("spiral").join("apps").join("compiler"); [compiler.join("scripts").join("heavy.ps1"), compiler.join("tmp").join("scripts").join("heavy.ps1")].into_iter().find(|candidate| candidate.is_file()) }))).map(|path| path.to_string_lossy().into_owned()).unwrap_or_default());
+    let mut v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_HEAVY_GATE").or_else(|| std::env::var_os("KIT_HEAVY_GATE")).map(std::path::PathBuf::from).filter(|path| path.is_file()).or_else(|| std::env::current_exe().ok().and_then(|exe| exe.parent().map(|dir| dir.join("heavy.ps1"))).filter(|path| path.is_file())).or_else(|| std::env::current_dir().ok().and_then(|cwd| cwd.ancestors().find_map(|base| { let compiler = base.join("spiral").join("apps").join("compiler"); [compiler.join("scripts").join("heavy.ps1"), compiler.join("tmp").join("scripts").join("heavy.ps1")].into_iter().find(|candidate| candidate.is_file()) }))).map(|path| path.to_string_lossy().into_owned()).unwrap_or_default());
     v0
 }
 fn joined_9(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
@@ -163,7 +163,7 @@ fn job_launched_2(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: bool, m
     };
     if v30 {
         if v24 {
-            let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--heavy needs spiral's scripts/heavy.ps1: set KIT_HEAVY_GATE or run from inside a tree that has a spiral checkout"); } LIT.with(|lit| lit.clone()) };
+            let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--heavy needs spiral's scripts/heavy.ps1: put heavy.ps1 beside the rig executable (rig-deploy does), set RIG_HEAVY_GATE to its path, or run from inside a tree that has a spiral checkout"); } LIT.with(|lit| lit.clone()) };
             US1::US1_LaunchRefused(v31)
         } else {
             US1::US1_LaunchRefused(v28)

@@ -1,0 +1,317 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| nonempty t =
+    | NonEmpty : t * list t
+
+:== ratio = { num : u64; den : u64 }
+
+:== evidence = { name : string; outcome : string; measure : option ratio }
+
+:| direction =
+    | Higher
+    | Lower
+
+:== rank_rule = { word : string; rank : i32 }
+
+:== measure_rule = { prefix : string; direction : direction; tolerance : u64 }
+
+:== judge_rule = { ranks : list rank_rule; measures : list measure_rule }
+
+:== moved_value = { name : string; before : string; after : string }
+
+:| loss =
+    | CaseLost : string
+    | OutcomeFell : moved_value
+    | MeasureFell : moved_value
+
+:| gain =
+    | CaseAdded : string
+    | OutcomeRose : moved_value
+    | MeasureRose : moved_value
+
+:| change =
+    | OutcomeChanged : moved_value
+    | MeasureMoved : moved_value
+    | OrderChanged
+
+:| finding =
+    | Lost : loss
+    | Won : gain
+    | Moved : change
+
+:| verdict =
+    | Equal
+    | Dominates : nonempty gain * list change
+    | Changed : nonempty change
+    | Regressed : nonempty loss * list gain
+
+:| movement =
+    | Worse
+    | Better
+    | Within
+
+:| parsed_side =
+    | Side : list evidence
+    | SideMalformed : string
+
+:| parsed_rule =
+    | Rule : judge_rule
+    | RuleMalformed : string
+
+:~ ^ ten_to (power : i32) : u64 = ? power <= 0i32 ?> 1u64 |: 10u64 * ten_to (power - 1i32)
+
+:~ whole_of (~text : string) : option u64 = (convert.try_convert text : option u64)
+
+:~ ratio_of (~text : string) : option ratio =
+    ?= sm'.split_list "/" text ?|
+    | top :: bottom :: [] =>
+        ?= whole_of top, whole_of bottom ?|
+        | (Some n), (Some d) ?& d > 0u64 => Some { num = n; den = d }
+        | _ => None
+    | single :: [] =>
+        ?= sm'.split_list "." single ?|
+        | whole :: [] =>
+            ?= whole_of whole ?|
+            | Some n => Some { num = n; den = 1u64 }
+            | None => None
+        | whole :: digits :: [] =>
+            := scale = ten_to (sm'.length digits)
+            ?= whole_of whole, whole_of digits ?|
+            | (Some n), (Some f) => Some { num = n * scale + f; den = scale }
+            | _ => None
+        | _ => None
+    | _ => None
+
+:~ ratio_text (r : ratio) : string = ? r.den = 1u64 ?> sm'.show r.num |: sm'.show r.num ++# "/" ++# sm'.show r.den
+
+:~ measure_text (measure : option ratio) : string =
+    ?= measure ?|
+    | Some r => ratio_text r
+    | None => "-"
+
+:~ present (side : list evidence) (~name : string) : bool = listm'.exists' (\ (e : evidence) => e.name = name) side
+
+:~ found (side : list evidence) (~name : string) : option evidence =
+    side |> listm'.try_find_ (\ (e : evidence) => e.name = name)
+
+:~ row_added (side : parsed_side) (~line : string) : parsed_side =
+    := text = sm'.trim line
+    ?= side ?|
+    | SideMalformed reason => SideMalformed reason
+    | Side rows =>
+        ? text = "" || sm'.starts_with "#" text
+        ?> side
+        |:
+            ?= sm'.split_list "\t" text ?|
+            | name :: _ :: _ ?& present rows name =>
+                SideMalformed ("case listed twice: " ++# name)
+            | name :: outcome :: [] => Side ({ name = name; outcome = outcome; measure = None } :: rows)
+            | name :: outcome :: raw :: [] =>
+                ?= ratio_of raw ?|
+                | Some m => Side ({ name = name; outcome = outcome; measure = Some m } :: rows)
+                | None => SideMalformed ("not a measure (n, n.n or n/m): " ++# raw)
+            | _ => SideMalformed ("expected case<TAB>result[<TAB>measure], got: " ++# text)
+
+:~ side_of (~text : string) : parsed_side =
+    ?= sm'.split_list "\n" text |> listm.fold row_added (Side []) ?|
+    | Side rows => Side (listm.rev rows)
+    | SideMalformed reason => SideMalformed reason
+
+:~ side_refused (side : parsed_side) : bool =
+    ?= side ?|
+    | SideMalformed _ => !+
+    | Side _ => !-
+
+:~ direction_of (~word : string) : option direction =
+    ? word = "higher" ?> Some Higher |? word = "lower" ?> Some Lower |: None
+
+:~ rule_added (rule : parsed_rule) (~line : string) : parsed_rule =
+    := words = sm'.split_list " " (sm'.trim line) |> listm'.filter (\ (w : string) => w <> "")
+    ?= rule ?|
+    | RuleMalformed reason => RuleMalformed reason
+    | Rule r =>
+        ?= words ?|
+        | [] => rule
+        | first :: _ ?& sm'.starts_with "#" first => rule
+        | verb :: word :: number :: [] ?& verb = "rank" =>
+            ?= (convert.try_convert number : option i32) ?|
+            | Some n => Rule { r ?| ranks = listm.append r.ranks [ { word = word; rank = n } ] }
+            | None => RuleMalformed ("rank needs a whole number: " ++# number)
+        | verb :: prefix :: way :: tolerance :: [] ?& verb = "measure" =>
+            ?= direction_of way, whole_of (sm'.replace "%" "" tolerance) ?|
+            | (Some d), (Some t) =>
+                Rule { r ?| measures = listm.append r.measures [ { prefix = prefix; direction = d; tolerance = t } ] }
+            | _ => RuleMalformed ("measure <case prefix|*> <higher|lower> <tolerance %>, got: " ++# sm'.trim line)
+        | _ => RuleMalformed ("expected rank <result> <n> or measure <prefix|*> <higher|lower> <tol>, got: " ++# line)
+
+:~ rule_of (~text : string) : parsed_rule =
+    sm'.split_list "\n" text |> listm.fold rule_added (Rule { ranks = []; measures = [] })
+
+:~ rank_of (rule : judge_rule) (~word : string) : option i32 =
+    ?= rule.ranks |> listm'.try_find_ (\ (r : rank_rule) => r.word = word) ?|
+    | Some r => Some r.rank
+    | None => None
+
+:~ specificity (r : measure_rule) : i32 = ? r.prefix = "*" ?> 0i32 |: sm'.length r.prefix
+
+:~ measure_rule_for (rule : judge_rule) (~name : string) : option measure_rule =
+    := better = \ (best : option measure_rule) (r : measure_rule) =>
+        ? not (r.prefix = "*" || sm'.starts_with r.prefix name)
+        ?> best
+        |:
+            ?= best ?|
+            | Some b ?& specificity b >= specificity r => best
+            | _ => Some r
+    rule.measures |> listm.fold better None
+
+:~ movement_of (r : measure_rule) (before : ratio) (after : ratio) : movement =
+    := scaled = after.num * before.den * 100u64
+    := base = before.num * after.den
+    := up = scaled > base * (100u64 + r.tolerance)
+    := floor = ? r.tolerance < 100u64 ?> base * (100u64 - r.tolerance) |: 0u64
+    := down = scaled < floor
+    ? r.tolerance >= 100u64
+    ?> Within
+    |:
+        ?= r.direction ?|
+        | Higher => ? down ?> Worse |? up ?> Better |: Within
+        | Lower => ? up ?> Worse |? down ?> Better |: Within
+
+:~ outcome_findings (rule : judge_rule) (before : evidence) (after : evidence) : list finding =
+    := shown = { name = before.name; before = before.outcome; after = after.outcome }
+    ? before.outcome = after.outcome
+    ?> []
+    |:
+        ?= rank_of rule before.outcome, rank_of rule after.outcome ?|
+        | (Some was), (Some now) ?& now < was => [ Lost (OutcomeFell shown) ]
+        | (Some was), (Some now) ?& now > was => [ Won (OutcomeRose shown) ]
+        | _ => [ Moved (OutcomeChanged shown) ]
+
+:~ measure_findings (rule : judge_rule) (before : evidence) (after : evidence) : list finding =
+    := shown = { name = before.name; before = measure_text before.measure; after = measure_text after.measure }
+    ?= before.measure, after.measure ?|
+    | (Some was), (Some now) =>
+        ? was.num * now.den = now.num * was.den
+        ?> []
+        |:
+            ?= measure_rule_for rule before.name ?|
+            | None => [ Moved (MeasureMoved shown) ]
+            | Some r =>
+                ?= movement_of r was now ?|
+                | Worse => [ Lost (MeasureFell shown) ]
+                | Better => [ Won (MeasureRose shown) ]
+                | Within => []
+    | None, None => []
+    | _ => [ Moved (MeasureMoved shown) ]
+
+:~ shared_order (side : list evidence) (other : list evidence) : list string =
+    side |> listm'.filter (\ (e : evidence) => present other e.name) |> listm.map (\ (e : evidence) => e.name)
+
+:~ findings_of (rule : judge_rule) (before : list evidence) (after : list evidence) : list finding =
+    := lost =
+        before
+        |> listm'.filter (\ (e : evidence) => present after e.name |> not)
+        |> listm.map (\ (e : evidence) => Lost (CaseLost e.name))
+    := added =
+        after
+        |> listm'.filter (\ (e : evidence) => present before e.name |> not)
+        |> listm.map (\ (e : evidence) => Won (CaseAdded e.name))
+    := paired = \ (so_far : list finding) (b : evidence) =>
+        ?= found after b.name ?|
+        | Some a => listm.append so_far (listm.append (outcome_findings rule b a) (measure_findings rule b a))
+        | None => so_far
+    := compared = before |> listm.fold paired []
+    := order = ? shared_order before after = shared_order after before ?> [] |: [ Moved OrderChanged ]
+    listm.append lost (listm.append compared (listm.append added order))
+
+:~ loss_in (f : finding) : list loss =
+    ?= f ?|
+    | Lost l => [ l ]
+    | _ => []
+
+:~ gain_in (f : finding) : list gain =
+    ?= f ?|
+    | Won g => [ g ]
+    | _ => []
+
+:~ change_in (f : finding) : list change =
+    ?= f ?|
+    | Moved c => [ c ]
+    | _ => []
+
+:~ verdict_of (all : list finding) : verdict =
+    := losses = all |> listm.map loss_in |> listm.fold listm.append []
+    := gains = all |> listm.map gain_in |> listm.fold listm.append []
+    := changes = all |> listm.map change_in |> listm.fold listm.append []
+    ?= losses, gains, changes ?|
+    | (l :: more), kept, _ => Regressed (NonEmpty (l, more), kept)
+    | [], (g :: more), moved => Dominates (NonEmpty (g, more), moved)
+    | [], [], (c :: more) => Changed (NonEmpty (c, more))
+    | _ => Equal
+
+:~ judged (rule : judge_rule) (before : list evidence) (after : list evidence) : verdict =
+    verdict_of (findings_of rule before after)
+
+:~ verdict_name (v : verdict) : string =
+    ?= v ?|
+    | Equal => "Equal"
+    | Dominates _ => "Dominates"
+    | Changed _ => "Changed"
+    | Regressed _ => "Regressed"
+
+:~ verdict_exit (v : verdict) : i32 =
+    ?= v ?|
+    | Equal => 0i32
+    | Regressed _ => 1i32
+    | Changed _ => 2i32
+    | Dominates _ => 3i32
+
+:~ moved_text (~kind : string) (m : moved_value) : string =
+    kind ++# " " ++# m.name ++# " " ++# m.before ++# " -> " ++# m.after
+
+:~ finding_text (f : finding) : string =
+    ?= f ?|
+    | Lost (CaseLost name) => "loss case-lost " ++# name
+    | Lost (OutcomeFell m) => "loss " ++# moved_text "result-fell" m
+    | Lost (MeasureFell m) => "loss " ++# moved_text "measure-fell" m
+    | Won (CaseAdded name) => "gain case-added " ++# name
+    | Won (OutcomeRose m) => "gain " ++# moved_text "result-rose" m
+    | Won (MeasureRose m) => "gain " ++# moved_text "measure-rose" m
+    | Moved (OutcomeChanged m) => "change " ++# moved_text "result-changed" m
+    | Moved (MeasureMoved m) => "change " ++# moved_text "measure-moved" m
+    | Moved (OrderChanged) => "change order"
+
+///> rust
+:# a_loss_outranks_any_gain_and_an_empty_regression_cannot_be_built =
+    := rule =
+        ?= rule_of "rank passed 1\nrank failed 0\nmeasure * higher 0\nmeasure removed higher 100%" ?|
+        | Rule r => r
+        | RuleMalformed _ => { ranks = []; measures = [] }
+    testing.expect (listm.length rule.ranks = 2i32 && listm.length rule.measures = 2i32) "rule parsed"
+    := side = \ (text : string) =>
+        ?= side_of text ?|
+        | Side rows => rows
+        | SideMalformed _ => []
+    := before = side "a.trx\tpassed\t3/5\nb.trx\tpassed\nremoved\tpresent\t10"
+    testing.expect (listm.length before = 3i32) "three rows"
+    testing.expect (verdict_name (judged rule before before) = "Equal") "same evidence is equal"
+    := worse = side "a.trx\tpassed\t2/5\nb.trx\tpassed\nremoved\tpresent\t4\nc.trx\tpassed"
+    := regressed = judged rule before worse
+    testing.expect (verdict_name regressed = "Regressed" && verdict_exit regressed = 1i32) "a loss wins over a gain"
+    := better = side "a.trx\tpassed\t4/5\nb.trx\tpassed\nremoved\tpresent\t40"
+    testing.expect (verdict_exit (judged rule before better) = 3i32) "a better measure dominates"
+    := fell = side "a.trx\tpassed\t3/5\nb.trx\tfailed\nremoved\tpresent\t10"
+    := listed = findings_of rule before fell |> listm.map finding_text
+    testing.expect (listed = [ "loss result-fell b.trx passed -> failed" ]) "a result that drops a rank is a loss"
+    := moved = side "b.trx\tpassed\na.trx\tpassed\t3/5\nremoved\tpresent\t10"
+    testing.expect (verdict_exit (judged rule before moved) = 2i32) "order alone is a change"
+    := gone = side "a.trx\tpassed\t3/5\nremoved\tpresent\t10"
+    testing.expect (findings_of rule before gone |> listm.map finding_text = [ "loss case-lost b.trx" ]) "a lost case"
+    testing.expect (ratio_of "12.5" = Some { num = 125u64; den = 10u64 }) "decimal measure"
+    testing.expect (ratio_of "3/0" = None && ratio_of "x" = None) "a bad measure is refused"
+    testing.expect (side_refused (side_of "a\tpassed\na\tfailed")) "a case listed twice is refused"
+    testing.expect (side_refused (side_of "a\tpassed\tsoon")) "a word is not a measure"

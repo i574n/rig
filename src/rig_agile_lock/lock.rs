@@ -71,17 +71,25 @@ fn held_by_ancestor_1(mut v0: Rc<str>) -> bool {
         false
     }
 }
-fn lock_directory_claimed_8(mut v0: Rc<str>) -> bool {
+fn os_lock_path_7(mut v0: Rc<str>) -> Rc<str> {
+    let v1: Rc<str> = std::rc::Rc::<str>::from({ let state = std::path::Path::new(&*v0).join("state"); let canonical = std::fs::canonicalize(&state).unwrap_or(state); let mut hash: u64 = 0xcbf29ce484222325; for byte in canonical.to_string_lossy().to_lowercase().bytes() { hash ^= byte as u64; hash = hash.wrapping_mul(0x100000001b3); } let dir = std::env::temp_dir().join("rig-agile-locks"); let _ = std::fs::create_dir_all(&dir); dir.join(format!("{:016x}.lock", hash)).to_string_lossy().into_owned() });
+    v1
+}
+fn os_lock_taken_8(mut v0: Rc<str>, mut v1: u64) -> bool {
+    let mut v2: bool = { let deadline = std::time::Instant::now() + std::time::Duration::from_millis(v1); let mark = format!("{} {}", std::process::id(), &*v0); if std::env::var("RIG_AGILE_OSLOCK").ok().as_deref() == Some(mark.as_str()) { true } else { match std::fs::OpenOptions::new().create(true).read(true).write(true).open(&*v0) { Err(_) => true, Ok(file) => loop { match file.try_lock() { Ok(()) => { std::mem::forget(file); unsafe { std::env::set_var("RIG_AGILE_OSLOCK", &mark) }; break true } Err(std::fs::TryLockError::WouldBlock) if std::time::Instant::now() < deadline => std::thread::sleep(std::time::Duration::from_millis(10)), Err(_) => break false } } } } };
+    v2
+}
+fn lock_directory_claimed_10(mut v0: Rc<str>) -> bool {
     let v1: bool = std::fs::create_dir(&*v0).is_ok();
     v1
 }
-fn lock_holder_text_9(mut v0: u64, mut v1: u64) -> Rc<str> {
+fn lock_holder_text_11(mut v0: u64, mut v1: u64) -> Rc<str> {
     let mut v2: Rc<str> = format_real_5(v0);
     let mut v4: Rc<str> = format_real_5(v1);
     let mut v5: Rc<str> = string_concat(&[&*v2, " ", &*v4]);
     v5
 }
-fn directory_exists_10(mut v0: Rc<str>) -> bool {
+fn directory_exists_12(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let mut v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
@@ -103,7 +111,7 @@ fn closure1() -> Rc<dyn Fn((usize)) -> i32> {
         v2
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method15(mut v0: Option<u64>) -> Option<u64> {
+fn method17(mut v0: Option<u64>) -> Option<u64> {
     v0
 }
 fn closure2() -> Rc<dyn Fn((u64)) -> US0> {
@@ -112,10 +120,10 @@ fn closure2() -> Rc<dyn Fn((u64)) -> US0> {
         US0::US0_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn lock_number_14(mut v0: Rc<str>) -> u64 {
+fn lock_number_16(mut v0: Rc<str>) -> u64 {
     let v1: Rc<str> = Rc::<str>::from((v0).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
     let mut v2: Option<u64> = (v1).trim().parse::<u64>().ok();
-    let v3: Option<u64> = method15(v2);
+    let v3: Option<u64> = method17(v2);
     let mut v4: Rc<dyn Fn((u64)) -> US0> = closure2();
     let mut v5: Option<US0> = v3.map(|x| v4(x));
     let mut v7: US0 = US0::US0_None;
@@ -131,7 +139,7 @@ fn lock_number_14(mut v0: Rc<str>) -> u64 {
         }
     }
 }
-fn holder_stale_by_12(mut v0: Rc<dyn Fn(u64) -> bool>, mut v1: Rc<str>, mut v2: u64) -> bool {
+fn holder_stale_by_15(mut v0: Rc<dyn Fn(u64) -> bool>, mut v1: Rc<str>, mut v2: u64) -> bool {
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
     let mut v4: Option<usize> = v1.find(&*v3);
     let mut v5: Option<usize> = method13(v4);
@@ -145,16 +153,16 @@ fn holder_stale_by_12(mut v0: Rc<dyn Fn(u64) -> bool>, mut v1: Rc<str>, mut v2: 
         let mut v11: usize = ((0i32) as usize);
         let v12: usize = ((v9) as usize);
         let v13: Rc<str> = Rc::<str>::from(&(v1)[v11..v12]);
-        let v14: u64 = lock_number_14(v13);
+        let v14: u64 = lock_number_16(v13);
         let v15: i32 = v9.wrapping_add(1i32);
         let v16: i32 = (v1.clone().len() as i32);
         let v17: i32 = v16.wrapping_sub(v9);
         let v18: i32 = v17.wrapping_sub(1i32);
         let v19: usize = ((v15) as usize);
-        let v20: i32 = v15.wrapping_add(v18);
-        let v21: usize = ((v20) as usize);
+        let mut v20: i32 = v15.wrapping_add(v18);
+        let mut v21: usize = ((v20) as usize);
         let v22: Rc<str> = Rc::<str>::from(&(v1)[v19..v21]);
-        let v23: u64 = lock_number_14(v22);
+        let v23: u64 = lock_number_16(v22);
         let v24: bool = v14 == 0u64;
         let v27: bool = if v24 {
             true
@@ -178,15 +186,15 @@ fn closure3() -> Rc<dyn Fn(u64) -> bool> {
         v1
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn lock_holder_stale_11(mut v0: Rc<str>, mut v1: u64) -> bool {
+fn lock_holder_stale_14(mut v0: Rc<str>, mut v1: u64) -> bool {
     let mut v2: Rc<dyn Fn(u64) -> bool> = closure3();
-    holder_stale_by_12(v2, v0, v1)
+    holder_stale_by_15(v2, v0, v1)
 }
-fn lock_directory_removed_17(mut v0: Rc<str>) -> () {
+fn lock_directory_removed_19(mut v0: Rc<str>) -> () {
     { let _ = std::fs::remove_dir(&*v0); };
     ()
 }
-fn file_exists_18(mut v0: Rc<str>) -> bool {
+fn file_exists_20(mut v0: Rc<str>) -> bool {
     let mut v2: &str = &*v0;
     let mut v4: std::string::String = String::from(v2);
     let mut v6: std::path::PathBuf = std::path::PathBuf::from(v4);
@@ -204,7 +212,7 @@ fn closure4() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
         v1
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method19() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
+fn method21() -> Rc<dyn Fn(std::io::Error) -> Rc<str>> {
     closure4()
 }
 fn ok_c5() -> Rc<dyn Fn() -> US1> {
@@ -212,7 +220,7 @@ fn ok_c5() -> Rc<dyn Fn() -> US1> {
         US1::US1_Ok
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method20() -> Rc<dyn Fn() -> US1> {
+fn method22() -> Rc<dyn Fn() -> US1> {
     ok_c5()
 }
 fn error_c6() -> Rc<dyn Fn(Rc<str>) -> US1> {
@@ -220,12 +228,12 @@ fn error_c6() -> Rc<dyn Fn(Rc<str>) -> US1> {
         US1::US1_Error(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn method21() -> Rc<dyn Fn(Rc<str>) -> US1> {
+fn method23() -> Rc<dyn Fn(Rc<str>) -> US1> {
     error_c6()
 }
-fn state_lock_cleared_16(mut v0: Rc<str>) -> () {
+fn state_lock_cleared_18(mut v0: Rc<str>) -> () {
     let v1: Rc<str> = lock_holder_path_3(v0.clone());
-    let mut v2: bool = file_exists_18(v1.clone());
+    let mut v2: bool = file_exists_20(v1.clone());
     let mut v6: Result<(), std::io::Error> = if v2 {
         let mut v4: Result<(), std::io::Error> = std::fs::remove_file(&*v1);
         v4
@@ -233,10 +241,10 @@ fn state_lock_cleared_16(mut v0: Rc<str>) -> () {
         let mut v5: Result<(), std::io::Error> = Ok::<(), std::io::Error>(());
         v5
     };
-    let mut v7: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method19();
+    let mut v7: Rc<dyn Fn(std::io::Error) -> Rc<str>> = method21();
     let v9: Result<(), Rc<str>> = v6.map_err(|x| v7(x));
-    let mut v10: Rc<dyn Fn() -> US1> = method20();
-    let mut v11: Rc<dyn Fn(Rc<str>) -> US1> = method21();
+    let mut v10: Rc<dyn Fn() -> US1> = method22();
+    let mut v11: Rc<dyn Fn(Rc<str>) -> US1> = method23();
     let v12: US1 = match v9 { Ok(()) => v10(), Err(e) => v11(e) };
     match v12 {
         US1::US1_Error(v13) => {
@@ -250,23 +258,23 @@ fn state_lock_cleared_16(mut v0: Rc<str>) -> () {
         }
     };
     let v15: Rc<str> = state_lock_path_4(v0);
-    lock_directory_removed_17(v15)
+    lock_directory_removed_19(v15)
 }
-fn state_lock_waited_7(mut v0: Rc<str>, mut v1: u64, mut v2: i32) -> bool {
+fn state_lock_waited_9(mut v0: Rc<str>, mut v1: u64, mut v2: i32) -> bool {
     loop {
         let v3: Rc<str> = state_lock_path_4(v0.clone());
-        let mut v4: bool = lock_directory_claimed_8(v3);
+        let mut v4: bool = lock_directory_claimed_10(v3);
         if v4 {
             let mut v5: u32 = std::process::id();
             let mut v6: u64 = ((v5) as u64);
             let mut v7: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
             let v8: Rc<str> = lock_holder_path_3(v0);
-            let v9: Rc<str> = lock_holder_text_9(v6, v7);
+            let v9: Rc<str> = lock_holder_text_11(v6, v7);
             std::fs::write(&*v8, &*v9).unwrap();
             return true;
         } else {
             let mut v11: Rc<str> = string_concat(&[&*v0, "/state"]);
-            let v12: bool = directory_exists_10(v11);
+            let v12: bool = directory_exists_12(v11);
             let v13: bool = v12 == false;
             if v13 {
                 return true;
@@ -274,32 +282,46 @@ fn state_lock_waited_7(mut v0: Rc<str>, mut v1: u64, mut v2: i32) -> bool {
                 let v14: Rc<str> = lock_holder_path_3(v0.clone());
                 let v15: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v14).unwrap_or_default().as_str());
                 let v16: bool = &*v15 == "";
-                let v18: bool = if v16 {
-                    let v17: bool = v2 < 400i32;
-                    v17
+                let v25: bool = if v16 {
+                    true
+                } else {
+                    let v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
+                    let v18: Option<usize> = v15.find(&*v17);
+                    let v19: Option<usize> = method13(v18);
+                    let mut v20: Rc<dyn Fn((usize)) -> i32> = closure1();
+                    let mut v21: Option<i32> = v19.map(|x| v20(x));
+                    let v23: i32 = v21.unwrap_or(-1i32);
+                    let v24: bool = v23 < 0i32;
+                    v24
+                };
+                let v27: bool = if v25 {
+                    let v26: bool = v2 < 400i32;
+                    v26
                 } else {
                     false
                 };
-                if v18 {
+                if v27 {
                     std::thread::sleep(std::time::Duration::from_millis(25u64));
-                    let v19: i32 = v2.wrapping_add(1i32);
-                    v2 = v19;
+                    let v28: i32 = v2.wrapping_add(1i32);
+                    v2 = v28;
                     continue;
                 } else {
-                    let v21: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
-                    let v22: bool = lock_holder_stale_11(v15, v21);
-                    if v22 {
-                        state_lock_cleared_16(v0.clone());
-                        let v23: i32 = 0i32;
-                        v2 = v23;
+                    let v30: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
+                    let v31: bool = lock_holder_stale_14(v15, v30);
+                    if v31 {
+                        state_lock_cleared_18(v0.clone());
+                        let v32: i32 = 0i32;
+                        v2 = v32;
                         continue;
                     } else {
-                        let v25: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
-                        let v26: bool = v25 >= v1;
-                        if v26 {
+                        let v34: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
+                        let v35: bool = v34 >= v1;
+                        if v35 {
                             return false;
                         } else {
                             std::thread::sleep(std::time::Duration::from_millis(25u64));
+                            let v36: i32 = 0i32;
+                            v2 = v36;
                             continue;
                         }
                     }
@@ -308,7 +330,7 @@ fn state_lock_waited_7(mut v0: Rc<str>, mut v1: u64, mut v2: i32) -> bool {
         }
     }
 }
-fn set_environment_variable_22(mut v0: Rc<str>, mut v1: Rc<str>) -> () {
+fn set_environment_variable_24(mut v0: Rc<str>, mut v1: Rc<str>) -> () {
     unsafe { std::env::set_var(&*v0, &*v1) };
     ()
 }
@@ -317,19 +339,27 @@ fn lock_taken_0(mut v0: Rc<str>) -> bool {
     if v1 {
         true
     } else {
-        let mut v2: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
-        let v3: u64 = v2.wrapping_add(300000u64);
-        let mut v4: i32 = 0i32;
-        let mut v5: bool = state_lock_waited_7(v0, v3, v4);
+        let mut v2: Rc<str> = os_lock_path_7(v0.clone());
+        let v3: u64 = 300000u64;
+        let mut v4: bool = os_lock_taken_8(v2, v3);
+        let mut v5: bool = v4 == false;
         if v5 {
-            let mut v6: u32 = std::process::id();
-            let mut v7: u64 = ((v6) as u64);
-            let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_AGILE_LOCK_HOLDER"); } LIT.with(|lit| lit.clone()) };
-            let v9: Rc<str> = format_real_5(v7);
-            set_environment_variable_22(v8, v9);
-            true
-        } else {
             false
+        } else {
+            let mut v6: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0);
+            let mut v7: u64 = v6.wrapping_add(300000u64);
+            let v8: i32 = 0i32;
+            let v9: bool = state_lock_waited_9(v0, v7, v8);
+            if v9 {
+                let mut v10: u32 = std::process::id();
+                let mut v11: u64 = ((v10) as u64);
+                let v12: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("KIT_AGILE_LOCK_HOLDER"); } LIT.with(|lit| lit.clone()) };
+                let v13: Rc<str> = format_real_5(v11);
+                set_environment_variable_24(v12, v13);
+                true
+            } else {
+                false
+            }
         }
     }
 }
@@ -338,18 +368,31 @@ fn closure0() -> Rc<dyn Fn(Rc<str>) -> bool> {
         lock_taken_0(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn lock_released_23(mut v0: Rc<str>) -> bool {
+fn owns_holder_26(mut v0: u64, mut v1: Rc<str>) -> bool {
+    let mut v2: Rc<str> = format_real_5(v0);
+    let v3: Rc<str> = string_concat(&[&*v2, " "]);
+    let mut v4: bool = v1.starts_with(&*v3);
+    v4
+}
+fn lock_released_25(mut v0: Rc<str>) -> bool {
     let v1: bool = held_by_ancestor_1(v0.clone());
     if v1 {
         true
     } else {
-        state_lock_cleared_16(v0);
+        let mut v2: u32 = std::process::id();
+        let v3: u64 = ((v2) as u64);
+        let mut v4: Rc<str> = lock_holder_path_3(v0.clone());
+        let mut v5: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v4).unwrap_or_default().as_str());
+        let mut v6: bool = owns_holder_26(v3, v5);
+        if v6 {
+            state_lock_cleared_18(v0)
+        };
         true
     }
 }
 fn closure7() -> Rc<dyn Fn(Rc<str>) -> bool> {
     thread_local!{ static CLOSURE: Rc<dyn Fn(Rc<str>) -> bool> = Rc::new(move |mut v0: Rc<str>| -> bool {
-        lock_released_23(v0)
+        lock_released_25(v0)
     }); } CLOSURE.with(|closure| closure.clone())
 }
 pub fn rig_agile_lock_taken(v0: &str) -> bool {

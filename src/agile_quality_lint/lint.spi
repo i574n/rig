@@ -22,6 +22,8 @@
         load : string
         assignee : string
         notes : string
+        waits : string
+        markers : string
     }
 
 := tag_words (~tags : string) : list string = sm'.split_list "," tags |> listm.map sm'.trim
@@ -38,14 +40,23 @@
 
 :~ markers_of (check : lint_check) : list string =
     ?= check ?|
-    | DoneDefinition => [ "dod:"; "definition of done"; "pronto quando"; "definição de pronto" ]
-    | NextStep => [ "next:"; "next step"; "próximo:"; "próximo passo" ]
+    | DoneDefinition => [ "dod:"; "definition of done" ]
+    | NextStep => [ "next:"; "next step" ]
     | TypeFeatures => [ "typefeatures:"; "type feature plan" ]
-    | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven"; "prova:"; "provado"; "verde" ]
-    | BlockerNamed => [ "blocked on"; "blocker:"; "waits on"; "bloqueado por"; "bloqueio:"; "espera por" ]
-    | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from"; "retomar quando"; "retoma quando" ]
+    | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven" ]
+    | BlockerNamed => [ "blocked on"; "blocker:"; "waits on" ]
+    | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from" ]
     | ProseWait => [ "waits on"; "resume when"; "blocked on" ]
     | PlanningFields => []
+
+:~ declared (~markers : string) (check : lint_check) : list string =
+    := head = reflection.union_to_string check ++# "="
+    sm'.split_list "\n" markers
+    |> listm'.filter (\ (line : string) => sm'.starts_with head line)
+    |> listm.map (\ (line : string) => sm'.to_lower (sm'.replace head "" line))
+
+:~ markers_for (f : item_facts) (check : lint_check) : list string =
+    listm.append (markers_of check) (declared f.markers check)
 
 :~ checks_for (~status : string) (~tags : string) : list lint_check =
     ? status = "Done"
@@ -65,8 +76,10 @@
 :~ passes (f : item_facts) (check : lint_check) : bool =
     ?= check ?|
     | PlanningFields => f.estimate_minutes > 0i32 && f.load <> "" && f.assignee <> "" && team_tagged f.tags
-    | ProseWait => says (markers_of check) (last_note f.notes) |> not
-    | _ => says (markers_of check) f.notes
+    | ProseWait => f.waits <> "" || says (markers_for f check) (last_note f.notes) |> not
+    | BlockerNamed => f.waits <> "" || says (markers_for f check) f.notes
+    | PauseResume => f.waits <> "" || says (markers_for f check) f.notes
+    | _ => says (markers_for f check) f.notes
 
 :~ failing (f : item_facts) : list lint_check =
     checks_for f.status f.tags |> listm'.filter (\ (check : lint_check) => passes f check |> not)
@@ -82,6 +95,8 @@
         load : string
         assignee : string
         notes : string
+        waits : string
+        markers : string
     }
 
 :== failure_row = { id : string; status : string; check : string }
@@ -99,6 +114,8 @@
                 load = r.load
                 assignee = r.assignee
                 notes = r.notes
+                waits = r.waits
+                markers = r.markers
             }
         := own = failing f |> listm.map (\ (c : lint_check) => { id = r.id; status = r.status; check = check_word c })
         rows_from facts (at - 1i32) (listm.append own rows)
@@ -110,15 +127,29 @@
 
 ///> rust
 :# a_planned_code_item_needs_fields_dod_next_and_a_type_plan =
-    := bare = { status = "Planned"; tags = "kit,agile"; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "" }
+    := bare =
+        {
+            status = "Planned"
+            tags = "kit,agile"
+            estimate_minutes = 0i32
+            load = ""
+            assignee = ""
+            notes = ""
+            waits = ""
+            markers = ""
+        }
     testing.expect (failing bare = [ PlanningFields; DoneDefinition; NextStep; TypeFeatures ]) (failing_words bare)
     := notes = "DoD: 3 CLI tests pass. NEXT: rig_agile_mutation route. TYPEFEATURES: lint_check union."
     := full =
         { bare ?| tags = "kit,team:kit"; estimate_minutes = 60i32; load = "light"; assignee = "agent"; notes = notes }
     testing.expect (failing full = []) (failing_words full)
     testing.expect (failing { full ?| tags = "docs,team:x" } = []) "a non-code item skips the type plan"
-    := portuguese = "Pronto quando: três testes da CLI passam. Próximo: rota no rig_agile_mutation."
-    testing.expect (failing { full ?| tags = "docs,team:x"; notes = portuguese } = []) "pt-BR marker lines count"
+    := own = "Accepted when three CLI tests pass. Then: the rig_agile_mutation route."
+    := phrases = "DoneDefinition=accepted when\nNextStep=then:"
+    := declared = { full ?| tags = "docs,team:x"; notes = own; markers = phrases }
+    testing.expect (failing declared = []) "markers the backlog declares count like the built-in ones"
+    := undeclared = failing { declared ?| markers = "" }
+    testing.expect (undeclared = [ DoneDefinition; NextStep ]) "undeclared phrases do not count"
 
 ///> rust
 :# phrase_style_notes_count_like_marker_lines =
@@ -131,13 +162,24 @@
             load = "light"
             assignee = "agent"
             notes = notes
+            waits = ""
+            markers = ""
         }
     testing.expect (failing f = []) (failing_words f)
 
 ///> rust
 :# each_status_arm_checks_only_its_own_rule =
     := f =
-        { status = "Done"; tags = "kit"; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "landed" }
+        {
+            status = "Done"
+            tags = "kit"
+            estimate_minutes = 0i32
+            load = ""
+            assignee = ""
+            notes = "landed"
+            waits = ""
+            markers = ""
+        }
     testing.expect (failing f = [ DoneEvidence ]) (failing_words f)
     testing.expect (failing { f ?| notes = "notebook 8/8 pass" } = []) "a passing run is evidence"
     testing.expect (failing { f ?| status = "Blocked" } = [ BlockerNamed ]) "blocked names its blocker"
@@ -157,8 +199,14 @@
             load = "light"
             assignee = "agent"
             notes = ready
+            waits = ""
+            markers = ""
         }
     testing.expect (failing f = []) (failing_words f)
+    := blocked = { f ?| status = "Blocked"; notes = "" }
+    := named = \ (f : item_facts) => failing f |> listm'.filter (\ (c : lint_check) => c = BlockerNamed)
+    testing.expect (named { blocked ?| waits = "item:T-B" } = []) "a typed wait names the blocker"
+    testing.expect (named blocked = [ BlockerNamed ]) "no wait and no prose leaves the blocker unnamed"
     := held = { f ?| notes = ready ++# "\n11-07 kit: built; waits on install: TRAIN40" }
     testing.expect (failing held = [ ProseWait ]) (failing_words held)
     := released = { f ?| notes = held.notes ++# "\n11-08 kit: installed and checked" }

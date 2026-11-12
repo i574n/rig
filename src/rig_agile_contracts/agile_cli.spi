@@ -170,6 +170,33 @@
     fixture_root_remove fixture.root
 
 ///> rust
+:# expect_refuses_a_set_or_edit_whose_field_changed_since_it_was_read =
+    := fixture = cache_fixture_new ()
+    fixture_append fixture.root "state/package.spiproj" "    agile\n"
+    fixture_write fixture.root
+        "state/agile.spi"
+        (
+            "union task_kind = | TaskKind :: task_kind\nunion priority = | P0 :: priority\n"
+            ^^ "union difficulty = | D1 :: difficulty\nunion task_status = | Active :: task_status\n"
+            ^^ "union agile_item = | Task :: string * string * task_kind * priority * difficulty * u32 * task_status "
+            ^^ "* string * string * string * string -> agile_item\n"
+            ^^ "inl task () = Task (\"ID\", \"Task fixture\", TaskKind, P0, D1, 0u32, Active, \"\", \"\", \"\", \"\")\n"
+            ^^ "inl main () : i32 = 0i32\n"
+        )
+    := expecting = \ (status : string) => Arg ("ID", Arg ("60", Arg ("Active", Arg ("--expect", Arg (status, NoArgs)))))
+    := _ = succeeded (agile_free fixture "set" (expecting "Active"))
+    failed_with (agile_free fixture "set" (expecting "Paused")) "the status changed since it was read; it is Active"
+    := _ = succeeded (agile_free fixture "set" (Arg ("ID", Arg ("-", Arg ("Active", NoArgs)))))
+    expect (sm'.contains "60u32, Active" (fixture_read fixture.root "state/agile.spi")) "a dash keeps the progress"
+    := retitled = \ (title : string) (seen : string) =>
+        Arg ("ID", Arg ("title", Arg (title, Arg ("--expect", Arg (seen, NoArgs)))))
+    := _ = succeeded (agile_free fixture "edit" (retitled "First" "Task fixture"))
+    failed_with (agile_free fixture "edit" (retitled "Second" "Task fixture")) "changed since it was read; it now reads"
+    := state = fixture_read fixture.root "state/agile.spi"
+    expect (sm'.contains "\"First\"" state) "the refused edit left the first title"
+    fixture_root_remove fixture.root
+
+///> rust
 :# history_appends_preserve_unrelated_drift_but_clean_appends_remain_compiler_free =
     := fixture = cache_fixture_new ()
     fixture_append fixture.root "state/package.spiproj" "    history\n    ratings\n    bench\n    migration\n"

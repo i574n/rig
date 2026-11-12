@@ -115,9 +115,54 @@
         := tail = upper_words rest
         ? part = "" ?> tail |? tail = "" ?> part |: part ++# "-" ++# tail
 
-:= gap_id_base (request : gap_request) : string =
+:== prefix_count = { prefix : string; count : i32 }
+
+:~ tagged_with (~team : string) (~row : string) : bool =
+    := tag = "team:" ++# team
+    sm'.contains (tag ++# "\"") row || sm'.contains (tag ++# ",") row
+
+:~ task_rows (~state : string) : list string =
+    sm'.split_list "\n" state |> listm'.filter (\ (row : string) => sm'.contains "() = Task (\"" row)
+
+:~ lane_team (request : gap_request) (~state : string) : string =
+    := whole = request.author
+    := declared = task_rows state |> listm'.exists' (\ (row : string) => tagged_with whole row)
+    ? declared ?> whole |: team_of whole
+
+:~ id_prefix_of (~row : string) : string =
+    := marker = "() = Task (\""
+    := at = sm'.index_of marker row
+    := start = at + sm'.length marker
+    := rest = ? at < 0i32 ?> "" |: sm'.substring start (sm'.length row - start) row
+    := stop = sm'.index_of "-" rest
+    ? stop <= 0i32 ?> "" |: sm'.substring 0i32 stop rest
+
+:~ team_prefix (~state : string) (~team : string) : string =
+    := counted = \ (acc : dict.dict string i32) (row : string) =>
+        ? tagged_with team row ?> acc |> dict.updated (id_prefix_of row) 0i32 (\ (n : i32) => n + 1i32) |: acc
+    := counts = task_rows state |> listm.fold counted (dict.empty ())
+    := best = \ (top : prefix_count) (prefix : string) (n : i32) =>
+        ? prefix <> "" && n > top.count ?> { prefix = prefix; count = n } |: top
+    := top = counts |> dict.fold best { prefix = ""; count = 0i32 }
+    ? top.prefix = "" ?> sm'.to_upper team |: top.prefix
+
+:~ declared (~markers : string) (~key : string) : string =
+    := marked = \ (line : string) => sm'.contains ("Marker (\"" ++# key ++# "\", \"") line
+    ?= sm'.split_list "\n" markers |> listm'.try_find_ marked ?|
+    | Some line =>
+        ?= sm'.split_list "\"" line ?|
+        | _ :: _ :: _ :: value :: _ => value
+        | _ => ""
+    | None => ""
+
+:~ gap_team (request : gap_request) (~state : string) (~markers : string) : string =
+    := team = declared markers "GapTeam"
+    ? team <> "" ?> team |: lane_team request state
+
+:= gap_id_base (request : gap_request) (~state : string) (~markers : string) : string =
     := words = sm'.split_list " " request.verb
-    sm'.to_upper (team_of request.author) ++# "-GAP-" ++# upper_words words
+    := prefix = declared markers "GapPrefix"
+    (? prefix <> "" ?> prefix |: team_prefix state (lane_team request state)) ++# "-GAP-" ++# upper_words words
 
 := id_taken (~state : string) (~id : string) : bool = sm'.contains ("Task (\"" ++# id ++# "\",") state
 
@@ -130,8 +175,8 @@
     | first :: _ => trim_dashes first
     | [] => ""
 
-:= gap_tags (request : gap_request) : string =
-    "rig,gap," ++# first_verb_word request ++# ",team:" ++# team_of request.author
+:= gap_tags (request : gap_request) (~state : string) (~markers : string) : string =
+    "rig,gap," ++# first_verb_word request ++# ",team:" ++# gap_team request state markers
 
 := shown (~value : string) : string = ? value = "" ?> "-" |: value
 
@@ -151,8 +196,8 @@
     | RequestRead request =>
         := note = gap_note request
         testing.expect (request.title = "help names no sub-verb usage") "the title is trimmed"
-        testing.expect (gap_id_base request = "RIG-GAP-HELP-AGILE-ADD") "team, GAP, then the verb words"
-        testing.expect (gap_tags request = "rig,gap,help,team:rig") "the team tag comes from --as"
+        testing.expect (gap_id_base request "" "" = "RIG-GAP-HELP-AGILE-ADD") "team, GAP, then the verb words"
+        testing.expect (gap_tags request "" "" = "rig,gap,help,team:rig") "the team tag comes from --as"
         testing.expect (sm'.starts_with "FAILED CALL: verb=help agile add exit=2 cwd=- argv=-" note) "the failed call"
         testing.expect (sm'.contains "DoD:" note && sm'.contains "TypeFeatures:" note) "the lint markers"
 
@@ -174,7 +219,16 @@
 :# the_id_takes_the_first_free_number_and_dashes_leave_flags =
     := base = titled "t"
     := request = { base ?| verb = "job start --on"; author = "org2-x" }
-    testing.expect (gap_id_base request = "ORG2-GAP-JOB-START-ON") "a flag's dashes are dropped"
+    testing.expect (gap_id_base request "" "" = "ORG2-GAP-JOB-START-ON") "a flag's dashes are dropped"
+    := head = "inl a () = Task (\"SP-A1\", \"t\", Story, P1, D1, 0u32, Planned, \"\", "
+    := row = head ++# "\"team:sigenius-pascal,x\", \"c\", \"c\")"
+    := lane = { base ?| verb = "agile check"; author = "sigenius-pascal" }
+    testing.expect (gap_id_base lane row "" = "SP-GAP-AGILE-CHECK") "the prefix the lane's team already uses"
+    testing.expect (gap_tags lane row "" = "rig,gap,agile,team:sigenius-pascal") "the lane's own team tag"
+    testing.expect (gap_tags lane "" "" = "rig,gap,agile,team:sigenius") "the first word when no item names the team"
+    := owner = ":= m1 () = Marker (\"GapPrefix\", \"RUST-RIG\")\n:= m2 () = Marker (\"GapTeam\", \"rust\")"
+    testing.expect (gap_id_base lane row owner = "RUST-RIG-GAP-AGILE-CHECK") "the backlog names who owns tool gaps"
+    testing.expect (gap_tags lane row owner = "rig,gap,agile,team:rust") "and the team that takes them"
     := first = "inl a () = Task (\"ORG2-GAP-JOB-START-ON\", \"t\")"
     := state = first ++# "\ninl b () = Task (\"ORG2-GAP-JOB-START-ON-2\", \"t\")"
     testing.expect (free_id state "ORG2-GAP-JOB-START-ON" 1i32 = "ORG2-GAP-JOB-START-ON-3") "the first free number"

@@ -35,7 +35,9 @@
     |: ()
 
 :~ state_text (~root : string) : string =
-    agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+    := state = sm'.replace "\\" "/" root ++# "/state"
+    := read = \ (name : string) => agile_state_fs.model.read_state (state ++# "/" ++# name)
+    read "agile.spi" ++# "\n" ++# read "waits.spi" ++# "\n" ++# read "markers.spi"
 
 :~ lint_run () : i32 =
     := started = workspace_primitives.clock.unix_ms ()

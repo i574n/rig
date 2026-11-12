@@ -60,11 +60,72 @@ fn rejected_3(mut v0: Rc<str>) -> i32 {
     stderr_line_5(v3);
     2i32
 }
-fn shared_summary_7(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+fn joined_9(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+    let v2: Rc<str> = std::rc::Rc::<str>::from(std::path::Path::new(&*v0).join(&*v1).to_string_lossy().as_ref());
+    v2
+}
+fn jobs_root_11() -> Rc<str> {
+    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
+    v0
+}
+fn job_directory_10(mut v0: Rc<str>) -> Rc<str> {
+    let v1: Rc<str> = jobs_root_11();
+    joined_9(v1, v0)
+}
+fn job_file_8(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
+    let v2: Rc<str> = job_directory_10(v0);
+    joined_9(v2, v1)
+}
+fn text_or_empty_12(mut v0: Rc<str>) -> Rc<str> {
+    let v1: Rc<str> = std::rc::Rc::<str>::from(std::fs::read_to_string(&*v0).unwrap_or_default());
+    v1
+}
+fn line_ended_13(mut v0: Rc<str>) -> Rc<str> {
+    let v1: bool = &*v0 == "";
+    let v4: bool = if v1 {
+        true
+    } else {
+        let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
+        let v3: bool = v0.ends_with(&*v2);
+        v3
+    };
+    if v4 {
+        v0
+    } else {
+        let v5: Rc<str> = string_concat(&[&*v0, "\n"]);
+        v5
+    }
+}
+fn output_echoed_7(mut v0: Rc<str>) -> () {
+    let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("stdout.log"); } LIT.with(|lit| lit.clone()) };
+    let v2: Rc<str> = job_file_8(v0.clone(), v1);
+    let v3: Rc<str> = text_or_empty_12(v2);
+    let v4: Rc<str> = line_ended_13(v3);
+    let v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("stderr.log"); } LIT.with(|lit| lit.clone()) };
+    let v6: Rc<str> = job_file_8(v0, v5);
+    let v7: Rc<str> = text_or_empty_12(v6);
+    let v8: Rc<str> = line_ended_13(v7);
+    let v9: bool = &*v4 == "";
+    if v9 {
+        ()
+    } else {
+        print!("{}", v4);
+        std::io::Write::flush(&mut std::io::stdout()).unwrap();
+        ()
+    };
+    let v10: bool = &*v8 == "";
+    if v10 {
+        ()
+    } else {
+        eprint!("{}", &*v8);
+        ()
+    }
+}
+fn shared_summary_14(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let v2: Rc<str> = rig_job_summary::rig_job_summary(&*v0, &*v1);
     v2
 }
-fn stdout_line_8(mut v0: Rc<str>) -> () {
+fn stdout_line_15(mut v0: Rc<str>) -> () {
     println!("{}", v0);
     ()
 }
@@ -78,18 +139,23 @@ fn started_code_6(mut v0: bool) -> i32 {
         false
     };
     if v5 {
-        let v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("run"); } LIT.with(|lit| lit.clone()) };
-        let v7: Rc<str> = shared_summary_7(v6, v3);
-        stdout_line_8(v7)
+        output_echoed_7(v3.clone())
+    };
+    let v7: bool = if v0 {
+        let v6: bool = &*v3 != "";
+        v6
+    } else {
+        false
+    };
+    if v7 {
+        let v8: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("run"); } LIT.with(|lit| lit.clone()) };
+        let v9: Rc<str> = shared_summary_14(v8, v3);
+        stdout_line_15(v9)
     };
     v2
 }
-fn jobs_root_10() -> Rc<str> {
-    let v0: Rc<str> = std::rc::Rc::<str>::from(std::env::var_os("RIG_JOBS_HOME").or_else(|| std::env::var_os("KIT_JOBS_HOME")).map(std::path::PathBuf::from).or_else(|| std::env::var_os("LOCALAPPDATA").map(|base| std::path::PathBuf::from(base).join("kit").join("jobs"))).or_else(|| std::env::var_os("HOME").map(|base| std::path::PathBuf::from(base).join(".cache").join("kit").join("jobs"))).unwrap_or_else(|| std::path::PathBuf::from(".kit-jobs")).to_string_lossy().as_ref());
-    v0
-}
-fn dispatched_9() -> i32 {
-    let v0: Rc<str> = jobs_root_10();
+fn dispatched_16() -> i32 {
+    let v0: Rc<str> = jobs_root_11();
     let v1: i32 = rig_job_dispatch::rig_job_dispatch_run(&v0);
     v1
 }
@@ -114,7 +180,7 @@ fn job_ran_2(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
             }
         }
         US0::US0_JobCoordinator => {
-            let v40: Rc<str> = jobs_root_10();
+            let v40: Rc<str> = jobs_root_11();
             let v41: i32 = rig_job_coordinator::rig_job_coordinator_run(&v40);
             v41
         }
@@ -136,7 +202,7 @@ fn job_ran_2(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
         US0::US0_JobList => {
             let v26: bool = &*v1 == "--on";
             if v26 {
-                let v27: Rc<str> = jobs_root_10();
+                let v27: Rc<str> = jobs_root_11();
                 let v28: i32 = rig_job_dispatch::rig_job_list_on(&v27);
                 v28
             } else {
@@ -151,7 +217,7 @@ fn job_ran_2(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
         US0::US0_JobStart => {
             let v3: bool = &*v1 == "--on";
             if v3 {
-                dispatched_9()
+                dispatched_16()
             } else {
                 let v5: bool = false;
                 started_code_6(v5)
@@ -187,7 +253,7 @@ fn job_ran_2(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>) -> i32 {
             v31
         }
         US0::US0_JobUnknown => {
-            let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job coordinator build --spiral <dir> --kit <dir> (builds the resident job coordinator through Cells --build-only and records its receipt) | job coordinator start --spool <dir> (starts it as a resident job that takes <name>.sub files from the spool) | job doctor [--env] (audits kit processes, job files and after-chains; --env also compares a detached job's environment with this shell's; exit 1 on a finding) | job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept) | job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one and prints every id; --serial runs the links in order inside one job, so waiting links hold no process) | job start [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] [--settle-ms <n>] <label> <timeout-ms> <program> [args...] (the cap covers the whole job tree; reaching it stops the job as memory-capped, exit 137; a plain start without --after watches the job for --settle-ms, default 2000, 0 skips, and a job that already settled badly prints 'job start failed' with its state, exit and detail and exits with that code) | job run [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] <label> <timeout-ms> <program> [args...] (supervises in this process, so the job's processes stay in the caller's tree and end with it; exits with the job's code; for long runs from an agent shell that can be reaped, use job start plus a background job wait) | job status <id> | job wait <id> [max-ms, default until it settles] | job list [count] | job tail <id> [lines] | job stop <id> | job amend <id> --timeout <ms> (a queued job only; the limit is read when its child starts)"); } LIT.with(|lit| lit.clone()) };
+            let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job coordinator build --spiral <dir> --kit <dir> (builds the resident job coordinator through Cells --build-only and records its receipt) | job coordinator start --spool <dir> (starts it as a resident job that takes <name>.sub files from the spool) | job doctor [--env] (audits kit processes, job files and after-chains; --env also compares a detached job's environment with this shell's; exit 1 on a finding) | job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept) | job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one and prints every id; --serial runs the links in order inside one job, so waiting links hold no process) | job start [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] [--settle-ms <n>] <label> <timeout-ms> <program> [args...] (the cap covers the whole job tree; reaching it stops the job as memory-capped, exit 137; a plain start without --after watches the job for --settle-ms, default 2000, 0 skips, and a job that already settled badly prints 'job start failed' with its state, exit and detail and exits with that code) | job run [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] <label> <timeout-ms> <program> [args...] (supervises in this process, so the job's processes stay in the caller's tree and end with it; when the job settles it prints the command's stdout, its stderr on stderr, then the receipt, and the job keeps both in its stdout.log and stderr.log; exits with the job's code; for long runs from an agent shell that can be reaped, use job start plus a background job wait) | job status <id> | job wait <id> [max-ms, default until it settles] | job list [count] | job tail <id> [lines] | job stop <id> | job amend <id> --timeout <ms> (a queued job only; the limit is read when its child starts)"); } LIT.with(|lit| lit.clone()) };
             rejected_3(v42)
         }
         US0::US0_JobWait => {
@@ -219,29 +285,29 @@ fn job_operands_1(mut v0: US0, mut v1: Rc<UH0>) -> i32 {
         }
     }
 }
-fn command_line_argument_count_12() -> i32 {
+fn command_line_argument_count_18() -> i32 {
     let v0: usize = std::env::args().count();
     let v1: i32 = ((v0) as i32);
     let v2: i32 = v1.wrapping_sub(1i32);
     v2
 }
-fn command_line_argument_13(mut v0: i32) -> Rc<str> {
+fn command_line_argument_19(mut v0: i32) -> Rc<str> {
     let v1: i32 = v0.wrapping_add(1i32);
     let v2: usize = ((v1) as usize);
     let v3: Rc<str> = Rc::<str>::from(std::env::args().nth(v2).unwrap_or_default());
     v3
 }
-fn arguments_from_11(mut v0: i32) -> Rc<UH0> {
+fn arguments_from_17(mut v0: i32) -> Rc<UH0> {
     let v1: bool = v0 >= 0i32;
     let v4: bool = if v1 {
-        let v2: i32 = command_line_argument_count_12();
+        let v2: i32 = command_line_argument_count_18();
         let v3: bool = v0 < v2;
         v3
     } else {
         false
     };
     let v8: US1 = if v4 {
-        let v5: Rc<str> = command_line_argument_13(v0);
+        let v5: Rc<str> = command_line_argument_19(v0);
         US1::US1_Some(v5)
     } else {
         US1::US1_None
@@ -253,19 +319,19 @@ fn arguments_from_11(mut v0: i32) -> Rc<UH0> {
         US1::US1_Some(v10) => {
             let v10: Rc<str> = v10;
             let v11: i32 = v0.wrapping_add(1i32);
-            let v12: Rc<UH0> = arguments_from_11(v11);
+            let v12: Rc<UH0> = arguments_from_17(v11);
             Rc::new(UH0::UH0_Cons(v10, v12))
         }
     }
 }
-fn method14(mut v0: &Rc<RefCell<Mut0>>) -> bool {
+fn method20(mut v0: &Rc<RefCell<Mut0>>) -> bool {
     let v1: i32 = v0.borrow().l0;
     let v2: bool = v1 > 0i32;
     v2
 }
 fn job_run_0() -> i32 {
     let v0: i32 = 0i32;
-    let v1: Rc<UH0> = arguments_from_11(v0);
+    let v1: Rc<UH0> = arguments_from_17(v0);
     match Rc::unwrap_or_clone(v1) {
         UH0::UH0_Cons(v2, v3) => {
             let v2: Rc<str> = v2;
@@ -386,7 +452,7 @@ fn job_run_0() -> i32 {
                     let v70: i32 = (v69.clone().borrow().len() as i32);
                     let v71: US2 = US2::US2_None;
                     let mut v72: Rc<RefCell<Mut0>> = Rc::new(RefCell::new(Mut0 { l0: v70, l1: v71 }));
-                    while method14(&v72) {
+                    while method20(&v72) {
                         let v74: i32 = v72.borrow().l0;
                         let v75: i32 = v74.wrapping_sub(1i32);
                         let v76: US2 = v72.borrow().l1.clone();
@@ -422,13 +488,13 @@ fn job_run_0() -> i32 {
                     job_operands_1(v90, v5)
                 }
                 _ => {
-                    let v92: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job coordinator build --spiral <dir> --kit <dir> (builds the resident job coordinator through Cells --build-only and records its receipt) | job coordinator start --spool <dir> (starts it as a resident job that takes <name>.sub files from the spool) | job doctor [--env] (audits kit processes, job files and after-chains; --env also compares a detached job's environment with this shell's; exit 1 on a finding) | job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept) | job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one and prints every id; --serial runs the links in order inside one job, so waiting links hold no process) | job start [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] [--settle-ms <n>] <label> <timeout-ms> <program> [args...] (the cap covers the whole job tree; reaching it stops the job as memory-capped, exit 137; a plain start without --after watches the job for --settle-ms, default 2000, 0 skips, and a job that already settled badly prints 'job start failed' with its state, exit and detail and exits with that code) | job run [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] <label> <timeout-ms> <program> [args...] (supervises in this process, so the job's processes stay in the caller's tree and end with it; exits with the job's code; for long runs from an agent shell that can be reaped, use job start plus a background job wait) | job status <id> | job wait <id> [max-ms, default until it settles] | job list [count] | job tail <id> [lines] | job stop <id> | job amend <id> --timeout <ms> (a queued job only; the limit is read when its child starts)"); } LIT.with(|lit| lit.clone()) };
+                    let v92: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job coordinator build --spiral <dir> --kit <dir> (builds the resident job coordinator through Cells --build-only and records its receipt) | job coordinator start --spool <dir> (starts it as a resident job that takes <name>.sub files from the spool) | job doctor [--env] (audits kit processes, job files and after-chains; --env also compares a detached job's environment with this shell's; exit 1 on a finding) | job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept) | job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one and prints every id; --serial runs the links in order inside one job, so waiting links hold no process) | job start [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] [--settle-ms <n>] <label> <timeout-ms> <program> [args...] (the cap covers the whole job tree; reaching it stops the job as memory-capped, exit 137; a plain start without --after watches the job for --settle-ms, default 2000, 0 skips, and a job that already settled badly prints 'job start failed' with its state, exit and detail and exits with that code) | job run [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] <label> <timeout-ms> <program> [args...] (supervises in this process, so the job's processes stay in the caller's tree and end with it; when the job settles it prints the command's stdout, its stderr on stderr, then the receipt, and the job keeps both in its stdout.log and stderr.log; exits with the job's code; for long runs from an agent shell that can be reaped, use job start plus a background job wait) | job status <id> | job wait <id> [max-ms, default until it settles] | job list [count] | job tail <id> [lines] | job stop <id> | job amend <id> --timeout <ms> (a queued job only; the limit is read when its child starts)"); } LIT.with(|lit| lit.clone()) };
                     rejected_3(v92)
                 }
             }
         }
         _ => {
-            let v95: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job coordinator build --spiral <dir> --kit <dir> (builds the resident job coordinator through Cells --build-only and records its receipt) | job coordinator start --spool <dir> (starts it as a resident job that takes <name>.sub files from the spool) | job doctor [--env] (audits kit processes, job files and after-chains; --env also compares a detached job's environment with this shell's; exit 1 on a finding) | job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept) | job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one and prints every id; --serial runs the links in order inside one job, so waiting links hold no process) | job start [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] [--settle-ms <n>] <label> <timeout-ms> <program> [args...] (the cap covers the whole job tree; reaching it stops the job as memory-capped, exit 137; a plain start without --after watches the job for --settle-ms, default 2000, 0 skips, and a job that already settled badly prints 'job start failed' with its state, exit and detail and exits with that code) | job run [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] <label> <timeout-ms> <program> [args...] (supervises in this process, so the job's processes stay in the caller's tree and end with it; exits with the job's code; for long runs from an agent shell that can be reaped, use job start plus a background job wait) | job status <id> | job wait <id> [max-ms, default until it settles] | job list [count] | job tail <id> [lines] | job stop <id> | job amend <id> --timeout <ms> (a queued job only; the limit is read when its child starts)"); } LIT.with(|lit| lit.clone()) };
+            let v95: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("job coordinator build --spiral <dir> --kit <dir> (builds the resident job coordinator through Cells --build-only and records its receipt) | job coordinator start --spool <dir> (starts it as a resident job that takes <name>.sub files from the spool) | job doctor [--env] (audits kit processes, job files and after-chains; --env also compares a detached job's environment with this shell's; exit 1 on a finding) | job after <queued-id> <predecessor-id> [--ok] (re-points a job still waiting on --after/--after-ok; label, timeout, gate and command are kept) | job chain [--ok] [--serial] [<after-id>] -- <label> <timeout-ms> <program> [args...] -- <label> ... (starts each job after the previous one and prints every id; --serial runs the links in order inside one job, so waiting links hold no process) | job start [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] [--settle-ms <n>] <label> <timeout-ms> <program> [args...] (the cap covers the whole job tree; reaching it stops the job as memory-capped, exit 137; a plain start without --after watches the job for --settle-ms, default 2000, 0 skips, and a job that already settled badly prints 'job start failed' with its state, exit and detail and exits with that code) | job run [--after <id>|--after-ok <id>] [--heavy|--compile] [--max-private-mb <n>] [--slot-within <minutes>] [--done-within <minutes>] [--min-free-mb <n>] [--quiet [--quiet-hold <min>] [--quiet-wait <min>]] <label> <timeout-ms> <program> [args...] (supervises in this process, so the job's processes stay in the caller's tree and end with it; when the job settles it prints the command's stdout, its stderr on stderr, then the receipt, and the job keeps both in its stdout.log and stderr.log; exits with the job's code; for long runs from an agent shell that can be reaped, use job start plus a background job wait) | job status <id> | job wait <id> [max-ms, default until it settles] | job list [count] | job tail <id> [lines] | job stop <id> | job amend <id> --timeout <ms> (a queued job only; the limit is read when its child starts)"); } LIT.with(|lit| lit.clone()) };
             rejected_3(v95)
         }
     }

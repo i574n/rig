@@ -1,0 +1,16 @@
+[package.metadata.spiral]
+entry = "verdict.spi"
+output = "verdict.rs"
+
+[package]
+name = "rig-verdict"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rig_verdict"
+path = "verdict.rs"
+
+[dependencies]

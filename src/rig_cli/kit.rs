@@ -349,6 +349,7 @@ enum US2 {
     US2_VerbUnits,
     US2_VerbDrafts,
     US2_VerbScratch,
+    US2_VerbVerdict,
 }
 #[derive(Clone)]
 enum US1 {
@@ -573,7 +574,13 @@ fn direct_of_2(mut v0: Rc<str>) -> US1 {
                                                                                                                                                 let v104: US2 = US2::US2_VerbScratch;
                                                                                                                                                 US1::US1_DirectKnown(v104)
                                                                                                                                             } else {
-                                                                                                                                                US1::US1_DirectUnknown
+                                                                                                                                                let v106: bool = &*v0 == "verdict";
+                                                                                                                                                if v106 {
+                                                                                                                                                    let v107: US2 = US2::US2_VerbVerdict;
+                                                                                                                                                    US1::US1_DirectKnown(v107)
+                                                                                                                                                } else {
+                                                                                                                                                    US1::US1_DirectUnknown
+                                                                                                                                                }
                                                                                                                                             }
                                                                                                                                         }
                                                                                                                                     }
@@ -780,6 +787,10 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
                             let v47: i32 = rig_units::rig_units_check_run();
                             v47
                         }
+                        US2::US2_VerbVerdict => {
+                            let v50: i32 = rig_verdict::rig_verdict_run();
+                            v50
+                        }
                         US2::US2_VerbWindow => {
                             let v22: i32 = rig_machine_windows::rig_window_run();
                             v22
@@ -787,37 +798,37 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
                     }
                 }
                 US1::US1_DirectUnknown => {
-                    let v85: i32 = rig_legacy_operations::dogfood_shim_argv0_code();
-                    let v86: bool = 0i32 == v85;
-                    if v86 {
-                        let v87: i32 = KitProcessVerbCode();
-                        let v88: bool = v87 == 7i32;
-                        let v127: US3 = if v88 {
+                    let v87: i32 = rig_legacy_operations::dogfood_shim_argv0_code();
+                    let v88: bool = 0i32 == v87;
+                    if v88 {
+                        let v89: i32 = KitProcessVerbCode();
+                        let v90: bool = v89 == 7i32;
+                        let v129: US3 = if v90 {
                             US3::US3_LeaseDeniedHandler
                         } else {
-                            let v90: i32 = v87.wrapping_add(1i32);
-                            let v91: bool = v90 == 1i32;
-                            let v112: US4 = if v91 {
+                            let v92: i32 = v89.wrapping_add(1i32);
+                            let v93: bool = v92 == 1i32;
+                            let v114: US4 = if v93 {
                                 US4::US4_StatusSpec
                             } else {
-                                let v93: bool = v90 == 2i32;
-                                if v93 {
+                                let v95: bool = v92 == 2i32;
+                                if v95 {
                                     US4::US4_PatchSpec
                                 } else {
-                                    let v95: bool = v90 == 3i32;
-                                    if v95 {
+                                    let v97: bool = v92 == 3i32;
+                                    if v97 {
                                         US4::US4_AgileSpec
                                     } else {
-                                        let v97: bool = v90 == 4i32;
-                                        if v97 {
+                                        let v99: bool = v92 == 4i32;
+                                        if v99 {
                                             US4::US4_BundleSpec
                                         } else {
-                                            let v99: bool = v90 == 5i32;
-                                            if v99 {
+                                            let v101: bool = v92 == 5i32;
+                                            if v101 {
                                                 US4::US4_ProxySpec
                                             } else {
-                                                let v101: bool = v90 == 6i32;
-                                                if v101 {
+                                                let v103: bool = v92 == 6i32;
+                                                if v103 {
                                                     US4::US4_HelpSpec
                                                 } else {
                                                     US4::US4_UnknownSpec
@@ -827,7 +838,7 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
                                     }
                                 }
                             };
-                            match v112 {
+                            match v114 {
                                 US4::US4_AgileSpec => {
                                     US3::US3_AgileHandler
                                 }
@@ -851,57 +862,57 @@ fn closure0() -> Rc<dyn Fn() -> i32> {
                                 }
                             }
                         };
-                        match v127 {
+                        match v129 {
                             US3::US3_AgileHandler => {
-                                let v139: i32 = KitAgileAdapter();
-                                v139
+                                let v141: i32 = KitAgileAdapter();
+                                v141
                             }
                             US3::US3_BundleHandler => {
-                                let v140: i32 = KitBundleAdapter();
-                                v140
+                                let v142: i32 = KitBundleAdapter();
+                                v142
                             }
                             US3::US3_HelpHandler => {
-                                let v142: i32 = KitHelpRejected();
-                                v142
+                                let v144: i32 = KitHelpRejected();
+                                v144
                             }
                             US3::US3_LeaseDeniedHandler => {
                                 2i32
                             }
                             US3::US3_PatchHandler => {
-                                let v138: i32 = KitPatchAdapter();
-                                v138
+                                let v140: i32 = KitPatchAdapter();
+                                v140
                             }
                             US3::US3_ProxyHandler => {
-                                let v141: i32 = KitProxyAdapter();
-                                v141
+                                let v143: i32 = KitProxyAdapter();
+                                v143
                             }
                             US3::US3_StatusHandler => {
-                                let v128: i32 = std::env::args().skip(2).count() as i32;
-                                let v129: bool = 0i32 == v128;
-                                if v129 {
-                                    let v130: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("."); } LIT.with(|lit| lit.clone()) };
-                                    let v131: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                    let v132: i32 = rig_status_facts::rig_status_printed(&v130, &v131);
-                                    v132
+                                let v130: i32 = std::env::args().skip(2).count() as i32;
+                                let v131: bool = 0i32 == v130;
+                                if v131 {
+                                    let v132: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("."); } LIT.with(|lit| lit.clone()) };
+                                    let v133: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                    let v134: i32 = rig_status_facts::rig_status_printed(&v132, &v133);
+                                    v134
                                 } else {
-                                    let v133: bool = 1i32 == v128;
-                                    if v133 {
-                                        let v134: i32 = KitStatusLive(0i32);
-                                        v134
+                                    let v135: bool = 1i32 == v130;
+                                    if v135 {
+                                        let v136: i32 = KitStatusLive(0i32);
+                                        v136
                                     } else {
-                                        let v135: i32 = KitStatusArityError();
-                                        v135
+                                        let v137: i32 = KitStatusArityError();
+                                        v137
                                     }
                                 }
                             }
                             US3::US3_UnknownHandler => {
-                                let v143: i32 = KitUnknownRejected();
-                                v143
+                                let v145: i32 = KitUnknownRejected();
+                                v145
                             }
                         }
                     } else {
-                        let v152: i32 = rig_legacy_operations::dogfood_shim_dispatch();
-                        v152
+                        let v154: i32 = rig_legacy_operations::dogfood_shim_dispatch();
+                        v154
                     }
                 }
             }

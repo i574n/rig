@@ -14,7 +14,7 @@
     ?> listm.rev found
     |:
         := name = rig_machine_watch.host.row_name rows at
-        ? sm'.starts_with "kit" name |> not
+        ? rig_process_name name |> not
         ?> facts_from rows (at + 1i32) count found
         |:
             := fact =
@@ -34,7 +34,7 @@
     ? rig_jobs.jobs.known_job job |> not
     ?> JobMissing
     |? file_system.file_exists (rig_jobs.jobs.job_file job "exit")
-    ?> JobSettled
+    ?> standing_at (rig_jobs.host.text_or_empty (rig_jobs.jobs.job_file job "exit")) (rig_jobs.host.now_ms ())
     |: JobLive
 
 :~ job_names () : list string =
@@ -71,8 +71,10 @@
     |: Some (HostEnvironmentDiffers changes)
 
 :~ doctor_run (env_drift : () -> bool * string) (server_report : () -> i32 * string) : i32 =
+    := started = rig_jobs.host.now_ms ()
     := with_environment = optionm'.default_value "" (env.try_command_line_argument 2i32) = "--env"
     := processes = process_facts ()
+    := sampled = rig_jobs.host.now_ms ()
     := findings = process_findings processes standing_of
     := findings =
         listm.rev (listm.fold (\ (all : list finding) (item : finding) => item :: all) (listm.rev findings) (
@@ -88,7 +90,9 @@
     := server_count, server_text = server_report ()
     ? server_text <> "" ?> console.write_line server_text |: ()
     := total = (listm.length findings : i32) + server_count
-    := summary = " processes=" ++# sm'.format (listm.length processes : i32) ++# " findings=" ++# sm'.format total
+    := counts = " processes=" ++# sm'.format (listm.length processes : i32) ++# " findings=" ++# sm'.format total
+    := timing = " ms=" ++# sm'.format (rig_jobs.host.now_ms () - started) ++# " sample_ms=" ++# sm'.format (sampled - started)
+    := summary = counts ++# timing
     ? total = 0i32 ?>
         console.write_line ("rig job doctor ok" ++# summary)
         0i32

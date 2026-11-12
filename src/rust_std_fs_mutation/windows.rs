@@ -293,7 +293,20 @@ pub fn promote_stage(temporary: &Path, target: &Path) -> Result<(), String> {
     windows_existing(&g.path)?;
     let stage = windows_guard(temporary, false, false)?;
     { let _validated = windows_open_regular(&stage.path)?; }
-    win_fs::rename(&stage.path, &g.path).map_err(|e| format!("promote stage: {e}"))
+    windows_rename_while_shared(&stage.path, &g.path).map_err(|e| format!("promote stage: {e}"))
+}
+fn windows_rename_while_shared(from: &Path, to: &Path) -> std::io::Result<()> {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+    let mut pause = std::time::Duration::from_millis(5);
+    loop {
+        match win_fs::rename(from, to) {
+            Err(error) if matches!(error.raw_os_error(), Some(5) | Some(32)) && std::time::Instant::now() < deadline => {
+                std::thread::sleep(pause);
+                pause = (pause * 2).min(std::time::Duration::from_millis(100));
+            }
+            outcome => return outcome,
+        }
+    }
 }
 pub fn discard_stage(temporary: &Path) -> Result<(), String> {
     let g = windows_guard(temporary, false, false)?;

@@ -5,7 +5,7 @@
     $'{ std::io::Write::write_all(&mut std::io::stdout(),format\!("spiral test blocks \
         {}\n",&*!relative).as_bytes()).unwrap(); 0i32 }' : i32
 
-:! batch_outcome = $'(i32, std::rc::Rc<str>)'
+:! batch_outcome = $'(i32, std::rc::Rc<str>, bool, std::rc::Rc<str>)'
 
 :~ run_batch (root : string) (target : string) (relatives : string) (timeout : u64) : batch_outcome =
     $'{ let root=std::path::Path::new(&*!root); let target=std::path::Path::new(&*!target); \
@@ -17,7 +17,13 @@
         let relatives=(&*!relatives).lines().map(str::to_owned).collect::<Vec<_>>(); \
         let reports_dir=target.join("spiral-tests"); let _=std::fs::create_dir_all(&reports_dir); \
         let kit=target.join("debug").join(format\!("kit{}",std::env::consts::EXE_SUFFIX)); \
-        let port=20000+std::process::id()%10000; let mut command=std::process::Command::new("pwsh"); \
+        let drives_cli=relatives.iter().any(|relative| std::fs::read_to_string(root.join(relative)).map(|text| \
+            text.lines().next().unwrap_or("").contains("rig_cli_check")).unwrap_or(false)); \
+        if drives_cli { let _=std::process::Command::new("cargo").current_dir(root.join("src")) \
+            .args(["build","--locked","-p","rig-cli","--target-dir"]).arg(target).status(); } \
+        let port=std::net::TcpListener::bind("127.0.0.1:0").ok().and_then(|listener| listener.local_addr().ok()) \
+            .map(|address| address.port() as u32).unwrap_or(20000+std::process::id()%10000); \
+        let mut command=std::process::Command::new("pwsh"); \
         command.current_dir(root).arg("-NoProfile").arg("-File").arg(cells_root.join("spi").join("run_notebook.ps1")); \
         for relative in &relatives { command.arg("--path").arg(root.join(relative)); \
         } command.arg("--output-dir").arg(&reports_dir).arg("--no-html").arg("--gate").env("RIG_BIN_UNDER_TEST", \
@@ -41,11 +47,46 @@
         rest.split(quote).next()).unwrap_or("").to_owned(); (file,failed) }).collect::<Vec<_>>(); \
         let failing=relatives.iter().filter(|relative| { let wanted=relative.replace(char::from(92u8),"/").to_lowercas\
         e(); match reports.iter().find(|(file,_)| file.ends_with(&wanted)) { Some((_,failed)) => failed.as_str() \!= \
-        "0", None => true } }).cloned().collect::<Vec<_>>(); (code,std::rc::Rc::<str>::from(failing.join("\n"))) } \
+        "0", None => true } }).cloned().collect::<Vec<_>>(); \
+        let daemon=["never answers the handshake","is already used by another program","compiler connection failed"]; \
+        let infra=code \!= 0 && daemon.iter().any(|marker| text.contains(marker)); \
+        (code,std::rc::Rc::<str>::from(failing.join("\n")),infra,std::rc::Rc::<str>::from(text.as_str())) } \
         Err(error) => { let _=std::io::Write::write_all(&mut std::io::stderr(),error.as_bytes()); \
-        (2,std::rc::Rc::<str>::from(relatives.join("\n"))) } } }' : batch_outcome
+        (2,std::rc::Rc::<str>::from(relatives.join("\n")),false,std::rc::Rc::<str>::from("")) } } }' : batch_outcome
 
 := batch_code (outcome : batch_outcome) : i32 = $'!outcome.0' : i32
 := batch_failed (outcome : batch_outcome) : string = $'!outcome.1.clone()' : string
+:= batch_daemon_failed (outcome : batch_outcome) : bool = $'!outcome.2' : bool
+:= batch_text (outcome : batch_outcome) : string = $'!outcome.3.clone()' : string
+:= batch_passed () : batch_outcome =
+    $'(0i32, std::rc::Rc::<str>::from(""), false, std::rc::Rc::<str>::from(""))' : batch_outcome
+
+:~ failure_rows (~relatives : string) (~text : string) : string =
+    $'std::rc::Rc::<str>::from({ let quote = char::from(34u8); let text = &*!text; let mut rows = Vec::new(); \
+        let file_key = format\!("{quote}file{quote}:{quote}"); \
+        let daemon = ["never answers the handshake", "is already used by another program", \
+            "compiler connection failed"]; \
+        for relative in (&*!relatives).lines() { \
+            let wanted = relative.replace(char::from(92u8), "/").to_lowercase(); \
+            let report = text.lines().filter_map(|line| line.strip_prefix("spiral-tests file ")).filter(|json| \
+                json.split(file_key.as_str()).nth(1).and_then(|rest| rest.split(quote).next()) \
+                .map(|file| file.ends_with(&wanted)).unwrap_or(false)).last(); \
+            let Some(json) = report else { rows.push(format\!("{wanted}\t\tpartial")); continue; }; \
+            let number = |key: &str| json.split(format\!("{quote}{key}{quote}:").as_str()).nth(1) \
+                .map(|rest| rest.chars().take_while(|c| c.is_ascii_digit()).collect::<String>()) \
+                .and_then(|digits| digits.parse::<i64>().ok()).unwrap_or(0); \
+            if number("executed") < number("discovered") { rows.push(format\!("{wanted}\t\tpartial")); } \
+            let messages = json.split(format\!("{quote}failed_messages{quote}:").as_str()).nth(1) \
+                .and_then(|rest| rest.split(char::from(125u8)).next()).unwrap_or(""); \
+            let names = json.split(format\!("{quote}failed_tests{quote}:").as_str()).nth(1) \
+                .and_then(|rest| rest.split(char::from(93u8)).next()).unwrap_or(""); \
+            let bracket = char::from(91u8); \
+            for name in names.split(char::from(44u8)).map(|n| n.trim_matches(|c: char| c == quote || c == bracket)) { \
+                if name.is_empty() { continue; } \
+                let message = messages.split(format\!("{quote}{name}{quote}:{quote}").as_str()).nth(1) \
+                    .and_then(|rest| rest.split(quote).next()).unwrap_or(""); \
+                let kind = if daemon.iter().any(|marker| message.contains(marker)) { "daemon" } else { "real" }; \
+                rows.push(format\!("{wanted}\t{name}\t{kind}")); } } \
+        rows.join("\n") })' : string
 := line_count (text : string) : i32 = sm'.line_count text
 := line_at (text : string) (index : i32) : string = sm'.line_at index text

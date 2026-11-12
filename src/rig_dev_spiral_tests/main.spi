@@ -33,6 +33,44 @@
         := _ = $'eprintln\!("spiral notebooks failed ({}): {}", !count, &*!listed)' : ()
         first_code failures 1i32
 
+:~ attempt_rows (~attempt : string) : list string =
+    sm'.split_list "\n" attempt |> listm'.filter (\ (row : string) => row <> "")
+
+:~ ran_fully (~attempt : string) (~file : string) : bool =
+    attempt_rows attempt |> listm'.exists' (\ (row : string) => row = file ++# "\t\tpartial") |> not
+
+:~ failed_in (~attempt : string) (~file : string) (~test : string) : bool =
+    attempt_rows attempt |> listm'.exists' (\ (row : string) => sm'.starts_with (file ++# "\t" ++# test ++# "\t") row)
+
+:~ cleared (attempts : list string) (~row : string) : bool =
+    ?= sm'.split_list "\t" row ?|
+    | file :: test :: _ =>
+        attempts |> listm'.exists' (\ (a : string) => ran_fully a file && (test = "" || failed_in a file test |> not))
+    | _ => !-
+
+:~ daemon_only_and_cleared (attempts : list string) : bool =
+    := rows = attempts |> listm.fold (\ (acc : list string) (a : string) => listm.append acc (attempt_rows a)) []
+    := genuine = rows |> listm'.exists' (\ (row : string) => sm'.ends_with "\treal" row)
+    genuine |> not && rows <> [] && (rows |> listm'.exists' (\ (row : string) => cleared attempts row |> not) |> not)
+
+:~ ^ chunk_outcome
+    (root : string) (target : string) (chunk : string) (timeout : u64) (attempt : i32) (seen : list string)
+    : notebook.batch_outcome
+    =
+    := outcome = notebook.run_batch root target chunk timeout
+    := attempts = listm.append seen [ notebook.failure_rows chunk (notebook.batch_text outcome) ]
+    ? notebook.batch_code outcome = 0i32 || notebook.batch_daemon_failed outcome |> not
+    ?> outcome
+    |? daemon_only_and_cleared attempts
+    ?>
+        := _ = $'eprintln\!("spiral notebooks: every daemon-failed test passed in another full attempt")' : ()
+        notebook.batch_passed ()
+    |? attempt < 4i32
+    ?>
+        := _ = $'eprintln\!("spiral notebooks: the compiler daemon did not answer; attempt {}", !attempt + 1)' : ()
+        chunk_outcome root target chunk timeout (attempt + 1i32) attempts
+    |: outcome
+
 :~ ^ batches_run
     (root : string) (target : string) (timeout : u64) (chunks : list string) (failures : failed_notebooks) (code : i32)
     : i32
@@ -40,7 +78,7 @@
     ?= chunks ?|
     | [] => reported failures code
     | chunk :: rest =>
-        := outcome = notebook.run_batch root target chunk timeout
+        := outcome = chunk_outcome root target chunk timeout 1i32 []
         := batch = notebook.batch_code outcome
         := failed = failures_of (notebook.batch_failed outcome) 0i32 (? batch = 0i32 ?> 1i32 |: batch) failures
         batches_run root target timeout rest failed (? code = 0i32 ?> batch |: code)

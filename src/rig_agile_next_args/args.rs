@@ -63,87 +63,87 @@ fn next_request_from_1(mut v0: i32, mut v1: i32, mut v2: Rc<str>, mut v3: i32, m
                     (v0, v2) = (v16, v11);
                     continue;
                 } else {
-                    let v18: Rc<str> = string_concat(&["--as expects main or subagent, got ", &*v11]);
-                    return US0::US0_ArgsRejected(v18);
+                    let v19: Rc<str> = string_concat(&["--as expects main or subagent, got ", &*v11, "; a lane is not a role here: --team <team> filters the list, claim <ID> --as <lane> takes an item"]);
+                    return US0::US0_ArgsRejected(v19);
                 }
             } else {
-                let v21: bool = &*v9 == "--json";
-                if v21 {
-                    let v22: bool = true;
-                    (v0, v6) = (v10, v22);
+                let v22: bool = &*v9 == "--json";
+                if v22 {
+                    let v23: bool = true;
+                    (v0, v6) = (v10, v23);
                     continue;
                 } else {
-                    let v24: bool = &*v9 == "--fits";
-                    if v24 {
-                        let v25: Rc<str> = rig_window_query::rig_fitting_loads();
-                        (v0, v5) = (v10, v25);
+                    let v25: bool = &*v9 == "--fits";
+                    if v25 {
+                        let v26: Rc<str> = rig_window_query::rig_fitting_loads();
+                        (v0, v5) = (v10, v26);
                         continue;
                     } else {
-                        let v27: bool = &*v9 == "--load";
-                        if v27 {
-                            let v28: bool = &*v11 != "";
-                            let v32: bool = if v28 {
-                                let v29: Rc<RefCell<Vec<Rc<str>>>> = load_words_2(v11.clone());
-                                let v30: i32 = 0i32;
-                                loads_valid_3(v29, v30)
+                        let v28: bool = &*v9 == "--load";
+                        if v28 {
+                            let v29: bool = &*v11 != "";
+                            let v33: bool = if v29 {
+                                let v30: Rc<RefCell<Vec<Rc<str>>>> = load_words_2(v11.clone());
+                                let v31: i32 = 0i32;
+                                loads_valid_3(v30, v31)
                             } else {
                                 false
                             };
-                            if v32 {
-                                let v33: i32 = v0.wrapping_add(2i32);
-                                (v0, v5) = (v33, v11);
+                            if v33 {
+                                let v34: i32 = v0.wrapping_add(2i32);
+                                (v0, v5) = (v34, v11);
                                 continue;
                             } else {
-                                let v35: Rc<str> = string_concat(&["--load expects light, medium, heavy or none, or a comma list of them, got ", &*v11]);
-                                return US0::US0_ArgsRejected(v35);
+                                let v36: Rc<str> = string_concat(&["--load expects light, medium, heavy or none, or a comma list of them, got ", &*v11]);
+                                return US0::US0_ArgsRejected(v36);
                             }
                         } else {
-                            let v38: i32 = agile_task_query::rig_query_flag_width(&*v9, &*v11);
-                            let v39: bool = v38 > 0i32;
-                            if v39 {
-                                let v40: i32 = v0.wrapping_add(v38);
-                                let v41: bool = v38 == 2i32;
-                                let v43: Rc<str> = if v41 {
+                            let v39: i32 = agile_task_query::rig_query_flag_width(&*v9, &*v11);
+                            let v40: bool = v39 > 0i32;
+                            if v40 {
+                                let v41: i32 = v0.wrapping_add(v39);
+                                let v42: bool = v39 == 2i32;
+                                let v44: Rc<str> = if v42 {
                                     v11
                                 } else {
-                                    let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                    v42
+                                    let v43: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                    v43
                                 };
-                                let v44: bool = &*v4 == "";
-                                let v47: Rc<str> = if v44 {
-                                    let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                    v45
-                                } else {
-                                    let v46: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
+                                let v45: bool = &*v4 == "";
+                                let v48: Rc<str> = if v45 {
+                                    let v46: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                                     v46
-                                };
-                                let v49: Rc<str> = string_concat(&[&*v4, &*v47, &*v9]);
-                                let v50: bool = &*v43 == "";
-                                let v53: Rc<str> = if v50 {
-                                    let v51: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-                                    v51
                                 } else {
-                                    let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
-                                    v52
+                                    let v47: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
+                                    v47
                                 };
-                                let v55: Rc<str> = string_concat(&[&*v49, &*v53, &*v43]);
-                                (v0, v4) = (v40, v55);
+                                let v50: Rc<str> = string_concat(&[&*v4, &*v48, &*v9]);
+                                let v51: bool = &*v44 == "";
+                                let v54: Rc<str> = if v51 {
+                                    let v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+                                    v52
+                                } else {
+                                    let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
+                                    v53
+                                };
+                                let v56: Rc<str> = string_concat(&[&*v50, &*v54, &*v44]);
+                                (v0, v4) = (v41, v56);
                                 continue;
                             } else {
-                                let v57: bool = v38 < 0i32;
-                                if v57 {
-                                    let v58: Rc<str> = agile_task_query::rig_query_flag_refusal(&*v9, &*v11);
-                                    return US0::US0_ArgsRejected(v58);
+                                let v58: bool = v39 < 0i32;
+                                if v58 {
+                                    let v59: Rc<str> = agile_task_query::rig_query_flag_refusal(&*v9, &*v11);
+                                    return US0::US0_ArgsRejected(v59);
                                 } else {
-                                    let v60: i32 = (v9).parse::<i32>().ok().filter(|value| *value > 0).unwrap_or(0);
-                                    let v61: bool = 0i32 < v60;
-                                    if v61 {
-                                        (v0, v3) = (v10, v60);
+                                    let v61: i32 = (v9).parse::<i32>().ok().filter(|value| *value > 0).unwrap_or(0);
+                                    let v62: bool = 0i32 < v61;
+                                    if v62 {
+                                        (v0, v3) = (v10, v61);
                                         continue;
                                     } else {
-                                        let v65: Rc<str> = agile_task_query::rig_query_usage();
-                                        let v69: Rc<str> = string_concat(&["unexpected argument ", &*v9, " (expected --as main|subagent, ", &*v65, ", --load <light|medium|heavy|none,...>, --fits, --json or a positive count)"]);
-                                        return US0::US0_ArgsRejected(v69);
+                                        let v66: Rc<str> = agile_task_query::rig_query_usage();
+                                        let v70: Rc<str> = string_concat(&["unexpected argument ", &*v9, " (expected --as main|subagent, ", &*v66, ", --load <light|medium|heavy|none,...>, --fits, --json or a positive count)"]);
+                                        return US0::US0_ArgsRejected(v70);
                                     }
                                 }
                             }

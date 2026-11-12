@@ -3,6 +3,7 @@ packages:
     spiral-
 modules:
     registry
+    coverage
     notebook
     batches
     failures

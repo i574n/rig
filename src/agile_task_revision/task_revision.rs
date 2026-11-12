@@ -966,62 +966,99 @@ fn agile_edit_entry_0() -> i32 {
                     let v84: US4 = US4::US4_ScanPlain;
                     let v85: i32 = field_end_15(v74.clone(), v83, v81, v84);
                     let v86: Rc<str> = std::rc::Rc::<str>::from(v74.get(v83 as usize..v85 as usize).unwrap_or(""));
-                    let v87: Rc<str> = agile_field_rendering::rig_agile_edit_field_token(&*v1, &*v86, &*v13);
-                    let v88: bool = &*v87 == "";
-                    let v91: US5 = if v88 {
+                    let v87: i32 = 5i32;
+                    let v88: Rc<str> = argument_owned_2(v87);
+                    let v89: bool = &*v88 == "--expect";
+                    let v92: Rc<str> = if v89 {
+                        let v90: i32 = 6i32;
+                        argument_owned_2(v90)
+                    } else {
+                        v16
+                    };
+                    let v93: Rc<str> = agile_field_rendering::rig_agile_edit_field_token(&*v1, &*v86, &*v92);
+                    let v94: bool = &*v93 == "";
+                    let v97: US5 = if v94 {
                         US5::US5_TokenRejected
                     } else {
-                        US5::US5_TokenRendered(v87)
+                        US5::US5_TokenRendered(v93)
                     };
-                    match v91 {
-                        US5::US5_TokenRejected => {
-                            let v92: Rc<str> = agile_field_rendering::rig_agile_edit_field_rule(&*v1);
-                            agile_edit_failure_1(v92, v11)
+                    let v98: bool = &*v92 == "";
+                    let v102: bool = if v98 {
+                        true
+                    } else {
+                        match v97 {
+                            US5::US5_TokenRendered(v99) => {
+                                let v99: Rc<str> = v99;
+                                let v100: bool = &*v99 == &*v86;
+                                v100
+                            }
+                            _ => {
+                                false
+                            }
                         }
-                        US5::US5_TokenRendered(v94) => {
-                            let v94: Rc<str> = v94;
-                            let v95: Rc<str> = std::rc::Rc::<str>::from(v74.get(0i32 as usize..v83 as usize).unwrap_or(""));
-                            let v97: Rc<str> = std::rc::Rc::<str>::from(v74.get(v85 as usize..v81 as usize).unwrap_or(""));
-                            let v98: Rc<str> = string_concat(&[&*v95, &*v94, &*v97]);
-                            let v99: US6 = replace_records_unchanged_17(v17, v74.clone(), v98.clone());
-                            match &v99 {
-                                US6::US6_Replaced => {
-                                    let v100: u64 = v74.len() as u64;
-                                    let v101: u64 = v98.len() as u64;
-                                    let v102: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v14);
-                                    let v106: Rc<str> = std::rc::Rc::<str>::from((v100).to_string());
-                                    let v109: Rc<str> = std::rc::Rc::<str>::from((v101).to_string());
-                                    let v112: Rc<str> = std::rc::Rc::<str>::from((v102).to_string());
-                                    let v114: Rc<str> = string_concat(&["rig agile edit ok id=", &*v11, " field=", &*v1, " bytes_before=", &*v106, " bytes_after=", &*v109, " elapsed_ms=", &*v112]);
-                                    let v115: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v114.to_string() + "
+                    };
+                    let v105: Rc<str> = string_concat(&["field ", &*v1, " changed since it was read; it now reads ", &*v86]);
+                    let v106: bool = v102 == false;
+                    if v106 {
+                        agile_edit_failure_1(v105, v11)
+                    } else {
+                        let v108: Rc<str> = agile_field_rendering::rig_agile_edit_field_token(&*v1, &*v86, &*v13);
+                        let v109: bool = &*v108 == "";
+                        let v112: US5 = if v109 {
+                            US5::US5_TokenRejected
+                        } else {
+                            US5::US5_TokenRendered(v108)
+                        };
+                        match v112 {
+                            US5::US5_TokenRejected => {
+                                let v113: Rc<str> = agile_field_rendering::rig_agile_edit_field_rule(&*v1);
+                                agile_edit_failure_1(v113, v11)
+                            }
+                            US5::US5_TokenRendered(v115) => {
+                                let v115: Rc<str> = v115;
+                                let v116: Rc<str> = std::rc::Rc::<str>::from(v74.get(0i32 as usize..v83 as usize).unwrap_or(""));
+                                let v118: Rc<str> = std::rc::Rc::<str>::from(v74.get(v85 as usize..v81 as usize).unwrap_or(""));
+                                let v119: Rc<str> = string_concat(&[&*v116, &*v115, &*v118]);
+                                let v120: US6 = replace_records_unchanged_17(v17, v74.clone(), v119.clone());
+                                match &v120 {
+                                    US6::US6_Replaced => {
+                                        let v121: u64 = v74.len() as u64;
+                                        let v122: u64 = v119.len() as u64;
+                                        let v123: u64 = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0).saturating_sub(v14);
+                                        let v127: Rc<str> = std::rc::Rc::<str>::from((v121).to_string());
+                                        let v130: Rc<str> = std::rc::Rc::<str>::from((v122).to_string());
+                                        let v133: Rc<str> = std::rc::Rc::<str>::from((v123).to_string());
+                                        let v135: Rc<str> = string_concat(&["rig agile edit ok id=", &*v11, " field=", &*v1, " bytes_before=", &*v127, " bytes_after=", &*v130, " elapsed_ms=", &*v133]);
+                                        let v136: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v135.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
-                                    v115
-                                }
-                                _ => {
-                                    let v125: Rc<str> = match v99 {
-                                        US6::US6_ChangedSinceRead => {
-                                            let v120: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the file changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
-                                            v120
-                                        }
-                                        US6::US6_ReadbackMismatch => {
-                                            let v119: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("readback did not match the written file"); } LIT.with(|lit| lit.clone()) };
-                                            v119
-                                        }
-                                        US6::US6_RenameFailed => {
-                                            let v117: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place"); } LIT.with(|lit| lit.clone()) };
-                                            v117
-                                        }
-                                        US6::US6_RenameFailedTemporaryKept => {
-                                            let v118: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place or remove its .pending copy"); } LIT.with(|lit| lit.clone()) };
-                                            v118
-                                        }
-                                        US6::US6_TemporaryWriteFailed => {
-                                            let v116: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write the replacement file"); } LIT.with(|lit| lit.clone()) };
-                                            v116
-                                        }
-                                        _ => unreachable!(),
-                                    };
-                                    agile_edit_failure_1(v125, v11)
+                                        v136
+                                    }
+                                    _ => {
+                                        let v146: Rc<str> = match v120 {
+                                            US6::US6_ChangedSinceRead => {
+                                                let v141: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the file changed since it was read; nothing written, run the call again"); } LIT.with(|lit| lit.clone()) };
+                                                v141
+                                            }
+                                            US6::US6_ReadbackMismatch => {
+                                                let v140: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("readback did not match the written file"); } LIT.with(|lit| lit.clone()) };
+                                                v140
+                                            }
+                                            US6::US6_RenameFailed => {
+                                                let v138: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place"); } LIT.with(|lit| lit.clone()) };
+                                                v138
+                                            }
+                                            US6::US6_RenameFailedTemporaryKept => {
+                                                let v139: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not move the replacement file into place or remove its .pending copy"); } LIT.with(|lit| lit.clone()) };
+                                                v139
+                                            }
+                                            US6::US6_TemporaryWriteFailed => {
+                                                let v137: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("could not write the replacement file"); } LIT.with(|lit| lit.clone()) };
+                                                v137
+                                            }
+                                            _ => unreachable!(),
+                                        };
+                                        agile_edit_failure_1(v146, v11)
+                                    }
                                 }
                             }
                         }

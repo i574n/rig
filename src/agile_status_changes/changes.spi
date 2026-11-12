@@ -13,9 +13,18 @@
 
 := row_marker () : string = " = StatusChanged (\""
 
+:= changed_variant () : string = "    | StatusChanged :: string * string * u64 -> status_change_row\n"
+
+:= author_variant () : string = "    | StatusAuthor :: string * u64 * string -> status_change_row\n"
+
 := changes_schema () : string =
     := head = "///- --no-respell\nunion status_change_row =\n"
-    head ++# "    | StatusChanged :: string * string * u64 -> status_change_row\n"
+    head ++# changed_variant () ++# author_variant ()
+
+:~ schema_upgraded (~text : string) : string =
+    ? sm'.contains "StatusAuthor ::" text || sm'.contains (changed_variant ()) text |> not
+    ?> text
+    |: sm'.replace (changed_variant ()) (changed_variant () ++# author_variant ()) text
 
 :~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_" |> sm'.replace "." "_"
 
@@ -54,16 +63,24 @@
     | workspace_primitives.files.Replaced => !+
     | _ => !-
 
-:~ appended (~before : string) (change : status_change) : string =
-    := head = ? before = "" ?> changes_schema () |: before
+:~ author_row (change : status_change) (~author : string) : string =
+    := name = "inl status_author_" ++# slug_of change.item ++# "_" ++# sm'.show change.at_ms
+    := head = name ++# " () = StatusAuthor (\"" ++# change.item ++# "\", "
+    head ++# sm'.show change.at_ms ++# "u64, \"" ++# author ++# "\")"
+
+:~ appended_by (~before : string) (change : status_change) (~author : string) : string =
+    := head = ? before = "" ?> changes_schema () |: schema_upgraded before
     := joined = ? head = "" || sm'.ends_with "\n" head ?> head |: head ++# "\n"
-    joined ++# row_of_change change ++# "\n"
+    := by = ? author = "" ?> "" |: author_row change author ++# "\n"
+    joined ++# row_of_change change ++# "\n" ++# by
+
+:~ appended (~before : string) (change : status_change) : string = appended_by before change ""
 
 :~ last_status (~before : string) (~item : string) : string =
     := latest = \ (found : string) (change : status_change) => ? change.item = item ?> change.status |: found
     changes_of_text before |> listm.fold latest ""
 
-:~ change_written (~root : string) (change : status_change) : change_write =
+:~ change_written (~root : string) (change : status_change) (~author : string) : change_write =
     := base = sm'.replace "\\" "/" root
     := path = history_path root
     := before = text_of path
@@ -73,19 +90,52 @@
     ?> ChangeUnchanged
     |:
         := _ = file_system.create_dir_all (base ++# "/history")
-        ? replaced path (appended before change)
+        ? replaced path (appended_by before change author)
         ?> ChangeAppended
         |: ChangeRefused "history/status_changes.spi could not be written"
 
-:~ change_recorded ((root, item, status) : string * string * string) : i32 =
+:~ change_recorded ((root, item, status, author) : string * string * string * string) : i32 =
     := change = { item = item; status = status; at_ms = workspace_primitives.clock.unix_ms () }
-    ?= change_written root change ?|
-    | ChangeAppended => 0i32
+    ?= change_written root change author ?|
+    | ChangeAppended =>
+        := line = "rig agile status recorded id=" ++# item ++# " author=" ++# author
+        := _ = ? author = "" ?> () |: console.write_line line
+        0i32
     | ChangeUnchanged => 0i32
     | ChangeRefused reason =>
         console.write_error_line ("rig agile status change not recorded id=" ++# item ++# ": " ++# reason)
         1i32
 
+:== authored_change = { change : status_change; author : string }
+
+:~ author_at (~text : string) (~item : string) (at_ms : u64) : string =
+    := key = "StatusAuthor (\"" ++# item ++# "\", " ++# sm'.show at_ms ++# "u64, \""
+    ?= sm'.split_list "\n" text |> listm'.try_find_ (\ (line : string) => sm'.contains key line) ?|
+    | Some line =>
+        := start = sm'.index_of key line + sm'.length key
+        := rest = sm'.substring start (sm'.length line - start) line
+        sm'.substring 0i32 (sm'.index_of "\"" rest) rest
+    | None => ""
+
+:~ recent_by_other (~text : string) (~item : string) (~author : string) (now_ms : u64) : option authored_change =
+    := latest = \ (found : option status_change) (c : status_change) => ? c.item = item ?> Some c |: found
+    ?= changes_of_text text |> listm.fold latest None ?|
+    | Some c ?& c.at_ms + 1800000u64 >= now_ms =>
+        := by = author_at text item c.at_ms
+        ? by <> "" && by <> author ?> Some { change = c; author = by } |: None
+    | _ => None
+
+:~ stale_warning_text (~text : string) (~item : string) (~author : string) (now_ms : u64) : string =
+    ?= recent_by_other text item author now_ms ?|
+    | Some r =>
+        := minutes = (now_ms - r.change.at_ms) / 60000u64
+        := head = "rig warning: " ++# item ++# " status was set to " ++# r.change.status ++# " by " ++# r.author
+        := advice = " min ago; pass --expect " ++# r.change.status ++# " to refuse a stale write"
+        head ++# " " ++# sm'.show minutes ++# advice
+    | None => ""
+
+:~ stale_warning (~root : string) (~item : string) (~author : string) : string =
+    stale_warning_text (text_of (history_path root)) item author (workspace_primitives.clock.unix_ms ())
 :~ changes_of (text : string) : array_base status_change = changes_of_text text |> listm'.box |> listm'.to_array'
 
 ///> rust
@@ -103,6 +153,17 @@
     testing.expect (last_status twice "KIT-A.2" = "Active") "the latest status of an item"
     testing.expect (last_status twice "KIT-B" = "") "an item without changes"
     testing.expect (history_path "C:\\b" = "C:/b/history/status_changes.spi") "a sidecar outside the attested state"
+    := old = "///- --no-respell\nunion status_change_row =\n" ++# changed_variant () ++# row ++# "\n"
+    := by = appended_by old { change ?| status = "Paused"; at_ms = 1793990000002u64 } "rig"
+    testing.expect (sm'.contains (author_variant ()) by) "an old file gains the author variant"
+    testing.expect (sm'.contains "StatusAuthor (\"KIT-A.2\", 1793990000002u64, \"rig\")" by) "the author row"
+    testing.expect (last_status by "KIT-A.2" = "Paused") "the status still reads back"
+    := now = 1793990000002u64 + 600000u64
+    := warned = stale_warning_text by "KIT-A.2" "auth" now
+    testing.expect (sm'.starts_with "rig warning: KIT-A.2 status was set to Paused by rig 10 min ago" warned) warned
+    testing.expect (stale_warning_text by "KIT-A.2" "rig" now = "") "your own change is not stale"
+    testing.expect (stale_warning_text by "KIT-A.2" "auth" (now + 3600000u64) = "") "an old change is not stale"
+    testing.expect (stale_warning_text by "KIT-B" "auth" now = "") "an item without changes"
 := main () : i32 =
     export "rig_agile_status_changes" changes_of
     export "rig_agile_status_change_recorded" change_recorded

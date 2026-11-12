@@ -39,6 +39,7 @@ enum US4 {
     US4_FlagAs,
     US4_FlagTtl,
     US4_FlagPaths,
+    US4_FlagAddPaths,
     US4_FlagClaim,
 }
 #[derive(Clone)]
@@ -184,19 +185,25 @@ fn flag_of_11(mut v0: Rc<str>) -> US3 {
                     let v11: US4 = US4::US4_FlagPaths;
                     US3::US3_Some(v11)
                 } else {
-                    let v13: bool = "--claim" == &*v0;
+                    let v13: bool = "--add-paths" == &*v0;
                     if v13 {
-                        let v14: US4 = US4::US4_FlagClaim;
+                        let v14: US4 = US4::US4_FlagAddPaths;
                         US3::US3_Some(v14)
                     } else {
-                        US3::US3_None
+                        let v16: bool = "--claim" == &*v0;
+                        if v16 {
+                            let v17: US4 = US4::US4_FlagClaim;
+                            US3::US3_Some(v17)
+                        } else {
+                            US3::US3_None
+                        }
                     }
                 }
             }
         }
     }
 }
-fn plain_text_12(mut v0: Rc<str>) -> bool {
+fn plain_text_13(mut v0: Rc<str>) -> bool {
     let v1: bool = &*v0 != "";
     let v5: bool = if v1 {
         let v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) };
@@ -263,14 +270,14 @@ fn plain_text_12(mut v0: Rc<str>) -> bool {
         false
     }
 }
-fn method13(mut v0: Rc<UH0>, mut v1: bool) -> bool {
+fn method12(mut v0: Rc<UH0>, mut v1: bool) -> bool {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
                 let v2: Rc<str> = v2;
                 let mut v3: Rc<UH0> = v3;
                 let v5: bool = if v1 {
-                    plain_text_12(v2)
+                    plain_text_13(v2)
                 } else {
                     false
                 };
@@ -287,7 +294,27 @@ fn paths_refusal_14(mut v0: Rc<str>) -> Rc<str> {
     let v2: Rc<str> = string_concat(&["--paths expects comma-separated globs without spaces, quotes or parentheses, got '", &*v0, "'"]);
     v2
 }
-fn method16(mut v0: Option<i32>) -> Option<i32> {
+fn method15(mut v0: Rc<UH0>, mut v1: bool) -> bool {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH0::UH0_Cons(v2, v3) => {
+                let v2: Rc<str> = v2;
+                let mut v3: Rc<UH0> = v3;
+                let v5: bool = if v1 {
+                    plain_text_13(v2)
+                } else {
+                    false
+                };
+                (v0, v1) = (v3, v5);
+                continue;
+            }
+            UH0::UH0_Nil => {
+                return v1;
+            }
+        }
+    }
+}
+fn method17(mut v0: Option<i32>) -> Option<i32> {
     v0
 }
 fn closure1() -> Rc<dyn Fn((i32)) -> US5> {
@@ -296,9 +323,9 @@ fn closure1() -> Rc<dyn Fn((i32)) -> US5> {
         US5::US5_Some(v1)
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn ttl_read_15(mut v0: Rc<str>) -> US5 {
+fn ttl_read_16(mut v0: Rc<str>) -> US5 {
     let v1: Option<i32> = (v0).trim().parse::<i32>().ok();
-    let v2: Option<i32> = method16(v1);
+    let v2: Option<i32> = method17(v1);
     let mut v3: Rc<dyn Fn((i32)) -> US5> = closure1();
     let mut v4: Option<US5> = v2.map(|x| v3(x));
     let v6: US5 = US5::US5_None;
@@ -341,52 +368,28 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                 let v23: US3 = flag_of_11(v12.clone());
                 match v23 {
                     US3::US3_None => {
-                        let v24: Rc<str> = string_concat(&["unexpected argument ", &*v12]);
-                        return US2::US2_RequestRefused(v24);
+                        let v24: bool = &*v12 == "--minutes";
+                        if v24 {
+                            let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--ttl"); } LIT.with(|lit| lit.clone()) };
+                            let v26: Rc<UH0> = Rc::new(UH0::UH0_Cons(v25, v13));
+                            v0 = v26;
+                            continue;
+                        } else {
+                            let v28: Rc<str> = string_concat(&["unexpected argument ", &*v12]);
+                            return US2::US2_RequestRefused(v28);
+                        }
                     }
-                    US3::US3_Some(v26) => {
-                        let v26: US4 = v26;
-                        match v26 {
-                            US4::US4_FlagAny => {
-                                v0 = v13;
-                                continue;
-                            }
-                            US4::US4_FlagAs => {
-                                let v34: bool = plain_text_12(v20.clone());
-                                if v34 {
-                                    (v0, v3) = (v21, v20);
-                                    continue;
-                                } else {
-                                    let v37: Rc<str> = string_concat(&["--as expects a lane name, got '", &*v20, "'"]);
-                                    return US2::US2_RequestRefused(v37);
-                                }
-                            }
-                            US4::US4_FlagClaim => {
-                                let v28: bool = match &v1 {
-                                    US1::US1_VerbNext => {
-                                        true
-                                    }
-                                    _ => {
-                                        false
-                                    }
-                                };
-                                if v28 {
-                                    let v29: bool = true;
-                                    (v0, v6) = (v13, v29);
-                                    continue;
-                                } else {
-                                    let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--claim belongs to next; claim takes an item ID"); } LIT.with(|lit| lit.clone()) };
-                                    return US2::US2_RequestRefused(v31);
-                                }
-                            }
-                            US4::US4_FlagPaths => {
-                                let v48: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
-                                let v49: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
-                                let v50: Rc<str> = Rc::<str>::from(v20.replace(&*v48, &*v49));
-                                let v51: Rc<UH0> = globs_of_flag_6(v50);
-                                let v52: bool = true;
-                                let v53: bool = method13(v51.clone(), v52);
-                                let v54: bool = match &v1 {
+                    US3::US3_Some(v31) => {
+                        let v31: US4 = v31;
+                        match v31 {
+                            US4::US4_FlagAddPaths => {
+                                let v68: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+                                let v69: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
+                                let v70: Rc<str> = Rc::<str>::from(v20.replace(&*v68, &*v69));
+                                let v71: Rc<UH0> = globs_of_flag_6(v70);
+                                let v72: bool = true;
+                                let v73: bool = method12(v71.clone(), v72);
+                                let v74: bool = match &v1 {
                                     US1::US1_VerbClaim => {
                                         true
                                     }
@@ -394,8 +397,8 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                         false
                                     }
                                 };
-                                let v57: bool = if v54 {
-                                    let v55: bool = match &*v51 {
+                                let v77: bool = if v74 {
+                                    let v75: bool = match &*v71 {
                                         UH0::UH0_Nil => {
                                             true
                                         }
@@ -403,30 +406,102 @@ fn flags_read_5(mut v0: Rc<UH0>, mut v1: US1, mut v2: Rc<str>, mut v3: Rc<str>, 
                                             false
                                         }
                                     };
-                                    let v56: bool = v55 != true;
-                                    v56
+                                    let v76: bool = v75 != true;
+                                    v76
                                 } else {
                                     false
                                 };
-                                let v58: bool = v57 && v53;
-                                if v58 {
-                                    (v0, v5) = (v21, v51);
+                                let v78: bool = v77 && v73;
+                                if v78 {
+                                    let v79: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("+"); } LIT.with(|lit| lit.clone()) };
+                                    let v80: Rc<UH0> = Rc::new(UH0::UH0_Cons(v79, v71));
+                                    (v0, v5) = (v21, v80);
                                     continue;
                                 } else {
-                                    let v60: Rc<str> = paths_refusal_14(v20);
-                                    return US2::US2_RequestRefused(v60);
+                                    let v82: Rc<str> = paths_refusal_14(v20);
+                                    return US2::US2_RequestRefused(v82);
+                                }
+                            }
+                            US4::US4_FlagAny => {
+                                v0 = v13;
+                                continue;
+                            }
+                            US4::US4_FlagAs => {
+                                let v39: bool = plain_text_13(v20.clone());
+                                if v39 {
+                                    (v0, v3) = (v21, v20);
+                                    continue;
+                                } else {
+                                    let v42: Rc<str> = string_concat(&["--as expects a lane name, got '", &*v20, "'"]);
+                                    return US2::US2_RequestRefused(v42);
+                                }
+                            }
+                            US4::US4_FlagClaim => {
+                                let v33: bool = match &v1 {
+                                    US1::US1_VerbNext => {
+                                        true
+                                    }
+                                    _ => {
+                                        false
+                                    }
+                                };
+                                if v33 {
+                                    let v34: bool = true;
+                                    (v0, v6) = (v13, v34);
+                                    continue;
+                                } else {
+                                    let v36: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--claim belongs to next; claim takes an item ID"); } LIT.with(|lit| lit.clone()) };
+                                    return US2::US2_RequestRefused(v36);
+                                }
+                            }
+                            US4::US4_FlagPaths => {
+                                let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
+                                let v54: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
+                                let v55: Rc<str> = Rc::<str>::from(v20.replace(&*v53, &*v54));
+                                let v56: Rc<UH0> = globs_of_flag_6(v55);
+                                let v57: bool = true;
+                                let v58: bool = method15(v56.clone(), v57);
+                                let v59: bool = match &v1 {
+                                    US1::US1_VerbClaim => {
+                                        true
+                                    }
+                                    _ => {
+                                        false
+                                    }
+                                };
+                                let v62: bool = if v59 {
+                                    let v60: bool = match &*v56 {
+                                        UH0::UH0_Nil => {
+                                            true
+                                        }
+                                        _ => {
+                                            false
+                                        }
+                                    };
+                                    let v61: bool = v60 != true;
+                                    v61
+                                } else {
+                                    false
+                                };
+                                let v63: bool = v62 && v58;
+                                if v63 {
+                                    (v0, v5) = (v21, v56);
+                                    continue;
+                                } else {
+                                    let v65: Rc<str> = paths_refusal_14(v20);
+                                    return US2::US2_RequestRefused(v65);
                                 }
                             }
                             US4::US4_FlagTtl => {
-                                let v40: US5 = ttl_read_15(v20.clone());
-                                match v40 {
+                                let v45: US5 = ttl_read_16(v20.clone());
+                                match v45 {
                                     US5::US5_None => {
-                                        let v44: Rc<str> = string_concat(&["--ttl expects positive minutes, got '", &*v20, "'"]);
-                                        return US2::US2_RequestRefused(v44);
+                                        let v49: Rc<str> = string_concat(&["--ttl expects positive minutes, got '", &*v20, "'"]);
+                                        return US2::US2_RequestRefused(v49);
                                     }
-                                    US5::US5_Some(v41) => {
-                                        let v41: i32 = v41;
-                                        (v0, v4) = (v21, v41);
+                                    US5::US5_Some(v46) => {
+                                        let v46: i32 = v46;
+                                        (v0, v4) = (v21, v46);
                                         continue;
                                     }
                                 }
@@ -458,7 +533,7 @@ fn closure2(mut v0: i32) -> Rc<dyn Fn(Rc<UH0>) -> US5> {
                     US5::US5_Some(v0)
                 } else {
                     let v7: i32 = v0.wrapping_add(1i32);
-                    let mut v8: Rc<dyn Fn(Rc<UH0>) -> US5> = method17(v7);
+                    let mut v8: Rc<dyn Fn(Rc<UH0>) -> US5> = method18(v7);
                     v8(v4)
                 }
             }
@@ -468,7 +543,7 @@ fn closure2(mut v0: i32) -> Rc<dyn Fn(Rc<UH0>) -> US5> {
         }
     })
 }
-fn method17(mut v0: i32) -> Rc<dyn Fn(Rc<UH0>) -> US5> {
+fn method18(mut v0: i32) -> Rc<dyn Fn(Rc<UH0>) -> US5> {
     closure2(v0)
 }
 fn request_of_4(mut v0: US1, mut v1: Rc<UH0>) -> US2 {
@@ -482,7 +557,7 @@ fn request_of_4(mut v0: US1, mut v1: Rc<UH0>) -> US2 {
     };
     if v2 {
         let mut v3: i32 = 0i32;
-        let mut v4: Rc<dyn Fn(Rc<UH0>) -> US5> = method17(v3);
+        let mut v4: Rc<dyn Fn(Rc<UH0>) -> US5> = method18(v3);
         let v5: US5 = v4(v1.clone());
         let v6: bool = match v5 {
             US5::US5_None => {
@@ -508,7 +583,7 @@ fn request_of_4(mut v0: US1, mut v1: Rc<UH0>) -> US2 {
             UH0::UH0_Cons(v16, v17) => {
                 let v16: Rc<str> = v16;
                 let v17: Rc<UH0> = v17;
-                let v18: bool = plain_text_12(v16.clone());
+                let v18: bool = plain_text_13(v16.clone());
                 let v22: bool = if v18 {
                     let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--"); } LIT.with(|lit| lit.clone()) };
                     let v20: bool = v16.starts_with(&*v19);
@@ -535,12 +610,12 @@ fn request_of_4(mut v0: US1, mut v1: Rc<UH0>) -> US2 {
         }
     }
 }
-fn method20(mut v0: i32, mut v1: &Rc<RefCell<Mut1>>) -> bool {
+fn method21(mut v0: i32, mut v1: &Rc<RefCell<Mut1>>) -> bool {
     let v2: i32 = v1.borrow().l0;
     let mut v3: bool = v2 < v0;
     v3
 }
-fn method19(mut v0: Rc<UH0>, mut v1: Rc<RefCell<Vec<Rc<str>>>>) -> Rc<RefCell<Vec<Rc<str>>>> {
+fn method20(mut v0: Rc<UH0>, mut v1: Rc<RefCell<Vec<Rc<str>>>>) -> Rc<RefCell<Vec<Rc<str>>>> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -552,7 +627,7 @@ fn method19(mut v0: Rc<UH0>, mut v1: Rc<RefCell<Vec<Rc<str>>>>) -> Rc<RefCell<Ve
                 let v7: i32 = v5.wrapping_add(v6);
                 let mut v8: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(vec![<Rc<str>>::default(); v7 as usize]));
                 let mut v9: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: 0i32 }));
-                while method20(v7, &v9) {
+                while method21(v7, &v9) {
                     let v11: i32 = v9.borrow().l0;
                     let v12: bool = v11 < v5;
                     let v16: Rc<str> = if v12 {
@@ -577,9 +652,9 @@ fn method19(mut v0: Rc<UH0>, mut v1: Rc<RefCell<Vec<Rc<str>>>>) -> Rc<RefCell<Ve
         }
     }
 }
-fn read_request_18(mut v0: US1, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, mut v4: Rc<UH0>, mut v5: bool) -> (Rc<str>, bool, bool, bool, Rc<str>, Rc<str>, Rc<str>, i32, Rc<RefCell<Vec<Rc<str>>>>) {
+fn read_request_19(mut v0: US1, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: i32, mut v4: Rc<UH0>, mut v5: bool) -> (Rc<str>, bool, bool, bool, Rc<str>, Rc<str>, Rc<str>, i32, Rc<RefCell<Vec<Rc<str>>>>) {
     let v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(vec![]));
-    let v7: Rc<RefCell<Vec<Rc<str>>>> = method19(v4, v6);
+    let v7: Rc<RefCell<Vec<Rc<str>>>> = method20(v4, v6);
     let mut v8: bool = match &v0 {
         US1::US1_VerbNext => {
             true
@@ -643,7 +718,7 @@ fn request_parsed_0(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<str>) -> Rc<Re
                                     let v32: i32 = v32;
                                     let v33: Rc<UH0> = v33;
                                     let v34: bool = v34;
-                                    read_request_18(v29, v30, v31, v32, v33, v34)
+                                    read_request_19(v29, v30, v31, v32, v33, v34)
                                 }
                                 _ => unreachable!(),
                             };

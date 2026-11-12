@@ -52,7 +52,10 @@
         ? argument = "--as" ?>
             ? value = "main" || value = "subagent"
             ?> next_request_from (index + 2i32) count { request ?| role = value }
-            |: ArgsRejected ("--as expects main or subagent, got " ++# value)
+            |:
+                := lane =
+                    "; a lane is not a role here: --team <team> filters the list, claim <ID> --as <lane> takes an item"
+                ArgsRejected ("--as expects main or subagent, got " ++# value ++# lane)
         |? argument = "--json"
         ?> next_request_from (index + 1i32) count { request ?| json = !+ }
         |? argument = "--fits"

@@ -273,7 +273,7 @@ fn method9(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
                             let v42: u64 = v42;
                             let v43: Rc<str> = v43;
                             let v44: Rc<str> = format_real_10(v42);
-                            let mut v48: Rc<str> = string_concat(&["unwatched-job pid=", &*v44, " job=", &*v43, " (live, but no kit job wait holds it; nothing will notice when it ends)"]);
+                            let mut v48: Rc<str> = string_concat(&["unwatched-job pid=", &*v44, " job=", &*v43, " (live, but no rig job wait holds it; nothing will notice when it ends)"]);
                             v48
                         }
                         US1::US1_WaitOnMissing(v29, v30) => {
@@ -330,7 +330,7 @@ fn method9(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
                             let v95: u64 = v95;
                             let v96: Rc<str> = v96;
                             let v97: Rc<str> = format_real_10(v95);
-                            let v101: Rc<str> = string_concat(&["unwatched-job pid=", &*v97, " job=", &*v96, " (live, but no kit job wait holds it; nothing will notice when it ends)"]);
+                            let v101: Rc<str> = string_concat(&["unwatched-job pid=", &*v97, " job=", &*v96, " (live, but no rig job wait holds it; nothing will notice when it ends)"]);
                             v101
                         }
                         US1::US1_WaitOnMissing(v82, v83) => {

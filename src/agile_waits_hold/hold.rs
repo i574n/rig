@@ -52,6 +52,7 @@ enum US3 {
     US3_WaitsItem(Rc<str>),
     US3_WaitsLane(Rc<str>),
     US3_WaitsUser(Rc<str>),
+    US3_WaitsJob(Rc<str>),
     US3_ResumeWhen(Rc<str>),
 }
 #[derive(Clone)]
@@ -454,12 +455,18 @@ fn kind_of_15(mut v0: Rc<str>, mut v1: Rc<str>) -> US5 {
                         let mut v14: US3 = US3::US3_WaitsUser(v1);
                         US5::US5_Some(v14)
                     } else {
-                        let mut v16: bool = &*v0 == "when";
+                        let mut v16: bool = &*v0 == "job";
                         if v16 {
-                            let v17: US3 = US3::US3_ResumeWhen(v1);
+                            let v17: US3 = US3::US3_WaitsJob(v1);
                             US5::US5_Some(v17)
                         } else {
-                            US5::US5_None
+                            let mut v19: bool = &*v0 == "when";
+                            if v19 {
+                                let mut v20: US3 = US3::US3_ResumeWhen(v1);
+                                US5::US5_Some(v20)
+                            } else {
+                                US5::US5_None
+                            }
                         }
                     }
                 }

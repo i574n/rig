@@ -14,6 +14,7 @@ name = "rig_agile_mutation"
 path = "agile_mutation.rs"
 
 [dependencies]
+regex = "1.13.1"
 rig-agile-state = { path = "../rig_agile_state" }
 rig-agile-lease = { path = "../rig_agile_lease" }
 rig-handoff-render = { path = "../rig_handoff_render" }
@@ -30,6 +31,8 @@ agile-note-edit = { path = "../agile_note_edit" }
 agile-todo-merge = { path = "../agile_todo_merge" }
 agile-note-seal = { path = "../agile_note_seal" }
 rig-agile-gap = { path = "../rig_agile_gap" }
+rig-agile-changes = { path = "../rig_agile_changes" }
+rig-agile-receipts = { path = "../rig_agile_receipts" }
 agile-title-notes = { path = "../agile_title_notes" }
 agile-task-rename = { path = "../agile_task_rename" }
 agile-todo-scan = { path = "../agile_todo_scan" }

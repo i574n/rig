@@ -40,6 +40,7 @@
     | VerbUnits
     | VerbDrafts
     | VerbScratch
+    | VerbVerdict
 
 :== verb_help =
     {
@@ -55,7 +56,8 @@
             line =
                 "job: start [--heavy] <label> <timeout-ms> <program> [args...] | run [--heavy] <label> "
                 ^^ "<timeout-ms> <program> [args...] (attached: supervises in this process, ends with its caller, "
-                ^^ "exits with the job's code; long runs from reapable agent shells use start + a background wait) | "
+                ^^ "prints the command's stdout and stderr when it settles, then the receipt, exits with the job's "
+                ^^ "code; long runs from reapable agent shells use start + a background wait) | "
                 ^^ "status <id> | wait <id> [max-ms] (default: until the job settles; a queued --heavy job's timeout "
                 ^^ "starts when it is admitted) | list [count] | tail <id> [lines] | stop <id> (stops the job's own "
                 ^^ "process tree)"
@@ -318,6 +320,14 @@
             line =
                 "scratch cited <backlog root> <scratch root> (one line per folder: kept when a backlog note cites it, "
                 ^^ "else removable after the archive verify; exit 2 when no notes are read)"
+        }
+    | VerbVerdict =>
+        {
+            word = "verdict"
+            line =
+                "verdict <before> <after> [--rule <file>] (case<TAB>result[<TAB>measure] rows per side; rule rows rank "
+                ^^ "<result> <n> and measure <case prefix|*> <higher|lower> <tolerance %>; exit Equal 0, Regressed 1, "
+                ^^ "Changed 2, Dominates 3)"
         }
 
 := help_line_for (~target : string) : string =

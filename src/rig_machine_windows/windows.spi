@@ -75,12 +75,17 @@
     | ProcessHolder => process_alive (window_pid (tab_field row 0i32)) = !-
     | LeaseHolder => !-
 
+:~ window_ended (~row : string) (now : u64) : bool =
+    ?= holder_of row ?|
+    | ProcessHolder => orphaned_window row
+    | LeaseHolder => row_expired row now
+
 :~ ^ live_rows (~root : string) (~rows : string) (now : u64) (~kept : string) : string =
     ? rows = ""
     ?> kept
     |:
         := row = first_row rows
-        ? row_expired row now || orphaned_window row ?>
+        ? window_ended row now ?>
             := _ = file_removed (window_file root (tab_field row 0i32))
             event_logged root WindowPruned row
             live_rows root (other_rows rows) now kept

@@ -127,6 +127,7 @@
     | VerbUnits => rig_units.check.check_run ()
     | VerbDrafts => rig_drafts.entry.drafts_run ()
     | VerbScratch => rig_scratch.entry.scratch_run ()
+    | VerbVerdict => rig_verdict.verdict.verdict_run ()
 
 := run_direct () : i32 =
     := verb = argument_file.process_argument 1i32

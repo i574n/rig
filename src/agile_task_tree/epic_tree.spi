@@ -122,7 +122,37 @@
         console.write_error_line "rig error: usage: agile list <root> --tree"
         2i32
 
-:~ list_routed () : i32 = ? tree_wanted () ?> tree_run () |: agile_task_listing.task_listing.agile_list_entry ()
+:~ ^ parent_after (args : list string) : string =
+    ?= args ?|
+    | flag :: value :: _ ?& flag = "--parent" => value
+    | _ :: rest => parent_after rest
+    | [] => ""
+
+:~ parent_run (~epic : string) : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: _ =>
+        := base = sm'.replace "\\" "/" root
+        := links = links_of_text (file_text (base ++# "/state/parents.spi"))
+        := text = file_text (base ++# "/state/agile.spi")
+        := facts = agile_quality_facts.facts.fact_rows_of text |> am'.to_list_base' |> listm'.unbox
+        := titles = titles_of text
+        := children = children_of links epic
+        := shown = \ (child : string) => console.write_line (titled_line titles child (child_line facts child))
+        children |> listm.iter shown
+        := count = sm'.format (listm.length children : i32)
+        console.write_line ("rig agile list ok parent=" ++# epic ++# " children=" ++# count)
+        0i32
+    | _ =>
+        console.write_error_line "rig error: usage: agile list <root> --parent <EPIC>"
+        2i32
+
+:~ list_routed () : i32 =
+    := parent = parent_after (env.command_line_arguments ())
+    ? parent <> ""
+    ?> parent_run parent
+    |? tree_wanted ()
+    ?> tree_run ()
+    |: agile_task_listing.task_listing.agile_list_entry ()
 
 ///> rust
 :# epics_list_their_children_once_each =
@@ -130,8 +160,17 @@
     := links = [ link "A" "E1"; link "B" "E2"; link "C" "E1" ]
     testing.expect (epics_of links = [ "E1"; "E2" ]) "each epic once, in first-seen order"
     := fact = \ (id : string) (status : string) (minutes : i32) =>
-        ({ id = id; status = status; tags = ""; estimate_minutes = minutes; load = ""; assignee = ""; notes = "" }
-            : agile_quality_lint.lint.fact_row)
+        ({
+            id = id
+            status = status
+            tags = ""
+            estimate_minutes = minutes
+            load = ""
+            assignee = ""
+            notes = ""
+            waits = ""
+            markers = ""
+        } : agile_quality_lint.lint.fact_row)
     := facts = [ fact "A" "Done" 60i32; fact "C" "Planned" 180i32; fact "B" "Active" 30i32 ]
     testing.expect (epic_line facts links "E1" = "E1  done=1/2 minutes=60/240") "minutes-weighted progress"
     testing.expect (child_line facts "C" = "  C  Planned 180m" && child_line facts "Z" = "  Z  unknown") "child lines"
@@ -144,8 +183,17 @@
     := link = \ (child : string) (parent : string) => ({ child = child; parent = parent } : parent_link)
     := links = [ link "A" "E1"; link "B" "E2" ]
     := fact = \ (id : string) (tags : string) =>
-        ({ id = id; status = "Planned"; tags = tags; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "" }
-            : agile_quality_lint.lint.fact_row)
+        ({
+            id = id
+            status = "Planned"
+            tags = tags
+            estimate_minutes = 0i32
+            load = ""
+            assignee = ""
+            notes = ""
+            waits = ""
+            markers = ""
+        } : agile_quality_lint.lint.fact_row)
     := facts = [ fact "E1" "team:alpha,x"; fact "E2" "team:beta"; fact "A" "team:alpha"; fact "B" "team:beta" ]
     := text = "inl e1 () = Task (\"E1\", \"First epic\", Epic)\ninl a () = Task (\"A\", \"Child a\", Story)\n"
     := lines = tree_text_of facts (titles_of text) (OneTeam "alpha") links

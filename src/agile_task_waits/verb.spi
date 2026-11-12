@@ -8,10 +8,11 @@
 
 :| wait_change =
     | WaitSet :: task_wait -> wait_change
+    | WaitRemoved :: task_wait -> wait_change
     | WaitCleared :: string -> wait_change
 
 :| waits_write =
-    | WaitsWritten :: i32 -> waits_write
+    | WaitsWritten :: i32 * string -> waits_write
     | WaitsRefused :: string -> waits_write
 
 := waits_schema () : string =
@@ -20,16 +21,30 @@
 :~ change_item (change : wait_change) : string =
     ?= change ?|
     | WaitSet w => w.item
+    | WaitRemoved w => w.item
     | WaitCleared item => item
 
 :~ waits_changed (waits : list task_wait) (change : wait_change) : list task_wait =
-    := kept = waits |> listm'.filter (\ (w : task_wait) => w.item <> change_item change)
+    := other = \ (target : task_wait) => waits |> listm'.filter (\ (w : task_wait) => w <> target)
     ?= change ?|
-    | WaitSet w => listm.append kept [ w ]
-    | WaitCleared _ => kept
+    | WaitSet w => listm.append (other w) [ w ]
+    | WaitRemoved w => other w
+    | WaitCleared item => waits |> listm'.filter (\ (w : task_wait) => w.item <> item)
 
-:~ waits_text (waits : list task_wait) : string =
-    waits_schema () ++# (waits |> listm.map (\ (w : task_wait) => row_of_wait w ++# "\n") |> sm'.concat_list "")
+:~ ^ numbered_rows (waits : list task_wait) (seen : list string) (~text : string) : string =
+    ?= waits ?|
+    | [] => text
+    | w :: rest =>
+        := n = (seen |> listm'.filter (\ (id : string) => id = w.item) |> listm.length) + 1i32
+        numbered_rows rest (w.item :: seen) (text ++# row_of_wait_numbered w n ++# "\n")
+
+:~ waits_text (waits : list task_wait) : string = waits_schema () ++# numbered_rows waits [] ""
+
+:~ item_waits (waits : list task_wait) (~item : string) : string =
+    waits
+    |> listm'.filter (\ (w : task_wait) => w.item = item)
+    |> listm.map (\ (w : task_wait) => kind_word w.kind ++# ":" ++# kind_value w.kind)
+    |> sm'.concat_list ";"
 
 :~ module_added (format : agile_state_fs.project.project_format) (~package_text : string) : option string =
     ?= agile_state_fs.project.project_with_module format package_text "waits" ?|
@@ -51,6 +66,8 @@
     := before = text_of path
     := item = change_item change
     := waits = waits_changed (waits_of_text before) change
+    := own = waits |> listm'.filter (\ (w : task_wait) => w.item = item) |> listm.length
+    := own_waits = item_waits waits item
     := package = agile_state_fs.project.project_path_in state
     ? agile_text = ""
     ?> WaitsRefused ("no backlog state at " ++# state)
@@ -65,11 +82,12 @@
         | None => WaitsRefused "the state project has no modules section to list waits in"
         | Some listed =>
             ? listed = text_of package || replaced package listed
-            ?> WaitsWritten (listm.length waits)
+            ?> WaitsWritten (own, own_waits)
             |: WaitsRefused "the state project was not updated"
 
 :~ wait_run () : i32 =
-    := usage = "rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>|--clear"
+    := forms = "--wait <train|item|lane|user|job|when>:<value> | --wait-remove <kind>:<value> | --wait --clear"
+    := usage = "rig error: usage: agile edit <root> <ID> " ++# forms
     := change =
         ?= env.command_line_arguments () ?|
         | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait" && value = "--clear" =>
@@ -78,6 +96,10 @@
             ?= kind_of_flag value ?|
             | Some kind => Some (root, WaitSet { item = item; kind = kind })
             | None => None
+        | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait-remove" =>
+            ?= kind_of_flag value ?|
+            | Some kind => Some (root, WaitRemoved { item = item; kind = kind })
+            | None => None
         | _ => None
     ?= change ?|
     | None =>
@@ -85,8 +107,9 @@
         2i32
     | Some (root, c) =>
         ?= waits_written root c ?|
-        | WaitsWritten count =>
-            console.write_line ("rig agile edit ok id=" ++# change_item c ++# " waits=" ++# sm'.show count)
+        | WaitsWritten (count, listed) =>
+            := head = "rig agile edit ok id=" ++# change_item c ++# " waits=" ++# sm'.show count
+            console.write_line (head ++# " item_waits=" ++# listed)
             0i32
         | WaitsRefused reason =>
             console.write_error_line ("rig error: agile edit --wait: " ++# reason)
@@ -96,12 +119,19 @@
 
 ///> rust
 :# a_task_has_one_wait_row_and_clear_drops_it =
-    := one = waits_changed [] (WaitSet { item = "S7"; kind = WaitsTrain "TRAIN40" })
-    := moved = waits_changed one (WaitSet { item = "S7"; kind = WaitsItem "DELEGATE-2" })
-    testing.expect (moved = [ { item = "S7"; kind = WaitsItem "DELEGATE-2" } ]) "setting again replaces the row"
-    testing.expect (waits_changed moved (WaitCleared "S7") = []) "clear drops it"
+    := train = { item = "S7"; kind = WaitsTrain "TRAIN40" }
+    := delegate = { item = "S7"; kind = WaitsItem "DELEGATE-2" }
+    := one = waits_changed [] (WaitSet train)
+    := both = waits_changed one (WaitSet delegate)
+    testing.expect (both = [ train; delegate ]) "a second wait on the same item keeps the first"
+    testing.expect (waits_changed both (WaitSet train) = [ delegate; train ]) "the same wait twice stays one row"
+    testing.expect (waits_changed both (WaitRemoved train) = [ delegate ]) "remove drops only that wait"
+    testing.expect (waits_changed both (WaitCleared "S7") = []) "clear drops them all"
     := row = "inl wait_of_s7 () = Waits (\"S7\", \"train\", \"TRAIN40\")\n"
     testing.expect (waits_text one = waits_schema () ++# row) "file text"
+    := second = "inl wait_of_s7_2 () = Waits (\"S7\", \"item\", \"DELEGATE-2\")\n"
+    testing.expect (waits_text both = waits_schema () ++# row ++# second) "the second row gets its own binding"
+    testing.expect (item_waits both "S7" = "train:TRAIN40;item:DELEGATE-2") "the receipt lists the item's waits"
     := words = agile_state_fs.project.SpiprojProject
     testing.expect (module_added words "modules:\n    claims\n" = Some "modules:\n    waits\n    claims\n") "register"
     testing.expect (module_added words "modules:\n    waits\n" = Some "modules:\n    waits\n") "already listed"

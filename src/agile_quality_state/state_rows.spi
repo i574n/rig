@@ -82,6 +82,8 @@
             load = "Light"
             assignee = "Agent"
             notes = ""
+            waits = ""
+            markers = ""
         }
     := done = { fact ?| id = "T-B"; status = "Done" }
     := rows = open_failures_in [ fact; done ]

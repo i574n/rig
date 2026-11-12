@@ -15,6 +15,12 @@ packages:
     union_reflection
     agile_team_lane
     agile_claim_listing
+    agile_state_spelling
+    agile_state_fs
+    agile_subcommand_domain
+    agile_task_query
+    agile_quality_lint
+    agile_quality_facts
 link:
     agile_claim_listing
     agile_claim_request

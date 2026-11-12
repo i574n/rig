@@ -958,6 +958,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "rig-agile-changes"
+version = "0.0.0"
+
+[[package]]
 name = "rig-agile-contracts"
 version = "0.0.0"
 
@@ -1045,13 +1049,16 @@ dependencies = [
  "agile-todo-record",
  "agile-todo-roots",
  "agile-todo-scan",
+ "regex",
  "rig-agile-activity-migration",
  "rig-agile-cadence",
+ "rig-agile-changes",
  "rig-agile-gap",
  "rig-agile-gate",
  "rig-agile-lease",
  "rig-agile-lint",
  "rig-agile-lock",
+ "rig-agile-receipts",
  "rig-agile-routes",
  "rig-agile-sprint",
  "rig-agile-state",
@@ -1070,6 +1077,10 @@ dependencies = [
 
 [[package]]
 name = "rig-agile-policy"
+version = "0.0.0"
+
+[[package]]
+name = "rig-agile-receipts"
 version = "0.0.0"
 
 [[package]]
@@ -1375,6 +1386,7 @@ dependencies = [
  "rig-table-test",
  "rig-toolchain-proxy",
  "rig-units",
+ "rig-verdict",
  "semantic-evidence-domain",
 ]
 
@@ -2935,6 +2947,10 @@ version = "0.0.0"
 
 [[package]]
 name = "rig-units-manifest"
+version = "0.0.0"
+
+[[package]]
+name = "rig-verdict"
 version = "0.0.0"
 
 [[package]]

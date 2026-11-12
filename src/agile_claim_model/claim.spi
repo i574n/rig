@@ -125,7 +125,11 @@
     (claims : list claim) (live : liveness) (~item : string) (~caller : string) (paths : list string) (now_ms : u64)
     : option refusal
     =
-    ?= lease_refusal claims live item caller now_ms ?|
+    := explicit =
+        ?= lease_refusal claims live item caller now_ms ?|
+        | Some (DeclinedByYou _) => lease_refusal_idle live
+        | other => other
+    ?= explicit ?|
     | Some refused => Some refused
     | None =>
         ?= overlapping_claim paths claims item caller now_ms ?|

@@ -4,7 +4,7 @@ use std::rc::Rc;
 #[derive(Clone)]
 enum UH0 {
     UH0_Nil,
-    UH0_Cons(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<UH0>),
+    UH0_Cons(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<UH0>),
 }
 #[derive(Clone)]
 enum UH1 {
@@ -22,24 +22,24 @@ enum US0 {
     US0_Some(i64),
     US0_None,
 }
-fn method2(mut v0: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>, mut v1: i32, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn method2(mut v0: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>)>>, mut v1: i32, mut v2: Rc<UH0>) -> Rc<UH0> {
     loop {
         let v3: bool = v1 < 0i32;
         if v3 {
             return v2;
         } else {
             let v4: usize = ((v1) as usize);
-            let (mut v5, mut v6, mut v7, mut v8, mut v9, mut v10, mut v11): (Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>) = (v0)[v4].clone();
-            let v12: i32 = v1.wrapping_sub(1i32);
-            let v13: Rc<UH0> = Rc::new(UH0::UH0_Cons(v5, v6, v7, v8, v9, v10, v11, v2));
-            (v1, v2) = (v12, v13);
+            let (mut v5, mut v6, mut v7, mut v8, mut v9, mut v10, mut v11, mut v12, mut v13): (Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>) = (v0)[v4].clone();
+            let v14: i32 = v1.wrapping_sub(1i32);
+            let v15: Rc<UH0> = Rc::new(UH0::UH0_Cons(v5, v6, v7, v8, v9, v10, v11, v12, v13, v2));
+            (v1, v2) = (v14, v15);
             continue;
         }
     }
 }
 fn facts_list_1(mut v0: Rc<str>) -> Rc<UH0> {
-    let v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::rig_agile_fact_rows(&v0);
-    let v2: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v1).borrow().clone());
+    let v1: Rc<RefCell<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>)>>> = agile_quality_facts::rig_agile_fact_rows(&v0);
+    let v2: Rc<Vec<(Rc<str>, Rc<str>, Rc<str>, i32, Rc<str>, Rc<str>, Rc<str>, Rc<str>, Rc<str>)>> = Rc::new((v1).borrow().clone());
     let v3: usize = (v2).len();
     let v4: i32 = ((v3) as i32);
     let v5: i32 = v4.wrapping_sub(1i32);
@@ -349,7 +349,7 @@ fn method12(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
 fn method3(mut v0: Rc<UH0>, mut v1: Rc<UH1>) -> Rc<UH1> {
     loop {
         match Rc::unwrap_or_clone(v0) {
-            UH0::UH0_Cons(v2, v3, v4, v5, v6, v7, v8, v9) => {
+            UH0::UH0_Cons(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) => {
                 let v2: Rc<str> = v2;
                 let v3: Rc<str> = v3;
                 let v4: Rc<str> = v4;
@@ -357,10 +357,12 @@ fn method3(mut v0: Rc<UH0>, mut v1: Rc<UH1>) -> Rc<UH1> {
                 let v6: Rc<str> = v6;
                 let v7: Rc<str> = v7;
                 let mut v8: Rc<str> = v8;
-                let mut v9: Rc<UH0> = v9;
-                let v10: Rc<UH1> = note_events_in_4(v8);
-                let v11: Rc<UH1> = method12(v1, v10);
-                (v0, v1) = (v9, v11);
+                let mut v9: Rc<str> = v9;
+                let v10: Rc<str> = v10;
+                let v11: Rc<UH0> = v11;
+                let v12: Rc<UH1> = note_events_in_4(v8);
+                let v13: Rc<UH1> = method12(v1, v12);
+                (v0, v1) = (v11, v13);
                 continue;
             }
             UH0::UH0_Nil => {

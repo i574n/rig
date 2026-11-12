@@ -27,6 +27,14 @@ fn main() {
 
 := beat_bytes (root : fixture_root) (~name : string) : string = decimal (byte_count (fixture_read root name))
 
+:= speaker_source () : string =
+    """
+fn main() {
+    println!("known stdout line");
+    eprintln!("known stderr line");
+}
+"""
+
 := probe_printer_source () : string =
     """
 fn main() {
@@ -121,6 +129,29 @@ fn main() {
     shows ran.stdout "state=finished exit=3"
     := id = word_after ran.stdout "id="
     shows (succeeded (job_call root (Arg ("status", Arg (id, NoArgs))))) "state=finished exit=3"
+    := speaker = rustc_program root "speaker" (speaker_source ())
+    := spoke = job_call root (Arg ("run", Arg ("speaks", Arg ("60000", Arg (speaker, NoArgs)))))
+    := said = succeeded spoke
+    shows said "known stdout line"
+    shows spoke.stderr "known stderr line"
+    expect (sm'.index_of "known stdout line" said < sm'.index_of "rig job run ok" said) (run_text spoke)
+    fixture_root_remove root
+
+///> rust
+:# a_doctor_at_a_job_end_answers_in_time_and_flags_nothing_settling =
+    := root = fixture_root_create "job doctor settling"
+    := nap = rustc_program root "nap" "fn main() { std::thread::sleep(std::time::Duration::from_millis(500)); }"
+    := started =
+        succeeded (job_call root (Arg ("start", Arg ("--settle-ms", Arg ("0", Arg ("settling", Arg ("60000",
+            Arg (nap, NoArgs))))))))
+    := id = word_after started "id="
+    shows (succeeded (job_call root (Arg ("wait", Arg (id, Arg ("30000", NoArgs)))))) "state=finished exit=0"
+    := before = now_ms ()
+    := doctor = job_call root (Arg ("doctor", NoArgs))
+    expect (now_ms () - before < 30000u64) (run_text doctor)
+    shows doctor.stdout "rig job doctor "
+    shows doctor.stdout " sample_ms="
+    hides doctor.stdout (cat "job=" id)
     fixture_root_remove root
 
 ///> rust

@@ -1,0 +1,147 @@
+///- --package .
+:# changes static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== change_row = { at : string; author : string; item : string; what : string }
+
+:~ not_after (~left : string) (~right : string) : bool = $'(&*!left) <= (&*!right)' : bool
+
+:~ window_minutes (~word : string) : option u64 =
+    := digits = sm'.substring 0i32 (sm'.length word - 1i32) word
+    := number = (convert.try_convert digits : option u64)
+    ?= number ?|
+    | Some n ?& sm'.ends_with "h" word => Some (n * 60u64)
+    | Some n ?& sm'.ends_with "m" word => Some n
+    | _ => None
+
+:~ since_of (~word : string) (now_ms : u64) : string =
+    ?= window_minutes word ?|
+    | Some minutes => agile_note_model.model.utc_stamp (now_ms - minutes * 60000u64)
+    | None => word
+
+:~ quoted_parts (~line : string) : list string = sm'.split_list "\"" line
+
+:~ note_of_line (~line : string) : option change_row =
+    ? sm'.contains " = Note (\"" line |> not
+    ?> None
+    |:
+        ?= quoted_parts line ?|
+        | _ :: item :: number :: stamp :: _ :: author :: _ :: text :: _ =>
+            := n = sm'.trim (sm'.replace "u32" "" (sm'.replace "," "" number))
+            := preview = sm'.clip 70i32 text
+            := what = (? n = "1" ?> "new item, note 1: " |: "note " ++# n ++# ": ") ++# preview
+            Some { at = stamp; author = author; item = item; what = what }
+        | _ => None
+
+:~ author_of (~history : string) (~item : string) (at_ms : u64) : string =
+    := key = "StatusAuthor (\"" ++# item ++# "\", " ++# sm'.show at_ms ++# "u64, \""
+    ?= sm'.split_list "\n" history |> listm'.try_find_ (\ (line : string) => sm'.contains key line) ?|
+    | Some line =>
+        := start = sm'.index_of key line + sm'.length key
+        := rest = sm'.substring start (sm'.length line - start) line
+        sm'.substring 0i32 (sm'.index_of "\"" rest) rest
+    | None => "-"
+
+:~ status_rows (~history : string) : list change_row =
+    agile_status_changes.changes.changes_of_text history
+    |> listm.map (\ (c : agile_status_changes.changes.status_change) =>
+        {
+            at = agile_note_model.model.utc_stamp c.at_ms
+            author = author_of history c.item c.at_ms
+            item = c.item
+            what = "status -> " ++# c.status
+        })
+
+:~ ^ merged (left : list change_row) (right : list change_row) : list change_row =
+    ?= left, right ?|
+    | [], rest => rest
+    | rest, [] => rest
+    | (a :: more_left), (b :: more_right) =>
+        ? not_after a.at b.at
+        ?> a :: merged more_left right
+        |: b :: merged left more_right
+
+:~ lines_of (rows : list change_row) : list string =
+    := noted = \ (seen : list string) (r : change_row) =>
+        ? listm'.contains r.author seen ?> seen |: listm.append seen [ r.author ]
+    := authors = rows |> listm.fold noted []
+    := line = \ (r : change_row) => "  " ++# r.at ++# "  " ++# r.item ++# "  " ++# r.what
+    := block = \ (author : string) =>
+        := own = rows |> listm'.filter (\ (r : change_row) => r.author = author) |> listm.map line
+        (author ++# ":") :: own
+    authors |> listm.map block |> listm.fold listm.append []
+
+:~ changes_of (~agile : string) (~history : string) (~since : string) (~team : string) : list change_row =
+    := facts = agile_quality_facts.facts.fact_rows_of agile |> am'.to_list_base' |> listm'.unbox
+    := tags = \ (item : string) =>
+        ?= facts |> listm'.try_find_ (\ (f : agile_quality_lint.lint.fact_row) => f.id = item) ?|
+        | Some f => f.tags
+        | None => ""
+    := wanted = \ (r : change_row) =>
+        not_after since r.at && (team = "" || agile_task_query.query.on_team team r.item (tags r.item))
+    := gathered = \ (found : list change_row) (line : string) =>
+        ?= note_of_line line ?|
+        | Some row => row :: found
+        | None => found
+    := notes = sm'.split_list "\n" agile |> listm.fold gathered [] |> listm.rev
+    merged (notes |> listm'.filter wanted) (status_rows history |> listm'.filter wanted)
+
+:= word (index : i32) : string = rust_std_env.model.argument_owned index
+
+:= usage () : string = "usage: rig agile changes <root> --since <8h|30m|yyyy-mm-ddThh:mmZ> [--team <team>]"
+
+:~ changes_run () : i32 =
+    := root = word 1i32
+    := flag = \ (name : string) => ? word 2i32 = name ?> word 3i32 |? word 4i32 = name ?> word 5i32 |: ""
+    := window = flag "--since"
+    := team = flag "--team"
+    ? window = ""
+    ?>
+        console.write_error_line (usage ())
+        2i32
+    |:
+        := base = sm'.replace "\\" "/" root
+        := agile = agile_state_fs.model.read_state (base ++# "/state/agile.spi")
+        := history = agile_state_fs.model.read_state (base ++# "/history/status_changes.spi")
+        := since = since_of window (workspace_primitives.clock.unix_ms ())
+        := rows = changes_of agile history since team
+        lines_of rows |> listm.iter (\ (line : string) => console.write_line line)
+        := noted = rows |> listm'.filter (\ (r : change_row) => sm'.starts_with "status" r.what |> not)
+        := notes = (listm.length noted : i32)
+        := statuses = (listm.length rows : i32) - notes
+        := scope = ? team = "" ?> "" |: " team=" ++# team
+        := head = "rig agile changes ok since=" ++# since ++# scope ++# " notes=" ++# sm'.show notes
+        console.write_line (head ++# " status_changes=" ++# sm'.show statuses)
+        0i32
+
+///> rust
+:# changes_read_notes_and_status_history_in_order_by_author =
+    testing.expect (window_minutes "8h" = Some 480u64 && window_minutes "30m" = Some 30u64) "windows"
+    testing.expect (window_minutes "2026-11-12T03:00Z" = None) "a stamp is not a window"
+    := task = "inl t_a () = Task (\"T-A\", \"t\", Story, P1, D1, 0u32, Active, \"\", \"team:x\", \"c\", \"c\")"
+    := one = "inl note_of_t_a_1 () = Note (\"T-A\", 1u32, \"2026-11-12T03:00Z\", \"rig\", \"criado\")"
+    := two = "inl note_of_t_a_2 () = Note (\"T-A\", 2u32, \"2026-11-12T05:00Z\", \"auth\", \"segunda\")"
+    := agile = sm'.concat_list "\n" [ task; one; two ]
+    := rows = changes_of agile "" "2026-11-12T04:00Z" ""
+    := second = { at = "2026-11-12T05:00Z"; author = "auth"; item = "T-A"; what = "note 2: segunda" }
+    testing.expect (rows = [ second ]) "the window"
+    := all = changes_of agile "" "2026-11-12T00:00Z" ""
+    := grouped =
+        [
+            "rig:"
+            "  2026-11-12T03:00Z  T-A  new item, note 1: criado"
+            "auth:"
+            "  2026-11-12T05:00Z  T-A  note 2: segunda"
+        ]
+    testing.expect (lines_of all = grouped) "grouped by author"
+    testing.expect (changes_of agile "" "2026-11-12T00:00Z" "y" = []) "another team sees nothing"
+    := accented = "nota de teste com texto bastante para passar de setenta caracteres, e então ação"
+    := long = "inl note_of_t_a_3 () = Note (\"T-A\", 3u32, \"2026-11-12T06:00Z\", \"rig\", \"" ++# accented ++# "\")"
+    := clipped = changes_of (sm'.concat_list "\n" [ task; long ]) "" "2026-11-12T00:00Z" ""
+    testing.expect (listm.length clipped = 1i32) "a long accented note is clipped on characters"
+
+:= main () : i32 =
+    export "rig_agile_changes_run" changes_run
+    0i32

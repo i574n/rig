@@ -39,7 +39,8 @@
             "agile set: "
             ++# slot
             ++# (" must be " ++# expected ++# ", received '" ++# (argument_owned index) ++# "'")
-            ++# "; usage: agile set <root> <id> <progress> <Planned|Active|Blocked|Paused|Done>"
+            ++# "; usage: agile set <root> <id> <progress|-> <Planned|Active|Blocked|Paused|Done>"
+            ++# " [--expect <status>] [--as <lane>]"
     agile_mutation_error message
 := agile_progress_error () : i32 = agile_slot_error "progress" "a whole number 0..100" 3i32
 := agile_status_error () : i32 = agile_slot_error "status" "Planned, Active, Blocked, Paused or Done" 4i32
@@ -57,7 +58,24 @@
 := digit_value index offset : i32 =
     := value = argument_byte index offset
     ? i32_digit value ?> i32_digit_value value |: invalid_i32 ()
-:= validate_progress () : validation_result agile_progress =
+:~ progress_in (~text : string) (~id : string) : i32 =
+    $'{ let text = &*!text; let key = format\!("Task ({q}{}{q}, {q}", &*!id, q = char::from(34u8)); \
+        match text.find(&key) { None => -1i32, Some(at) => { let rest = &text[at + key.len()..]; \
+            let mut escaped = false; let mut end = None; \
+            for (i, ch) in rest.char_indices() { \
+                if escaped { escaped = false; continue; } \
+                if ch == char::from(92u8) { escaped = true; continue; } \
+                if ch == char::from(34u8) { end = Some(i); break; } } \
+            end.and_then(|e| rest[e + 1..].split(char::from(44u8)).map(str::trim).nth(4) \
+                .and_then(|field| field.strip_suffix("u32")).and_then(|n| n.parse::<i32>().ok())).unwrap_or(-1) } } }'
+    : i32
+
+:= current_progress () : validation_result agile_progress =
+    := text = agile_state_fs.model.read_state (sm'.replace "\\" "/" (argument_owned 1i32) ++# "/state/agile.spi")
+    := progress = progress_in text (argument_owned 2i32)
+    ? progress >= 0i32 && progress <= 100i32 ?> Valid (agile_progress progress) |: Invalid
+
+:= validate_given_progress () : validation_result agile_progress =
     := length = argument_byte_count 3i32
     := a = digit_value 3i32 0i32
     := b = digit_value 3i32 1i32
@@ -70,6 +88,8 @@
         := value = i32_triple_value a b c
         ? value <= 100i32 ?> Valid (agile_progress value) |: Invalid
     |: Invalid
+:= validate_progress () : validation_result agile_progress =
+    ? argument_owned 3i32 = "-" ?> current_progress () |: validate_given_progress ()
 := validate_status () : validation_result agile_status =
     := text = argument_owned 4i32
     union_reflection.cases.union_cases_fold
@@ -92,7 +112,7 @@
     ?> agile_task_asks.verb.ask_edit_run ()
     |? argument_owned 3i32 = "--split"
     ?> agile_task_split.verb.split_run ()
-    |? argument_owned 3i32 = "--wait"
+    |? argument_owned 3i32 = "--wait" || argument_owned 3i32 = "--wait-remove"
     ?> agile_task_waits.verb.wait_run ()
     |? planning_field_named (argument_owned 3i32)
     ?> $"agile_planning_revision::rig_agile_planning_edit_run()"
@@ -121,13 +141,15 @@
         checks_joined rows (at + 1i32) (? text = "" ?> check |: text ++# "," ++# check)
 
 :~ lint_warned (~root : string) (~id : string) (~status : string) : () =
-    := text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+    := state = sm'.replace "\\" "/" root ++# "/state"
+    := read = \ (name : string) => agile_state_fs.model.read_state (state ++# "/" ++# name)
+    := text = read "agile.spi" ++# "\n" ++# read "waits.spi" ++# "\n" ++# read "markers.spi"
     := checks = checks_joined (agile_quality_state.state_rows.item_failures (text, id, status)) 0i32 ""
     ? checks = ""
     ?> ()
     |:
         := head = "rig agile lint warning id=" ++# id ++# " status=" ++# status ++# " failing=" ++# checks
-        := markers = " (add a note with the marker lines, e.g. 'dod:' or 'pronto quando:', 'next:' or 'próximo:'"
+        := markers = " (add a note with the marker lines, e.g. 'dod:' and 'next:', or ones state/markers.spi declares"
         console.write_error_line (head ++# markers ++# "; a later train refuses the change)")
         ? sm'.contains "ProseWait" checks
         ?>
@@ -137,24 +159,51 @@
             console.write_error_line (hint ++# command)
         |: ()
 
+:~ status_now (~root : string) (~id : string) : string =
+    := text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+    := named = \ (f : agile_quality_lint.lint.fact_row) => f.id = id
+    ?= agile_quality_state.state_rows.facts_list text |> listm'.try_find_ named ?|
+    | Some f => f.status
+    | None => ""
+
+:~ expect_refusal (~id : string) (~current : string) (~expected : string) : i32 =
+    := head = "agile set " ++# id ++# " rejected: the status changed since it was read; it is "
+    agile_mutation_error (head ++# current ++# ", --expect said " ++# expected ++# "; nothing written")
+
 := agile_set_route () : i32 =
     := root = argument_owned 1i32
     := id = argument_owned 2i32
-    ?= validate_progress (), validate_status () ?|
-    | Valid progress, Valid status =>
-        := code =
-            ?= status ?|
-            | AgileDone => agile_done_route root id progress
-            | _ => agile_set root id progress status
-        := _ = ? code = 0i32 ?> lint_warned root id (argument_owned 4i32) |: ()
-        := _ = ? code = 0i32 ?> agile_status_changes.changes.change_recorded (root, id, argument_owned 4i32) |: 0i32
-        code
-    | Invalid, _ => agile_progress_error ()
-    | _, Invalid => agile_status_error ()
+    := flag = \ (name : string) =>
+        ? argument_owned 5i32 = name
+        ?> argument_owned 6i32
+        |? argument_owned 7i32 = name
+        ?> argument_owned 8i32
+        |: ""
+    := expected = flag "--expect"
+    := author = flag "--as"
+    := current = ? expected = "" ?> "" |: status_now root id
+    := stale = ? expected = "" ?> agile_status_changes.changes.stale_warning root id author |: ""
+    ? expected <> "" && current <> expected
+    ?> expect_refusal id current expected
+    |:
+        ?= validate_progress (), validate_status () ?|
+        | Valid progress, Valid status =>
+            := code =
+                ?= status ?|
+                | AgileDone => agile_done_route root id progress
+                | _ => agile_set root id progress status
+            := _ = ? code = 0i32 ?> lint_warned root id (argument_owned 4i32) |: ()
+            := _ = ? code = 0i32 && stale <> "" ?> console.write_error_line stale |: ()
+            := recorded = \ () => agile_status_changes.changes.change_recorded (root, id, argument_owned 4i32, author)
+            := _ = ? code = 0i32 ?> recorded () |: 0i32
+            code
+        | Invalid, _ => agile_progress_error ()
+        | _, Invalid => agile_status_error ()
 
 := main () : i32 =
     export "rig_agile_usage_error" ((\ () => agile_usage_error ()) : () -> i32)
     export "rig_agile_begin_route" ((\ () => agile_begin_route ()) : () -> i32)
     export "rig_agile_set_route" ((\ () => agile_set_route ()) : () -> i32)
     export "rig_agile_edit_route" ((\ () => agile_edit_route ()) : () -> i32)
+    export "rig_agile_ask_route" ((\ () => agile_task_asks.verb.ask_now_run ()) : () -> i32)
     0i32

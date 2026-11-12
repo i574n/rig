@@ -118,7 +118,13 @@
     |:
         ?= outcome_of kind ?|
         | OutcomeGranted =>
-            := where = ? detail = "" ?> "paths none" |: "paths " ++# detail
+            := mine = \ (found : list string) (c : claim) => ? c.item = item && c.owner = owner ?> c.paths |: found
+            := before = claims_of_text rows |> listm.fold mine []
+            := now = sm'.split_list ";" detail |> listm'.filter (\ (glob : string) => glob <> "")
+            := kept : i32 = before |> listm'.filter (\ (glob : string) => listm'.contains glob now) |> listm.length
+            := removed : i32 = listm.length before - kept
+            := counted = ? before = [] ?> "" |: " kept=" ++# sm'.show kept ++# " removed=" ++# sm'.show removed
+            := where = (? detail = "" ?> "paths none" |: "paths " ++# detail) ++# counted
             := line = receipt r.verb item owner expires r.ttl_min wip rank ++# " lane_wip=" ++# sm'.show (lane_wip root owner)
             printed [ line; claim_item_lines root item; where ] 0i32
         | OutcomeRefused => printed [ "rig agile claim refused id=" ++# r.item ++# " reason=" ++# detail ] 5i32
@@ -146,19 +152,32 @@
     := head = "  " ++# c.item ++# "  " ++# c.owner ++# "  expires=" ++# utc_stamp c.expires_ms ++# " local=" ++# local_clock c.expires_ms
     head ++# " left_min=" ++# sm'.show left ++# "  paths=" ++# where
 
-:~ claims_listed (~root : string) (~lane : string) : i32 =
+:~ tags_of_item (~root : string) (~item : string) : string =
+    := text = agile_state_fs.model.read_state (sm'.replace "\\" "/" root ++# "/state/agile.spi")
+    := rows = agile_quality_facts.facts.fact_rows_of text |> am'.to_list_base' |> listm'.unbox
+    ?= rows |> listm'.try_find_ (\ (f : agile_quality_lint.lint.fact_row) => f.id = item) ?|
+    | Some f => f.tags
+    | None => ""
+
+:~ claims_listed (~root : string) (~lane : string) (~team : string) : i32 =
     := _, rows = claims_loaded root
     := now_ms = unix_ms ()
-    := live = live_claims lane now_ms (claims_of_text rows)
+    := owned = live_claims lane now_ms (claims_of_text rows)
+    := on = \ (c : claim) => team = "" || agile_task_query.query.on_team team c.item (tags_of_item root c.item)
+    := live = owned |> listm'.filter on
     := count : i32 = listm.length live
-    := head = "rig agile claims ok live=" ++# sm'.show count ++# (? lane = "" ?> "" |: " lane=" ++# lane)
+    := scope = (? lane = "" ?> "" |: " lane=" ++# lane) ++# (? team = "" ?> "" |: " team=" ++# team)
+    := head = "rig agile claims ok live=" ++# sm'.show count ++# scope
     printed (listm.append (live |> listm.map (claim_line now_ms)) [ head ]) 0i32
 
 :~ claims_run () : i32 =
     ?= env.command_line_arguments () ?|
-    | _ :: _ :: root :: [] => claims_listed root ""
-    | _ :: _ :: root :: flag :: lane :: [] ?& flag = "--as" => claims_listed root lane
-    | _ => stderr_failure "agile claims: usage: claims <root> [--as <lane>]"
+    | _ :: _ :: root :: [] => claims_listed root "" ""
+    | _ :: _ :: root :: flag :: lane :: [] ?& flag = "--as" => claims_listed root lane ""
+    | _ :: _ :: root :: flag :: team :: [] ?& flag = "--team" => claims_listed root "" team
+    | _ :: _ :: root :: f1 :: v1 :: f2 :: v2 :: [] ?& f1 = "--as" && f2 = "--team" => claims_listed root v1 v2
+    | _ :: _ :: root :: f1 :: v1 :: f2 :: v2 :: [] ?& f1 = "--team" && f2 = "--as" => claims_listed root v2 v1
+    | _ => stderr_failure "agile claims: usage: claims <root> [--as <lane>] [--team <team>]"
 
 :~ claim_requested (~root : string) (asked : claim_order) : i32 =
     := base = claims_base (file_system.get_current_directory ()) root

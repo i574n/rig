@@ -48,14 +48,22 @@
             := length = byte_len original
             := start = field_start original ((anchor + (task_arguments_offset ()))) length position
             := stop = field_end original start length ScanPlain
-            ?= field_token_of (edit_field_token field_name (byte_slice original start stop) value) ?|
-            | TokenRejected => agile_edit_failure (edit_field_rule field_name) id
-            | TokenRendered token =>
-                := updated = (byte_slice original 0i32 start) ++# token ++# (byte_slice original stop length)
-                ?= replace_records_unchanged state original updated ?|
-                | Replaced =>
-                    agile_edit_success id field_name (text_bytes original) (text_bytes updated) (ms_since started)
-                | problem => agile_edit_failure (file_replacement_problem problem) id
+            := current = byte_slice original start stop
+            := expected = ? argument_owned 5i32 = "--expect" ?> argument_owned 6i32 |: ""
+            := seen = field_token_of (edit_field_token field_name current expected)
+            := unchanged = expected = "" || seen = TokenRendered current
+            := changed = "field " ++# field_name ++# " changed since it was read; it now reads " ++# current
+            ? unchanged |> not
+            ?> agile_edit_failure changed id
+            |:
+                ?= field_token_of (edit_field_token field_name current value) ?|
+                | TokenRejected => agile_edit_failure (edit_field_rule field_name) id
+                | TokenRendered token =>
+                    := updated = (byte_slice original 0i32 start) ++# token ++# (byte_slice original stop length)
+                    ?= replace_records_unchanged state original updated ?|
+                    | Replaced =>
+                        agile_edit_success id field_name (text_bytes original) (text_bytes updated) (ms_since started)
+                    | problem => agile_edit_failure (file_replacement_problem problem) id
 
 :~ agile_edit_entry () : i32 =
     := field_name = argument_owned 3i32

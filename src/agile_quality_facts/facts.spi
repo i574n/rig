@@ -10,6 +10,8 @@
     | TaskLine : string * string * string
     | PlanningLine : string * i32 * string * string
     | NoteLine : string * string
+    | WaitLine : string * string
+    | MarkerLine : string
     | OtherLine
 
 := part (parts : array string) (index : i32) : string = am'.index index parts
@@ -39,13 +41,18 @@
     ?> OtherLine
     |? sm'.starts_with "inl note_of_" line
     ?> NoteLine (part parts 1i32, line)
+    |? (sm'.starts_with "inl wait_of_" line || sm'.starts_with ":= wait_of_" line) && count >= 7i32
+    ?> WaitLine (part parts 1i32, part parts 3i32 ++# ":" ++# part parts 5i32)
+    |? sm'.contains " = Marker (\"" line && count >= 5i32
+    ?> MarkerLine (part parts 1i32 ++# "=" ++# part parts 3i32)
     |? sm'.starts_with "inl planning_of_" line
     ?> planning_line parts
     |? sm'.starts_with "inl " line && sm'.contains "() = Task (" line && count >= 10i32
     ?> task_line parts
     |: OtherLine
 
-:= blank () : item_facts = { status = ""; tags = ""; estimate_minutes = 0i32; load = ""; assignee = ""; notes = "" }
+:= blank () : item_facts =
+    { status = ""; tags = ""; estimate_minutes = 0i32; load = ""; assignee = ""; notes = ""; waits = ""; markers = "" }
 
 :~ folded (acc : dict.dict string item_facts) (line : state_line) : dict.dict string item_facts =
     ?= line ?|
@@ -56,6 +63,10 @@
         acc |> dict.updated id (blank ()) planned
     | NoteLine (id, text) =>
         acc |> dict.updated id (blank ()) (\ (f : item_facts) => { f ?| notes = f.notes ++# "\n" ++# text })
+    | WaitLine (id, wait) =>
+        := joined = \ (f : item_facts) => { f ?| waits = ? f.waits = "" ?> wait |: f.waits ++# "," ++# wait }
+        acc |> dict.updated id (blank ()) joined
+    | MarkerLine _ => acc
     | OtherLine => acc
 
 :~ facts_of (~text : string) : dict.dict string item_facts =
@@ -64,7 +75,15 @@
         (\ (acc : dict.dict string item_facts) (line : string) => folded acc (state_line_of line))
         (dict.empty ())
 
+:~ declared_markers (~text : string) : string =
+    := gathered = \ (acc : string) (line : string) =>
+        ?= state_line_of line ?|
+        | MarkerLine marker => ? acc = "" ?> marker |: acc ++# "\n" ++# marker
+        | _ => acc
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold gathered ""
+
 :~ fact_rows_of (~text : string) : array_base fact_row =
+    := declared = declared_markers text
     := row = \ (id : string) (f : item_facts) =>
         {
             id = id
@@ -74,6 +93,8 @@
             load = f.load
             assignee = f.assignee
             notes = f.notes
+            waits = f.waits
+            markers = declared
         }
     facts_of text
     |> dict.fold
@@ -103,6 +124,19 @@
         testing.expect (failing f = [ TypeFeatures ]) (failing_words f)
     | None => testing.expect !- "T-A read back"
     testing.expect (am'.length_base (fact_rows_of text) = 2i32) "both tasks become fact rows"
+    := wait = "inl wait_of_t_a () = Waits (\"T-A\", \"item\", \"T-B\")"
+    ?= dict.find "T-A" (facts_of (text ++# "\n" ++# wait)) ?|
+    | Some f => testing.expect (f.waits = "item:T-B") f.waits
+    | None => testing.expect !- "T-A with a wait read back"
+    := symbols = ":= wait_of_t_a () = Waits (\"T-A\", \"user\", \"a decision\")"
+    ?= dict.find "T-A" (facts_of (text ++# "\n" ++# symbols)) ?|
+    | Some f => testing.expect (f.waits = "user:a decision") f.waits
+    | None => testing.expect !- "T-A with a symbols-dialect wait read back"
+    := marker = ":= marker_of_done_definition_1 () = Marker (\"DoneDefinition\", \"Accepted when\")"
+    := rows = fact_rows_of (text ++# "\n" ++# marker)
+    := first = am'.index_base 0i32 rows
+    testing.expect (first.markers = "DoneDefinition=Accepted when") "declared markers reach every row"
+    testing.expect (declared_markers text = "") "a backlog without marker rows declares none"
 := main () : i32 =
     export "rig_agile_fact_rows" fact_rows_of
     0i32

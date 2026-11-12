@@ -164,9 +164,9 @@
 
 ///> rust
 :# an_accented_tail_after_the_stamp_still_counts =
-    testing.expect (kept_end "Item um titulo; 2026-11-10 revisão de paridade" = 14i32) "a two-byte letter right after the stamp window"
-    testing.expect (kept_end "Item um título; 2026-11-10 revisao" = 15i32) "an accent before the separator"
-    testing.expect (kept_end "Item; sem data; ação" = -1i32) "no stamp anywhere"
+    testing.expect (kept_end "Item an object; 2026-11-10 attaché review" = 14i32) "a two-byte letter right after the stamp window"
+    testing.expect (kept_end "Item an éclair; 2026-11-10 review" = 15i32) "an accent before the separator"
+    testing.expect (kept_end "Item; no date; façade" = -1i32) "no stamp anywhere"
 
 := main () : i32 =
     export

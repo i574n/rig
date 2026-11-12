@@ -21,6 +21,7 @@
     | FlagAs
     | FlagTtl
     | FlagPaths
+    | FlagAddPaths
     | FlagClaim
 
 := flag_word (flag : claim_flag) : string = "--" ++# union_reflection.cases.union_case_kebab "Flag" flag
@@ -54,6 +55,7 @@
             | [] => "", []
         := globs = globs_of_flag value
         ?= flag_of word ?|
+        | None ?& word = "--minutes" => flags_read (flag_word FlagTtl :: rest) request
         | None => RequestRefused ("unexpected argument " ++# word)
         | Some flag =>
             ?= flag ?|
@@ -75,6 +77,12 @@
                 := plain = listm.fold (\ ok (g : string) => ok && plain_text g) !+ slashed
                 ? request.verb = VerbClaim && slashed <> [] && plain
                 ?> flags_read after { request ?| paths = slashed }
+                |: RequestRefused (paths_refusal value)
+            | FlagAddPaths =>
+                := slashed = globs_of_flag (sm'.replace "\\" "/" value)
+                := plain = listm.fold (\ ok (g : string) => ok && plain_text g) !+ slashed
+                ? request.verb = VerbClaim && slashed <> [] && plain
+                ?> flags_read after { request ?| paths = "+" :: slashed }
                 |: RequestRefused (paths_refusal value)
 
 
@@ -161,6 +169,12 @@
     | RequestRefused reason => testing.expect !- reason
     ?= request_of VerbClaim [ "KIT-A"; "--as"; "kit"; "--paths"; "C:\\work\\job.ps1,D:\\tree\\**" ] ?|
     | RequestRead r => testing.expect (r.paths = [ "C:/work/job.ps1"; "D:/tree/**" ]) "backslashed paths read as forward slashes"
+    | RequestRefused reason => testing.expect !- reason
+    ?= request_of VerbClaim [ "KIT-A"; "--as"; "kit"; "--add-paths"; "src/b/**" ] ?|
+    | RequestRead r => testing.expect (r.paths = [ "+"; "src/b/**" ]) "--add-paths marks the paths as an addition"
+    | RequestRefused reason => testing.expect !- reason
+    ?= request_of VerbClaim [ "KIT-A"; "--as"; "kit"; "--minutes"; "45" ] ?|
+    | RequestRead r => testing.expect (r.ttl_min = 45i32) "--minutes is the same as --ttl"
     | RequestRefused reason => testing.expect !- reason
     ?= request_of VerbNext [ "--any"; "--as"; "kit" ] ?|
     | RequestRead r => testing.expect (r.lane = "kit" && r.ttl_min = 90i32 && r.grab |> not) "next lists by default"

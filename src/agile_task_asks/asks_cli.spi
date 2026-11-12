@@ -15,11 +15,18 @@
     fixture_write root "state/package.spiproj" "modules:\n    agile\n"
     := here = fixture_text_of root
     := ask = \ (rest : cli_args) => agile_call root (Arg ("edit", Arg (here, Arg ("KIT-A", Arg ("--asked", rest)))))
-    := dated = Arg ("2026-11-01", Arg ("--quote", Arg ("plot it", NoArgs)))
+    := dated = Arg ("2026-11-01", Arg ("--quote", Arg ("plot it; done when it renders", NoArgs)))
     shows (succeeded (ask dated)) "rig agile edit ok id=KIT-A asked=2026-11-01 asks=1"
-    shows (fixture_read root "state/asks.spi") "inl asked_of_kit_a () = Asked (\"KIT-A\", \"2026-11-01\", \"plot it\")"
+    shows (fixture_read root "state/asks.spi") "Asked (\"KIT-A\", \"2026-11-01\", \"plot it; done when it renders\")"
+    rejected_with (ask (Arg ("2026-11-01", Arg ("--quote", Arg ("plot it", NoArgs))))) 2i32 "never a transcript"
     shows (fixture_read root "state/package.spiproj") "    asks\n"
     rejected_with (ask (Arg ("11-01", Arg ("--quote", Arg ("plot it", NoArgs))))) 2i32 "usage"
+    := scoped = Arg ("2026-11-02", Arg ("--ask", Arg ("plot export; done when the png matches", NoArgs)))
+    shows (succeeded (ask scoped)) "rig agile edit ok id=KIT-A asked=2026-11-02 asks=1"
+    rejected_with (ask (Arg ("2026-11-02", Arg ("--ask", Arg ("plot it", NoArgs))))) 2i32 "never a transcript"
+    fixture_write root "state/markers.spi" ":= marker_of_done_1 () = Marker (\"DoneDefinition\", \"accepted when\")\n"
+    := declared = Arg ("2026-11-03", Arg ("--ask", Arg ("plot export; accepted when the png matches", NoArgs)))
+    shows (succeeded (ask declared)) "rig agile edit ok id=KIT-A asked=2026-11-03 asks=1"
     shows (succeeded (ask (Arg ("--clear", NoArgs)))) "rig agile edit ok id=KIT-A asked=none asks=0"
     := unknown = agile_call root (Arg ("edit", Arg (here, Arg ("NOPE", Arg ("--asked", Arg ("--clear", NoArgs))))))
     rejected_with unknown 2i32 "no task NOPE"

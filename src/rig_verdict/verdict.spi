@@ -1,0 +1,49 @@
+:< sm'_operators
+:< model
+
+:= usage () : string =
+    "rig error: usage: verdict <before> <after> [--rule <file>] (each side: case<TAB>result[<TAB>measure] per line; "
+    ++# "rule: rank <result> <n> and measure <case prefix|*> <higher|lower> <tolerance %>; "
+    ++# "exit Equal 0, Regressed 1, Changed 2, Dominates 3)"
+
+:~ refused (~reason : string) : i32 =
+    console.write_error_line ("rig error: verdict: " ++# reason)
+    console.write_error_line (usage ())
+    64i32
+
+:~ counted (v : verdict) : string =
+    ?= v ?|
+    | Equal => " losses=0 gains=0 changes=0"
+    | Regressed (NonEmpty (_, more), gains) =>
+        " losses=" ++# sm'.show (listm.length more + 1i32) ++# " gains=" ++# sm'.show (listm.length gains : i32)
+    | Dominates (NonEmpty (_, more), changes) =>
+        := shown = sm'.show (listm.length changes : i32)
+        " losses=0 gains=" ++# sm'.show (listm.length more + 1i32) ++# " changes=" ++# shown
+    | Changed (NonEmpty (_, more)) => " losses=0 gains=0 changes=" ++# sm'.show (listm.length more + 1i32)
+
+:~ judged_run (rule : judge_rule) (~before_path : string) (~after_path : string) : i32 =
+    ?= side_of (file_system.read_text_or_empty before_path), side_of (file_system.read_text_or_empty after_path) ?|
+    | (SideMalformed reason), _ => refused (before_path ++# ": " ++# reason)
+    | _, (SideMalformed reason) => refused (after_path ++# ": " ++# reason)
+    | (Side before), (Side after) =>
+        ? listm.length before = 0i32 && listm.length after = 0i32
+        ?> refused "both sides are empty or unreadable"
+        |:
+            := found = findings_of rule before after
+            found |> listm.iter (\ (f : finding) => console.write_line (finding_text f))
+            := v = verdict_of found
+            console.write_line ("rig verdict ok verdict=" ++# verdict_name v ++# counted v)
+            verdict_exit v
+
+:~ verdict_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: before :: after :: [] => judged_run { ranks = []; measures = [] } before after
+    | _ :: before :: after :: flag :: path :: [] ?& flag = "--rule" =>
+        ?= rule_of (file_system.read_text_or_empty path) ?|
+        | Rule r => judged_run r before after
+        | RuleMalformed reason => refused (path ++# ": " ++# reason)
+    | _ => refused "expected <before> <after> [--rule <file>]"
+
+:= main () : i32 =
+    export "rig_verdict_run" verdict_run
+    0i32

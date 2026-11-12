@@ -182,8 +182,10 @@
         if \!created.status.success() { std::panic::panic_any(String::from_utf8_lossy(&created.stderr).into_owned()); \
         } } \#[cfg(unix)] std::os::unix::fs::symlink(&*!source, &*!path).unwrap(); }' : ()
 := rig_checkout () : string =
-    $'std::rc::Rc::<str>::from(std::path::PathBuf::from(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
-        std::env::var("KIT_BIN_UNDER_TEST")).unwrap()).ancestors().nth(4).unwrap().to_string_lossy().as_ref())'
+    $'std::rc::Rc::<str>::from({ let bin = std::path::PathBuf::from(std::env::var("RIG_BIN_UNDER_TEST").or_else(|_| \
+        std::env::var("KIT_BIN_UNDER_TEST")).unwrap()); \
+        let checkout = bin.ancestors().find(|p| p.join("state").is_dir() && p.join("src").is_dir()); \
+        checkout.unwrap_or_else(|| bin.ancestors().nth(4).unwrap()).to_string_lossy().into_owned() })'
     : string
 := now_ms () : u64 =
     $'std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64' : u64

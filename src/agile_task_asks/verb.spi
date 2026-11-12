@@ -70,16 +70,51 @@
             |: AsksRefused "the state project was not updated"
 
 := usage () : string =
-    "rig error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> --quote <the user's words> | --asked --clear"
+    := ask = "--ask \"<scope>; done when <criterion>\""
+    "rig error: usage: agile edit <root> <id> --asked <yyyy-mm-dd> " ++# ask ++# " | --asked --clear"
+    ++# " (distil the request: scope and done criterion, never a transcript;"
+    ++# " a DoneDefinition marker declared in state/markers.spi also marks it)"
 
-:~ reported (~item : string) (~asked_on : string) (outcome : asks_write) : i32 =
+:~ declared_done (~root : string) : list string =
+    := marker = \ (line : string) =>
+        ?= sm'.split_list "\"" line ?|
+        | _ :: _ :: _ :: phrase :: _ => sm'.to_lower phrase
+        | _ => ""
+    sm'.split_list "\n" (text_of (sm'.replace "\\" "/" root ++# "/state/markers.spi"))
+    |> listm'.filter (\ (line : string) => sm'.contains "Marker (\"DoneDefinition\", \"" line)
+    |> listm.map marker
+    |> listm'.filter (\ (phrase : string) => phrase <> "")
+
+:~ distilled (~root : string) (~ask : string) : bool =
+    := lower = sm'.to_lower ask
+    := marked = \ (phrase : string) => sm'.contains phrase lower
+    sm'.contains "done when" lower || listm'.exists' marked (declared_done root)
+
+:~ ask_flag (~root : string) (~flag : string) (~text : string) : bool =
+    (flag = "--ask" || flag = "--quote") && distilled root text
+
+:~ occurrences_of (~needle : string) (~text : string) : i32 = listm.length (sm'.split_list needle text) - 1i32
+
+:~ rewrites_of (change : ask_change) : string =
+    ?= change ?|
+    | AskSet ask =>
+        := quotes = occurrences_of "\"" ask.quote
+        := slashes = occurrences_of "\\" ask.quote
+        := breaks = occurrences_of "\n" ask.quote
+        ? quotes + slashes + breaks = 0i32
+        ?> ""
+        |: " rewrote=quotes:" ++# sm'.format quotes ++# ",backslashes:" ++# sm'.format slashes
+           ++# ",newlines:" ++# sm'.format breaks
+    | AskCleared _ => ""
+
+:~ reported (~verb : string) (~item : string) (~asked_on : string) (~rewrites : string) (outcome : asks_write) : i32 =
     ?= outcome ?|
     | AsksWritten count =>
-        := counts = " asked=" ++# asked_on ++# " asks=" ++# sm'.format count
-        console.write_line ("rig agile edit ok id=" ++# item ++# counts)
+        := counts = " asked=" ++# asked_on ++# " asks=" ++# sm'.format count ++# rewrites
+        console.write_line ("rig agile " ++# verb ++# " ok id=" ++# item ++# counts)
         0i32
     | AsksRefused reason =>
-        console.write_error_line ("rig error: agile edit --asked: " ++# reason)
+        console.write_error_line ("rig error: agile " ++# verb ++# ": " ++# reason)
         2i32
 
 := word (index : i32) : string = rust_std_env.model.argument_owned index
@@ -90,20 +125,44 @@
     ?> None
     |? day = "--clear" && word 5i32 = ""
     ?> Some (root, AskCleared item, "none")
-    |? word 5i32 = "--quote" && word 7i32 = "" && day_shaped day && sm'.trim quote <> "" ?>
+    |? ask_flag root (word 5i32) quote && word 7i32 = "" && day_shaped day && sm'.trim quote <> "" ?>
         Some (root, AskSet { item = item; asked_on = day; quote = quote }, day)
     |: None
 
 :~ ask_edit_run () : i32 =
     ?= ask_request () ?|
-    | Some (root, change, day) => reported (change_item change) day (asks_written root change)
+    | Some (root, change, day) =>
+        reported "edit" (change_item change) day (rewrites_of change) (asks_written root change)
     | None =>
         console.write_error_line (usage ())
+        2i32
+
+:~ today (now_ms : u64) : string = sm'.substring 0i32 10i32 (agile_note_model.model.utc_stamp now_ms)
+
+:= ask_usage () : string =
+    "rig error: usage: agile ask <root> <id> \"<scope>; done when <criterion>\" (records today's date;"
+    ++# " distil the request: scope and done criterion, never a transcript)"
+
+:~ ask_now_run () : i32 =
+    := root, item, text = word 1i32, word 2i32, word 3i32
+    ? item <> "" && word 4i32 = "" && sm'.trim text <> "" && distilled root text
+    ?>
+        := day = today (workspace_primitives.clock.unix_ms ())
+        := change = AskSet { item = item; asked_on = day; quote = text }
+        reported "ask" item day (rewrites_of change) (asks_written root change)
+    |:
+        console.write_error_line (ask_usage ())
         2i32
 
 ///> rust
 :# an_item_has_one_ask_row_and_clear_drops_it =
     := first = { item = "S7"; asked_on = "2026-11-01"; quote = "do it" }
+    testing.expect (rewrites_of (AskSet first) = "") "a plain ask reports no rewrite"
+    := quoted = AskSet { first ?| quote = "use \"x\" at C:\\a" }
+    testing.expect (rewrites_of quoted = " rewrote=quotes:2,backslashes:1,newlines:0") (rewrites_of quoted)
+    testing.expect (today 1794450000000u64 = "2026-11-12") (today 1794450000000u64)
+    testing.expect (ask_flag "." "--quote" "a literal transcript" = !-) "a quote is distilled like an ask"
+    testing.expect (ask_flag "." "--quote" "move x; done when y" && ask_flag "." "--ask" "a; done when b") "both pass"
     := one = asks_changed [] (AskSet first)
     := again = asks_changed one (AskSet { first ?| asked_on = "2026-11-02" })
     testing.expect (again = [ { first ?| asked_on = "2026-11-02" } ]) "setting again replaces the row"
@@ -118,4 +177,5 @@
 := main () : i32 =
     export "rig_agile_asks" asks_of
     export "rig_agile_ask_edit_run" ask_edit_run
+    export "rig_agile_ask_now_run" ask_now_run
     0i32
