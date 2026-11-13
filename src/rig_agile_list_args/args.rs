@@ -127,7 +127,12 @@ fn status_word_known_6(mut v0: Rc<str>) -> bool {
                         true
                     } else {
                         let v6: bool = &*v0 == "Done";
-                        v6
+                        if v6 {
+                            true
+                        } else {
+                            let v7: bool = &*v0 == "Dropped";
+                            v7
+                        }
                     }
                 }
             }
@@ -241,7 +246,7 @@ fn list_args_from_5(mut v0: i32, mut v1: i32, mut v2: Rc<str>, mut v3: Rc<str>, 
                                         continue;
                                     } else {
                                         let v70: Rc<str> = agile_task_query::rig_query_usage();
-                                        let v72: Rc<str> = string_concat(&["invalid agile status filter: ", &*v14, " (expected all, Planned, Active, Blocked, Paused or Done; or ", &*v70, ", --sort priority|difficulty|progress)"]);
+                                        let v72: Rc<str> = string_concat(&["invalid agile status filter: ", &*v14, " (expected all, Planned, Active, Blocked, Paused, Done or Dropped; or ", &*v70, ", --sort priority|difficulty|progress)"]);
                                         return US1::US1_ListRejected(v72);
                                     }
                                 }

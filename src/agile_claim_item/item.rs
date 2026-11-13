@@ -54,7 +54,7 @@ enum US2 {
 #[derive(Clone)]
 enum UH1 {
     UH1_NoTasks,
-    UH1_TaskThen(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<UH1>),
+    UH1_TaskThen(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>, Rc<UH1>),
 }
 #[derive(Clone)]
 enum US4 {
@@ -64,7 +64,7 @@ enum US4 {
 }
 #[derive(Clone)]
 enum US5 {
-    US5_Some(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>),
+    US5_Some(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>),
     US5_None,
 }
 pub struct Mut1 { pub l0: Rc<str> }
@@ -452,7 +452,7 @@ fn field_start_14(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32) -> i32
         }
     }
 }
-fn backlog_task_at_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) {
+fn backlog_task_at_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) {
     let v3: i32 = 0i32;
     let mut v4: i32 = field_start_14(v0.clone(), v1, v2, v3);
     let v5: US4 = US4::US4_ScanPlain;
@@ -515,7 +515,7 @@ fn backlog_task_at_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc
     let v62: Rc<str> = std::rc::Rc::<str>::from(v0.get(v59 as usize..v61 as usize).unwrap_or(""));
     let v63: i32 = (v62).trim().trim_end_matches("u32").parse::<i32>().unwrap_or(0);
     let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    (v10, v18, v23, v29, v35, v40, v48, v56, v57, v63, 0i32, false, v64)
+    (v10, v18, v23, v29, v35, v40, v48, v56, v57, v63, 0i32, false, v64.clone(), v64.clone())
 }
 fn tasks_from_12(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<UH1>) -> Rc<UH1> {
     loop {
@@ -531,9 +531,9 @@ fn tasks_from_12(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<UH1>) -> 
             let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
             let v11: bool = v9.starts_with(&*v10);
             if v11 {
-                let (mut v12, mut v13, mut v14, mut v15, mut v16, mut v17, mut v18, mut v19, mut v20, mut v21, mut v22, mut v23, mut v24): (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) = backlog_task_at_13(v0.clone(), v7, v2);
-                let mut v25: Rc<UH1> = Rc::new(UH1::UH1_TaskThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v3));
-                (v1, v3) = (v7, v25);
+                let (mut v12, mut v13, mut v14, mut v15, mut v16, mut v17, mut v18, mut v19, mut v20, mut v21, mut v22, mut v23, mut v24, mut v25): (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) = backlog_task_at_13(v0.clone(), v7, v2);
+                let v26: Rc<UH1> = Rc::new(UH1::UH1_TaskThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v3));
+                (v1, v3) = (v7, v26);
                 continue;
             } else {
                 v1 = v7;
@@ -548,7 +548,7 @@ fn task_found_17(mut v0: Rc<UH1>, mut v1: Rc<str>) -> US5 {
             UH1::UH1_NoTasks => {
                 return US5::US5_None;
             }
-            UH1::UH1_TaskThen(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => {
+            UH1::UH1_TaskThen(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17) => {
                 let v3: Rc<str> = v3;
                 let mut v4: Rc<str> = v4;
                 let v5: Rc<str> = v5;
@@ -562,12 +562,13 @@ fn task_found_17(mut v0: Rc<UH1>, mut v1: Rc<str>) -> US5 {
                 let mut v13: i32 = v13;
                 let mut v14: bool = v14;
                 let mut v15: Rc<str> = v15;
-                let v16: Rc<UH1> = v16;
-                let mut v17: bool = &*v3 == &*v1;
-                if v17 {
-                    return US5::US5_Some(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
+                let v16: Rc<str> = v16;
+                let mut v17: Rc<UH1> = v17;
+                let mut v18: bool = &*v3 == &*v1;
+                if v18 {
+                    return US5::US5_Some(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16);
                 } else {
-                    v0 = v16;
+                    v0 = v17;
                     continue;
                 }
             }
@@ -635,26 +636,26 @@ fn team_of_21(mut v0: Rc<str>) -> Rc<str> {
         v4
     }
 }
-fn task_line_18(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: &Rc<str>, mut v3: i32, mut v4: i32, mut v5: Rc<str>, mut v6: &Rc<str>, mut v7: Rc<str>, mut v8: i32, mut v9: i32, mut v10: i32, mut v11: bool, mut v12: &Rc<str>) -> Rc<str> {
-    let mut v13: Rc<str> = format_real_19(v3);
-    let mut v14: Rc<str> = string_concat(&["P", &*v13]);
-    let mut v15: Rc<str> = format_real_19(v4);
-    let v16: Rc<str> = string_concat(&["D", &*v15]);
-    let mut v17: Rc<str> = team_of_21(v7);
-    let mut v18: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
-    let mut v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("item"); } LIT.with(|lit| lit.clone()) };
-    v18.borrow_mut().push(v19);
-    v18.borrow_mut().push(v0);
-    v18.borrow_mut().push(v14);
-    v18.borrow_mut().push(v16);
-    v18.borrow_mut().push(v5);
-    v18.borrow_mut().push(v17);
-    v18.borrow_mut().push(v1);
-    let v20: Rc<Vec<Rc<str>>> = Rc::new(v18.borrow().clone());
-    let v21: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v20).as_ref().clone()));
-    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
-    let v23: Rc<str> = Rc::<str>::from((*v21.borrow()).join(&*v22));
-    v23
+fn task_line_18(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: &Rc<str>, mut v3: i32, mut v4: i32, mut v5: Rc<str>, mut v6: &Rc<str>, mut v7: Rc<str>, mut v8: i32, mut v9: i32, mut v10: i32, mut v11: bool, mut v12: &Rc<str>, mut v13: &Rc<str>) -> Rc<str> {
+    let mut v14: Rc<str> = format_real_19(v3);
+    let mut v15: Rc<str> = string_concat(&["P", &*v14]);
+    let v16: Rc<str> = format_real_19(v4);
+    let mut v17: Rc<str> = string_concat(&["D", &*v16]);
+    let mut v18: Rc<str> = team_of_21(v7);
+    let mut v19: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
+    let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("item"); } LIT.with(|lit| lit.clone()) };
+    v19.borrow_mut().push(v20);
+    v19.borrow_mut().push(v0);
+    v19.borrow_mut().push(v15);
+    v19.borrow_mut().push(v17);
+    v19.borrow_mut().push(v5);
+    v19.borrow_mut().push(v18);
+    v19.borrow_mut().push(v1);
+    let v21: Rc<Vec<Rc<str>>> = Rc::new(v19.borrow().clone());
+    let v22: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v21).as_ref().clone()));
+    let v23: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(" "); } LIT.with(|lit| lit.clone()) };
+    let v24: Rc<str> = Rc::<str>::from((*v22.borrow()).join(&*v23));
+    v24
 }
 fn state_file_text_24(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
     let mut v2: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
@@ -1289,7 +1290,7 @@ fn claim_item_lines_0(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
                 US5::US5_None => {
                     v3
                 }
-                US5::US5_Some(v65, v66, v67, v68, v69, v70, v71, v72, v73, v74, v75, v76, v77) => {
+                US5::US5_Some(v65, v66, v67, v68, v69, v70, v71, v72, v73, v74, v75, v76, v77, v78) => {
                     let v65: Rc<str> = v65;
                     let v66: Rc<str> = v66;
                     let v67: Rc<str> = v67;
@@ -1303,12 +1304,13 @@ fn claim_item_lines_0(mut v0: Rc<str>, mut v1: Rc<str>) -> Rc<str> {
                     let v75: i32 = v75;
                     let v76: bool = v76;
                     let v77: Rc<str> = v77;
-                    let v78: Rc<str> = task_line_18(v65, v66, &v67, v68, v69, v70, &v71, v72, v73, v74, v75, v76, &v77);
-                    let v80: Rc<str> = string_concat(&[&*v0, "/state"]);
-                    let v81: Rc<str> = state_text_with_notes_23(v80);
-                    let v82: Rc<str> = last_note_line_31(v81, v1);
-                    let v83: Rc<str> = string_concat(&[&*v78, "\n", &*v82]);
-                    v83
+                    let v78: Rc<str> = v78;
+                    let v79: Rc<str> = task_line_18(v65, v66, &v67, v68, v69, v70, &v71, v72, v73, v74, v75, v76, &v77, &v78);
+                    let v81: Rc<str> = string_concat(&[&*v0, "/state"]);
+                    let v82: Rc<str> = state_text_with_notes_23(v81);
+                    let v83: Rc<str> = last_note_line_31(v82, v1);
+                    let v84: Rc<str> = string_concat(&[&*v79, "\n", &*v83]);
+                    v84
                 }
             }
         }

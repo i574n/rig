@@ -39,11 +39,11 @@
             "agile set: "
             ++# slot
             ++# (" must be " ++# expected ++# ", received '" ++# (argument_owned index) ++# "'")
-            ++# "; usage: agile set <root> <id> <progress|-> <Planned|Active|Blocked|Paused|Done>"
+            ++# "; usage: agile set <root> <id> <progress|-> <Planned|Active|Blocked|Paused|Done|Dropped>"
             ++# " [--expect <status>] [--as <lane>]"
     agile_mutation_error message
 := agile_progress_error () : i32 = agile_slot_error "progress" "a whole number 0..100" 3i32
-:= agile_status_error () : i32 = agile_slot_error "status" "Planned, Active, Blocked, Paused or Done" 4i32
+:= agile_status_error () : i32 = agile_slot_error "status" "Planned, Active, Blocked, Paused, Done or Dropped" 4i32
 := agile_check (~root : string) : i32 = $"rig_agile_state::agile_check_owned(!root.as_ref())"
 := agile_lease_status (~root : string) : i32 = $"rig_agile_state::agile_lease_status_owned(!root.as_ref())"
 := agile_handoff (~root : string) : i32 = $"rig_handoff_render::handoff_render_owned(!root.as_ref())"
@@ -108,6 +108,8 @@
 := agile_edit_route () : i32 =
     ? argument_owned 3i32 = "--parent"
     ?> agile_task_parents.verb.parent_edit_run ()
+    |? argument_owned 3i32 = "--after"
+    ?> agile_task_afters.verb.after_edit_run ()
     |? argument_owned 3i32 = "--asked"
     ?> agile_task_asks.verb.ask_edit_run ()
     |? argument_owned 3i32 = "--split"

@@ -1,0 +1,390 @@
+///- --package .
+:# redact static =
+    :< rust_std_fs.model
+    :< agile_state_fs.model
+    :< sm'_operators
+    :< agile_task_text.model
+    :< agile_note_model.model
+    :< workspace_primitives.outcome
+    :< workspace_primitives.numbers
+    :< workspace_primitives.bytes
+    :< workspace_primitives.clock
+    :< workspace_primitives.console
+    :< workspace_primitives.files
+
+:< rust_std_fs.model
+:< agile_state_fs.model
+:< sm'_operators
+:< agile_task_text.model
+:< agile_note_model.model
+:< workspace_primitives.outcome
+:< workspace_primitives.numbers
+:< workspace_primitives.bytes
+:< workspace_primitives.clock
+:< workspace_primitives.console
+:< workspace_primitives.files
+
+:== redact_term =
+    {
+        term : string
+        role : string
+    }
+
+:== redact_rules =
+    {
+        words : list redact_term
+        authors : list (string * string)
+    }
+
+:| redact_mode =
+    | RedactPlan
+    | RedactApply
+
+:== redact_request =
+    {
+        root : string
+        terms : string
+        editor : string
+        mode : redact_mode
+        valid : bool
+    }
+
+:== note_redaction =
+    {
+        id : string
+        seq : i32
+        author : string
+        roles : list string
+    }
+
+:| redact_outcome =
+    | RedactPlanned :: list note_redaction -> redact_outcome
+    | RedactApplied :: list note_redaction * u64 * u64 -> redact_outcome
+    | RedactRefused :: string -> redact_outcome
+
+:~ term_of_line (~line : string) : option redact_term =
+    ?= sm'.split_list "\t" (sm'.replace "\r" "" line) ?|
+    | term :: role :: [] ?& sm'.trim term <> "" && sm'.trim role <> "" =>
+        Some { term = ascii_lowercase (sm'.trim term); role = sm'.trim role }
+    | _ => None
+
+:~ ^ terms_of_lines (lines : list string) : list redact_term =
+    ?= lines ?|
+    | [] => []
+    | line :: rest =>
+        ?= term_of_line line ?|
+        | Some term => term :: terms_of_lines rest
+        | None => terms_of_lines rest
+
+:~ terms_of (~text : string) : list redact_term = terms_of_lines (sm'.split_list "\n" text)
+
+:~ ^ authors_of_lines (lines : list string) : list (string * string) =
+    ?= lines ?|
+    | [] => []
+    | line :: rest =>
+        ?= sm'.split_list "\t" (sm'.replace "\r" "" line) ?|
+        | kind :: old :: new :: [] ?& sm'.trim kind = "author" && sm'.trim old <> "" && sm'.trim new <> "" =>
+            (sm'.trim old, sm'.trim new) :: authors_of_lines rest
+        | _ => authors_of_lines rest
+
+:~ rules_of (~text : string) : redact_rules =
+    := lines = sm'.split_list "\n" text
+    { words = terms_of_lines lines; authors = authors_of_lines lines }
+
+:~ ^ author_renamed (authors : list (string * string)) (~author : string) : option string =
+    ?= authors ?|
+    | [] => None
+    | (old, new) :: rest => ? old = author ?> Some new |: author_renamed rest author
+
+:= word_byte (b : i32) : bool =
+    (b >= 48i32 && b <= 57i32) || (b >= 65i32 && b <= 90i32) || (b >= 97i32 && b <= 122i32) || b = 95i32 || b = 45i32
+
+:~ ^ replaced_from (~text : string) (~lower : string) (term : redact_term) (from : i32) (~done : string) (hits : i32)
+    : string * i32
+    =
+    := at = byte_find_from lower term.term from
+    ? at < 0i32
+    ?> done ++# byte_slice text from (byte_len text), hits
+    |:
+        := stop = at + byte_len term.term
+        ? word_byte (byte_at text (at - 1i32)) || word_byte (byte_at text stop)
+        ?> replaced_from text lower term stop (done ++# byte_slice text from stop) hits
+        |: replaced_from text lower term stop (done ++# byte_slice text from at ++# term.role) (hits + 1i32)
+
+:~ ^ text_redacted (terms : list redact_term) (~text : string) (roles : list string) : string * list string =
+    ?= terms ?|
+    | [] => text, roles
+    | term :: rest =>
+        := revised, hits = replaced_from text (ascii_lowercase text) term 0i32 "" 0i32
+        := known = listm'.exists' (\ (role : string) => role = term.role) roles
+        text_redacted rest revised (? hits > 0i32 && not known ?> listm.append roles [ term.role ] |: roles)
+
+:= note_line_head () : string = "inl note_of_"
+
+:= seq_of (~field : string) : i32 =
+    optionm'.default_value (-1i32) (convert.try_convert (sm'.replace "u32" "" (sm'.trim field)))
+
+:~ line_redacted (rules : redact_rules) (~line : string) : string * option note_redaction =
+    := marker = byte_find line " () = "
+    ? sm'.starts_with (note_line_head ()) line |> not || marker < 0i32
+    ?> line, None
+    |:
+        := found = marker + byte_len " () = "
+        := note = note_at line found
+        := revised, roles = text_redacted rules.words note.text []
+        := renamed = author_renamed rules.authors note.author
+        := author = optionm'.default_value note.author renamed
+        := marks =
+            ?= renamed ?|
+            | Some name => listm.append roles [ "author " ++# name ]
+            | None => roles
+        ? marks = []
+        ?> line, None
+        |:
+            := id = unquoted (item_field line NoteItem found 0i32)
+            := seq = seq_of (item_field line NoteItem found 1i32)
+            := redaction = { id = id; seq = seq; author = author; roles = marks }
+            note_row id seq { note ?| text = revised; author = author }, Some redaction
+
+:~ ^ lines_redacted (rules : redact_rules) (lines : list string) : list string * list note_redaction =
+    ?= lines ?|
+    | [] => [], []
+    | line :: rest =>
+        := revised, found = line_redacted rules line
+        := others, redactions = lines_redacted rules rest
+        ?= found ?|
+        | Some redaction => revised :: others, redaction :: redactions
+        | None => revised :: others, redactions
+
+:~ redacted_text (rules : redact_rules) (~original : string) : string * list note_redaction =
+    := lines, redactions = lines_redacted rules (sm'.split_list "\n" original)
+    sm'.concat_list "\n" lines, redactions
+
+:~ ^ audit_authors_renamed (authors : list (string * string)) (~text : string) : string =
+    ?= authors ?|
+    | [] => text
+    | (old, new) :: rest =>
+        audit_authors_renamed rest (
+            sm'.replace ("u32, " ++# spi_quoted old ++# ", ") ("u32, " ++# spi_quoted new ++# ", ") text
+        )
+
+:= redactions_schema () : string =
+    "///- --no-respell\nunion task_redaction =\n"
+    ^^ "    | Redacted :: string * u32 * string * string * string * string -> task_redaction\n"
+
+:~ redaction_row (number : i32) (~editor : string) (~at : string) (redaction : note_redaction) : string =
+    := head = "inl redaction_" ++# i32_text number ++# " () = Redacted (" ++# spi_quoted redaction.id ++# ", "
+    := middle = i32_text redaction.seq ++# "u32, " ++# spi_quoted redaction.author ++# ", " ++# spi_quoted editor
+    head ++# middle ++# ", " ++# spi_quoted at ++# ", " ++# spi_quoted (sm'.concat_list "; " redaction.roles) ++# ")\n"
+
+:~ ^ rows_counted (lines : list string) (count : i32) : i32 =
+    ?= lines ?|
+    | [] => count
+    | line :: rest =>
+        rows_counted rest (
+            ? sm'.starts_with "inl redaction_" line || sm'.starts_with ":= redaction_" line
+            ?> count + 1i32
+            |: count
+        )
+
+:~ ^ rows_text (redactions : list note_redaction) (number : i32) (~editor : string) (~at : string) (~done : string)
+    : string
+    =
+    ?= redactions ?|
+    | [] => done
+    | redaction :: rest => rows_text rest (number + 1i32) editor at (done ++# redaction_row number editor at redaction)
+
+:~ audit_text (~before : string) (redactions : list note_redaction) (~editor : string) (~at : string) : string =
+    := start = ? sm'.trim before = "" ?> redactions_schema () |: before
+    := spaced = ? sm'.ends_with "\n" start ?> start |: start ++# "\n"
+    rows_text redactions (rows_counted (sm'.split_list "\n" spaced) 0i32 + 1i32) editor at spaced
+
+:~ module_added (format : agile_state_fs.project.project_format) (~package_text : string) : option string =
+    ?= agile_state_fs.project.project_with_module format package_text "redactions" ?|
+    | agile_state_fs.project.ModuleListed => Some package_text
+    | agile_state_fs.project.ModuleAdded listed => Some listed
+    | agile_state_fs.project.NoModulesSection => None
+
+:~ ^ request_flags (words : list string) (request : redact_request) : redact_request =
+    ?= words ?|
+    | [] => request
+    | flag :: value :: rest ?& flag = "--terms" && sm'.trim value <> "" =>
+        request_flags rest { request ?| terms = sm'.trim value }
+    | flag :: value :: rest ?& flag = "--as" && sm'.trim value <> "" =>
+        request_flags rest { request ?| editor = sm'.trim value }
+    | flag :: rest ?& flag = "--apply" => request_flags rest { request ?| mode = RedactApply }
+    | _ => { request ?| valid = !- }
+
+:~ request_of (words : list string) : redact_request =
+    := start = { root = ""; terms = ""; editor = ""; mode = RedactPlan; valid = !+ }
+    ?= words ?|
+    | root :: flags =>
+        := read = request_flags flags { start ?| root = root }
+        { read ?| valid = read.valid && read.terms <> "" && read.editor <> "" }
+    | [] => { start ?| valid = !- }
+
+:~ ^ words_after (count : i32) (words : list string) : list string =
+    ?= words ?|
+    | _ :: rest ?& count > 0i32 => words_after (count - 1i32) rest
+    | _ => words
+
+:= inside (~root : string) (~path : string) : bool =
+    := base = ascii_lowercase (absolute_slashed root)
+    := target = ascii_lowercase (absolute_slashed path)
+    target = base || sm'.starts_with (? sm'.ends_with "/" base ?> base |: base ++# "/") target
+
+:~ redaction_done (request : redact_request) : redact_outcome =
+    := started = unix_ms ()
+    := state = backlog_state_path request.root
+    ? inside request.root request.terms
+    ?> RedactRefused "--terms must live outside the backlog, so the replaced words never enter it"
+    |:
+        ?= probe (unchecked request.terms) ?|
+        | FileMissing _ => RedactRefused "the --terms file is missing"
+        | FileReadable terms_file =>
+            := rules = rules_of (loaded_string (read_text terms_file))
+            ?= probe (unchecked state) ?|
+            | FileMissing _ => RedactRefused "state/agile.spi is missing"
+            | FileReadable file =>
+                := raw = loaded_string (read_text file)
+                := original = records_text raw
+                := updated, redactions = redacted_text rules original
+                ? rules.words = [] && rules.authors = []
+                ?> RedactRefused "the --terms file has no term<TAB>role or author<TAB>old<TAB>new rows"
+                |? request.mode = RedactPlan || redactions = []
+                ?> RedactPlanned redactions
+                |:
+                    ?= state_written state raw updated ?|
+                    | StateWritten =>
+                        := folder = sm'.replace "\\" "/" request.root ++# "/state"
+                        := audit = folder ++# "/redactions.spi"
+                        := package = agile_state_fs.project.project_path_in folder
+                        := written =
+                            replace_file_checked audit (
+                                audit_text
+                                    (audit_authors_renamed rules.authors (agile_state_fs.model.read_state audit))
+                                    redactions
+                                    request.editor
+                                    (utc_stamp started)
+                            )
+                        ?=
+                            written,
+                            module_added
+                                (agile_state_fs.project.project_format_in folder)
+                                (agile_state_fs.model.read_state package)
+                        ?|
+                        | Replaced, Some listed =>
+                            ?=
+                                ? listed = agile_state_fs.model.read_state package
+                                ?> Replaced
+                                |: replace_file_checked package listed
+                            ?|
+                            | Replaced => RedactApplied (redactions, text_bytes original, text_bytes updated)
+                            | problem =>
+                                RedactRefused (
+                                    "the state project was not updated: " ++# file_replacement_problem problem
+                                )
+                        | Replaced, None =>
+                            RedactRefused "the state project has no modules section to list redactions in"
+                        | problem, _ =>
+                            RedactRefused (
+                                "state/redactions.spi was not written: " ++# file_replacement_problem problem
+                            )
+                    | problem => RedactRefused (state_write_problem problem)
+
+:~ ^ tally_add (~key : string) (counts : list (string * i32)) : list (string * i32) =
+    ?= counts ?|
+    | [] => [ key, 1i32 ]
+    | (name, n) :: rest ?& name = key => (name, n + 1i32) :: rest
+    | pair :: rest => pair :: tally_add key rest
+
+:~ tally_text (counts : list (string * i32)) : string =
+    counts |> listm.map (\ ((name, n) : string * i32) => name ++# "=" ++# i32_text n) |> sm'.concat_list ","
+
+:~ summary (redactions : list note_redaction) : string =
+    := authors =
+        redactions |> listm.fold (\ (counts : list (string * i32)) (r : note_redaction) => tally_add r.author counts) []
+    := roles =
+        redactions
+        |> listm.fold \ (counts : list (string * i32)) (r : note_redaction) =>
+                r.roles |> listm.fold (\ (inner : list (string * i32)) (role : string) => tally_add role inner) counts
+            []
+    := items =
+        redactions |> listm.fold (\ (counts : list (string * i32)) (r : note_redaction) => tally_add r.id counts) []
+    "notes="
+    ++# i32_text (listm.length redactions)
+    ++# " items="
+    ++# i32_text (listm.length items)
+    ++# " by_author="
+    ++# spi_quoted (tally_text authors)
+    ++# " roles="
+    ++# spi_quoted (tally_text roles)
+
+:~ redact_entry () : i32 =
+    := request = request_of (words_after 2i32 (env.command_line_arguments ()))
+    ? request.valid |> not
+    ?> stderr_failure "usage: agile redact <root> --terms <file outside the backlog> --as <lane> [--apply]"
+    |:
+        ?= redaction_done request ?|
+        | RedactPlanned redactions => stdout_line ("rig agile redact plan " ++# summary redactions ++# " apply=--apply")
+        | RedactApplied (redactions, before, after) =>
+            stdout_line (
+                "rig agile redact ok "
+                ++# summary redactions
+                ++# " audit=state/redactions.spi"
+                ++# measured_sizes before after 0u64
+            )
+        | RedactRefused reason => stderr_failure ("agile redact rejected: " ++# reason)
+
+///> rust
+:# redaction_swaps_whole_words_for_roles_and_keeps_ids =
+    := terms = terms_of "Orion\tbuild node\nvega\tapp node\n\nbroken line\n"
+    testing.expect (listm.length terms = 2i32) "two rows, blank and malformed lines skipped"
+    := text, roles = text_redacted terms "build on orion, deploy to Vega; NT-VEGA-X stays; orion_dir stays" []
+    testing.expect (text = "build on build node, deploy to app node; NT-VEGA-X stays; orion_dir stays") text
+    testing.expect (roles = [ "build node"; "app node" ]) "roles in order of first use"
+    := same, none = text_redacted terms "nothing here" []
+    testing.expect (same = "nothing here" && none = []) "untouched text"
+    := line = "inl note_of_a_1 () = Note (\"A\", 1u32, \"2026-11-12T10:00Z\", \"user\", \"ran on orion\")"
+    := revised, found = line_redacted { words = terms; authors = [] } line
+    testing.expect
+        (revised = "inl note_of_a_1 () = Note (\"A\", 1u32, \"2026-11-12T10:00Z\", \"user\", \"ran on build node\")")
+        revised
+    ?= found ?|
+    | Some r => testing.expect (r.id = "A" && r.seq = 1i32 && r.author = "user" && r.roles = [ "build node" ]) r.id
+    | None => testing.expect !- "the note row was found"
+    := rules = rules_of "orion\tbuild node\nauthor\tlane@orion\tlane\n"
+    testing.expect (rules.authors = [ "lane@orion", "lane" ] && listm.length rules.words = 1i32) "author rows"
+    := moved = "inl note_of_a_2 () = Note (\"A\", 2u32, \"2026-11-12T10:00Z\", \"lane@orion\", \"no term here\")"
+    := renamed, by_author = line_redacted rules moved
+    testing.expect
+        (renamed = "inl note_of_a_2 () = Note (\"A\", 2u32, \"2026-11-12T10:00Z\", \"lane\", \"no term here\")")
+        renamed
+    ?= by_author ?|
+    | Some r => testing.expect (r.author = "lane" && r.roles = [ "author lane" ]) r.id
+    | None => testing.expect !- "the author rename was found"
+    := old_audit = "inl redaction_1 () = Redacted (\"A\", 1u32, \"lane@orion\", \"rig\", \"t\", \"build node\")\n"
+    testing.expect
+        (audit_authors_renamed rules.authors old_audit = sm'.replace "\"lane@orion\"" "\"lane\"" old_audit)
+        "earlier audit rows drop the old author"
+    := audit =
+        audit_text "" [ { id = "A"; seq = 1i32; author = "user"; roles = [ "build node" ] } ] "rig" "2026-11-12T22:00Z"
+    testing.expect
+        (
+            sm'.ends_with
+                (
+                    "inl redaction_1 () = Redacted (\"A\", 1u32, \"user\", \"rig\", \"2026-11-12T22:00Z\", \"build "
+                    ^^ "node\")\n"
+                )
+                audit
+        )
+        audit
+    := next =
+        audit_text audit
+            [ { id = "B"; seq = 2i32; author = "org"; roles = [ "windows node" ] } ]
+            "rig"
+            "2026-11-12T23:00Z"
+    testing.expect (sm'.contains "inl redaction_2 () = Redacted (\"B\"" next) "the next row gets the next number"
+    := request = request_of [ "root"; "--terms"; "C:/t.tsv"; "--as"; "rig"; "--apply" ]
+    testing.expect (request.valid && request.mode = RedactApply && request.editor = "rig") request.terms
+    testing.expect ((request_of [ "root"; "--terms"; "x" ]).valid |> not) "--as is required"

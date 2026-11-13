@@ -20,7 +20,8 @@
 :~ ^ open_words (tasks : task_list) : list string =
     ?= tasks ?|
     | NoTasks => []
-    | TaskThen (task, rest) => ? task.status = "Done" ?> open_words rest |: task.id :: open_words rest
+    | TaskThen (task, rest) =>
+        ? agile_mutation_policy.model.agile_status_word_settled task.status ?> open_words rest |: task.id :: open_words rest
 
 :~ agents_take (~records : string) (task : backlog_task) : bool =
     task.kind <> "Epic" && agile_claim_api.api.planning_selected records task.id "all" "user" = !-

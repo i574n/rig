@@ -145,4 +145,5 @@
 
 := main () : i32 =
     export "rig_agile_note_edit_run" ((\ () => note_edit_entry ()) : () -> i32)
+    export "rig_agile_redact_run" ((\ () => redact.redact_entry ()) : () -> i32)
     0i32

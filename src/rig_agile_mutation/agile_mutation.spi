@@ -66,7 +66,6 @@
 := agile_with_root (route : () -> i32) : i32 = ? 2i32 <= agile_argument_count () ?> route () |: agile_usage_error ()
 := agile_arity_route (accepted : bool) (route : () -> i32) : i32 = ? accepted ?> route () |: agile_usage_error ()
 := agile_either_arity a b : bool = ? argument_count_is a ?> !+ |: argument_count_is b
-:= set_with_author () : bool = ? argument_count_is 7i32 ?> ((argument_owned 5i32) = "--as") |: !-
 := set_flag (index : i32) : bool = ? (argument_owned index) = "--expect" ?> !+ |: (argument_owned index) = "--as"
 := set_with_expect () : bool =
     ? argument_count_is 7i32
@@ -74,13 +73,6 @@
     |? argument_count_is 9i32
     ?> set_flag 5i32 && set_flag 7i32 && (argument_owned 5i32) <> (argument_owned 7i32)
     |: !-
-:= agile_set_author_error () : i32 =
-    := message =
-            "agile set records no author (only agile note does); drop --as "
-            ++# (argument_owned 6i32)
-            ++# ", or add a note with --as to say who moved "
-            ++# (argument_owned 2i32)
-    agile_mutation_error message
 := todos_recording () : bool = rust_std_env.model.argument_flag_present 4i32 "--record"
 := next_claims () : bool = rust_std_env.model.argument_flag_present 4i32 "--any"
 := claim_queue_call (s : agile_subcommand) : bool =
@@ -143,6 +135,7 @@
     | AgileGap => agile_with_root \ () => rig_agile_gap.intake.gap_entry ()
     | AgileChanges => agile_with_root \ () => rig_agile_changes.changes.changes_run ()
     | AgileAsk => agile_with_root \ () => agile_ask_route ()
+    | AgileBatch => agile_with_root \ () => rig_agile_batch.batch.batch_run ()
     | AgileReceipts => agile_with_root \ () => rig_agile_receipts.verify.verify_run ()
     | AgileTerms => agile_root_only terms_report
     | AgileEdit => agile_arity_route (agile_either_arity 5i32 7i32) agile_edit_route
@@ -156,6 +149,7 @@
     | AgileCadence => agile_with_root \ () => rig_agile_cadence.cadence.cadence_run ()
     | AgileNote => agile_arity_route (agile_either_arity 4i32 6i32) \ () => $"agile_task_notes::rig_agile_note_run()"
     | AgileNoteEdit => agile_with_root \ () => $"agile_note_edit::rig_agile_note_edit_run()"
+    | AgileRedact => agile_with_root \ () => $"agile_note_edit::rig_agile_redact_run()"
     | AgileNotes =>
         agile_arity_route (argument_count_is 4i32) \ () => $"agile_title_notes::rig_agile_notes_from_title_run()"
     | AgileRename => agile_arity_route (argument_count_is 4i32) \ () => $"agile_task_rename::rig_agile_rename_run()"

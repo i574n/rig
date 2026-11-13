@@ -216,6 +216,17 @@
     shows shown "planning: estimate=120m"
     shows shown "  user  moves with the task"
     shows (accepted root "show" (Arg ("ID-C", NoArgs))) "follow-up to ID-A"
+    := history_head =
+        cat "///- --no-respell\n:| status_change_row =\n"
+            "    | StatusChanged :: string * string * u64 -> status_change_row\n"
+    := moved = ":= status_changed_id_a_1700000000000 () = StatusChanged (\"ID-A\", \"Done\", 1700000000000u64)\n"
+    := _ = fixture_write root "history/status_changes.spi" (cat history_head moved)
+    shows
+        (accepted root "rename" (Arg ("ID-A", Arg ("ID-Z", NoArgs))))
+        "items=0 completed=sides side_rows=1 side_bindings=1"
+    shows
+        (fixture_read root "history/status_changes.spi")
+        ":= status_changed_id_z_1700000000000 () = StatusChanged (\"ID-Z\""
     := before = state_text root
     unchanged_after root
         (agile root "rename" (Arg ("ID-Z", Arg ("ID-B", NoArgs))))
@@ -351,6 +362,34 @@
         (agile root "note-edit" (Arg ("ID-A", Arg ("1", Arg ("x", Arg ("--bogus", NoArgs))))))
         "usage: agile note-edit <root> <id> <note-number> <text> [--as <author>] [--append]"
         (state_text root)
+    fixture_root_remove root
+
+///> rust
+:# redact_swaps_terms_in_any_authors_notes_and_records_who_did_it =
+    := root = backlog_new "redact"
+    := words = fixture_root_create "redact terms"
+    := _ = fixture_write words "terms.tsv" "orion\tbuild node\n"
+    := terms = cat (fixture_text_of words) "/terms.tsv"
+    := noted = Arg ("built on Orion; NT-ORION-X stays", Arg ("--as", Arg ("lane 2", NoArgs)))
+    := _ = accepted root "note" (Arg ("ID-A", noted))
+    := _ = accepted root "note" (Arg ("ID-B", Arg ("nothing to change", Arg ("--as", Arg ("lane 3", NoArgs)))))
+    := plan = accepted root "redact" (Arg ("--terms", Arg (terms, Arg ("--as", Arg ("rig", NoArgs)))))
+    shows plan "rig agile redact plan notes=1 items=1 by_author=\"lane 2=1\" roles=\"build node=1\""
+    shows (accepted root "show" (Arg ("ID-A", NoArgs))) "built on Orion"
+    := flags = Arg ("--as", Arg ("rig", Arg ("--apply", NoArgs)))
+    := applied = accepted root "redact" (Arg ("--terms", Arg (terms, flags)))
+    shows applied "rig agile redact ok notes=1"
+    := shown = accepted root "show" (Arg ("ID-A", NoArgs))
+    shows shown "  lane 2  built on build node; NT-ORION-X stays"
+    := audit = fixture_read root "state/redactions.spi"
+    shows audit "Redacted (\"ID-A\", 1u32, \"lane 2\", \"rig\", "
+    shows (cat (fixture_read root "state/spiral.toml") (fixture_read root "state/package.spiproj")) "redactions"
+    rejected_with
+        (agile root "redact" (Arg ("--terms", Arg (cat (fixture_text_of root) "/state/agile.spi",
+            Arg ("--as", Arg ("rig", NoArgs))))))
+        2i32
+        "--terms must live outside the backlog"
+    fixture_root_remove words
     fixture_root_remove root
 
 ///> rust

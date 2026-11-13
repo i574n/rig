@@ -6,10 +6,10 @@
     rig_run (fixture_text_of root) NoArgs NoArgs (Arg ("agile", args))
 
 := backlog () : string =
-    := opening = "inl task_kit_a () = Task (\"KIT-A\", \"big item\", Story, P1, D4, 0u32, Planned, \"\", "
+    := opening = "inl task_item_a () = Task (\"ITEM-A\", \"big item\", Story, P1, D4, 0u32, Planned, \"\", "
     := task = opening ++# "\"kit,team:kit\", "
-    := planning = "inl planning_of_kit_a () = Planning (\"KIT-A\", Minutes 360u32, Load Light, Assigned Agent)\n"
-    := head = "inl note_of_kit_a_1 () = Note (\"KIT-A\", 1u32, \"2026-11-06T10:00Z\", \"kit\", "
+    := planning = "inl planning_of_item_a () = Planning (\"ITEM-A\", Minutes 360u32, Load Light, Assigned Agent)\n"
+    := head = "inl note_of_item_a_1 () = Note (\"ITEM-A\", 1u32, \"2026-11-06T10:00Z\", \"kit\", "
     := note = head ++# "\"MILESTONES: model 90 m; verb 60 m\")\n"
     task ++# "\"current\", \"current\")\n" ++# planning ++# note ++# "inl main () : i32 = 0i32\n"
 
@@ -19,10 +19,10 @@
     fixture_write root "state/agile.spi" (backlog ())
     fixture_write root "state/package.spiproj" "modules:\n    agile\n"
     := here = fixture_text_of root
-    := split_args = Arg ("edit", Arg (here, Arg ("KIT-A", Arg ("--split", Arg ("milestones", NoArgs)))))
+    := split_args = Arg ("edit", Arg (here, Arg ("ITEM-A", Arg ("--split", Arg ("milestones", NoArgs)))))
     := split = succeeded (agile_call root split_args)
-    shows split "rig agile split ok id=KIT-A children=2"
-    := second = succeeded (agile_call root (Arg ("show", Arg (here, Arg ("KIT-A-M2", NoArgs)))))
-    shows second "deps: KIT-A-M1"
-    shows (fixture_read root "state/parents.spi") "Parent (\"KIT-A-M2\", \"KIT-A\")"
+    shows split "rig agile split ok id=ITEM-A children=2"
+    := second = succeeded (agile_call root (Arg ("show", Arg (here, Arg ("ITEM-A-M2", NoArgs)))))
+    shows second "deps: ITEM-A-M1"
+    shows (fixture_read root "state/parents.spi") "Parent (\"ITEM-A-M2\", \"ITEM-A\")"
     fixture_root_remove root

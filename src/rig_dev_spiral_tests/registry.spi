@@ -115,6 +115,7 @@
         { package = "rig-agile-lock"; relative = "src/rig_agile_lock/lock.spi" }
         { package = "rig-agile-changes"; relative = "src/rig_agile_changes/changes.spi" }
         { package = "rig-verdict"; relative = "src/rig_verdict/model.spi" }
+        { package = "rig-agile-batch"; relative = "src/rig_agile_batch/model.spi" }
         { package = "agile-task-waits"; relative = "src/agile_task_waits/waits.spi" }
         { package = "agile-task-waits"; relative = "src/agile_task_waits/verb.spi" }
         { package = "rig-agile-gap"; relative = "src/rig_agile_gap/gap.spi" }
@@ -269,6 +270,7 @@
         { package = "agile-claim-release"; relative = "src/agile_claim_release/release.spi" }
         { package = "rig-cli"; relative = "src/agile_epic_tree/tree.spi" }
         { package = "agile-next-print"; relative = "src/agile_next_print/next_print.spi" }
+        { package = "agile-note-edit"; relative = "src/agile_note_edit/redact.spi" }
         { package = "agile-note-edit-args"; relative = "src/agile_note_edit_args/args.spi" }
         { package = "agile-note-events"; relative = "src/agile_note_events/events.spi" }
         { package = "agile-note-listing"; relative = "src/agile_note_listing/note_filter.spi" }
@@ -319,6 +321,8 @@
         { package = "agile-task-notes"; relative = "src/agile_task_notes/task_notes.spi" }
         { package = "agile-task-parents"; relative = "src/agile_task_parents/parents.spi" }
         { package = "agile-task-parents"; relative = "src/agile_task_parents/verb.spi" }
+        { package = "agile-task-afters"; relative = "src/agile_task_afters/afters.spi" }
+        { package = "agile-task-afters"; relative = "src/agile_task_afters/verb.spi" }
         { package = "agile-task-split"; relative = "src/agile_task_split/verb.spi" }
         { package = "agile-task-tree"; relative = "src/agile_task_tree/epic_tree.spi" }
         { package = "agile-team-lane"; relative = "src/agile_team_lane/lane.spi" }
@@ -380,6 +384,20 @@
         { package = "rig-do-git"; relative = "src/rig_do_git/git_cli.spi" }
         { package = "rig-machine-sample"; relative = "src/rig_machine_sample/sample.spi" }
         { package = "rig-do-walk"; relative = "src/rig_do_walk/walk.spi" }
+        { package = "rig-granular-rounds"; relative = "src/rig_granular_rounds/rounds.spi" }
+        { package = "rig-heal-nameof"; relative = "src/rig_heal_nameof/heal.spi" }
+        { package = "rig-lint-precheck"; relative = "src/rig_lint_precheck/precheck.spi" }
+        { package = "rig-lint-walk"; relative = "src/rig_lint_walk/walk.spi" }
+        { package = "rig-mirror-plan"; relative = "src/rig_mirror_plan/plan.spi" }
+        { package = "rig-read-query"; relative = "src/rig_read_query/encoding.spi" }
+        { package = "rig-read-query"; relative = "src/rig_read_query/read.spi" }
+        { package = "rig-contracts"; relative = "src/agile_claim_cli/cli_check.spi" }
+        { package = "rig-contracts"; relative = "src/agile_task_parents/parents_cli.spi" }
+        { package = "rig-contracts"; relative = "src/agile_task_split/split_cli.spi" }
+        { package = "rig-contracts"; relative = "src/rig_agile_cadence/cadence_cli.spi" }
+        { package = "rig-contracts"; relative = "src/rig_agile_sprint_change/sprint_cli.spi" }
+        { package = "rig-contracts"; relative = "src/rig_repo_affected/affected_cli.spi" }
+        { package = "rig-contracts"; relative = "src/rig_window_wait/wait_cli.spi" }
     ]
 
 := selects (names : string) (separator : string) (package : string) : bool =

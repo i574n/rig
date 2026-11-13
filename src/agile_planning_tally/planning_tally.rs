@@ -11,15 +11,6 @@ fn string_concat(parts: &[&str]) -> Rc<str> {
     }
     unsafe { Rc::from_raw(Rc::into_raw(joined.assume_init()) as *const str) }
 }
-fn string_slice(value: &str, from: i64, to: i64) -> Rc<str> {
-    let bytes = value.as_bytes();
-    let length = bytes.len() as i64;
-    if from < 0 || from > length || to < from - 1 || to >= length { std::process::abort(); }
-    if to < from { return { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }; }
-    if (bytes[from as usize] & 0xC0) == 0x80 || (to + 1 < length && (bytes[(to + 1) as usize] & 0xC0) == 0x80) { std::process::exit(3); }
-    let slice = &bytes[from as usize..(to + 1) as usize];
-    match std::str::from_utf8(slice) { Ok(text) => Rc::<str>::from(text), Err(error) => Rc::<str>::from(std::str::from_utf8(&slice[..error.valid_up_to()]).unwrap_or("")) }
-}
 #[derive(Clone)]
 enum US0 {
     US0_EveryTask,
@@ -509,74 +500,6 @@ fn rollup_task_at_2(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<s
     let (mut v24, mut v25, mut v26): (US1, US2, US4) = planning_beside_6(v0, v10.clone(), v1);
     (v10, v15, v23, v24, v25, v26)
 }
-fn method18(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> i32 {
-    loop {
-        let mut v3: bool = v2 >= v1;
-        if v3 {
-            return v1;
-        } else {
-            let v4: u8 = v0.clone().as_bytes()[v2 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                let v12: i32 = v2.wrapping_add(1i32);
-                v2 = v12;
-                continue;
-            } else {
-                return v2;
-            }
-        }
-    }
-}
-fn method19(mut v0: Rc<str>, mut v1: i32) -> i32 {
-    loop {
-        let mut v2: bool = v1 <= 0i32;
-        if v2 {
-            return -1i32;
-        } else {
-            let mut v3: i32 = v1.wrapping_sub(1i32);
-            let v4: u8 = v0.clone().as_bytes()[v3 as usize];
-            let v5: bool = v4 == b' ';
-            let v11: bool = if v5 {
-                true
-            } else {
-                let v6: bool = v4 == b'\t';
-                if v6 {
-                    true
-                } else {
-                    let mut v7: bool = v4 == b'\r';
-                    if v7 {
-                        true
-                    } else {
-                        let v8: bool = v4 == b'\n';
-                        v8
-                    }
-                }
-            };
-            if v11 {
-                v1 = v3;
-                continue;
-            } else {
-                return v3;
-            }
-        }
-    }
-}
 fn loop_17(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut v3: i32) -> bool {
     loop {
         let v4: bool = v3 >= v2;
@@ -584,20 +507,13 @@ fn loop_17(mut v0: Rc<str>, mut v1: Rc<RefCell<Vec<Rc<str>>>>, mut v2: i32, mut 
             return false;
         } else {
             let v5: Rc<str> = v1.borrow()[v3 as usize].clone();
-            let v6: i32 = (v5.clone().len() as i32);
-            let mut v7: i32 = 0i32;
-            let v8: i32 = method18(v5.clone(), v6, v7);
-            let v9: i32 = v6.wrapping_sub(1i32);
-            let v10: Rc<str> = string_slice(&v5, v8 as i64, v9 as i64);
-            let v11: i32 = (v10.clone().len() as i32);
-            let v12: i32 = method19(v10.clone(), v11);
-            let v13: Rc<str> = string_slice(&v10, 0i32 as i64, v12 as i64);
-            let mut v14: bool = &*v13 == &*v0;
-            if v14 {
+            let v6: Rc<str> = Rc::<str>::from((v5).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
+            let mut v7: bool = &*v6 == &*v0;
+            if v7 {
                 return true;
             } else {
-                let v15: i32 = v3.wrapping_add(1i32);
-                v3 = v15;
+                let v8: i32 = v3.wrapping_add(1i32);
+                v3 = v8;
                 continue;
             }
         }
@@ -679,7 +595,7 @@ fn bucket_holds_16(mut v0: US0, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str
         }
     }
 }
-fn tally_with_20(mut v0: i32, mut v1: i32, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: &Rc<str>, mut v6: Rc<str>, mut v7: &Rc<str>, mut v8: US1, mut v9: US2, mut v10: US4) -> (i32, i32, i32, i32, i32) {
+fn tally_with_18(mut v0: i32, mut v1: i32, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: &Rc<str>, mut v6: Rc<str>, mut v7: &Rc<str>, mut v8: US1, mut v9: US2, mut v10: US4) -> (i32, i32, i32, i32, i32) {
     let v13: i32 = match &v8 {
         US1::US1_EstimateMinutes(v11) => {
             let v11: i32 = *v11;
@@ -690,37 +606,43 @@ fn tally_with_20(mut v0: i32, mut v1: i32, mut v2: i32, mut v3: i32, mut v4: i32
         }
     };
     let mut v14: bool = &*v6 == "Done";
-    let v15: bool = v14 == false;
-    let v16: i32 = v0.wrapping_add(1i32);
-    let v17: i32 = if v15 {
+    let v16: bool = if v14 {
+        true
+    } else {
+        let v15: bool = &*v6 == "Dropped";
+        v15
+    };
+    let v17: bool = v16 == false;
+    let v18: i32 = v0.wrapping_add(1i32);
+    let v19: i32 = if v17 {
         1i32
     } else {
         0i32
     };
-    let v18: i32 = v1.wrapping_add(v17);
-    let v21: bool = match v8 {
-        US1::US1_EstimateMinutes(v19) => {
-            let v19: i32 = v19;
+    let mut v20: i32 = v1.wrapping_add(v19);
+    let v23: bool = match v8 {
+        US1::US1_EstimateMinutes(v21) => {
+            let v21: i32 = v21;
             true
         }
         US1::US1_Unestimated => {
             false
         }
     };
-    let v22: i32 = if v21 {
+    let v24: i32 = if v23 {
         1i32
     } else {
         0i32
     };
-    let v23: i32 = v2.wrapping_add(v22);
-    let v24: i32 = v3.wrapping_add(v13);
-    let v25: i32 = if v15 {
+    let v25: i32 = v2.wrapping_add(v24);
+    let v26: i32 = v3.wrapping_add(v13);
+    let v27: i32 = if v17 {
         v13
     } else {
         0i32
     };
-    let v26: i32 = v4.wrapping_add(v25);
-    (v16, v18, v23, v24, v26)
+    let v28: i32 = v4.wrapping_add(v27);
+    (v18, v20, v25, v26, v28)
 }
 fn tally_from_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: US0, mut v4: i32, mut v5: i32, mut v6: i32, mut v7: i32, mut v8: i32) -> (i32, i32, i32, i32, i32) {
     loop {
@@ -739,7 +661,7 @@ fn tally_from_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: US0, mut v4: 
                 let (mut v17, mut v18, mut v19, mut v20, mut v21, mut v22): (Rc<str>, Rc<str>, Rc<str>, US1, US2, US4) = rollup_task_at_2(v0.clone(), v12, v2);
                 let v23: bool = bucket_holds_16(v3.clone(), v17.clone(), v18.clone(), v19.clone(), v20.clone(), v21.clone(), v22.clone());
                 if v23 {
-                    let (mut v24, mut v25, mut v26, mut v27, mut v28): (i32, i32, i32, i32, i32) = tally_with_20(v4, v5, v6, v7, v8, &v17, v18, &v19, v20, v21, v22);
+                    let (mut v24, mut v25, mut v26, mut v27, mut v28): (i32, i32, i32, i32, i32) = tally_with_18(v4, v5, v6, v7, v8, &v17, v18, &v19, v20, v21, v22);
                     (v1, v4, v5, v6, v7, v8) = (v12, v24, v25, v26, v27, v28);
                     continue;
                 } else {
@@ -753,7 +675,7 @@ fn tally_from_1(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: US0, mut v4: 
         }
     }
 }
-fn bucket_of_21(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
+fn bucket_of_19(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
     let mut v2: bool = &*v0 == "all";
     let v5: US0 = if v2 {
         US0::US0_EveryTask
@@ -844,7 +766,7 @@ fn bucket_of_21(mut v0: Rc<str>, mut v1: Rc<str>) -> US0 {
 fn planning_tally_0(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>) -> (i32, i32, i32, i32, i32) {
     let mut v3: i32 = 0i32;
     let v4: i32 = (v0.clone().len() as i32);
-    let v5: US0 = bucket_of_21(v1, v2);
+    let v5: US0 = bucket_of_19(v1, v2);
     let v6: i32 = 0i32;
     let mut v7: i32 = 0i32;
     let v8: i32 = 0i32;

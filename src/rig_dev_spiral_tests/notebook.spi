@@ -86,7 +86,8 @@
                 let message = messages.split(format\!("{quote}{name}{quote}:{quote}").as_str()).nth(1) \
                     .and_then(|rest| rest.split(quote).next()).unwrap_or(""); \
                 let kind = if daemon.iter().any(|marker| message.contains(marker)) { "daemon" } else { "real" }; \
-                rows.push(format\!("{wanted}\t{name}\t{kind}")); } } \
+                let clipped = message.chars().take(240).collect::<String>(); \
+                rows.push(format\!("{wanted}\t{name}\t{kind}\t{clipped}")); } } \
         rows.join("\n") })' : string
 := line_count (text : string) : i32 = sm'.line_count text
 := line_at (text : string) (index : i32) : string = sm'.line_at index text

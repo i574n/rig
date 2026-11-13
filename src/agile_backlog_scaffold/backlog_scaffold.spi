@@ -80,7 +80,7 @@
             """
         inl statuses = """
             union task_status =
-                | Planned :: task_status | Active :: task_status | Blocked :: task_status | Paused :: task_status | Done :: task_status
+                | Planned :: task_status | Active :: task_status | Blocked :: task_status | Paused :: task_status | Done :: task_status | Dropped :: task_status
 
 
             """

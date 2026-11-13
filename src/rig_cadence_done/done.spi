@@ -11,7 +11,7 @@
     ?> Active
     |? word = "Blocked"
     ?> Blocked
-    |? word = "Paused"
+    |? word = "Paused" || word = "Dropped"
     ?> Paused
     |? word = "Done"
     ?> Done

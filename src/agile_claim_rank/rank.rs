@@ -54,7 +54,7 @@ enum US2 {
 #[derive(Clone)]
 enum UH1 {
     UH1_NoTasks,
-    UH1_TaskThen(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<UH1>),
+    UH1_TaskThen(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>, Rc<UH1>),
 }
 #[derive(Clone)]
 enum US4 {
@@ -70,7 +70,7 @@ enum US5 {
 #[derive(Clone)]
 enum UH2 {
     UH2_NoRanked,
-    UH2_RankedThen(Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>, Rc<UH2>),
+    UH2_RankedThen(Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>, Rc<str>, Rc<UH2>),
 }
 fn concat5_1(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: Rc<str>) -> Rc<str> {
     let v8: Rc<str> = string_concat(&[&*v0, &*v1, &*v2, &*v3, &*v4]);
@@ -446,7 +446,7 @@ fn field_start_14(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: i32) -> i32
         }
     }
 }
-fn backlog_task_at_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) {
+fn backlog_task_at_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) {
     let mut v3: i32 = 0i32;
     let v4: i32 = field_start_14(v0.clone(), v1, v2, v3);
     let v5: US4 = US4::US4_ScanPlain;
@@ -509,7 +509,7 @@ fn backlog_task_at_13(mut v0: Rc<str>, mut v1: i32, mut v2: i32) -> (Rc<str>, Rc
     let v62: Rc<str> = std::rc::Rc::<str>::from(v0.get(v59 as usize..v61 as usize).unwrap_or(""));
     let v63: i32 = (v62).trim().trim_end_matches("u32").parse::<i32>().unwrap_or(0);
     let v64: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    (v10, v18, v23, v29, v35, v40, v48, v56, v57, v63, 0i32, false, v64)
+    (v10, v18, v23, v29, v35, v40, v48, v56, v57, v63, 0i32, false, v64.clone(), v64.clone())
 }
 fn tasks_from_12(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<UH1>) -> Rc<UH1> {
     loop {
@@ -525,9 +525,9 @@ fn tasks_from_12(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<UH1>) -> 
             let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
             let v11: bool = v9.starts_with(&*v10);
             if v11 {
-                let (mut v12, mut v13, mut v14, mut v15, mut v16, mut v17, mut v18, mut v19, mut v20, mut v21, mut v22, mut v23, mut v24): (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) = backlog_task_at_13(v0.clone(), v7, v2);
-                let v25: Rc<UH1> = Rc::new(UH1::UH1_TaskThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v3));
-                (v1, v3) = (v7, v25);
+                let (mut v12, mut v13, mut v14, mut v15, mut v16, mut v17, mut v18, mut v19, mut v20, mut v21, mut v22, mut v23, mut v24, mut v25): (Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) = backlog_task_at_13(v0.clone(), v7, v2);
+                let v26: Rc<UH1> = Rc::new(UH1::UH1_TaskThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v3));
+                (v1, v3) = (v7, v26);
                 continue;
             } else {
                 v1 = v7;
@@ -536,41 +536,46 @@ fn tasks_from_12(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<UH1>) -> 
         }
     }
 }
-fn agents_take_18(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: i32, mut v5: i32, mut v6: Rc<str>, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: i32, mut v10: i32, mut v11: i32, mut v12: bool, mut v13: Rc<str>) -> bool {
-    let mut v14: bool = &*v3 != "Epic";
-    if v14 {
-        let v15: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("all"); } LIT.with(|lit| lit.clone()) };
-        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("user"); } LIT.with(|lit| lit.clone()) };
-        let mut v17: bool = agile_planning_filters::rig_agile_planning_selected(&v0, &v1, &v15, &v16);
-        let mut v18: bool = v17 == false;
-        v18
+fn agents_take_18(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: i32, mut v5: i32, mut v6: Rc<str>, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: i32, mut v10: i32, mut v11: i32, mut v12: bool, mut v13: Rc<str>, mut v14: Rc<str>) -> bool {
+    let v15: bool = &*v3 != "Epic";
+    if v15 {
+        let v16: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("all"); } LIT.with(|lit| lit.clone()) };
+        let mut v17: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("user"); } LIT.with(|lit| lit.clone()) };
+        let mut v18: bool = agile_planning_filters::rig_agile_planning_selected(&v0, &v1, &v16, &v17);
+        let v19: bool = v18 == false;
+        v19
     } else {
         false
     }
 }
-fn closure2(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) -> bool> {
-    Rc::new(move |mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: i32, mut v5: i32, mut v6: Rc<str>, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: i32, mut v10: i32, mut v11: i32, mut v12: bool, mut v13: Rc<str>| -> bool {
-        agents_take_18(v0.clone(), v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13)
+fn closure2(mut v0: Rc<str>) -> Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) -> bool> {
+    Rc::new(move |mut v1: Rc<str>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: i32, mut v5: i32, mut v6: Rc<str>, mut v7: Rc<str>, mut v8: Rc<str>, mut v9: i32, mut v10: i32, mut v11: i32, mut v12: bool, mut v13: Rc<str>, mut v14: Rc<str>| -> bool {
+        agents_take_18(v0.clone(), v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14)
     })
 }
-fn task_open_20(mut v0: &Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: i32, mut v4: i32, mut v5: Rc<str>, mut v6: &Rc<str>, mut v7: &Rc<str>, mut v8: i32, mut v9: i32, mut v10: i32, mut v11: bool, mut v12: &Rc<str>) -> bool {
-    let v13: bool = &*v5 == "Planned";
-    if v13 {
+fn task_open_20(mut v0: &Rc<str>, mut v1: &Rc<str>, mut v2: &Rc<str>, mut v3: i32, mut v4: i32, mut v5: Rc<str>, mut v6: &Rc<str>, mut v7: &Rc<str>, mut v8: i32, mut v9: i32, mut v10: i32, mut v11: bool, mut v12: &Rc<str>, mut v13: &Rc<str>) -> bool {
+    let mut v14: bool = &*v5 == "Planned";
+    if v14 {
         true
     } else {
-        let mut v14: bool = &*v5 == "Active";
-        if v14 {
+        let v15: bool = &*v5 == "Active";
+        if v15 {
             true
         } else {
-            let v15: bool = &*v5 == "Blocked";
-            if v15 {
+            let v16: bool = &*v5 == "Blocked";
+            if v16 {
                 false
             } else {
-                let v16: bool = &*v5 == "Paused";
-                if v16 {
+                let mut v17: bool = &*v5 == "Paused";
+                if v17 {
                     false
                 } else {
-                    false
+                    let mut v18: bool = &*v5 == "Done";
+                    if v18 {
+                        false
+                    } else {
+                        false
+                    }
                 }
             }
         }
@@ -582,7 +587,7 @@ fn open_child_of_21(mut v0: Rc<UH1>, mut v1: Rc<str>) -> bool {
             UH1::UH1_NoTasks => {
                 return false;
             }
-            UH1::UH1_TaskThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) => {
+            UH1::UH1_TaskThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => {
                 let mut v2: Rc<str> = v2;
                 let mut v3: Rc<str> = v3;
                 let v4: Rc<str> = v4;
@@ -596,18 +601,26 @@ fn open_child_of_21(mut v0: Rc<UH1>, mut v1: Rc<str>) -> bool {
                 let v12: i32 = v12;
                 let v13: bool = v13;
                 let mut v14: Rc<str> = v14;
-                let v15: Rc<UH1> = v15;
-                let v16: bool = &*v14 == &*v1;
-                let mut v18: bool = if v16 {
-                    let mut v17: bool = &*v7 != "Done";
-                    v17
+                let v15: Rc<str> = v15;
+                let v16: Rc<UH1> = v16;
+                let mut v17: bool = &*v14 == &*v1;
+                let v22: bool = if v17 {
+                    let mut v18: bool = &*v7 == "Done";
+                    let v20: bool = if v18 {
+                        true
+                    } else {
+                        let v19: bool = &*v7 == "Dropped";
+                        v19
+                    };
+                    let v21: bool = v20 == false;
+                    v21
                 } else {
                     false
                 };
-                if v18 {
+                if v22 {
                     return true;
                 } else {
-                    v0 = v15;
+                    v0 = v16;
                     continue;
                 }
             }
@@ -621,7 +634,7 @@ fn status_of_23(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
                 let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
                 return v2;
             }
-            UH1::UH1_TaskThen(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => {
+            UH1::UH1_TaskThen(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17) => {
                 let mut v3: Rc<str> = v3;
                 let v4: Rc<str> = v4;
                 let v5: Rc<str> = v5;
@@ -635,12 +648,13 @@ fn status_of_23(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
                 let v13: i32 = v13;
                 let mut v14: bool = v14;
                 let v15: Rc<str> = v15;
-                let v16: Rc<UH1> = v16;
-                let mut v17: bool = &*v3 == &*v1;
-                if v17 {
+                let v16: Rc<str> = v16;
+                let mut v17: Rc<UH1> = v17;
+                let mut v18: bool = &*v3 == &*v1;
+                if v18 {
                     return v8;
                 } else {
-                    v0 = v16;
+                    v0 = v17;
                     continue;
                 }
             }
@@ -666,15 +680,20 @@ fn deps_settled_22(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> bool {
             let v10: Rc<str> = std::rc::Rc::<str>::from(v9.trim());
             let v11: Rc<str> = status_of_23(v0.clone(), v10);
             let v12: bool = &*v11 == "";
-            let mut v14: bool = if v12 {
+            let v16: bool = if v12 {
                 true
             } else {
                 let v13: bool = &*v11 == "Done";
-                v13
+                if v13 {
+                    true
+                } else {
+                    let mut v14: bool = &*v11 == "Dropped";
+                    v14
+                }
             };
-            if v14 {
-                let v15: i32 = v8.wrapping_add(1i32);
-                v2 = v15;
+            if v16 {
+                let mut v17: i32 = v8.wrapping_add(1i32);
+                v2 = v17;
                 continue;
             } else {
                 return false;
@@ -700,21 +719,26 @@ fn open_deps_26(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32, mut v3: i32) -> i
             let v10: Rc<str> = std::rc::Rc::<str>::from(v1.get(v2 as usize..v9 as usize).unwrap_or(""));
             let v11: Rc<str> = std::rc::Rc::<str>::from(v10.trim());
             let v12: Rc<str> = status_of_23(v0.clone(), v11);
-            let v13: i32 = v9.wrapping_add(1i32);
-            let mut v14: bool = &*v12 == "";
-            let v16: bool = if v14 {
+            let v13: bool = &*v12 == "";
+            let mut v17: bool = if v13 {
                 true
             } else {
-                let v15: bool = &*v12 == "Done";
-                v15
+                let mut v14: bool = &*v12 == "Done";
+                if v14 {
+                    true
+                } else {
+                    let v15: bool = &*v12 == "Dropped";
+                    v15
+                }
             };
-            let mut v18: i32 = if v16 {
+            let mut v18: i32 = v9.wrapping_add(1i32);
+            let v20: i32 = if v17 {
                 v3
             } else {
-                let mut v17: i32 = v3.wrapping_add(1i32);
-                v17
+                let v19: i32 = v3.wrapping_add(1i32);
+                v19
             };
-            (v2, v3) = (v13, v18);
+            (v2, v3) = (v18, v20);
             continue;
         }
     }
@@ -725,7 +749,7 @@ fn unblocked_weight_25(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> i32 {
             UH1::UH1_NoTasks => {
                 return v2;
             }
-            UH1::UH1_TaskThen(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => {
+            UH1::UH1_TaskThen(v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17) => {
                 let mut v3: Rc<str> = v3.clone();
                 let v4: Rc<str> = v4.clone();
                 let v5: Rc<str> = v5.clone();
@@ -739,77 +763,130 @@ fn unblocked_weight_25(mut v0: Rc<UH1>, mut v1: Rc<str>, mut v2: i32) -> i32 {
                 let v13: i32 = *v13;
                 let mut v14: bool = *v14;
                 let v15: Rc<str> = v15.clone();
-                let v16: Rc<UH1> = v16.clone();
-                let mut v17: bool = task_open_20(&v3, &v4, &v5, v6, v7, v8, &v9, &v10, v11, v12, v13, v14, &v15);
-                let v24: bool = if v17 {
-                    let mut v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
-                    let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
-                    let v20: Rc<str> = Rc::<str>::from(v9.replace(&*v18, &*v19));
-                    let v21: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
-                    let v22: Rc<str> = Rc::<str>::from(v20.replace(&*v21, &*v19));
-                    let v23: bool = v22.split("|").any(|item| item == &*v1);
-                    v23
+                let v16: Rc<str> = v16.clone();
+                let mut v17: Rc<UH1> = v17.clone();
+                let mut v18: bool = task_open_20(&v3, &v4, &v5, v6, v7, v8, &v9, &v10, v11, v12, v13, v14, &v15, &v16);
+                let v25: bool = if v18 {
+                    let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
+                    let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
+                    let v21: Rc<str> = Rc::<str>::from(v9.replace(&*v19, &*v20));
+                    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
+                    let v23: Rc<str> = Rc::<str>::from(v21.replace(&*v22, &*v20));
+                    let v24: bool = v23.split("|").any(|item| item == &*v1);
+                    v24
                 } else {
                     false
                 };
-                let v32: i32 = if v24 {
-                    let v25: i32 = 0i32;
+                let v33: i32 = if v25 {
                     let v26: i32 = 0i32;
-                    let v27: i32 = open_deps_26(v0, v9, v25, v26);
-                    let v28: i32 = 1i32 << (2 * (5 - (v6).clamp(0, 5)));
-                    let v29: bool = v27 < 1i32;
-                    let v30: i32 = if v29 {
+                    let v27: i32 = 0i32;
+                    let v28: i32 = open_deps_26(v0, v9, v26, v27);
+                    let v29: i32 = 1i32 << (2 * (5 - (v6).clamp(0, 5)));
+                    let v30: bool = v28 < 1i32;
+                    let v31: i32 = if v30 {
                         1i32
                     } else {
-                        v27
+                        v28
                     };
-                    let v31: i32 = v28.wrapping_div(v30);
-                    v31
+                    let v32: i32 = v29.wrapping_div(v31);
+                    v32
                 } else {
                     0i32
                 };
-                let v33: i32 = v2.wrapping_add(v32);
-                (v0, v2) = (v16, v33);
+                let v34: i32 = v2.wrapping_add(v33);
+                (v0, v2) = (v17, v34);
                 continue;
             }
         }
     }
 }
-fn ranked_of_24(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: &Rc<str>, mut v5: i32, mut v6: i32, mut v7: &Rc<str>, mut v8: &Rc<str>, mut v9: &Rc<str>, mut v10: i32, mut v11: i32, mut v12: i32, mut v13: bool, mut v14: Rc<str>) -> (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>) {
-    let v15: bool = 0i32 < v10;
-    let v33: i32 = if v15 {
+fn after_waiting_27(mut v0: Rc<UH1>, mut v1: Rc<str>) -> bool {
+    let mut v2: Rc<str> = status_of_23(v0, v1.clone());
+    let mut v3: bool = &*v1 != "";
+    let v5: bool = if v3 {
+        let v4: bool = &*v2 != "";
+        v4
+    } else {
+        false
+    };
+    if v5 {
+        let v6: bool = &*v2 == "Done";
+        let v8: bool = if v6 {
+            true
+        } else {
+            let v7: bool = &*v2 == "Dropped";
+            v7
+        };
+        let mut v9: bool = v8 == false;
+        v9
+    } else {
+        false
+    }
+}
+fn after_shown_28(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
+    let mut v2: Rc<str> = status_of_23(v0, v1.clone());
+    let mut v3: bool = &*v1 == "";
+    if v3 {
+        let v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
+        v4
+    } else {
+        let v5: bool = &*v2 == "";
+        if v5 {
+            let v6: Rc<str> = string_concat(&[&*v1, ":gone"]);
+            v6
+        } else {
+            let v7: bool = &*v2 == "Done";
+            let mut v9: bool = if v7 {
+                true
+            } else {
+                let v8: bool = &*v2 == "Dropped";
+                v8
+            };
+            if v9 {
+                let v11: Rc<str> = Rc::<str>::from(v2.to_lowercase());
+                let v12: Rc<str> = string_concat(&[&*v1, ":", &*v11]);
+                v12
+            } else {
+                v1
+            }
+        }
+    }
+}
+fn ranked_of_24(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, mut v4: &Rc<str>, mut v5: i32, mut v6: i32, mut v7: &Rc<str>, mut v8: &Rc<str>, mut v9: &Rc<str>, mut v10: i32, mut v11: i32, mut v12: i32, mut v13: bool, mut v14: Rc<str>, mut v15: Rc<str>) -> (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>, Rc<str>) {
+    let v16: bool = 0i32 < v10;
+    let v34: i32 = if v16 {
         v10
     } else {
-        let v16: bool = 0i32 == v6;
-        let v31: i32 = if v16 {
+        let mut v17: bool = 0i32 == v6;
+        let v32: i32 = if v17 {
             15i32
         } else {
-            let mut v17: bool = 1i32 == v6;
-            if v17 {
+            let mut v18: bool = 1i32 == v6;
+            if v18 {
                 30i32
             } else {
-                let mut v18: bool = 2i32 == v6;
-                if v18 {
+                let v19: bool = 2i32 == v6;
+                if v19 {
                     60i32
                 } else {
-                    let v19: bool = 3i32 == v6;
-                    if v19 {
+                    let v20: bool = 3i32 == v6;
+                    if v20 {
                         180i32
                     } else {
-                        let v20: bool = 4i32 == v6;
-                        if v20 {
+                        let v21: bool = 4i32 == v6;
+                        if v21 {
                             300i32
                         } else {
-                            let v21: bool = 5i32 == v6;
-                            if v21 {
+                            let v22: bool = 5i32 == v6;
+                            if v22 {
                                 600i32
                             } else {
-                                let v22: bool = 6i32 == v6;
-                                if v22 {
+                                let v23: bool = 6i32 == v6;
+                                if v23 {
                                     1200i32
                                 } else {
-                                    let v23: bool = 7i32 == v6;
-                                    if v23 {
+                                    let v24: bool = 7i32 == v6;
+                                    if v24 {
                                         2400i32
                                     } else {
                                         3600i32
@@ -821,90 +898,99 @@ fn ranked_of_24(mut v0: US5, mut v1: Rc<UH1>, mut v2: Rc<str>, mut v3: Rc<str>, 
                 }
             }
         };
-        let v32: i32 = ((v31 as i64) * (100 - (v11).clamp(0, 100)) as i64 / 100).max(15) as i32;
-        v32
+        let v33: i32 = ((v32 as i64) * (100 - (v11).clamp(0, 100)) as i64 / 100).max(15) as i32;
+        v33
     };
-    let v34: i32 = 0i32;
-    let v35: i32 = unblocked_weight_25(v1, v2.clone(), v34);
-    let v36: i32 = 1i32 << (2 * (5 - (v5).clamp(0, 5)));
-    let v37: i32 = v36.wrapping_add(v35);
-    let v43: i32 = match &v0 {
+    let v35: i32 = 0i32;
+    let v36: i32 = unblocked_weight_25(v1.clone(), v2.clone(), v35);
+    let v37: i32 = 1i32 << (2 * (5 - (v5).clamp(0, 5)));
+    let v38: i32 = v37.wrapping_add(v36);
+    let v44: i32 = match &v0 {
         US5::US5_MainAgent => {
-            let v38: i32 = ((v37 as i64) * 6000 / (v33).max(1) as i64).min(i32::MAX as i64) as i32;
-            v38
+            let v39: i32 = ((v38 as i64) * 6000 / (v34).max(1) as i64).min(i32::MAX as i64) as i32;
+            v39
         }
         US5::US5_Subagent => {
-            let v39: i32 = v33.wrapping_mul(8i32);
-            let v40: i32 = v39.wrapping_add(5i32);
-            let v41: i32 = v40.wrapping_sub(v5);
-            v41
+            let v40: i32 = v34.wrapping_mul(8i32);
+            let v41: i32 = v40.wrapping_add(5i32);
+            let v42: i32 = v41.wrapping_sub(v5);
+            v42
         }
     };
-    let v55: i32 = match v0 {
+    let v56: i32 = match v0 {
         US5::US5_MainAgent => {
-            let v44: bool = v12 < 14i32;
-            let v45: i32 = if v44 {
+            let v45: bool = v12 < 14i32;
+            let v46: i32 = if v45 {
                 v12
             } else {
                 14i32
             };
-            let v46: i32 = 7i32.wrapping_add(v45);
-            let v47: i32 = if v13 {
+            let v47: i32 = 7i32.wrapping_add(v46);
+            let v48: i32 = if v13 {
                 2i32
             } else {
                 1i32
             };
-            let v48: i32 = v46.wrapping_mul(v47);
-            let v49: i32 = 2147483647i32.wrapping_div(v48);
-            let v50: bool = v43 > v49;
-            if v50 {
+            let v49: i32 = v47.wrapping_mul(v48);
+            let v50: i32 = 2147483647i32.wrapping_div(v49);
+            let v51: bool = v44 > v50;
+            if v51 {
                 2147483647i32
             } else {
-                let v51: i32 = v43.wrapping_mul(v48);
-                let v52: i32 = v51.wrapping_div(7i32);
-                v52
+                let v52: i32 = v44.wrapping_mul(v49);
+                let v53: i32 = v52.wrapping_div(7i32);
+                v53
             }
         }
         US5::US5_Subagent => {
-            v43
+            v44
         }
     };
-    (v2, v3, v5, v6, v33, v15, v35, v55, v14)
+    let v57: bool = after_waiting_27(v1.clone(), v15.clone());
+    let v59: i32 = if v57 {
+        let v58: i32 = v56.wrapping_div(1000i32);
+        v58
+    } else {
+        v56
+    };
+    let v60: Rc<str> = after_shown_28(v1, v15);
+    (v2, v3, v5, v6, v34, v16, v36, v59, v14, v60)
 }
-fn inserted_27(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: bool, mut v6: i32, mut v7: i32, mut v8: Rc<str>, mut v9: Rc<UH2>) -> Rc<UH2> {
-    match &*v9 {
+fn inserted_29(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32, mut v3: i32, mut v4: i32, mut v5: bool, mut v6: i32, mut v7: i32, mut v8: Rc<str>, mut v9: Rc<str>, mut v10: Rc<UH2>) -> Rc<UH2> {
+    match &*v10 {
         UH2::UH2_NoRanked => {
-            let v10: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_NoRanked); } CASE.with(|case| case.clone()) };
-            Rc::new(UH2::UH2_RankedThen(v0, v1, v2, v3, v4, v5, v6, v7, v8, v10))
+            let v11: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_NoRanked); } CASE.with(|case| case.clone()) };
+            Rc::new(UH2::UH2_RankedThen(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v11))
         }
-        UH2::UH2_RankedThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v21) => {
-            let v12: Rc<str> = v12.clone();
+        UH2::UH2_RankedThen(v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23) => {
             let v13: Rc<str> = v13.clone();
-            let mut v14: i32 = *v14;
+            let mut v14: Rc<str> = v14.clone();
             let v15: i32 = *v15;
             let v16: i32 = *v16;
-            let mut v17: bool = *v17;
-            let mut v18: i32 = *v18;
+            let mut v17: i32 = *v17;
+            let mut v18: bool = *v18;
             let v19: i32 = *v19;
-            let v20: Rc<str> = v20.clone();
-            let v21: Rc<UH2> = v21.clone();
-            let v22: bool = v19 < v7;
-            if v22 {
-                Rc::new(UH2::UH2_RankedThen(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9))
+            let v20: i32 = *v20;
+            let v21: Rc<str> = v21.clone();
+            let v22: Rc<str> = v22.clone();
+            let v23: Rc<UH2> = v23.clone();
+            let v24: bool = v20 < v7;
+            if v24 {
+                Rc::new(UH2::UH2_RankedThen(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10))
             } else {
-                let v24: Rc<UH2> = inserted_27(v0, v1, v2, v3, v4, v5, v6, v7, v8, v21);
-                Rc::new(UH2::UH2_RankedThen(v12, v13, v14, v15, v16, v17, v18, v19, v20, v24))
+                let v26: Rc<UH2> = inserted_29(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v23);
+                Rc::new(UH2::UH2_RankedThen(v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v26))
             }
         }
     }
 }
-fn ranked_from_19(mut v0: US5, mut v1: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) -> bool>, mut v2: Rc<UH1>, mut v3: Rc<UH1>, mut v4: Rc<UH2>) -> Rc<UH2> {
+fn ranked_from_19(mut v0: US5, mut v1: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) -> bool>, mut v2: Rc<UH1>, mut v3: Rc<UH1>, mut v4: Rc<UH2>) -> Rc<UH2> {
     loop {
         match Rc::unwrap_or_clone(v3) {
             UH1::UH1_NoTasks => {
                 return v4;
             }
-            UH1::UH1_TaskThen(v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18) => {
+            UH1::UH1_TaskThen(v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19) => {
                 let v5: Rc<str> = v5;
                 let v6: Rc<str> = v6;
                 let v7: Rc<str> = v7;
@@ -918,76 +1004,77 @@ fn ranked_from_19(mut v0: US5, mut v1: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32,
                 let v15: i32 = v15;
                 let v16: bool = v16;
                 let mut v17: Rc<str> = v17;
-                let mut v18: Rc<UH1> = v18;
-                let v19: bool = task_open_20(&v5, &v6, &v7, v8, v9, v10.clone(), &v11, &v12, v13, v14, v15, v16, &v17);
-                let v23: bool = if v19 {
+                let mut v18: Rc<str> = v18;
+                let v19: Rc<UH1> = v19;
+                let v20: bool = task_open_20(&v5, &v6, &v7, v8, v9, v10.clone(), &v11, &v12, v13, v14, v15, v16, &v17, &v18);
+                let v24: bool = if v20 {
                     match &v0 {
                         US5::US5_MainAgent => {
                             true
                         }
                         US5::US5_Subagent => {
-                            let v20: bool = &*v7 != "Epic";
-                            v20
+                            let v21: bool = &*v7 != "Epic";
+                            v21
                         }
                     }
                 } else {
                     false
                 };
-                let v28: bool = if v23 {
-                    let v24: bool = &*v7 == "Epic";
-                    let v26: bool = if v24 {
+                let v29: bool = if v24 {
+                    let v25: bool = &*v7 == "Epic";
+                    let v27: bool = if v25 {
                         open_child_of_21(v2.clone(), v5.clone())
                     } else {
                         false
                     };
-                    let v27: bool = v26 == false;
-                    v27
+                    let v28: bool = v27 == false;
+                    v28
                 } else {
                     false
                 };
-                let v37: bool = if v28 {
-                    let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("user-batch"); } LIT.with(|lit| lit.clone()) };
-                    let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
-                    let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
-                    let v32: Rc<str> = Rc::<str>::from(v12.replace(&*v30, &*v31));
-                    let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
-                    let v34: Rc<str> = Rc::<str>::from(v32.replace(&*v33, &*v31));
-                    let v35: bool = v34.split("|").any(|item| item == &*v29);
-                    let v36: bool = v35 == false;
-                    v36
+                let v38: bool = if v29 {
+                    let v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("user-batch"); } LIT.with(|lit| lit.clone()) };
+                    let v31: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(", "); } LIT.with(|lit| lit.clone()) };
+                    let v32: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("|"); } LIT.with(|lit| lit.clone()) };
+                    let v33: Rc<str> = Rc::<str>::from(v12.replace(&*v31, &*v32));
+                    let v34: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(","); } LIT.with(|lit| lit.clone()) };
+                    let v35: Rc<str> = Rc::<str>::from(v33.replace(&*v34, &*v32));
+                    let v36: bool = v35.split("|").any(|item| item == &*v30);
+                    let v37: bool = v36 == false;
+                    v37
                 } else {
                     false
                 };
-                let v40: bool = if v37 {
-                    let v38: i32 = 0i32;
-                    deps_settled_22(v2.clone(), v11.clone(), v38)
+                let v41: bool = if v38 {
+                    let v39: i32 = 0i32;
+                    deps_settled_22(v2.clone(), v11.clone(), v39)
                 } else {
                     false
                 };
-                let v42: bool = if v40 {
-                    v1(v5.clone(), v6.clone(), v7.clone(), v8, v9, v10.clone(), v11.clone(), v12.clone(), v13, v14, v15, v16, v17.clone())
+                let v43: bool = if v41 {
+                    v1(v5.clone(), v6.clone(), v7.clone(), v8, v9, v10.clone(), v11.clone(), v12.clone(), v13, v14, v15, v16, v17.clone(), v18.clone())
                 } else {
                     false
                 };
-                if v42 {
-                    let (mut v43, mut v44, mut v45, mut v46, mut v47, mut v48, mut v49, mut v50, mut v51): (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>) = ranked_of_24(v0.clone(), v2.clone(), v5, v6, &v7, v8, v9, &v10, &v11, &v12, v13, v14, v15, v16, v17);
-                    let v52: Rc<UH2> = inserted_27(v43, v44, v45, v46, v47, v48, v49, v50, v51, v4);
-                    (v3, v4) = (v18, v52);
+                if v43 {
+                    let (mut v44, mut v45, mut v46, mut v47, mut v48, mut v49, mut v50, mut v51, mut v52, mut v53): (Rc<str>, Rc<str>, i32, i32, i32, bool, i32, i32, Rc<str>, Rc<str>) = ranked_of_24(v0.clone(), v2.clone(), v5, v6, &v7, v8, v9, &v10, &v11, &v12, v13, v14, v15, v16, v17, v18);
+                    let v54: Rc<UH2> = inserted_29(v44, v45, v46, v47, v48, v49, v50, v51, v52, v53, v4);
+                    (v3, v4) = (v19, v54);
                     continue;
                 } else {
-                    v3 = v18;
+                    v3 = v19;
                     continue;
                 }
             }
         }
     }
 }
-fn ranked_words_28(mut v0: Rc<UH2>) -> Rc<UH0> {
+fn ranked_words_30(mut v0: Rc<UH2>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH2::UH2_NoRanked => {
             { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) }
         }
-        UH2::UH2_RankedThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) => {
+        UH2::UH2_RankedThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) => {
             let mut v2: Rc<str> = v2;
             let mut v3: Rc<str> = v3;
             let v4: i32 = v4;
@@ -997,18 +1084,19 @@ fn ranked_words_28(mut v0: Rc<UH2>) -> Rc<UH0> {
             let v8: i32 = v8;
             let mut v9: i32 = v9;
             let v10: Rc<str> = v10;
-            let v11: Rc<UH2> = v11;
-            let v12: Rc<UH0> = ranked_words_28(v11);
-            Rc::new(UH0::UH0_Cons(v2, v12))
+            let v11: Rc<str> = v11;
+            let v12: Rc<UH2> = v12;
+            let v13: Rc<UH0> = ranked_words_30(v12);
+            Rc::new(UH0::UH0_Cons(v2, v13))
         }
     }
 }
-fn method29(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn method31(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v1) {
         UH0::UH0_Cons(v3, v4) => {
             let mut v3: Rc<str> = v3;
             let v4: Rc<UH0> = v4;
-            let v5: Rc<UH0> = method29(v0.clone(), v4, v2);
+            let v5: Rc<UH0> = method31(v0.clone(), v4, v2);
             let v6: Rc<str> = status_of_23(v0, v3.clone());
             let v7: bool = &*v6 == "Active";
             if v7 {
@@ -1022,13 +1110,13 @@ fn method29(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn open_words_30(mut v0: Rc<UH1>) -> Rc<UH0> {
+fn open_words_32(mut v0: Rc<UH1>) -> Rc<UH0> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_NoTasks => {
                 return { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
             }
-            UH1::UH1_TaskThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) => {
+            UH1::UH1_TaskThen(v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => {
                 let mut v2: Rc<str> = v2;
                 let mut v3: Rc<str> = v3;
                 let v4: Rc<str> = v4;
@@ -1042,14 +1130,21 @@ fn open_words_30(mut v0: Rc<UH1>) -> Rc<UH0> {
                 let v12: i32 = v12;
                 let v13: bool = v13;
                 let mut v14: Rc<str> = v14;
-                let v15: Rc<UH1> = v15;
-                let v16: bool = &*v7 == "Done";
-                if v16 {
-                    v0 = v15;
+                let v15: Rc<str> = v15;
+                let v16: Rc<UH1> = v16;
+                let mut v17: bool = &*v7 == "Done";
+                let v19: bool = if v17 {
+                    true
+                } else {
+                    let mut v18: bool = &*v7 == "Dropped";
+                    v18
+                };
+                if v19 {
+                    v0 = v16;
                     continue;
                 } else {
-                    let mut v18: Rc<UH0> = open_words_30(v15);
-                    return Rc::new(UH0::UH0_Cons(v2, v18));
+                    let v21: Rc<UH0> = open_words_32(v16);
+                    return Rc::new(UH0::UH0_Cons(v2, v21));
                 }
             }
         }
@@ -1057,12 +1152,12 @@ fn open_words_30(mut v0: Rc<UH1>) -> Rc<UH0> {
 }
 fn ranking_of_17(mut v0: Rc<str>, mut v1: Rc<UH1>) -> (Rc<str>, Rc<str>, Rc<str>) {
     let mut v2: US5 = US5::US5_MainAgent;
-    let mut v3: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>) -> bool> = closure2(v0);
+    let mut v3: Rc<dyn Fn(Rc<str>, Rc<str>, Rc<str>, i32, i32, Rc<str>, Rc<str>, Rc<str>, i32, i32, i32, bool, Rc<str>, Rc<str>) -> bool> = closure2(v0);
     let v4: Rc<UH2> = { thread_local!{ static CASE: Rc<UH2> = Rc::new(UH2::UH2_NoRanked); } CASE.with(|case| case.clone()) };
     let v5: Rc<UH2> = ranked_from_19(v2, v3, v1.clone(), v1.clone(), v4);
-    let v6: Rc<UH0> = ranked_words_28(v5);
+    let v6: Rc<UH0> = ranked_words_30(v5);
     let v7: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let v8: Rc<UH0> = method29(v1.clone(), v6.clone(), v7);
+    let v8: Rc<UH0> = method31(v1.clone(), v6.clone(), v7);
     let mut v9: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     let v10: i32 = 0i32;
     let v11: i32 = method11(v9.clone(), v6, v10);
@@ -1076,7 +1171,7 @@ fn ranking_of_17(mut v0: Rc<str>, mut v1: Rc<UH1>) -> (Rc<str>, Rc<str>, Rc<str>
     let v19: Rc<Vec<Rc<str>>> = Rc::new(v16.borrow().clone());
     let v20: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v19).as_ref().clone()));
     let v21: Rc<str> = Rc::<str>::from((*v20.borrow()).join(&*v14));
-    let v22: Rc<UH0> = open_words_30(v1);
+    let v22: Rc<UH0> = open_words_32(v1);
     let v23: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     let v24: i32 = 0i32;
     let v25: i32 = method11(v23.clone(), v22, v24);

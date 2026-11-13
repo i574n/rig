@@ -597,7 +597,7 @@ fn agile_set_decision_19(mut v0: i32, mut v1: i32) -> i32 {
     };
     if v4 {
         let v5: bool = v1 == 0i32;
-        let v13: bool = if v5 {
+        let v15: bool = if v5 {
             true
         } else {
             let v6: bool = v1 == 1i32;
@@ -613,12 +613,17 @@ fn agile_set_decision_19(mut v0: i32, mut v1: i32) -> i32 {
                         true
                     } else {
                         let v9: bool = v1 == 4i32;
-                        v9
+                        if v9 {
+                            true
+                        } else {
+                            let v10: bool = v1 == 5i32;
+                            v10
+                        }
                     }
                 }
             }
         };
-        if v13 {
+        if v15 {
             1i32
         } else {
             0i32

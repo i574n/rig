@@ -85,11 +85,17 @@
             ?> WaitsWritten (own, own_waits)
             |: WaitsRefused "the state project was not updated"
 
+:~ ^ author_dropped (words : list string) : list string =
+    ?= words ?|
+    | flag :: _ :: rest ?& flag = "--as" => author_dropped rest
+    | word :: rest => word :: author_dropped rest
+    | [] => []
+
 :~ wait_run () : i32 =
     := forms = "--wait <train|item|lane|user|job|when>:<value> | --wait-remove <kind>:<value> | --wait --clear"
     := usage = "rig error: usage: agile edit <root> <ID> " ++# forms
     := change =
-        ?= env.command_line_arguments () ?|
+        ?= author_dropped (env.command_line_arguments ()) ?|
         | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait" && value = "--clear" =>
             Some (root, WaitCleared item)
         | _ :: _ :: root :: item :: flag :: value :: [] ?& flag = "--wait" =>
@@ -142,3 +148,9 @@
     export "rig_agile_waits_of" waiting_of
     export "rig_agile_wait_run" wait_run
     0i32
+
+///> rust
+:# edit_wait_takes_a_trailing_author_like_the_other_writes =
+    := words = [ "agile"; "edit"; "r"; "A"; "--wait"; "train:T" ]
+    testing.expect (author_dropped (listm.append words [ "--as"; "rig" ]) = words) "a trailing --as is dropped"
+    testing.expect (author_dropped words = words) "nothing else changes"

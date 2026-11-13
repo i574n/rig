@@ -468,7 +468,38 @@ fn arguments_from_13(mut v0: i32) -> Rc<UH0> {
         }
     }
 }
-fn kind_of_flag_16(mut v0: Rc<str>) -> US2 {
+fn author_dropped_16(mut v0: Rc<UH0>) -> Rc<UH0> {
+    loop {
+        match Rc::unwrap_or_clone(v0) {
+            UH0::UH0_Cons(v1, v2) => {
+                let v1: Rc<str> = v1;
+                let mut v2: Rc<UH0> = v2;
+                match &*v2 {
+                    UH0::UH0_Cons(v3, v4) => {
+                        let v3: Rc<str> = v3.clone();
+                        let mut v4: Rc<UH0> = v4.clone();
+                        let mut v5: bool = &*v1 == "--as";
+                        if v5 {
+                            v0 = v4;
+                            continue;
+                        } else {
+                            let v7: Rc<UH0> = author_dropped_16(v2);
+                            return Rc::new(UH0::UH0_Cons(v1, v7));
+                        }
+                    }
+                    _ => {
+                        let mut v10: Rc<UH0> = author_dropped_16(v2);
+                        return Rc::new(UH0::UH0_Cons(v1, v10));
+                    }
+                }
+            }
+            UH0::UH0_Nil => {
+                return { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
+            }
+        }
+    }
+}
+fn kind_of_flag_17(mut v0: Rc<str>) -> US2 {
     let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(":"); } LIT.with(|lit| lit.clone()) };
     let mut v2: Option<usize> = v0.find(&*v1);
     let v3: Option<usize> = method4(v2);
@@ -493,7 +524,7 @@ fn kind_of_flag_16(mut v0: Rc<str>) -> US2 {
         kind_of_6(v12, v20)
     }
 }
-fn loop_19(mut v0: Rc<str>) -> Rc<str> {
+fn loop_20(mut v0: Rc<str>) -> Rc<str> {
     loop {
         let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(".pending"); } LIT.with(|lit| lit.clone()) };
         let mut v2: bool = v0.ends_with(&*v1);
@@ -516,7 +547,7 @@ fn closure3() -> Rc<dyn Fn((usize)) -> i32> {
         v2
     }); } CLOSURE.with(|closure| closure.clone())
 }
-fn loop_20(mut v0: Rc<str>) -> Rc<str> {
+fn loop_21(mut v0: Rc<str>) -> Rc<str> {
     loop {
         let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
         let mut v2: bool = v0.ends_with(&*v1);
@@ -532,7 +563,7 @@ fn loop_20(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn loop_21(mut v0: Rc<str>) -> Rc<str> {
+fn loop_22(mut v0: Rc<str>) -> Rc<str> {
     loop {
         let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
         let mut v2: bool = v0.ends_with(&*v1);
@@ -548,7 +579,7 @@ fn loop_21(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn loop_22(mut v0: Rc<str>) -> Rc<str> {
+fn loop_23(mut v0: Rc<str>) -> Rc<str> {
     loop {
         let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
         let mut v2: bool = v0.ends_with(&*v1);
@@ -564,12 +595,12 @@ fn loop_22(mut v0: Rc<str>) -> Rc<str> {
         }
     }
 }
-fn method23(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method24(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
-            let mut v4: Rc<UH0> = method23(v3, v1);
+            let mut v4: Rc<UH0> = method24(v3, v1);
             let mut v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("type "); } LIT.with(|lit| lit.clone()) };
             let mut v6: bool = v2.starts_with(&*v5);
             let v15: US8 = if v6 {
@@ -710,7 +741,7 @@ fn method23(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn method24(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<UH0>, mut v2: i32) -> i32 {
+fn method25(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<UH0>, mut v2: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v1) {
             UH0::UH0_Cons(v3, v4) => {
@@ -727,7 +758,7 @@ fn method24(mut v0: Rc<RefCell<Vec<Rc<str>>>>, mut v1: Rc<UH0>, mut v2: i32) -> 
         }
     }
 }
-fn text_of_18(mut v0: Rc<str>) -> Rc<str> {
+fn text_of_19(mut v0: Rc<str>) -> Rc<str> {
     let v1: bool = std::path::Path::new(&*v0).is_file();
     if v1 {
         let (mut v2, mut v3): (bool, Rc<str>) = match std::fs::read(&*v0) { Ok(bytes) => (bytes.contains(&0u8), std::rc::Rc::<str>::from(String::from_utf8_lossy(&bytes).as_ref())), Err(_) => (true, { thread_local!{ static LIT: std::rc::Rc<str> = std::rc::Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) }) };
@@ -738,7 +769,7 @@ fn text_of_18(mut v0: Rc<str>) -> Rc<str> {
             let mut v6: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
             let v7: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
             let v8: Rc<str> = Rc::<str>::from(v0.replace(&*v6, &*v7));
-            let mut v9: Rc<str> = loop_19(v8);
+            let mut v9: Rc<str> = loop_20(v8);
             let mut v10: Option<usize> = v9.rfind(&*v7);
             let v11: Option<usize> = method4(v10);
             let mut v12: Rc<dyn Fn((usize)) -> i32> = closure3();
@@ -762,19 +793,19 @@ fn text_of_18(mut v0: Rc<str>) -> Rc<str> {
                 let v25: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
                 let v26: bool = v24.ends_with(&*v25);
                 if v26 {
-                    let v27: Rc<str> = loop_20(v24);
+                    let v27: Rc<str> = loop_21(v24);
                     US7::US7_StateFile(v27)
                 } else {
                     let v29: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
                     let mut v30: bool = v24.ends_with(&*v29);
                     if v30 {
-                        let v31: Rc<str> = loop_21(v24);
+                        let v31: Rc<str> = loop_22(v24);
                         US7::US7_HistoryFile(v31)
                     } else {
                         let v33: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
                         let v34: bool = v24.ends_with(&*v33);
                         if v34 {
-                            let v35: Rc<str> = loop_22(v24);
+                            let v35: Rc<str> = loop_23(v24);
                             US7::US7_ArchiveFile(v35)
                         } else {
                             US7::US7_OtherFile
@@ -790,10 +821,10 @@ fn text_of_18(mut v0: Rc<str>) -> Rc<str> {
                     let v42: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
                     let v43: Rc<UH0> = split_list_8(v42.clone(), v3);
                     let v44: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-                    let v45: Rc<UH0> = method23(v43, v44);
+                    let v45: Rc<UH0> = method24(v43, v44);
                     let v46: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
                     let v47: i32 = 0i32;
-                    let v48: i32 = method24(v46.clone(), v45, v47);
+                    let v48: i32 = method25(v46.clone(), v45, v47);
                     let v49: Rc<Vec<Rc<str>>> = Rc::new(v46.borrow().clone());
                     let v50: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v49).as_ref().clone()));
                     let v51: Rc<str> = Rc::<str>::from((*v50.borrow()).join(&*v42));
@@ -806,7 +837,7 @@ fn text_of_18(mut v0: Rc<str>) -> Rc<str> {
         v54
     }
 }
-fn change_item_25(mut v0: US5) -> Rc<str> {
+fn change_item_26(mut v0: US5) -> Rc<str> {
     match v0 {
         US5::US5_WaitCleared(v5) => {
             let mut v5: Rc<str> = v5;
@@ -824,13 +855,13 @@ fn change_item_25(mut v0: US5) -> Rc<str> {
         }
     }
 }
-fn method27(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
+fn method28(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
     match Rc::unwrap_or_clone(v1) {
         UH1::UH1_Cons(v3, v4, v5) => {
             let v3: Rc<str> = v3;
             let mut v4: wait_kind = v4;
             let mut v5: Rc<UH1> = v5;
-            let mut v6: Rc<UH1> = method27(v0.clone(), v5, v2);
+            let mut v6: Rc<UH1> = method28(v0.clone(), v5, v2);
             let v7: bool = &*v3 != &*v0;
             if v7 {
                 Rc::new(UH1::UH1_Cons(v3, v4, v6))
@@ -843,13 +874,13 @@ fn method27(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
         }
     }
 }
-fn method28(mut v0: Rc<str>, mut v1: wait_kind, mut v2: Rc<UH1>, mut v3: Rc<UH1>) -> Rc<UH1> {
+fn method29(mut v0: Rc<str>, mut v1: wait_kind, mut v2: Rc<UH1>, mut v3: Rc<UH1>) -> Rc<UH1> {
     match Rc::unwrap_or_clone(v2) {
         UH1::UH1_Cons(v4, v5, v6) => {
             let mut v4: Rc<str> = v4;
             let mut v5: wait_kind = v5;
             let mut v6: Rc<UH1> = v6;
-            let v7: Rc<UH1> = method28(v0.clone(), v1.clone(), v6, v3);
+            let v7: Rc<UH1> = method29(v0.clone(), v1.clone(), v6, v3);
             let v8: bool = &*v4 == &*v0;
             let v28: bool = if v8 {
                 match (&v5, &v1) {
@@ -908,37 +939,37 @@ fn method28(mut v0: Rc<str>, mut v1: wait_kind, mut v2: Rc<UH1>, mut v3: Rc<UH1>
         }
     }
 }
-fn waits_changed_26(mut v0: Rc<UH1>, mut v1: US5) -> Rc<UH1> {
+fn waits_changed_27(mut v0: Rc<UH1>, mut v1: US5) -> Rc<UH1> {
     match v1 {
         US5::US5_WaitCleared(v13) => {
             let mut v13: Rc<str> = v13;
             let v14: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-            method27(v13, v0, v14)
+            method28(v13, v0, v14)
         }
         US5::US5_WaitRemoved(v9, v10) => {
             let mut v9: Rc<str> = v9;
             let mut v10: wait_kind = v10;
             let v11: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-            method28(v9, v10, v0, v11)
+            method29(v9, v10, v0, v11)
         }
         US5::US5_WaitSet(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: wait_kind = v3;
             let mut v4: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-            let mut v5: Rc<UH1> = method28(v2.clone(), v3.clone(), v0, v4);
+            let mut v5: Rc<UH1> = method29(v2.clone(), v3.clone(), v0, v4);
             let mut v6: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
             let v7: Rc<UH1> = Rc::new(UH1::UH1_Cons(v2, v3, v6));
             method7(v5, v7)
         }
     }
 }
-fn method29(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
+fn method30(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
     match Rc::unwrap_or_clone(v1) {
         UH1::UH1_Cons(v3, v4, v5) => {
             let v3: Rc<str> = v3;
             let mut v4: wait_kind = v4;
             let mut v5: Rc<UH1> = v5;
-            let mut v6: Rc<UH1> = method29(v0.clone(), v5, v2);
+            let mut v6: Rc<UH1> = method30(v0.clone(), v5, v2);
             let v7: bool = &*v3 == &*v0;
             if v7 {
                 Rc::new(UH1::UH1_Cons(v3, v4, v6))
@@ -951,7 +982,7 @@ fn method29(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
         }
     }
 }
-fn method30(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
+fn method31(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v2, v3, v4) => {
@@ -968,13 +999,13 @@ fn method30(mut v0: Rc<UH1>, mut v1: i32) -> i32 {
         }
     }
 }
-fn method32(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
+fn method33(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
     match Rc::unwrap_or_clone(v1) {
         UH1::UH1_Cons(v3, v4, v5) => {
             let v3: Rc<str> = v3;
             let mut v4: wait_kind = v4;
             let mut v5: Rc<UH1> = v5;
-            let mut v6: Rc<UH1> = method32(v0.clone(), v5, v2);
+            let mut v6: Rc<UH1> = method33(v0.clone(), v5, v2);
             let v7: bool = &*v3 == &*v0;
             if v7 {
                 Rc::new(UH1::UH1_Cons(v3, v4, v6))
@@ -987,7 +1018,7 @@ fn method32(mut v0: Rc<str>, mut v1: Rc<UH1>, mut v2: Rc<UH1>) -> Rc<UH1> {
         }
     }
 }
-fn kind_word_34(mut v0: wait_kind) -> Rc<str> {
+fn kind_word_35(mut v0: wait_kind) -> Rc<str> {
     match v0 {
         wait_kind::wait_kind_ResumeWhen(v11) => {
             let v11: Rc<str> = v11;
@@ -1021,7 +1052,7 @@ fn kind_word_34(mut v0: wait_kind) -> Rc<str> {
         }
     }
 }
-fn kind_value_35(mut v0: wait_kind) -> Rc<str> {
+fn kind_value_36(mut v0: wait_kind) -> Rc<str> {
     match v0 {
         wait_kind::wait_kind_ResumeWhen(v6) => {
             let mut v6: Rc<str> = v6;
@@ -1049,15 +1080,15 @@ fn kind_value_35(mut v0: wait_kind) -> Rc<str> {
         }
     }
 }
-fn method33(mut v0: Rc<UH1>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method34(mut v0: Rc<UH1>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH1::UH1_Cons(v2, v3, v4) => {
             let mut v2: Rc<str> = v2;
             let v3: wait_kind = v3;
             let mut v4: Rc<UH1> = v4;
-            let mut v5: Rc<UH0> = method33(v4, v1);
-            let mut v6: Rc<str> = kind_word_34(v3.clone());
-            let v8: Rc<str> = kind_value_35(v3);
+            let mut v5: Rc<UH0> = method34(v4, v1);
+            let mut v6: Rc<str> = kind_word_35(v3.clone());
+            let v8: Rc<str> = kind_value_36(v3);
             let mut v9: Rc<str> = string_concat(&[&*v6, ":", &*v8]);
             Rc::new(UH0::UH0_Cons(v9, v5))
         }
@@ -1066,26 +1097,26 @@ fn method33(mut v0: Rc<UH1>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn item_waits_31(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
+fn item_waits_32(mut v0: Rc<UH1>, mut v1: Rc<str>) -> Rc<str> {
     let mut v2: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-    let v3: Rc<UH1> = method32(v1, v0, v2);
+    let v3: Rc<UH1> = method33(v1, v0, v2);
     let mut v4: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let mut v5: Rc<UH0> = method33(v3, v4);
+    let mut v5: Rc<UH0> = method34(v3, v4);
     let mut v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     let v7: i32 = 0i32;
-    let v8: i32 = method24(v6.clone(), v5, v7);
+    let v8: i32 = method25(v6.clone(), v5, v7);
     let mut v9: Rc<Vec<Rc<str>>> = Rc::new(v6.borrow().clone());
     let mut v10: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v9).as_ref().clone()));
     let v11: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(";"); } LIT.with(|lit| lit.clone()) };
     let mut v12: Rc<str> = Rc::<str>::from((*v10.borrow()).join(&*v11));
     v12
 }
-fn method38(mut v0: Rc<str>, mut v1: wait_kind, mut v2: Rc<UH0>, mut v3: Rc<UH0>) -> Rc<UH0> {
+fn method39(mut v0: Rc<str>, mut v1: wait_kind, mut v2: Rc<UH0>, mut v3: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v2) {
         UH0::UH0_Cons(v4, v5) => {
             let mut v4: Rc<str> = v4;
             let mut v5: Rc<UH0> = v5;
-            let mut v6: Rc<UH0> = method38(v0.clone(), v1, v5, v3);
+            let mut v6: Rc<UH0> = method39(v0.clone(), v1, v5, v3);
             let v7: bool = &*v4 == &*v0;
             if v7 {
                 Rc::new(UH0::UH0_Cons(v4, v6))
@@ -1098,7 +1129,7 @@ fn method38(mut v0: Rc<str>, mut v1: wait_kind, mut v2: Rc<UH0>, mut v3: Rc<UH0>
         }
     }
 }
-fn method39(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
+fn method40(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH0::UH0_Cons(v2, v3) => {
@@ -1114,28 +1145,28 @@ fn method39(mut v0: Rc<UH0>, mut v1: i32) -> i32 {
         }
     }
 }
-fn quoted_41(mut v0: Rc<str>) -> Rc<str> {
+fn quoted_42(mut v0: Rc<str>) -> Rc<str> {
     let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\""); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("'"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = Rc::<str>::from(v0.replace(&*v1, &*v2));
     let mut v5: Rc<str> = string_concat(&["\"", &*v3, "\""]);
     v5
 }
-fn method43(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
+fn method44(mut v0: &Rc<RefCell<Mut1>>, mut v1: Rc<str>) -> () {
     let mut v2: Rc<str> = v0.borrow().l0.clone();
     let v3: Rc<str> = string_concat(&[&*v2, &*v1]);
     v0.borrow_mut().l0 = v3;
     ()
 }
-fn format_real_42(mut v0: i32) -> Rc<str> {
+fn format_real_43(mut v0: i32) -> Rc<str> {
     let v1: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
     let mut v2: Rc<RefCell<Mut1>> = Rc::new(RefCell::new(Mut1 { l0: v1 }));
     let v3: Rc<str> = Rc::<str>::from(format!("{}", v0));
-    method43(&v2, v3);
+    method44(&v2, v3);
     let mut v4: Rc<str> = v2.borrow().l0.clone();
     v4
 }
-fn slug_of_44(mut v0: Rc<str>) -> Rc<str> {
+fn slug_of_45(mut v0: Rc<str>) -> Rc<str> {
     let v1: Rc<str> = Rc::<str>::from(v0.to_lowercase());
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("-"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("_"); } LIT.with(|lit| lit.clone()) };
@@ -1144,27 +1175,27 @@ fn slug_of_44(mut v0: Rc<str>) -> Rc<str> {
     let mut v6: Rc<str> = Rc::<str>::from(v4.replace(&*v5, &*v3));
     v6
 }
-fn row_of_wait_numbered_40(mut v0: Rc<str>, mut v1: wait_kind, mut v2: i32) -> Rc<str> {
-    let v3: Rc<str> = quoted_41(v0.clone());
-    let mut v5: Rc<str> = kind_word_34(v1.clone());
-    let mut v6: Rc<str> = quoted_41(v5);
-    let mut v9: Rc<str> = kind_value_35(v1);
-    let mut v10: Rc<str> = quoted_41(v9);
+fn row_of_wait_numbered_41(mut v0: Rc<str>, mut v1: wait_kind, mut v2: i32) -> Rc<str> {
+    let v3: Rc<str> = quoted_42(v0.clone());
+    let mut v5: Rc<str> = kind_word_35(v1.clone());
+    let mut v6: Rc<str> = quoted_42(v5);
+    let mut v9: Rc<str> = kind_value_36(v1);
+    let mut v10: Rc<str> = quoted_42(v9);
     let v11: Rc<str> = string_concat(&[&*v3, ", ", &*v6, ", ", &*v10]);
     let mut v12: bool = v2 <= 1i32;
     let v16: Rc<str> = if v12 {
         let mut v13: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
         v13
     } else {
-        let v14: Rc<str> = format_real_42(v2);
+        let v14: Rc<str> = format_real_43(v2);
         let v15: Rc<str> = string_concat(&["_", &*v14]);
         v15
     };
-    let mut v17: Rc<str> = slug_of_44(v0);
+    let mut v17: Rc<str> = slug_of_45(v0);
     let mut v22: Rc<str> = string_concat(&["inl wait_of_", &*v17, &*v16, " () = Waits (", &*v11, ")"]);
     v22
 }
-fn numbered_rows_37(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<str>) -> Rc<str> {
+fn numbered_rows_38(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<str>) -> Rc<str> {
     loop {
         match Rc::unwrap_or_clone(v0) {
             UH1::UH1_Cons(v3, v4, v5) => {
@@ -1172,12 +1203,12 @@ fn numbered_rows_37(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<str>) -> Rc<str
                 let mut v4: wait_kind = v4;
                 let mut v5: Rc<UH1> = v5;
                 let mut v6: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-                let v7: Rc<UH0> = method38(v3.clone(), v4.clone(), v1.clone(), v6);
+                let v7: Rc<UH0> = method39(v3.clone(), v4.clone(), v1.clone(), v6);
                 let v8: i32 = 0i32;
-                let mut v9: i32 = method39(v7, v8);
+                let mut v9: i32 = method40(v7, v8);
                 let mut v10: i32 = v9.wrapping_add(1i32);
                 let v11: Rc<UH0> = Rc::new(UH0::UH0_Cons(v3.clone(), v1));
-                let mut v12: Rc<str> = row_of_wait_numbered_40(v3, v4, v10);
+                let mut v12: Rc<str> = row_of_wait_numbered_41(v3, v4, v10);
                 let v14: Rc<str> = string_concat(&[&*v2, &*v12, "\n"]);
                 (v0, v1, v2) = (v5, v11, v14);
                 continue;
@@ -1188,19 +1219,19 @@ fn numbered_rows_37(mut v0: Rc<UH1>, mut v1: Rc<UH0>, mut v2: Rc<str>) -> Rc<str
         }
     }
 }
-fn waits_text_36(mut v0: Rc<UH1>) -> Rc<str> {
+fn waits_text_37(mut v0: Rc<UH1>) -> Rc<str> {
     let v1: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from(""); } LIT.with(|lit| lit.clone()) };
-    let v3: Rc<str> = numbered_rows_37(v0, v1, v2);
+    let v3: Rc<str> = numbered_rows_38(v0, v1, v2);
     let mut v4: Rc<str> = string_concat(&["///- --no-respell\nunion task_wait =\n    | Waits :: string * string * string -> task_wait\n", &*v3]);
     v4
 }
-fn method46(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method47(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
-            let mut v4: Rc<UH0> = method46(v3, v1);
+            let mut v4: Rc<UH0> = method47(v3, v1);
             let mut v5: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("type "); } LIT.with(|lit| lit.clone()) };
             let mut v6: bool = v2.starts_with(&*v5);
             let v15: US8 = if v6 {
@@ -1341,7 +1372,7 @@ fn method46(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn renamed_within_47(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
+fn renamed_within_48(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
     loop {
         let v3: bool = std::fs::rename(&*v1, &*v0).is_ok();
         if v3 {
@@ -1359,12 +1390,12 @@ fn renamed_within_47(mut v0: Rc<str>, mut v1: Rc<str>, mut v2: i32) -> bool {
         }
     }
 }
-fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
+fn replaced_46(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let mut v2: Rc<str> = string_concat(&[&*v0, ".pending"]);
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let mut v5: Rc<str> = Rc::<str>::from(v2.replace(&*v3, &*v4));
-    let mut v6: Rc<str> = loop_19(v5);
+    let mut v6: Rc<str> = loop_20(v5);
     let v7: Option<usize> = v6.rfind(&*v4);
     let v8: Option<usize> = method4(v7);
     let mut v9: Rc<dyn Fn((usize)) -> i32> = closure3();
@@ -1388,19 +1419,19 @@ fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
         let mut v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
         let v23: bool = v21.ends_with(&*v22);
         if v23 {
-            let mut v24: Rc<str> = loop_20(v21);
+            let mut v24: Rc<str> = loop_21(v21);
             US7::US7_StateFile(v24)
         } else {
             let v26: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
             let v27: bool = v21.ends_with(&*v26);
             if v27 {
-                let v28: Rc<str> = loop_21(v21);
+                let v28: Rc<str> = loop_22(v21);
                 US7::US7_HistoryFile(v28)
             } else {
                 let mut v30: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
                 let v31: bool = v21.ends_with(&*v30);
                 if v31 {
-                    let v32: Rc<str> = loop_22(v21);
+                    let v32: Rc<str> = loop_23(v21);
                     US7::US7_ArchiveFile(v32)
                 } else {
                     US7::US7_OtherFile
@@ -1448,10 +1479,10 @@ fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
             let v62: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
             let v63: Rc<UH0> = split_list_8(v62.clone(), v1.clone());
             let v64: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-            let v65: Rc<UH0> = method46(v63, v64);
+            let v65: Rc<UH0> = method47(v63, v64);
             let v66: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
             let v67: i32 = 0i32;
-            let v68: i32 = method24(v66.clone(), v65, v67);
+            let v68: i32 = method25(v66.clone(), v65, v67);
             let v69: Rc<Vec<Rc<str>>> = Rc::new(v66.borrow().clone());
             let v70: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v69).as_ref().clone()));
             let v71: Rc<str> = Rc::<str>::from((*v70.borrow()).join(&*v62));
@@ -1464,10 +1495,10 @@ fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
     let v74: bool = std::fs::write(&*v2, &*v73).is_ok();
     let v155: US12 = if v74 {
         let v75: i32 = 40i32;
-        let v76: bool = renamed_within_47(v0.clone(), v2.clone(), v75);
+        let v76: bool = renamed_within_48(v0.clone(), v2.clone(), v75);
         if v76 {
             let v77: Rc<str> = Rc::<str>::from(v0.replace(&*v3, &*v4));
-            let mut v78: Rc<str> = loop_19(v77);
+            let mut v78: Rc<str> = loop_20(v77);
             let v79: Option<usize> = v78.rfind(&*v4);
             let v80: Option<usize> = method4(v79);
             let mut v81: Option<i32> = v80.map(|x| v9(x));
@@ -1490,19 +1521,19 @@ fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
                 let v93: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/state"); } LIT.with(|lit| lit.clone()) };
                 let v94: bool = v92.ends_with(&*v93);
                 if v94 {
-                    let v95: Rc<str> = loop_20(v92);
+                    let v95: Rc<str> = loop_21(v92);
                     US7::US7_StateFile(v95)
                 } else {
                     let v97: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/history"); } LIT.with(|lit| lit.clone()) };
                     let v98: bool = v92.ends_with(&*v97);
                     if v98 {
-                        let v99: Rc<str> = loop_21(v92);
+                        let v99: Rc<str> = loop_22(v92);
                         US7::US7_HistoryFile(v99)
                     } else {
                         let v101: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/archive"); } LIT.with(|lit| lit.clone()) };
                         let v102: bool = v92.ends_with(&*v101);
                         if v102 {
-                            let v103: Rc<str> = loop_22(v92);
+                            let v103: Rc<str> = loop_23(v92);
                             US7::US7_ArchiveFile(v103)
                         } else {
                             US7::US7_OtherFile
@@ -1550,10 +1581,10 @@ fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
                     let v133: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
                     let v134: Rc<UH0> = split_list_8(v133.clone(), v1);
                     let v135: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-                    let v136: Rc<UH0> = method46(v134, v135);
+                    let v136: Rc<UH0> = method47(v134, v135);
                     let v137: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
                     let v138: i32 = 0i32;
-                    let v139: i32 = method24(v137.clone(), v136, v138);
+                    let v139: i32 = method25(v137.clone(), v136, v138);
                     let v140: Rc<Vec<Rc<str>>> = Rc::new(v137.borrow().clone());
                     let v141: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v140).as_ref().clone()));
                     let v142: Rc<str> = Rc::<str>::from((*v141.borrow()).join(&*v133));
@@ -1589,12 +1620,12 @@ fn replaced_45(mut v0: Rc<str>, mut v1: Rc<str>) -> bool {
         }
     }
 }
-fn method49(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method50(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
-            let mut v4: Rc<UH0> = method49(v3, v1);
+            let mut v4: Rc<UH0> = method50(v3, v1);
             let mut v5: Rc<str> = Rc::<str>::from((v2).trim_matches(|c: char| { let n = c as u32; n == 32 || n == 9 || n == 13 || n == 10 }));
             let mut v6: bool = &*v5 != "";
             if v6 {
@@ -1608,7 +1639,7 @@ fn method49(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn section_lines_51(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<UH0>) -> US13 {
+fn section_lines_52(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<UH0>) -> US13 {
     loop {
         match &*v1 {
             UH0::UH0_Cons(v8, v9) => {
@@ -1654,7 +1685,7 @@ fn section_lines_51(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>, mut v3: Rc<U
         }
     }
 }
-fn split_lines_50(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> US13 {
+fn split_lines_51(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> US13 {
     loop {
         match Rc::unwrap_or_clone(v1) {
             UH0::UH0_Cons(v4, v5) => {
@@ -1677,7 +1708,7 @@ fn split_lines_50(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> US13 {
                     let mut v13: Rc<UH0> = Rc::new(UH0::UH0_Cons(v4, v12));
                     let v14: Rc<UH0> = method9(v2, v13);
                     let v15: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-                    return section_lines_51(v0, v5, v14, v15);
+                    return section_lines_52(v0, v5, v14, v15);
                 } else {
                     let mut v17: Rc<UH0> = Rc::new(UH0::UH0_Cons(v4, v2));
                     (v1, v2) = (v5, v17);
@@ -1701,7 +1732,7 @@ fn closure4(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US15> {
                     US15::US15_Some(v1)
                 } else {
                     let v8: i32 = v1.wrapping_add(1i32);
-                    let mut v9: Rc<dyn Fn(Rc<UH0>) -> US15> = method52(v0.clone(), v8);
+                    let mut v9: Rc<dyn Fn(Rc<UH0>) -> US15> = method53(v0.clone(), v8);
                     v9(v5)
                 }
             }
@@ -1711,15 +1742,15 @@ fn closure4(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US15> {
         }
     })
 }
-fn method52(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US15> {
+fn method53(mut v0: Rc<str>, mut v1: i32) -> Rc<dyn Fn(Rc<UH0>) -> US15> {
     closure4(v0, v1)
 }
-fn method53(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
+fn method54(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v1) {
         UH0::UH0_Cons(v3, v4) => {
             let v3: Rc<str> = v3;
             let mut v4: Rc<UH0> = v4;
-            let mut v5: Rc<UH0> = method53(v0.clone(), v4, v2);
+            let mut v5: Rc<UH0> = method54(v0.clone(), v4, v2);
             let mut v13: Rc<str> = match v0 {
                 US10::US10_SpiprojProject => {
                     let mut v6: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
@@ -1743,12 +1774,12 @@ fn method53(mut v0: US10, mut v1: Rc<UH0>, mut v2: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn method54(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
+fn method55(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
     match Rc::unwrap_or_clone(v0) {
         UH0::UH0_Cons(v2, v3) => {
             let mut v2: Rc<str> = v2;
             let v3: Rc<UH0> = v3;
-            let mut v4: Rc<UH0> = method54(v3, v1);
+            let mut v4: Rc<UH0> = method55(v3, v1);
             Rc::new(UH0::UH0_Cons(v2, v4))
         }
         UH0::UH0_Nil => {
@@ -1756,7 +1787,7 @@ fn method54(mut v0: Rc<UH0>, mut v1: Rc<UH0>) -> Rc<UH0> {
         }
     }
 }
-fn module_added_48(mut v0: US10, mut v1: Rc<str>) -> US3 {
+fn module_added_49(mut v0: US10, mut v1: Rc<str>) -> US3 {
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("waits"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\n"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\r"); } LIT.with(|lit| lit.clone()) };
@@ -1764,9 +1795,9 @@ fn module_added_48(mut v0: US10, mut v1: Rc<str>) -> US3 {
     let mut v6: Rc<str> = Rc::<str>::from(v1.replace(&*v4, &*v5));
     let v7: Rc<UH0> = split_list_8(v3.clone(), v6);
     let v8: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let mut v9: Rc<UH0> = method49(v7, v8);
+    let mut v9: Rc<UH0> = method50(v7, v8);
     let mut v10: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-    let v11: US13 = split_lines_50(v0.clone(), v9, v10);
+    let v11: US13 = split_lines_51(v0.clone(), v9, v10);
     let v47: US14 = match v11 {
         US13::US13_NoModules => {
             US14::US14_NoModulesSection
@@ -1776,7 +1807,7 @@ fn module_added_48(mut v0: US10, mut v1: Rc<str>) -> US3 {
             let v14: Rc<UH0> = v14;
             let v15: Rc<UH0> = v15;
             let v16: i32 = 0i32;
-            let mut v17: Rc<dyn Fn(Rc<UH0>) -> US15> = method52(v2.clone(), v16);
+            let mut v17: Rc<dyn Fn(Rc<UH0>) -> US15> = method53(v2.clone(), v16);
             let mut v18: US15 = v17(v14.clone());
             let v19: bool = match v18 {
                 US15::US15_None => {
@@ -1791,7 +1822,7 @@ fn module_added_48(mut v0: US10, mut v1: Rc<str>) -> US3 {
                 US14::US14_ModuleListed
             } else {
                 let mut v22: Rc<UH0> = { thread_local!{ static CASE: Rc<UH0> = Rc::new(UH0::UH0_Nil); } CASE.with(|case| case.clone()) };
-                let v23: Rc<UH0> = method53(v0.clone(), v14, v22);
+                let v23: Rc<UH0> = method54(v0.clone(), v14, v22);
                 let mut v30: Rc<str> = match v0 {
                     US10::US10_SpiprojProject => {
                         let mut v24: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
@@ -1807,12 +1838,12 @@ fn module_added_48(mut v0: US10, mut v1: Rc<str>) -> US3 {
                         v2
                     }
                 };
-                let v31: Rc<UH0> = method54(v23, v15);
+                let v31: Rc<UH0> = method55(v23, v15);
                 let v32: Rc<UH0> = Rc::new(UH0::UH0_Cons(v30, v31));
-                let v33: Rc<UH0> = method54(v13, v32);
+                let v33: Rc<UH0> = method55(v13, v32);
                 let v34: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
                 let v35: i32 = 0i32;
-                let v36: i32 = method24(v34.clone(), v33, v35);
+                let v36: i32 = method25(v34.clone(), v33, v35);
                 let v37: Rc<Vec<Rc<str>>> = Rc::new(v34.borrow().clone());
                 let v38: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new((v37).as_ref().clone()));
                 let v39: Rc<str> = Rc::<str>::from((*v38.borrow()).join(&*v3));
@@ -1839,23 +1870,23 @@ fn module_added_48(mut v0: US10, mut v1: Rc<str>) -> US3 {
         }
     }
 }
-fn waits_written_17(mut v0: Rc<str>, mut v1: US5) -> US6 {
+fn waits_written_18(mut v0: Rc<str>, mut v1: US5) -> US6 {
     let mut v2: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("\\"); } LIT.with(|lit| lit.clone()) };
     let v3: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("/"); } LIT.with(|lit| lit.clone()) };
     let mut v4: Rc<str> = Rc::<str>::from(v0.replace(&*v2, &*v3));
     let mut v5: Rc<str> = string_concat(&[&*v4, "/state"]);
     let mut v6: Rc<str> = string_concat(&[&*v5, "/agile.spi"]);
-    let v7: Rc<str> = text_of_18(v6);
+    let v7: Rc<str> = text_of_19(v6);
     let v8: Rc<str> = string_concat(&[&*v5, "/waits.spi"]);
-    let mut v9: Rc<str> = text_of_18(v8.clone());
-    let mut v10: Rc<str> = change_item_25(v1.clone());
+    let mut v9: Rc<str> = text_of_19(v8.clone());
+    let mut v10: Rc<str> = change_item_26(v1.clone());
     let v11: Rc<UH1> = waits_of_text_1(v9.clone());
-    let mut v12: Rc<UH1> = waits_changed_26(v11, v1);
+    let mut v12: Rc<UH1> = waits_changed_27(v11, v1);
     let mut v13: Rc<UH1> = { thread_local!{ static CASE: Rc<UH1> = Rc::new(UH1::UH1_Nil); } CASE.with(|case| case.clone()) };
-    let v14: Rc<UH1> = method29(v10.clone(), v12.clone(), v13);
+    let v14: Rc<UH1> = method30(v10.clone(), v12.clone(), v13);
     let v15: i32 = 0i32;
-    let v16: i32 = method30(v14, v15);
-    let mut v17: Rc<str> = item_waits_31(v12.clone(), v10.clone());
+    let v16: i32 = method31(v14, v15);
+    let mut v17: Rc<str> = item_waits_32(v12.clone(), v10.clone());
     let mut v18: Rc<RefCell<Vec<Rc<str>>>> = Rc::new(RefCell::new(Vec::new()));
     v18.borrow_mut().push(v5.clone());
     let v19: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("spiral.toml"); } LIT.with(|lit| lit.clone()) };
@@ -1896,14 +1927,14 @@ fn waits_written_17(mut v0: Rc<str>, mut v1: US5) -> US6 {
             let v41: Rc<str> = string_concat(&["no task ", &*v10]);
             US6::US6_WaitsRefused(v41)
         } else {
-            let v43: Rc<str> = text_of_18(v8.clone());
+            let v43: Rc<str> = text_of_19(v8.clone());
             let v44: bool = &*v43 != &*v9;
             if v44 {
                 let v45: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/waits.spi changed since it was read; run again"); } LIT.with(|lit| lit.clone()) };
                 US6::US6_WaitsRefused(v45)
             } else {
-                let v47: Rc<str> = waits_text_36(v12);
-                let v48: bool = replaced_45(v8, v47);
+                let v47: Rc<str> = waits_text_37(v12);
+                let v48: bool = replaced_46(v8, v47);
                 let v49: bool = v48 == false;
                 if v49 {
                     let v50: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("state/waits.spi could not be written"); } LIT.with(|lit| lit.clone()) };
@@ -1921,8 +1952,8 @@ fn waits_written_17(mut v0: Rc<str>, mut v1: US5) -> US6 {
                     } else {
                         US10::US10_SpiprojProject
                     };
-                    let v60: Rc<str> = text_of_18(v33.clone());
-                    let v61: US3 = module_added_48(v59, v60);
+                    let v60: Rc<str> = text_of_19(v33.clone());
+                    let v61: US3 = module_added_49(v59, v60);
                     match v61 {
                         US3::US3_None => {
                             let v62: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("the state project has no modules section to list waits in"); } LIT.with(|lit| lit.clone()) };
@@ -1930,12 +1961,12 @@ fn waits_written_17(mut v0: Rc<str>, mut v1: US5) -> US6 {
                         }
                         US3::US3_Some(v64) => {
                             let v64: Rc<str> = v64;
-                            let v65: Rc<str> = text_of_18(v33.clone());
+                            let v65: Rc<str> = text_of_19(v33.clone());
                             let v66: bool = &*v64 == &*v65;
                             let v68: bool = if v66 {
                                 true
                             } else {
-                                replaced_45(v33, v64)
+                                replaced_46(v33, v64)
                             };
                             if v68 {
                                 US6::US6_WaitsWritten(v16, v17)
@@ -1953,67 +1984,68 @@ fn waits_written_17(mut v0: Rc<str>, mut v1: US5) -> US6 {
 fn wait_run_12() -> i32 {
     let mut v0: i32 = 0i32;
     let v1: Rc<UH0> = arguments_from_13(v0);
-    let v51: US4 = match Rc::unwrap_or_clone(v1) {
-        UH0::UH0_Cons(v2, v3) => {
-            let mut v2: Rc<str> = v2;
-            let v3: Rc<UH0> = v3;
-            match Rc::unwrap_or_clone(v3) {
-                UH0::UH0_Cons(v4, v5) => {
-                    let mut v4: Rc<str> = v4;
-                    let mut v5: Rc<UH0> = v5;
-                    match Rc::unwrap_or_clone(v5) {
-                        UH0::UH0_Cons(v6, v7) => {
-                            let mut v6: Rc<str> = v6;
-                            let v7: Rc<UH0> = v7;
-                            match Rc::unwrap_or_clone(v7) {
-                                UH0::UH0_Cons(v8, v9) => {
-                                    let v8: Rc<str> = v8;
-                                    let mut v9: Rc<UH0> = v9;
-                                    match Rc::unwrap_or_clone(v9) {
-                                        UH0::UH0_Cons(v10, v11) => {
-                                            let mut v10: Rc<str> = v10;
-                                            let v11: Rc<UH0> = v11;
-                                            match Rc::unwrap_or_clone(v11) {
-                                                UH0::UH0_Cons(v12, v13) => {
-                                                    let mut v12: Rc<str> = v12;
-                                                    let mut v13: Rc<UH0> = v13;
-                                                    match Rc::unwrap_or_clone(v13) {
+    let mut v2: Rc<UH0> = author_dropped_16(v1);
+    let mut v52: US4 = match Rc::unwrap_or_clone(v2) {
+        UH0::UH0_Cons(v3, v4) => {
+            let v3: Rc<str> = v3;
+            let mut v4: Rc<UH0> = v4;
+            match Rc::unwrap_or_clone(v4) {
+                UH0::UH0_Cons(v5, v6) => {
+                    let mut v5: Rc<str> = v5;
+                    let mut v6: Rc<UH0> = v6;
+                    match Rc::unwrap_or_clone(v6) {
+                        UH0::UH0_Cons(v7, v8) => {
+                            let v7: Rc<str> = v7;
+                            let v8: Rc<UH0> = v8;
+                            match Rc::unwrap_or_clone(v8) {
+                                UH0::UH0_Cons(v9, v10) => {
+                                    let mut v9: Rc<str> = v9;
+                                    let mut v10: Rc<UH0> = v10;
+                                    match Rc::unwrap_or_clone(v10) {
+                                        UH0::UH0_Cons(v11, v12) => {
+                                            let v11: Rc<str> = v11;
+                                            let mut v12: Rc<UH0> = v12;
+                                            match Rc::unwrap_or_clone(v12) {
+                                                UH0::UH0_Cons(v13, v14) => {
+                                                    let mut v13: Rc<str> = v13;
+                                                    let v14: Rc<UH0> = v14;
+                                                    match Rc::unwrap_or_clone(v14) {
                                                         UH0::UH0_Nil => {
-                                                            let v14: bool = &*v10 == "--wait";
-                                                            let v16: bool = if v14 {
-                                                                let v15: bool = &*v12 == "--clear";
-                                                                v15
+                                                            let v15: bool = &*v11 == "--wait";
+                                                            let mut v17: bool = if v15 {
+                                                                let v16: bool = &*v13 == "--clear";
+                                                                v16
                                                             } else {
                                                                 false
                                                             };
-                                                            if v16 {
-                                                                let mut v17: US5 = US5::US5_WaitCleared(v8);
-                                                                US4::US4_Some(v6, v17)
+                                                            if v17 {
+                                                                let mut v18: US5 = US5::US5_WaitCleared(v9);
+                                                                US4::US4_Some(v7, v18)
                                                             } else {
-                                                                if v14 {
-                                                                    let v19: US2 = kind_of_flag_16(v12);
-                                                                    match v19 {
+                                                                if v15 {
+                                                                    let v20: US2 = kind_of_flag_17(v13);
+                                                                    match v20 {
                                                                         US2::US2_None => {
                                                                             US4::US4_None
                                                                         }
-                                                                        US2::US2_Some(v20) => {
-                                                                            let v20: wait_kind = v20;
-                                                                            let v21: US5 = US5::US5_WaitSet(v8, v20);
-                                                                            US4::US4_Some(v6, v21)
+                                                                        US2::US2_Some(v21) => {
+                                                                            let v21: wait_kind = v21;
+                                                                            let mut v22: US5 = US5::US5_WaitSet(v9, v21);
+                                                                            US4::US4_Some(v7, v22)
                                                                         }
                                                                     }
                                                                 } else {
-                                                                    let v26: bool = &*v10 == "--wait-remove";
-                                                                    if v26 {
-                                                                        let v27: US2 = kind_of_flag_16(v12);
-                                                                        match v27 {
+                                                                    let v27: bool = &*v11 == "--wait-remove";
+                                                                    if v27 {
+                                                                        let v28: US2 = kind_of_flag_17(v13);
+                                                                        match v28 {
                                                                             US2::US2_None => {
                                                                                 US4::US4_None
                                                                             }
-                                                                            US2::US2_Some(v28) => {
-                                                                                let v28: wait_kind = v28;
-                                                                                let v29: US5 = US5::US5_WaitRemoved(v8, v28);
-                                                                                US4::US4_Some(v6, v29)
+                                                                            US2::US2_Some(v29) => {
+                                                                                let v29: wait_kind = v29;
+                                                                                let mut v30: US5 = US5::US5_WaitRemoved(v9, v29);
+                                                                                US4::US4_Some(v7, v30)
                                                                             }
                                                                         }
                                                                     } else {
@@ -2056,30 +2088,30 @@ fn wait_run_12() -> i32 {
             US4::US4_None
         }
     };
-    match v51 {
+    match v52 {
         US4::US4_None => {
-            let mut v52: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|job|when>:<value> | --wait-remove <kind>:<value> | --wait --clear"); } LIT.with(|lit| lit.clone()) };
-            eprintln!("{}", v52);
+            let v53: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("rig error: usage: agile edit <root> <ID> --wait <train|item|lane|user|job|when>:<value> | --wait-remove <kind>:<value> | --wait --clear"); } LIT.with(|lit| lit.clone()) };
+            eprintln!("{}", v53);
             2i32
         }
-        US4::US4_Some(v53, v54) => {
-            let v53: Rc<str> = v53;
-            let v54: US5 = v54;
-            let v55: US6 = waits_written_17(v53, v54.clone());
-            match v55 {
-                US6::US6_WaitsRefused(v65) => {
-                    let v65: Rc<str> = v65;
-                    let v66: Rc<str> = string_concat(&["rig error: agile edit --wait: ", &*v65]);
-                    eprintln!("{}", v66);
+        US4::US4_Some(v54, v55) => {
+            let v54: Rc<str> = v54;
+            let v55: US5 = v55;
+            let v56: US6 = waits_written_18(v54, v55.clone());
+            match v56 {
+                US6::US6_WaitsRefused(v66) => {
+                    let v66: Rc<str> = v66;
+                    let v67: Rc<str> = string_concat(&["rig error: agile edit --wait: ", &*v66]);
+                    eprintln!("{}", v67);
                     2i32
                 }
-                US6::US6_WaitsWritten(v56, v57) => {
-                    let v56: i32 = v56;
-                    let v57: Rc<str> = v57;
-                    let v58: Rc<str> = change_item_25(v54);
-                    let v61: Rc<str> = format_real_42(v56);
-                    let v64: Rc<str> = string_concat(&["rig agile edit ok id=", &*v58, " waits=", &*v61, " item_waits=", &*v57]);
-                    println!("{}", v64);
+                US6::US6_WaitsWritten(v57, v58) => {
+                    let v57: i32 = v57;
+                    let v58: Rc<str> = v58;
+                    let v59: Rc<str> = change_item_26(v55);
+                    let v62: Rc<str> = format_real_43(v57);
+                    let v65: Rc<str> = string_concat(&["rig agile edit ok id=", &*v59, " waits=", &*v62, " item_waits=", &*v58]);
+                    println!("{}", v65);
                     0i32
                 }
             }

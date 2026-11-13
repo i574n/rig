@@ -9,6 +9,9 @@
 
 := text_bytes (~text : string) : u64 = $'!text.len() as u64' : u64
 := loaded_string (loaded_text text) : string = text
+:= absolute_slashed (~path : string) : string =
+    $'std::rc::Rc::<str>::from(std::path::absolute(&*!path).map(|p| p.to_string_lossy().replace(char::from(92u8), \
+        "/")).unwrap_or_else(|_| (&*!path).replace(char::from(92u8), "/")).as_str())' : string
 
 :| file_replacement =
     | Replaced

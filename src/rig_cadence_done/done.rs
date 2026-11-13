@@ -60,11 +60,17 @@ fn status_named_2(mut v0: Rc<str>) -> US0 {
             US0::US0_Blocked
         } else {
             let v5: bool = &*v0 == "Paused";
-            if v5 {
+            let v7: bool = if v5 {
+                true
+            } else {
+                let v6: bool = &*v0 == "Dropped";
+                v6
+            };
+            if v7 {
                 US0::US0_Paused
             } else {
-                let v7: bool = &*v0 == "Done";
-                if v7 {
+                let mut v9: bool = &*v0 == "Done";
+                if v9 {
                     US0::US0_Done
                 } else {
                     US0::US0_Planned

@@ -82,7 +82,13 @@ fn method4(mut v0: Rc<UH1>, mut v1: Rc<UH1>) -> Rc<UH1> {
             let v11: Rc<UH1> = v11;
             let v12: Rc<UH1> = method4(v11, v1);
             let v13: bool = &*v3 != "Done";
-            if v13 {
+            let v15: bool = if v13 {
+                let v14: bool = &*v3 != "Dropped";
+                v14
+            } else {
+                false
+            };
+            if v15 {
                 Rc::new(UH1::UH1_Cons(v2, v3, v4, v5, v6, v7, v8, v9, v10, v12))
             } else {
                 v12

@@ -1,0 +1,50 @@
+///- --package .
+:# afters static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:== after_link = { item : string; after : string }
+
+:= row_marker () : string = " = After (\""
+
+:~ quoted_pair (~text : string) : option (string * string) =
+    ?= sm'.split_list "\", \"" text ?|
+    | item :: rest :: [] ?& sm'.ends_with "\")" rest =>
+        := after = sm'.trim_end_suffix "\")" rest
+        ? item = "" || after = "" ?> None |: Some (item, after)
+    | _ => None
+
+:~ link_of_line (~line : string) : option after_link =
+    := row = sm'.trim line
+    := at = sm'.index_of (row_marker ()) row
+    ? at < 0i32
+    ?> None
+    |:
+        := start = at + sm'.length (row_marker ())
+        ?= quoted_pair (sm'.slice start (sm'.length row - 1i32) row) ?|
+        | Some (item, after) => Some { item = item; after = after }
+        | None => None
+
+:~ links_of_text (~text : string) : list after_link =
+    := gathered = \ (found : list after_link) (line : string) =>
+        ?= link_of_line line ?|
+        | Some link => link :: found
+        | None => found
+    sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm.fold gathered [] |> listm.rev
+
+:~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_" |> sm'.replace "." "_"
+
+:~ row_of_link (link : after_link) : string =
+    "inl after_of_" ++# slug_of link.item ++# " () = After (\"" ++# link.item ++# "\", \"" ++# link.after ++# "\")"
+
+///> rust
+:# after_rows_round_trip_and_skip_broken_lines =
+    := text =
+        "inl after_of_sp_a49 () = After (\"SP-A49\", \"SP-A29\")\r\n"
+        ^^ "inl after_of_broken () = After (\"ONLY-ONE\")\n"
+    := links = links_of_text text
+    testing.expect (links = [ { item = "SP-A49"; after = "SP-A29" } ]) "one well-formed After row"
+    := row = row_of_link { item = "SP-A49"; after = "SP-A29" }
+    testing.expect (row = "inl after_of_sp_a49 () = After (\"SP-A49\", \"SP-A29\")") row
+    testing.expect (link_of_line row = Some { item = "SP-A49"; after = "SP-A29" }) "a written row reads back"

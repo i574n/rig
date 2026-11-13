@@ -8,6 +8,7 @@
     | ParentsFile
     | ClaimsFile
     | WaitsFile
+    | HistoryFile
 
 :== id_rename = { old : string; new : string }
 
@@ -20,19 +21,28 @@
 
 :== side_acc = { kept : list string; rows : i32; bindings : i32 }
 
-:~ side_files () : list side_file = [ ParentsFile; ClaimsFile; WaitsFile ]
+:~ side_files () : list side_file = [ ParentsFile; ClaimsFile; WaitsFile; HistoryFile ]
 
 :~ file_name (f : side_file) : string =
     ?= f ?|
     | ParentsFile => "parents.spi"
     | ClaimsFile => "claims.spi"
     | WaitsFile => "waits.spi"
+    | HistoryFile => "status_changes.spi"
 
-:~ binding_prefix (f : side_file) : string =
+:~ file_folder (f : side_file) : string =
     ?= f ?|
-    | ParentsFile => "inl parent_of_"
-    | ClaimsFile => "inl claim_"
-    | WaitsFile => "inl wait_of_"
+    | HistoryFile => "history"
+    | _ => "state"
+
+:~ binding_name (f : side_file) : string =
+    ?= f ?|
+    | ParentsFile => "parent_of_"
+    | ClaimsFile => "claim_"
+    | WaitsFile => "wait_of_"
+    | HistoryFile => "status_changed_"
+
+:~ spellings () : list string = [ "inl "; ":= " ]
 
 :~ slug_of (~id : string) : string = sm'.to_lower id |> sm'.replace "-" "_"
 
@@ -43,16 +53,20 @@
     | first :: _ => first = id
     | [] => !-
 
+:~ ^ owned_head (f : side_file) (r : id_rename) (~fields : string) (spelled : list string) : option (string * string) =
+    ?= spelled ?|
+    | [] => None
+    | spelling :: rest =>
+        := head = spelling ++# binding_name f ++# slug_of r.old
+        ? sm'.starts_with head fields ?> Some (head, spelling) |: owned_head f r fields rest
+
 :~ renamed_row (f : side_file) (r : id_rename) (~line : string) : row_change =
     := fields = sm'.replace (quoted r.old) (quoted r.new) line
-    := head = binding_prefix f ++# slug_of r.old
-    ? owned_by line r.old && sm'.starts_with head fields
-    ?>
+    ?= (? owned_by line r.old ?> owned_head f r fields (spellings ()) |: None) ?|
+    | Some (head, spelling) =>
         := rest = sm'.substring (sm'.length head) (sm'.length fields - sm'.length head) fields
-        Owned (binding_prefix f ++# slug_of r.new ++# rest)
-    |? fields <> line
-    ?> Pointing fields
-    |: Untouched
+        Owned (spelling ++# binding_name f ++# slug_of r.new ++# rest)
+    | None => ? fields <> line ?> Pointing fields |: Untouched
 
 :~ line_after (~line : string) (c : row_change) : string =
     ?= c ?|
@@ -83,7 +97,7 @@
 
 :~ id_rename_of (~old : string) (~new : string) : id_rename = { old = old; new = new }
 
-:~ side_path (~root : string) (f : side_file) : string = root ++# "/state/" ++# file_name f
+:~ side_path (~root : string) (f : side_file) : string = root ++# "/" ++# file_folder f ++# "/" ++# file_name f
 
 :~ renamed_sides
     (~root : string) (r : id_rename) (read : string -> string) (write : string -> string -> string -> string)
@@ -140,7 +154,7 @@
     := lines_before : i32 = listm.length (sm'.split_list "\n" text)
     := lines_after : i32 = listm.length (sm'.split_list "\n" after)
     testing.expect (lines_before = lines_after && sm'.ends_with "\n" after) "same lines, final newline kept"
-    testing.expect (file_name WaitsFile = "waits.spi" && listm.length (side_files ()) = (3i32 : i32)) "three side files"
+    testing.expect (file_name WaitsFile = "waits.spi" && listm.length (side_files ()) = (4i32 : i32)) "four side files"
 
 ///> rust
 :# every_side_file_is_read_rewritten_and_written_once_and_a_refused_write_is_named =
@@ -155,3 +169,18 @@
     := refused = \ (path : string) (_ : string) (_ : string) => ? sm'.ends_with "waits.spi" path ?> "changed" |: ""
     := partial = renamed_sides "R" r read refused
     testing.expect (partial.problems = [ "waits.spi: changed" ]) "the refused file is named, the others still written"
+
+///> rust
+:# symbol_spelled_rows_and_history_rows_rename_their_bindings_too =
+    := r = { old = "KIT-X"; new = "RIG-X" }
+    := wait = ":= wait_of_kit_x () = Waits (\"KIT-X\", \"train\", \"T\")"
+    testing.expect
+        (renamed_row WaitsFile r wait = Owned ":= wait_of_rig_x () = Waits (\"RIG-X\", \"train\", \"T\")")
+        wait
+    := moved = ":= status_changed_kit_x_1700000000000 () = StatusChanged (\"KIT-X\", \"Done\", 1700000000000u64)"
+    := renamed_moved =
+        ":= status_changed_rig_x_1700000000000 () = StatusChanged (\"RIG-X\", \"Done\", 1700000000000u64)"
+    testing.expect (renamed_row HistoryFile r moved = Owned renamed_moved) moved
+    testing.expect
+        (side_path "R" HistoryFile = "R/history/status_changes.spi" && side_path "R" WaitsFile = "R/state/waits.spi")
+        "folders"

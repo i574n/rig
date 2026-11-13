@@ -42,6 +42,7 @@
         idle_days = 0i32
         asked = !-
         parent = ""
+        after = ""
     }
 
 :~ ^ ids_text (tasks : task_list) (~kept : string) : string =
@@ -57,7 +58,8 @@
     | NoTasks => NoTasks
     | TaskThen (task, rest) =>
         := note = am'.index_base at notes
-        := annotated = { task ?| idle_days = note.idle_days; parent = note.parent; asked = note.asked }
+        := annotated =
+            { task ?| idle_days = note.idle_days; parent = note.parent; asked = note.asked; after = note.after }
         TaskThen (annotated, annotated_from notes rest (at + 1i32))
 
 :~ annotated_tasks (~root : string) (~text : string) (now_hour : i64) (tasks : task_list) : task_list =
@@ -101,7 +103,7 @@
                 {
                     id = item.id; title = item.title; priority = item.priority; difficulty = item.difficulty
                     minutes = item.minutes; estimated = item.estimated; unblocks = item.unblocks; key = item.key
-                    parent = item.parent
+                    parent = item.parent; after = item.after
                 }
             rows_of rest limit (kept ++ ;[ row ])
 

@@ -12,7 +12,7 @@
 :== census_row = { check : string; items : i32 }
 
 :~ open_failures_in (facts : list fact_row) : list failure_row =
-    := unsettled = facts |> listm'.filter (\ (f : fact_row) => f.status <> "Done")
+    := unsettled = facts |> listm'.filter (\ (f : fact_row) => f.status <> "Done" && f.status <> "Dropped")
     := rows = agile_quality_lint.lint.failing_rows (unsettled |> listm'.box |> listm'.to_array')
     am'.to_list_base' rows |> listm'.unbox
 

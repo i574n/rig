@@ -219,9 +219,11 @@ fn status_counts_7(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
     let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Paused"); } LIT.with(|lit| lit.clone()) };
     let v15: Rc<str> = status_count_text_8(v0.clone(), v1, v14);
     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Done"); } LIT.with(|lit| lit.clone()) };
-    let v19: Rc<str> = status_count_text_8(v0, v1, v18);
-    let v21: Rc<str> = string_concat(&["", &*v3, "", &*v7, "", &*v11, "", &*v15, "", &*v19]);
-    v21
+    let v19: Rc<str> = status_count_text_8(v0.clone(), v1, v18);
+    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
+    let v23: Rc<str> = status_count_text_8(v0, v1, v22);
+    let v25: Rc<str> = string_concat(&["", &*v3, "", &*v7, "", &*v11, "", &*v15, "", &*v19, "", &*v23]);
+    v25
 }
 fn census_text_6(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: i32 = (v0.clone().len() as i32);
@@ -251,9 +253,11 @@ fn status_counts_json_13(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
     let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Paused"); } LIT.with(|lit| lit.clone()) };
     let v15: Rc<str> = status_count_json_14(v0.clone(), v1, v14);
     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Done"); } LIT.with(|lit| lit.clone()) };
-    let v19: Rc<str> = status_count_json_14(v0, v1, v18);
-    let v23: Rc<str> = string_concat(&[",\"counts\":{", &*v3, ",", &*v7, ",", &*v11, ",", &*v15, ",", &*v19, "}"]);
-    v23
+    let v19: Rc<str> = status_count_json_14(v0.clone(), v1, v18);
+    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
+    let v23: Rc<str> = status_count_json_14(v0, v1, v22);
+    let v27: Rc<str> = string_concat(&[",\"counts\":{", &*v3, ",", &*v7, ",", &*v11, ",", &*v15, ",", &*v19, ",", &*v23, "}"]);
+    v27
 }
 fn census_json_12(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: i32 = (v0.clone().len() as i32);
@@ -282,32 +286,37 @@ fn unsettled_from_16(mut v0: Rc<str>, mut v1: i32, mut v2: i32, mut v3: Rc<str>)
             let v9: Rc<str> = std::rc::Rc::<str>::from(v0.get(v8 as usize..v5 as usize).unwrap_or(""));
             let v10: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("inl "); } LIT.with(|lit| lit.clone()) };
             let v11: bool = v9.starts_with(&*v10);
-            let v18: bool = if v11 {
+            let v20: bool = if v11 {
                 let v12: i32 = 6i32;
                 let v13: i32 = field_start_3(v0.clone(), v7, v2, v12);
                 let v14: US0 = US0::US0_ScanPlain;
                 let v15: i32 = field_end_4(v0.clone(), v13, v2, v14);
                 let v16: Rc<str> = std::rc::Rc::<str>::from(v0.get(v13 as usize..v15 as usize).unwrap_or(""));
                 let v17: bool = &*v16 == "Done";
-                v17
+                if v17 {
+                    true
+                } else {
+                    let v18: bool = &*v16 == "Dropped";
+                    v18
+                }
             } else {
                 true
             };
-            let v19: i32 = 0i32;
-            let v20: i32 = field_start_3(v0.clone(), v7, v2, v19);
-            let v21: US0 = US0::US0_ScanPlain;
-            let v22: i32 = field_end_4(v0.clone(), v20, v2, v21);
-            let v23: Rc<str> = std::rc::Rc::<str>::from(v0.get(v20 as usize..v22 as usize).unwrap_or(""));
-            let v29: Rc<str> = if v18 {
+            let v21: i32 = 0i32;
+            let v22: i32 = field_start_3(v0.clone(), v7, v2, v21);
+            let v23: US0 = US0::US0_ScanPlain;
+            let v24: i32 = field_end_4(v0.clone(), v22, v2, v23);
+            let v25: Rc<str> = std::rc::Rc::<str>::from(v0.get(v22 as usize..v24 as usize).unwrap_or(""));
+            let v31: Rc<str> = if v20 {
                 v3
             } else {
-                let v24: i32 = (v23.clone().len() as i32);
-                let v25: i32 = v24.wrapping_sub(1i32);
-                let v26: Rc<str> = std::rc::Rc::<str>::from(v23.get(1i32 as usize..v25 as usize).unwrap_or(""));
-                let v28: Rc<str> = string_concat(&[&*v3, &*v26, "\n"]);
-                v28
+                let v26: i32 = (v25.clone().len() as i32);
+                let v27: i32 = v26.wrapping_sub(1i32);
+                let v28: Rc<str> = std::rc::Rc::<str>::from(v25.get(1i32 as usize..v27 as usize).unwrap_or(""));
+                let v30: Rc<str> = string_concat(&[&*v3, &*v28, "\n"]);
+                v30
             };
-            (v1, v3) = (v7, v29);
+            (v1, v3) = (v7, v31);
             continue;
         }
     }

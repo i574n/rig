@@ -231,6 +231,10 @@ name = "agile-status-changes"
 version = "0.0.0"
 
 [[package]]
+name = "agile-task-afters"
+version = "0.0.0"
+
+[[package]]
 name = "agile-task-annotation"
 version = "0.0.0"
 
@@ -948,6 +952,10 @@ name = "rig-agile-activity-migration"
 version = "0.0.0"
 
 [[package]]
+name = "rig-agile-batch"
+version = "0.0.0"
+
+[[package]]
 name = "rig-agile-cadence"
 version = "0.0.0"
 dependencies = [
@@ -1051,6 +1059,7 @@ dependencies = [
  "agile-todo-scan",
  "regex",
  "rig-agile-activity-migration",
+ "rig-agile-batch",
  "rig-agile-cadence",
  "rig-agile-changes",
  "rig-agile-gap",
@@ -1094,6 +1103,7 @@ dependencies = [
  "agile-planning-revision",
  "agile-quality-state",
  "agile-status-changes",
+ "agile-task-afters",
  "agile-task-asks",
  "agile-task-parents",
  "agile-task-revision",

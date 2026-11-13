@@ -1,0 +1,113 @@
+///- --package .
+:# verb static =
+    :< sm'_operators
+    :< afters
+
+:< sm'_operators
+:< afters
+
+:| after_change =
+    | AfterSet : string * string
+    | AfterCleared : string
+
+:| afters_write =
+    | AftersWritten : i32
+    | AftersRefused : string
+
+:= afters_schema () : string =
+    "///- --no-respell\nunion task_after =\n" ^^ "    | After :: string * string -> task_after\n"
+
+:= change_item = \|
+    | AfterSet (item, _) => item
+    | AfterCleared item => item
+
+:~ links_changed (links : list after_link) (change : after_change) : list after_link =
+    := kept = links |> listm'.filter (\ (link : after_link) => link.item <> change_item change)
+    ?= change ?|
+    | AfterSet (item, after) => listm.append kept [ { item = item; after = after } ]
+    | AfterCleared _ => kept
+
+:~ afters_text (links : list after_link) : string =
+    := rows = links |> listm.map (\ (link : after_link) => row_of_link link ++# "\n") |> sm'.concat_list ""
+    afters_schema () ++# rows
+
+:~ module_listed (format : agile_state_fs.project.project_format) (~package_text : string)
+    : agile_state_fs.project.module_listing
+    =
+    agile_state_fs.project.project_with_module format package_text "afters"
+
+:~ task_known (~agile_text : string) (~id : string) : bool = sm'.contains ("Task (\"" ++# id ++# "\"") agile_text
+
+:~ text_of (~path : string) : string = agile_state_fs.model.read_state path
+
+:~ replaced (~path : string) (~text : string) : bool =
+    ?= workspace_primitives.files.replace_file_checked path text ?|
+    | workspace_primitives.files.Replaced => !+
+    | _ => !-
+
+:~ afters_changed (~root : string) (change : after_change) : afters_write =
+    := state = sm'.replace "\\" "/" root ++# "/state"
+    := agile_text = text_of (state ++# "/agile.spi")
+    := path = state ++# "/afters.spi"
+    := before = text_of path
+    := unknown = \ (id : string) => ? task_known agile_text id ?> "" |: id
+    := missing =
+        ?= change ?|
+        | AfterSet (item, after) => ? unknown item <> "" ?> item |: unknown after
+        | AfterCleared item => unknown item
+    := looped =
+        ?= change ?|
+        | AfterSet (item, after) => item = after
+        | AfterCleared _ => !-
+    := links = links_changed (links_of_text before) change
+    ? agile_text = ""
+    ?> AftersRefused ("no backlog state at " ++# state)
+    |? missing <> ""
+    ?> AftersRefused ("no task " ++# missing ++# " in state/agile.spi")
+    |? looped
+    ?> AftersRefused "an item cannot be ordered after itself"
+    |? text_of path <> before
+    ?> AftersRefused "state/afters.spi changed since it was read; run again"
+    |? replaced path (afters_text links) = !-
+    ?> AftersRefused "state/afters.spi could not be written"
+    |:
+        := package = agile_state_fs.project.project_path_in state
+        := count = listm.length links
+        ?= module_listed (agile_state_fs.project.project_format_in state) (text_of package) ?|
+        | agile_state_fs.project.ModuleListed => AftersWritten count
+        | agile_state_fs.project.NoModulesSection =>
+            AftersRefused "the state project has no modules section to list afters in"
+        | agile_state_fs.project.ModuleAdded listed =>
+            ? replaced package listed ?> AftersWritten count |: AftersRefused "the state project was not updated"
+
+:~ after_edit_run () : i32 =
+    ?= env.command_line_arguments () ?|
+    | _ :: _ :: root :: item :: flag :: target :: [] ?& flag = "--after" =>
+        := change = ? target = "--clear" ?> AfterCleared item |: AfterSet (item, target)
+        ?= afters_changed root change ?|
+        | AftersWritten count =>
+            := after = ? target = "--clear" ?> "none" |: target
+            := counts = " after=" ++# after ++# " links=" ++# sm'.format count
+            console.write_line ("rig agile edit ok id=" ++# item ++# counts)
+            0i32
+        | AftersRefused reason =>
+            console.write_error_line ("rig error: agile edit --after: " ++# reason)
+            2i32
+    | _ =>
+        console.write_error_line "rig error: usage: agile edit <root> <id> --after <other-id|--clear>"
+        2i32
+
+///> rust
+:# an_item_has_one_after_row_and_clear_drops_it =
+    := one = links_changed [] (AfterSet ("A", "B"))
+    := moved = links_changed one (AfterSet ("A", "C"))
+    testing.expect (moved = [ { item = "A"; after = "C" } ]) "setting again replaces the row"
+    testing.expect (links_changed moved (AfterCleared "A") = []) "clear drops it"
+    := row = "inl after_of_a () = After (\"A\", \"B\")\n"
+    testing.expect (afters_text one = afters_schema () ++# row) "file text"
+    := words = agile_state_fs.project.SpiprojProject
+    := added = agile_state_fs.project.ModuleAdded "modules:\n    afters\n    agile\n"
+    testing.expect (module_listed words "modules:\n    agile\n" = added) "register"
+:= main () : i32 =
+    export "rig_agile_after_edit_run" after_edit_run
+    0i32

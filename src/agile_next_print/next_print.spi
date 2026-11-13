@@ -15,6 +15,7 @@
         unblocks : i32
         key : i32
         parent : string
+        after : string
     }
 
 :| next_format =
@@ -35,7 +36,8 @@
     := head = right_aligned (sm'.show rank) 3i32 ++# "  " ++# padded row.id 28i32 ++# " P" ++# sm'.show row.priority
     := middle = " D" ++# sm'.show row.difficulty ++# "  " ++# right_aligned minutes 7i32 ++# score
     := parent = ? row.parent = "" ?> "" |: "  parent=" ++# row.parent
-    := tail = "  unblocks=" ++# padded (sm'.show row.unblocks) 5i32 ++# parent
+    := after = ? row.after = "" ?> "" |: "  after=" ++# row.after
+    := tail = "  unblocks=" ++# padded (sm'.show row.unblocks) 5i32 ++# parent ++# after
     head ++# middle ++# tail ++# "  " ++# sm'.clip 72i32 row.title
 
 :~ row_json (rank : i32) (row : next_row) : string =
@@ -45,7 +47,7 @@
         ",\"difficulty\":" ++# sm'.show row.difficulty ++# ",\"minutes\":" ++# sm'.show row.minutes
         ++# ",\"estimated\":" ++# (? row.estimated ?> "true" |: "false")
     := rank_part = ",\"wsjf\":" ++# sm'.show row.key ++# ",\"unblocks\":" ++# sm'.show row.unblocks
-    := named = ",\"parent\":\"" ++# row.parent ++# "\",\"title\":\"" ++# row.title ++# "\"}"
+    := named = ",\"parent\":\"" ++# row.parent ++# "\",\"after\":\"" ++# row.after ++# "\",\"title\":\"" ++# row.title ++# "\"}"
     head ++# level ++# sizes ++# rank_part ++# named
 
 :~ ^ json_items (rows : array_base next_row) (at : i32) (~items : string) : string =
@@ -85,14 +87,15 @@
     := row =
         {
             id = "KIT-A"; title = "do it"; priority = 1i32; difficulty = 2i32; minutes = 45i32; estimated = !+
-            unblocks = 0i32; key = 25600i32; parent = "EPIC"
+            unblocks = 0i32; key = 25600i32; parent = "EPIC"; after = ""
         }
     := line = row_line !+ 1i32 row
     testing.expect (sm'.starts_with "  1  KIT-A" line && sm'.contains "wsjf=25600" line) line
     testing.expect (sm'.contains "  parent=EPIC  do it" line) line
+    testing.expect (sm'.contains "parent=EPIC  after=B  do it" (row_line !+ 1i32 { row ?| after = "B" })) "after column"
     testing.expect (sm'.contains "wsjf=" (row_line !- 1i32 row) = !-) "subagents print no score"
     := json_head = "{\"rank\":1,\"id\":\"KIT-A\",\"priority\":1,\"difficulty\":2,\"minutes\":45,\"estimated\":true,"
-    := json_tail = "\"wsjf\":25600,\"unblocks\":0,\"parent\":\"EPIC\",\"title\":\"do it\"}"
+    := json_tail = "\"wsjf\":25600,\"unblocks\":0,\"parent\":\"EPIC\",\"after\":\"\",\"title\":\"do it\"}"
     testing.expect (row_json 1i32 row = json_head ++# json_tail) (row_json 1i32 row)
     testing.expect (padded "ab" 4i32 = "ab  " && right_aligned "ab" 4i32 = "  ab") "padding"
     testing.expect (padded "abcde" 3i32 = "abcde") "never truncates"

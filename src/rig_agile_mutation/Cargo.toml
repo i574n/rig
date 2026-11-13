@@ -32,6 +32,7 @@ agile-todo-merge = { path = "../agile_todo_merge" }
 agile-note-seal = { path = "../agile_note_seal" }
 rig-agile-gap = { path = "../rig_agile_gap" }
 rig-agile-changes = { path = "../rig_agile_changes" }
+rig-agile-batch = { path = "../rig_agile_batch" }
 rig-agile-receipts = { path = "../rig_agile_receipts" }
 agile-title-notes = { path = "../agile_title_notes" }
 agile-task-rename = { path = "../agile_task_rename" }

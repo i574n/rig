@@ -195,7 +195,11 @@ owners. Use `-KitRoot` after relocating KIT, `-Filter` for selected members,
 and `-Offline` with a populated registry cache. Auxiliary probes and operating
 system adapters remain consumers by default; `-IncludeAuxiliary` also regenerates
 the declared probes. Checkout Rust changes only with explicit `-Publish`, after
-successful Cargo validation and a checkout snapshot check.
+successful Cargo validation and a checkout snapshot check. Every free worker takes a share of the owners whose `link:`
+units are done and builds them in one `--batch` compiler process, so package loading is paid once per batch; an owner
+left without a result (an error after another build in the same process, a timeout or a crash) goes to a fresh
+process. A shape exported by two linked units is imported from the first of them in the owner's `link:` list, so a
+batch emits the same crates as a fresh process. `-FreshProcess` compiles each owner in its own compiler process.
 
 ## Generic versus strict bundles
 
@@ -420,6 +424,15 @@ second run changes nothing.
 sequence, UTC instant, author and text, kept after the task's lines; the `task_note` union is added
 on first use), and `agile show` prints the notes under the title (`--json`: a `notes` array).
 
+`agile redact <root> --terms <file> --as <lane> [--apply]` replaces words that must not live in a
+backlog (machine names, for one) in the notes of any author. The terms file holds `term<TAB>role`
+rows, plus `author<TAB>old<TAB>new` rows that rename a note author (the earlier audit rows follow),
+and must sit outside the backlog, so the replaced words never enter it. A term matches as a
+whole word, ignoring case; a term inside an ID or a name joined by `-` or `_` stays. Without
+`--apply` the verb only counts the notes it would change, by author and by role; with it, each
+note keeps its author, instant and the rest of its text, and every change adds a `Redacted` row
+(item, note number, note author, who redacted, instant, roles applied) to `state/redactions.spi`.
+
 Typed facts belong in their own state files, not in note prose, so `next`, `cadence` and the lint can read them:
 
 - `agile edit <root> <ID> --wait <train|item|lane|user|when>:<value>` records what the item waits for in
@@ -436,6 +449,18 @@ Typed facts belong in their own state files, not in note prose, so `next`, `cade
 - `agile edit <root> <child-ID> --parent <epic-ID>` links a child to its epic in `state/parents.spi`;
   `--parent --clear` unlinks it.
 - `agile edit <root> <ID> --split milestones` splits an item whose notes carry a `MILESTONES:` list into children.
+- `agile edit <root> <ID> --after <OTHER-ID>` orders an item after another in `state/afters.spi` without hiding it:
+  `next --ready` still lists it, below the other item while that one is open, and the row shows `after=<OTHER-ID>`
+  (`after=<OTHER-ID>:done` once it closed, a relation to clear); `--after --clear` removes it. A dependency in
+  `deps` keeps hiding the item until it closes.
+- `Dropped` is a status for work that is obsolete or superseded: `list --open` and `next` leave it out, a dependency
+  on it counts as settled, the lint asks for the reason (`superseded by`, `replaced by`, `dropped because`, or a
+  `DropReason` marker), and the first `set ... Dropped` adds the status to an older state's `task_status` union.
+
+`agile batch <root> --file <plan.tsv> [--as <lane>] [--dry-run]` applies one op per line, fields split by TAB, so
+no text passes through a shell: `note <id> <text>`, `set <id> <progress|-> <status> [<expected status>]`,
+`wait <id> <kind:value>`, `edit <id> <field> <value>`, `ask <id> <ask>`, `after <id> <other id>`. A bad line
+refuses the whole plan before anything runs; each op prints its own receipt, and the last line carries the lint.
 
 `agile changes <root> --since <8h|30m|yyyy-mm-ddThh:mmZ> [--team <team>]` lists, by author, the notes and status
 changes written since then (a new item shows as its note 1). `set` without `--expect` warns on stderr when another
@@ -454,7 +479,10 @@ Quote `--paths` globs in Git Bash (`--paths 'src/a/**'`): unquoted, the shell ex
 each stamped tail, undated clauses included, into one note dated from its stamp (author `migrated`).
 `agile rename <root> <old-id> <new-id>` renames the task, its planning and notes, and every `deps`
 entry that names it, in one write; titles that mention the old id are counted, not changed. Each of
-these writes only if `state/agile.spi` still holds what the call read.
+these writes only if `state/agile.spi` still holds what the call read. The rows of `state/parents.spi`,
+`state/claims.spi`, `state/waits.spi` and `history/status_changes.spi` move to the new id too, with
+their bindings, in either spelling. When the old id is already gone and the new one exists, the same
+call only finishes those files (`items=0 completed=sides`), for a rename made before they were covered.
 
 `agile todos <root> [<path>...] [--json] [--tagged | --id <ID>]` lists the TODO comments in any language under each path
 (the backlog root when none is given) as `path:line  comment`, and reads nothing else. A git work tree

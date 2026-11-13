@@ -6,6 +6,7 @@
     | AgileBlocked
     | AgilePaused
     | AgileDone
+    | AgileDropped
 
 := i32_eq a b : bool = (a = b)
 := i32_le a b : bool = (a <= b)
@@ -44,6 +45,7 @@
     | AgileBlocked => !-
     | AgilePaused => !-
     | AgileDone => !-
+    | AgileDropped => !-
 
 := agile_status_code status : i32 =
     ?= status ?|
@@ -52,6 +54,7 @@
     | AgileBlocked => 2i32
     | AgilePaused => 3i32
     | AgileDone => 4i32
+    | AgileDropped => 5i32
 
 := agile_status_code_valid code : bool =
     ? code = 0i32
@@ -64,7 +67,11 @@
     ?> !+
     |? code = 4i32
     ?> !+
+    |? code = 5i32
+    ?> !+
     |: !-
+
+:= agile_status_word_settled (~word : string) : bool = word = "Done" || word = "Dropped"
 
 := agile_progress_valid value : bool =
     ? i32_nonnegative value ?> value <= 100i32 |: !-

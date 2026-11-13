@@ -53,7 +53,8 @@
 := empty_tally () : planning_tally =
     { tasks = 0i32; open_tasks = 0i32; estimated = 0i32; minutes = 0i32; open_minutes = 0i32 }
 
-:= task_unfinished (task : rollup_task) : bool = ? (task.status = "Done") ?> !- |: !+
+:= task_unfinished (task : rollup_task) : bool =
+    ? agile_mutation_policy.model.agile_status_word_settled task.status ?> !- |: !+
 := counted (flag : bool) : i32 = ? flag ?> 1i32 |: 0i32
 := counted_minutes (flag : bool) (minutes : i32) : i32 = ? flag ?> minutes |: 0i32
 

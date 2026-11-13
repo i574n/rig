@@ -1,0 +1,68 @@
+:< sm'_operators
+:< model
+
+:= usage () : string =
+    "rig error: usage: agile batch <root> --file <plan.tsv> [--as <lane>] [--dry-run] (one op per line, fields "
+    ++# "split by TAB: note <id> <text> | set <id> <progress|-> <status> [<expected status>] | wait <id> <kind:value> | "
+    ++# "edit <id> <field> <value> | ask <id> <scope; done when ...> | after <id> <other id>)"
+
+:~ last_line (~text : string) : string =
+    := kept = sm'.split_list "\n" (sm'.replace "\r" "" text) |> listm'.filter (\ (l : string) => sm'.trim l <> "")
+    listm.fold (\ (before : string) (l : string) => ? l = "" ?> before |: l) "" kept
+
+:~ ^ ops_run (~root : string) (~lane : string) (dry : bool) (ops : list batch_op) (at : i32) (failed : i32) : i32 =
+    ?= ops ?|
+    | [] => failed
+    | op :: rest =>
+        := head = "line " ++# sm'.show at ++# " " ++# op_word op ++# " " ++# op_id op
+        := args = argv_of root lane op
+        ? dry
+        ?>
+            console.write_line (head ++# " dry-run: rig " ++# sm'.concat_list " " args)
+            ops_run root lane dry rest (at + 1i32) failed
+        |:
+            := c = process.captured_by (env.current_executable ()) args !+
+            := code = ? c.ran ?> c.code |: 127i32
+            console.write_line (head ++# " exit=" ++# sm'.show code ++# ": " ++# last_line c.stdout)
+            ops_run root lane dry rest (at + 1i32) (? code = 0i32 ?> failed |: failed + 1i32)
+
+:~ lint_tail (~root : string) : string =
+    := c = process.captured_by (env.current_executable ()) [ "agile"; "lint"; root ] !+
+    last_line c.stdout
+
+:~ ^ flag_in (words : list string) (~name : string) : string =
+    ?= words ?|
+    | word :: value :: rest => ? word = name ?> value |: flag_in (value :: rest) name
+    | _ => ""
+
+:~ batch_run () : i32 =
+    := words = env.command_line_arguments ()
+    := flag = \ (name : string) => flag_in words name
+    := dry = listm'.exists' (\ (w : string) => w = "--dry-run") words
+    ?= words ?|
+    | _ :: _ :: root :: _ ?& flag "--file" <> "" =>
+        := lane = flag "--as"
+        ?= plan_of (file_system.read_text_or_empty (flag "--file")) ?|
+        | PlanRefused refused =>
+            refused |> listm.iter (\ (r : string) => console.write_error_line ("rig error: agile batch: " ++# r))
+            console.write_error_line (usage ())
+            2i32
+        | Plan [] =>
+            console.write_error_line ("rig error: agile batch: no ops in " ++# flag "--file")
+            2i32
+        | Plan ops =>
+            := failed = ops_run root lane dry ops 1i32 0i32
+            := total = (listm.length ops : i32)
+            := lint = ? dry ?> "" |: " lint: " ++# lint_tail root
+            := counts = " ops=" ++# sm'.show total ++# " failed=" ++# sm'.show failed
+            := verdict = ? failed = 0i32 ?> "ok" |: "failed"
+            := mode = " dry_run=" ++# (? dry ?> "yes" |: "no")
+            console.write_line ("rig agile batch " ++# verdict ++# counts ++# mode ++# lint)
+            ? failed = 0i32 ?> 0i32 |: 1i32
+    | _ =>
+        console.write_error_line (usage ())
+        2i32
+
+:= main () : i32 =
+    export "rig_agile_batch_run" batch_run
+    0i32

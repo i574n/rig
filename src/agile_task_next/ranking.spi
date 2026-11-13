@@ -2,8 +2,10 @@
 :# ranking static =
     :< rust_std_string.model
     :< workspace_primitives.bytes
+    :< sm'_operators
 
 :< workspace_primitives.bytes
+:< sm'_operators
 
 :| rank_role =
     | MainAgent
@@ -24,6 +26,7 @@
         idle_days : i32
         asked : bool
         parent : string
+        after : string
     }
 
 :| ^ task_list =
@@ -41,6 +44,7 @@
         unblocks : i32
         key : i32
         parent : string
+        after : string
     }
 
 :| ^ ranked_list =
@@ -106,7 +110,7 @@
         := comma = byte_find_from deps "," offset
         := stop = ? comma < 0i32 ?> byte_len deps |: comma
         := status = status_of tasks (rust_std_string.model.trim (byte_slice deps offset stop))
-        ? status = "" || status = "Done" ?> deps_settled tasks deps (stop + 1i32) |: !-
+        ? status = "" || agile_mutation_policy.model.agile_status_word_settled status ?> deps_settled tasks deps (stop + 1i32) |: !-
 
 :~ ^ open_deps (tasks : task_list) (~deps : string) (offset : i32) (count : i32) : i32 =
     ? byte_len deps <= offset
@@ -115,7 +119,8 @@
         := comma = byte_find_from deps "," offset
         := stop = ? comma < 0i32 ?> byte_len deps |: comma
         := status = status_of tasks (rust_std_string.model.trim (byte_slice deps offset stop))
-        open_deps tasks deps (stop + 1i32) (? status = "" || status = "Done" ?> count |: count + 1i32)
+        := settled = status = "" || agile_mutation_policy.model.agile_status_word_settled status
+        open_deps tasks deps (stop + 1i32) (? settled ?> count |: count + 1i32)
 
 :~ ^ unblocked_weight (tasks : task_list) (~id : string) (sum : i32) : i32 =
     ?= tasks ?|
@@ -176,9 +181,24 @@
     | MainAgent => aged_key base task.idle_days task.asked
     | Subagent => base
 
+:~ after_shown (tasks : task_list) (~after : string) : string =
+    := status = status_of tasks after
+    ? after = ""
+    ?> ""
+    |? status = ""
+    ?> after ++# ":gone"
+    |? agile_mutation_policy.model.agile_status_word_settled status
+    ?> after ++# ":" ++# sm'.to_lower status
+    |: after
+
+:~ after_waiting (tasks : task_list) (~after : string) : bool =
+    := status = status_of tasks after
+    after <> "" && status <> "" && not (agile_mutation_policy.model.agile_status_word_settled status)
+
 :~ ranked_of (role : rank_role) (tasks : task_list) (task : backlog_task) : ranked_task =
     := minutes = task_minutes task
     := unblocks = unblocked_weight tasks task.id 0i32
+    := base = role_key role (rank_key role (priority_weight task.priority + unblocks) minutes task.priority) task
     {
         id = task.id
         title = task.title
@@ -187,8 +207,9 @@
         minutes = minutes
         estimated = 0i32 < task.estimate
         unblocks = unblocks
-        key = role_key role (rank_key role (priority_weight task.priority + unblocks) minutes task.priority) task
+        key = ? after_waiting tasks task.after ?> base / 1000i32 |: base
         parent = task.parent
+        after = after_shown tasks task.after
     }
 
 := role_takes (role : rank_role) (task : backlog_task) : bool =
@@ -199,7 +220,10 @@
 :~ ^ open_child_of (tasks : task_list) (~id : string) : bool =
     ?= tasks ?|
     | NoTasks => !-
-    | TaskThen (task, rest) => ? task.parent = id && task.status <> "Done" ?> !+ |: open_child_of rest id
+    | TaskThen (task, rest) =>
+        ? task.parent = id && not (agile_mutation_policy.model.agile_status_word_settled task.status)
+        ?> !+
+        |: open_child_of rest id
 
 := aggregates (tasks : task_list) (task : backlog_task) : bool = task.kind = "Epic" && open_child_of tasks task.id
 
@@ -258,6 +282,7 @@
         idle_days = 0i32
         asked = !-
         parent = ""
+        after = ""
     }
 
 := sample_backlog () : task_list =
@@ -695,6 +720,16 @@
     testing.expect (deps_settled tasks "SHIPPED, MISSING" 0i32) "done and unknown dependencies do not block"
     testing.expect (unblocked_weight tasks "GATE" 0i32 = 256i32) "GATE unblocks a P1"
 
+///> rust
+:# an_after_relation_ranks_the_item_below_its_target_without_hiding_it =
+    := first = task_at "B" 3i32 1i32 "Planned" "" "" 60i32
+    := later = { first ?| id = "A"; title = "A"; priority = 1i32; after = "B" }
+    := tasks = TaskThen (later, TaskThen (first, NoTasks))
+    testing.expect (ranked_ids (ranking MainAgent tasks) = "B A") (ranked_ids (ranking MainAgent tasks))
+    := closed = TaskThen (later, TaskThen ({ first ?| status = "Done" }, NoTasks))
+    testing.expect (ranked_ids (ranking MainAgent closed) = "A") "a closed target frees the item"
+    testing.expect (after_shown closed "B" = "B:done" && after_shown tasks "B" = "B") "after shows a met relation"
+    testing.expect (after_shown tasks "NOPE" = "NOPE:gone") "a removed target"
 ///> rust
 :# an_epic_shares_its_weight_across_the_open_items_it_waits_on =
     := tasks =

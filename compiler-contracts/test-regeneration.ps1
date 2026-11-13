@@ -17,6 +17,7 @@ param(
     [switch]$KeepStaged,
     [switch]$Incremental,
     [ValidateRange(1, 8)][int]$Parallel = 1,
+    [switch]$FreshProcess,
     [string]$FrozenLib = ''
 )
 $ErrorActionPreference = 'Stop'
@@ -282,15 +283,8 @@ try {
         $pending = [Collections.Generic.List[object]]::new()
         foreach ($row in $rows) { $pending.Add($row) }
         $running = [Collections.Generic.List[object]]::new()
-        function Complete-Owner($job) {
-            $row = $job.Row
-            if ($job.TimedOut) {
-                $writer.WriteLine("$($row.Member)`ttimeout`t$($job.Watch.ElapsedMilliseconds)`tno result within $timeoutMs ms")
-                Write-Host "$($row.Member) timeout $($job.Watch.ElapsedMilliseconds) ms"
-                return
-            }
-            $elapsed = $job.Watch.ElapsedMilliseconds
-            if ($job.ExitCode -eq 0 -and (Test-Path -LiteralPath $row.Output)) {
+        function Complete-Row($row, [string]$status, [long]$elapsed, [string]$detail) {
+            if ($status -eq 'ok' -and (Test-Path -LiteralPath $row.Output)) {
                 $bytes = (Get-Item -LiteralPath $row.Output).Length
                 if ($Incremental) {
                     Copy-Item -LiteralPath $row.Output -Destination (Get-CachedOutput $row.Member) -Force
@@ -298,31 +292,57 @@ try {
                 }
                 $writer.WriteLine("$($row.Member)`tok`t$elapsed`tbytes=$bytes entry=main revision=process")
                 Write-Host "$($row.Member) ok $elapsed ms ($bytes bytes)"
-            } else {
-                $detail = ''
-                if (Test-Path -LiteralPath $job.Stderr) { $detail = ([IO.File]::ReadAllText($job.Stderr) -replace '[\t\r\n]', ' ').Trim() }
-                if (-not $detail -and (Test-Path -LiteralPath $job.Stdout)) { $detail = ([IO.File]::ReadAllText($job.Stdout) -replace '[\t\r\n]', ' ').Trim() }
-                if ($detail.Length -gt 500) { $detail = $detail.Substring(0, 500) }
-                if (-not $detail) { $detail = "compiler exit $($job.ExitCode)" }
-                $writer.WriteLine("$($row.Member)`terror`t$elapsed`t$detail")
-                Write-Host "$($row.Member) error $elapsed ms $detail"
+                return
             }
+            if ($status -eq 'ok') { $status = 'error'; $detail = 'compiler reported ok without writing the output' }
+            $detail = ($detail -replace '[\t\r\n]', ' ').Trim()
+            if ($detail.Length -gt 500) { $detail = $detail.Substring(0, 500) }
+            $writer.WriteLine("$($row.Member)`t$status`t$elapsed`t$detail")
+            Write-Host "$($row.Member) $status $elapsed ms $detail"
         }
-        while ($pending.Count -or $running.Count) {
-            $busy = @($running | ForEach-Object { $_.Row.Member })
-            $next = $null
-            if ($running.Count -lt $Parallel) {
-                foreach ($candidate in $pending) {
-                    $waits = @($linksOf[$candidate.Member] | Where-Object { $_ -in $busy -or $_ -in @($pending | ForEach-Object Member) })
-                    if (-not $waits.Count) { $next = $candidate; break }
+        function Complete-Batch($job) {
+            $seen = @{}
+            if (Test-Path -LiteralPath $job.Results) {
+                foreach ($line in [IO.File]::ReadAllLines($job.Results)) {
+                    $fields = $line -split "`t", 4
+                    if ($fields.Count -lt 3) { continue }
+                    $row = @($job.Rows | Where-Object Member -eq $fields[0])[0]
+                    if (-not $row -or $seen.ContainsKey($row.Member)) { continue }
+                    $seen[$row.Member] = $true
+                    Complete-Row $row $fields[1] ([long]$fields[2]) $(if ($fields.Count -ge 4) { $fields[3] } else { '' })
                 }
             }
-            if ($next) {
-                [void]$pending.Remove($next)
-                $row = $next
-                if ($Incremental -and $row.Member -notin $linkedUnits) {
+            $rest = @($job.Rows | Where-Object { -not $seen.ContainsKey($_.Member) })
+            if (-not $rest.Count) { return }
+            if (-not $seen.Count) {
+                $elapsed = $job.Watch.ElapsedMilliseconds
+                if ($job.TimedOut) { Complete-Row $rest[0] 'timeout' $elapsed "no result within $timeoutMs ms" }
+                else {
+                    $detail = ''
+                    if (Test-Path -LiteralPath $job.Stderr) { $detail = ([IO.File]::ReadAllText($job.Stderr) -replace '[\t\r\n]', ' ').Trim() }
+                    if (-not $detail -and (Test-Path -LiteralPath $job.Stdout)) { $detail = ([IO.File]::ReadAllText($job.Stdout) -replace '[\t\r\n]', ' ').Trim() }
+                    if (-not $detail) { $detail = "compiler exit $($job.ExitCode)" }
+                    Complete-Row $rest[0] 'error' $elapsed $detail
+                }
+                $rest = @($rest | Select-Object -Skip 1)
+            }
+            for ($i = $rest.Count - 1; $i -ge 0; $i--) { $pending.Insert(0, $rest[$i]) }
+            if ($rest.Count) { Write-Host "$($rest.Count) owners without a result go to a fresh compiler process" }
+        }
+        $batchCount = 0
+        while ($pending.Count -or $running.Count) {
+            $busy = @($running | ForEach-Object { $_.Rows.Member })
+            $chunk = @()
+            $skipped = $false
+            if ($running.Count -lt $Parallel) {
+                $pendingMembers = @($pending | ForEach-Object Member)
+                $ready = @($pending | Where-Object { $member = $_.Member; -not @($linksOf[$member] | Where-Object { $_ -in $busy -or $_ -in $pendingMembers }).Count })
+                foreach ($row in $ready) {
+                    if (-not $Incremental -or $row.Member -in $linkedUnits) { continue }
                     $stored = Get-StoredKey $row.Member
                     if ($stored[0] -and $stored[0] -eq $ownerKeys[$row.Member] -and (Test-Path -LiteralPath $row.Original) -and (Get-FileHash -LiteralPath $row.Original -Algorithm SHA256).Hash -eq $stored[1] -and (Restore-UnitGraphs $row)) {
+                        [void]$pending.Remove($row)
+                        $skipped = $true
                         Copy-Item -LiteralPath $row.Original -Destination $row.Output -Force
                         $writer.WriteLine("$($row.Member)`tok`t0`tbytes=$((Get-Item -LiteralPath $row.Output).Length) entry=main revision=unchanged-inputs")
                         Write-Host "$($row.Member) unchanged inputs; compile skipped"
@@ -330,12 +350,25 @@ try {
                     }
                     $cached = Get-CachedOutput $row.Member
                     if ((Test-Path -LiteralPath $cached) -and (Restore-UnitGraphs $row)) {
+                        [void]$pending.Remove($row)
+                        $skipped = $true
                         Copy-Item -LiteralPath $cached -Destination $row.Output -Force
                         $writer.WriteLine("$($row.Member)`tok`t0`tbytes=$((Get-Item -LiteralPath $row.Output).Length) entry=main revision=cached-output")
                         Write-Host "$($row.Member) same inputs as an earlier regeneration; cached output reused"
-                        continue
                     }
                 }
+                $ready = @($ready | Where-Object { $pending.Contains($_) })
+                if ($ready.Count) {
+                    $size = if (-not $FreshProcess) { [int][Math]::Ceiling($ready.Count / ($Parallel - $running.Count)) } else { 1 }
+                    $chunk = @($ready | Select-Object -First $size)
+                }
+            }
+            if ($chunk.Count) {
+                foreach ($row in $chunk) { [void]$pending.Remove($row) }
+                $batchCount++
+                $jobsFile = Join-Path $work "logs/batch-$batchCount.jobs.tsv"
+                $resultsFile = Join-Path $work "logs/batch-$batchCount.results.tsv"
+                [IO.File]::WriteAllLines($jobsFile, [string[]]@($chunk | ForEach-Object { "$($_.Member)`tRust`t$($_.Input)`t$($_.Output)" }), $encoding)
                 $start = [Diagnostics.ProcessStartInfo]::new()
                 $start.FileName = $dotnet
                 $start.WorkingDirectory = $work
@@ -343,23 +376,24 @@ try {
                 $start.CreateNoWindow = $true
                 $start.RedirectStandardOutput = $true
                 $start.RedirectStandardError = $true
-                foreach ($argument in @($compiler, '--backend', 'Rust', $row.Input, $row.Output)) { $start.ArgumentList.Add($argument) }
+                $start.Environment['SPIRAL_BATCH_RECYCLE_AFTER_ERROR'] = '1'
+                foreach ($argument in @($compiler, '--batch', $jobsFile, $resultsFile, '--timeout-ms', [string]$timeoutMs)) { $start.ArgumentList.Add($argument) }
                 $proc = [Diagnostics.Process]::new()
                 $proc.StartInfo = $start
-                if (-not $proc.Start()) { throw "Cannot start compiler for $($row.Member)" }
+                if (-not $proc.Start()) { throw "Cannot start compiler for $(($chunk | ForEach-Object Member) -join ', ')" }
                 $running.Add([pscustomobject]@{
-                    Row = $row; Proc = $proc; Watch = [Diagnostics.Stopwatch]::StartNew()
+                    Rows = $chunk; Proc = $proc; Watch = [Diagnostics.Stopwatch]::StartNew(); Deadline = [long]$timeoutMs * $chunk.Count + 30000
                     OutTask = $proc.StandardOutput.ReadToEndAsync(); ErrTask = $proc.StandardError.ReadToEndAsync()
-                    Stdout = (Join-Path $work "logs/$($row.Member).out"); Stderr = (Join-Path $work "logs/$($row.Member).err")
+                    Stdout = (Join-Path $work "logs/batch-$batchCount.out"); Stderr = (Join-Path $work "logs/batch-$batchCount.err"); Results = $resultsFile
                     TimedOut = $false; ExitCode = -1
                 })
                 continue
             }
             foreach ($job in @($running)) {
                 $done = $job.Proc.HasExited
-                if (-not $done -and $job.Watch.ElapsedMilliseconds -ge $timeoutMs) {
+                if (-not $done -and $job.Watch.ElapsedMilliseconds -ge $job.Deadline) {
                     $job.Proc.Kill($true)
-                    if (-not $job.Proc.WaitForExit(10000)) { throw "Compiler did not terminate: $($job.Row.Member)" }
+                    if (-not $job.Proc.WaitForExit(10000)) { throw "Compiler did not terminate: $(($job.Rows | ForEach-Object Member) -join ', ')" }
                     $job.TimedOut = $true
                     $done = $true
                 }
@@ -370,9 +404,9 @@ try {
                 if (-not $job.TimedOut) { $job.ExitCode = $job.Proc.ExitCode }
                 $job.Proc.Dispose()
                 [void]$running.Remove($job)
-                Complete-Owner $job
+                Complete-Batch $job
             }
-            if ($running.Count -ge $Parallel -or (-not $next -and $running.Count)) { Start-Sleep -Milliseconds 100 }
+            if (-not $skipped -and $running.Count) { Start-Sleep -Milliseconds 100 }
         }
     } finally {
         $writer.Dispose()

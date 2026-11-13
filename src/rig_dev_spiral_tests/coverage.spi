@@ -37,23 +37,9 @@
 
 := baseline_files () : list string =
     [
-        "src/agile_claim_cli/cli_check.spi"
-        "src/agile_task_parents/parents_cli.spi"
-        "src/agile_task_split/split_cli.spi"
-        "src/rig_agile_cadence/cadence_cli.spi"
-        "src/rig_agile_sprint_change/sprint_cli.spi"
-        "src/rig_granular_rounds/rounds.spi"
         "src/rig_handoff_degrade/degrade.spi"
         "src/rig_handoff_degrade/inputs.spi"
-        "src/rig_heal_nameof/heal.spi"
-        "src/rig_lint_precheck/precheck.spi"
-        "src/rig_lint_walk/walk.spi"
-        "src/rig_mirror_plan/plan.spi"
-        "src/rig_read_query/encoding.spi"
-        "src/rig_read_query/read.spi"
         "src/rig_ready_rank/rank.spi"
-        "src/rig_repo_affected/affected_cli.spi"
-        "src/rig_window_wait/wait_cli.spi"
     ]
 
 :~ listed_in (rows : list string) (~path : string) : bool = listm'.exists' (\ (row : string) => row = path) rows

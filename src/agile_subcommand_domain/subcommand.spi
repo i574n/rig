@@ -28,6 +28,7 @@
     | AgileCadence
     | AgileNote
     | AgileNoteEdit
+    | AgileRedact
     | AgileNotes
     | AgileRename
     | AgileSeal
@@ -47,6 +48,7 @@
     | AgileTerms
     | AgileChanges
     | AgileAsk
+    | AgileBatch
 
 := agile_subcommand_spec = function
     | AgileInit => { name = "init"; shape = "<root> [--dialect symbols|words]" }
@@ -58,7 +60,7 @@
         {
             name = "list"
             shape =
-                "<root> [all|Planned|Active|Blocked|Paused|Done] [--team <team>] [--tag <tag>] [--prefix <ID "
+                "<root> [all|Planned|Active|Blocked|Paused|Done|Dropped] [--team <team>] [--tag <tag>] [--prefix <ID "
                 ^^ "prefix>] [--words <w1,w2>] [--open] [--ready] [--blocked] [--sort priority|difficulty|progress] "
                 ^^ "[--load light|medium|heavy|none] [--assignee agent|pair|user|none] [--json]"
         }
@@ -67,7 +69,9 @@
     | AgileSet =>
         {
             name = "set"
-            shape = "<root> <id> <progress|-> <Planned|Active|Blocked|Paused|Done> [--expect <status>] [--as <lane>]"
+            shape =
+                "<root> <id> <progress|-> <Planned|Active|Blocked|Paused|Done|Dropped> [--expect <status>] "
+                ^^ "[--as <lane>]"
         }
     | AgileAdd =>
         {
@@ -87,7 +91,7 @@
             shape =
                 "<root> <id> <title|title-append|kind|priority|difficulty|deps|tags|estimate|load|assignee> <value> | "
                 ^^ "<root> <id> --wait <train|item|lane|user|job|when>:<value> | --wait-remove <kind>:<value> | "
-                ^^ "--wait --clear | --parent <EPIC> | --split milestones | "
+                ^^ "--wait --clear | --parent <EPIC> | --after <ID> | --after --clear | --split milestones | "
                 ^^ "--asked <yyyy-mm-dd> --ask \"<scope>; done when <criterion>\" | --asked --clear | "
                 ^^ "<field> <value> --expect <current value>"
         }
@@ -114,6 +118,7 @@
                 "<root> <id> <note-number> <text> [--as <author>] [--append] [--expect-at <iso> | --expect-prefix "
                 ^^ "<text>]"
         }
+    | AgileRedact => { name = "redact"; shape = "<root> --terms <file outside the backlog> --as <lane> [--apply]" }
     | AgileNotes => { name = "notes"; shape = "from-title <root> <id>" }
     | AgileRename => { name = "rename"; shape = "<root> <old-id> <new-id>" }
     | AgileSeal => { name = "seal"; shape = "<root> [--dry-run]" }
@@ -140,6 +145,7 @@
     | AgileReceipts => { name = "receipts"; shape = "<root> verify <file>" }
     | AgileTerms => { name = "terms"; shape = "<root>" }
     | AgileAsk => { name = "ask"; shape = "<root> <id> \"<scope>; done when <criterion>\"" }
+    | AgileBatch => { name = "batch"; shape = "<root> --file <plan.tsv> [--as <lane>] [--dry-run]" }
 
 :| agile_parsed =
     | AgileKnown : agile_subcommand
@@ -183,7 +189,8 @@
     | AgileClaim | AgileRelease | AgileBegin | AgileRecord | AgileSet | AgileAdd | AgileGap | AgileEdit => WritesState
     | AgileMigrateTags | AgileMigrateActivity | AgileNote | AgileNoteEdit | AgileNotes | AgileRename => WritesState
     | AgileSeal | AgileTodos | AgileRoots | AgileViewAdd | AgileSprint | AgileDialect | AgileCheck => WritesState
-    | AgileAsk => WritesState
+    | AgileAsk | AgileRedact => WritesState
+    | AgileBatch => ReadsState
 
 :| root_place =
     | RootLeads

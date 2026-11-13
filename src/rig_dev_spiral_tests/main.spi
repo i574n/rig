@@ -50,8 +50,13 @@
 
 :~ daemon_only_and_cleared (attempts : list string) : bool =
     := rows = attempts |> listm.fold (\ (acc : list string) (a : string) => listm.append acc (attempt_rows a)) []
-    := genuine = rows |> listm'.exists' (\ (row : string) => sm'.ends_with "\treal" row)
+    := genuine = rows |> listm'.exists' (\ (row : string) => sm'.contains "\treal\t" row)
     genuine |> not && rows <> [] && (rows |> listm'.exists' (\ (row : string) => cleared attempts row |> not) |> not)
+
+:~ real_failures_printed (~attempt : string) : () =
+    := shown = \ (row : string) => sm'.contains "\treal\t" row || sm'.ends_with "\t\tpartial" row
+    := line = \ (row : string) => "spiral notebooks: failed " ++# sm'.replace "\t" "  " row
+    attempt_rows attempt |> listm'.filter shown |> listm.iter (\ (row : string) => console.write_error_line (line row))
 
 :~ ^ chunk_outcome
     (root : string) (target : string) (chunk : string) (timeout : u64) (attempt : i32) (seen : list string)
@@ -80,6 +85,7 @@
     | chunk :: rest =>
         := outcome = chunk_outcome root target chunk timeout 1i32 []
         := batch = notebook.batch_code outcome
+        := _ = ? batch <> 0i32 ?> real_failures_printed (notebook.failure_rows chunk (notebook.batch_text outcome)) |: ()
         := failed = failures_of (notebook.batch_failed outcome) 0i32 (? batch = 0i32 ?> 1i32 |: batch) failures
         batches_run root target timeout rest failed (? code = 0i32 ?> batch |: code)
 

@@ -114,7 +114,17 @@
     | FileReadable file =>
         := raw = loaded_string (read_text file)
         := original = records_text raw
-        ? negated (task_declared original old)
+        ? negated (task_declared original old) && task_declared original new
+        ?>
+            := sides = sides_renamed root old new
+            := listed = sm'.concat_list "; " sides.problems
+            ? sides.problems <> []
+            ?> rename_failure ("side files not finished (" ++# listed ++# "); run it again") old
+            |:
+                := done = "rig agile rename ok old=" ++# old ++# " new=" ++# new ++# " items=0 completed=sides"
+                := counts = " side_rows=" ++# i32_text sides.rows ++# " side_bindings=" ++# i32_text sides.bindings
+                stdout_line (done ++# counts)
+        |? negated (task_declared original old)
         ?> rename_failure "no task with this id" old
         |? task_declared original new
         ?> rename_failure ("the id " ++# new ++# " is already taken") old

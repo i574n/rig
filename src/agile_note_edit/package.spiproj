@@ -12,4 +12,5 @@ packages:
 link:
     agile_note_edit_args
 modules:
+    redact
     note_edit

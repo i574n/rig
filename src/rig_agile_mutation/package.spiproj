@@ -17,11 +17,13 @@ packages:
     agile_task_tree
     rig_agile_gap
     rig_agile_changes
+    rig_agile_batch
     rig_agile_receipts
 link:
     agile_task_tree
     rig_agile_gap
     rig_agile_changes
+    rig_agile_batch
     rig_agile_receipts
     rig_agile_lock
     rig_agile_activity_migration

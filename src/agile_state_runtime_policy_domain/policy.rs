@@ -114,7 +114,13 @@ fn agile_status_name_code_4(mut v0: Rc<str>) -> u64 {
                         let v11: u64 = 4i32 as u64;
                         v11
                     } else {
-                        v1
+                        let v12: bool = "Dropped" == &*v0;
+                        if v12 {
+                            let v13: u64 = 5i32 as u64;
+                            v13
+                        } else {
+                            v1
+                        }
                     }
                 }
             }
@@ -394,11 +400,19 @@ fn agile_status_text_21(mut v0: Rc<str>) -> Rc<str> {
     };
     let v18: Rc<str> = std::rc::Rc::<str>::from((4i32).to_string());
     let v19: bool = &*v0 == &*v18;
-    if v19 {
+    let v21: Rc<str> = if v19 {
         let v20: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Done"); } LIT.with(|lit| lit.clone()) };
         v20
     } else {
         v17
+    };
+    let v22: Rc<str> = std::rc::Rc::<str>::from((5i32).to_string());
+    let v23: bool = &*v0 == &*v22;
+    if v23 {
+        let v24: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
+        v24
+    } else {
+        v21
     }
 }
 fn closure16() -> Rc<dyn Fn(Rc<str>) -> Rc<str>> {

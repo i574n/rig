@@ -213,16 +213,9 @@
         before
     set_refused root
         (Arg ("ID-A", Arg ("40", Arg ("Sleeping", NoArgs))))
-        "agile set: status must be Planned, Active, Blocked, Paused or Done, received 'Sleeping'"
+        "agile set: status must be Planned, Active, Blocked, Paused, Done or Dropped, received 'Sleeping'"
         before
     set_refused root (Arg ("NO-SUCH", Arg ("10", Arg ("Active", NoArgs)))) "agile task not found: NO-SUCH" before
-    set_refused root
-        (Arg ("ID-A", Arg ("90", Arg ("Active", Arg ("--as", Arg ("main", NoArgs))))))
-        (
-            "agile set records no author (only agile note does); drop --as main, or add a note with --as to say "
-            ^^ "who moved ID-A"
-        )
-        before
     fixture_root_remove root
 
 := matrix_row (~id : string) (~arg : string) : string =

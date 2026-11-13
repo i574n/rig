@@ -25,6 +25,7 @@ enum US1 {
     US1_AgileCadence,
     US1_AgileNote,
     US1_AgileNoteEdit,
+    US1_AgileRedact,
     US1_AgileNotes,
     US1_AgileRename,
     US1_AgileSeal,
@@ -44,6 +45,7 @@ enum US1 {
     US1_AgileTerms,
     US1_AgileChanges,
     US1_AgileAsk,
+    US1_AgileBatch,
 }
 #[derive(Clone)]
 enum US0 {
@@ -210,138 +212,152 @@ fn agile_subcommand_of_1(mut v0: Rc<str>) -> US0 {
     } else {
         v85
     };
-    let v90: bool = &*v0 == "notes";
+    let v90: bool = &*v0 == "redact";
     let v93: US0 = if v90 {
-        let v91: US1 = US1::US1_AgileNotes;
+        let v91: US1 = US1::US1_AgileRedact;
         US0::US0_AgileKnown(v91)
     } else {
         v89
     };
-    let v94: bool = &*v0 == "rename";
+    let v94: bool = &*v0 == "notes";
     let v97: US0 = if v94 {
-        let v95: US1 = US1::US1_AgileRename;
+        let v95: US1 = US1::US1_AgileNotes;
         US0::US0_AgileKnown(v95)
     } else {
         v93
     };
-    let v98: bool = &*v0 == "seal";
+    let v98: bool = &*v0 == "rename";
     let v101: US0 = if v98 {
-        let v99: US1 = US1::US1_AgileSeal;
+        let v99: US1 = US1::US1_AgileRename;
         US0::US0_AgileKnown(v99)
     } else {
         v97
     };
-    let v102: bool = &*v0 == "todos";
+    let v102: bool = &*v0 == "seal";
     let v105: US0 = if v102 {
-        let v103: US1 = US1::US1_AgileTodos;
+        let v103: US1 = US1::US1_AgileSeal;
         US0::US0_AgileKnown(v103)
     } else {
         v101
     };
-    let v106: bool = &*v0 == "next";
+    let v106: bool = &*v0 == "todos";
     let v109: US0 = if v106 {
-        let v107: US1 = US1::US1_AgileNext;
+        let v107: US1 = US1::US1_AgileTodos;
         US0::US0_AgileKnown(v107)
     } else {
         v105
     };
-    let v110: bool = &*v0 == "claim";
+    let v110: bool = &*v0 == "next";
     let v113: US0 = if v110 {
-        let v111: US1 = US1::US1_AgileClaim;
+        let v111: US1 = US1::US1_AgileNext;
         US0::US0_AgileKnown(v111)
     } else {
         v109
     };
-    let v114: bool = &*v0 == "release";
+    let v114: bool = &*v0 == "claim";
     let v117: US0 = if v114 {
-        let v115: US1 = US1::US1_AgileRelease;
+        let v115: US1 = US1::US1_AgileClaim;
         US0::US0_AgileKnown(v115)
     } else {
         v113
     };
-    let v118: bool = &*v0 == "claims";
+    let v118: bool = &*v0 == "release";
     let v121: US0 = if v118 {
-        let v119: US1 = US1::US1_AgileClaims;
+        let v119: US1 = US1::US1_AgileRelease;
         US0::US0_AgileKnown(v119)
     } else {
         v117
     };
-    let v122: bool = &*v0 == "roots";
+    let v122: bool = &*v0 == "claims";
     let v125: US0 = if v122 {
-        let v123: US1 = US1::US1_AgileRoots;
+        let v123: US1 = US1::US1_AgileClaims;
         US0::US0_AgileKnown(v123)
     } else {
         v121
     };
-    let v126: bool = &*v0 == "links";
+    let v126: bool = &*v0 == "roots";
     let v129: US0 = if v126 {
-        let v127: US1 = US1::US1_AgileLinks;
+        let v127: US1 = US1::US1_AgileRoots;
         US0::US0_AgileKnown(v127)
     } else {
         v125
     };
-    let v130: bool = &*v0 == "wip";
+    let v130: bool = &*v0 == "links";
     let v133: US0 = if v130 {
-        let v131: US1 = US1::US1_AgileWip;
+        let v131: US1 = US1::US1_AgileLinks;
         US0::US0_AgileKnown(v131)
     } else {
         v129
     };
-    let v134: bool = &*v0 == "views";
+    let v134: bool = &*v0 == "wip";
     let v137: US0 = if v134 {
-        let v135: US1 = US1::US1_AgileViews;
+        let v135: US1 = US1::US1_AgileWip;
         US0::US0_AgileKnown(v135)
     } else {
         v133
     };
-    let v138: bool = &*v0 == "view";
+    let v138: bool = &*v0 == "views";
     let v141: US0 = if v138 {
-        let v139: US1 = US1::US1_AgileView;
+        let v139: US1 = US1::US1_AgileViews;
         US0::US0_AgileKnown(v139)
     } else {
         v137
     };
-    let v142: bool = &*v0 == "view-add";
+    let v142: bool = &*v0 == "view";
     let v145: US0 = if v142 {
-        let v143: US1 = US1::US1_AgileViewAdd;
+        let v143: US1 = US1::US1_AgileView;
         US0::US0_AgileKnown(v143)
     } else {
         v141
     };
-    let v146: bool = &*v0 == "dialect";
+    let v146: bool = &*v0 == "view-add";
     let v149: US0 = if v146 {
-        let v147: US1 = US1::US1_AgileDialect;
+        let v147: US1 = US1::US1_AgileViewAdd;
         US0::US0_AgileKnown(v147)
     } else {
         v145
     };
-    let v150: bool = &*v0 == "receipts";
+    let v150: bool = &*v0 == "dialect";
     let v153: US0 = if v150 {
-        let v151: US1 = US1::US1_AgileReceipts;
+        let v151: US1 = US1::US1_AgileDialect;
         US0::US0_AgileKnown(v151)
     } else {
         v149
     };
-    let v154: bool = &*v0 == "terms";
+    let v154: bool = &*v0 == "receipts";
     let v157: US0 = if v154 {
-        let v155: US1 = US1::US1_AgileTerms;
+        let v155: US1 = US1::US1_AgileReceipts;
         US0::US0_AgileKnown(v155)
     } else {
         v153
     };
-    let v158: bool = &*v0 == "changes";
+    let v158: bool = &*v0 == "terms";
     let v161: US0 = if v158 {
-        let v159: US1 = US1::US1_AgileChanges;
+        let v159: US1 = US1::US1_AgileTerms;
         US0::US0_AgileKnown(v159)
     } else {
         v157
     };
-    let v162: bool = &*v0 == "ask";
-    if v162 {
-        let v163: US1 = US1::US1_AgileAsk;
+    let v162: bool = &*v0 == "changes";
+    let v165: US0 = if v162 {
+        let v163: US1 = US1::US1_AgileChanges;
         US0::US0_AgileKnown(v163)
     } else {
         v161
+    };
+    let v166: bool = &*v0 == "ask";
+    let v169: US0 = if v166 {
+        let v167: US1 = US1::US1_AgileAsk;
+        US0::US0_AgileKnown(v167)
+    } else {
+        v165
+    };
+    let v170: bool = &*v0 == "batch";
+    if v170 {
+        let v171: US1 = US1::US1_AgileBatch;
+        US0::US0_AgileKnown(v171)
+    } else {
+        v169
     }
 }
 fn writes_named_0(mut v0: Rc<str>) -> bool {
@@ -349,12 +365,15 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
     match v1 {
         US0::US0_AgileKnown(v2) => {
             let v2: US1 = v2;
-            let v84: US2 = match v2 {
+            let v88: US2 = match v2 {
                 US1::US1_AgileAdd => {
                     US2::US2_WritesState
                 }
                 US1::US1_AgileAsk => {
                     US2::US2_WritesState
+                }
+                US1::US1_AgileBatch => {
+                    US2::US2_ReadsState
                 }
                 US1::US1_AgileBegin => {
                     US2::US2_WritesState
@@ -431,6 +450,9 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                 US1::US1_AgileRecord => {
                     US2::US2_WritesState
                 }
+                US1::US1_AgileRedact => {
+                    US2::US2_WritesState
+                }
                 US1::US1_AgileRelease => {
                     US2::US2_WritesState
                 }
@@ -474,7 +496,7 @@ fn writes_named_0(mut v0: Rc<str>) -> bool {
                     US2::US2_ReadsState
                 }
             };
-            match v84 {
+            match v88 {
                 US2::US2_WritesState => {
                     true
                 }

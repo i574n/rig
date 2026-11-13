@@ -4,7 +4,7 @@
 
 :< sm'_operators
 
-:== task_annotation = { id : string; idle_days : i32; parent : string; asked : bool }
+:== task_annotation = { id : string; idle_days : i32; parent : string; asked : bool; after : string }
 
 :== note_hour_index = dict.dict string i64
 
@@ -14,16 +14,19 @@
     | NoteRow :: state_row
     | ParentRow :: state_row
     | AskRow :: state_row
+    | AfterRow :: state_row
 
 := row_prefix = \|
     | NoteRow => "inl note_of_"
     | ParentRow => "inl parent_of_"
     | AskRow => "inl asked_of_"
+    | AfterRow => "inl after_of_"
 
 := row_file = \|
     | NoteRow => "agile.spi"
     | ParentRow => "parents.spi"
     | AskRow => "asks.spi"
+    | AfterRow => "afters.spi"
 
 :~ stamp_hour (~stamp : string) : i64 =
     := number = \ (from : i32) (size : i32) =>
@@ -68,7 +71,8 @@
 := idle_days_of (now_hour : i64) (last : i64) : i32 =
     ? last <= 0i64 || now_hour <= last ?> 0i32 |: conv ((now_hour - last) / 24i64)
 
-:~ annotation_for (hours : note_hour_index) (parents : row_pairs) (asks : row_pairs) (now_hour : i64) (~id : string)
+:~ annotation_for
+    (hours : note_hour_index) (parents : row_pairs) (asks : row_pairs) (afters : row_pairs) (now_hour : i64) (~id : string)
     : task_annotation
     =
     {
@@ -76,18 +80,19 @@
         idle_days = idle_days_of now_hour (optionm'.default_value 0i64 (dict.find id hours))
         parent = optionm'.default_value "" (dict.find id parents)
         asked = optionm'.default_value "" (dict.find id asks) <> ""
+        after = optionm'.default_value "" (dict.find id afters)
     }
 
 :~ ^ annotate_into
     (out : array_base task_annotation) (hours : note_hour_index) (parents : row_pairs) (asks : row_pairs)
-    (now_hour : i64) (ids : array_base string) (at : i32)
+    (afters : row_pairs) (now_hour : i64) (ids : array_base string) (at : i32)
     : ()
     =
     ? am'.length_base ids <= at
     ?> ()
     |:
-        am'.set_base out at (annotation_for hours parents asks now_hour (am'.index_base at ids))
-        annotate_into out hours parents asks now_hour ids (at + 1i32)
+        am'.set_base out at (annotation_for hours parents asks afters now_hour (am'.index_base at ids))
+        annotate_into out hours parents asks afters now_hour ids (at + 1i32)
 
 :~ annotations_of
     ((root, text, ids_text, now_hour) : string * string * string * i64)
@@ -96,10 +101,11 @@
     := hours = note_hours_from (sm'.lines text) 0i32 (dict.empty ())
     := parents = state_pairs root ParentRow
     := asks = state_pairs root AskRow
+    := afters = state_pairs root AfterRow
     := ids = sm'.lines ids_text |> am'.base
     := count = am'.length_base ids
     := out = am'.create_base count
-    annotate_into out hours parents asks now_hour ids 0i32
+    annotate_into out hours parents asks afters now_hour ids 0i32
     out
 
 ///> rust
@@ -112,10 +118,16 @@
     := parents = pairs_from ParentRow parent_rows 0i32 (dict.empty ())
     := ask_rows = sm'.lines "inl asked_of_a () = Asked (\"A\", \"2026-11-01\", \"q\")"
     := asks = pairs_from AskRow ask_rows 0i32 (dict.empty ())
-    := seen = annotation_for hours parents asks now "A"
-    testing.expect (seen = { id = "A"; idle_days = 3i32; parent = "EPIC"; asked = !+ }) "three days since the last note"
-    := fresh = annotation_for hours parents asks now "B"
-    testing.expect (fresh = { id = "B"; idle_days = 0i32; parent = ""; asked = !- }) "an item with no rows is fresh"
+    := after_rows = sm'.lines "inl after_of_a () = After (\"A\", \"B\")"
+    := afters = pairs_from AfterRow after_rows 0i32 (dict.empty ())
+    := seen = annotation_for hours parents asks afters now "A"
+    testing.expect
+        (seen = { id = "A"; idle_days = 3i32; parent = "EPIC"; asked = !+; after = "B" })
+        "three days since the last note, ordered after B"
+    := fresh = annotation_for hours parents asks afters now "B"
+    testing.expect
+        (fresh = { id = "B"; idle_days = 0i32; parent = ""; asked = !-; after = "" })
+        "an item with no rows is fresh"
 := main () : i32 =
     export "rig_agile_task_annotations" annotations_of
     0i32

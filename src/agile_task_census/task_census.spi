@@ -65,7 +65,7 @@
     ?> ids
     |:
         := arguments = (found + (task_arguments_offset ()))
-        := settled = ? declared_task text found ?> ((tuple_field text arguments length 6i32) = "Done") |: !+
+        := settled = ? declared_task text found ?> agile_status_word_settled (tuple_field text arguments length 6i32) |: !+
         := id = tuple_field text arguments length 0i32
         unsettled_from text arguments length (
             ? settled ?> ids |: ids ++# (byte_slice id 1i32 (byte_len id - 1i32)) ++# "\n"

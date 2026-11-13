@@ -35,6 +35,7 @@ enum US1 {
     US1_AgileCadence,
     US1_AgileNote,
     US1_AgileNoteEdit,
+    US1_AgileRedact,
     US1_AgileNotes,
     US1_AgileRename,
     US1_AgileSeal,
@@ -54,6 +55,7 @@ enum US1 {
     US1_AgileTerms,
     US1_AgileChanges,
     US1_AgileAsk,
+    US1_AgileBatch,
 }
 #[derive(Clone)]
 enum US0 {
@@ -235,138 +237,152 @@ fn agile_subcommand_of_3(mut v0: Rc<str>) -> US0 {
     } else {
         v85
     };
-    let v90: bool = &*v0 == "notes";
+    let v90: bool = &*v0 == "redact";
     let v93: US0 = if v90 {
-        let v91: US1 = US1::US1_AgileNotes;
+        let v91: US1 = US1::US1_AgileRedact;
         US0::US0_AgileKnown(v91)
     } else {
         v89
     };
-    let v94: bool = &*v0 == "rename";
+    let v94: bool = &*v0 == "notes";
     let v97: US0 = if v94 {
-        let v95: US1 = US1::US1_AgileRename;
+        let v95: US1 = US1::US1_AgileNotes;
         US0::US0_AgileKnown(v95)
     } else {
         v93
     };
-    let v98: bool = &*v0 == "seal";
+    let v98: bool = &*v0 == "rename";
     let v101: US0 = if v98 {
-        let v99: US1 = US1::US1_AgileSeal;
+        let v99: US1 = US1::US1_AgileRename;
         US0::US0_AgileKnown(v99)
     } else {
         v97
     };
-    let v102: bool = &*v0 == "todos";
+    let v102: bool = &*v0 == "seal";
     let v105: US0 = if v102 {
-        let v103: US1 = US1::US1_AgileTodos;
+        let v103: US1 = US1::US1_AgileSeal;
         US0::US0_AgileKnown(v103)
     } else {
         v101
     };
-    let v106: bool = &*v0 == "next";
+    let v106: bool = &*v0 == "todos";
     let v109: US0 = if v106 {
-        let v107: US1 = US1::US1_AgileNext;
+        let v107: US1 = US1::US1_AgileTodos;
         US0::US0_AgileKnown(v107)
     } else {
         v105
     };
-    let v110: bool = &*v0 == "claim";
+    let v110: bool = &*v0 == "next";
     let v113: US0 = if v110 {
-        let v111: US1 = US1::US1_AgileClaim;
+        let v111: US1 = US1::US1_AgileNext;
         US0::US0_AgileKnown(v111)
     } else {
         v109
     };
-    let v114: bool = &*v0 == "release";
+    let v114: bool = &*v0 == "claim";
     let v117: US0 = if v114 {
-        let v115: US1 = US1::US1_AgileRelease;
+        let v115: US1 = US1::US1_AgileClaim;
         US0::US0_AgileKnown(v115)
     } else {
         v113
     };
-    let v118: bool = &*v0 == "claims";
+    let v118: bool = &*v0 == "release";
     let v121: US0 = if v118 {
-        let v119: US1 = US1::US1_AgileClaims;
+        let v119: US1 = US1::US1_AgileRelease;
         US0::US0_AgileKnown(v119)
     } else {
         v117
     };
-    let v122: bool = &*v0 == "roots";
+    let v122: bool = &*v0 == "claims";
     let v125: US0 = if v122 {
-        let v123: US1 = US1::US1_AgileRoots;
+        let v123: US1 = US1::US1_AgileClaims;
         US0::US0_AgileKnown(v123)
     } else {
         v121
     };
-    let v126: bool = &*v0 == "links";
+    let v126: bool = &*v0 == "roots";
     let v129: US0 = if v126 {
-        let v127: US1 = US1::US1_AgileLinks;
+        let v127: US1 = US1::US1_AgileRoots;
         US0::US0_AgileKnown(v127)
     } else {
         v125
     };
-    let v130: bool = &*v0 == "wip";
+    let v130: bool = &*v0 == "links";
     let v133: US0 = if v130 {
-        let v131: US1 = US1::US1_AgileWip;
+        let v131: US1 = US1::US1_AgileLinks;
         US0::US0_AgileKnown(v131)
     } else {
         v129
     };
-    let v134: bool = &*v0 == "views";
+    let v134: bool = &*v0 == "wip";
     let v137: US0 = if v134 {
-        let v135: US1 = US1::US1_AgileViews;
+        let v135: US1 = US1::US1_AgileWip;
         US0::US0_AgileKnown(v135)
     } else {
         v133
     };
-    let v138: bool = &*v0 == "view";
+    let v138: bool = &*v0 == "views";
     let v141: US0 = if v138 {
-        let v139: US1 = US1::US1_AgileView;
+        let v139: US1 = US1::US1_AgileViews;
         US0::US0_AgileKnown(v139)
     } else {
         v137
     };
-    let v142: bool = &*v0 == "view-add";
+    let v142: bool = &*v0 == "view";
     let v145: US0 = if v142 {
-        let v143: US1 = US1::US1_AgileViewAdd;
+        let v143: US1 = US1::US1_AgileView;
         US0::US0_AgileKnown(v143)
     } else {
         v141
     };
-    let v146: bool = &*v0 == "dialect";
+    let v146: bool = &*v0 == "view-add";
     let v149: US0 = if v146 {
-        let v147: US1 = US1::US1_AgileDialect;
+        let v147: US1 = US1::US1_AgileViewAdd;
         US0::US0_AgileKnown(v147)
     } else {
         v145
     };
-    let v150: bool = &*v0 == "receipts";
+    let v150: bool = &*v0 == "dialect";
     let v153: US0 = if v150 {
-        let v151: US1 = US1::US1_AgileReceipts;
+        let v151: US1 = US1::US1_AgileDialect;
         US0::US0_AgileKnown(v151)
     } else {
         v149
     };
-    let v154: bool = &*v0 == "terms";
+    let v154: bool = &*v0 == "receipts";
     let v157: US0 = if v154 {
-        let v155: US1 = US1::US1_AgileTerms;
+        let v155: US1 = US1::US1_AgileReceipts;
         US0::US0_AgileKnown(v155)
     } else {
         v153
     };
-    let v158: bool = &*v0 == "changes";
+    let v158: bool = &*v0 == "terms";
     let v161: US0 = if v158 {
-        let v159: US1 = US1::US1_AgileChanges;
+        let v159: US1 = US1::US1_AgileTerms;
         US0::US0_AgileKnown(v159)
     } else {
         v157
     };
-    let v162: bool = &*v0 == "ask";
-    if v162 {
-        let v163: US1 = US1::US1_AgileAsk;
+    let v162: bool = &*v0 == "changes";
+    let v165: US0 = if v162 {
+        let v163: US1 = US1::US1_AgileChanges;
         US0::US0_AgileKnown(v163)
     } else {
         v161
+    };
+    let v166: bool = &*v0 == "ask";
+    let v169: US0 = if v166 {
+        let v167: US1 = US1::US1_AgileAsk;
+        US0::US0_AgileKnown(v167)
+    } else {
+        v165
+    };
+    let v170: bool = &*v0 == "batch";
+    if v170 {
+        let v171: US1 = US1::US1_AgileBatch;
+        US0::US0_AgileKnown(v171)
+    } else {
+        v169
     }
 }
 fn state_lock_held_4(mut v0: bool, mut v1: Rc<str>) -> bool {
@@ -530,7 +546,7 @@ fn agile_entry_0() -> i32 {
                         } else {
                             0i32
                         };
-                        let v316: i32 = match v3 {
+                        let v328: i32 = match v3 {
                             US1::US1_AgileAdd => {
                                 let v125: i32 = agile_argument_count_7();
                                 let v126: bool = 8i32 <= v125;
@@ -551,6 +567,16 @@ fn agile_entry_0() -> i32 {
                                     agile_usage_error_2()
                                 }
                             }
+                            US1::US1_AgileBatch => {
+                                let v145: i32 = agile_argument_count_7();
+                                let v146: bool = 2i32 <= v145;
+                                if v146 {
+                                    let v147: i32 = rig_agile_batch::rig_agile_batch_run();
+                                    v147
+                                } else {
+                                    agile_usage_error_2()
+                                }
+                            }
                             US1::US1_AgileBegin => {
                                 let v52: i32 = 3i32;
                                 let v53: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v52 ;
@@ -562,11 +588,11 @@ fn agile_entry_0() -> i32 {
                                 }
                             }
                             US1::US1_AgileCadence => {
-                                let v200: i32 = agile_argument_count_7();
-                                let v201: bool = 2i32 <= v200;
-                                if v201 {
-                                    let v202: i32 = rig_agile_cadence::rig_agile_cadence_run();
-                                    v202
+                                let v205: i32 = agile_argument_count_7();
+                                let v206: bool = 2i32 <= v205;
+                                if v206 {
+                                    let v207: i32 = rig_agile_cadence::rig_agile_cadence_run();
+                                    v207
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -597,11 +623,11 @@ fn agile_entry_0() -> i32 {
                                 method8()
                             }
                             US1::US1_AgileClaims => {
-                                let v253: i32 = agile_argument_count_7();
-                                let v254: bool = 2i32 <= v253;
-                                if v254 {
-                                    let v255: i32 = agile_claim_cli::rig_agile_claims_run();
-                                    v255
+                                let v263: i32 = agile_argument_count_7();
+                                let v264: bool = 2i32 <= v263;
+                                if v264 {
+                                    let v265: i32 = agile_claim_cli::rig_agile_claims_run();
+                                    v265
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -617,18 +643,18 @@ fn agile_entry_0() -> i32 {
                                 }
                             }
                             US1::US1_AgileEdit => {
-                                let v157: i32 = 5i32;
-                                let v158: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v157 ;
-                                let v161: bool = if v158 {
+                                let v162: i32 = 5i32;
+                                let v163: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v162 ;
+                                let v166: bool = if v163 {
                                     true
                                 } else {
-                                    let v159: i32 = 7i32;
-                                    let v160: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v159 ;
-                                    v160
+                                    let v164: i32 = 7i32;
+                                    let v165: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v164 ;
+                                    v165
                                 };
-                                if v161 {
-                                    let v162: i32 = rig_agile_routes::rig_agile_edit_route();
-                                    v162
+                                if v166 {
+                                    let v167: i32 = rig_agile_routes::rig_agile_edit_route();
+                                    v167
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -644,11 +670,11 @@ fn agile_entry_0() -> i32 {
                                 }
                             }
                             US1::US1_AgileGate => {
-                                let v195: i32 = agile_argument_count_7();
-                                let v196: bool = 2i32 <= v195;
-                                if v196 {
-                                    let v197: i32 = rig_agile_gate::rig_agile_gate_run();
-                                    v197
+                                let v200: i32 = agile_argument_count_7();
+                                let v201: bool = 2i32 <= v200;
+                                if v201 {
+                                    let v202: i32 = rig_agile_gate::rig_agile_gate_run();
+                                    v202
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -686,21 +712,21 @@ fn agile_entry_0() -> i32 {
                                 method9()
                             }
                             US1::US1_AgileLinks => {
-                                let v263: i32 = agile_argument_count_7();
-                                let v264: bool = 2i32 <= v263;
-                                if v264 {
-                                    let v265: i32 = agile_memory_links::rig_agile_links_run();
-                                    v265
+                                let v273: i32 = agile_argument_count_7();
+                                let v274: bool = 2i32 <= v273;
+                                if v274 {
+                                    let v275: i32 = agile_memory_links::rig_agile_links_run();
+                                    v275
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileLint => {
-                                let v190: i32 = agile_argument_count_7();
-                                let v191: bool = 2i32 <= v190;
-                                if v191 {
-                                    let v192: i32 = rig_agile_lint::rig_agile_lint_run();
-                                    v192
+                                let v195: i32 = agile_argument_count_7();
+                                let v196: bool = 2i32 <= v195;
+                                if v196 {
+                                    let v197: i32 = rig_agile_lint::rig_agile_lint_run();
+                                    v197
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -716,95 +742,95 @@ fn agile_entry_0() -> i32 {
                                 }
                             }
                             US1::US1_AgileMigrateActivity => {
-                                let v180: i32 = agile_argument_count_7();
-                                let v181: bool = 2i32 <= v180;
-                                if v181 {
-                                    let v182: i32 = rig_agile_activity_migration::rig_agile_migrate_activity();
-                                    v182
+                                let v185: i32 = agile_argument_count_7();
+                                let v186: bool = 2i32 <= v185;
+                                if v186 {
+                                    let v187: i32 = rig_agile_activity_migration::rig_agile_migrate_activity();
+                                    v187
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileMigrateTags => {
-                                let v175: i32 = agile_argument_count_7();
-                                let v176: bool = 2i32 <= v175;
-                                if v176 {
-                                    let v177: i32 = agile_planning_migration::rig_agile_migrate_tags_run();
-                                    v177
+                                let v180: i32 = agile_argument_count_7();
+                                let v181: bool = 2i32 <= v180;
+                                if v181 {
+                                    let v182: i32 = agile_planning_migration::rig_agile_migrate_tags_run();
+                                    v182
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileNext => {
-                                let v242: i32 = agile_argument_count_7();
-                                let v243: bool = 2i32 <= v242;
-                                if v243 {
-                                    let v244: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--any"); } LIT.with(|lit| lit.clone()) };
-                                    let v245: bool = std::env::args().skip(4i32 as usize).any(|argument| argument == &*v244);
-                                    if v245 {
-                                        let v246: i32 = agile_claim_cli::rig_agile_claim_run();
-                                        v246
+                                let v252: i32 = agile_argument_count_7();
+                                let v253: bool = 2i32 <= v252;
+                                if v253 {
+                                    let v254: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--any"); } LIT.with(|lit| lit.clone()) };
+                                    let v255: bool = std::env::args().skip(4i32 as usize).any(|argument| argument == &*v254);
+                                    if v255 {
+                                        let v256: i32 = agile_claim_cli::rig_agile_claim_run();
+                                        v256
                                     } else {
-                                        let v247: i32 = agile_task_next::rig_agile_next_run();
-                                        v247
+                                        let v257: i32 = agile_task_next::rig_agile_next_run();
+                                        v257
                                     }
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileNote => {
-                                let v205: i32 = 4i32;
-                                let v206: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v205 ;
-                                let v209: bool = if v206 {
+                                let v210: i32 = 4i32;
+                                let v211: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v210 ;
+                                let v214: bool = if v211 {
                                     true
                                 } else {
-                                    let v207: i32 = 6i32;
-                                    let v208: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v207 ;
-                                    v208
+                                    let v212: i32 = 6i32;
+                                    let v213: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v212 ;
+                                    v213
                                 };
-                                if v209 {
-                                    let v210: i32 = agile_task_notes::rig_agile_note_run();
-                                    v210
-                                } else {
-                                    agile_usage_error_2()
-                                }
-                            }
-                            US1::US1_AgileNoteEdit => {
-                                let v213: i32 = agile_argument_count_7();
-                                let v214: bool = 2i32 <= v213;
                                 if v214 {
-                                    let v215: i32 = agile_note_edit::rig_agile_note_edit_run();
+                                    let v215: i32 = agile_task_notes::rig_agile_note_run();
                                     v215
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
-                            US1::US1_AgileNotes => {
-                                let v218: i32 = 4i32;
-                                let v219: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v218 ;
+                            US1::US1_AgileNoteEdit => {
+                                let v218: i32 = agile_argument_count_7();
+                                let v219: bool = 2i32 <= v218;
                                 if v219 {
-                                    let v220: i32 = agile_title_notes::rig_agile_notes_from_title_run();
+                                    let v220: i32 = agile_note_edit::rig_agile_note_edit_run();
                                     v220
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
+                            US1::US1_AgileNotes => {
+                                let v228: i32 = 4i32;
+                                let v229: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v228 ;
+                                if v229 {
+                                    let v230: i32 = agile_title_notes::rig_agile_notes_from_title_run();
+                                    v230
+                                } else {
+                                    agile_usage_error_2()
+                                }
+                            }
                             US1::US1_AgilePlan => {
-                                let v170: i32 = agile_argument_count_7();
-                                let v171: bool = 2i32 <= v170;
-                                if v171 {
-                                    let v172: i32 = agile_planning_rollup::rig_agile_planning_rollup_run();
-                                    v172
+                                let v175: i32 = agile_argument_count_7();
+                                let v176: bool = 2i32 <= v175;
+                                if v176 {
+                                    let v177: i32 = agile_planning_rollup::rig_agile_planning_rollup_run();
+                                    v177
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileReceipts => {
-                                let v145: i32 = agile_argument_count_7();
-                                let v146: bool = 2i32 <= v145;
-                                if v146 {
-                                    let v147: i32 = rig_agile_receipts::rig_agile_receipts_verify_run();
-                                    v147
+                                let v150: i32 = agile_argument_count_7();
+                                let v151: bool = 2i32 <= v150;
+                                if v151 {
+                                    let v152: i32 = rig_agile_receipts::rig_agile_receipts_verify_run();
+                                    v152
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -821,35 +847,45 @@ fn agile_entry_0() -> i32 {
                                     agile_usage_error_2()
                                 }
                             }
-                            US1::US1_AgileRelease => {
-                                method8()
-                            }
-                            US1::US1_AgileRename => {
-                                let v223: i32 = 4i32;
-                                let v224: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v223 ;
+                            US1::US1_AgileRedact => {
+                                let v223: i32 = agile_argument_count_7();
+                                let v224: bool = 2i32 <= v223;
                                 if v224 {
-                                    let v225: i32 = agile_task_rename::rig_agile_rename_run();
+                                    let v225: i32 = agile_note_edit::rig_agile_redact_run();
                                     v225
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
+                            US1::US1_AgileRelease => {
+                                method8()
+                            }
+                            US1::US1_AgileRename => {
+                                let v233: i32 = 4i32;
+                                let v234: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v233 ;
+                                if v234 {
+                                    let v235: i32 = agile_task_rename::rig_agile_rename_run();
+                                    v235
+                                } else {
+                                    agile_usage_error_2()
+                                }
+                            }
                             US1::US1_AgileRoots => {
-                                let v258: i32 = agile_argument_count_7();
-                                let v259: bool = 2i32 <= v258;
-                                if v259 {
-                                    let v260: i32 = agile_todo_roots::rig_agile_roots_run();
-                                    v260
+                                let v268: i32 = agile_argument_count_7();
+                                let v269: bool = 2i32 <= v268;
+                                if v269 {
+                                    let v270: i32 = agile_todo_roots::rig_agile_roots_run();
+                                    v270
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileSeal => {
-                                let v228: i32 = agile_argument_count_7();
-                                let v229: bool = 2i32 <= v228;
-                                if v229 {
-                                    let v230: i32 = agile_note_seal::rig_agile_seal_run();
-                                    v230
+                                let v238: i32 = agile_argument_count_7();
+                                let v239: bool = 2i32 <= v238;
+                                if v239 {
+                                    let v240: i32 = agile_note_seal::rig_agile_seal_run();
+                                    v240
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -927,21 +963,21 @@ fn agile_entry_0() -> i32 {
                                 }
                             }
                             US1::US1_AgileShow => {
-                                let v165: i32 = agile_argument_count_7();
-                                let v166: bool = 2i32 <= v165;
-                                if v166 {
-                                    let v167: i32 = agile_task_inspection::rig_agile_show_run();
-                                    v167
+                                let v170: i32 = agile_argument_count_7();
+                                let v171: bool = 2i32 <= v170;
+                                if v171 {
+                                    let v172: i32 = agile_task_inspection::rig_agile_show_run();
+                                    v172
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileSprint => {
-                                let v185: i32 = agile_argument_count_7();
-                                let v186: bool = 2i32 <= v185;
-                                if v186 {
-                                    let v187: i32 = rig_agile_sprint::rig_agile_sprint_run();
-                                    v187
+                                let v190: i32 = agile_argument_count_7();
+                                let v191: bool = 2i32 <= v190;
+                                if v191 {
+                                    let v192: i32 = rig_agile_sprint::rig_agile_sprint_run();
+                                    v192
                                 } else {
                                     agile_usage_error_2()
                                 }
@@ -950,28 +986,28 @@ fn agile_entry_0() -> i32 {
                                 method9()
                             }
                             US1::US1_AgileTerms => {
-                                let v150: i32 = 2i32;
-                                let v151: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v150 ;
-                                if v151 {
-                                    let v152: i32 = 1i32;
-                                    let v153: Rc<str> = usize::try_from(v152).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
-                                    terms_report_10(v153)
+                                let v155: i32 = 2i32;
+                                let v156: bool = i32::try_from(std::env::args().skip(2).count()).unwrap_or(i32::MAX) == v155 ;
+                                if v156 {
+                                    let v157: i32 = 1i32;
+                                    let v158: Rc<str> = usize::try_from(v157).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
+                                    terms_report_10(v158)
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                             US1::US1_AgileTodos => {
-                                let v233: i32 = agile_argument_count_7();
-                                let v234: bool = 2i32 <= v233;
-                                if v234 {
-                                    let v235: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--record"); } LIT.with(|lit| lit.clone()) };
-                                    let v236: bool = std::env::args().skip(4i32 as usize).any(|argument| argument == &*v235);
-                                    if v236 {
-                                        let v237: i32 = agile_todo_record::rig_agile_todos_record_run();
-                                        v237
+                                let v243: i32 = agile_argument_count_7();
+                                let v244: bool = 2i32 <= v243;
+                                if v244 {
+                                    let v245: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--record"); } LIT.with(|lit| lit.clone()) };
+                                    let v246: bool = std::env::args().skip(4i32 as usize).any(|argument| argument == &*v245);
+                                    if v246 {
+                                        let v247: i32 = agile_todo_record::rig_agile_todos_record_run();
+                                        v247
                                     } else {
-                                        let v238: i32 = agile_todo_scan::rig_agile_todos_run();
-                                        v238
+                                        let v248: i32 = agile_todo_scan::rig_agile_todos_run();
+                                        v248
                                     }
                                 } else {
                                     agile_usage_error_2()
@@ -987,27 +1023,27 @@ fn agile_entry_0() -> i32 {
                                 method11()
                             }
                             US1::US1_AgileWip => {
-                                let v268: i32 = agile_argument_count_7();
-                                let v269: bool = 2i32 <= v268;
-                                if v269 {
-                                    let v270: i32 = agile_todo_merge::rig_agile_wip_run();
-                                    v270
+                                let v278: i32 = agile_argument_count_7();
+                                let v279: bool = 2i32 <= v278;
+                                if v279 {
+                                    let v280: i32 = agile_todo_merge::rig_agile_wip_run();
+                                    v280
                                 } else {
                                     agile_usage_error_2()
                                 }
                             }
                         };
                         state_lock_done_12(v35, v26);
-                        v316
+                        v328
                     } else {
-                        let v321: bool = match v3 {
+                        let v333: bool = match v3 {
                             US1::US1_AgileClaim => {
                                 true
                             }
                             US1::US1_AgileNext => {
-                                let v317: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--any"); } LIT.with(|lit| lit.clone()) };
-                                let v318: bool = std::env::args().skip(4i32 as usize).any(|argument| argument == &*v317);
-                                v318
+                                let v329: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("--any"); } LIT.with(|lit| lit.clone()) };
+                                let v330: bool = std::env::args().skip(4i32 as usize).any(|argument| argument == &*v329);
+                                v330
                             }
                             US1::US1_AgileRelease => {
                                 true
@@ -1016,11 +1052,11 @@ fn agile_entry_0() -> i32 {
                                 false
                             }
                         };
-                        if v321 {
-                            let v322: i32 = 0i32;
-                            let v323: Rc<str> = usize::try_from(v322).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
-                            let v325: Rc<str> = string_concat(&["rig agile ", &*v323, " refused reason=contention"]);
-                            let v326: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v325.to_string() + "
+                        if v333 {
+                            let v334: i32 = 0i32;
+                            let v335: Rc<str> = usize::try_from(v334).ok().and_then(|index| std::env::args().skip(2).nth(index)).map_or_else(std::rc::Rc::<str>::default, std::rc::Rc::<str>::from);
+                            let v337: Rc<str> = string_concat(&["rig agile ", &*v335, " refused reason=contention"]);
+                            let v338: i32 = std::io::Write::write_all(&mut std::io::stdout(), (v337.to_string() + "
 ").as_bytes()).map(|_| 0i32).unwrap_or(2i32);
                             4i32
                         } else {

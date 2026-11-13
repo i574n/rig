@@ -1,0 +1,97 @@
+///- --package .
+:# model static =
+    :< sm'_operators
+
+:< sm'_operators
+
+:| batch_op =
+    | NoteOp : string * string
+    | SetOp : string * string * string * string
+    | WaitOp : string * string
+    | EditOp : string * string * string
+    | AskOp : string * string
+    | AfterOp : string * string
+
+:| parsed_line =
+    | Op : batch_op
+    | Skipped
+    | LineRefused : string
+
+:| parsed_plan =
+    | Plan : list batch_op
+    | PlanRefused : list string
+
+:~ op_of_line (~line : string) : parsed_line =
+    := text = sm'.replace "\r" "" line
+    ? sm'.trim text = "" || sm'.starts_with "#" (sm'.trim text)
+    ?> Skipped
+    |:
+        ?= sm'.split_list "\t" text ?|
+        | op :: id :: body :: [] ?& op = "note" => Op (NoteOp (id, body))
+        | op :: id :: progress :: status :: [] ?& op = "set" => Op (SetOp (id, progress, status, ""))
+        | op :: id :: progress :: status :: expected :: [] ?& op = "set" => Op (SetOp (id, progress, status, expected))
+        | op :: id :: wait :: [] ?& op = "wait" => Op (WaitOp (id, wait))
+        | op :: id :: field :: value :: [] ?& op = "edit" => Op (EditOp (id, field, value))
+        | op :: id :: ask :: [] ?& op = "ask" => Op (AskOp (id, ask))
+        | op :: id :: other :: [] ?& op = "after" => Op (AfterOp (id, other))
+        | _ => LineRefused text
+
+:== plan_read = { ops : list batch_op; refused : list string; at : i32 }
+
+:~ line_read (read : plan_read) (~line : string) : plan_read =
+    := moved = { read ?| at = read.at + 1i32 }
+    ?= op_of_line line ?|
+    | Op op => { moved ?| ops = op :: read.ops }
+    | Skipped => moved
+    | LineRefused shown => { moved ?| refused = ("line " ++# sm'.show read.at ++# ": " ++# shown) :: read.refused }
+
+:~ plan_of (~text : string) : parsed_plan =
+    := read = sm'.split_list "\n" text |> listm.fold line_read { ops = []; refused = []; at = 1i32 }
+    ?= read.refused ?|
+    | [] => Plan (listm.rev read.ops)
+    | refused => PlanRefused (listm.rev refused)
+
+:~ op_id (op : batch_op) : string =
+    ?= op ?|
+    | NoteOp (id, _) => id
+    | SetOp (id, _, _, _) => id
+    | WaitOp (id, _) => id
+    | EditOp (id, _, _) => id
+    | AskOp (id, _) => id
+    | AfterOp (id, _) => id
+
+:~ op_word (op : batch_op) : string =
+    ?= op ?|
+    | NoteOp _ => "note"
+    | SetOp _ => "set"
+    | WaitOp _ => "wait"
+    | EditOp _ => "edit"
+    | AskOp _ => "ask"
+    | AfterOp _ => "after"
+
+:~ argv_of (~root : string) (~lane : string) (op : batch_op) : list string =
+    := signed = ? lane = "" ?> [] |: [ "--as"; lane ]
+    ?= op ?|
+    | NoteOp (id, body) => listm.append [ "agile"; "note"; root; id; body ] signed
+    | SetOp (id, progress, status, expected) =>
+        := guard = ? expected = "" ?> [] |: [ "--expect"; expected ]
+        listm.append (listm.append [ "agile"; "set"; root; id; progress; status ] guard) signed
+    | WaitOp (id, wait) => [ "agile"; "edit"; root; id; "--wait"; wait ]
+    | EditOp (id, field, value) => [ "agile"; "edit"; root; id; field; value ]
+    | AskOp (id, ask) => [ "agile"; "ask"; root; id; ask ]
+    | AfterOp (id, other) => [ "agile"; "edit"; root; id; "--after"; other ]
+
+///> rust
+:# a_plan_line_becomes_one_typed_op_and_a_bad_line_refuses_the_plan =
+    := verbatim = "uses \"quotes\" and C:\\paths"
+    testing.expect (op_of_line ("note\tT-A\t" ++# verbatim) = Op (NoteOp ("T-A", verbatim))) "verbatim text"
+    := guarded = Op (SetOp ("T-A", "-", "Done", "Active"))
+    testing.expect (op_of_line "set\tT-A\t-\tDone\tActive" = guarded) "set with expect"
+    testing.expect (op_of_line "# comment" = Skipped && op_of_line "" = Skipped) "comments and blanks"
+    := plan = plan_of "note\tT-A\tfirst\r\nwait\tT-A\tuser:the user\n"
+    testing.expect (plan = Plan [ NoteOp ("T-A", "first"); WaitOp ("T-A", "user:the user") ]) "two ops in order"
+    := refused = PlanRefused [ "line 2: bogus\tT-A" ]
+    testing.expect (plan_of "note\tT-A\tok\nbogus\tT-A\n" = refused) "the bad line is named"
+    := args = argv_of "R" "rig" (SetOp ("T-A", "-", "Done", "Active"))
+    testing.expect (args = [ "agile"; "set"; "R"; "T-A"; "-"; "Done"; "--expect"; "Active"; "--as"; "rig" ]) "set argv"
+    testing.expect (argv_of "R" "" (AfterOp ("A", "B")) = [ "agile"; "edit"; "R"; "A"; "--after"; "B" ]) "after argv"

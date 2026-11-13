@@ -12,6 +12,7 @@ packages:
     agile_quality_lint
     agile_quality_state
     agile_task_parents
+    agile_task_afters
     agile_task_asks
     agile_task_split
     agile_status_changes
@@ -19,6 +20,7 @@ packages:
 link:
     agile_quality_state
     agile_task_parents
+    agile_task_afters
     agile_task_asks
     agile_task_split
     agile_status_changes

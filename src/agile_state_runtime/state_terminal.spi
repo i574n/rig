@@ -158,9 +158,9 @@ inl emit_typecheck () : () = global """
     fn agile_typecheck_external_drift(path: &Path, compiler: &SpiralCompilerDiscovery) -> Result<(), String> { agile_typecheck_spiral(compiler, path) }
 
     fn agile_list_from_args(args: Vec<String>) -> Result<(), String> {
-        if !(2..=3).contains(&args.len()) || agile_arg(&args, 0, "subcommand")? != "list" { return Err("agile list expects list <root> [Planned|Active|Blocked|Paused|Done]".to_owned()); }
+        if !(2..=3).contains(&args.len()) || agile_arg(&args, 0, "subcommand")? != "list" { return Err("agile list expects list <root> [Planned|Active|Blocked|Paused|Done|Dropped]".to_owned()); }
         let filter = args.get(2).map(|status| rig_agile_status_name_code(status));
-        if filter.is_some_and(|code| code >= 5) { return Err("invalid agile status filter; expected Planned|Active|Blocked|Paused|Done".to_owned()); }
+        if filter.is_some_and(|code| code == u64::MAX) { return Err("invalid agile status filter; expected Planned|Active|Blocked|Paused|Done|Dropped".to_owned()); }
         let state = Path::new(agile_arg(&args, 1, "root")?).join("state/agile.spi");
         let source = agile_read_regular_text_limited(&state, 64 * 1024 * 1024)?;
         for line in source.lines().filter(|line| rig_agile_task_line_candidate_code(line) == 1) {
@@ -170,7 +170,7 @@ inl emit_typecheck () : () = global """
                 let fields = agile_tuple_fields(line.get(start..end).ok_or("malformed Task range")?)?;
                 if rig_agile_task_identity_binding(fields.len() as i32, 1) != 1 { return Err("malformed Task fields".to_owned()); }
                 let status = rig_agile_status_name_code(&fields[6]);
-                if status >= 5 { return Err("invalid Task status".to_owned()); }
+                if status == u64::MAX { return Err("invalid Task status".to_owned()); }
                 if status != filter { continue; }
             }
             println!("{}", line.trim());
@@ -245,6 +245,7 @@ inl emit_mutations () : () = global """
         }
         if !found { return Err(format!("agile task not found: {id}")); }
         let updated = format!("{}\n", lines.join("\n"));
+        let updated = if status == "Dropped" && !updated.contains("Dropped :: task_status") { updated.replacen("| Done :: task_status\n", "| Done :: task_status | Dropped :: task_status\n", 1) } else { updated };
         if agile_read_regular_text_limited(&state, 64 * 1024 * 1024)? != original { return Err("state/agile.spi changed since it was read; nothing written, run the call again".to_owned()); }
         agile_atomic_write(&state, updated.as_bytes())?;
         let validate = (|| -> Result<(), String> {

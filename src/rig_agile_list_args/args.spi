@@ -43,7 +43,7 @@
 := invalid_filter_reason (~argument : string) : string =
         "invalid agile status filter: "
         ++# argument
-        ++# " (expected all, Planned, Active, Blocked, Paused or Done; or "
+        ++# " (expected all, Planned, Active, Blocked, Paused, Done or Dropped; or "
         ++# (query_usage ())
         ++# ", --sort priority|difficulty|progress)"
 

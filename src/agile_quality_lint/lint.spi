@@ -12,6 +12,7 @@
     | DoneEvidence
     | BlockerNamed
     | PauseResume
+    | DropReason
     | ProseWait
 
 :== item_facts =
@@ -46,6 +47,7 @@
     | DoneEvidence => [ "exit 0"; " pass"; "green"; "proof:"; "proven" ]
     | BlockerNamed => [ "blocked on"; "blocker:"; "waits on" ]
     | PauseResume => [ "resume when"; "resume:"; "resumes on"; "resume from" ]
+    | DropReason => [ "dropped because"; "drop reason:"; "superseded by"; "replaced by"; "obsolete:" ]
     | ProseWait => [ "waits on"; "resume when"; "blocked on" ]
     | PlanningFields => []
 
@@ -65,6 +67,8 @@
     ?> [ BlockerNamed ]
     |? status = "Paused"
     ?> [ PauseResume ]
+    |? status = "Dropped"
+    ?> [ DropReason ]
     |? code_tagged tags
     ?> [ PlanningFields; DoneDefinition; NextStep; TypeFeatures; ProseWait ]
     |: [ PlanningFields; DoneDefinition; NextStep; ProseWait ]
@@ -187,6 +191,8 @@
     := paused = { f ?| status = "Paused"; notes = "resume when TRAIN22 installs" }
     testing.expect (failing paused = []) "paused with a resume"
     testing.expect (check_word PauseResume = "PauseResume") "check words come from the union"
+    testing.expect (failing { f ?| status = "Dropped"; notes = "landed" } = [ DropReason ]) "dropped asks a reason"
+    testing.expect (failing { f ?| status = "Dropped"; notes = "superseded by KIT-Y" } = []) "a named reason"
 
 ///> rust
 :# a_ready_item_whose_last_note_waits_is_flagged_and_an_old_wait_is_not =

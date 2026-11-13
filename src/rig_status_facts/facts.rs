@@ -628,9 +628,11 @@ fn status_counts_19(mut v0: Rc<str>, mut v1: i32) -> Rc<str> {
     let v14: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Paused"); } LIT.with(|lit| lit.clone()) };
     let v15: Rc<str> = status_count_text_20(v0.clone(), v1, v14);
     let v18: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Done"); } LIT.with(|lit| lit.clone()) };
-    let v19: Rc<str> = status_count_text_20(v0, v1, v18);
-    let v21: Rc<str> = string_concat(&["", &*v3, "", &*v7, "", &*v11, "", &*v15, "", &*v19]);
-    v21
+    let v19: Rc<str> = status_count_text_20(v0.clone(), v1, v18);
+    let v22: Rc<str> = { thread_local!{ static LIT: Rc<str> = Rc::<str>::from("Dropped"); } LIT.with(|lit| lit.clone()) };
+    let v23: Rc<str> = status_count_text_20(v0, v1, v22);
+    let v25: Rc<str> = string_concat(&["", &*v3, "", &*v7, "", &*v11, "", &*v15, "", &*v19, "", &*v23]);
+    v25
 }
 fn census_text_18(mut v0: Rc<str>) -> Rc<str> {
     let mut v1: i32 = (v0.clone().len() as i32);
